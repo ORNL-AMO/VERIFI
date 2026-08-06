@@ -1,10 +1,11 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/accountAnalysisStatusCheck';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -16,21 +17,22 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
   standalone: false
 })
 export class AccountAnalysisBannerComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
   modalOpen: Signal<boolean> = toSignal(this.sharedDataService.modalOpen);
-  accountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
-  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
+  accountAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   inDashboard: Signal<boolean> = computed(() => {
     const url = this.url();
     return url.includes('dashboard') || (url == '/data-evaluation/account/analysis');
   });
-  
+
   url: Signal<string> = toSignal(
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -53,7 +55,6 @@ export class AccountAnalysisBannerComponent {
 
   constructor() {
     effect(() => {
-      const url = this.url();
       this.showDropdown = false;
     })
   }
@@ -67,7 +68,7 @@ export class AccountAnalysisBannerComponent {
   }
 
   selectItem(item: IdbAccountAnalysisItem) {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(item);
+    this.accountWorkspaceService.selectAccountAnalysis((item)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

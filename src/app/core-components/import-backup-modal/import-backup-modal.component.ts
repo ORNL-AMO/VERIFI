@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { Component, OnInit, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -11,17 +13,13 @@ import { ToastNotificationsService } from '../toast-notifications/toast-notifica
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -30,6 +28,10 @@ import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile 
   standalone: false
 })
 export class ImportBackupModalComponent implements OnInit {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   inFacility: boolean;
   backupFile: PreparedBackupFile;
@@ -51,21 +53,17 @@ export class ImportBackupModalComponent implements OnInit {
   accountGroups: Array<IdbUtilityMeterGroup>;
   differencesList: { facilityName: string, differences: Array<string> }[] = [];
   accountFacilityNames: Array<string> = [];
-  constructor(private loadingService: LoadingService,
+  constructor(
+    private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
     private importBackupModalService: ImportBackupModalService,
     private dbChangesService: DbChangesService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private deleteDataService: DeleteDataService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private backupPreparationService: BackupPreparationService) { }
+    private backupPreparationService: BackupPreparationService
+  ) { }
 
   ngOnInit(): void {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
@@ -80,10 +78,10 @@ export class ImportBackupModalComponent implements OnInit {
         } else {
           this.overwriteData = false;
         }
-        this.selectedAccount = this.accountDbService.selectedAccount.getValue();
-        this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
+        this.selectedAccount = this.accountWorkspaceStore.account();
+        this.accountFacilities = [...this.accountWorkspaceStore.facilities()];
         this.accountFacilityNames = this.accountFacilities.map(facility => facility.name);
-        this.accountGroups = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+        this.accountGroups = [...this.accountWorkspaceStore.meterGroups()];
         this.duplicateFacilityError = false;
         if (!this.selectedAccount) {
           this.overwriteData = false;
@@ -129,7 +127,7 @@ export class ImportBackupModalComponent implements OnInit {
       if (files.length !== 0) {
         let fr: FileReader = new FileReader();
         fr.readAsText(files[0]);
-        fr.onloadend = (e) => {
+        fr.onloadend = () => {
           try {
             let testBackup = this.backupPreparationService.prepare(JSON.parse(String(fr.result)));
             this.backupFile = testBackup;
@@ -249,17 +247,18 @@ export class ImportBackupModalComponent implements OnInit {
     this.deleteDataService.suspendQueuedDeletion();
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
     await this.dbChangesService.updateAccount(newAccount);
-    await this.dbChangesService.selectAccount(newAccount, false);
+    await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
     await this.deleteDataService.resumeQueuedDeletion();
   }
 
   async importExistingAccount(backupFile: PreparedBackupFile) {
     //delete existing account and data
     this.deleteDataService.suspendQueuedDeletion();
-    this.selectedAccount.deleteAccount = true;
-    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-    this.accountDbService.allAccounts.next(accounts);
+    await firstValueFrom(this.accountDbService.updateWithObservable({
+      ...this.selectedAccount,
+      deleteAccount: true
+    }));
+    await this.applicationLifecycleService.refreshAccountCatalog();
     await this.importNewAccount(backupFile);
     await this.deleteDataService.resumeQueuedDeletion();
   }
@@ -267,9 +266,8 @@ export class ImportBackupModalComponent implements OnInit {
   async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {
     let idx = currIdx !== undefined ? currIdx : 0;
     let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
-    let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(currentAccount, false);
-    this.dbChangesService.selectFacility(newFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacility(newFacility.guid);
   }
 
   async importExistingFacility(backupFile: PreparedBackupFile) {
@@ -368,8 +366,7 @@ export class ImportBackupModalComponent implements OnInit {
       idx = index + 1;
     }
 
-    let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(currentAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   checkDifferences() {
@@ -401,7 +398,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in meters
         let facilityBackupMeters: Array<IdbUtilityMeter> = backupData.meters?.filter(m => m.facilityId === f.backupFacility.guid);
-        let facilityAccountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(f.accountFacility.guid);
+        let facilityAccountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(f.accountFacility.guid);
         const meterDifferenceFound =
           facilityBackupMeters.some(bm => !facilityAccountMeters.some(am => am.name === bm.name && am.meterNumber === bm.meterNumber)) ||
           facilityAccountMeters.some(am => !facilityBackupMeters.some(bm => bm.name === am.name && bm.meterNumber === am.meterNumber));
@@ -412,7 +409,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in meter data
         let facilityBackupMeterData: Array<IdbUtilityMeterData> = backupData.meterData?.filter(md => md.facilityId === f.backupFacility.guid);
-        let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(f.accountFacility.guid);
+        let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(f.accountFacility.guid);
 
         const meterDataDifferenceFound =
           facilityBackupMeterData.some(bmd => !facilityAccountMeterData.some(amd => {
@@ -439,7 +436,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in predictors
         let facilityBackupPredictors: Array<IdbPredictor> = backupData.predictors?.filter(p => p.facilityId === f.backupFacility.guid);
-        let facilityAccountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(f.accountFacility.guid);
+        let facilityAccountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(f.accountFacility.guid);
         const predictorDifferenceFound =
           facilityBackupPredictors.some(bp => !facilityAccountPredictors.some(ap => ap.name === bp.name)) ||
           facilityAccountPredictors.some(ap => !facilityBackupPredictors.some(bp => bp.name === ap.name));
@@ -449,7 +446,7 @@ export class ImportBackupModalComponent implements OnInit {
 
         // check for differences in predictor data
         let facilityBackupPredictorData: Array<IdbPredictorData> = backupData.predictorDataV2?.filter(pd => pd.facilityId === f.backupFacility.guid);
-        let facilityAccountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(f.accountFacility.guid);
+        let facilityAccountPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(f.accountFacility.guid);
 
         const predictorDataDifferenceFound =
           facilityBackupPredictorData.some(bpd => !facilityAccountPredictorData.some(apd => {

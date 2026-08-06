@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup.service';
 
@@ -13,6 +13,7 @@ import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup
   styleUrl: './edit-existing-groups-setup-options.component.css',
 })
 export class EditExistingGroupsSetupOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facility: IdbFacility;
   facilitySub: Subscription;
@@ -24,19 +25,20 @@ export class EditExistingGroupsSetupOptionsComponent {
   }>;
   facilityEnergyUseGroupsSub: Subscription;
 
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+  constructor(
     private router: Router,
     private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
 
-    this.facilityEnergyUseGroupsSub = this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups.subscribe(groups => {
+    this.facilityEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]), { injector: this.injector }).subscribe(groups => {
       this.facilityEnergyUseGroups = groups.map(group => {
         return {
           guid: group.guid,

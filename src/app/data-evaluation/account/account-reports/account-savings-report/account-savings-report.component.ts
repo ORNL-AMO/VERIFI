@@ -1,9 +1,7 @@
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -15,12 +13,6 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 import { AccountSavingsReport } from 'src/app/calculations/savings-report-calculations/accountSavingsReport';
@@ -43,6 +35,7 @@ import { AccountSavingsReportPptAdapter } from './account-savings-report-ppt.ada
   styleUrl: './account-savings-report.component.css'
 })
 export class AccountSavingsReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   account: IdbAccount;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -91,23 +84,16 @@ export class AccountSavingsReportComponent {
   @ViewChildren('facilityMonthlySavingsGraph') facilityMonthlySavingsGraphs!: QueryList<MonthlyAnalysisSummarySavingsGraphComponent>;
   @ViewChild('performanceChart') performanceChartComponent?: PerformanceChartComponent;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
+  constructor(
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private analysisDbService: AnalysisDbService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private sharedDataService: SharedDataService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService,
     private dataEvaluationService: DataEvaluationService,
     private accountSavingsReportAdapter: AccountSavingsReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private pptReportService: PptReportService,
     private accountSavingsReportPPTAdapter: AccountSavingsReportPptAdapter
+
   ) { }
 
   ngOnInit(): void {
@@ -117,15 +103,15 @@ export class AccountSavingsReportComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     this.analysisService.analysisTableColumns.next(this.selectedReport.accountSavingsReportSetup.analysisTableColumns);
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     } else {
       this.accountSavingsReportSetup = this.selectedReport.accountSavingsReportSetup;
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.account = this.accountWorkspaceStore.account();
+    this.accountAnalysisItems = [...this.accountWorkspaceStore.accountAnalyses()];
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
     this.calculateSavingsReport();
     this.getSetupDetails();
@@ -157,19 +143,19 @@ export class AccountSavingsReportComponent {
   }
 
   calculateSavingsReport() {
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+    let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+    let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {
         includedFacilityIds.push(item.facilityId);
       }
     });
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../web-workers/account-savings-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -220,7 +206,7 @@ export class AccountSavingsReportComponent {
   }
 
   async onExportPdf() {
-    let selectedReport = this.accountReportDbService.selectedReport.value;
+    let selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!selectedReport || this.isExportingPdf) {
       return;
     }
@@ -313,4 +299,3 @@ export class AccountSavingsReportComponent {
     await this.pptReportService.buildPowerpoint(document, `Savings Report - ${this.selectedReport.name}.pptx`);
   }
 }
-

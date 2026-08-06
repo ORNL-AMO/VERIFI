@@ -1,18 +1,16 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WeatherDataService } from './weather-data.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { WeatherDataSelection } from '../models/degreeDays';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import * as _ from 'lodash';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
-import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { WeatherPredictorManagementService } from './weather-predictor-management.service';
 // import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
@@ -23,6 +21,8 @@ import { WeatherPredictorManagementService } from './weather-predictor-managemen
   standalone: false
 })
 export class WeatherDataComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   applyToFacility: boolean;
   applyToFacilitySub: Subscription;
@@ -46,15 +46,12 @@ export class WeatherDataComponent {
 
   constructor(
     private weatherDataService: WeatherDataService,
-    private facilityDbService: FacilitydbService,
-    private predictorDataDbService: PredictorDataDbService,
     private loadingService: LoadingService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analyticsService: AnalyticsService,
-    // private degreeDaysService: DegreeDaysService
     private weatherPredictorManagementService: WeatherPredictorManagementService
+
   ) {
 
   }
@@ -64,7 +61,7 @@ export class WeatherDataComponent {
       this.applyToFacility = val;
       if (this.applyToFacility) {
         this.weatherDataSelection = this.weatherDataService.weatherDataSelection;
-        this.facilities = this.facilityDbService.accountFacilities.getValue();
+        this.facilities = [...this.accountWorkspaceStore.facilities()];
         this.setWeatherDataSelection();
         if (this.weatherDataService.selectedFacility) {
           let facilityExists: IdbFacility = this.facilities.find(facility => { return facility.guid == this.weatherDataService.selectedFacility.guid });
@@ -198,7 +195,7 @@ export class WeatherDataComponent {
     this.loadingService.setCurrentLoadingIndex(0);
     let results: "success" | "error" = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(this.selectedFacility, this.selectedValues);
 
-    // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    // let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     // let hddPredictor: IdbPredictor;
     // let cddPredictor: IdbPredictor;
     // let relativeHumidityPredictor: IdbPredictor;
@@ -261,9 +258,9 @@ export class WeatherDataComponent {
 
     // //create predictor data
     // //predictor data created to match start/end of meter data in facility
-    // let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    // let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     // let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.selectedFacility.guid });
-    // let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    // let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     // let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.selectedFacility, false, undefined, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion);
     // let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     // monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
@@ -322,7 +319,6 @@ export class WeatherDataComponent {
     //     startDate.setMonth(startDate.getMonth() + 1);
     //   }
 
-    //   await this.dbChangesService.selectAccount(selectedAccount, true);
     if (results == "success") {
       this.loadingService.isLoadingComplete.next(true);
     } else {
@@ -342,8 +338,8 @@ export class WeatherDataComponent {
 
   setFacilityData() {
     if (this.selectedFacility) {
-      this.facilityPredictorData = this.predictorDataDbService.getByFacilityId(this.selectedFacility.guid);
-      let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+      this.facilityPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(this.selectedFacility.guid);
+      let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
       this.facilityMeterData = accountMeterData.filter(meterData => { return meterData.facilityId == this.selectedFacility.guid });
     } else {
       this.facilityPredictorData = [];
@@ -355,5 +351,4 @@ export class WeatherDataComponent {
     this.inDashboard = url.includes('data-management') == false;
   }
 }
-
 

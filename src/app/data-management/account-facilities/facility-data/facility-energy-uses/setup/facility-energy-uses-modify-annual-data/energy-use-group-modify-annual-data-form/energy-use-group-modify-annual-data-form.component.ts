@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject, Injector } from '@angular/core';
 import { EnergyEquipmentOperatingConditionsData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 import { FormGroup } from '@angular/forms';
 import { distinctUntilChanged, Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-energy-use-group-modify-annual-data-form',
@@ -12,6 +13,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
   styleUrl: './energy-use-group-modify-annual-data-form.component.css',
 })
 export class EnergyUseGroupModifyAnnualDataFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   equipment: IdbFacilityEnergyUseEquipment;
   @Input({ required: true })
@@ -25,13 +27,15 @@ export class EnergyUseGroupModifyAnnualDataFormComponent {
   facilitySub: Subscription;
   formSubscriptions: Subscription = new Subscription();
 
-  constructor(private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
-    private facilityDbService: FacilitydbService
+  constructor(
+    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
+    private injector: Injector
+
   ) { }
 
   ngOnInit() {
     this.setForm();
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facilityUnits = facility?.energyUnit;
     });
   }

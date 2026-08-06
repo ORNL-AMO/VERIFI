@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -7,9 +9,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-process-predictors',
@@ -19,6 +19,8 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
   styleUrl: './process-predictors.component.css'
 })
 export class ProcessPredictorsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
@@ -33,11 +35,11 @@ export class ProcessPredictorsComponent {
   skipAll: boolean = false;
   showExisting: boolean = false;
   existingPredictorOptions: Array<IdbPredictor> = [];
-  constructor(private activatedRoute: ActivatedRoute,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private dataManagementService: DataManagementService,
-    private editPredictorFormService: EditPredictorFormService,
-    private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private editPredictorFormService: EditPredictorFormService
+  ) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -106,7 +108,7 @@ export class ProcessPredictorsComponent {
   }
 
   setShowExisting() {
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(p => { return p.facilityId == this.editPredictor.facilityId; });
     let existingPredictorsInUse: Array<string> = this.fileReference.predictors.flatMap(predictor => {
       return predictor.guid
@@ -124,7 +126,7 @@ export class ProcessPredictorsComponent {
     this.editPredictor.importWizardName = importWizardName;
     this.editPredictorForm = this.editPredictorFormService.getFormFromPredictor(predictor);
 
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.editPredictor.guid);
+    let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.editPredictor.guid);
     this.fileReference.predictorData.forEach(pData => {
       if (pData.predictorId == previousId) {
         pData.predictorId = predictor.guid;

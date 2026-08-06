@@ -1,3 +1,7 @@
+/**
+ * Defines the readonly snapshot, selection, lifecycle, revision, and error contracts
+ * shared by the account workspace store, loader, service, and consumers.
+ */
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
@@ -17,35 +21,37 @@ import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 
 export type WorkspaceStatus = 'idle' | 'loading' | 'switching' | 'ready' | 'error';
 
+export type WorkspaceEntity<T> = Readonly<T>;
+
 export interface AccountWorkspaceSnapshot {
-  readonly account: IdbAccount;
-  readonly facilities: readonly IdbFacility[];
-  readonly meters: readonly IdbUtilityMeter[];
-  readonly meterData: readonly IdbUtilityMeterData[];
-  readonly meterGroups: readonly IdbUtilityMeterGroup[];
-  readonly predictors: readonly IdbPredictor[];
-  readonly predictorData: readonly IdbPredictorData[];
-  readonly facilityAnalyses: readonly IdbAnalysisItem[];
-  readonly accountAnalyses: readonly IdbAccountAnalysisItem[];
-  readonly accountReports: readonly IdbAccountReport[];
-  readonly facilityReports: readonly IdbFacilityReport[];
-  readonly customEmissions: readonly IdbCustomEmissionsItem[];
-  readonly customFuels: readonly IdbCustomFuel[];
-  readonly customGWPs: readonly IdbCustomGWP[];
-  readonly energyUseGroups: readonly IdbFacilityEnergyUseGroup[];
-  readonly energyUseEquipment: readonly IdbFacilityEnergyUseEquipment[];
+  readonly account: WorkspaceEntity<IdbAccount>;
+  readonly facilities: readonly WorkspaceEntity<IdbFacility>[];
+  readonly meters: readonly WorkspaceEntity<IdbUtilityMeter>[];
+  readonly meterData: readonly WorkspaceEntity<IdbUtilityMeterData>[];
+  readonly meterGroups: readonly WorkspaceEntity<IdbUtilityMeterGroup>[];
+  readonly predictors: readonly WorkspaceEntity<IdbPredictor>[];
+  readonly predictorData: readonly WorkspaceEntity<IdbPredictorData>[];
+  readonly facilityAnalyses: readonly WorkspaceEntity<IdbAnalysisItem>[];
+  readonly accountAnalyses: readonly WorkspaceEntity<IdbAccountAnalysisItem>[];
+  readonly accountReports: readonly WorkspaceEntity<IdbAccountReport>[];
+  readonly facilityReports: readonly WorkspaceEntity<IdbFacilityReport>[];
+  readonly customEmissions: readonly WorkspaceEntity<IdbCustomEmissionsItem>[];
+  readonly customFuels: readonly WorkspaceEntity<IdbCustomFuel>[];
+  readonly customGWPs: readonly WorkspaceEntity<IdbCustomGWP>[];
+  readonly energyUseGroups: readonly WorkspaceEntity<IdbFacilityEnergyUseGroup>[];
+  readonly energyUseEquipment: readonly WorkspaceEntity<IdbFacilityEnergyUseEquipment>[];
 }
 
 export interface WorkspaceSelections {
-  readonly facility?: IdbFacility;
-  readonly meter?: IdbUtilityMeter;
-  readonly predictor?: IdbPredictor;
-  readonly facilityAnalysis?: IdbAnalysisItem;
-  readonly accountAnalysis?: IdbAccountAnalysisItem;
-  readonly accountReport?: IdbAccountReport;
-  readonly facilityReport?: IdbFacilityReport;
-  readonly energyUseGroup?: IdbFacilityEnergyUseGroup;
-  readonly energyUseEquipment?: IdbFacilityEnergyUseEquipment;
+  readonly facility?: WorkspaceEntity<IdbFacility>;
+  readonly meter?: WorkspaceEntity<IdbUtilityMeter>;
+  readonly predictor?: WorkspaceEntity<IdbPredictor>;
+  readonly facilityAnalysis?: WorkspaceEntity<IdbAnalysisItem>;
+  readonly accountAnalysis?: WorkspaceEntity<IdbAccountAnalysisItem>;
+  readonly accountReport?: WorkspaceEntity<IdbAccountReport>;
+  readonly facilityReport?: WorkspaceEntity<IdbFacilityReport>;
+  readonly energyUseGroup?: WorkspaceEntity<IdbFacilityEnergyUseGroup>;
+  readonly energyUseEquipment?: WorkspaceEntity<IdbFacilityEnergyUseEquipment>;
 }
 
 export interface WorkspaceCommittedRevision {

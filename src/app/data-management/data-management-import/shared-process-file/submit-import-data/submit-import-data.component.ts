@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
@@ -9,12 +10,9 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
-import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { getEarliestMeterData, getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterData, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-submit-import-data',
@@ -24,6 +22,7 @@ import { getEarliestMeterData, getEarliestMeterDataDate, getEarliestPredictorDat
   styleUrl: './submit-import-data.component.css'
 })
 export class SubmitImportDataComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference;
   paramsSub: Subscription;
   navSub: Subscription;
@@ -45,9 +44,8 @@ export class SubmitImportDataComponent {
     private dataManagementService: DataManagementService,
     private uploadDataService: UploadDataService,
     private router: Router,
-    private accountDbService: AccountdbService,
-    private predictorDbService: PredictorDbService,
     private loadingService: LoadingService
+
   ) { }
 
 
@@ -61,7 +59,7 @@ export class SubmitImportDataComponent {
     this.navSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'submit-file-data') {
         this.uploadDataService.navigate();
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
         this.loadingService.navigationAfterLoading.next(undefined);
       }
@@ -88,7 +86,7 @@ export class SubmitImportDataComponent {
   }
 
   checkAccountWeatherPredictors(): boolean {
-    let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let weatherPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
       return predictor.predictorType == 'Weather';
     });

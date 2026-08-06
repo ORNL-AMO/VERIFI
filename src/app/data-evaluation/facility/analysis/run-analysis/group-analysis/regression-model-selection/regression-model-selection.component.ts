@@ -1,13 +1,11 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -19,6 +17,7 @@ import { GroupAnalysisErrors } from 'src/app/models/validation';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { emptyGroupAnalysisErrors } from 'src/app/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { RegressionModelStateService } from 'src/app/account-workspace/regression-model-state.service';
 
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
@@ -29,20 +28,20 @@ type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
   standalone: false
 })
 export class RegressionModelSelectionComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private regressionModelState = inject(RegressionModelStateService);
 
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility);
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
   calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
-  generatedModelsPerGroup: Signal<{ [groupId: string]: Array<JStatRegressionModel> }> = toSignal(this.analysisDbService.generatedModelsPerGroup, { initialValue: {} });
+  generatedModelsPerGroup = this.regressionModelState.modelsByGroup;
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
   hideInUseMessage: Signal<boolean> = toSignal(this.analysisService.hideInUseMessage, { initialValue: false });
 
@@ -96,7 +95,7 @@ export class RegressionModelSelectionComponent {
   showInUseMessage: Signal<boolean> = computed(() => {
     const analysisItem = this.analysisItem();
     if (analysisItem && this.hideInUseMessage() == false) {
-      const accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+      const accountAnalysisItems = this.accountWorkspaceQuery.getAccountAnalysesForFacilityAnalysis(analysisItem.guid);
       if (accountAnalysisItems.length != 0) {
         return true;
       }
@@ -148,7 +147,7 @@ export class RegressionModelSelectionComponent {
       const selectedGroup = this.selectedGroup();
       const generatedModelsPerGroup = this.generatedModelsPerGroup();
       if (selectedGroup && selectedGroup.models && generatedModelsPerGroup && !generatedModelsPerGroup[selectedGroup.idbGroupId]) {
-        this.analysisDbService.setGeneratedModelsForGroup(selectedGroup.idbGroupId, selectedGroup.models);
+        this.regressionModelState.setForGroup(selectedGroup.idbGroupId, selectedGroup.models);
       }
     });
 
@@ -196,21 +195,19 @@ export class RegressionModelSelectionComponent {
       }),
     };
     await this.saveItem(updatedGroup);
-    this.analysisDbService.setGeneratedModelsForGroup(updatedGroup.idbGroupId, generatedModels);
+    this.regressionModelState.setForGroup(updatedGroup.idbGroupId, generatedModels);
   }
 
   async saveItem(selectedGroup?: AnalysisGroup) {
     const _group: AnalysisGroup = selectedGroup ?? this.selectedGroup();
     const _analysisItemCurrent: IdbAnalysisItem = this.analysisItem();
-    const selectedFacility: IdbFacility = this.selectedFacility();
     const groupIndex: number = _analysisItemCurrent.groups.findIndex(group => group.idbGroupId === _group.idbGroupId);
     const updatedGroups = [..._analysisItemCurrent.groups];
     updatedGroups[groupIndex] = _group;
     const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    const selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next(_group);
   }
 
@@ -261,4 +258,3 @@ export class RegressionModelSelectionComponent {
     }
   }
 }
-

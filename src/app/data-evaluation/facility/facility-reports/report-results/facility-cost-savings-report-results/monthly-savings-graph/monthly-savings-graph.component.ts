@@ -1,7 +1,6 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
@@ -11,6 +10,7 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
   styleUrl: './monthly-savings-graph.component.css',
 })
 export class MonthlySavingsGraphComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   @Input()
   selectedAnalysisItem: IdbAnalysisItem;
@@ -24,8 +24,8 @@ export class MonthlySavingsGraphComponent {
   @ViewChild('monthlySavingsGraph', { static: false }) monthlySavingsGraph: ElementRef;
 
   constructor(
-    private plotlyService: PlotlyService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
+    private plotlyService: PlotlyService
+
   ) { }
 
   ngAfterViewInit() {
@@ -61,7 +61,7 @@ export class MonthlySavingsGraphComponent {
         return {
           type: "scatter",
           mode: "lines+markers",
-          name: this.utilityMeterGroupDbService.getGroupName(group.idbGroupId),
+          name: this.accountWorkspaceQuery.getMeterGroupName(group.idbGroupId),
           x: xVals,
           y: yVals,
           marker: { size: 8 }

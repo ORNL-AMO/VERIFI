@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -21,6 +20,7 @@ import { UploadDataService } from 'src/app/data-management/data-management-impor
   styleUrl: './process-meters.component.css'
 })
 export class ProcessMetersComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   editMeterForm: FormGroup;
@@ -39,11 +39,12 @@ export class ProcessMetersComponent {
   showExisting: boolean = false;
   existingMeterOptions: Array<IdbUtilityMeter> = [];
 
-  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private dataManagementService: DataManagementService) { }
+    private dataManagementService: DataManagementService
+  ) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -137,7 +138,7 @@ export class ProcessMetersComponent {
   }
 
   setFacilityMeterGroups() {
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let facilityGroups: Array<{
       facilityId: string,
       groupOptions: Array<IdbUtilityMeterGroup>
@@ -271,7 +272,7 @@ export class ProcessMetersComponent {
   }
 
   setShowExisting() {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(aMeter => {
       return aMeter.facilityId == this.editMeter.facilityId;
     });

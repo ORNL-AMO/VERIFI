@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { Injectable, inject } from '@angular/core';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -11,21 +11,16 @@ import { AssessmentReportVersion } from 'src/app/models/idbModels/account';
 import { RegressionModelsCalculator } from './regression-models-calculator';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import * as _ from 'lodash';
-import {
-  convertOrphanedGeneratedModelToUserDefined,
-  findEquivalentRegressionModel,
-  getSelectedRegressionModel
-} from './regression-model-recovery';
+import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from './regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegressionModelsService {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
   private currentWorker: Worker | null = null;
 
-  constructor(private predictorDataDbService: PredictorDataDbService) { }
 
   terminateCurrentWorker(): void {
     this.currentWorker?.terminate();
@@ -132,14 +127,14 @@ export class RegressionModelsService {
   }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
-    const facilityPredictorData = this.predictorDataDbService.getByFacilityId(facility.guid);
+    const facilityPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(facility.guid);
     return new RegressionModelsCalculator(facilityPredictorData).getModels(analysisGroup, calanderizedMeters, facility, analysisItem);
   }
 
   getUserDefinedModel(selectedGroup: AnalysisGroup, selectedFacility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): JStatRegressionModel {
     //report year is determined by the latest full year of data
     let baselineYear: number = analysisItem.baselineYear;
-    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(selectedFacility.guid);
+    let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(selectedFacility.guid);
     const selectedPredictors = selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
 
     let userModel: JStatRegressionModel = {
@@ -189,7 +184,7 @@ export class RegressionModelsService {
         selectedModel = getSelectedRegressionModel(group);
         if (selectedModel) {
           //set model validation for report year
-          let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
+          let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(facility.guid);
           //check p-variable ids for model object, was not getting updated on import prior to v0.14.9
           //group p-variable ids will be correctly mapped to data use them to check model variable ids and update if needed
           let groupPredictorVariableIds: Array<string> = group.predictorVariables.map(variable => variable.id);

@@ -1,9 +1,10 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EMPTY, firstValueFrom, map, startWith, switchMap, tap } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -11,7 +12,6 @@ import { AccountReportsService } from '../../account-reports.service';
 import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -22,17 +22,17 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './account-savings-report-setup.component.css'
 })
 export class AccountSavingsReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
 
 
-  account: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  account: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   analysisTableColumns: Signal<AnalysisTableColumns> = toSignal(this.analysisService.analysisTableColumns);
-  selectedReport: Signal<IdbAccountReport> = toSignal(this.accountReportDbService.selectedReport);
+  selectedReport: Signal<IdbAccountReport> = this.accountWorkspaceStore.selectedAccountReport;
 
   accountSavingsReportForm: WritableSignal<FormGroup> = signal(undefined);
 
@@ -45,7 +45,7 @@ export class AccountSavingsReportSetupComponent {
           )
         : EMPTY
       ),
-      map(id => this.accountAnalysisDbService.getByGuid(id))
+      map(id => this.accountWorkspaceQuery.getAccountAnalysisByGuid(id))
     )
   );
 
@@ -100,8 +100,8 @@ export class AccountSavingsReportSetupComponent {
     let selectedReport: IdbAccountReport = this.selectedReport();
     selectedReport.accountSavingsReportSetup = this.accountReportsService.updateAccountSavingsReportFromForm(selectedReport.accountSavingsReportSetup, this.accountSavingsReportForm());
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account());
-    this.accountReportDbService.selectedReport.next({ ...selectedReport });
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 
 
@@ -207,5 +207,4 @@ export class AccountSavingsReportSetupComponent {
     )
   }
 }
-
 

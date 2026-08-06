@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -10,12 +11,14 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
     standalone: false
 })
 export class AccountHomeHelpComponent {
+  constructor(private injector: Injector) { }
+
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedAccount: IdbAccount;
   selectedAccountSub: Subscription;
-  constructor(private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(selectedAccount => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(selectedAccount => {
       this.selectedAccount = selectedAccount;
     });
   }

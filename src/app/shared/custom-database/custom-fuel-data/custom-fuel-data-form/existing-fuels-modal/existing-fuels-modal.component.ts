@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
@@ -24,6 +24,7 @@ import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySo
     standalone: false
 })
 export class ExistingFuelsModalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   isMobile: boolean;
   @Output('emitClose')
@@ -33,9 +34,6 @@ export class ExistingFuelsModalComponent {
   selectedFuelTypeOptions: Array<FuelTypeOption>;
   displayModal: boolean = false;
   selectedAccount: IdbAccount;
-  constructor(private accountDbService: AccountdbService) {
-
-  }
 
   ngOnInit() {
     if (this.isMobile) {
@@ -44,7 +42,7 @@ export class ExistingFuelsModalComponent {
       this.fuelType = 'stationaryGas';
     }
     this.setSelectedFuelTypeOptions();
-    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
+    this.selectedAccount = this.accountWorkspaceStore.account();
     setTimeout(() => {
       this.displayModal = true;
     }, 100);

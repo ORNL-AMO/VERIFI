@@ -1,10 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -22,6 +19,7 @@ import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptio
     standalone: false
 })
 export class EditVehicleMeterBillComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -46,16 +44,12 @@ export class EditVehicleMeterBillComponent {
   totalVolumeLabel: 'Total Fuel Consumption' | 'Total Distance';
   usingMeterFuelEfficiency: boolean;
   account: IdbAccount;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) {
-  }
 
   ngOnInit(): void {
     this.setFuel();
     this.setTotalEmissions();
     this.setUsingMeterFuelEfficiency();
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
   }
 
   ngOnChanges() {
@@ -84,7 +78,7 @@ export class EditVehicleMeterBillComponent {
   }
 
   setFuel() {
-    let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     let mobileTypeFuels: Array<FuelTypeOption> = getMobileFuelTypes(this.editMeter.vehicleCategory, this.editMeter.vehicleType, allFuels)
     this.meterFuel = mobileTypeFuels.find(fuel => {
       return fuel.value == this.editMeter.vehicleFuel;
@@ -120,7 +114,7 @@ export class EditVehicleMeterBillComponent {
   }
 
   checkDate() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
       this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
@@ -138,8 +132,8 @@ export class EditVehicleMeterBillComponent {
 
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value && this.account && this.account.displayEmissions) {
-      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
       this.emissionsValues = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,
         this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value,

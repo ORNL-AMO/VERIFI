@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { BehaviorSubject } from 'rxjs';
@@ -10,6 +10,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
   providedIn: 'root'
 })
 export class AccountHomeService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   latestEnergyAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
   latestWaterAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
@@ -22,7 +23,7 @@ export class AccountHomeService {
   calculatingOverview: BehaviorSubject<boolean | 'error'>;
   accountOverviewData: BehaviorSubject<AccountOverviewData>;
 
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService) {
+  constructor() {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
     this.annualWaterAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
@@ -36,7 +37,7 @@ export class AccountHomeService {
   }
 
   setLatestEnergyAnalysisItem(analysisItemId: string) {
-    let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let analysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     if (analysisItemId) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
       this.latestEnergyAnalysisItem.next(selectedAnalysisItem);
@@ -52,7 +53,7 @@ export class AccountHomeService {
   }
 
   setLatestWaterAnalysisItem(analysisItemId: string) {
-    let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let analysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     if (analysisItemId) {
       let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
       this.latestWaterAnalysisItem.next(selectedAnalysisItem);

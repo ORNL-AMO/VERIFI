@@ -1,13 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisGroupItem, AnalysisService } from '../../analysis.service';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 
 @Component({
   selector: 'app-analysis-detail-item-card',
@@ -17,6 +14,7 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
   styleUrl: './analysis-detail-item-card.component.css'
 })
 export class AnalysisDetailItemCardComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({required: true})
   analysisItem: IdbAnalysisItem;
 
@@ -40,15 +38,13 @@ export class AnalysisDetailItemCardComponent {
   displayCreateReportModal: boolean = false;
   isBanked: boolean;
 
-  constructor(private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
-    private analysisDbService: AnalysisDbService, 
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService,
+  constructor(
+    private analysisService: AnalysisService
+
   ) { }
 
   ngOnChanges(): void {
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.initializeGroups();
     this.setLinkedItems();
   }
@@ -72,14 +68,14 @@ export class AnalysisDetailItemCardComponent {
     }
 
     this.isBanked = false;
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.selectedFacilityAnalyses()];
     facilityAnalysisItems.forEach(item => {
       if (item.hasBanking && item.bankedAnalysisItemId == this.analysisItem?.guid) {
         this.isBanked = true;
       }
     });
 
-    let facilityReportsItems: Array<IdbFacilityReport> = this.facilityReportsDbService.facilityReports.getValue();
+    let facilityReportsItems: Array<IdbFacilityReport> = [...this.accountWorkspaceStore.selectedFacilityReports()];
     facilityReportsItems.forEach(item => {
       if (item.facilityReportType == 'analysis' && item.analysisItemId == this.analysisItem?.guid) {
         this.linkedItems.push({
@@ -90,7 +86,7 @@ export class AnalysisDetailItemCardComponent {
       }
     });
 
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
         if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.analysisItem?.guid) {

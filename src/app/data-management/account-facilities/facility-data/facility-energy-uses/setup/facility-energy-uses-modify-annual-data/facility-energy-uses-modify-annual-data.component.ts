@@ -1,7 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -10,10 +13,7 @@ import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityDataEnergyUse, 
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
@@ -23,15 +23,17 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-uses-modify-annual-data.component.css',
 })
 export class FacilityEnergyUsesModifyAnnualDataComponent {
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
+  constructor(private injector: Injector) { }
+
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService = inject(FacilityEnergyUsesSetupService);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private routerGuardService: RouterGuardService = inject(RouterGuardService);
 
@@ -47,7 +49,7 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
     this.activatedRoute.params.subscribe(params => {
       this.selectedYear = parseInt(params['year']);
     });
-    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
       this.facility = facility;
     });
     this.initEnergyUseGroups();
@@ -61,8 +63,8 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
     this.groupSetupIndex = 0;
     this.energyUseGroups = new Array();
     if (this.facilityEnergyUsesSetupService.existingGroupsToEdit) {
-      let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupsDbService.getByFacilityId(this.facility.guid);
-      let equipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(this.facility.guid);
+      let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountWorkspaceQuery.getFacilityEnergyUseGroups(this.facility.guid);
+      let equipment: Array<IdbFacilityEnergyUseEquipment> = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(this.facility.guid);
       this.facilityEnergyUsesSetupService.existingGroupsToEdit.forEach(groupId => {
         let group: IdbFacilityEnergyUseGroup = facilityEnergyUseGroups.find(group => group.guid == groupId);
         if (group) {
@@ -145,9 +147,7 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
         }
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, this.facility);
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Updated", undefined, undefined, false, "alert-success");
     this.routingAfterSubmit = true;

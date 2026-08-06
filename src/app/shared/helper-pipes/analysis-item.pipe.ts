@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Pipe({
@@ -8,10 +8,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 })
 export class AnalysisItemPipe implements PipeTransform {
 
-  constructor(private analysisDbService: AnalysisDbService) { }
+  constructor(private accountWorkspaceQuery: AccountWorkspaceQueryService) { }
 
   transform(analysisItemId: string): IdbAnalysisItem {
-    return this.analysisDbService.getByGuid(analysisItemId);
+    return this.accountWorkspaceQuery.getFacilityAnalysisByGuid(analysisItemId);
   }
 
 }

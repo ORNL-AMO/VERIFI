@@ -1,12 +1,11 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AccountOverviewService } from '../../account-overview.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
@@ -17,6 +16,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
   styleUrl: './account-overview-options.css',
 })
 export class AccountOverviewOptions {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
 
   emissionsDisplay: 'market' | 'location';
@@ -33,13 +33,14 @@ export class AccountOverviewOptions {
   errorMessage: string = '';
   dateRangeSub: Subscription;
   displayMenu: boolean = true;
-  constructor(private accountDbService: AccountdbService,
+  constructor(
     private accountOverviewService: AccountOverviewService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private injector: Injector
+  ) { }
 
   ngOnInit() {
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
       this.setYears();
     });
@@ -92,7 +93,7 @@ export class AccountOverviewOptions {
   }
 
   setYears() {
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let allYears: Array<number> = accountMeterData.flatMap(meterData => { return meterData.year });
     allYears = _.uniq(allYears);
     this.years = _.orderBy(allYears, (year) => { return year }, 'desc');

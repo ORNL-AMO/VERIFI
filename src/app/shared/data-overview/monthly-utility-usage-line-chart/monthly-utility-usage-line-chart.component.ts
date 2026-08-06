@@ -1,13 +1,12 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { Month, Months } from '../../form-data/months';
 import * as _ from 'lodash';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -18,6 +17,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
     standalone: false
 })
 export class MonthlyUtilityUsageLineChartComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
@@ -29,9 +29,11 @@ export class MonthlyUtilityUsageLineChartComponent {
 
   emissionsDisplaySub: Subscription;
   emissionsDisplay: "market" | "location";
-  constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
-    private accountDbService: AccountdbService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private plotlyService: PlotlyService,
+    private accountOverviewService: AccountOverviewService,
+    private facilityOverviewService: FacilityOverviewService
+  ) { }
 
   ngOnInit(): void {
     if (!this.facilityId) {
@@ -73,9 +75,9 @@ export class MonthlyUtilityUsageLineChartComponent {
 
       let accountOrFacility: IdbFacility | IdbAccount;
       if (!this.facilityId) {
-        accountOrFacility = this.accountDbService.selectedAccount.getValue();
+        accountOrFacility = this.accountWorkspaceStore.account();
       } else {
-        let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
         accountOrFacility = facilities.find(facility => { return facility.guid == this.facilityId });
       }
       let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
@@ -104,7 +106,7 @@ export class MonthlyUtilityUsageLineChartComponent {
           x: x,
           y: y,
           name: name,
-          text: x.map(item => {
+          text: x.map(() => {
             if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
               return 'FY - ' + year
             } else {

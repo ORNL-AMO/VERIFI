@@ -1,7 +1,7 @@
+import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { UserSurvey } from 'src/app/models/userSurvey';
 import { environment } from 'src/environments/environment';
@@ -13,22 +13,24 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
   providedIn: 'root'
 })
 export class SurveyService {
+  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
   completedStatus: BehaviorSubject<'sending' | 'success' | 'error'>;
   userSurvey: BehaviorSubject<UserSurvey>;
 
-  constructor(private httpClient: HttpClient,
-    private accountDbService: AccountdbService
+  constructor(
+    private httpClient: HttpClient
+
   ) {
     this.completedStatus = new BehaviorSubject<'sending' | 'success' | 'error'>(undefined);
     this.userSurvey = new BehaviorSubject<UserSurvey>(undefined);
   }
 
   /**
-   * Check if is legacy user and has used app for 30 days 
+   * Check if is legacy user and has used app for 30 days
    */
   checkIsExistingUser(): boolean {
     let currentDate = new Date();
-    let accounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
+    let accounts: Array<IdbAccount> = [...this.applicationLifecycleService.accountCatalog()];
     let accountDates: Array<Date> = accounts.map(acc => {
       return new Date(acc.createdDate);
     });

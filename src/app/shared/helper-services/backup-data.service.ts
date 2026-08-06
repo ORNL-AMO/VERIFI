@@ -724,7 +724,7 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.workspaceStore.accountAnalyses()];
     for (let i = 0; i < accountAnalysisItems.length; i++) {
       accountAnalysisItems[i].facilityAnalysisItems.push({
         facilityId: newFacilityGUID,
@@ -734,7 +734,7 @@ export class BackupDataService {
     }
 
     this.loadingService.setCurrentLoadingIndex(++currIdx);
-    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
+    let accountReports: Array<IdbAccountReport> = [...this.workspaceStore.accountReports()];
     for (let reportIndex = 0; reportIndex < accountReports.length; reportIndex++) {
       accountReports[reportIndex].dataOverviewReportSetup.includedFacilities.push({
         facilityId: newFacilityGUID,

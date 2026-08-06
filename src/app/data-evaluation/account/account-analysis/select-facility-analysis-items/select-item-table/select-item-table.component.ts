@@ -1,10 +1,9 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -13,9 +12,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
@@ -35,22 +32,19 @@ interface FacilityAnalysisListItem {
   standalone: false
 })
 export class SelectItemTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
   private router: Router = inject(Router);
   private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private loadingService: LoadingService = inject(LoadingService);
   private analysisService: AnalysisService = inject(AnalysisService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
-  private facilityDbservice: FacilitydbService = inject(FacilitydbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.accountAnalysisDbService.selectedAnalysisItem);
-  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = toSignal(this.analysisDbService.accountAnalysisItems);
-  selectedFacility: Signal<IdbFacility> = toSignal(this.facilityDbservice.selectedFacility);
+  selectedAnalysisItem: Signal<IdbAccountAnalysisItem> = this.accountWorkspaceStore.selectedAccountAnalysis;
+  allFacilityAnalysisItems: Signal<Array<IdbAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]);
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   accountAnalysisStatusCheck: Signal<AccountAnalysisStatusCheck> = computed(() => {
@@ -127,8 +121,7 @@ export class SelectItemTableComponent {
     const facility = this.selectedFacility();
     selectedAnalysisItem.isAnalysisVisited = false;
     await this.accountAnalysisDbService.updateFacilityItemSelection(selectedAnalysisItem, analysisItemId, facility.guid);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account, true);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
 
@@ -147,7 +140,7 @@ export class SelectItemTableComponent {
     const facility = this.selectedFacility();
     const selectedAnalysisItem = this.selectedAnalysisItem();
     this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
-    this.analysisDbService.selectedAnalysisItem.next(this.itemToEdit);
+    this.accountWorkspaceService.selectFacilityAnalysis((this.itemToEdit)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/analysis/run-analysis');
   }
 
@@ -169,16 +162,16 @@ export class SelectItemTableComponent {
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
-    this.dbChangesService.selectFacility(facility);
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    this.accountWorkspaceService.selectFacility(facility.guid);
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = selectedAnalysisItem.energyIsSource;
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-    await this.dbChangesService.selectAccount(account, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     await this.save(newIdbItem.guid);
-    this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
+    this.accountWorkspaceService.selectFacilityAnalysis((newIdbItem)?.guid);
     this.loadingService.setLoadingStatus(false);
     this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
     this.router.navigateByUrl("/data-evaluation/facility/" + facility.guid + "/analysis/run-analysis/analysis-setup");

@@ -1,20 +1,20 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
-import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { maxDateValidator, minDateValidator } from '../customFormValidators';
 import { getMeterDataDateString } from '../dateHelperFunctions';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UtilityMeterDataService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   optionSelected: WritableSignal<'all' | 'estimated'> = signal('all');
 
@@ -23,8 +23,9 @@ export class UtilityMeterDataService {
   tableVehicleDataFilters: BehaviorSubject<VehicleDataFilters>;
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
 
-  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService
+  constructor(
+    private formBuilder: FormBuilder
+
   ) {
     let defaultFilters: ElectricityDataFilters = this.getDefaultFilters();
     this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
@@ -35,15 +36,13 @@ export class UtilityMeterDataService {
     let defaultVehicleFilters: VehicleDataFilters = this.getDefaultVehicleFilters();
     this.tableVehicleDataFilters = new BehaviorSubject<VehicleDataFilters>(defaultVehicleFilters);
 
-    this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
+    toObservable(this.accountWorkspaceStore.selectedFacility).subscribe(selectedFacility => {
       if (selectedFacility) {
         if (selectedFacility.electricityInputFilters) {
-          selectedFacility.electricityInputFilters = this.checkSavedFilters(selectedFacility.electricityInputFilters);
-          this.electricityInputFilters.next(selectedFacility.electricityInputFilters);
+          this.electricityInputFilters.next(this.checkSavedFilters({ ...selectedFacility.electricityInputFilters }));
         }
         if (selectedFacility.tableElectricityFilters) {
-          selectedFacility.tableElectricityFilters = this.checkSavedFilters(selectedFacility.tableElectricityFilters);
-          this.tableElectricityFilters.next(selectedFacility.tableElectricityFilters);
+          this.tableElectricityFilters.next(this.checkSavedFilters({ ...selectedFacility.tableElectricityFilters }));
         }
 
         if (selectedFacility.tableGeneralUtilityFilters) {
@@ -58,7 +57,7 @@ export class UtilityMeterDataService {
   }
 
   checkSavedFilters(dataFilters: ElectricityDataFilters): ElectricityDataFilters {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (!dataFilters.emissionsFilters) {
       dataFilters.emissionsFilters = this.getDefaultEmissionsFilters(account ? account.displayEmissions : false);
     }
@@ -70,7 +69,7 @@ export class UtilityMeterDataService {
 
 
   getDefaultFilters(): ElectricityDataFilters {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     return {
       emissionsFilters: this.getDefaultEmissionsFilters(account ? account.displayEmissions : false),
       generalInformationFilters: this.getDefaultGeneralInformationFilters()
@@ -99,7 +98,7 @@ export class UtilityMeterDataService {
   }
 
   getDefaultGeneralFilters(): GeneralUtilityDataFilters {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     return {
       totalVolume: true,
       totalCost: true,
@@ -112,7 +111,7 @@ export class UtilityMeterDataService {
   }
 
   getDefaultVehicleFilters(): VehicleDataFilters {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     return {
       totalEnergy: true,
       totalCost: true,

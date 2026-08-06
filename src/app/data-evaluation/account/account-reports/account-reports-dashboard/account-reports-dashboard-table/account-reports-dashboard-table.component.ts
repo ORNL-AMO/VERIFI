@@ -1,11 +1,11 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -39,18 +39,18 @@ interface ReportListItem {
   styleUrl: './account-reports-dashboard-table.component.css'
 })
 export class AccountReportsDashboardTableComponent {
-  private accountDbService: AccountdbService = inject(AccountdbService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
   private router: Router = inject(Router);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private loadingService: LoadingService = inject(LoadingService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
-  selectedAccount: Signal<IdbAccount> = toSignal(this.accountDbService.selectedAccount);
+  selectedAccount: Signal<IdbAccount> = this.accountWorkspaceStore.account;
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
-  reports: Signal<Array<IdbAccountReport>> = toSignal(this.accountReportDbService.accountReports);
+  reports: Signal<Array<IdbAccountReport>> = computed(() => [...this.accountWorkspaceStore.accountReports()]);
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   reportTypes: Array<ReportType> = ['betterPlants', 'dataOverview', 'performance', 'betterClimate', 'analysis', 'accountEmissionFactors', 'accountSavings'];
@@ -104,7 +104,7 @@ export class AccountReportsDashboardTableComponent {
   selectReport(report: ReportListItem) {
     const raw = this.reports().find(r => r.guid === report.guid);
     if (raw) {
-      this.accountReportDbService.selectedReport.next(raw);
+      this.accountWorkspaceService.selectAccountReport((raw)?.guid);
       this.router.navigateByUrl('/data-evaluation/account/reports/setup');
     }
   }
@@ -117,8 +117,8 @@ export class AccountReportsDashboardTableComponent {
     newReport.name = newReport.name + ' (Copy)';
     newReport.guid = getGUID();
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-    await this.dbChangesService.setAccountReports(this.selectedAccount());
-    this.accountReportDbService.selectedReport.next(addedReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
@@ -140,7 +140,7 @@ export class AccountReportsDashboardTableComponent {
     const report = this.deletedReport();
     if (!report) return;
     await firstValueFrom(this.accountReportDbService.deleteWithObservable(report.id));
-    await this.dbChangesService.setAccountReports(this.selectedAccount());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.displayDeleteModal.set(false);
     this.deletedReport.set(undefined);
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, 'alert-success');
@@ -197,7 +197,7 @@ export class AccountReportsDashboardTableComponent {
     for (const item of itemsToDelete) {
       await firstValueFrom(this.accountReportDbService.deleteWithObservable(item.id));
     }
-    await this.dbChangesService.setAccountReports(this.selectedAccount());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
     this.selectedReportType.set('');

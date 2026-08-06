@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, SimpleChanges, inject } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
 import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -17,6 +17,7 @@ import { getDateFromPredictorData } from '../../dateHelperFunctions';
   standalone: false
 })
 export class EditPredictorDataEntryFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   predictor: IdbPredictor;
   @Input({ required: true })
@@ -28,10 +29,9 @@ export class EditPredictorDataEntryFormComponent {
   isSaved = new EventEmitter<boolean>();
 
   constructor(
-    // private degreeDaysService: DegreeDaysService,
-    private facilityDbService: FacilitydbService,
     private weatherDataService: WeatherDataService,
-    private router: Router,
+    private router: Router
+
   ) {
   }
 
@@ -81,7 +81,7 @@ export class EditPredictorDataEntryFormComponent {
   }
 
   async goToWeatherData() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.weatherDataService.selectedFacility = facility;
     this.weatherDataService.selectedMonth = getDateFromPredictorData(this.predictorData);
     this.weatherDataService.selectedYear = this.predictorData.year

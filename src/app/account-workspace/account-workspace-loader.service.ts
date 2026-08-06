@@ -1,3 +1,7 @@
+/**
+ * Builds a complete account workspace snapshot from persistence. It loads account-scoped
+ * collections concurrently, validates account ownership, and returns deterministic ordering without publishing state.
+ */
 import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from '../indexedDB/account-analysis-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';

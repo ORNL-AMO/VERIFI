@@ -1,3 +1,7 @@
+/**
+ * Reads and writes local-storage selection hints. Hints are non-authoritative and are
+ * restored only after AccountWorkspaceService validates them against a loaded snapshot.
+ */
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 
@@ -45,16 +49,32 @@ export class WorkspaceSelectionStorageService {
     this.localStorage.store('analysisItemId', id);
   }
 
+  clearFacilityAnalysis(): void {
+    this.localStorage.clear('analysisItemId');
+  }
+
   storeAccountAnalysis(id: number): void {
     this.localStorage.store('accountAnalysisItemsId', id);
+  }
+
+  clearAccountAnalysis(): void {
+    this.localStorage.clear('accountAnalysisItemsId');
   }
 
   storeAccountReport(id: number): void {
     this.localStorage.store('accountReportId', id);
   }
 
+  clearAccountReport(): void {
+    this.localStorage.clear('accountReportId');
+  }
+
   storeFacilityReport(id: number): void {
     this.localStorage.store('facilityReportId', id);
+  }
+
+  clearFacilityReport(): void {
+    this.localStorage.clear('facilityReportId');
   }
 }
 

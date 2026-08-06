@@ -1,3 +1,4 @@
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -5,7 +6,6 @@ import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec, PptChartSeries } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IUseAndCost, UseAndCost, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityColors } from 'src/app/shared/utilityColors';
@@ -26,8 +26,8 @@ export interface FacilityOverviewReportPptInput {
 
 @Injectable({ providedIn: 'root' })
 export class FacilityOverviewReportPptAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
-    utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
 
     reportSettings: DataOverviewFacilityReportSettings;
     facility: IdbFacility;
@@ -205,7 +205,7 @@ export class FacilityOverviewReportPptAdapter {
             };
         });
 
-        const stackedTotals = sortedKeys.map((k, i) => series.reduce((sum, s) => sum + (s.data[i] ?? 0), 0));
+        const stackedTotals = sortedKeys.map((i) => series.reduce((sum, s) => sum + (s.data[i] ?? 0), 0));
         const axis = getPptAxisSpec(stackedTotals.filter(v => isFinite(v) && !isNaN(v)));
         const yAxisUnit = sectionType === 'water' ? this.facility.volumeLiquidUnit : sectionType === 'cost' ? 'Cost ($)' : this.facility.energyUnit;
 
@@ -240,7 +240,7 @@ export class FacilityOverviewReportPptAdapter {
             let row: string[] = [];
             row.push(m.meter.name);
             row.push(m.meter.source);
-            row.push(this.utilityMeterGroupDbService.getGroupName(m.meter.groupId) || '-');
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(m.meter.groupId) || '-');
             if (sectionType === 'energyUse' || sectionType === 'water') {
                 row.push(this.formatValue(m.totalUsage, false));
             }

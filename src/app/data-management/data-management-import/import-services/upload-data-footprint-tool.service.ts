@@ -1,30 +1,25 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { FileReference, ParsedTemplate } from './upload-data-models';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { getEnergyUseUnit, setEnergyFootprintEnergyUse } from 'src/app/calculations/energy-footprint/energyFootprintCalculations';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UploadDataFootprintToolService {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService,
-    private facilityEnergyUseGroupDbService: FacilityEnergyUseGroupsDbService
-  ) { }
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let mainWorksheet: XLSX.WorkSheet = workbook.Sheets['Main'];
     let currentYearCell: number = parseInt(mainWorksheet['K13']?.v);
     let numYearsCell: number = parseInt(mainWorksheet['K14']?.v);
@@ -181,9 +176,9 @@ export class UploadDataFootprintToolService {
   }
 
   setSelectedFacility(fileReference: FileReference): FileReference {
-    let selectedFacility: IdbFacility = this.facilityDbService.getFacilityById(fileReference.selectedFacilityId);
-    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.facilityEnergyUseGroupDbService.getByFacilityId(selectedFacility.guid);
-    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.facilityEnergyUseEquipmentDbService.getByFacilityId(selectedFacility.guid);
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (fileReference.selectedFacilityId));
+    let facilityEnergyUseGroups: Array<IdbFacilityEnergyUseGroup> = this.accountWorkspaceQuery.getFacilityEnergyUseGroups(selectedFacility.guid);
+    let facilityEnergyUseEquipment: Array<IdbFacilityEnergyUseEquipment> = this.accountWorkspaceQuery.getFacilityEnergyUseEquipment(selectedFacility.guid);
     fileReference.facilityEnergyUseGroups.forEach(group => {
       group.facilityId = selectedFacility.guid;
       //check group exists

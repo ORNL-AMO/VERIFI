@@ -1,21 +1,18 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
@@ -26,6 +23,8 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     standalone: false
 })
 export class CreateReportModalComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   showModalSub: Subscription;
   showModal: boolean;
@@ -35,22 +34,20 @@ export class CreateReportModalComponent {
   inAccount: boolean;
   account: IdbAccount;
   accountSub: Subscription;
-  constructor(private sharedDataService: SharedDataService, private router: Router,
+  constructor(
+    private sharedDataService: SharedDataService,
+    private router: Router,
     private accountReportDbService: AccountReportDbService,
-    private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService,
     private accountOverviewService: AccountOverviewService,
     private toastNotificationService: ToastNotificationsService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private facilityOverviewService: FacilityOverviewService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
+    private injector: Injector
+  ) {
 
   }
 
   ngOnInit() {
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
       this.account = account;
     });
     this.showModalSub = this.sharedDataService.openCreateReportModal.subscribe(val => {
@@ -75,7 +72,6 @@ export class CreateReportModalComponent {
   }
 
   async createReport() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let navigateToStr: string;
     if (this.router.url.includes('account/overview')) {
       navigateToStr = '/data-evaluation/account/reports/data-overview-report';
@@ -85,17 +81,17 @@ export class CreateReportModalComponent {
       navigateToStr = '/data-evaluation/account/reports/better-plants-report';
     }
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(this.accountReport));
-    await this.dbChangesService.setAccountReports(account);
-    this.accountReportDbService.selectedReport.next(addedReport);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.sharedDataService.openCreateReportModal.next(false);
     this.router.navigateByUrl(navigateToStr);
   }
 
   getNewReport(): IdbAccountReport {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+    let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     if (this.router.url.includes('account/overview')) {
       newReport.reportType = 'dataOverview';
@@ -128,7 +124,7 @@ export class CreateReportModalComponent {
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
       }
     } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       newReport.reportType = 'dataOverview';
       let dateRange: { startDate: Date, endDate: Date } = this.facilityOverviewService.dateRange.getValue();
       newReport.startMonth = dateRange.startDate.getMonth();
@@ -167,7 +163,7 @@ export class CreateReportModalComponent {
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
       }
     } else if (this.router.url.includes('account/analysis')) {
-      let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+      let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
       newReport.name = 'Better Plants Report';
       newReport.reportType = 'betterPlants';
       newReport.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
@@ -185,11 +181,11 @@ export class CreateReportModalComponent {
 
   setShowWater() {
     if (this.router.url.includes('account')) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
       this.showWater = waterMeter != undefined;
     } else if (this.router.url.includes('facility')) {
-      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
       let waterMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
       this.showWater = waterMeter != undefined;
     }

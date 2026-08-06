@@ -1,8 +1,8 @@
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -18,14 +18,14 @@ import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calc
   standalone: false
 })
 export class GroupAnalysisComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
-  private utilityMeterGroupDbService: UtilityMeterGroupdbService = inject(UtilityMeterGroupdbService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
-  analysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   params: Signal<Params> = toSignal(this.activatedRoute.params);
   selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
 
@@ -54,7 +54,7 @@ export class GroupAnalysisComponent {
     const url = this.url();
     const group = this.selectedGroup();
     if (!group) return '';
-    const groupName = this.utilityMeterGroupDbService.getGroupName(group.idbGroupId);
+    const groupName = this.accountWorkspaceQuery.getMeterGroupName(group.idbGroupId);
     if (url.includes('annual-analysis')) return groupName + ' Annual Analysis';
     if (url.includes('monthly-analysis')) return groupName + ' Monthly Analysis';
     if (url.includes('model-selection')) return groupName + ' Regression Model';

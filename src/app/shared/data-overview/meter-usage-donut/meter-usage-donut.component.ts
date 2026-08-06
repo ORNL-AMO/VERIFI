@@ -1,10 +1,10 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -15,6 +15,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   standalone: false
 })
 export class MeterUsageDonutComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
@@ -32,11 +33,13 @@ export class MeterUsageDonutComponent {
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
 
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private plotlyService: PlotlyService,
+    private facilityOverviewService: FacilityOverviewService
+  ) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
 
@@ -161,7 +164,7 @@ export class MeterUsageDonutComponent {
       return '%{x:,.0f} ' + this.energyUnit;
     }
   }
-  
+
   getValues(): Array<number> {
     if (this.dataType == 'energyUse' || this.dataType == 'water') {
       return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalUsage });

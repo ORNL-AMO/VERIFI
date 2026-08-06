@@ -1,13 +1,12 @@
-import { Injectable } from '@angular/core';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { checkSameMonthPredictorData } from './upload-helper-functions';
 
@@ -15,13 +14,12 @@ import { checkSameMonthPredictorData } from './upload-helper-functions';
   providedIn: 'root'
 })
 export class UploadDataSharedFunctionsService {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService
-  ) { }
 
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>, account: IdbAccount, meterSource: MeterSource): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
-    let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();
+    let accountGroups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getAccountMeterGroupsCopy();
     let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
     let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => {
       if (group.groupType == 'Energy' && (meterSource == 'Electricity' || meterSource == 'Natural Gas' || meterSource == 'Other Energy' || meterSource == 'Other Fuels')) {
@@ -68,7 +66,7 @@ export class UploadDataSharedFunctionsService {
   getPredictorData(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, importPredictors: Array<IdbPredictor>): Array<IdbPredictorData> {
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     let importPredictorData: Array<IdbPredictorData> = new Array();
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
 
     importFacilities.forEach(facility => {
       let importFacilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
@@ -108,8 +106,7 @@ export class UploadDataSharedFunctionsService {
   getPredictors(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>): Array<IdbPredictor> {
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     let importPredictors: Array<IdbPredictor> = new Array();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
-    let hasNewData: boolean = false;
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     importFacilities.forEach(facility => {
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
       let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
@@ -122,7 +119,6 @@ export class UploadDataSharedFunctionsService {
           if (key != 'Facility Name' && key != 'Date') {
             let predictor: IdbPredictor = facilityPredictors.find(predictor => { return predictor.name == key });
             if (predictor == undefined) {
-              hasNewData = true;
               let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
               let nameTest: string = key.toLocaleLowerCase();
               if (!nameTest.includes('cdd') && !nameTest.includes('hdd')) {

@@ -1,8 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -13,6 +14,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
   styleUrl: './account-report-analysis-selection.component.css',
 })
 export class AccountReportAnalysisSelectionComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @Input({ required: true })
   reportForm: FormGroup;
@@ -25,9 +28,10 @@ export class AccountReportAnalysisSelectionComponent {
   filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
   calanderizedMeterSub: Subscription;
 
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService,
+  constructor(
     private router: Router,
-    private calanderizationService: CalanderizationService) {
+    private calanderizationService: CalanderizationService
+  ) {
   }
 
   ngOnInit() {
@@ -42,7 +46,7 @@ export class AccountReportAnalysisSelectionComponent {
   }
 
   setAnalysisOptions() {
-    let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let analysisOptions: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     this.accountAnalysisItems = analysisOptions.filter(option => { return option.energyIsSource });
     this.applyFilters();
     this.setSelectedAnalysisItem();
@@ -53,7 +57,7 @@ export class AccountReportAnalysisSelectionComponent {
   }
 
   confirmEditItem() {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
+    this.accountWorkspaceService.selectAccountAnalysis((this.itemToEdit)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
   }
 

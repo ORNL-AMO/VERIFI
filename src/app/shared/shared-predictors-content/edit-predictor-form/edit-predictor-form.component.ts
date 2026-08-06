@@ -1,13 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
-import * as _ from 'lodash';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { Month, Months } from '../../form-data/months';
 
@@ -18,6 +17,7 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class EditPredictorFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
   predictorForm: FormGroup;
   @Input({ required: true })
@@ -35,14 +35,15 @@ export class EditPredictorFormComponent {
   displaySationModal: boolean = false;
   months: Array<Month> = Months;
   constructor(
-    private router: Router, private facilityDbService: FacilitydbService,
+    private router: Router,
     private weatherDataService: WeatherDataService,
-    private editPredictorFormService: EditPredictorFormService) {
+    private editPredictorFormService: EditPredictorFormService
+  ) {
   }
 
   ngOnInit() {
     if (!this.facility) {
-      this.facility = this.facilityDbService.getFacilityById(this.predictor.facilityId);
+      this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.predictor.facilityId));
     }
   }
 

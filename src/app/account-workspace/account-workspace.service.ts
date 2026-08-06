@@ -1,14 +1,12 @@
-import { Injectable } from '@angular/core';
+/**
+ * Orchestrates latest-request-wins account loading, validated entity selection, selection hints,
+ * and hydration or committed workspace refreshes.
+ */
+import { Injectable, untracked } from '@angular/core';
 import { AccountWorkspaceLoaderService, AccountWorkspaceLoadError } from './account-workspace-loader.service';
-import {
-  AccountWorkspaceSnapshot,
-  WorkspaceLoadResult,
-  WorkspaceSelections,
-  WorkspaceSelectionError
-} from './account-workspace.models';
+import { AccountWorkspaceSnapshot, WorkspaceLoadResult, WorkspaceSelections, WorkspaceSelectionError } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceSelectionHints, WorkspaceSelectionStorageService } from './workspace-selection-storage.service';
-import { LegacyWorkspaceStateBridge } from './legacy-workspace-state-bridge.service';
 
 @Injectable({ providedIn: 'root' })
 export class AccountWorkspaceService {
@@ -17,8 +15,7 @@ export class AccountWorkspaceService {
   constructor(
     private loader: AccountWorkspaceLoaderService,
     private store: AccountWorkspaceStore,
-    private selectionStorage: WorkspaceSelectionStorageService,
-    private legacyBridge: LegacyWorkspaceStateBridge
+    private selectionStorage: WorkspaceSelectionStorageService
   ) { }
 
   async selectAccount(accountGuid: string): Promise<WorkspaceLoadResult> {
@@ -32,8 +29,7 @@ export class AccountWorkspaceService {
 
       const selections = restoreSelections(snapshot, this.selectionStorage.read());
       this.store.publish(snapshot, selections);
-      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-      this.persistPublishedHints(snapshot, selections);
+      this.syncPersistedHints(snapshot, selections);
       return 'published';
     } catch (error) {
       if (token !== this.latestRequestToken) { return 'superseded'; }
@@ -70,8 +66,7 @@ export class AccountWorkspaceService {
       } else {
         this.store.publish(snapshot, selections);
       }
-      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-      this.persistPublishedHints(snapshot, selections);
+      this.syncPersistedHints(snapshot, selections);
       return 'published';
     } catch (error) {
       if (token !== this.latestRequestToken) { return 'superseded'; }
@@ -89,38 +84,163 @@ export class AccountWorkspaceService {
   }
 
   selectFacility(facilityGuid?: string): void {
-    if (!facilityGuid) {
-      this.store.selectFacility(undefined);
-      this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-      this.selectionStorage.clearFacility();
-      return;
-    }
-    const facility = this.store.facilities().find(item => item.guid === facilityGuid);
-    if (!facility) {
-      throw new WorkspaceSelectionError('The requested facility does not belong to the active account.');
-    }
-    this.store.selectFacility(facility);
-    this.legacyBridge.publish(this.store.snapshot(), this.store.selections());
-    if (facility.id !== undefined) { this.selectionStorage.storeFacility(facility.id); }
+    untracked(() => {
+      if (!facilityGuid) {
+        if (this.store.selectedFacility()) {
+          this.store.selectFacility(undefined);
+        }
+        this.syncPersistedSelectionHints(this.store.selections());
+        return;
+      }
+      const facility = this.store.facilities().find(item => item.guid === facilityGuid);
+      if (!facility) {
+        throw new WorkspaceSelectionError('The requested facility does not belong to the active account.');
+      }
+      if (this.store.selectedFacility()?.guid !== facilityGuid) {
+        this.store.selectFacility(facility);
+      }
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
+  }
+
+  selectMeter(meterGuid?: string): void {
+    untracked(() => this.selectFacilityEntity('meter', this.store.meters(), meterGuid, 'meter'));
+  }
+
+  selectPredictor(predictorGuid?: string): void {
+    untracked(() => this.selectFacilityEntity('predictor', this.store.predictors(), predictorGuid, 'predictor'));
+  }
+
+  selectFacilityAnalysis(analysisGuid?: string): void {
+    untracked(() => {
+      this.selectFacilityEntity(
+        'facilityAnalysis',
+        this.store.facilityAnalyses(),
+        analysisGuid,
+        'facility analysis'
+      );
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
+  }
+
+  selectAccountAnalysis(analysisGuid?: string): void {
+    untracked(() => {
+      this.selectAccountEntity('accountAnalysis', this.store.accountAnalyses(), analysisGuid, 'account analysis');
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
+  }
+
+  selectAccountReport(reportGuid?: string): void {
+    untracked(() => {
+      this.selectAccountEntity('accountReport', this.store.accountReports(), reportGuid, 'account report');
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
+  }
+
+  selectFacilityReport(reportGuid?: string): void {
+    untracked(() => {
+      this.selectFacilityEntity('facilityReport', this.store.facilityReports(), reportGuid, 'facility report');
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
+  }
+
+  selectEnergyUseGroup(groupGuid?: string): void {
+    untracked(() => this.selectFacilityEntity(
+      'energyUseGroup',
+      this.store.energyUseGroups(),
+      groupGuid,
+      'energy-use group'
+    ));
+  }
+
+  selectEnergyUseEquipment(equipmentGuid?: string): void {
+    untracked(() => this.selectFacilityEntity(
+      'energyUseEquipment',
+      this.store.energyUseEquipment(),
+      equipmentGuid,
+      'energy-use equipment'
+    ));
   }
 
   clear(): void {
     ++this.latestRequestToken;
     this.store.clear();
-    this.legacyBridge.clear();
     this.selectionStorage.clearAccount();
     this.selectionStorage.clearFacility();
+    this.selectionStorage.clearFacilityAnalysis();
+    this.selectionStorage.clearAccountAnalysis();
+    this.selectionStorage.clearAccountReport();
+    this.selectionStorage.clearFacilityReport();
   }
 
-  private persistPublishedHints(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {
+  private selectFacilityEntity<K extends keyof WorkspaceSelections, T extends { guid?: string; facilityId?: string }>(
+    key: K,
+    items: readonly T[],
+    guid: string | undefined,
+    label: string
+  ): void {
+    const selected = guid === undefined ? undefined : items.find(item => item.guid === guid);
+    const facilityGuid = this.store.selectedFacility()?.guid;
+    if (guid !== undefined && (!selected || !facilityGuid || selected.facilityId !== facilityGuid)) {
+      throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active facility.`);
+    }
+    const selections = this.store.selections();
+    const current = selections[key] as { guid?: string } | undefined;
+    if (current?.guid !== selected?.guid) {
+      this.store.setSelections({ ...selections, [key]: selected });
+    }
+  }
+
+  private selectAccountEntity<K extends keyof WorkspaceSelections, T extends { guid?: string }>(
+    key: K,
+    items: readonly T[],
+    guid: string | undefined,
+    label: string
+  ): void {
+    const selected = guid === undefined ? undefined : items.find(item => item.guid === guid);
+    if (guid !== undefined && !selected) {
+      throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active account.`);
+    }
+    const selections = this.store.selections();
+    const current = selections[key] as { guid?: string } | undefined;
+    if (current?.guid !== selected?.guid) {
+      this.store.setSelections({ ...selections, [key]: selected });
+    }
+  }
+
+  private syncPersistedHints(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {
     if (snapshot.account.id !== undefined) {
       this.selectionStorage.storeAccount(snapshot.account.id);
     }
+    this.syncPersistedSelectionHints(selections);
+  }
+
+  private syncPersistedSelectionHints(selections: WorkspaceSelections): void {
     if (selections.facility?.id !== undefined) {
       this.selectionStorage.storeFacility(selections.facility.id);
     } else {
       this.selectionStorage.clearFacility();
     }
+    syncHint(selections.facilityAnalysis?.id, id => this.selectionStorage.storeFacilityAnalysis(id), () => {
+      this.selectionStorage.clearFacilityAnalysis();
+    });
+    syncHint(selections.accountAnalysis?.id, id => this.selectionStorage.storeAccountAnalysis(id), () => {
+      this.selectionStorage.clearAccountAnalysis();
+    });
+    syncHint(selections.accountReport?.id, id => this.selectionStorage.storeAccountReport(id), () => {
+      this.selectionStorage.clearAccountReport();
+    });
+    syncHint(selections.facilityReport?.id, id => this.selectionStorage.storeFacilityReport(id), () => {
+      this.selectionStorage.clearFacilityReport();
+    });
+  }
+}
+
+function syncHint(id: number | undefined, store: (id: number) => void, clear: () => void): void {
+  if (id === undefined) {
+    clear();
+  } else {
+    store(id);
   }
 }
 

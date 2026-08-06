@@ -1,12 +1,12 @@
-import { Component, input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, input, inject, computed, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EquipmentTypes } from './equipmentTypes';
 import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { Subscription } from 'rxjs';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import * as _ from 'lodash';
 import { UtilityDataForm } from '../facility-energy-use-equipment-form.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -18,6 +18,9 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
   styleUrl: './equipment-details-form.component.css',
 })
 export class EquipmentDetailsFormComponent {
+  constructor(private injector: Injector) { }
+
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   equipmentDetailsForm = input.required<FormGroup>();
   utilityDataForms = input.required<Array<UtilityDataForm>>();
   annualOperatingConditionsDataForms = input.required<Array<FormGroup>>();
@@ -34,16 +37,13 @@ export class EquipmentDetailsFormComponent {
   linkedMeterGroups: Array<IdbUtilityMeterGroup>;
   linkedMeterGroupIds: Array<string>;
   linkedMeterGroupSources: Array<MeterSource>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utiltiyMeterDbService: UtilityMeterdbService
-  ) { }
 
   ngOnInit() {
     this.linkedMeterGroupIds = this.equipmentDetailsForm().controls['utilityMeterGroupIds'].value.map(id => id);
-    this.utilityMetersSub = this.utiltiyMeterDbService.facilityMeters.subscribe(meters => {
+    this.utilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeters()]), { injector: this.injector }).subscribe(meters => {
       this.utilityMeters = meters;
     });
-    this.utilityMeterGroupsSub = this.utilityMeterGroupDbService.facilityMeterGroups.subscribe(groups => {
+    this.utilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityMeterGroups()]), { injector: this.injector }).subscribe(groups => {
       this.utilityMeterGroups = groups.filter(group => { return group.groupType == 'Energy' });
       this.setLinkedMeterGroupSources();
       this.setLinkedMeterGroup();

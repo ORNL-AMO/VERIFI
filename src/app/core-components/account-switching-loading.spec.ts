@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Injector, NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
@@ -21,6 +22,7 @@ describe('account switching loading ownership', () => {
   it('switches from the header through workspace state without opening legacy loading', async () => {
     const router = {
       url: '/data-evaluation/account',
+      events: of(),
       navigate: vi.fn(),
       navigateByUrl: vi.fn()
     };
@@ -30,13 +32,13 @@ describe('account switching loading ownership', () => {
     };
     const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
     const electron = {
+      isElectron: false,
       accountLatestBackupFile: { next: vi.fn() }
     };
     const automaticBackups = {};
     const header = new HeaderComponent(
       router as any,
       {} as any,
-      { selectedFacility: { getValue: vi.fn() } } as any,
       {} as any,
       {} as any,
       {} as any,
@@ -47,8 +49,14 @@ describe('account switching loading ownership', () => {
       electron as any,
       { showToast: vi.fn() } as any,
       { detectChanges: vi.fn() } as any,
-      automaticBackups as any
+      automaticBackups as any,
+      { resetAndRestart: vi.fn() } as any,
+      { accountCatalog: signal([account]) } as any,
+      { account: signal(account), selectedFacility: signal(undefined) } as any,
+      TestBed.inject(Injector)
     );
+    header.ngOnInit();
+    TestBed.tick();
     header.inDataEvaluation = true;
 
     await header.switchAccount(account);
@@ -57,6 +65,9 @@ describe('account switching loading ownership', () => {
     expect(loading.setLoadingMessage).not.toHaveBeenCalled();
     expect(loading.setLoadingStatus).not.toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account');
+    expect(header.accountList).toEqual([account]);
+    expect(header.activeAccount).toEqual(account);
+    header.ngOnDestroy();
   });
 
   it('switches from account management without opening legacy loading', async () => {
@@ -76,6 +87,8 @@ describe('account switching loading ownership', () => {
       {} as any,
       {} as any,
       workspace as any,
+      {} as any,
+      { resetAndRestart: vi.fn() } as any,
       {} as any
     );
     manageAccounts.accountErrors = [undefined];
@@ -132,15 +145,15 @@ describe('account switching loading ownership', () => {
     const createdAccount = { id: 3, guid: 'account-c', name: 'Account C' } as IdbAccount;
     const router = { navigateByUrl: vi.fn(() => events.push('navigate')) };
     const workspace = {
-      selectAccount: vi.fn(async () => {
+      selectAccount: vi.fn(async (_guid: string) => {
         events.push('workspace');
         return 'published';
       })
     };
     const lifecycle = {
-      refreshAccountCatalog: vi.fn(async () => {
+      activatePersistedAccount: vi.fn(async (guid: string) => {
         events.push('catalog');
-        return [createdAccount];
+        await workspace.selectAccount(guid);
       })
     };
     const manageAccounts = createManageAccounts({
@@ -186,6 +199,8 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
       exportFacilityData: vi.fn()
     }) as any,
     (overrides.workspace ?? { selectAccount: vi.fn().mockResolvedValue('published') }) as any,
-    (overrides.lifecycle ?? { refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any
+    (overrides.lifecycle ?? { activatePersistedAccount: vi.fn().mockResolvedValue(undefined), refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any,
+    (overrides.databaseReset ?? { resetAndRestart: vi.fn() }) as any,
+    {} as any
   );
 }

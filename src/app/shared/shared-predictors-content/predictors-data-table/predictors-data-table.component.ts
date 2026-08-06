@@ -1,8 +1,9 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -11,8 +12,6 @@ import { CopyTableService } from 'src/app/shared/helper-services/copy-table.serv
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -33,17 +32,16 @@ type OrderDataField = 'date' | 'amount';
   standalone: false
 })
 export class PredictorsDataTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private predictorDbService: PredictorDbService = inject(PredictorDbService);
   private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private router: Router = inject(Router);
   private copyTableService: CopyTableService = inject(CopyTableService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private loadingService: LoadingService = inject(LoadingService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
   private weatherDataService: WeatherDataService = inject(WeatherDataService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
@@ -51,10 +49,10 @@ export class PredictorsDataTableComponent {
   copyingTable: boolean = false;
 
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
-  private facilityPredictors: Signal<Array<IdbPredictor>> = toSignal(this.predictorDbService.facilityPredictors, { initialValue: [] });
-  private facilityPredictorData: Signal<Array<IdbPredictorData>> = toSignal(this.predictorDataDbService.facilityPredictorData, { initialValue: [] });
+  private facilityPredictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
+  private facilityPredictorData: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]);
   private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
-  private facility: Signal<IdbFacility> = toSignal(this.facilityDbService.selectedFacility, { initialValue: undefined });
+  private facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   private params: Signal<Params> = toSignal(this.activatedRoute.params, { initialValue: { id: undefined } });
   private parentParams: Signal<Params> = toSignal(this.activatedRoute.parent.params, { initialValue: { id: undefined } });
 
@@ -158,8 +156,7 @@ export class PredictorsDataTableComponent {
     if (this.inDataManagement) {
       let newEntry: IdbPredictorData = getNewIdbPredictorData(predictor, predictorData);
       newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
-      const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(newEntry);
     } else {
@@ -193,7 +190,7 @@ export class PredictorsDataTableComponent {
   }
 
   uploadData() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
@@ -232,9 +229,7 @@ export class PredictorsDataTableComponent {
   }
 
   async finishDelete() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -326,8 +321,7 @@ export class PredictorsDataTableComponent {
     const predictor = this.predictor();
     predictor.ignoreWeatherDataWarning = !predictor.ignoreWeatherDataWarning;
     await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    const account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsV2(account, this.facility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   openIgnoreWarningModal() {

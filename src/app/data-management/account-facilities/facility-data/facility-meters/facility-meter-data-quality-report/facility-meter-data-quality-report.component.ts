@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -14,15 +14,17 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
   styleUrl: './facility-meter-data-quality-report.component.css'
 })
 export class FacilityMeterDataQualityReportComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   utilityMeter: IdbUtilityMeter;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router
+
   ) {
 
   }
@@ -30,10 +32,10 @@ export class FacilityMeterDataQualityReportComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
-      this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+      this.utilityMeter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
       if (this.utilityMeter) {
-        this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
-        this.utilityMeterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.utilityMeter.guid);
+        this.accountWorkspaceService.selectMeter((this.utilityMeter)?.guid);
+        this.utilityMeterData = this.accountWorkspaceQuery.getMeterData(this.utilityMeter.guid);
       } else {
         this.goToMeterList();
       }
@@ -41,12 +43,12 @@ export class FacilityMeterDataQualityReportComponent {
   }
 
   ngOnDestroy() {
-    this.utilityMeterDbService.selectedMeter.next(undefined);
+    this.accountWorkspaceService.selectMeter(undefined);
   }
- 
+
 
   goToMeterList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
   }
 }

@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IndexedDbAccessService } from './indexed-db-access.service';
@@ -10,26 +10,12 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class AccountAnalysisDbService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  accountAnalysisItems: BehaviorSubject<Array<IdbAccountAnalysisItem>>;
-  selectedAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
-
-  constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
+  constructor(private dbService: NgxIndexedDBService,
     private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
-    this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
-    this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
     //subscribe after initialization
-    this.selectedAnalysisItem.subscribe(analysisItem => {
-      if (analysisItem) {
-        this.localStorageService.store('accountAnalysisItemsId', analysisItem.id);
-      }
-    });
-  }
-
-  getInitialAnalysisItem(): number {
-    let analysisItemId: number = this.localStorageService.retrieve("accountAnalysisItemsId");
-    return analysisItemId;
   }
 
   getAll(): Observable<Array<IdbAccountAnalysisItem>> {
@@ -80,7 +66,7 @@ export class AccountAnalysisDbService {
   }
 
   async deleteAccountAnalysisItems() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
     await this.deleteAnalysisItems(accountAnalysisItems);
   }
 
@@ -98,33 +84,6 @@ export class AccountAnalysisDbService {
       }
     });
     await firstValueFrom(this.updateWithObservable(analysiItem));
-    this.selectedAnalysisItem.next({ ...analysiItem });
   }
 
-  getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {
-    let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
-    let correspondingItems: Array<IdbAccountAnalysisItem> = new Array();
-    allAccountAnalysisItems.forEach(accountItem => {
-      accountItem.facilityAnalysisItems.forEach(facilityItem => {
-        if (facilityItem.analysisItemId == facilityAnalysisItemId) {
-          correspondingItems.push(accountItem);
-        }
-      });
-    });
-    return correspondingItems;
-  }
-
-  getByGuid(itemId: string): IdbAccountAnalysisItem {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
-    let item: IdbAccountAnalysisItem = accountAnalysisItems.find(accItem => { return accItem.guid == itemId });
-    return item;
-  }
-
-  getAccountAnalysisName(itemId: string): string {
-    let item: IdbAccountAnalysisItem = this.getByGuid(itemId);
-    if(item){
-      return item.name
-    };
-    return '';
-  }
 }

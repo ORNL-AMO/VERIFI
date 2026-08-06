@@ -1,12 +1,11 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -21,6 +20,9 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './account-reports-data-check.component.css',
 })
 export class AccountReportsDataCheckComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   selectedReport: IdbAccountReport;
   account: IdbAccount;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -28,23 +30,21 @@ export class AccountReportsDataCheckComponent {
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityAnalysisItemsSub: Subscription;
 
-  constructor(private accountReportDbService: AccountReportDbService,
+  constructor(
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
-    private analysisDbService: AnalysisDbService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
     private regressionModelsService: RegressionModelsService,
-    private facilityDbService: FacilitydbService) { }
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
-    this.account = this.accountDbService.selectedAccount.getValue();
+    this.account = this.accountWorkspaceStore.account();
 
-    this.facilityAnalysisItemsSub = this.analysisDbService.accountAnalysisItems.subscribe(items => {
+    this.facilityAnalysisItemsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityAnalyses()]), { injector: this.injector }).subscribe(items => {
       this.setFacilityItems(items);
     });
   }
@@ -59,24 +59,22 @@ export class AccountReportsDataCheckComponent {
     if (this.selectedAnalysisItem) {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      await this.dbChangesService.setAccountAnalysisItems(account, true);
-      this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      this.accountWorkspaceService.selectAccountAnalysis((this.selectedAnalysisItem)?.guid);
     }
   }
 
   setFacilityItems(allFacilityAnalysisItems: Array<IdbAnalysisItem>) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.executiveSummaryItems = [];
 
     if (this.selectedReport.reportType == 'betterPlants') {
-      this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.betterPlantsReportSetup.analysisItemId);
     }
     else if (this.selectedReport.reportType == 'performance') {
-      this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.performanceReportSetup.analysisItemId });
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.performanceReportSetup.analysisItemId);
     }
     else if (this.selectedReport.reportType == 'accountSavings') {
-      this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
+      this.selectedAnalysisItem = this.accountWorkspaceQuery.getAccountAnalysisByGuid(this.selectedReport.accountSavingsReportSetup.analysisItemId);
     }
 
     this.facilityAnalysisItems = allFacilityAnalysisItems.filter(item => {
@@ -93,7 +91,7 @@ export class AccountReportsDataCheckComponent {
   initializeGroups() {
     this.executiveSummaryItems = [];
     this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
-      let facility: IdbFacility = this.facilityDbService.getFacilityById(facilityAnalysisItem.facilityId);
+      let facility: IdbFacility = this.accountWorkspaceQuery.getFacilityByGuid(facilityAnalysisItem.facilityId);
       facilityAnalysisItem.groups.forEach(group => {
         if (group.analysisType == 'regression') {
           let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, this.selectedReport.reportYear);

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { AccountAnalysisService } from '../../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -15,6 +15,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
     standalone: false
 })
 export class AnnualAccountAnalysisComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   accountAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
@@ -26,14 +27,16 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   key: string;
   accountSub: Subscription;
 
-  constructor(private analysisService: AnalysisService,
-    private accountAnalysisDbService: AccountAnalysisDbService, private accountDbService: AccountdbService,
-    private accountAnalysisService: AccountAnalysisService) { }
+  constructor(
+    private analysisService: AnalysisService,
+    private accountAnalysisService: AccountAnalysisService,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
+    this.accountAnalysisItem = this.accountWorkspaceStore.selectedAccountAnalysis();
 
-    this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.account = val;
       this.key = 'annual-' + this.account?.id;
       this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'table').getValue();

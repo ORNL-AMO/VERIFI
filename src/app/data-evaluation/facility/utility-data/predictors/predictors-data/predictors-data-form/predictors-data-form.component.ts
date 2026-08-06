@@ -1,17 +1,14 @@
-import { Component, HostListener } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import * as _ from 'lodash';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
@@ -25,6 +22,9 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class PredictorsDataFormComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   addOrEdit: 'add' | 'edit';
   predictor: IdbPredictor;
@@ -42,19 +42,20 @@ export class PredictorsDataFormComponent {
     }
   }
 
-  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
-    private router: Router, private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private predictorDataDbService: PredictorDataDbService,
-    private routerGuardService: RouterGuardService) {
+    private routerGuardService: RouterGuardService
+  ) {
   }
 
   ngOnInit() {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let predictorId: string = params['id'];
-      this.predictor = this.predictorDbService.getByGuid(predictorId);
+      this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
     });
 
     this.activatedRoute.params.subscribe(params => {
@@ -75,7 +76,7 @@ export class PredictorsDataFormComponent {
 
   cancel() {
     this.isSaved = true;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
   }
 
@@ -87,21 +88,19 @@ export class PredictorsDataFormComponent {
     } else {
       await firstValueFrom(this.predictorDataDbService.addWithObservable(this.predictorData));
     }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorDataV2(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
   }
 
   setPredictorEntryEdit(predictorId: string) {
-    let predictorData: IdbPredictorData = this.predictorDataDbService.getByGuid(predictorId);
+    let predictorData: IdbPredictorData = this.accountWorkspaceQuery.getPredictorDataByGuid(predictorId);
     this.predictorData = JSON.parse(JSON.stringify(predictorData));
   }
 
   setNewPredictorEntry() {
-    let predictorDataEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+    let predictorDataEntries: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     this.predictorData = getNewIdbPredictorData(this.predictor, predictorDataEntries);
   }
 

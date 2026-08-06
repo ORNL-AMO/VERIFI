@@ -29,6 +29,8 @@ The Electron renderer is the same Angular application built with the Electron en
 
 [`ApplicationLifecycleService`](src/app/application-lifecycle/application-lifecycle.service.ts) owns idempotent startup. It opens persistence, runs versioned migrations, initializes application metadata and reference data, loads the account catalog, resolves the initial account, publishes its workspace, loads Electron metadata when applicable, and finally enables automatic-backup observation. Concurrent callers share one initialization operation; a failed operation may be retried.
 
+Account creation and import flows activate their persisted account through the lifecycle service so catalog refresh, workspace publication, and the transition from an empty startup to ready state remain coordinated.
+
 [`AppComponent`](src/app/app.component.ts) triggers and renders that lifecycle but does not query repositories. Its shell exposes accessible initializing, error/retry, and switching states. Application-instance metadata is lifecycle-owned readonly state; its IndexedDB service is persistence-only.
 
 Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts):
@@ -44,15 +46,17 @@ Readiness guards in [`workspace-readiness.guards.ts`](src/app/routing/workspace-
 
 ## Domain and persistence
 
-Persistence is configured with `ngx-indexed-db` in [`src/app/indexedDB/_dbConfig.ts`](src/app/indexedDB/_dbConfig.ts) and registered by [`IndexedDBModule`](src/app/indexedDB/indexed-db.module.ts). Object-store services own queries and writes. New application state must not be added to repositories.
+Persistence is configured with `ngx-indexed-db` in [`src/app/indexedDB/_dbConfig.ts`](src/app/indexedDB/_dbConfig.ts) and registered by [`IndexedDBModule`](src/app/indexedDB/indexed-db.module.ts). Object-store services own persistence queries and writes only. They do not own active collections, selections, navigation, notifications, local-storage hints, or Electron orchestration.
 
-[`AccountWorkspaceStore`](src/app/account-workspace/account-workspace.store.ts) owns the active account snapshot as one private signal. A publication replaces the account, all account-scoped collections, and validated selections atomically. Facility-scoped collections are derived from that snapshot. [`AccountWorkspaceService`](src/app/account-workspace/account-workspace.service.ts) loads indexed account data concurrently, validates ownership, restores valid selection hints, and uses request tokens so stale account switches cannot publish.
+[`AccountWorkspaceStore`](src/app/account-workspace/account-workspace.store.ts) owns the active account snapshot as one private signal. Its arrays and entities are shallow-readonly. A publication replaces the account, all account-scoped collections, and validated selections atomically; consumers edit copies, persist them, and then request one committed reload. Facility-scoped collections are derived from that snapshot. [`AccountWorkspaceService`](src/app/account-workspace/account-workspace.service.ts) loads indexed account data concurrently, validates GUID-based selections, restores or clears persisted selection hints, and uses request tokens so stale account switches cannot publish.
 
-During the #2576 consumer migration, [`LegacyWorkspaceStateBridge`](src/app/account-workspace/legacy-workspace-state-bridge.service.ts) mirrors a published snapshot into older repository subjects. It is a compatibility seam only: new code reads workspace signals, and persistence-first compatibility writes refresh the atomic workspace after commit. The full typed write boundary remains assigned to #2577.
+Feature code reads account-scoped state only through workspace signals and changes selections through `AccountWorkspaceService`. `DbChangesService` remains a deprecated persistence/orchestration facade while the future typed write boundary remains assigned to #2577; it must not reintroduce repository-held application state.
+
+See [Working with application data](docs/data-access-and-workspace.md) for developer-facing decision guidance and examples for reading, editing, selecting, persisting, refreshing, and testing account-scoped data.
 
 Ordinary single-store access uses `ngx-indexed-db`. Atomic operations spanning multiple stores use the internal native transaction adapter in [`indexed-db-transaction.service.ts`](src/app/indexedDB/indexed-db-transaction.service.ts). Transaction operations must use only the adapter's transaction-bound request context; calling an object-store service from inside the operation would open an unrelated transaction.
 
-Account and facility removal are infrastructure-owned cascades in [`indexed-db-cascade-delete.service.ts`](src/app/indexedDB/indexed-db-cascade-delete.service.ts). Every participating store and retained-reference update must remain inside its declared native transaction; application subjects are refreshed only after that transaction commits.
+Account and facility removal are infrastructure-owned cascades in [`indexed-db-cascade-delete.service.ts`](src/app/indexedDB/indexed-db-cascade-delete.service.ts). Every participating store and retained-reference update must remain inside its declared native transaction; the account catalog and active workspace are refreshed only after that transaction commits.
 
 ```mermaid
 flowchart TD

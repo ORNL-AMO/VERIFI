@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
@@ -10,14 +10,9 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 })
 export class PredictorDataDbService {
 
-    facilityPredictorData: BehaviorSubject<Array<IdbPredictorData>>;
-    accountPredictorData: BehaviorSubject<Array<IdbPredictorData>>;
     constructor(private dbService: NgxIndexedDBService,
         private loadingService: LoadingService,
-        private indexedDbAccess: IndexedDbAccessService) {
-        this.facilityPredictorData = new BehaviorSubject<Array<IdbPredictorData>>(new Array());
-        this.accountPredictorData = new BehaviorSubject<Array<IdbPredictorData>>(new Array());
-    }
+        private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbPredictorData>> {
         return this.dbService.getAll('predictorData');
@@ -81,12 +76,6 @@ export class PredictorDataDbService {
         await this.indexedDbAccess.deleteAllByIndex('predictorData', 'facilityId', facilityId);
     }
 
-    async deleteAllSelectedAccountPredictorData() {
-        let accountPredictorData: Array<IdbPredictorData> = this.accountPredictorData.getValue();
-        await this.deletePredictorDataAsync(accountPredictorData);
-    }
-
-
     async deletePredictorDataAsync(predictorData: Array<IdbPredictorData>) {
         for (let i = 0; i < predictorData.length; i++) {
             this.loadingService.setLoadingMessage('Deleting Predictor Data (' + i + '/' + predictorData.length + ')...');
@@ -94,24 +83,4 @@ export class PredictorDataDbService {
         }
     }
 
-    getByPredictorId(predictorGuid: string): Array<IdbPredictorData> {
-        let predictorData: Array<IdbPredictorData> = this.accountPredictorData.getValue();
-        return predictorData.filter(predictor => {
-            return predictor.predictorId == predictorGuid;
-        });
-    }
-
-    getByGuid(predictorDataGuid: string): IdbPredictorData {
-        let predictorData: Array<IdbPredictorData> = this.accountPredictorData.getValue();
-        return predictorData.find(predictor => {
-            return predictor.guid == predictorDataGuid;
-        });
-    }
-
-    getByFacilityId(facilityGuid: string): Array<IdbPredictorData> {
-        let predictorData: Array<IdbPredictorData> = this.accountPredictorData.getValue();
-        return predictorData.filter(predictor => {
-            return predictor.facilityId == facilityGuid;
-        });
-    }
 }

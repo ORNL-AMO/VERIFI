@@ -1,24 +1,20 @@
-import { Component, QueryList, ViewChildren } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, QueryList, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { FacilityOverviewReportAdapter } from './facility-overview-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
@@ -33,6 +29,8 @@ import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
   standalone: false
 })
 export class FacilityOverviewReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   facilityReport: IdbFacilityReport;
   overviewReportSettings: DataOverviewFacilityReportSettings;
@@ -54,25 +52,21 @@ export class FacilityOverviewReportResultsComponent {
 
   @ViewChildren(FacilitySectionReportComponent) sectionReports !: QueryList<FacilitySectionReportComponent>;
 
-  constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private customFuelDbService: CustomFuelDbService,
+  constructor(
     private eGridService: EGridService,
-    private accountDbService: AccountdbService,
     private dataEvaluationService: DataEvaluationService,
-    private customGWPDbService: CustomGWPDbService,
     private facilityOverviewReportAdapter: FacilityOverviewReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
     private pptReportService: PptReportService,
-    private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter
+    private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter,
+    private injector: Injector
+
   ) {
 
   }
 
   ngOnInit() {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.overviewReportSettings = this.facilityReport.dataOverviewReportSettings;
       this.calculateFacilitiesSummary();
@@ -92,9 +86,9 @@ export class FacilityOverviewReportResultsComponent {
 
   calculateFacilitiesSummary() {
     this.calculating = true;
-    this.facility = this.facilityDbService.getFacilityById(this.facilityReport.facilityId);
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    this.facility = this.accountWorkspaceStore.selectedFacility();
+    let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
+    let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (this.overviewReportSettings.includeAllMeterData == false) {
       let includeGroupIds: Array<string> = [];
       this.overviewReportSettings.includedGroups.forEach(group => {
@@ -106,13 +100,13 @@ export class FacilityOverviewReportResultsComponent {
         return includeGroupIds.includes(meter.groupId);
       });
     };
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
+    let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     this.dateRange = {
       startDate: new Date(this.overviewReportSettings.startYear, this.overviewReportSettings.startMonth, 1),
       endDate: new Date(this.overviewReportSettings.endYear, this.overviewReportSettings.endMonth, 1)
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -200,7 +194,7 @@ export class FacilityOverviewReportResultsComponent {
     };
   }
 
-  
+
   async downloadPpt(): Promise<void> {
     const document = this.facilityOverviewReportPptAdapter.buildDocument({
       report: this.facilityReport,

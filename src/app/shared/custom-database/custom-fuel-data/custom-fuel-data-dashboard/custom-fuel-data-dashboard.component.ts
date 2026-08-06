@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -15,6 +16,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class CustomFuelDataDashboardComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   customFuels: Array<IdbCustomFuel>;
   customFuelsSub: Subscription;
@@ -22,17 +25,19 @@ export class CustomFuelDataDashboardComponent {
   selectedAccountSub: Subscription;
   itemToDelete: IdbCustomFuel;
   deleteFuelInUse: boolean = false;
-  constructor(private customFuelDbService: CustomFuelDbService, private router: Router,
-    private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private activatedRoute: ActivatedRoute) { }
+  constructor(
+    private customFuelDbService: CustomFuelDbService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private injector: Injector
+  ) { }
 
   ngOnInit(): void {
-    this.customFuelsSub = this.customFuelDbService.accountCustomFuels.subscribe(val => {
+    this.customFuelsSub = toObservable(computed(() => [...this.accountWorkspaceStore.customFuels()]), { injector: this.injector }).subscribe(val => {
       this.customFuels = val;
     });
 
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
   }
@@ -69,15 +74,13 @@ export class CustomFuelDataDashboardComponent {
 
   async confirmDelete() {
     await firstValueFrom(this.customFuelDbService.deleteWithObservable(this.itemToDelete.id));
-    let allFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
-    let accountFuels: Array<IdbCustomFuel> = allFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
-    this.customFuelDbService.accountCustomFuels.next(accountFuels);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
   }
 
   setDeleteFuelInUse() {
     if (this.itemToDelete) {
-      let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+      let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
       let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => {
         if (meter.scope != 2) {
           return meter.fuel == this.itemToDelete.value

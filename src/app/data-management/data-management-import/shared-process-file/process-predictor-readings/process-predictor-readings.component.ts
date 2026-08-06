@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
-import * as _ from 'lodash';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredictorDataDate } from 'src/app/shared/dateHelperFunctions';
 
 @Component({
@@ -18,6 +17,7 @@ import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredic
   styleUrl: './process-predictor-readings.component.css'
 })
 export class ProcessPredictorReadingsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference;
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
@@ -31,8 +31,10 @@ export class ProcessPredictorReadingsComponent {
   orderDataField: string = 'readDate';
   orderByDirection: 'asc' | 'desc' = 'desc';
 
-  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
-    private predictorDataDbService: PredictorDataDbService) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService
+  ) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -50,7 +52,7 @@ export class ProcessPredictorReadingsComponent {
 
   comparePredictorReadings() {
     this.readingDifferencesMap = {};
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
     this.fileReference.predictorData.forEach(newData => {
       const key = `${newData.predictorId}_${newData.facilityId}`;
       if (!this.readingDifferencesMap[key]) {

@@ -1,11 +1,10 @@
-import { Component } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -18,24 +17,26 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
   styleUrl: './facility-reports-data-check.component.css',
 })
 export class FacilityReportsDataCheckComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
   analysisItem: IdbAnalysisItem;
-  
-  constructor(private analysisDbService: AnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService,
-    private regressionModelsService: RegressionModelsService
+
+  constructor(
+    private analysisDbService: AnalysisDbService,
+    private regressionModelsService: RegressionModelsService,
+    private injector: Injector
+
   ) { }
 
   ngOnInit(): void {
-    this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
-      this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisItem = this.accountWorkspaceQuery.getFacilityAnalysisByGuid(this.facilityReport.analysisItemId);
       this.executiveSummaryItems = [];
       if (this.analysisItem) {
         this.initializeFacilityGroups();
@@ -51,7 +52,7 @@ export class FacilityReportsDataCheckComponent {
   }
 
   initializeFacilityGroups() {
-    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let reportYear: number;
     if (this.facilityReport.facilityReportType == 'analysis') {
       reportYear = this.facilityReport.analysisReportSettings.reportYear;
@@ -85,10 +86,8 @@ export class FacilityReportsDataCheckComponent {
       this.analysisItem.isAnalysisVisited = true;
       this.analysisItem.dataCheckedDate = new Date();
       await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
-      this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      this.accountWorkspaceService.selectFacilityAnalysis((this.analysisItem)?.guid);
     }
   }
 }

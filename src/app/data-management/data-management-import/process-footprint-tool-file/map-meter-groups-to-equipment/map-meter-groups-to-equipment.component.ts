@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
 import { FileReference } from '../../import-services/upload-data-models';
 import { ActivatedRoute } from '@angular/router';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { Subscription } from 'rxjs';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
@@ -19,6 +19,7 @@ import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEner
   styleUrl: './map-meter-groups-to-equipment.component.css',
 })
 export class MapMeterGroupsToEquipmentComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   fileReference: FileReference;
   paramsSub: Subscription;
 
@@ -41,8 +42,8 @@ export class MapMeterGroupsToEquipmentComponent {
   constructor(
     private activatedRoute: ActivatedRoute,
     private dataManagementService: DataManagementService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService
+    private injector: Injector
+
   ) { }
 
 
@@ -52,11 +53,11 @@ export class MapMeterGroupsToEquipmentComponent {
       this.fileReference = this.dataManagementService.getFileReferenceById(id);
     });
 
-    this.facilityMeterGroupsSub = this.utilityMeterGroupDbService.accountMeterGroups.subscribe(groups => {
+    this.facilityMeterGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.meterGroups()]), { injector: this.injector }).subscribe(groups => {
       this.facilityMeterGroups = groups.filter(group => group.facilityId == this.fileReference.selectedFacilityId);
     });
 
-    this.utilityMetersSub = this.utilityMeterDbService.accountMeters.subscribe(meters => {
+    this.utilityMetersSub = toObservable(computed(() => [...this.accountWorkspaceStore.meters()]), { injector: this.injector }).subscribe(meters => {
       this.utilityMeters = meters.filter(meter => meter.facilityId == this.fileReference.selectedFacilityId);
     });
   }

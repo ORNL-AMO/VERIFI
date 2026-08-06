@@ -1,6 +1,6 @@
-import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
@@ -15,6 +15,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
     standalone: false
 })
 export class MetersOverviewStackedLineChartComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
   dataType: 'energyUse' | 'cost' | 'water';
   @Input()
@@ -27,11 +28,12 @@ export class MetersOverviewStackedLineChartComponent {
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
   selectedFacility: IdbFacility;
-  constructor(private plotlyService: PlotlyService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(
+    private plotlyService: PlotlyService
+  ) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
     this.drawChart();
   }
@@ -76,7 +78,7 @@ export class MetersOverviewStackedLineChartComponent {
             x: x,
             y: y,
             name: cMeter.meter.name,
-            text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
+            text: monthlyDataInRange.map(() => { return cMeter.meter.name }),
             stackgroup: 'one',
             marker: {
               color: UtilityColors[cMeter.meter.source].color,

@@ -1,27 +1,25 @@
-import { Component, inject, Signal } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, inject, Signal, computed } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupFormService } from './facility-energy-use-group-form.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -30,23 +28,22 @@ import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculation
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private router: Router = inject(Router);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private facilityEnergyUseGroupFormService: FacilityEnergyUseGroupFormService = inject(FacilityEnergyUseGroupFormService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private loadingService: LoadingService = inject(LoadingService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private routerGuardService: RouterGuardService = inject(RouterGuardService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
 
-  facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = toSignal(this.facilityEnergyUseEquipmentDbService.facilityEnergyUseEquipment, { initialValue: [] });
-  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = toSignal(this.facilityEnergyUseGroupsDbService.facilityEnergyUseGroups, { initialValue: [] });
+  facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
+  facilityEnergyUseGroups: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]);
 
   get hasSelectedEquipment(): boolean {
     return this.facilityEnergyUseEquipment().some(equip => equip.selected);
@@ -73,7 +70,7 @@ export class FacilityEnergyUseGroupComponent {
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let groupId: string = params['id'];
-      this.energyUseGroup = this.facilityEnergyUseGroupsDbService.getByGuid(groupId);
+      this.energyUseGroup = this.accountWorkspaceQuery.getEnergyUseGroupByGuid(groupId);
       if (this.energyUseGroup) {
         this.form = this.facilityEnergyUseGroupFormService.getFormFromEnergyUseGroup(this.energyUseGroup);
       } else {
@@ -88,9 +85,7 @@ export class FacilityEnergyUseGroupComponent {
     this.form.markAsPristine();
     this.energyUseGroup = this.facilityEnergyUseGroupFormService.updateEnergyUseGroupFromForm(this.energyUseGroup, this.form);
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(this.energyUseGroup));
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
   }
 
@@ -114,11 +109,9 @@ export class FacilityEnergyUseGroupComponent {
     //delete equipment associated with group
     await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(this.energyUseGroup.guid);
     //set groups
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //set equipment
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");
@@ -126,7 +119,7 @@ export class FacilityEnergyUseGroupComponent {
   }
 
   goToGroupList() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses')
   }
 
@@ -149,12 +142,12 @@ export class FacilityEnergyUseGroupComponent {
 
   async addEquipment() {
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.calanderizedMeters.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let latestYear: number = getLatestYearWithData(calanderizedMeters, [facility]);
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, latestYear);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);
   }
 
@@ -173,9 +166,7 @@ export class FacilityEnergyUseGroupComponent {
       equipment.selected = false;
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(equipment));
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.showBulkTransfer = false;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Equipment Transferred", undefined, undefined, false, "alert-success");
@@ -199,9 +190,7 @@ export class FacilityEnergyUseGroupComponent {
     for (let i = 0; i < this.selectedEquipment.length; i++) {
       await firstValueFrom(this.facilityEnergyUseEquipmentDbService.deleteWithObservable(this.selectedEquipment[i].id));
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.showBulkDelete = false;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Equipment Deleted", undefined, undefined, false, "alert-success");

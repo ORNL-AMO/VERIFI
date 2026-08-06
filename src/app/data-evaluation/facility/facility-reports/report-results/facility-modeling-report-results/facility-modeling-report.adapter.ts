@@ -1,21 +1,19 @@
-import { inject, Injectable } from "@angular/core";
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { inject, Injectable } from '@angular/core';
 import { IdbFacilityReport, ModelingReportSettings } from "src/app/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "src/app/shared/pdf-report/models/report-document.model";
 import { BaseSection, TableSection, TextSection } from "src/app/shared/pdf-report/models/report-section.model";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { RegressionNumberPipe } from "src/app/shared/helper-pipes/regression-number.pipe";
-import { UtilityMeterGroupdbService } from "src/app/indexedDB/utilityMeterGroup-db.service";
 import { FacilityGroupAnalysisItem } from "src/app/shared/shared-analysis/calculations/regression-models.service";
-import { FacilitydbService } from "src/app/indexedDB/facility-db.service";
 import { UserDefineModelDateRangePipe } from "src/app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe";
 import { CustomNumberPipe } from "src/app/shared/helper-pipes/custom-number.pipe";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityModelingReportAdapter {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
 
-    private facilityDbService = inject(FacilitydbService);
     private regressionNumberPipe = inject(RegressionNumberPipe);
-    private utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
     private userDefineModelDateRangePipe = inject(UserDefineModelDateRangePipe);
     private customNumberPipe = inject(CustomNumberPipe);
 
@@ -187,7 +185,7 @@ export class FacilityModelingReportAdapter {
                 const regressionSummarySection = this.buildRegressionSection('', [item]);
                 if (regressionSummarySection) {
                     regressionSummarySection.tocInclude = true;
-                    regressionSummarySection.tocLabel = this.facilityDbService.getFacilityNameById(item.facilityId) + ' - ' + this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+                    regressionSummarySection.tocLabel = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '') + ' - ' + this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
                     regressionSummarySection.bookmarkLevel = 1;
                     sections.push(regressionSummarySection);
                 }
@@ -206,8 +204,8 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         items.forEach(item => {
-            const facilityName = this.facilityDbService.getFacilityNameById(item.facilityId);
-            const groupName = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
+            const groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             let notes = '';
             if (title === 'Critical Issues') {
                 notes = item.selectedModel.modelValidationNotes ? item.selectedModel.modelValidationNotes.join('\n') : '';
@@ -241,8 +239,8 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         items.forEach(item => {
-            const facilityName = this.facilityDbService.getFacilityNameById(item.facilityId);
-            let groupName = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
+            let groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             groupName = item.selectedModel?.isUserDefinedModel ? '* ' + groupName : groupName;
 
             let modelYear: string;
@@ -330,8 +328,8 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         classicIntensityGroupItems.forEach(item => {
-            const facilityName = this.facilityDbService.getFacilityNameById(item.facilityId);
-            let groupName = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
+            let groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             let predictorVariables: string = '';
             item.group.predictorVariables.forEach(p => {
                if (p.productionInAnalysis) {
@@ -360,8 +358,8 @@ export class FacilityModelingReportAdapter {
         let rows: string[][] = [];
 
         absoluteGroupItems.forEach(item => {
-            const facilityName = this.facilityDbService.getFacilityNameById(item.facilityId);
-            let groupName = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+            const facilityName = (this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name ?? '');
+            let groupName = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId);
             rows.push([
                 facilityName,
                 groupName,

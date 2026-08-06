@@ -1,9 +1,8 @@
-import { Component, computed, inject, OnInit, Signal } from '@angular/core';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisService } from '../analysis.service';
-import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -16,16 +15,16 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: false
 })
 export class AccountAnalysisListComponent {
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
-  private allAccountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = toSignal(this.accountAnalysisDbService.accountAnalysisItems);
+  private allAccountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => [...this.accountWorkspaceStore.accountAnalyses()]);
 
   selectedAccountAnalysisItem: Signal<IdbAccountAnalysisItem> = toSignal(this.analysisService.accountAnalysisItem);
-  selectedAnalysisItem: Signal<IdbAnalysisItem> = toSignal(this.analysisDbService.selectedAnalysisItem);
+  selectedAnalysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => {
     const allItems = this.allAccountAnalysisItems();
     const selectedAnalysisItem = this.selectedAnalysisItem();
@@ -39,18 +38,18 @@ export class AccountAnalysisListComponent {
   itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
-  
+
   canReturnToAccount: Signal<boolean> = computed(() => {
     const analysisItem = this.selectedAccountAnalysisItem();
     return analysisItem !== undefined;
   })
-  
+
   setOrderDataField(str: string) {
     this.orderDataField = str;
   }
 
   selectAnalysisItem(item: IdbAccountAnalysisItem) {
-    this.accountAnalysisDbService.selectedAnalysisItem.next(item);
+    this.accountWorkspaceService.selectAccountAnalysis((item)?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
   }
 

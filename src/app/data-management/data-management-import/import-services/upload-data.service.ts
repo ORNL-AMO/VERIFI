@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../../../indexedDB/facility-db.service';
-import { AccountdbService } from '../../../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../../../shared/helper-services/energy-units-helper.service';
@@ -16,7 +18,6 @@ import { FuelTypeOption } from '../../../shared/fuel-options/fuelTypeOption';;
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate, TemplateVersion } from './upload-data-models';
 import { UploadDataV1Service } from './upload-data-v1.service';
 import { UploadDataV2Service } from './upload-data-v2.service';
-import * as _ from 'lodash';
 import { IdbAccount } from '../../../models/idbModels/account';
 import { IdbFacility } from '../../../models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '../../../models/idbModels/utilityMeterGroup';
@@ -26,13 +27,12 @@ import { PredictorDbService } from '../../../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../../../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../../../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../../../models/idbModels/predictorData';
-import { checkSameDay, checkSameMonthPredictorData } from './upload-helper-functions';
+import { checkSameMonthPredictorData } from './upload-helper-functions';
 import { LoadingService } from '../../../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../../../core-components/toast-notifications/toast-notifications.service';
 import { SharedDataService } from '../../../shared/helper-services/shared-data.service';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '../../../shared/shared-meter-content/utility-meter-data.service';
-import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from './upload-data-v3.service';
 import { UploadDataFootprintToolService } from './upload-data-footprint-tool.service';
@@ -46,14 +46,18 @@ import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions
   providedIn: 'root'
 })
 export class UploadDataService {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   fileReferences: Array<FileReference>;
   allFilesSet: BehaviorSubject<boolean>;
   uploadMeters: Array<IdbUtilityMeter>;
 
   importFileReference: FileReference;
-  constructor(private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
+  constructor(
+    private facilityDbService: FacilitydbService,
+    private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -66,12 +70,12 @@ export class UploadDataService {
     private toastNotificationService: ToastNotificationsService,
     private sharedDataService: SharedDataService,
     private utilityMeterDataService: UtilityMeterDataService,
-    private dbChangesService: DbChangesService,
     private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
     private uploadDataV3Service: UploadDataV3Service,
     private uploadDataFootprintToolService: UploadDataFootprintToolService,
     private facilityEnergyUseGroupDbService: FacilityEnergyUseGroupsDbService,
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService) {
+    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService
+  ) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -80,7 +84,7 @@ export class UploadDataService {
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
     let isTemplate: TemplateVersion = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
-      let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+      let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
       return {
         name: file.name,
         file: file,
@@ -145,7 +149,7 @@ export class UploadDataService {
       };
     } else if (isTemplate == 'Footprint-tool') {
       console.log('parsing footprint tool template');
-      // let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
+      // let accountFacilities: Array<IdbFacility> = this.accountWorkspaceStore.facilities().map(facility => ({ ...facility }));
       let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
       return {
         name: file.name,
@@ -254,7 +258,7 @@ export class UploadDataService {
 
 
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
-    let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();
+    let accountGroups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getAccountMeterGroupsCopy();
     let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
     let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.name == groupName || group.guid == groupName });
     if (dbGroup) {
@@ -265,7 +269,7 @@ export class UploadDataService {
       if (dbGroup) {
         return { group: dbGroup, newGroups: newGroups }
       } else if (groupName) {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
         dbGroup = getNewIdbUtilityMeterGroup("Energy", groupName, facilityId, account.guid);
         newGroups.push(dbGroup);
         return { group: dbGroup, newGroups: newGroups }
@@ -343,7 +347,7 @@ export class UploadDataService {
 
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
     let meters: Array<IdbUtilityMeter> = new Array();
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
+    let accountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getAccountMetersCopy();
     fileReference.meterFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Meters') {
         let facility: IdbFacility = fileReference.importFacilities.find(facility => { return group.facilityId == facility.guid });
@@ -417,7 +421,7 @@ export class UploadDataService {
       }
     }
     newMeter.name = groupItem.value;
-    //use import wizard name so that the name of the meter can be changed but 
+    //use import wizard name so that the name of the meter can be changed but
     //we can still access the data using this value
     newMeter.importWizardName = groupItem.value;
     //start with random meter number
@@ -432,7 +436,7 @@ export class UploadDataService {
   parseExcelMeterData(fileReference: FileReference): Array<IdbUtilityMeterData> {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     let accountUtilityData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
@@ -478,13 +482,13 @@ export class UploadDataService {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
 
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
 
     let predictorData: Array<IdbPredictorData> = new Array();
     let predictors: Array<IdbPredictor> = new Array();
 
-    let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
 
     fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
@@ -570,7 +574,7 @@ export class UploadDataService {
     this.loadingService.addLoadingMessage('Creating Meter Groups');
     this.loadingService.addLoadingMessage('Uploading Meter Data');
     this.loadingService.addLoadingMessage('Uploading Predictors');
-    this.loadingService.addLoadingMessage('Uploading Predictor Data');    
+    this.loadingService.addLoadingMessage('Uploading Predictor Data');
     this.loadingService.addLoadingMessage('Finishing Up');
   }
 
@@ -702,9 +706,8 @@ export class UploadDataService {
       }
     }
 
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setCurrentLoadingIndex(6);
-    await this.dbChangesService.selectAccount(selectedAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     fileReference.dataSubmitted = true;
     this.importFileReference = fileReference;
     this.loadingService.isLoadingComplete.next(true);

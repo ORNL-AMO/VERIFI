@@ -4,10 +4,11 @@ import { BackupDataService, BackupFile } from '../shared/helper-services/backup-
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { IdbAccount } from '../models/idbModels/account';
 import { AccountWorkspaceState } from '../account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
+import { getNewIdbElectronBackup, IdbElectronBackup } from '../models/idbModels/electronBackup';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,7 @@ export class AutomaticBackupsService {
   creatingFile: boolean = false;
   private observingRevisions = false;
   private lastObservedRevision?: string;
+  accountBackups: IdbElectronBackup[] = [];
   constructor(
     private electronService: ElectronService,
     private backupDataService: BackupDataService,
@@ -71,7 +73,7 @@ export class AutomaticBackupsService {
           setTimeout(() => {
             if (this.fileExists) {
               let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-              this.electronBackupsDbService.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
+              void this.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
               this.electronService.sendSaveData(backupFile)
             } else {
               console.log('tried to save but there is no file')
@@ -83,7 +85,7 @@ export class AutomaticBackupsService {
       } else {
         console.log('create file')
         let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-        this.electronBackupsDbService.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
+        void this.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
         this.electronService.sendSaveData(backupFile, false, true);
         this.creatingFile = false;
         this.saving.next(false);
@@ -96,7 +98,7 @@ export class AutomaticBackupsService {
     setTimeout(() => {
       if (this.fileExists) {
         let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-        this.electronBackupsDbService.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
+        void this.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
         this.electronService.sendSaveData(backupFile)
       } else {
         this.alertFileDoesNotExist();
@@ -112,6 +114,27 @@ export class AutomaticBackupsService {
         this.initializingAccount = false;
       }
     }
+  }
+
+  async initializeMetadata(): Promise<void> {
+    this.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+  }
+
+  async addOrUpdateFile(dataBackupId: string, accountId: string): Promise<void> {
+    const existing = this.accountBackups.find(backup => backup.accountId === accountId);
+    if (existing) {
+      const updated = await firstValueFrom(this.electronBackupsDbService.updateWithObservable({
+        ...existing,
+        dataBackupId,
+        timeStamp: new Date()
+      }));
+      this.accountBackups = this.accountBackups.map(item => item.id === updated.id ? updated : item);
+      return;
+    }
+    const added = await firstValueFrom(this.electronBackupsDbService.addWithObservable(
+      getNewIdbElectronBackup(accountId, dataBackupId)
+    ));
+    this.accountBackups = [...this.accountBackups, added];
   }
 
   private observeWorkspace(state: AccountWorkspaceState): void {

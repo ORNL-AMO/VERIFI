@@ -1,9 +1,9 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -18,6 +18,8 @@ import { MeterGroupingDataService } from '../meter-grouping-data.service';
   styleUrl: './meter-grouping-results-table.component.css',
 })
 export class MeterGroupingResultsTableComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
@@ -44,20 +46,20 @@ export class MeterGroupingResultsTableComponent {
   calculatingMeterGroups: boolean | 'error' = false;
   calculatingMeterGroupsSub: Subscription;
 
-  constructor(private activatedRoute: ActivatedRoute,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+  constructor(
+    private activatedRoute: ActivatedRoute,
     private router: Router,
-    private facilityDbService: FacilitydbService,
     private copyTableService: CopyTableService,
     private sharedDataService: SharedDataService,
     private dbChangesService: DbChangesService,
     private meterGroupingDataService: MeterGroupingDataService
+
   ) { }
 
   ngOnInit() {
     this.activatedRoute.params.subscribe(params => {
       let meterGroupId: string = params['id'];
-      this.meterGroup = this.utilityMeterGroupDbService.getGroupById(meterGroupId);
+      this.meterGroup = this.accountWorkspaceQuery.getMeterGroupByGuid(meterGroupId);
       if (!this.meterGroup) {
         this.cancel();
       }
@@ -69,7 +71,7 @@ export class MeterGroupingResultsTableComponent {
     this.calculatingMeterGroupsSub = this.meterGroupingDataService.calanderizingMeterData.subscribe(calculating => {
         this.calculatingMeterGroups = calculating;
     });
-    
+
     this.calanderizedMetersSub = this.meterGroupingDataService.calanderizedMeters.subscribe(calanderizedMeters => {
        if (calanderizedMeters.length > 0) {
          this.setCalanderizedMeterData(calanderizedMeters);
@@ -99,7 +101,7 @@ export class MeterGroupingResultsTableComponent {
     this.calanderizedMeters = calanderizedMeters.filter(cMeter => {
       return cMeter.meter.groupId == this.meterGroup.guid;
     });
-    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
     this.energyUnit = this.selectedFacility.energyUnit;
     this.consumptionUnit = this.selectedFacility.volumeLiquidUnit;
     this.groupMonthlyData = this.calanderizedMeters.flatMap(meter => { return meter.monthlyData });
