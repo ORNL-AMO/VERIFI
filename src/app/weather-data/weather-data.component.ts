@@ -326,7 +326,6 @@ export class WeatherDataComponent {
     //     startDate.setMonth(startDate.getMonth() + 1);
     //   }
 
-    //   await this.dbChangesService.selectAccount(selectedAccount, true);
     if (results == "success") {
       this.loadingService.isLoadingComplete.next(true);
     } else {
@@ -359,5 +358,4 @@ export class WeatherDataComponent {
     this.inDashboard = url.includes('data-management') == false;
   }
 }
-
 

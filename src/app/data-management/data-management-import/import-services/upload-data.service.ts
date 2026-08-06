@@ -1,5 +1,6 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -50,6 +51,7 @@ import { setPredictorDateDataFromDate } from 'src/app/shared/dateHelperFunctions
 export class UploadDataService {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   fileReferences: Array<FileReference>;
   allFilesSet: BehaviorSubject<boolean>;
@@ -708,7 +710,7 @@ export class UploadDataService {
 
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.loadingService.setCurrentLoadingIndex(6);
-    await this.dbChangesService.selectAccount(selectedAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     fileReference.dataSubmitted = true;
     this.importFileReference = fileReference;
     this.loadingService.isLoadingComplete.next(true);

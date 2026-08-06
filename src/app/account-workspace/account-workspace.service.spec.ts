@@ -136,6 +136,85 @@ describe('AccountWorkspaceService', () => {
     expect(store.selectedPredictor()).toBeUndefined();
     expect(store.revision()).toBe(0);
   });
+
+  it('validates every analysis, report, and energy-use selector and resets facility-owned selections', async () => {
+    const facilityGuid = 'account-a-facility';
+    const snapshot: AccountWorkspaceSnapshot = {
+      ...createSnapshot('account-a', 1),
+      facilities: [
+        { id: 11, guid: facilityGuid, accountId: 'account-a' },
+        { id: 12, guid: 'account-a-facility-b', accountId: 'account-a' }
+      ] as any,
+      facilityAnalyses: [{ guid: 'facility-analysis', facilityId: facilityGuid }] as any,
+      accountAnalyses: [{ guid: 'account-analysis', accountId: 'account-a' }] as any,
+      accountReports: [{ guid: 'account-report', accountId: 'account-a' }] as any,
+      facilityReports: [{ guid: 'facility-report', facilityId: facilityGuid }] as any,
+      energyUseGroups: [{ guid: 'energy-group', facilityId: facilityGuid }] as any,
+      energyUseEquipment: [{ guid: 'energy-equipment', facilityId: facilityGuid }] as any
+    };
+    const store = new AccountWorkspaceStore();
+    const service = new AccountWorkspaceService(
+      { load: vi.fn().mockResolvedValue(snapshot) } as any,
+      store,
+      createSelectionStorage() as any
+    );
+    await service.selectAccount('account-a');
+    service.selectFacility(facilityGuid);
+
+    service.selectFacilityAnalysis('facility-analysis');
+    service.selectAccountAnalysis('account-analysis');
+    service.selectAccountReport('account-report');
+    service.selectFacilityReport('facility-report');
+    service.selectEnergyUseGroup('energy-group');
+    service.selectEnergyUseEquipment('energy-equipment');
+
+    expect(() => service.selectFacilityAnalysis('foreign')).toThrow('active facility');
+    expect(() => service.selectAccountAnalysis('foreign')).toThrow('active account');
+    expect(() => service.selectAccountReport('foreign')).toThrow('active account');
+    expect(() => service.selectFacilityReport('foreign')).toThrow('active facility');
+    expect(() => service.selectEnergyUseGroup('foreign')).toThrow('active facility');
+    expect(() => service.selectEnergyUseEquipment('foreign')).toThrow('active facility');
+
+    service.selectFacility('account-a-facility-b');
+    expect(store.selectedFacilityAnalysis()).toBeUndefined();
+    expect(store.selectedFacilityReport()).toBeUndefined();
+    expect(store.selectedEnergyUseGroup()).toBeUndefined();
+    expect(store.selectedEnergyUseEquipment()).toBeUndefined();
+    expect(store.selectedAccountAnalysis()?.guid).toBe('account-analysis');
+    expect(store.selectedAccountReport()?.guid).toBe('account-report');
+
+    service.selectAccountAnalysis(undefined);
+    service.selectAccountReport(undefined);
+    expect(store.selectedAccountAnalysis()).toBeUndefined();
+    expect(store.selectedAccountReport()).toBeUndefined();
+    expect(store.revision()).toBe(0);
+  });
+
+  it('clears invalid persisted selection hints only after publishing the validated workspace', async () => {
+    const storage = createSelectionStorage();
+    storage.read.mockReturnValue({
+      facilityId: 999,
+      facilityAnalysisId: 998,
+      accountAnalysisId: 997,
+      accountReportId: 996,
+      facilityReportId: 995
+    });
+    const store = new AccountWorkspaceStore();
+    const service = new AccountWorkspaceService(
+      { load: vi.fn().mockResolvedValue(createSnapshot('account-a', 1)) } as any,
+      store,
+      storage as any
+    );
+
+    await service.selectAccount('account-a');
+
+    expect(store.status()).toBe('ready');
+    expect(storage.clearFacility).toHaveBeenCalledOnce();
+    expect(storage.clearFacilityAnalysis).toHaveBeenCalledOnce();
+    expect(storage.clearAccountAnalysis).toHaveBeenCalledOnce();
+    expect(storage.clearAccountReport).toHaveBeenCalledOnce();
+    expect(storage.clearFacilityReport).toHaveBeenCalledOnce();
+  });
 });
 
 function createRepositories() {

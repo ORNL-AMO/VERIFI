@@ -125,7 +125,7 @@ export class FacilityMeterComponent {
     await this.updateMeterData(this.utilityMeter);
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
   }
 
@@ -169,9 +169,9 @@ export class FacilityMeterComponent {
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let account: IdbAccount = this.accountWorkspaceStore.account();
     //set meters
-    await this.dbChangesService.setMeters(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //set meter data
-    await this.dbChangesService.setMeterData(account, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");

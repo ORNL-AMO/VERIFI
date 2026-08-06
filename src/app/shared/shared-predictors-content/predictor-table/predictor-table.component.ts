@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
@@ -38,6 +39,7 @@ interface PredictorListItem {
   standalone: false
 })
 export class PredictorTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private predictorDbService: PredictorDbService = inject(PredictorDbService);
@@ -141,8 +143,7 @@ export class PredictorTableComponent {
     //set values in services
     const selectedFacility = this.selectedFacility();
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setPredictorsV2(account, selectedFacility);
-    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
@@ -163,7 +164,7 @@ export class PredictorTableComponent {
       predictor.sidebarOpen = true;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
       const account: IdbAccount = this.accountWorkspaceStore.account();
-      await this.dbChangesService.setPredictorsV2(account, facility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
@@ -177,9 +178,7 @@ export class PredictorTableComponent {
       newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
       await this.analysisDbService.addAnalysisPredictor(newPredictor);
       let account: IdbAccount = this.accountWorkspaceStore.account();
-      await this.dbChangesService.setPredictorsV2(account, facility);
-      await this.dbChangesService.setPredictorDataV2(account, true, facility);
-      await this.dbChangesService.setAnalysisItems(account, true, facility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
       this.selectEditPredictor(newPredictor);
@@ -282,7 +281,7 @@ export class PredictorTableComponent {
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
     }
     const account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setPredictorsV2(account, this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast(
       ignoreWarning ? 'Weather gap warnings dismissed' : 'Weather gap warnings re-enabled',
       undefined,

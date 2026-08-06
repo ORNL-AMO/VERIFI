@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, SimpleChanges, inject } from '@angular/core';
@@ -30,6 +31,7 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class SharedMeterCalendarizationComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
@@ -285,8 +287,7 @@ export class SharedMeterCalendarizationComponent {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter));
     this.selectedMeter = this.dataApplicationMeter;
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility)
-    this.cancelSetDataApplication();
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.setCalanderizedMeterData();
   }
 

@@ -160,7 +160,6 @@ export class CustomFuelDataFormComponent {
     let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
     let accountCustomFuels: Array<IdbCustomFuel> = allCustomFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
     await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 

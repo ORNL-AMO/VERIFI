@@ -340,7 +340,7 @@ export class RegressionModelMenuComponent {
     const _analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(_analysisItem));
     const selectedAccount: IdbAccount = this.selectedAccount();
-    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((_analysisItem)?.guid);
     this._suppressFormPatch = suppressFormPatch;
     this.analysisService.selectedGroup.next(_group);

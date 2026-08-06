@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceSnapshot } from '../account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
@@ -43,7 +43,14 @@ describe('AutomaticBackupsService', () => {
         },
         { provide: ToastNotificationsService, useValue: { showToast: vi.fn() } },
         { provide: DbChangesService, useValue: { updateAccount: vi.fn() } },
-        { provide: ElectronBackupsDbService, useValue: { addOrUpdateFile: vi.fn() } },
+        {
+          provide: ElectronBackupsDbService,
+          useValue: {
+            getAll: vi.fn(() => of([])),
+            addWithObservable: vi.fn(backup => of({ ...backup, id: 1 })),
+            updateWithObservable: vi.fn(backup => of(backup))
+          }
+        },
         { provide: AccountWorkspaceStore, useValue: store }
       ]
     });

@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -39,6 +40,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -129,9 +131,7 @@ export class FacilityPredictorComponent {
 
     await this.analysisDbService.updateAnalysisPredictor(this.predictor);
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
-    await this.dbChangesService.setAnalysisItems(account, true, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
   }
@@ -229,8 +229,7 @@ export class FacilityPredictorComponent {
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     //set values in services
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setPredictorsV2(account, this.facility);
-    await this.dbChangesService.setPredictorDataV2(account, true, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update analysis items
     this.loadingService.setLoadingMessage('Updating analysis items...');
     await this.analysisDbService.deleteAnalysisPredictor(this.predictor);

@@ -92,7 +92,7 @@ export class FacilityReportsDataCheckComponent {
       await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
       let account: IdbAccount = this.accountWorkspaceStore.account();
       let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-      await this.dbChangesService.setAnalysisItems(account, false, selectedFacility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.accountWorkspaceService.selectFacilityAnalysis((this.analysisItem)?.guid);
     }
   }

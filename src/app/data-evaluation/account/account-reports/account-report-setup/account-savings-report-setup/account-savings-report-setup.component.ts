@@ -104,7 +104,7 @@ export class AccountSavingsReportSetupComponent {
     let selectedReport: IdbAccountReport = this.selectedReport();
     selectedReport.accountSavingsReportSetup = this.accountReportsService.updateAccountSavingsReportFromForm(selectedReport.accountSavingsReportSetup, this.accountSavingsReportForm());
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 

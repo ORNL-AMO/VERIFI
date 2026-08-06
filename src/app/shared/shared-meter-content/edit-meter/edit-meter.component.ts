@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, OnInit, inject } from '@angular/core';
@@ -28,6 +29,7 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   }
 })
 export class EditMeterComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -108,7 +110,7 @@ export class EditMeterComponent implements OnInit {
     await this.utilityMeterDbService.updateWithObservable(meterToSave);
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.meterForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);

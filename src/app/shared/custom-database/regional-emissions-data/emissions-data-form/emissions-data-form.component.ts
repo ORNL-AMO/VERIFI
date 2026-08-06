@@ -173,7 +173,7 @@ export class EmissionsDataFormComponent implements OnInit {
         }
       }
       if (hasUpdatedValues) {
-        await this.dbChangesService.selectAccount(this.selectedAccount, false);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
       }
       successMessage = 'Custom Emissions Updated!'
     }

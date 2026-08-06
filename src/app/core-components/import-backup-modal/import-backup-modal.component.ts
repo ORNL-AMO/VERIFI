@@ -1,5 +1,6 @@
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
@@ -35,6 +36,7 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 export class ImportBackupModalComponent implements OnInit {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   inFacility: boolean;
@@ -255,7 +257,7 @@ export class ImportBackupModalComponent implements OnInit {
     this.deleteDataService.suspendQueuedDeletion();
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
     await this.dbChangesService.updateAccount(newAccount);
-    await this.dbChangesService.selectAccount(newAccount, false);
+    await this.accountWorkspaceService.selectAccount(newAccount.guid);
     await this.deleteDataService.resumeQueuedDeletion();
   }
 
@@ -275,8 +277,8 @@ export class ImportBackupModalComponent implements OnInit {
     let idx = currIdx !== undefined ? currIdx : 0;
     let { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
     let currentAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.selectAccount(currentAccount, false);
-    this.dbChangesService.selectFacility(newFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    this.accountWorkspaceService.selectFacility(newFacility.guid);
   }
 
   async importExistingFacility(backupFile: PreparedBackupFile) {
@@ -376,7 +378,7 @@ export class ImportBackupModalComponent implements OnInit {
     }
 
     let currentAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.selectAccount(currentAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   checkDifferences() {

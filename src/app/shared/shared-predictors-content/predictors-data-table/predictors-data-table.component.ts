@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -34,6 +35,7 @@ type OrderDataField = 'date' | 'amount';
   standalone: false
 })
 export class PredictorsDataTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private predictorDbService: PredictorDbService = inject(PredictorDbService);
@@ -161,7 +163,7 @@ export class PredictorsDataTableComponent {
       let newEntry: IdbPredictorData = getNewIdbPredictorData(predictor, predictorData);
       newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
       const account: IdbAccount = this.accountWorkspaceStore.account();
-      await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(newEntry);
     } else {
@@ -236,7 +238,7 @@ export class PredictorsDataTableComponent {
   async finishDelete() {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -329,7 +331,7 @@ export class PredictorsDataTableComponent {
     predictor.ignoreWeatherDataWarning = !predictor.ignoreWeatherDataWarning;
     await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
     const account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setPredictorsV2(account, this.facility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   openIgnoreWarningModal() {

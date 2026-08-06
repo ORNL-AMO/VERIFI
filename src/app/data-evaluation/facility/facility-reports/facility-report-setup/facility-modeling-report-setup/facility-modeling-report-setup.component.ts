@@ -76,7 +76,7 @@ export class FacilityModelingReportSetupComponent {
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
   }
 

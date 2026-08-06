@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -30,6 +31,7 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   }
 })
 export class EditBillComponent implements OnInit {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   editMeterData: IdbUtilityMeterData;
@@ -125,7 +127,7 @@ export class EditBillComponent implements OnInit {
     }
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.meterDataForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
@@ -146,7 +148,7 @@ export class EditBillComponent implements OnInit {
     meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
     let nextDate: Date = getDateFromMeterData(meterDataToSave);

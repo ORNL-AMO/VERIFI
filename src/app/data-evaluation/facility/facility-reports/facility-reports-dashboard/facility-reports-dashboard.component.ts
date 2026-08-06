@@ -56,7 +56,7 @@ export class FacilityReportsDashboardComponent {
     let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(selectedFacility.guid);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(selectedFacility.guid, selectedFacility.accountId, this.newReportType, groups);
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    await this.dbChangesService.setAccountFacilityReports(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");

@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -28,6 +29,7 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
   standalone: false
 })
 export class MeterDataTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
@@ -125,7 +127,7 @@ export class MeterDataTableComponent {
     }
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -151,7 +153,7 @@ export class MeterDataTableComponent {
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     this.loadingService.setLoadingMessage("Setting Meter Data...");
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingMessage("Meter Data Set...");
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
@@ -217,7 +219,7 @@ export class MeterDataTableComponent {
         await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(newMeterData));
       }
 
-      await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.cancelFillMissingDataModal();
       this.toastNoticationService.showToast(
         `${missingMonths.length} Missing Month${missingMonths.length === 1 ? '' : 's'} Filled!`,
@@ -228,7 +230,7 @@ export class MeterDataTableComponent {
       );
     } catch {
       try {
-        await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
       } catch {
         // The original save error is the useful error to report to the user.
       }

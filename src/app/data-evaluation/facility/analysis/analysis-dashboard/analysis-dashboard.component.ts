@@ -85,7 +85,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-    await this.dbChangesService.setAnalysisItems(account, false, this.selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");

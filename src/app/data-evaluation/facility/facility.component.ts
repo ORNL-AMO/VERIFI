@@ -1,9 +1,9 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataEvaluationService } from '../data-evaluation.service';
@@ -16,6 +16,7 @@ import { DataEvaluationService } from '../data-evaluation.service';
 })
 export class FacilityComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
@@ -23,7 +24,6 @@ export class FacilityComponent implements OnInit {
   print: boolean;
   printSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private router: Router,
-    private dbChangesService: DbChangesService,
     private dataEvaluationService: DataEvaluationService) { }
 
   ngOnInit(): void {
@@ -35,7 +35,7 @@ export class FacilityComponent implements OnInit {
       let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
       let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == facilityId });
       if (selectedFacility) {
-        this.dbChangesService.selectFacility(selectedFacility);
+        this.accountWorkspaceService.selectFacility(selectedFacility.guid);
       } else {
         this.router.navigateByUrl('/data-evaluation/account')
       }

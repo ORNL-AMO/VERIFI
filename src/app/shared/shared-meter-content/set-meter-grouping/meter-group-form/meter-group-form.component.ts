@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, HostListener, inject } from '@angular/core';
@@ -32,6 +33,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class MeterGroupFormComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -120,7 +122,6 @@ export class MeterGroupFormComponent {
     if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
       //need to update analysis items if groupType changes
       await this.analysisDbService.changeGroupType(this.meterGroup.guid, this.groupForm.controls['groupType'].value, this.meterGroup.groupType);
-      await this.dbChangesService.setAnalysisItems(account, true, facility)
     }
     this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
     this.meterGroup.description = this.groupForm.controls['description'].value;
@@ -139,9 +140,7 @@ export class MeterGroupFormComponent {
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
       }
     }
-    await this.dbChangesService.setMeterGroups(account, facility);
-    await this.dbChangesService.setMeters(account, facility);
-    await this.dbChangesService.setMeterData(account, true, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNoticationService.showToast("Meter Group Changes Saved!", undefined, undefined, false, "alert-success");
     this.selectionsChanged = false;
     this.groupForm.markAsPristine();
@@ -238,7 +237,7 @@ export class MeterGroupFormComponent {
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.meterGroup.id));
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setMeterGroups(selectedAccount, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
 
     let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
     let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.groupId == this.meterGroup.guid });
@@ -248,13 +247,13 @@ export class MeterGroupFormComponent {
       meter.groupId = undefined;
       await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter))
     }
-    await this.dbChangesService.setMeters(selectedAccount, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update analysis items
     await this.analysisDbService.deleteGroup(this.meterGroup.guid);
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //update BCC reports
     await this.accountReportDbService.updateReportsRemoveGroup(this.meterGroup.guid);
-    await this.dbChangesService.setAccountReports(selectedAccount);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");

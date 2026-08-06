@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
@@ -27,6 +28,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-uses-group-setup.component.css'
 })
 export class FacilityEnergyUsesGroupSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
@@ -168,8 +170,7 @@ export class FacilityEnergyUsesGroupSetupComponent {
       await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(group.guid);
     }
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, this.facility);
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Groups and Equipment Added", undefined, undefined, false, "alert-success");
     this.routingAfterSubmit = true;

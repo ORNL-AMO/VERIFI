@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed } from '@angular/core';
@@ -24,6 +25,7 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
   styleUrl: './set-meter-grouping.component.css'
 })
 export class SetMeterGroupingComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
@@ -79,7 +81,7 @@ export class SetMeterGroupingComponent {
     let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(this.facility.guid, this.facility.accountId, true, this.facility.energyUnit);
     newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setMeters(account, this.facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + newMeter.guid);
   }
 

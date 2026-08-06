@@ -1,5 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -9,7 +10,6 @@ import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from 'src/app/calculations/status-check-calculations/statusCheckModels';
@@ -33,6 +33,7 @@ interface FacilityActionGroup {
 })
 export class DataManagementHomeComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   account: IdbAccount;
   accountSub: Subscription;
@@ -60,7 +61,6 @@ export class DataManagementHomeComponent {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService
   ) {
 
@@ -130,7 +130,7 @@ export class DataManagementHomeComponent {
 
   async showToast() {
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.selectAccount(selectedAccount, true);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let hasWarning = this.weatherPredictorManagementService.hasWarning;
     if (hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")

@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -18,6 +19,7 @@ import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from 'src/
   styleUrl: './facility-energy-use-group-management.component.css'
 })
 export class FacilityEnergyUseGroupManagementComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
@@ -33,7 +35,7 @@ export class FacilityEnergyUseGroupManagementComponent {
     let newEnergyUseGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(facility.accountId, facility.guid);
     newEnergyUseGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(newEnergyUseGroup));
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.selectEditGroup(newEnergyUseGroup);
   }
 
@@ -42,7 +44,7 @@ export class FacilityEnergyUseGroupManagementComponent {
     let facility: IdbFacility = this.facility();
     energyUseGroup.sidebarOpen = true;
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + energyUseGroup.guid);
   }
 

@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Input, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -25,6 +26,7 @@ import { getGUID } from 'src/app/shared/sharedHelperFunctions';
     styleUrl: './energy-use-group-card.component.css'
 })
 export class EnergyUseGroupCardComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
     @Input({ required: true })
     group: IdbFacilityEnergyUseGroup;
@@ -82,7 +84,7 @@ export class EnergyUseGroupCardComponent {
         let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         energyUseGroup.sidebarOpen = true;
         await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
-        await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
         this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + energyUseGroup.guid);
     }
 
@@ -94,7 +96,7 @@ export class EnergyUseGroupCardComponent {
         copyGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(copyGroup));
         let account: IdbAccount = this.accountWorkspaceStore.account();
         let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-        await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, facility);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
         this.editGroup(copyGroup);
     }
 
@@ -121,9 +123,9 @@ export class EnergyUseGroupCardComponent {
         //set groups
         let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         let account: IdbAccount = this.accountWorkspaceStore.account();
-        await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
         //set equipment
-        await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
+        await this.accountWorkspaceService.reloadActiveWorkspace(true);
         this.cancelDelete();
         this.loadingService.setLoadingStatus(false);
         this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");

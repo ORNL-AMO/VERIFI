@@ -75,7 +75,7 @@ export class PerformanceSetupComponent {
       selectedReport.baselineYear = this.selectedAnalysisItem.baselineYear;
     }
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 

@@ -136,7 +136,7 @@ export class FacilityReportsDashboardTableComponent {
     newReport.name = raw.name + ' (Copy)';
     newReport.analysisItemId = raw.analysisItemId;
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
-    await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_facility_analysis', undefined);
     this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, 'alert-success');
@@ -160,7 +160,7 @@ export class FacilityReportsDashboardTableComponent {
     const report = this.deletedReport();
     if (!report) return;
     await firstValueFrom(this.facilityDbReportsService.deleteWithObservable(report.id));
-    await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.displayDeleteModal.set(false);
     this.deletedReport.set(undefined);
     this.toastNotificationService.showToast('Report Item Deleted', undefined, undefined, false, 'alert-success');
@@ -217,7 +217,7 @@ export class FacilityReportsDashboardTableComponent {
     for (const item of itemsToDelete) {
       await firstValueFrom(this.facilityDbReportsService.deleteWithObservable(item.id));
     }
-    await this.dbChangesService.setAccountFacilityReports(this.account(), this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
     this.selectedReportType.set('');

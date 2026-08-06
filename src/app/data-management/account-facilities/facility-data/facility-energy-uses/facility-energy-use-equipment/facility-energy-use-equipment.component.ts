@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
@@ -27,6 +28,7 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   styleUrl: './facility-energy-use-equipment.component.css'
 })
 export class FacilityEnergyUseEquipmentComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -88,7 +90,7 @@ export class FacilityEnergyUseEquipmentComponent {
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.updateWithObservable(this.energyUseEquipment));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.dataChanged = false;
   }
@@ -113,7 +115,7 @@ export class FacilityEnergyUseEquipmentComponent {
     //set equipment
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Equipment Deleted", undefined, undefined, false, "alert-success");

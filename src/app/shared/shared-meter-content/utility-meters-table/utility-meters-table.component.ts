@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, input, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
@@ -41,6 +42,7 @@ type OrderMeterListField = 'name' | 'source' | 'fuel' | 'scope' | 'startingUnit'
   standalone: false
 })
 export class UtilityMetersTableComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private utilityMeterdbService: UtilityMeterdbService = inject(UtilityMeterdbService);
@@ -110,7 +112,7 @@ export class UtilityMetersTableComponent {
       let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
       newMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(newMeter));
       const account: IdbAccount = this.accountWorkspaceStore.account();
-      await this.dbChangesService.setMeters(account, facility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       await this.selectEditMeter(newMeter);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/new-meter');
@@ -151,8 +153,7 @@ export class UtilityMetersTableComponent {
     //set meters
     const selectedFacility = this.selectedFacility();
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
-    await this.dbChangesService.setMeterData(selectedAccount, true, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
@@ -182,7 +183,7 @@ export class UtilityMetersTableComponent {
       const facility: IdbFacility = this.selectedFacility();
       meter.sidebarOpen = true;
       await firstValueFrom(this.utilityMeterdbService.updateWithObservable(meter));
-      await this.dbChangesService.setMeters(account, facility);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/meters/' + meter.guid);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
@@ -212,7 +213,7 @@ export class UtilityMetersTableComponent {
     copyMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(copyMeter));
     const account: IdbAccount = this.accountWorkspaceStore.account();
     const facility: IdbFacility = this.selectedFacility();
-    await this.dbChangesService.setMeters(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.selectEditMeter(copyMeter);
   }
 }

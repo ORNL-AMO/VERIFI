@@ -259,7 +259,7 @@ export class AnalysisSetupComponent {
     await firstValueFrom(this.analysisDbService.updateWithObservable(updatedItem));
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((updatedItem)?.guid);
   }
 
@@ -295,7 +295,7 @@ export class AnalysisSetupComponent {
     await firstValueFrom(this.analysisDbService.updateWithObservable(clearedItem));
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }

@@ -187,7 +187,7 @@ export class GroupAnalysisOptionsComponent {
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     const facility: IdbFacility = this.facility();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next({ ..._group });
   }

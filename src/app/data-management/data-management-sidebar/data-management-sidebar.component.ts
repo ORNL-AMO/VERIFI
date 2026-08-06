@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject, computed } from '@angular/core';
@@ -30,6 +31,7 @@ import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-
   standalone: false
 })
 export class DataManagementSidebarComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
@@ -173,7 +175,7 @@ export class DataManagementSidebarComponent {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   async toggleFacilityMetersOpen(facility: IdbFacility) {
@@ -195,7 +197,7 @@ export class DataManagementSidebarComponent {
     await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setPredictorsV2(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   async toggleCustomDataOpen() {
@@ -215,7 +217,7 @@ export class DataManagementSidebarComponent {
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
   toggleSidebar() {

@@ -265,7 +265,7 @@ export class AccountAnalysisDetailsTableComponent {
       selectedAccount.selectedWaterAnalysisId = undefined;
       await this.dbChangesService.updateAccount(selectedAccount);
     }
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     if (!isBulkDelete) {
       this.displayDeleteModal = false;
       this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");

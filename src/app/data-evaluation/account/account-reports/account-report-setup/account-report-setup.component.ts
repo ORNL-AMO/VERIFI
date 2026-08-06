@@ -97,7 +97,7 @@ export class AccountReportSetupComponent {
     let selectedReport = this.selectedReport();
     selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm());
     const updatedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountReport((updatedReport)?.guid);
   }
 }

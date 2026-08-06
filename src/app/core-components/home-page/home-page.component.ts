@@ -1,4 +1,5 @@
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
@@ -21,6 +22,7 @@ import { BackupPreparationService } from 'src/app/shared/helper-services/backup-
 })
 export class HomePageComponent {
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   backupFile: any;
   showTestDataModal: boolean = false;
   accounts: Array<IdbAccount>;
@@ -76,10 +78,9 @@ export class HomePageComponent {
           this.backupDataService.accountBackupMessages();
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);
-          await this.dbChangesService.selectAccount(newAccount, false);
+          await this.accountWorkspaceService.selectAccount(newAccount.guid);
           // let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
           // this.accountDbService.allAccounts.next(allAccounts);
-          // await this.dbChangesService.selectAccount(newAccount, false);
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
@@ -107,7 +108,7 @@ export class HomePageComponent {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
     await this.applicationLifecycleService.refreshAccountCatalog();
-    await this.dbChangesService.selectAccount(account, false);
+    await this.accountWorkspaceService.selectAccount(account.guid);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 
@@ -122,7 +123,7 @@ export class HomePageComponent {
   async goToAccountHome(account: IdbAccount) {
     this.loadingService.setLoadingMessage('Loading Account...');
     this.loadingService.setLoadingStatus(true);
-    await this.dbChangesService.selectAccount(account, false);
+    await this.accountWorkspaceService.selectAccount(account.guid);
     this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/data-evaluation/account/home');
   }
@@ -130,7 +131,7 @@ export class HomePageComponent {
   async goToDataWizard(account: IdbAccount) {
     this.loadingService.setLoadingMessage('Loading Account...');
     this.loadingService.setLoadingStatus(true);
-    await this.dbChangesService.selectAccount(account, false);
+    await this.accountWorkspaceService.selectAccount(account.guid);
     this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }

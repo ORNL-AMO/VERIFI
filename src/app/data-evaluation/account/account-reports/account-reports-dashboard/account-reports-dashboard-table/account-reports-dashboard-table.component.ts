@@ -121,7 +121,7 @@ export class AccountReportsDashboardTableComponent {
     newReport.name = newReport.name + ' (Copy)';
     newReport.guid = getGUID();
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-    await this.dbChangesService.setAccountReports(this.selectedAccount());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
@@ -144,7 +144,7 @@ export class AccountReportsDashboardTableComponent {
     const report = this.deletedReport();
     if (!report) return;
     await firstValueFrom(this.accountReportDbService.deleteWithObservable(report.id));
-    await this.dbChangesService.setAccountReports(this.selectedAccount());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.displayDeleteModal.set(false);
     this.deletedReport.set(undefined);
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, 'alert-success');
@@ -201,7 +201,7 @@ export class AccountReportsDashboardTableComponent {
     for (const item of itemsToDelete) {
       await firstValueFrom(this.accountReportDbService.deleteWithObservable(item.id));
     }
-    await this.dbChangesService.setAccountReports(this.selectedAccount());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
     this.selectedReportType.set('');

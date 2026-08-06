@@ -132,7 +132,7 @@ export class SelectItemTableComponent {
     selectedAnalysisItem.isAnalysisVisited = false;
     await this.accountAnalysisDbService.updateFacilityItemSelection(selectedAnalysisItem, analysisItemId, facility.guid);
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountAnalysisItems(account, true);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
   }
 
 
@@ -173,14 +173,14 @@ export class SelectItemTableComponent {
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
-    this.dbChangesService.selectFacility(facility);
+    this.accountWorkspaceService.selectFacility(facility.guid);
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = selectedAnalysisItem.energyIsSource;
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-    await this.dbChangesService.selectAccount(account, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     await this.save(newIdbItem.guid);
     this.accountWorkspaceService.selectFacilityAnalysis((newIdbItem)?.guid);
     this.loadingService.setLoadingStatus(false);

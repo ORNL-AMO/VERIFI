@@ -109,7 +109,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   async createReport() {
     this.facilityReport = await firstValueFrom(this.facilityReportDbService.addWithObservable(this.facilityReport));
-    await this.dbChangesService.setAccountFacilityReports(this.account, this.selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }

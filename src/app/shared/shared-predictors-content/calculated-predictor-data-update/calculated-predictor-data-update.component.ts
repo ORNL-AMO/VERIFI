@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
@@ -32,6 +33,7 @@ import { Month, Months } from '../../form-data/months';
   standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input()
@@ -336,8 +338,7 @@ export class CalculatedPredictorDataUpdateComponent {
     }
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setPredictorDataV2(account, true, selectedFacility)
-    this.loadingService.setLoadingStatus(false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
   }

@@ -1,5 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -20,6 +21,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 })
 export class FacilitiesListComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   facilitiesSub: Subscription;
   facilities: Array<IdbFacility>;
   modalOpen: boolean;
@@ -73,9 +75,9 @@ export class FacilitiesListComponent {
       let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
       let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
       let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
-      await this.dbChangesService.updateDataNewFacility(newFacility);
-      await this.dbChangesService.selectAccount(selectedAccount, false);
+      await this.dbChangesService.updateDataNewFacility(newFacility, false);
     }
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     if (this.numberOfFacilities > 1) {
       this.toastNotificationService.showToast(this.numberOfFacilities + ' Facilities Added!', undefined, undefined, false, 'alert-success');

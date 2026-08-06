@@ -1,4 +1,5 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Injectable, inject } from '@angular/core';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { IdbAccount } from '../models/idbModels/account';
@@ -16,7 +17,6 @@ import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/pr
 import { getDegreeDayAmount } from '../shared/sharedHelperFunctions';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { checkSameMonthPredictorData } from '../data-management/data-management-import/import-services/upload-helper-functions';
 import { Month, Months } from '../shared/form-data/months';
@@ -28,6 +28,7 @@ import { CalanderizationService } from '../shared/helper-services/calanderizatio
 })
 export class WeatherPredictorManagementService {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   hasWarning: boolean = false;
   heatingTemp: number;
@@ -39,7 +40,6 @@ export class WeatherPredictorManagementService {
     private analysisDbService: AnalysisDbService,
     private predictorDataDbService: PredictorDataDbService,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService
   ) {
@@ -270,7 +270,7 @@ export class WeatherPredictorManagementService {
         startDate.setMonth(startDate.getMonth() + 1);
       }
 
-      await this.dbChangesService.selectAccount(selectedAccount, true);
+      await this.accountWorkspaceService.reloadActiveWorkspace(true);
       return "success";
     } else {
       return "error";

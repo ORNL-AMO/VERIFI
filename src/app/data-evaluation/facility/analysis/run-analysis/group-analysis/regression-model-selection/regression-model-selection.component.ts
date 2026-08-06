@@ -215,7 +215,7 @@ export class RegressionModelSelectionComponent {
     const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next(_group);
   }

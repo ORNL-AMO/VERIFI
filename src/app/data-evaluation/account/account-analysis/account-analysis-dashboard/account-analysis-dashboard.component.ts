@@ -60,7 +60,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let newItem: IdbAccountAnalysisItem = getNewIdbAccountAnalysisItem(this.newAnalysisCategory, this.selectedAccount, accountFacilities);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_account_analysis');
     this.accountWorkspaceService.selectAccountAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");

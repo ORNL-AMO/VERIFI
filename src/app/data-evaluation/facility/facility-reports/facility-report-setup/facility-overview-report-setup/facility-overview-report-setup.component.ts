@@ -69,7 +69,7 @@ export class FacilityOverviewReportSetupComponent {
     this.facilityReport.dataOverviewReportSettings = this.reportSettings;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(facilityReport));
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityReports(this.account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
   }
 

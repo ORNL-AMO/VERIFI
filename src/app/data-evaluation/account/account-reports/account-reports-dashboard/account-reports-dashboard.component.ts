@@ -46,7 +46,7 @@ export class AccountReportsDashboardComponent {
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     newReport.reportType = this.newReportType;
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-    await this.dbChangesService.setAccountReports(account);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.analyticsService.sendEvent('create_report');
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");

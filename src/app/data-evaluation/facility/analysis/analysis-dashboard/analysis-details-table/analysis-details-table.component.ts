@@ -289,7 +289,7 @@ export class AnalysisDetailsTableComponent {
     newReport.analysisItemId = analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountFacilityReports(selectedAccount, this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
     this.goToReport(newReport.guid);
   }
@@ -316,7 +316,7 @@ export class AnalysisDetailsTableComponent {
     newItem.guid = Math.random().toString(36).substr(2, 9);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility());
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
@@ -352,8 +352,7 @@ export class AnalysisDetailsTableComponent {
       await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
     }
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false)
-    await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     if (!isBulkDelete) {
       this.displayDeleteModal = false;
       this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");

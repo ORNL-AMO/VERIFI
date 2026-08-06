@@ -57,7 +57,7 @@ export class DataOverviewSetupComponent {
     // selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
     selectedReport.dataOverviewReportSetup = this.reportSetup;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.dbChangesService.setAccountReports(this.account);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 

@@ -215,7 +215,7 @@ export class AccountAnalysisSetupComponent {
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
     const account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
   }
 
@@ -244,7 +244,7 @@ export class AccountAnalysisSetupComponent {
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
     const account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
@@ -270,7 +270,7 @@ export class AccountAnalysisSetupComponent {
     let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
     for (let i = 0; i < facilities.length; i++) {
       const facility: IdbFacility = facilities[i];
-      this.dbChangesService.selectFacility(facility);
+      this.accountWorkspaceService.selectFacility(facility.guid);
       let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, analysisItem.analysisCategory);
       newIdbItem.energyIsSource = analysisItem.energyIsSource;
       let facilityBaselineYear: number;
@@ -295,14 +295,14 @@ export class AccountAnalysisSetupComponent {
         fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
       );
     }
-    await this.dbChangesService.setAnalysisItems(account, true);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     const updatedItem: IdbAccountAnalysisItem = {
       ...analysisItem,
       isAnalysisVisited: false,
       facilityAnalysisItems: updatedFacilityAnalysisItems,
     };
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    await this.dbChangesService.setAccountAnalysisItems(account, false);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');

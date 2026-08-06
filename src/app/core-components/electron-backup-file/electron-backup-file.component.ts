@@ -1,5 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
@@ -23,6 +24,7 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 })
 export class ElectronBackupFileComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
 
@@ -160,7 +162,7 @@ export class ElectronBackupFileComponent {
         newAccount.isSharedBackupFile = isSharedBackupFile;
 
         await this.dbChangesService.updateAccount(newAccount);
-        await this.dbChangesService.selectAccount(newAccount, false);
+        await this.accountWorkspaceService.selectAccount(newAccount.guid);
         await this.deleteDataService.resumeQueuedDeletion();
         needUpdate = false;
 

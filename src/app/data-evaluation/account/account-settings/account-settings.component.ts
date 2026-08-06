@@ -1,5 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom, skip, take } from 'rxjs';
@@ -24,6 +25,7 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 })
 export class AccountSettingsComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   facilityList: Array<IdbFacility> = [];
@@ -102,7 +104,7 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   switchFacility(facility: IdbFacility) {
-    this.dbChangesService.selectFacility(facility);
+    this.accountWorkspaceService.selectFacility(facility.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/settings');
   }
 
@@ -113,7 +115,7 @@ export class AccountSettingsComponent implements OnInit {
     let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
     let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
     await this.dbChangesService.updateDataNewFacility(newFacility);
-    await this.dbChangesService.selectAccount(this.selectedAccount, false);
+    this.accountWorkspaceService.selectFacility(newFacility.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/facility/' + newFacility.guid + '/settings');

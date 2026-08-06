@@ -1,3 +1,4 @@
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed } from '@angular/core';
@@ -32,6 +33,7 @@ import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculation
   styleUrl: './facility-energy-use-group.component.css'
 })
 export class FacilityEnergyUseGroupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
@@ -94,7 +96,7 @@ export class FacilityEnergyUseGroupComponent {
     await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(this.energyUseGroup));
     let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(selectedAccount, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
   }
 
@@ -120,9 +122,9 @@ export class FacilityEnergyUseGroupComponent {
     //set groups
     let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountFacilityEnergyUseGroups(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     //set equipment
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, selectedFacility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");
@@ -158,7 +160,7 @@ export class FacilityEnergyUseGroupComponent {
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, latestYear);
     await firstValueFrom(this.facilityEnergyUseEquipmentDbService.addWithObservable(newEquipment));
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);
   }
 
@@ -179,7 +181,7 @@ export class FacilityEnergyUseGroupComponent {
     }
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.showBulkTransfer = false;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Equipment Transferred", undefined, undefined, false, "alert-success");
@@ -205,7 +207,7 @@ export class FacilityEnergyUseGroupComponent {
     }
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    await this.dbChangesService.setAccountFacilityEnergyUseEquipment(account, facility);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.showBulkDelete = false;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Equipment Deleted", undefined, undefined, false, "alert-success");

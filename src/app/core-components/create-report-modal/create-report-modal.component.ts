@@ -90,7 +90,7 @@ export class CreateReportModalComponent {
       navigateToStr = '/data-evaluation/account/reports/better-plants-report';
     }
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(this.accountReport));
-    await this.dbChangesService.setAccountReports(account);
+    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.sharedDataService.openCreateReportModal.next(false);

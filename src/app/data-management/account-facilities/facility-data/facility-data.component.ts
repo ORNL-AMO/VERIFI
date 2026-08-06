@@ -1,7 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -13,11 +13,11 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class FacilityDataComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
 
   constructor(private activatedRoute: ActivatedRoute,
     private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService,
     private router: Router
   ) {
 
@@ -28,7 +28,7 @@ export class FacilityDataComponent {
       let facilityId: string = params['id'];
       let selectedFacility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityId));
       if (selectedFacility) {
-        this.dbChangesService.selectFacility(selectedFacility);
+        this.accountWorkspaceService.selectFacility(selectedFacility.guid);
       } else {
         this.router.navigateByUrl('/welcome')
       }
