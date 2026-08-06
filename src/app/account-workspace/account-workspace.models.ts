@@ -79,6 +79,13 @@ export interface AccountWorkspaceState {
   readonly revision: number;
   readonly committedRevision?: WorkspaceCommittedRevision;
   readonly error?: WorkspaceError;
+  readonly pendingOperations: readonly PendingOperation[];
+}
+
+/** Lightweight pending-operation record tracked inside the workspace state. */
+export interface PendingOperation {
+  readonly id: number;
+  readonly label: string;
 }
 
 export type WorkspaceLoadResult = 'published' | 'superseded';
