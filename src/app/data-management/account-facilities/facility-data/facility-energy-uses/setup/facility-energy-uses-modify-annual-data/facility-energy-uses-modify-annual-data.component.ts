@@ -5,7 +5,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -14,8 +13,6 @@ import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityDataEnergyUse, 
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
@@ -30,15 +27,12 @@ export class FacilityEnergyUsesModifyAnnualDataComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService = inject(FacilityEnergyUsesSetupService);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private routerGuardService: RouterGuardService = inject(RouterGuardService);
 

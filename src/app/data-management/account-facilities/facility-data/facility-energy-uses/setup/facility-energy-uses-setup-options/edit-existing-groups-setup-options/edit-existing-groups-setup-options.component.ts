@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup.service';
 
@@ -27,11 +25,11 @@ export class EditExistingGroupsSetupOptionsComponent {
   }>;
   facilityEnergyUseGroupsSub: Subscription;
 
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+  constructor(
     private router: Router,
     private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
     private route: ActivatedRoute
+
   ) { }
 
   ngOnInit() {

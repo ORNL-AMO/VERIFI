@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { UploadDataService } from '../../import-services/upload-data.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -27,8 +26,8 @@ export class ConfirmEnergyUsesUploadComponent {
     private dataManagementService: DataManagementService,
     private uploadDataService: UploadDataService,
     private router: Router,
-    private accountDbService: AccountdbService,
     private loadingService: LoadingService
+
   ) { }
 
 

@@ -5,26 +5,22 @@ import { Component, inject, Signal, computed } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupFormService } from './facility-energy-use-group-form.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getLatestYearWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-use-group',
@@ -38,14 +34,11 @@ export class FacilityEnergyUseGroupComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private router: Router = inject(Router);
   private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
   private facilityEnergyUseGroupFormService: FacilityEnergyUseGroupFormService = inject(FacilityEnergyUseGroupFormService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private loadingService: LoadingService = inject(LoadingService);
-  private accountDbService: AccountdbService = inject(AccountdbService);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
   private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
   private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
   private routerGuardService: RouterGuardService = inject(RouterGuardService);

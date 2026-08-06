@@ -2,12 +2,9 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getGUID } from 'src/app/shared/sharedHelperFunctions';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilityEnergyUsesSetupService } from '../../facility-energy-uses-setup.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -45,12 +42,11 @@ export class NewEquipmentGroupSetupOptionsComponent {
   }];
   yearOptions: Array<number>;
 
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+  constructor(
     private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
     private route: ActivatedRoute
+
   ) { }
 
   ngOnInit() {

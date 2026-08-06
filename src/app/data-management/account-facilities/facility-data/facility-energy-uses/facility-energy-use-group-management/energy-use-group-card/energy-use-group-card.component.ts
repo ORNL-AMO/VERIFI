@@ -1,14 +1,10 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Input, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
 import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -31,10 +27,7 @@ export class EnergyUseGroupCardComponent {
     @Input({ required: true })
     group: IdbFacilityEnergyUseGroup;
 
-    private facilityDbService: FacilitydbService = inject(FacilitydbService);
     private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
-    private accountDbService: AccountdbService = inject(AccountdbService);
-    private dbChangesService: DbChangesService = inject(DbChangesService);
     private router: Router = inject(Router);
     private sharedDataService: SharedDataService = inject(SharedDataService);
     private loadingService: LoadingService = inject(LoadingService);

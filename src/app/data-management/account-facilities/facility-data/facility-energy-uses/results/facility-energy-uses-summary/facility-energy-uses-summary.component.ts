@@ -1,10 +1,6 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { EnergyUsesFacilitySummary } from 'src/app/calculations/energy-footprint/energyUsesFacilitySummary';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
@@ -17,9 +13,6 @@ import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEner
 })
 export class FacilityEnergyUsesSummaryComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
-  private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
-  private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
 
   facility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   get facility(): IdbFacility {
@@ -43,12 +36,12 @@ export class FacilityEnergyUsesSummaryComponent {
     if (!facility || !facilityEnergyUseGroups || !facilityEnergyUseEquipment) {
       return null;
     }
-    return new EnergyUsesFacilitySummary(facility, facilityEnergyUseGroups, facilityEnergyUseEquipment);    
+    return new EnergyUsesFacilitySummary(facility, facilityEnergyUseGroups, facilityEnergyUseEquipment);
   });
   get energyUsesFacilitySummary(): EnergyUsesFacilitySummary {
     return this.energyUsesFacilitySummary$();
   }
-  
+
   displayHistory: boolean = false;
 
 }

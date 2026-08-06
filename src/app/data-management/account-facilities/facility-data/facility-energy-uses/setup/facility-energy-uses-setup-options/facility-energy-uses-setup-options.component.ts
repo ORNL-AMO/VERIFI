@@ -3,8 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -20,10 +18,10 @@ export class FacilityEnergyUsesSetupOptionsComponent {
   facilitySub: Subscription;
   facilityEnergyUseGroupsSub: Subscription;
   hasChildRoute: boolean;
-  constructor(private facilityDbService: FacilitydbService,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
+  constructor(
     private router: Router,
     private route: ActivatedRoute
+
   ) { }
 
   ngOnInit() {
@@ -54,7 +52,7 @@ export class FacilityEnergyUsesSetupOptionsComponent {
   setHasChildRoute() {
     this.hasChildRoute = this.route.firstChild != null;
   }
-  
+
   leaveGroupSetup() {
     this.router.navigate(['../'], { relativeTo: this.route });
   }

@@ -5,7 +5,6 @@ import { EnergyEquipmentOperatingConditionsData, IdbFacilityEnergyUseEquipment }
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '../../facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 import { FormGroup } from '@angular/forms';
 import { distinctUntilChanged, Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-energy-use-group-modify-annual-data-form',
@@ -28,8 +27,9 @@ export class EnergyUseGroupModifyAnnualDataFormComponent {
   facilitySub: Subscription;
   formSubscriptions: Subscription = new Subscription();
 
-  constructor(private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService,
-    private facilityDbService: FacilitydbService
+  constructor(
+    private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService
+
   ) { }
 
   ngOnInit() {

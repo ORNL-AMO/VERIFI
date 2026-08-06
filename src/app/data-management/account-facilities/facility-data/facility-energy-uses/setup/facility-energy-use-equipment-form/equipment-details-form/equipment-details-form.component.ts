@@ -7,8 +7,6 @@ import { EquipmentType } from 'src/app/models/idbModels/facilityEnergyUseEquipme
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { Subscription } from 'rxjs';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import * as _ from 'lodash';
 import { UtilityDataForm } from '../facility-energy-use-equipment-form.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -37,9 +35,6 @@ export class EquipmentDetailsFormComponent {
   linkedMeterGroups: Array<IdbUtilityMeterGroup>;
   linkedMeterGroupIds: Array<string>;
   linkedMeterGroupSources: Array<MeterSource>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utiltiyMeterDbService: UtilityMeterdbService
-  ) { }
 
   ngOnInit() {
     this.linkedMeterGroupIds = this.equipmentDetailsForm().controls['utilityMeterGroupIds'].value.map(id => id);

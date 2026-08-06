@@ -3,12 +3,10 @@ import { Component, computed, effect, EventEmitter, inject, Injector, input, Out
 import { FormGroup } from '@angular/forms';
 import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { auditTime, distinctUntilChanged, merge } from 'rxjs';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from './facility-energy-use-equipment-form.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -30,8 +28,6 @@ export class FacilityEnergyUseEquipmentFormComponent {
 
 
   private facilityEnergyUseEquipmentFormService: FacilityEnergyUseEquipmentFormService = inject(FacilityEnergyUseEquipmentFormService);
-  private utilityMeterDbService: UtilityMeterdbService = inject(UtilityMeterdbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private injector: Injector = inject(Injector);
 
