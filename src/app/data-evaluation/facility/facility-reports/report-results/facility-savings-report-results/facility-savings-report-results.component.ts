@@ -88,8 +88,13 @@ export class FacilitySavingsReportResultsComponent {
   ngOnInit(): void {
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
+      if (!this.facilityReport) {
+        return;
+      }
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
       this.analysisService.analysisTableColumns.next(this.facilityReport.savingsReportSettings.analysisTableColumns);
+      this.endDate = new Date(this.facilityReport.savingsReportSettings.endYear, this.facilityReport.savingsReportSettings.endMonth, 1);
+      this.getAnnualAnalysisSummary();
     });
 
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -99,10 +104,6 @@ export class FacilitySavingsReportResultsComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
-
-    this.endDate = new Date(this.facilityReport.savingsReportSettings.endYear, this.facilityReport.savingsReportSettings.endMonth, 1);
-
-    this.getAnnualAnalysisSummary();
   }
 
   getAnnualAnalysisSummary() {

@@ -2,7 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, startWith, Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -45,19 +45,28 @@ export class FacilitySavingsReportSetupComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
-      this.facilityReport = report;
-      this.reportSettings = this.facilityReport.savingsReportSettings;
-      this.analysisTableColumns = this.reportSettings.analysisTableColumns;
-    });
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityReport()),
+        distinctUntilChanged()
+      )
+      .subscribe(report => {
+        this.facilityReport = report;
+        this.setReportSettings();
+      });
 
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
     });
 
-    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector }).subscribe(items => {
-      this.analysisItems = [...items];
-    });
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityAnalyses()),
+        distinctUntilChanged()
+      )
+      .subscribe(items => {
+        this.analysisItems = [...items];
+      });
     this.setSelectedAnalysisItem(true);
   }
 
@@ -67,12 +76,23 @@ export class FacilitySavingsReportSetupComponent {
     this.calanderizedMetersSub.unsubscribe();
   }
 
-  async setSelectedAnalysisItem(onInit: boolean) {
+  setSelectedAnalysisItem(onInit: boolean) {
+    if (!this.analysisItems || !this.facilityReport) {
+      return;
+    }
     this.selectedAnalysisItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
     this.setPredictorVariables();
     this.setLabels();
+  }
+
+  private setReportSettings(): void {
+    if (!this.facilityReport) {
+      return;
+    }
+    this.reportSettings = this.facilityReport.savingsReportSettings;
+    this.analysisTableColumns = this.reportSettings.analysisTableColumns;
   }
 
   setPredictorVariables() {

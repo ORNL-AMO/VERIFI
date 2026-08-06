@@ -2,7 +2,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, startWith, Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
@@ -62,17 +62,24 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   ngOnInit() {
-    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
-      this.facilityReport = report;
-      this.reportSettings = this.facilityReport.costSavingsReportSettings;
-      if (this.reportSettings && this.reportSettings.unitCostTable) {
-        this.unitCostTable = this.reportSettings.unitCostTable ? JSON.parse(JSON.stringify(this.reportSettings.unitCostTable)) : {};
-      }
-    });
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityReport()),
+        distinctUntilChanged()
+      )
+      .subscribe(report => {
+        this.facilityReport = report;
+        this.setReportSettings();
+      });
 
-    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector }).subscribe(items => {
-      this.analysisItems = items.filter(item => (item.analysisCategory == 'water') || (item.analysisCategory == 'energy' && !item.energyIsSource));
-    });
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityAnalyses()),
+        distinctUntilChanged()
+      )
+      .subscribe(items => {
+        this.analysisItems = this.getEligibleAnalysisItems(items);
+      });
 
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
@@ -98,8 +105,8 @@ export class FacilityCostSavingsReportSetupComponent {
     this.filteredAnalysisItems = items;
   }
 
-  async setSelectedAnalysisItem() {
-    if (!this.analysisItems) {
+  setSelectedAnalysisItem() {
+    if (!this.analysisItems || !this.facilityReport) {
       return;
     }
 
@@ -107,6 +114,24 @@ export class FacilityCostSavingsReportSetupComponent {
       return item.guid == this.facilityReport.analysisItemId;
     });
     this.checkSelectedYearError();
+  }
+
+  private getEligibleAnalysisItems(
+    items = this.accountWorkspaceStore.selectedFacilityAnalyses()
+  ): Array<IdbAnalysisItem> {
+    return items.filter(item =>
+      item.analysisCategory == 'water' || (item.analysisCategory == 'energy' && !item.energyIsSource)
+    );
+  }
+
+  private setReportSettings(): void {
+    if (!this.facilityReport) {
+      return;
+    }
+    this.reportSettings = this.facilityReport.costSavingsReportSettings;
+    if (this.reportSettings?.unitCostTable) {
+      this.unitCostTable = JSON.parse(JSON.stringify(this.reportSettings.unitCostTable));
+    }
   }
 
   checkSelectedYearError() {
