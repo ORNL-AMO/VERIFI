@@ -1,10 +1,11 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { Subscription } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportsService } from '../../account-reports.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -19,6 +20,8 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 export class BetterClimateSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
 
   account: IdbAccount;
   selectedReportSub: Subscription;
@@ -30,7 +33,6 @@ export class BetterClimateSetupComponent {
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   initiativeNotes: Array<{year: number, note: string}>;
   constructor(
-    private accountReportDbService: AccountReportDbService,
     private calanderizationService: CalanderizationService,
     private accountReportsService: AccountReportsService,
     private injector: Injector
@@ -62,8 +64,11 @@ export class BetterClimateSetupComponent {
     // selectedReport.betterClimateReportSetup = this.reportSetup;
     selectedReport.betterClimateReportSetup = this.accountReportsService.updateBetterClimateReportFromForm(selectedReport.betterClimateReportSetup, this.reportForm);
     selectedReport.betterClimateReportSetup.initiativeNotes = this.initiativeNotes;
-    await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'update', entityGuid: selectedReport.guid, label: 'Save Report' },
+      () => this.reportHandler.updateAccountReport(selectedReport, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 

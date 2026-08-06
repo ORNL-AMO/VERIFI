@@ -6,7 +6,8 @@ import { vi } from 'vitest';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceSnapshot } from 'src/app/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -61,13 +62,13 @@ describe('FacilityAnalysisReportSetupComponent', () => {
       providers: [
         { provide: AccountWorkspaceStore, useValue: store },
         { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn() } },
-        { provide: FacilityReportsDbService, useValue: { updateWithObservable: vi.fn(value => of(value)) } },
+        { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } },
+        { provide: ReportCommandHandler, useValue: { updateFacilityReport: vi.fn(v => Promise.resolve(v)) } },
         { provide: CalanderizationService, useValue: calendarization }
       ]
     });
     const injector = TestBed.inject(Injector);
     const component = TestBed.runInInjectionContext(() => new FacilityAnalysisReportSetupComponent(
-      TestBed.inject(FacilityReportsDbService),
       TestBed.inject(CalanderizationService),
       injector
     ));

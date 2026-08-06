@@ -2,8 +2,8 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
@@ -22,7 +22,8 @@ export class AccountReportsDashboardComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private router: Router = inject(Router);
-  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private analyticsService: AnalyticsService = inject(AnalyticsService);
 
@@ -36,8 +37,10 @@ export class AccountReportsDashboardComponent {
     let groups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     newReport.reportType = this.newReportType;
-    let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedReport } = await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
+      () => this.reportHandler.addAccountReport(newReport)
+    );
     this.analyticsService.sendEvent('create_report');
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");

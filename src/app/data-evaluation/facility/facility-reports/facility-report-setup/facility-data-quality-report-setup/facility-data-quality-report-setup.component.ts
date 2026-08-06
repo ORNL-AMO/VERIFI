@@ -2,9 +2,10 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { Subscription } from 'rxjs';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { DataQualityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -21,6 +22,8 @@ export class FacilityDataQualityReportSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
 
   facilityReportSub: Subscription;
   facilityReport: IdbFacilityReport;
@@ -41,7 +44,6 @@ export class FacilityDataQualityReportSetupComponent {
 
   constructor(
     private calanderizationService: CalanderizationService,
-    private facilityReportsDbService: FacilityReportsDbService,
     private injector: Injector
 
   ) { }
@@ -107,10 +109,14 @@ export class FacilityDataQualityReportSetupComponent {
   }
 
   async save() {
-    this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
     this.facilityReport.analysisItemId = this.selectedAnalysisItem ? this.selectedAnalysisItem.guid : undefined;
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value: updatedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' },
+      () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
+    );
+    this.facilityReport = updatedReport;
+    this.accountWorkspaceService.selectFacilityReport(this.facilityReport?.guid);
   }
 
   toggleMeter(meter: IdbUtilityMeter) {

@@ -3,10 +3,10 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -22,7 +22,8 @@ export class FacilityReportsDashboardComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityReportsDbService: FacilityReportsDbService = inject(FacilityReportsDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
   private analyticsService: AnalyticsService = inject(AnalyticsService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private router: Router = inject(Router);
@@ -45,8 +46,10 @@ export class FacilityReportsDashboardComponent {
     const selectedFacility = this.selectedFacility();
     let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(selectedFacility.guid);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(selectedFacility.guid, selectedFacility.accountId, this.newReportType, groups);
-    let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
+      () => this.reportHandler.addFacilityReport(newReport)
+    );
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");

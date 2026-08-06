@@ -1,9 +1,10 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
-import { distinctUntilChanged, firstValueFrom, startWith, Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacilityReport, ModelingReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -17,6 +18,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class FacilityModelingReportSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
 
@@ -30,7 +33,6 @@ export class FacilityModelingReportSetupComponent {
   filteredAnalysisItems: Array<IdbAnalysisItem>;
   baselineYears: Array<number>;
   constructor(
-    private facilityReportsDbService: FacilityReportsDbService,
     private calanderizationService: CalanderizationService,
     private injector: Injector
   ) {
@@ -79,9 +81,13 @@ export class FacilityModelingReportSetupComponent {
   }
 
   async save() {
-    this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value: updatedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' },
+      () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
+    );
+    this.facilityReport = updatedReport;
+    this.accountWorkspaceService.selectFacilityReport(this.facilityReport?.guid);
   }
 
   setYearOptions() {

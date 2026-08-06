@@ -2,8 +2,9 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { Subscription } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
@@ -15,15 +16,15 @@ import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/
 export class FacilityReportSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
 
   facilityReportType: FacilityReportType;
   reportName: string;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   constructor(
-    private facilityReportDbService: FacilityReportsDbService,
     private injector: Injector
-
   ) { }
 
   ngOnInit() {
@@ -49,8 +50,11 @@ export class FacilityReportSetupComponent {
     this.isFormChange = true;
     let facilityReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
     facilityReport.name = this.reportName;
-    facilityReport = await firstValueFrom(this.facilityReportDbService.updateWithObservable(facilityReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectFacilityReport((facilityReport)?.guid);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value: updatedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: facilityReport.guid, label: 'Save Report' },
+      () => this.reportHandler.updateFacilityReport(facilityReport, activeAccountGuid)
+    );
+    this.accountWorkspaceService.selectFacilityReport(updatedReport?.guid);
   }
 }

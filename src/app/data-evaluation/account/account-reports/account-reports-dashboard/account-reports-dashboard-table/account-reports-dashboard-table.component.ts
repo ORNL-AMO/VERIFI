@@ -3,9 +3,9 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -41,7 +41,8 @@ interface ReportListItem {
 export class AccountReportsDashboardTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
   private router: Router = inject(Router);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
@@ -116,8 +117,10 @@ export class AccountReportsDashboardTableComponent {
     delete newReport.id;
     newReport.name = newReport.name + ' (Copy)';
     newReport.guid = getGUID();
-    let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedReport } = await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
+      () => this.reportHandler.addAccountReport(newReport)
+    );
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/reports/setup');
@@ -139,8 +142,11 @@ export class AccountReportsDashboardTableComponent {
   async confirmDelete() {
     const report = this.deletedReport();
     if (!report) return;
-    await firstValueFrom(this.accountReportDbService.deleteWithObservable(report.id));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'delete', entityGuid: report.guid, label: 'Delete Account Report' },
+      () => this.reportHandler.deleteAccountReport(report, activeAccountGuid)
+    );
     this.displayDeleteModal.set(false);
     this.deletedReport.set(undefined);
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, 'alert-success');
@@ -194,10 +200,19 @@ export class AccountReportsDashboardTableComponent {
     const itemsToDelete = this.checkedItems();
     this.loadingService.setLoadingMessage('Deleting Reports...');
     this.loadingService.setLoadingStatus(true);
-    for (const item of itemsToDelete) {
-      await firstValueFrom(this.accountReportDbService.deleteWithObservable(item.id));
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'bulk', label: 'Delete Account Reports' },
+      async () => {
+        for (const item of itemsToDelete) {
+          const rawReport = this.reports().find(r => r.guid === item.guid);
+          if (rawReport) {
+            await this.reportHandler.deleteAccountReport(rawReport, activeAccountGuid);
+          }
+        }
+        return itemsToDelete.length;
+      }
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
     this.selectedReportType.set('');

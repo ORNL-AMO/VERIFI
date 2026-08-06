@@ -1,12 +1,12 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
+import { from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -22,9 +22,10 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class PredictorsDataFormComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly predictorHandler = inject(PredictorCommandHandler);
 
   addOrEdit: 'add' | 'edit';
   predictor: IdbPredictor;
@@ -47,7 +48,6 @@ export class PredictorsDataFormComponent {
     private router: Router,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
-    private predictorDataDbService: PredictorDataDbService,
     private routerGuardService: RouterGuardService
   ) {
   }
@@ -83,12 +83,13 @@ export class PredictorsDataFormComponent {
   async saveChanges() {
     this.loadingService.setLoadingMessage('Savings Predictor Entry...');
     this.loadingService.setLoadingStatus(true);
-    if (this.addOrEdit == "edit") {
-      await firstValueFrom(this.predictorDataDbService.updateWithObservable(this.predictorData));
-    } else {
-      await firstValueFrom(this.predictorDataDbService.addWithObservable(this.predictorData));
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', entityGuid: this.predictorData.guid, label: 'Saving predictor data' },
+      () => this.addOrEdit === 'edit'
+        ? this.predictorHandler.updatePredictorData(this.predictorData, activeAccountGuid)
+        : this.predictorHandler.addPredictorData(this.predictorData)
+    );
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
