@@ -82,6 +82,15 @@ await this.lifecycle.refreshAccountCatalog();
 
 Refreshing the catalog does not replace the active workspace. If the active account was also changed, refresh both at the appropriate orchestration boundary.
 
+When an account has just been created or imported and should immediately become active, use the lifecycle operation that keeps the catalog, workspace, and startup state consistent:
+
+```ts
+const account = await firstValueFrom(this.accountDbService.addWithObservable(newAccount));
+await this.lifecycle.activatePersistedAccount(account.guid);
+```
+
+Do not replace this with separate catalog-refresh and workspace-selection calls. In an application that started without accounts, separate calls can leave the lifecycle in its `empty` state even though the new workspace has loaded.
+
 ## Treat workspace entities as readonly
 
 Workspace arrays and entities are exposed as readonly. The boundary is enforced by types and immutable publication, not by production deep-freezing. Never mutate an entity obtained from a workspace signal.
@@ -151,6 +160,8 @@ if (result === 'superseded') {
 ```
 
 Account switching is latest-request-wins. A stale request must not navigate, persist a hint, or assume that its account became active. During switching, the previous ready snapshot remains available for rendering, but `workspace.canWrite()` is false and account-dependent actions should be disabled.
+
+Entity-selection commands form a reactive boundary: they do not expose their internal signal reads as dependencies of a calling `effect()`, and selecting the same GUID is a no-op. Route-driven effects may therefore derive a GUID and call `selectMeter`, `selectPredictor`, or another selection command without creating a read/write feedback loop.
 
 ## Persisting a single-record change
 

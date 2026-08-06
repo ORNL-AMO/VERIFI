@@ -1,3 +1,5 @@
+import { effect, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AccountWorkspaceLoaderService } from './account-workspace-loader.service';
 import { AccountWorkspaceSnapshot } from './account-workspace.models';
@@ -135,6 +137,34 @@ describe('AccountWorkspaceService', () => {
     expect(store.selectedMeter()).toBeUndefined();
     expect(store.selectedPredictor()).toBeUndefined();
     expect(store.revision()).toBe(0);
+  });
+
+  it('does not turn command-internal selection reads into dependencies of a caller effect', async () => {
+    const snapshot: AccountWorkspaceSnapshot = {
+      ...createSnapshot('account-a', 1),
+      meters: [{ guid: 'meter-a', accountId: 'account-a', facilityId: 'account-a-facility' }] as any
+    };
+    const store = new AccountWorkspaceStore();
+    const service = new AccountWorkspaceService(
+      { load: vi.fn().mockResolvedValue(snapshot) } as any,
+      store,
+      createSelectionStorage() as any
+    );
+    await service.selectAccount('account-a');
+    service.selectFacility('account-a-facility');
+    const routeMeterGuid = signal('meter-a');
+    let effectRuns = 0;
+
+    TestBed.configureTestingModule({});
+    const selectionEffect = TestBed.runInInjectionContext(() => effect(() => {
+      effectRuns++;
+      service.selectMeter(routeMeterGuid());
+    }));
+    TestBed.tick();
+
+    expect(effectRuns).toBe(1);
+    expect(store.selectedMeter()?.guid).toBe('meter-a');
+    selectionEffect.destroy();
   });
 
   it('validates every analysis, report, and energy-use selector and resets facility-owned selections', async () => {

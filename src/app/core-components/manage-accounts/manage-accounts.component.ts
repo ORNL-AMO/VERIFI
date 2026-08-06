@@ -175,8 +175,7 @@ export class ManageAccountsComponent {
   async addNewAccount() {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
-    this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
-    await this.selectAccountWorkspace(account);
+    await this.applicationLifecycleService.activatePersistedAccount(account.guid);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 

@@ -77,6 +77,20 @@ export class ApplicationLifecycleService {
     return accounts;
   }
 
+  async activatePersistedAccount(accountGuid: string): Promise<void> {
+    await this.refreshAccountCatalog();
+    const account = this.usableAccounts().find(item => item.guid === accountGuid);
+    if (!account) {
+      throw new Error('The requested account is not available in the account catalog.');
+    }
+
+    const result = await this.workspace.selectAccount(accountGuid);
+    if (result !== 'published') {
+      throw new Error('The requested account workspace was superseded before it could be loaded.');
+    }
+    this.writableState.set({ status: 'ready' });
+  }
+
   async updateApplicationMetadata(
     update: (current: ApplicationInstanceData) => ApplicationInstanceData
   ): Promise<ApplicationInstanceData> {

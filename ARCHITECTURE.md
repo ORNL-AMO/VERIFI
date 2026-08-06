@@ -29,6 +29,8 @@ The Electron renderer is the same Angular application built with the Electron en
 
 [`ApplicationLifecycleService`](src/app/application-lifecycle/application-lifecycle.service.ts) owns idempotent startup. It opens persistence, runs versioned migrations, initializes application metadata and reference data, loads the account catalog, resolves the initial account, publishes its workspace, loads Electron metadata when applicable, and finally enables automatic-backup observation. Concurrent callers share one initialization operation; a failed operation may be retried.
 
+Account creation and import flows activate their persisted account through the lifecycle service so catalog refresh, workspace publication, and the transition from an empty startup to ready state remain coordinated.
+
 [`AppComponent`](src/app/app.component.ts) triggers and renders that lifecycle but does not query repositories. Its shell exposes accessible initializing, error/retry, and switching states. Application-instance metadata is lifecycle-owned readonly state; its IndexedDB service is persistence-only.
 
 Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts):

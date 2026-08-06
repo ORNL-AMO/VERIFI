@@ -2,7 +2,7 @@
  * Orchestrates latest-request-wins account loading, validated entity selection, selection hints,
  * and hydration or committed workspace refreshes.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, untracked } from '@angular/core';
 import { AccountWorkspaceLoaderService, AccountWorkspaceLoadError } from './account-workspace-loader.service';
 import { AccountWorkspaceSnapshot, WorkspaceLoadResult, WorkspaceSelections, WorkspaceSelectionError } from './account-workspace.models';
 import { AccountWorkspaceStore } from './account-workspace.store';
@@ -84,63 +84,82 @@ export class AccountWorkspaceService {
   }
 
   selectFacility(facilityGuid?: string): void {
-    if (!facilityGuid) {
-      this.store.selectFacility(undefined);
+    untracked(() => {
+      if (!facilityGuid) {
+        if (this.store.selectedFacility()) {
+          this.store.selectFacility(undefined);
+        }
+        this.syncPersistedSelectionHints(this.store.selections());
+        return;
+      }
+      const facility = this.store.facilities().find(item => item.guid === facilityGuid);
+      if (!facility) {
+        throw new WorkspaceSelectionError('The requested facility does not belong to the active account.');
+      }
+      if (this.store.selectedFacility()?.guid !== facilityGuid) {
+        this.store.selectFacility(facility);
+      }
       this.syncPersistedSelectionHints(this.store.selections());
-      return;
-    }
-    const facility = this.store.facilities().find(item => item.guid === facilityGuid);
-    if (!facility) {
-      throw new WorkspaceSelectionError('The requested facility does not belong to the active account.');
-    }
-    this.store.selectFacility(facility);
-    this.syncPersistedSelectionHints(this.store.selections());
+    });
   }
 
   selectMeter(meterGuid?: string): void {
-    this.selectFacilityEntity('meter', this.store.meters(), meterGuid, 'meter');
+    untracked(() => this.selectFacilityEntity('meter', this.store.meters(), meterGuid, 'meter'));
   }
 
   selectPredictor(predictorGuid?: string): void {
-    this.selectFacilityEntity('predictor', this.store.predictors(), predictorGuid, 'predictor');
+    untracked(() => this.selectFacilityEntity('predictor', this.store.predictors(), predictorGuid, 'predictor'));
   }
 
   selectFacilityAnalysis(analysisGuid?: string): void {
-    this.selectFacilityEntity(
-      'facilityAnalysis',
-      this.store.facilityAnalyses(),
-      analysisGuid,
-      'facility analysis'
-    );
-    this.syncPersistedSelectionHints(this.store.selections());
+    untracked(() => {
+      this.selectFacilityEntity(
+        'facilityAnalysis',
+        this.store.facilityAnalyses(),
+        analysisGuid,
+        'facility analysis'
+      );
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
   }
 
   selectAccountAnalysis(analysisGuid?: string): void {
-    this.selectAccountEntity('accountAnalysis', this.store.accountAnalyses(), analysisGuid, 'account analysis');
-    this.syncPersistedSelectionHints(this.store.selections());
+    untracked(() => {
+      this.selectAccountEntity('accountAnalysis', this.store.accountAnalyses(), analysisGuid, 'account analysis');
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
   }
 
   selectAccountReport(reportGuid?: string): void {
-    this.selectAccountEntity('accountReport', this.store.accountReports(), reportGuid, 'account report');
-    this.syncPersistedSelectionHints(this.store.selections());
+    untracked(() => {
+      this.selectAccountEntity('accountReport', this.store.accountReports(), reportGuid, 'account report');
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
   }
 
   selectFacilityReport(reportGuid?: string): void {
-    this.selectFacilityEntity('facilityReport', this.store.facilityReports(), reportGuid, 'facility report');
-    this.syncPersistedSelectionHints(this.store.selections());
+    untracked(() => {
+      this.selectFacilityEntity('facilityReport', this.store.facilityReports(), reportGuid, 'facility report');
+      this.syncPersistedSelectionHints(this.store.selections());
+    });
   }
 
   selectEnergyUseGroup(groupGuid?: string): void {
-    this.selectFacilityEntity('energyUseGroup', this.store.energyUseGroups(), groupGuid, 'energy-use group');
+    untracked(() => this.selectFacilityEntity(
+      'energyUseGroup',
+      this.store.energyUseGroups(),
+      groupGuid,
+      'energy-use group'
+    ));
   }
 
   selectEnergyUseEquipment(equipmentGuid?: string): void {
-    this.selectFacilityEntity(
+    untracked(() => this.selectFacilityEntity(
       'energyUseEquipment',
       this.store.energyUseEquipment(),
       equipmentGuid,
       'energy-use equipment'
-    );
+    ));
   }
 
   clear(): void {
@@ -165,7 +184,11 @@ export class AccountWorkspaceService {
     if (guid !== undefined && (!selected || !facilityGuid || selected.facilityId !== facilityGuid)) {
       throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active facility.`);
     }
-    this.store.setSelections({ ...this.store.selections(), [key]: selected });
+    const selections = this.store.selections();
+    const current = selections[key] as { guid?: string } | undefined;
+    if (current?.guid !== selected?.guid) {
+      this.store.setSelections({ ...selections, [key]: selected });
+    }
   }
 
   private selectAccountEntity<K extends keyof WorkspaceSelections, T extends { guid?: string }>(
@@ -178,7 +201,11 @@ export class AccountWorkspaceService {
     if (guid !== undefined && !selected) {
       throw new WorkspaceSelectionError(`The requested ${label} does not belong to the active account.`);
     }
-    this.store.setSelections({ ...this.store.selections(), [key]: selected });
+    const selections = this.store.selections();
+    const current = selections[key] as { guid?: string } | undefined;
+    if (current?.guid !== selected?.guid) {
+      this.store.setSelections({ ...selections, [key]: selected });
+    }
   }
 
   private syncPersistedHints(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections): void {

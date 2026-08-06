@@ -162,7 +162,7 @@ export class ElectronBackupFileComponent {
         newAccount.isSharedBackupFile = isSharedBackupFile;
 
         await this.dbChangesService.updateAccount(newAccount);
-        await this.accountWorkspaceService.selectAccount(newAccount.guid);
+        await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
         await this.deleteDataService.resumeQueuedDeletion();
         needUpdate = false;
 

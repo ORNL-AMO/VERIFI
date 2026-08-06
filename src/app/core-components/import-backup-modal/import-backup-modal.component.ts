@@ -247,7 +247,7 @@ export class ImportBackupModalComponent implements OnInit {
     this.deleteDataService.suspendQueuedDeletion();
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
     await this.dbChangesService.updateAccount(newAccount);
-    await this.accountWorkspaceService.selectAccount(newAccount.guid);
+    await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
     await this.deleteDataService.resumeQueuedDeletion();
   }
 

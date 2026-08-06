@@ -78,9 +78,7 @@ export class HomePageComponent {
           this.backupDataService.accountBackupMessages();
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
           await this.dbChangesService.updateAccount(newAccount);
-          await this.accountWorkspaceService.selectAccount(newAccount.guid);
-          // let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-          // this.accountDbService.allAccounts.next(allAccounts);
+          await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
@@ -107,8 +105,7 @@ export class HomePageComponent {
   async createNewAccount() {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
-    await this.applicationLifecycleService.refreshAccountCatalog();
-    await this.accountWorkspaceService.selectAccount(account.guid);
+    await this.applicationLifecycleService.activatePersistedAccount(account.guid);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 
