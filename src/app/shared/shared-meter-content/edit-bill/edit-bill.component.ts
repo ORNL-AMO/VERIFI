@@ -125,9 +125,10 @@ export class EditBillComponent implements OnInit {
       );
     } else {
       delete meterDataToSave.id;
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
         { entityKind: 'meterData', changeKind: 'add', label: 'Add Reading' },
-        () => this.meterHandler.addMeterData(meterDataToSave)
+        () => this.meterHandler.addMeterData(meterDataToSave, accountGuid)
       );
     }
     this.meterDataForm.markAsPristine();
@@ -146,9 +147,10 @@ export class EditBillComponent implements OnInit {
       meterDataToSave = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
     }
     delete meterDataToSave.id;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const result = await this.commandBoundary.execute(
       { entityKind: 'meterData', changeKind: 'add', label: 'Add Reading' },
-      () => this.meterHandler.addMeterData(meterDataToSave)
+      () => this.meterHandler.addMeterData(meterDataToSave, accountGuid)
     );
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);

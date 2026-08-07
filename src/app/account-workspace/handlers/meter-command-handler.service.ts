@@ -23,7 +23,8 @@ export class MeterCommandHandler {
   // Meter
   // ---------------------------------------------------------------------------
 
-  async addMeter(meter: IdbUtilityMeter): Promise<IdbUtilityMeter> {
+  async addMeter(meter: IdbUtilityMeter, activeAccountGuid: string): Promise<IdbUtilityMeter> {
+    this.assertOwnership(meter.accountId, activeAccountGuid, 'meter');
     return firstValueFrom(this.meterDb.addWithObservable({ ...meter }));
   }
 
@@ -42,7 +43,8 @@ export class MeterCommandHandler {
   // Meter data
   // ---------------------------------------------------------------------------
 
-  async addMeterData(meterData: IdbUtilityMeterData): Promise<IdbUtilityMeterData> {
+  async addMeterData(meterData: IdbUtilityMeterData, activeAccountGuid: string): Promise<IdbUtilityMeterData> {
+    this.assertOwnership(meterData.accountId, activeAccountGuid, 'meter data');
     return firstValueFrom(this.meterDataDb.addWithObservable({ ...meterData }));
   }
 
@@ -60,7 +62,8 @@ export class MeterCommandHandler {
   // Meter group
   // ---------------------------------------------------------------------------
 
-  async addMeterGroup(group: IdbUtilityMeterGroup): Promise<IdbUtilityMeterGroup> {
+  async addMeterGroup(group: IdbUtilityMeterGroup, activeAccountGuid: string): Promise<IdbUtilityMeterGroup> {
+    this.assertOwnership(group.accountId, activeAccountGuid, 'meter group');
     return firstValueFrom(this.meterGroupDb.addWithObservable({ ...group }));
   }
 

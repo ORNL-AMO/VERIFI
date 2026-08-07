@@ -154,7 +154,7 @@ export class PredictorsDataTableComponent {
       let newEntry: IdbPredictorData = getNewIdbPredictorData(predictor, predictorData);
       const result = await this.commandBoundary.execute(
         { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' },
-        () => this.predictorHandler.addPredictorData(newEntry)
+        () => this.predictorHandler.addPredictorData(newEntry, this.accountWorkspaceStore.account()?.guid)
       );
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
       this.setEditPredictorData(result.value);

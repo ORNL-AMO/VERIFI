@@ -10,14 +10,15 @@ describe('ReportCommandHandler', () => {
   function createHandler() {
     const facilityReportDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
     const accountReportDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
-    const handler = new ReportCommandHandler(facilityReportDb as any, accountReportDb as any);
-    return { handler, facilityReportDb, accountReportDb };
+    const transactions = { runTransaction: vi.fn() };
+    const handler = new ReportCommandHandler(facilityReportDb as any, accountReportDb as any, transactions as any);
+    return { handler, facilityReportDb, accountReportDb, transactions };
   }
 
   it('addFacilityReport persists and returns the new report', async () => {
     const { handler, facilityReportDb } = createHandler();
     facilityReportDb.addWithObservable.mockReturnValue(of({ guid: 'fr-1', id: 1 }));
-    const result = await handler.addFacilityReport({ guid: 'fr-1', accountId: ACCOUNT } as IdbFacilityReport);
+    const result = await handler.addFacilityReport({ guid: 'fr-1', accountId: ACCOUNT } as IdbFacilityReport, ACCOUNT);
     expect(result.id).toBe(1);
   });
 
@@ -43,8 +44,27 @@ describe('ReportCommandHandler', () => {
   it('addAccountReport persists and returns the new report', async () => {
     const { handler, accountReportDb } = createHandler();
     accountReportDb.addWithObservable.mockReturnValue(of({ guid: 'ar-1', id: 2 }));
-    const result = await handler.addAccountReport({ guid: 'ar-1', accountId: ACCOUNT } as IdbAccountReport);
-    expect(result.id).toBe(2);
+    const result = await handler.addAccountReport({ guid: 'ar-1', accountId: ACCOUNT } as IdbAccountReport, ACCOUNT);
+  expect(result.id).toBe(2);
+  });
+
+  it('bulkDeleteFacilityReports deletes every selected report in one transaction', async () => {
+    const { handler, transactions } = createHandler();
+    transactions.runTransaction.mockImplementation(async (_stores: unknown, _mode: unknown, operation: (context: { deleteByKey: (store: string, id: number) => Promise<void> }) => Promise<number>) => {
+      const deleted: Array<{ store: string, id: number }> = [];
+      const count = await operation({
+        deleteByKey: async (store: string, id: number) => { deleted.push({ store, id }); }
+      });
+      expect(deleted).toEqual([{ store: 'facilityReports', id: 7 }, { store: 'facilityReports', id: 8 }]);
+      return count;
+    });
+
+    const result = await handler.bulkDeleteFacilityReports([
+      { id: 7, guid: 'fr-1', accountId: ACCOUNT } as IdbFacilityReport,
+      { id: 8, guid: 'fr-2', accountId: ACCOUNT } as IdbFacilityReport
+    ], ACCOUNT);
+
+    expect(result).toBe(2);
   });
 
   it('deleteAccountReport rejects cross-account report', async () => {

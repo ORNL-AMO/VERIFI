@@ -72,9 +72,13 @@ export class AccountSetupComponent {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
-    await this.applicationLifecycleService.refreshAccountCatalog();
-    this.router.navigateByUrl('/welcome');
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'delete', entityGuid: this.selectedAccount.guid, label: 'Deleting account' },
+      () => this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid)
+    );
+    const accounts = await this.applicationLifecycleService.handleMarkedAccountDeletion(this.selectedAccount.guid);
+    const hasUsableAccount = accounts.some(account => !account.deleteAccount);
+    this.router.navigateByUrl(hasUsableAccount ? '/manage-accounts' : '/welcome');
   }
 
   cancelAccountDelete() {
@@ -95,12 +99,15 @@ export class AccountSetupComponent {
     console.log('update file path')
     this.automaticBackupsService.initializingAccount = false;
     this.automaticBackupsService.creatingFile = true;
-    this.selectedAccount.dataBackupFilePath = savedFilePath;
-    this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
+    const updatedAccount: IdbAccount = {
+      ...this.selectedAccount,
+      dataBackupFilePath: savedFilePath,
+      dataBackupId: this.backupFile.dataBackupId
+    };
     this.updatingFilePath = false;
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Updating account' },
-      () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
+      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account' },
+      () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
     );
     this.cd.detectChanges();
   }

@@ -27,7 +27,7 @@ export class FacilityEnergyUseGroupManagementComponent {
     let newEnergyUseGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(facility.accountId, facility.guid);
     const result = await this.commandBoundary.execute(
       { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Adding energy use group' },
-      () => this.energyUseHandler.addGroup(newEnergyUseGroup)
+      () => this.energyUseHandler.addGroup(newEnergyUseGroup, this.accountWorkspaceStore.account()?.guid)
     );
     this.selectEditGroup(result.value);
   }

@@ -24,7 +24,8 @@ export class PredictorCommandHandler {
   // Predictor
   // ---------------------------------------------------------------------------
 
-  async addPredictor(predictor: IdbPredictor): Promise<IdbPredictor> {
+  async addPredictor(predictor: IdbPredictor, activeAccountGuid: string): Promise<IdbPredictor> {
+    this.assertOwnership(predictor.accountId, activeAccountGuid, 'predictor');
     return firstValueFrom(this.predictorDb.addWithObservable({ ...predictor }));
   }
 
@@ -43,7 +44,8 @@ export class PredictorCommandHandler {
   // Predictor data
   // ---------------------------------------------------------------------------
 
-  async addPredictorData(predictorData: IdbPredictorData): Promise<IdbPredictorData> {
+  async addPredictorData(predictorData: IdbPredictorData, activeAccountGuid: string): Promise<IdbPredictorData> {
+    this.assertOwnership(predictorData.accountId, activeAccountGuid, 'predictor data');
     return firstValueFrom(this.predictorDataDb.addWithObservable({ ...predictorData }));
   }
 

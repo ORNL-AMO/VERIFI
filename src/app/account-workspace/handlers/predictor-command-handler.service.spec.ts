@@ -27,7 +27,7 @@ describe('PredictorCommandHandler', () => {
     const { handler, predictorDb } = createHandler();
     predictorDb.addWithObservable.mockReturnValue(of({ guid: 'p-1', id: 1 }));
 
-    const result = await handler.addPredictor({ guid: 'p-1', accountId: ACCOUNT } as IdbPredictor);
+    const result = await handler.addPredictor({ guid: 'p-1', accountId: ACCOUNT } as IdbPredictor, ACCOUNT);
     expect(result.id).toBe(1);
   });
 

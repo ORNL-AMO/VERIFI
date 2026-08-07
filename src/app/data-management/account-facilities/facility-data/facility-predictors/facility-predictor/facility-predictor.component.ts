@@ -159,7 +159,7 @@ export class FacilityPredictorComponent {
             newPredictorData.year = newDate.getFullYear();
             newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
             newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-            await this.predictorHandler.addPredictorData(newPredictorData);
+            await this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid);
           } else {
             predictorExists.month = newDate.getMonth() + 1;
             predictorExists.year = newDate.getFullYear();

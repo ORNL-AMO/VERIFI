@@ -88,7 +88,7 @@ export class PredictorsDataFormComponent {
       { entityKind: 'predictorData', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', entityGuid: this.predictorData.guid, label: 'Saving predictor data' },
       () => this.addOrEdit === 'edit'
         ? this.predictorHandler.updatePredictorData(this.predictorData, activeAccountGuid)
-        : this.predictorHandler.addPredictorData(this.predictorData)
+        : this.predictorHandler.addPredictorData(this.predictorData, activeAccountGuid)
     );
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);

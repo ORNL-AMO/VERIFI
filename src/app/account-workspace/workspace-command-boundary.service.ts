@@ -103,21 +103,7 @@ export class WorkspaceCommandBoundary {
     options: WorkspaceCommandOptions,
     persist: () => Promise<T>
   ): Promise<WorkspaceCommandResult<T>> {
-    // Reject if the account changed between submission and execution.
-    const currentAccountGuid = this.store.account()?.guid;
-    if (currentAccountGuid !== submittedAccountGuid) {
-      throw new WorkspaceWriteError(
-        'stale-workspace',
-        `Command was submitted for account ${submittedAccountGuid} but the active account is now ${currentAccountGuid}.`
-      );
-    }
-
-    if (!this.store.isReady()) {
-      throw new WorkspaceWriteError(
-        'workspace-not-ready',
-        'The workspace is no longer ready.'
-      );
-    }
+    this.assertCommandStillCurrent(submittedAccountGuid, 'before execution');
 
     const opId = ++nextOperationId;
     this.store.setPending({ id: opId, label: options.label });
@@ -135,17 +121,30 @@ export class WorkspaceCommandBoundary {
       );
     }
 
-    // Reload the workspace. If this fails, the persistence already committed —
-    // re-throw so the caller can report a partial failure.
     try {
-      await this.workspaceService.reloadActiveWorkspace(true);
+      this.assertCommandStillCurrent(submittedAccountGuid, 'after persistence');
     } catch (error) {
       this.store.clearPending(opId);
+      throw error;
+    }
+
+    // Reload the workspace. If this fails, the persistence already committed —
+    // re-throw so the caller can report a partial failure.
+    const reloadResult = await this.reloadCommittedWorkspace(opId, options);
+
+    if (reloadResult !== 'published') {
+      this.store.clearPending(opId);
       throw new WorkspaceWriteError(
-        'persistence-failed',
-        `Workspace reload failed after ${options.entityKind} ${options.changeKind}.`,
-        error
+        'stale-workspace',
+        `Command for account ${submittedAccountGuid} was superseded before the committed workspace reload could publish.`
       );
+    }
+
+    try {
+      this.assertCommandStillCurrent(submittedAccountGuid, 'after reload');
+    } catch (error) {
+      this.store.clearPending(opId);
+      throw error;
     }
 
     this.store.clearPending(opId);
@@ -159,5 +158,38 @@ export class WorkspaceCommandBoundary {
     this.committedChangeSubject.next(change);
 
     return { value, change };
+  }
+
+  private async reloadCommittedWorkspace(
+    opId: number,
+    options: WorkspaceCommandOptions
+  ) {
+    try {
+      return await this.workspaceService.reloadActiveWorkspace(true);
+    } catch (error) {
+      this.store.clearPending(opId);
+      throw new WorkspaceWriteError(
+        'persistence-failed',
+        `Workspace reload failed after ${options.entityKind} ${options.changeKind}.`,
+        error
+      );
+    }
+  }
+
+  private assertCommandStillCurrent(submittedAccountGuid: string, phase: string): void {
+    if (!this.store.isReady()) {
+      throw new WorkspaceWriteError(
+        'stale-workspace',
+        `Command for account ${submittedAccountGuid} became stale ${phase} because the workspace is no longer ready.`
+      );
+    }
+
+    const currentAccountGuid = this.store.account()?.guid;
+    if (currentAccountGuid !== submittedAccountGuid) {
+      throw new WorkspaceWriteError(
+        'stale-workspace',
+        `Command was submitted for account ${submittedAccountGuid} but the active account is now ${currentAccountGuid} ${phase}.`
+      );
+    }
   }
 }

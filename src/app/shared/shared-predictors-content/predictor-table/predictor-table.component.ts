@@ -172,7 +172,7 @@ export class PredictorTableComponent {
       const result = await this.commandBoundary.execute(
         { entityKind: 'predictor', changeKind: 'add', label: 'Add Predictor' },
         async () => {
-          const added = await this.predictorHandler.addPredictor(newPredictor);
+          const added = await this.predictorHandler.addPredictor(newPredictor, this.accountWorkspaceStore.account()?.guid);
           await this.analysisDbService.addAnalysisPredictor(added);
           return added;
         }

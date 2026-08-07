@@ -285,7 +285,7 @@ export class AccountAnalysisSetupComponent {
           newIdbItem.groups.forEach(group => {
             group.analysisType = analysisType;
           });
-          newIdbItem = await this.analysisHandler.addFacilityAnalysis(newIdbItem);
+          newIdbItem = await this.analysisHandler.addFacilityAnalysis(newIdbItem, this.accountWorkspaceStore.account()?.guid);
           updatedFacilityAnalysisItems = updatedFacilityAnalysisItems.map(fi =>
             fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
           );

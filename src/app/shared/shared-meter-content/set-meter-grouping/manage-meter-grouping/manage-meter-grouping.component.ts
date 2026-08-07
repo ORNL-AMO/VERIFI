@@ -88,7 +88,7 @@ export class ManageMeterGroupingComponent {
     const result = await this.commandBoundary.execute(
       { entityKind: 'meterGroup', changeKind: 'add', label: 'Add Meter Group' },
       async () => {
-        const added = await this.meterHandler.addMeterGroup(newGroup);
+        const added = await this.meterHandler.addMeterGroup(newGroup, this.accountWorkspaceStore.account()?.guid);
         await this.analysisDbService.addGroup(added.guid, added.groupType);
         return added;
       }

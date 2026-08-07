@@ -106,7 +106,7 @@ export class EditMeterComponent implements OnInit {
           await this.persistMeterDataUpdates(meterToSave);
         } else {
           delete meterToSave.id;
-          meterToSave = await this.meterHandler.addMeter(meterToSave);
+          meterToSave = await this.meterHandler.addMeter(meterToSave, this.accountWorkspaceStore.account()?.guid);
         }
         return meterToSave;
       }

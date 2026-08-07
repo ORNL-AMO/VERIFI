@@ -327,7 +327,7 @@ export class CalculatedPredictorDataUpdateComponent {
             delete pData.updatedAmount;
             delete pData.added;
             delete pData.deleted;
-            await this.predictorHandler.addPredictorData(pData);
+            await this.predictorHandler.addPredictorData(pData, accountGuid);
           } else if (pData.deleted) {
             await this.predictorHandler.deletePredictorData(pData.id);
           }

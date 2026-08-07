@@ -39,7 +39,7 @@ export class AccountReportsDashboardComponent {
     newReport.reportType = this.newReportType;
     const { value: addedReport } = await this.commandBoundary.execute(
       { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
-      () => this.reportHandler.addAccountReport(newReport)
+      () => this.reportHandler.addAccountReport(newReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_report');
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);

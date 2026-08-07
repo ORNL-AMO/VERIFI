@@ -20,7 +20,8 @@ export class EnergyUseCommandHandler {
   // Energy-use groups
   // ---------------------------------------------------------------------------
 
-  async addGroup(group: IdbFacilityEnergyUseGroup): Promise<IdbFacilityEnergyUseGroup> {
+  async addGroup(group: IdbFacilityEnergyUseGroup, activeAccountGuid: string): Promise<IdbFacilityEnergyUseGroup> {
+    this.assertOwnership(group.accountId, activeAccountGuid, 'energy-use group');
     return firstValueFrom(this.groupDb.addWithObservable({ ...group }));
   }
 
@@ -39,7 +40,8 @@ export class EnergyUseCommandHandler {
   // Energy-use equipment
   // ---------------------------------------------------------------------------
 
-  async addEquipment(equipment: IdbFacilityEnergyUseEquipment): Promise<IdbFacilityEnergyUseEquipment> {
+  async addEquipment(equipment: IdbFacilityEnergyUseEquipment, activeAccountGuid: string): Promise<IdbFacilityEnergyUseEquipment> {
+    this.assertOwnership(equipment.accountId, activeAccountGuid, 'energy-use equipment');
     return firstValueFrom(this.equipmentDb.addWithObservable({ ...equipment }));
   }
 

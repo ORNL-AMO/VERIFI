@@ -95,16 +95,17 @@ export class CustomGwpFormComponent {
     this.editCustomGWP.gwp_ar5 = this.form.controls.gwp.value;
     this.editCustomGWP.gwp_ar6 = this.form.controls.gwp.value;
     this.editCustomGWP.display = this.form.controls.gwpLabel.value;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
 
     if (this.isAdd) {
       await this.commandBoundary.execute(
         { entityKind: 'customGWP', changeKind: 'add', label: 'Adding custom GWP' },
-        () => this.customDataHandler.addCustomGWP(this.editCustomGWP)
+        () => this.customDataHandler.addCustomGWP(this.editCustomGWP, activeAccountGuid)
       );
     } else {
       await this.commandBoundary.execute(
         { entityKind: 'customGWP', changeKind: 'update', entityGuid: this.editCustomGWP.guid, label: 'Saving custom GWP' },
-        () => this.customDataHandler.updateCustomGWP(this.editCustomGWP, this.accountWorkspaceStore.account()?.guid)
+        () => this.customDataHandler.updateCustomGWP(this.editCustomGWP, activeAccountGuid)
       );
     }
     this.navigateHome();

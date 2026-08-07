@@ -139,13 +139,13 @@ export class CustomFuelDataFormComponent {
 
     this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
     this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     if (this.isAdd) {
       await this.commandBoundary.execute(
         { entityKind: 'customFuel', changeKind: 'add', label: 'Adding custom fuel' },
-        () => this.customDataHandler.addCustomFuel(this.editCustomFuel)
+        () => this.customDataHandler.addCustomFuel(this.editCustomFuel, activeAccountGuid)
       );
     } else {
-      const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
         { entityKind: 'customFuel', changeKind: 'update', entityGuid: this.editCustomFuel.guid, label: 'Saving custom fuel' },
         async () => {

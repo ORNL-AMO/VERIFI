@@ -286,7 +286,7 @@ export class AnalysisDetailsTableComponent {
     newReport.analysisItemId = analysisItem.guid;
     const { value: addedReport } = await this.commandBoundary.execute(
       { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
-      () => this.reportHandler.addFacilityReport(newReport)
+      () => this.reportHandler.addFacilityReport(newReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
     this.goToReport(newReport.guid);
@@ -313,7 +313,7 @@ export class AnalysisDetailsTableComponent {
     newItem.guid = Math.random().toString(36).substr(2, 9);
     const { value: addedItem } = await this.commandBoundary.execute(
       { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' },
-      () => this.analysisHandler.addFacilityAnalysis(newItem)
+      () => this.analysisHandler.addFacilityAnalysis(newItem, this.accountWorkspaceStore.account()?.guid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");

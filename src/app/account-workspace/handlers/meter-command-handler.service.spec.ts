@@ -35,7 +35,7 @@ describe('MeterCommandHandler', () => {
       const meter = { guid: 'm-1', accountId: ACCOUNT } as IdbUtilityMeter;
       meterDb.addWithObservable.mockReturnValue(of({ ...meter, id: 1 }));
 
-      const result = await handler.addMeter(meter);
+      const result = await handler.addMeter(meter, ACCOUNT);
 
       expect(result.id).toBe(1);
     });
@@ -73,7 +73,7 @@ describe('MeterCommandHandler', () => {
       const data = { guid: 'd-1', accountId: ACCOUNT } as IdbUtilityMeterData;
       meterDataDb.addWithObservable.mockReturnValue(of({ ...data, id: 2 }));
 
-      const result = await handler.addMeterData(data);
+      const result = await handler.addMeterData(data, ACCOUNT);
       expect(result.id).toBe(2);
     });
 

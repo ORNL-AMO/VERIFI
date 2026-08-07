@@ -59,7 +59,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let newItem: IdbAccountAnalysisItem = getNewIdbAccountAnalysisItem(this.newAnalysisCategory, this.selectedAccount, accountFacilities);
     const { value: addedItem } = await this.commandBoundary.execute(
       { entityKind: 'accountAnalysis', changeKind: 'add', label: 'Create Account Analysis' },
-      () => this.analysisHandler.addAccountAnalysis(newItem)
+      () => this.analysisHandler.addAccountAnalysis(newItem, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_account_analysis');
     this.accountWorkspaceService.selectAccountAnalysis((addedItem)?.guid);

@@ -81,7 +81,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
     const { value: addedItem } = await this.commandBoundary.execute(
       { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' },
-      () => this.analysisHandler.addFacilityAnalysis(newIdbItem)
+      () => this.analysisHandler.addFacilityAnalysis(newIdbItem, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.accountWorkspaceService.selectFacilityAnalysis(addedItem?.guid);

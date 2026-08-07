@@ -81,7 +81,7 @@ export class WeatherPredictorManagementService {
       hddPredictor.weatherDataType = 'HDD';
       hddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       hddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await this.predictorHandler.addPredictor(hddPredictor);
+      await this.predictorHandler.addPredictor(hddPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(hddPredictor);
 
@@ -99,7 +99,7 @@ export class WeatherPredictorManagementService {
       cddPredictor.weatherDataType = 'CDD';
       cddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       cddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await this.predictorHandler.addPredictor(cddPredictor);
+      await this.predictorHandler.addPredictor(cddPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(cddPredictor);
     }
@@ -112,7 +112,7 @@ export class WeatherPredictorManagementService {
       relativeHumidityPredictor.weatherDataType = 'relativeHumidity';
       relativeHumidityPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       relativeHumidityPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await this.predictorHandler.addPredictor(relativeHumidityPredictor);
+      await this.predictorHandler.addPredictor(relativeHumidityPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(relativeHumidityPredictor);
     }
@@ -125,7 +125,7 @@ export class WeatherPredictorManagementService {
       dryBulbTempPredictor.weatherDataType = 'dryBulbTemp';
       dryBulbTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       dryBulbTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await this.predictorHandler.addPredictor(dryBulbTempPredictor);
+      await this.predictorHandler.addPredictor(dryBulbTempPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(dryBulbTempPredictor);
     }
@@ -138,7 +138,7 @@ export class WeatherPredictorManagementService {
       wetBulbTempPredictor.weatherDataType = 'wetBulbTemp';
       wetBulbTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       wetBulbTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await this.predictorHandler.addPredictor(wetBulbTempPredictor);
+      await this.predictorHandler.addPredictor(wetBulbTempPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(wetBulbTempPredictor);
     }
@@ -151,7 +151,7 @@ export class WeatherPredictorManagementService {
       dewPointTempPredictor.weatherDataType = 'dewPointTemp';
       dewPointTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
       dewPointTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-      await this.predictorHandler.addPredictor(dewPointTempPredictor);
+      await this.predictorHandler.addPredictor(dewPointTempPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
       //add predictor to analysis
       await this.analysisDbService.addAnalysisPredictor(dewPointTempPredictor);
     }
@@ -164,7 +164,7 @@ export class WeatherPredictorManagementService {
         precipitationPredictor.weatherDataType = 'precipitation';
         precipitationPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
         precipitationPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
-        await this.predictorHandler.addPredictor(precipitationPredictor);
+        await this.predictorHandler.addPredictor(precipitationPredictor, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         //add predictor to analysis
         await this.analysisDbService.addAnalysisPredictor(precipitationPredictor);
     }
@@ -200,7 +200,7 @@ export class WeatherPredictorManagementService {
           newCddPredictorData.year = entryDate.getFullYear();
           newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
           newCddPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newCddPredictorData);
+          await this.predictorHandler.addPredictorData(newCddPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         if (hddPredictor) {
@@ -209,7 +209,7 @@ export class WeatherPredictorManagementService {
           newHddPredictorData.year = entryDate.getFullYear();
           newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
           newHddPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newHddPredictorData);
+          await this.predictorHandler.addPredictorData(newHddPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         if (relativeHumidityPredictor) {
@@ -218,7 +218,7 @@ export class WeatherPredictorManagementService {
           newRHPredictorData.year = entryDate.getFullYear();
           newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
           newRHPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newRHPredictorData);
+          await this.predictorHandler.addPredictorData(newRHPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         if (dryBulbTempPredictor) {
@@ -227,7 +227,7 @@ export class WeatherPredictorManagementService {
           newDryBulbTempPredictorData.year = entryDate.getFullYear();
           newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
           newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newDryBulbTempPredictorData);
+          await this.predictorHandler.addPredictorData(newDryBulbTempPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         if (wetBulbTempPredictor) {
@@ -236,7 +236,7 @@ export class WeatherPredictorManagementService {
           newWetBulbTempPredictorData.year = entryDate.getFullYear();
           newWetBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'wetBulbTemp');
           newWetBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newWetBulbTempPredictorData);
+          await this.predictorHandler.addPredictorData(newWetBulbTempPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         if (dewPointTempPredictor) {
@@ -245,7 +245,7 @@ export class WeatherPredictorManagementService {
           newDewPointTempPredictorData.year = entryDate.getFullYear();
           newDewPointTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dewPointTemp');
           newDewPointTempPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newDewPointTempPredictorData);
+          await this.predictorHandler.addPredictorData(newDewPointTempPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         if (precipitationPredictor) {
@@ -254,7 +254,7 @@ export class WeatherPredictorManagementService {
           newPrecipitationPredictorData.year = entryDate.getFullYear();
           newPrecipitationPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
           newPrecipitationPredictorData.weatherDataWarning = hasErrors != undefined;
-          await this.predictorHandler.addPredictorData(newPrecipitationPredictorData);
+          await this.predictorHandler.addPredictorData(newPrecipitationPredictorData, this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId);
         }
 
         startDate.setMonth(startDate.getMonth() + 1);
@@ -372,7 +372,7 @@ export class WeatherPredictorManagementService {
               if (newPredictorData.weatherDataWarning) {
                 this.hasWarning = true;
               }
-              await this.predictorHandler.addPredictorData(newPredictorData);
+              await this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid ?? weatherPredictor.accountId);
             }
             else {
               results = "error"

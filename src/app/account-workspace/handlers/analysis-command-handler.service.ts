@@ -20,7 +20,8 @@ export class AnalysisCommandHandler {
   // Facility analysis
   // ---------------------------------------------------------------------------
 
-  async addFacilityAnalysis(analysis: IdbAnalysisItem): Promise<IdbAnalysisItem> {
+  async addFacilityAnalysis(analysis: IdbAnalysisItem, activeAccountGuid: string): Promise<IdbAnalysisItem> {
+    this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
     return firstValueFrom(this.analysisDb.addWithObservable({ ...analysis }));
   }
 
@@ -39,7 +40,8 @@ export class AnalysisCommandHandler {
   // Account analysis
   // ---------------------------------------------------------------------------
 
-  async addAccountAnalysis(analysis: IdbAccountAnalysisItem): Promise<IdbAccountAnalysisItem> {
+  async addAccountAnalysis(analysis: IdbAccountAnalysisItem, activeAccountGuid: string): Promise<IdbAccountAnalysisItem> {
+    this.assertOwnership(analysis.accountId, activeAccountGuid, 'account analysis');
     return firstValueFrom(this.accountAnalysisDb.addWithObservable({ ...analysis }));
   }
 

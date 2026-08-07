@@ -205,7 +205,7 @@ export class MeterDataTableComponent {
             newMeterData.totalVolume = 0;
             newMeterData.totalCost = 0;
             newMeterData.isEstimated = false;
-            await this.meterHandler.addMeterData(newMeterData);
+            await this.meterHandler.addMeterData(newMeterData, this.accountWorkspaceStore.account()?.guid);
           }
         }
       );

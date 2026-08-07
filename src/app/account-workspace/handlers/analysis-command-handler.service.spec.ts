@@ -17,7 +17,7 @@ describe('AnalysisCommandHandler', () => {
   it('addFacilityAnalysis persists and returns the new analysis', async () => {
     const { handler, analysisDb } = createHandler();
     analysisDb.addWithObservable.mockReturnValue(of({ guid: 'a-1', id: 1 }));
-    const result = await handler.addFacilityAnalysis({ guid: 'a-1', accountId: ACCOUNT } as IdbAnalysisItem);
+    const result = await handler.addFacilityAnalysis({ guid: 'a-1', accountId: ACCOUNT } as IdbAnalysisItem, ACCOUNT);
     expect(result.id).toBe(1);
   });
 
@@ -42,7 +42,7 @@ describe('AnalysisCommandHandler', () => {
   it('addAccountAnalysis persists and returns the new account analysis', async () => {
     const { handler, accountAnalysisDb } = createHandler();
     accountAnalysisDb.addWithObservable.mockReturnValue(of({ guid: 'aa-1', id: 2 }));
-    const result = await handler.addAccountAnalysis({ guid: 'aa-1', accountId: ACCOUNT } as IdbAccountAnalysisItem);
+    const result = await handler.addAccountAnalysis({ guid: 'aa-1', accountId: ACCOUNT } as IdbAccountAnalysisItem, ACCOUNT);
     expect(result.id).toBe(2);
   });
 

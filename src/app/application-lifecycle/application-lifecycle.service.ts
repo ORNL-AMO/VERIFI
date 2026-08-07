@@ -91,6 +91,34 @@ export class ApplicationLifecycleService {
     this.writableState.set({ status: 'ready' });
   }
 
+  async handleMarkedAccountDeletion(accountGuid: string): Promise<readonly IdbAccount[]> {
+    const accounts = await this.refreshAccountCatalog();
+    const usableAccounts = this.usableAccounts();
+    if (this.workspaceStore.account()?.guid !== accountGuid) {
+      if (usableAccounts.length === 0) {
+        this.workspace.clear();
+        this.selectionStorage.clearAccount();
+        this.writableState.set({ status: 'empty', message: 'No accounts are available.' });
+      }
+      return accounts;
+    }
+
+    const replacement = resolveInitialAccount(usableAccounts, this.selectionStorage.read().accountId);
+    if (!replacement) {
+      this.workspace.clear();
+      this.selectionStorage.clearAccount();
+      this.writableState.set({ status: 'empty', message: 'No accounts are available.' });
+      return accounts;
+    }
+
+    const result = await this.workspace.selectAccount(replacement.guid);
+    if (result !== 'published') {
+      throw new Error('The replacement account workspace was superseded before it could be loaded.');
+    }
+    this.writableState.set({ status: 'ready' });
+    return accounts;
+  }
+
   async updateApplicationMetadata(
     update: (current: ApplicationInstanceData) => ApplicationInstanceData
   ): Promise<ApplicationInstanceData> {

@@ -139,6 +139,24 @@ describe('WorkspaceCommandBoundary', () => {
 
     d.resolve('value');
     await expect(p).rejects.toMatchObject({ code: 'stale-workspace' });
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('rejects a command when the committed reload is superseded', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('superseded');
+
+    const changes: unknown[] = [];
+    boundary.committedChange$.subscribe(c => changes.push(c));
+
+    await expect(
+      boundary.execute(makeOptions(), () => Promise.resolve('value'))
+    ).rejects.toMatchObject({ code: 'stale-workspace' });
+
+    expect(changes).toHaveLength(0);
+    expect(store.hasPending()).toBe(false);
   });
 
   it('accepts a command for the new account after an account switch', async () => {

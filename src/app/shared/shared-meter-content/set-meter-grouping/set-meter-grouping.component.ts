@@ -77,7 +77,7 @@ export class SetMeterGroupingComponent {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     const result = await this.commandBoundary.execute(
       { entityKind: 'meter', changeKind: 'add', label: 'Add Meter' },
-      () => this.meterHandler.addMeter(newMeter)
+      () => this.meterHandler.addMeter(newMeter, this.accountWorkspaceStore.account()?.guid)
     );
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + result.value.guid);
   }

@@ -179,7 +179,7 @@ export class SelectItemTableComponent {
     const { value: addedItem } = await this.commandBoundary.execute(
       { entityKind: 'facilityAnalysis', changeKind: 'bulk', label: 'Create Facility Analysis' },
       async () => {
-        const added = await this.analysisHandler.addFacilityAnalysis(newIdbItem);
+        const added = await this.analysisHandler.addFacilityAnalysis(newIdbItem, activeAccountGuid);
         const updatedAccountAnalysisItem: IdbAccountAnalysisItem = {
           ...selectedAnalysisItem,
           isAnalysisVisited: false,

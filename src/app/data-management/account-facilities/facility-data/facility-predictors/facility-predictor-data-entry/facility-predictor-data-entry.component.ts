@@ -95,7 +95,7 @@ export class FacilityPredictorDataEntryComponent {
     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor, predictorData);
     const result = await this.commandBoundary.execute(
       { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' },
-      () => this.predictorHandler.addPredictorData(newPredictorData)
+      () => this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid)
     );
     this.router.navigateByUrl('data-management/' + result.value.accountId + '/facilities/' + result.value.facilityId + '/predictors/' + result.value.predictorId + '/predictor-data/edit-entry/' + result.value.guid);
     this.toastNotificationService.showToast('Predictor entry added!', undefined, undefined, undefined, 'alert-success');

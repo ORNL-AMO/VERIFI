@@ -103,7 +103,7 @@ export class UtilityMetersTableComponent {
       let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
       const result = await this.commandBoundary.execute(
         { entityKind: 'meter', changeKind: 'add', label: 'Add Meter' },
-        () => this.meterHandler.addMeter(newMeter)
+        () => this.meterHandler.addMeter(newMeter, this.accountWorkspaceStore.account()?.guid)
       );
       await this.selectEditMeter(result.value);
     } else {
@@ -204,7 +204,7 @@ export class UtilityMetersTableComponent {
     copyMeter.name = copyMeter.name + ' (copy)';
     const result = await this.commandBoundary.execute(
       { entityKind: 'meter', changeKind: 'add', label: 'Copy Meter' },
-      () => this.meterHandler.addMeter(copyMeter)
+      () => this.meterHandler.addMeter(copyMeter, this.accountWorkspaceStore.account()?.guid)
     );
     this.selectEditMeter(result.value);
   }

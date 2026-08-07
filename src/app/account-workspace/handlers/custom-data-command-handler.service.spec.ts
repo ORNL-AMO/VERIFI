@@ -19,7 +19,7 @@ describe('CustomDataCommandHandler', () => {
   it('addCustomEmissions persists and returns the new item', async () => {
     const { handler, customEmissionsDb } = createHandler();
     customEmissionsDb.addWithObservable.mockReturnValue(of({ guid: 'ce-1', id: 1 }));
-    const result = await handler.addCustomEmissions({ guid: 'ce-1', accountId: ACCOUNT } as IdbCustomEmissionsItem);
+    const result = await handler.addCustomEmissions({ guid: 'ce-1', accountId: ACCOUNT } as IdbCustomEmissionsItem, ACCOUNT);
     expect(result.id).toBe(1);
   });
 
@@ -41,7 +41,7 @@ describe('CustomDataCommandHandler', () => {
   it('addCustomFuel persists and returns the new fuel', async () => {
     const { handler, customFuelDb } = createHandler();
     customFuelDb.addWithObservable.mockReturnValue(of({ guid: 'cf-1', id: 4 }));
-    const result = await handler.addCustomFuel({ guid: 'cf-1', accountId: ACCOUNT } as IdbCustomFuel);
+    const result = await handler.addCustomFuel({ guid: 'cf-1', accountId: ACCOUNT } as IdbCustomFuel, ACCOUNT);
     expect(result.id).toBe(4);
   });
 

@@ -119,7 +119,7 @@ export class AccountReportsDashboardTableComponent {
     newReport.guid = getGUID();
     const { value: addedReport } = await this.commandBoundary.execute(
       { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
-      () => this.reportHandler.addAccountReport(newReport)
+      () => this.reportHandler.addAccountReport(newReport, this.selectedAccount()?.guid)
     );
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, 'alert-success');
@@ -203,15 +203,12 @@ export class AccountReportsDashboardTableComponent {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
       { entityKind: 'accountReport', changeKind: 'bulk', label: 'Delete Account Reports' },
-      async () => {
-        for (const item of itemsToDelete) {
-          const rawReport = this.reports().find(r => r.guid === item.guid);
-          if (rawReport) {
-            await this.reportHandler.deleteAccountReport(rawReport, activeAccountGuid);
-          }
-        }
-        return itemsToDelete.length;
-      }
+      () => this.reportHandler.bulkDeleteAccountReports(
+        itemsToDelete
+          .map(item => this.reports().find(r => r.guid === item.guid))
+          .filter((report): report is IdbAccountReport => !!report),
+        activeAccountGuid
+      )
     );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');

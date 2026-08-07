@@ -89,7 +89,7 @@ export class EnergyUseGroupCardComponent {
         const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
         const result = await this.commandBoundary.execute(
           { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Copying energy use group' },
-          () => this.energyUseHandler.addGroup(copyGroup)
+          () => this.energyUseHandler.addGroup(copyGroup, this.accountWorkspaceStore.account()?.guid)
         );
         this.editGroup(result.value);
     }

@@ -121,7 +121,7 @@ export class EditPredictorComponent {
       { entityKind: 'predictor', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', entityGuid: this.predictor.guid, label: 'Saving predictor' },
       async () => {
         if (this.addOrEdit == 'add') {
-          await this.predictorHandler.addPredictor(this.predictor);
+          await this.predictorHandler.addPredictor(this.predictor, this.accountWorkspaceStore.account()?.guid);
         } else {
           await this.predictorHandler.updatePredictor(this.predictor, activeAccountGuid);
         }
@@ -193,7 +193,7 @@ export class EditPredictorComponent {
           newPredictorData.month = newDate.getMonth() + 1;
           newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
           newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-          await this.predictorHandler.addPredictorData(newPredictorData);
+          await this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid);
         }
         startDate.setMonth(startDate.getMonth() + 1);
       } else {

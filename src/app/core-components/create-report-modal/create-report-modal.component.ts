@@ -84,7 +84,7 @@ export class CreateReportModalComponent {
     }
     const { value: addedReport } = await this.commandBoundary.execute(
       { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
-      () => this.reportHandler.addAccountReport(this.accountReport)
+      () => this.reportHandler.addAccountReport(this.accountReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");

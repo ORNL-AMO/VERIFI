@@ -48,7 +48,7 @@ export class FacilityReportsDashboardComponent {
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(selectedFacility.guid, selectedFacility.accountId, this.newReportType, groups);
     const { value: addedReport } = await this.commandBoundary.execute(
       { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
-      () => this.reportHandler.addFacilityReport(newReport)
+      () => this.reportHandler.addFacilityReport(newReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);

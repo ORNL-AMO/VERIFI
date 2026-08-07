@@ -23,7 +23,8 @@ export class CustomDataCommandHandler {
   // Custom emissions
   // ---------------------------------------------------------------------------
 
-  async addCustomEmissions(item: IdbCustomEmissionsItem): Promise<IdbCustomEmissionsItem> {
+  async addCustomEmissions(item: IdbCustomEmissionsItem, activeAccountGuid: string): Promise<IdbCustomEmissionsItem> {
+    this.assertOwnership(item.accountId, activeAccountGuid, 'custom emissions');
     return firstValueFrom(this.customEmissionsDb.addWithObservable({ ...item }));
   }
 
@@ -42,7 +43,8 @@ export class CustomDataCommandHandler {
   // Custom fuel
   // ---------------------------------------------------------------------------
 
-  async addCustomFuel(fuel: IdbCustomFuel): Promise<IdbCustomFuel> {
+  async addCustomFuel(fuel: IdbCustomFuel, activeAccountGuid: string): Promise<IdbCustomFuel> {
+    this.assertOwnership(fuel.accountId, activeAccountGuid, 'custom fuel');
     return firstValueFrom(this.customFuelDb.addWithObservable({ ...fuel }));
   }
 
@@ -61,7 +63,8 @@ export class CustomDataCommandHandler {
   // Custom GWP
   // ---------------------------------------------------------------------------
 
-  async addCustomGWP(gwp: IdbCustomGWP): Promise<IdbCustomGWP> {
+  async addCustomGWP(gwp: IdbCustomGWP, activeAccountGuid: string): Promise<IdbCustomGWP> {
+    this.assertOwnership(gwp.accountId, activeAccountGuid, 'custom GWP');
     return firstValueFrom(this.customGWPDb.addWithObservable({ ...gwp }));
   }
 

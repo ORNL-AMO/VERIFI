@@ -7,20 +7,23 @@ import { AccountReportDbService } from '../../indexedDB/account-report-db.servic
 import { FacilityReportsDbService } from '../../indexedDB/facility-reports-db.service';
 import { IdbAccountReport } from '../../models/idbModels/accountReport';
 import { IdbFacilityReport } from '../../models/idbModels/facilityReport';
+import { IndexedDbTransactionService } from '../../indexedDB/indexed-db-transaction.service';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 
 @Injectable({ providedIn: 'root' })
 export class ReportCommandHandler {
   constructor(
     private readonly facilityReportDb: FacilityReportsDbService,
-    private readonly accountReportDb: AccountReportDbService
+    private readonly accountReportDb: AccountReportDbService,
+    private readonly transactions: IndexedDbTransactionService
   ) { }
 
   // ---------------------------------------------------------------------------
   // Facility reports
   // ---------------------------------------------------------------------------
 
-  async addFacilityReport(report: IdbFacilityReport): Promise<IdbFacilityReport> {
+  async addFacilityReport(report: IdbFacilityReport, activeAccountGuid: string): Promise<IdbFacilityReport> {
+    this.assertOwnership(report.accountId, activeAccountGuid, 'facility report');
     return firstValueFrom(this.facilityReportDb.addWithObservable({ ...report }));
   }
 
@@ -35,11 +38,27 @@ export class ReportCommandHandler {
     return report.id;
   }
 
+  async bulkDeleteFacilityReports(reports: readonly IdbFacilityReport[], activeAccountGuid: string): Promise<number> {
+    reports.forEach(report => this.assertOwnership(report.accountId, activeAccountGuid, 'facility report'));
+    return this.transactions.runTransaction(['facilityReports'], 'readwrite', async transaction => {
+      let deleted = 0;
+      for (const report of reports) {
+        if (report.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'Facility report is missing its IndexedDB id.');
+        }
+        await transaction.deleteByKey('facilityReports', report.id);
+        deleted++;
+      }
+      return deleted;
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Account reports
   // ---------------------------------------------------------------------------
 
-  async addAccountReport(report: IdbAccountReport): Promise<IdbAccountReport> {
+  async addAccountReport(report: IdbAccountReport, activeAccountGuid: string): Promise<IdbAccountReport> {
+    this.assertOwnership(report.accountId, activeAccountGuid, 'account report');
     return firstValueFrom(this.accountReportDb.addWithObservable({ ...report }));
   }
 
@@ -52,6 +71,21 @@ export class ReportCommandHandler {
     this.assertOwnership(report.accountId, activeAccountGuid, 'account report');
     await firstValueFrom(this.accountReportDb.deleteWithObservable(report.id));
     return report.id;
+  }
+
+  async bulkDeleteAccountReports(reports: readonly IdbAccountReport[], activeAccountGuid: string): Promise<number> {
+    reports.forEach(report => this.assertOwnership(report.accountId, activeAccountGuid, 'account report'));
+    return this.transactions.runTransaction(['accountReports'], 'readwrite', async transaction => {
+      let deleted = 0;
+      for (const report of reports) {
+        if (report.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'Account report is missing its IndexedDB id.');
+        }
+        await transaction.deleteByKey('accountReports', report.id);
+        deleted++;
+      }
+      return deleted;
+    });
   }
 
   // ---------------------------------------------------------------------------

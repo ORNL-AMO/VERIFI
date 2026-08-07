@@ -17,7 +17,7 @@ describe('EnergyUseCommandHandler', () => {
   it('addGroup persists and returns the new group', async () => {
     const { handler, groupDb } = createHandler();
     groupDb.addWithObservable.mockReturnValue(of({ guid: 'g-1', id: 1 }));
-    const result = await handler.addGroup({ guid: 'g-1', accountId: ACCOUNT } as IdbFacilityEnergyUseGroup);
+    const result = await handler.addGroup({ guid: 'g-1', accountId: ACCOUNT } as IdbFacilityEnergyUseGroup, ACCOUNT);
     expect(result.id).toBe(1);
   });
 
@@ -39,7 +39,7 @@ describe('EnergyUseCommandHandler', () => {
   it('addEquipment persists and returns the new equipment', async () => {
     const { handler, equipmentDb } = createHandler();
     equipmentDb.addWithObservable.mockReturnValue(of({ guid: 'eq-1', id: 2 }));
-    const result = await handler.addEquipment({ guid: 'eq-1', accountId: ACCOUNT } as IdbFacilityEnergyUseEquipment);
+    const result = await handler.addEquipment({ guid: 'eq-1', accountId: ACCOUNT } as IdbFacilityEnergyUseEquipment, ACCOUNT);
     expect(result.id).toBe(2);
   });
 

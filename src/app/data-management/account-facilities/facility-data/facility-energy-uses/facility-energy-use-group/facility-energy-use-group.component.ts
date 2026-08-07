@@ -152,7 +152,7 @@ export class FacilityEnergyUseGroupComponent {
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, latestYear);
     await this.commandBoundary.execute(
       { entityKind: 'energyUseEquipment', changeKind: 'add', label: 'Adding energy use equipment' },
-      () => this.energyUseHandler.addEquipment(newEquipment)
+      () => this.energyUseHandler.addEquipment(newEquipment, this.accountWorkspaceStore.account()?.guid)
     );
     let account: IdbAccount = this.accountWorkspaceStore.account();
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + this.energyUseGroup.guid + '/equipment/' + newEquipment.guid);

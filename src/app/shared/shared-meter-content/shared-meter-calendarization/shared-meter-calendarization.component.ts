@@ -296,11 +296,11 @@ export class SharedMeterCalendarizationComponent {
 
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
-      this.selectedFacility.energyIsSource = energyIsSource;
+      const updatedFacility: IdbFacility = { ...this.selectedFacility, energyIsSource };
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Update Facility Energy Source' },
-        () => this.facilityHandler.update(this.selectedFacility, accountGuid)
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' },
+        () => this.facilityHandler.update(updatedFacility, accountGuid)
       );
       this.setCalanderizedMeterData();
     }

@@ -148,8 +148,11 @@ export class AccountSettingsComponent implements OnInit {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
-    const accounts = await this.applicationLifecycleService.refreshAccountCatalog();
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'delete', entityGuid: this.selectedAccount.guid, label: 'Deleting account' },
+      () => this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid)
+    );
+    const accounts = await this.applicationLifecycleService.handleMarkedAccountDeletion(this.selectedAccount.guid);
     let nonDeleteAccounts: Array<IdbAccount> = accounts.filter(acc => {
       return acc.deleteAccount == false;
     })

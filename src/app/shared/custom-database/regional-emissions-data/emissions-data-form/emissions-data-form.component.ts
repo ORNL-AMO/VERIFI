@@ -155,7 +155,7 @@ export class EmissionsDataFormComponent implements OnInit {
       this.loadingService.setLoadingStatus(true);
       await this.commandBoundary.execute(
         { entityKind: 'customEmissions', changeKind: 'add', label: 'Adding custom emissions' },
-        () => this.customDataHandler.addCustomEmissions(this.editCustomEmissions)
+        () => this.customDataHandler.addCustomEmissions(this.editCustomEmissions, activeAccountGuid)
       );
       successMessage = 'Custom Emissions Added!';
     } else {

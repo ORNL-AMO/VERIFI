@@ -146,13 +146,13 @@ export class FacilityEnergyUsesGroupSetupComponent {
           };
           if (!newGroup.id) {
             delete newGroup.id;
-            newGroup = await this.energyUseHandler.addGroup(newGroup);
+            newGroup = await this.energyUseHandler.addGroup(newGroup, this.accountWorkspaceStore.account()?.guid);
           } else {
             await this.energyUseHandler.updateGroup(newGroup, activeAccountGuid);
           }
           for (let equipment of group.equipment) {
             if (!equipment.id) {
-              await this.energyUseHandler.addEquipment(equipment);
+              await this.energyUseHandler.addEquipment(equipment, this.accountWorkspaceStore.account()?.guid);
             } else {
               await this.energyUseHandler.updateEquipment(equipment, activeAccountGuid);
             }

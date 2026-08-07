@@ -128,7 +128,7 @@ export class FacilityReportsDashboardTableComponent {
     newReport.analysisItemId = raw.analysisItemId;
     const { value: addedReport } = await this.commandBoundary.execute(
       { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
-      () => this.reportHandler.addFacilityReport(newReport)
+      () => this.reportHandler.addFacilityReport(newReport, this.account()?.guid)
     );
     this.analyticsService.sendEvent('create_facility_analysis', undefined);
     this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
@@ -213,15 +213,12 @@ export class FacilityReportsDashboardTableComponent {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
       { entityKind: 'facilityReport', changeKind: 'bulk', label: 'Delete Facility Reports' },
-      async () => {
-        for (const item of itemsToDelete) {
-          const rawReport = this.facilityReports().find(r => r.guid === item.guid);
-          if (rawReport) {
-            await this.reportHandler.deleteFacilityReport(rawReport, activeAccountGuid);
-          }
-        }
-        return itemsToDelete.length;
-      }
+      () => this.reportHandler.bulkDeleteFacilityReports(
+        itemsToDelete
+          .map(item => this.facilityReports().find(r => r.guid === item.guid))
+          .filter((report): report is IdbFacilityReport => !!report),
+        activeAccountGuid
+      )
     );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
