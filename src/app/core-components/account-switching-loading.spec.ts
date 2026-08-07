@@ -161,11 +161,12 @@ describe('account switching loading ownership', () => {
       activatePersistedAccount: vi.fn(async (guid: string) => {
         events.push('catalog');
         await workspace.selectAccount(guid);
+      }),
+      createAccount: vi.fn(async () => {
+        events.push('catalog');
+        await workspace.selectAccount(createdAccount.guid);
+        return createdAccount;
       })
-    };
-    const accountHandler = {
-      update: vi.fn(),
-      add: vi.fn().mockResolvedValue(createdAccount)
     };
     const manageAccounts = createManageAccounts({
       accountDb: {
@@ -173,14 +174,13 @@ describe('account switching loading ownership', () => {
       },
       router,
       workspace,
-      lifecycle,
-      accountHandler
+      lifecycle
     });
 
     await manageAccounts.addNewAccount();
 
     expect(events).toEqual(['catalog', 'workspace', 'navigate']);
-    expect(accountHandler.add).toHaveBeenCalled();
+    expect(lifecycle.createAccount).toHaveBeenCalled();
     expect(workspace.selectAccount).toHaveBeenCalledWith('account-c');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-management/account-c');
   });
@@ -212,7 +212,11 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
       exportFacilityData: vi.fn()
     }) as any,
     (overrides.workspace ?? { selectAccount: vi.fn().mockResolvedValue('published') }) as any,
-    (overrides.lifecycle ?? { activatePersistedAccount: vi.fn().mockResolvedValue(undefined), refreshAccountCatalog: vi.fn().mockResolvedValue([]) }) as any,
+    (overrides.lifecycle ?? {
+      activatePersistedAccount: vi.fn().mockResolvedValue(undefined),
+      createAccount: vi.fn().mockImplementation(async () => ({ id: 99, guid: 'new-guid' })),
+      refreshAccountCatalog: vi.fn().mockResolvedValue([])
+    }) as any,
     (overrides.databaseReset ?? { resetAndRestart: vi.fn() }) as any,
     {} as any
   );

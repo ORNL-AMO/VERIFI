@@ -40,7 +40,7 @@ describe('FacilityCommandHandler', () => {
     } as unknown as IdbAccountAnalysisItem;
     const report = { guid: 'report-1', dataOverviewReportSetup: { includedFacilities: [] } } as unknown as IdbAccountReport;
 
-    const result = await handler.add(facility, [analysis], [report]);
+    const result = await handler.add(facility, ACCOUNT_GUID, [analysis], [report]);
 
     expect(result.facility).toEqual(added);
     expect(accountAnalysisDb.updateWithObservable).toHaveBeenCalledWith(
@@ -70,6 +70,18 @@ describe('FacilityCommandHandler', () => {
     const result = await handler.update(facility, ACCOUNT_GUID);
 
     expect(result).toEqual(persisted);
+  });
+
+  it('add rejects cross-account entity before any repository call', async () => {
+    const { handler, facilityDb, accountAnalysisDb, accountReportDb } = createHandler();
+    const facility = { guid: 'fac-1', accountId: 'other-acct' } as IdbFacility;
+
+    await expect(handler.add(facility, ACCOUNT_GUID, [], [])).rejects.toMatchObject({
+      code: 'cross-account-entity'
+    });
+    expect(facilityDb.addWithObservable).not.toHaveBeenCalled();
+    expect(accountAnalysisDb.updateWithObservable).not.toHaveBeenCalled();
+    expect(accountReportDb.updateWithObservable).not.toHaveBeenCalled();
   });
 
   it('update rejects cross-account entity before any repository call', async () => {

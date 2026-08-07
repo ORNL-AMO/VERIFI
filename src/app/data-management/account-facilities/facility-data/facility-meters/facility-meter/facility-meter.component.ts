@@ -119,27 +119,21 @@ export class FacilityMeterComponent {
     this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const meter = this.utilityMeter;
+    const meterDataUpdates = this.getMeterDataUpdates(meter);
     await this.commandBoundary.execute(
       { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Save Meter' },
-      async () => {
-        await this.meterHandler.updateMeter(meter, accountGuid);
-        await this.updateMeterData(meter, accountGuid);
-      }
+      () => this.meterHandler.updateMeterWithData(meter, meterDataUpdates, accountGuid)
     );
     this.loadingService.setLoadingStatus(false);
-  }
-
-  async updateMeterData(meter: IdbUtilityMeter, accountGuid: string) {
-    this.loadingService.setLoadingMessage('Updating Meter Data...')
-    this.loadingService.setLoadingStatus(true);
-    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(meter.guid);
-    let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData);
-    if (dataNeedsUpdate.length > 0) {
-      for (const data of dataNeedsUpdate) {
-        await this.meterHandler.updateMeterData(data, accountGuid);
-      }
+    if (meterDataUpdates.length > 0) {
       this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
     }
+  }
+
+  private getMeterDataUpdates(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    this.loadingService.setLoadingMessage('Updating Meter Data...')
+    const meterData = structuredClone(this.accountWorkspaceQuery.getMeterData(meter.guid));
+    return updateMeterDataCharges(meter, meterData);
   }
 
   showDelete() {

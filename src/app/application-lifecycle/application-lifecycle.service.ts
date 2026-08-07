@@ -91,6 +91,31 @@ export class ApplicationLifecycleService {
     this.writableState.set({ status: 'ready' });
   }
 
+  async createAccount(account: IdbAccount): Promise<IdbAccount> {
+    const created = await firstValueFrom(this.accounts.addWithObservable({ ...account }));
+    await this.activatePersistedAccount(created.guid);
+    return created;
+  }
+
+  async replaceActiveAccount(importReplacement: () => Promise<IdbAccount>): Promise<IdbAccount> {
+    const previousAccount = this.workspaceStore.account();
+    if (!previousAccount?.guid) {
+      throw new Error('An active account is required before replacing it.');
+    }
+
+    const replacement = await importReplacement();
+    await this.activatePersistedAccount(replacement.guid);
+
+    try {
+      await firstValueFrom(this.accounts.updateWithObservable({ ...previousAccount, deleteAccount: true }));
+      await this.refreshAccountCatalog();
+    } catch (error) {
+      console.warn('Replacement account activated, but the previous account could not be marked for deletion.', error);
+    }
+
+    return replacement;
+  }
+
   async handleMarkedAccountDeletion(accountGuid: string): Promise<readonly IdbAccount[]> {
     const accounts = await this.refreshAccountCatalog();
     const usableAccounts = this.usableAccounts();

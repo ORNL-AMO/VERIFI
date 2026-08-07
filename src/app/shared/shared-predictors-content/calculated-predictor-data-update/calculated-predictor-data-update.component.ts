@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
+import { PredictorCommandHandler, PredictorDataBatchChanges } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -312,30 +312,52 @@ export class CalculatedPredictorDataUpdateComponent {
     this.loadingService.setLoadingMessage('Updating Entries...');
     this.loadingService.setLoadingStatus(true);
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const changes = this.getPredictorDataChanges();
     await this.commandBoundary.execute(
       { entityKind: 'predictorData', changeKind: 'bulk', label: 'Update Predictor Entries' },
-      async () => {
-        for (let i = 0; i < this.predictorData.length; i++) {
-          let pData: CalculatedPredictorTableItem = this.predictorData[i];
-          if (pData.changeAmount && !pData.added && !pData.deleted) {
-            pData.amount = pData.updatedAmount;
-            delete pData.changeAmount;
-            delete pData.updatedAmount;
-            await this.predictorHandler.updatePredictorData(pData, accountGuid);
-          } else if (pData.added) {
-            delete pData.changeAmount;
-            delete pData.updatedAmount;
-            delete pData.added;
-            delete pData.deleted;
-            await this.predictorHandler.addPredictorData(pData, accountGuid);
-          } else if (pData.deleted) {
-            await this.predictorHandler.deletePredictorData(pData.id);
-          }
-        }
-      }
+      () => this.predictorHandler.reconcilePredictorData(this.predictor.guid, changes, accountGuid)
     );
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
+  }
+
+  private getPredictorDataChanges(): PredictorDataBatchChanges {
+    const changes: {
+      add: IdbPredictorData[];
+      update: IdbPredictorData[];
+      delete: IdbPredictorData[];
+    } = {
+      add: [],
+      update: [],
+      delete: []
+    };
+
+    for (const predictorData of this.predictorData) {
+      if (predictorData.added) {
+        changes.add.push(this.toPredictorDataRecord(predictorData));
+        continue;
+      }
+      if (predictorData.deleted) {
+        changes.delete.push(this.toPredictorDataRecord(predictorData));
+        continue;
+      }
+      if (predictorData.changeAmount) {
+        changes.update.push(this.toPredictorDataRecord(predictorData, predictorData.updatedAmount));
+      }
+    }
+
+    return changes;
+  }
+
+  private toPredictorDataRecord(
+    predictorData: CalculatedPredictorTableItem,
+    amount = predictorData.amount
+  ): IdbPredictorData {
+    const { updatedAmount, changeAmount, deleted, added, ...record } = predictorData;
+    return {
+      ...record,
+      amount
+    };
   }
 
   async setEndDate(eventData: string) {

@@ -80,18 +80,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   async save() {
-    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
-    if (this.meter.source == 'Electricity') {
-      this.checkShowSection();
-      let electricityDataFilters: ElectricityDataFilters = {
-        emissionsFilters: this.emissionsFilters,
-        generalInformationFilters: this.generalInformationFilters
-      }
-      selectedFacility.tableElectricityFilters = electricityDataFilters;
-    } else if (this.meter.scope != 2) {
-      selectedFacility.tableGeneralUtilityFilters = this.generalUtilityDataFilters;
-    } else if (this.meter.scope == 2) {
-      selectedFacility.tableVehicleDataFilters = this.vehicleDataFilters;
+    const selectedFacility = this.getUpdatedFacilityFilters();
+    if (!selectedFacility) {
+      return;
     }
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
@@ -207,12 +198,45 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   };
 
   async changeCharge() {
+    const selectedFacility = this.getUpdatedFacilityFilters();
+    if (!selectedFacility) {
+      return;
+    }
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
       { entityKind: 'meter', changeKind: 'update', entityGuid: this.meter.guid, label: 'Update Meter Charges' },
-      () => this.meterHandler.updateMeter(this.meter, accountGuid)
+      () => this.meterHandler.updateMeterWithFacility(this.meter, selectedFacility, accountGuid)
     );
     this.accountWorkspaceService.selectMeter(this.meter?.guid);
-    await this.save();
+  }
+
+  private getUpdatedFacilityFilters(): IdbFacility | undefined {
+    const selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    if (!selectedFacility) {
+      return undefined;
+    }
+
+    if (this.meter.source == 'Electricity') {
+      this.checkShowSection();
+      const electricityDataFilters: ElectricityDataFilters = {
+        emissionsFilters: { ...this.emissionsFilters },
+        generalInformationFilters: { ...this.generalInformationFilters }
+      };
+      return {
+        ...selectedFacility,
+        tableElectricityFilters: electricityDataFilters
+      };
+    } else if (this.meter.scope != 2) {
+      return {
+        ...selectedFacility,
+        tableGeneralUtilityFilters: { ...this.generalUtilityDataFilters }
+      };
+    } else if (this.meter.scope == 2) {
+      return {
+        ...selectedFacility,
+        tableVehicleDataFilters: { ...this.vehicleDataFilters }
+      };
+    }
+    return { ...selectedFacility };
   }
 }

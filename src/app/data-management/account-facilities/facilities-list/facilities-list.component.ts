@@ -80,6 +80,7 @@ export class FacilitiesListComponent {
         { entityKind: 'facility', changeKind: 'add', label: 'Adding facility' },
         () => this.facilityHandler.add(
           idbFacility,
+          selectedAccount.guid,
           this.accountWorkspaceStore.accountAnalyses(),
           this.accountWorkspaceStore.accountReports()
         )

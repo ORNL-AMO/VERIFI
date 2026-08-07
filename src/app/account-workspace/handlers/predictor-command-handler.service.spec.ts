@@ -19,8 +19,11 @@ describe('PredictorCommandHandler', () => {
       deleteIndexWithObservable: vi.fn(),
       deleteAllFacilityPredictorData: vi.fn()
     };
-    const handler = new PredictorCommandHandler(predictorDb as any, predictorDataDb as any);
-    return { handler, predictorDb, predictorDataDb };
+    const transactions = {
+      runTransaction: vi.fn()
+    };
+    const handler = new PredictorCommandHandler(predictorDb as any, predictorDataDb as any, transactions as any);
+    return { handler, predictorDb, predictorDataDb, transactions };
   }
 
   it('addPredictor persists and returns the new predictor', async () => {

@@ -1,4 +1,3 @@
-import { WorkspaceCommandBoundary } from '../account-workspace/workspace-command-boundary.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
@@ -24,7 +23,6 @@ import { WeatherPredictorManagementService } from './weather-predictor-managemen
 export class WeatherDataComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
 
   applyToFacility: boolean;
   applyToFacilitySub: Subscription;
@@ -195,13 +193,7 @@ export class WeatherDataComponent {
     this.loadingService.setCurrentLoadingIndex(0);
     const facility = this.selectedFacility;
     const selectedValues = this.selectedValues;
-    let results: string = "error";
-    await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'bulk', label: 'Create Weather Predictors' },
-      async () => {
-        results = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(facility, selectedValues);
-      }
-    );
+    let results: string = await this.weatherPredictorManagementService.createPredictorsFromWeatherDataPage(facility, selectedValues);
     if (results == "success") {
       this.loadingService.isLoadingComplete.next(true);
     } else {
@@ -234,4 +226,3 @@ export class WeatherDataComponent {
     this.inDashboard = url.includes('data-management') == false;
   }
 }
-

@@ -147,27 +147,31 @@ export class ElectronBackupFileComponent {
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.suspendQueuedDeletion();
-        await this.accountHandler.update({ ...this.account, deleteAccount: true }, this.account.guid);
-        await this.applicationLifecycleService.refreshAccountCatalog();
+        try {
+          let backupPath: string = this.account.dataBackupFilePath;
+          let sharedFileAuthor: string = this.account.sharedFileAuthor;
+          let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
+          this.backupDataService.accountBackupMessages();
+          let newAccount: IdbAccount = await this.applicationLifecycleService.replaceActiveAccount(
+            () => this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1)
+          );
+          newAccount = {
+            ...newAccount,
+            dataBackupFilePath: backupPath,
+            sharedFileAuthor: sharedFileAuthor,
+            isSharedBackupFile: isSharedBackupFile
+          };
 
-        let backupPath: string = this.account.dataBackupFilePath;
-        let sharedFileAuthor: string = this.account.sharedFileAuthor;
-        let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-        this.backupDataService.accountBackupMessages();
-        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1);
-        newAccount.dataBackupFilePath = backupPath;
-        newAccount.sharedFileAuthor = sharedFileAuthor;
-        newAccount.isSharedBackupFile = isSharedBackupFile;
+          await this.commandBoundary.execute(
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
+            () => this.accountHandler.update(newAccount, newAccount.guid)
+          );
+          needUpdate = false;
 
-        await this.commandBoundary.execute(
-          { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
-          () => this.accountHandler.update(newAccount, newAccount.guid)
-        );
-        await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
-        await this.deleteDataService.resumeQueuedDeletion();
-        needUpdate = false;
-
-        this.loadingService.isLoadingComplete.next(true);
+          this.loadingService.isLoadingComplete.next(true);
+        } finally {
+          await this.deleteDataService.resumeQueuedDeletion();
+        }
       }
     }
 

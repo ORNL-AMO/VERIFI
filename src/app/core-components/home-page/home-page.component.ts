@@ -6,7 +6,6 @@ import { LoadingService } from '../loading/loading.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
@@ -34,7 +33,6 @@ export class HomePageComponent {
     private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
     private commandBoundary: WorkspaceCommandBoundary,
-    private accountHandler: AccountCommandHandler,
     private titleService: Title,
     private metaService: Meta) { }
 
@@ -107,8 +105,7 @@ export class HomePageComponent {
   }
 
   async createNewAccount() {
-    const account = await this.accountHandler.add(getNewIdbAccount());
-    await this.applicationLifecycleService.activatePersistedAccount(account.guid);
+    const account = await this.applicationLifecycleService.createAccount(getNewIdbAccount());
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 

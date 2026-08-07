@@ -176,7 +176,7 @@ export class SelectItemTableComponent {
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = selectedAnalysisItem.energyIsSource;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
-    const { value: addedItem } = await this.commandBoundary.execute(
+    const { value } = await this.commandBoundary.execute(
       { entityKind: 'facilityAnalysis', changeKind: 'bulk', label: 'Create Facility Analysis' },
       async () => {
         const added = await this.analysisHandler.addFacilityAnalysis(newIdbItem, activeAccountGuid);
@@ -188,12 +188,12 @@ export class SelectItemTableComponent {
           )
         };
         await this.analysisHandler.updateAccountAnalysis(updatedAccountAnalysisItem, activeAccountGuid);
-        return added;
+        return { addedItem: added, updatedAccountAnalysisItem };
       }
     );
-    this.accountWorkspaceService.selectFacilityAnalysis(addedItem?.guid);
+    this.accountWorkspaceService.selectFacilityAnalysis(value.addedItem?.guid);
     this.loadingService.setLoadingStatus(false);
-    this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
+    this.analysisService.accountAnalysisItem.next(value.updatedAccountAnalysisItem);
     this.router.navigateByUrl("/data-evaluation/facility/" + facility.guid + "/analysis/run-analysis/analysis-setup");
   }
 }

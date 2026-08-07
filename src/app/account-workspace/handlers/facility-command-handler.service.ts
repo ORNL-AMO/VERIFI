@@ -35,10 +35,11 @@ export class FacilityCommandHandler {
 
   async add(
     facility: IdbFacility,
+    activeAccountGuid: string,
     accountAnalyses: readonly IdbAccountAnalysisItem[],
     accountReports: readonly IdbAccountReport[]
   ): Promise<AddFacilityResult> {
-    this.assertOwnership(facility.accountId, facility.accountId);
+    this.assertOwnership(facility.accountId, activeAccountGuid);
 
     const added = await firstValueFrom(this.facilityDb.addWithObservable({ ...facility }));
 

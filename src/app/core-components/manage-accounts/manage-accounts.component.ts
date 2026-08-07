@@ -179,8 +179,7 @@ export class ManageAccountsComponent {
   }
 
   async addNewAccount() {
-    const account = await this.accountHandler.add(getNewIdbAccount());
-    await this.applicationLifecycleService.activatePersistedAccount(account.guid);
+    const account = await this.applicationLifecycleService.createAccount(getNewIdbAccount());
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 

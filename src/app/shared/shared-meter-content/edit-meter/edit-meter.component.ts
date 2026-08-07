@@ -97,13 +97,13 @@ export class EditMeterComponent implements OnInit {
     this.loadingService.setLoadingMessage('Saving Meter...');
     this.loadingService.setLoadingStatus(true);
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
+    const meterDataUpdates = this.getMeterDataUpdates(meterToSave);
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
       { entityKind: 'meter', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', label: 'Saving meter' },
       async () => {
         if (this.addOrEdit == 'edit') {
-          await this.meterHandler.updateMeter(meterToSave, activeAccountGuid);
-          await this.persistMeterDataUpdates(meterToSave);
+          await this.meterHandler.updateMeterWithData(meterToSave, meterDataUpdates, activeAccountGuid);
         } else {
           delete meterToSave.id;
           meterToSave = await this.meterHandler.addMeter(meterToSave, this.accountWorkspaceStore.account()?.guid);
@@ -115,6 +115,9 @@ export class EditMeterComponent implements OnInit {
     this.cancel();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "alert-success");
+    if (this.addOrEdit === 'edit' && meterDataUpdates.length > 0) {
+      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
+    }
   }
 
   cancel() {
@@ -126,16 +129,14 @@ export class EditMeterComponent implements OnInit {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.editMeter.guid + '/data-table');
   }
 
-  private async persistMeterDataUpdates(meter: IdbUtilityMeter): Promise<void> {
-    this.loadingService.setLoadingMessage('Updating Meter Data...')
-    const meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
-    const dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData);
-    if (dataNeedsUpdate.length > 0) {
-      for (const entry of dataNeedsUpdate) {
-        await this.meterHandler.updateMeterData(entry, meter.accountId);
-      }
-      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
+  private getMeterDataUpdates(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    if (this.addOrEdit !== 'edit') {
+      return [];
     }
+
+    this.loadingService.setLoadingMessage('Updating Meter Data...')
+    const meterData = structuredClone(this.accountWorkspaceQuery.getMeterData(this.editMeter.guid));
+    return updateMeterDataCharges(meter, meterData);
   }
 
   canDeactivate(): Observable<boolean> {

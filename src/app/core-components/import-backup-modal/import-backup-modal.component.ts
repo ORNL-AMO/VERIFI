@@ -254,12 +254,14 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importExistingAccount(backupFile: PreparedBackupFile) {
-    //delete existing account and data
     this.deleteDataService.suspendQueuedDeletion();
-    await this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid);
-    await this.applicationLifecycleService.refreshAccountCatalog();
-    await this.importNewAccount(backupFile);
-    await this.deleteDataService.resumeQueuedDeletion();
+    try {
+      await this.applicationLifecycleService.replaceActiveAccount(
+        () => this.backupDataService.importAccountBackupFile(backupFile, 0)
+      );
+    } finally {
+      await this.deleteDataService.resumeQueuedDeletion();
+    }
   }
 
   async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {

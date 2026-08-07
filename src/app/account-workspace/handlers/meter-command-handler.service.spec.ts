@@ -25,8 +25,11 @@ describe('MeterCommandHandler', () => {
       updateWithObservable: vi.fn(),
       deleteWithObservable: vi.fn()
     };
-    const handler = new MeterCommandHandler(meterDb as any, meterDataDb as any, meterGroupDb as any);
-    return { handler, meterDb, meterDataDb, meterGroupDb };
+    const transactions = {
+      runTransaction: vi.fn()
+    };
+    const handler = new MeterCommandHandler(meterDb as any, meterDataDb as any, meterGroupDb as any, transactions as any);
+    return { handler, meterDb, meterDataDb, meterGroupDb, transactions };
   }
 
   describe('meter', () => {
