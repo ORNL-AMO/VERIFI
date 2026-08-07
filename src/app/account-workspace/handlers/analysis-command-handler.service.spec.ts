@@ -62,7 +62,7 @@ describe('AnalysisCommandHandler', () => {
   // ---------------------------------------------------------------------------
 
   describe('addAnalysisPredictor', () => {
-    it('adds a predictor variable to all facility analysis groups', async () => {
+    it('adds a predictor variable to all facility analysis groups without mutating the original', async () => {
       const group = { predictorVariables: [] };
       const analysisItem = { facilityId: FACILITY, groups: [group] };
       const { handler, analysisDb } = createHandler([analysisItem as any]);
@@ -74,9 +74,12 @@ describe('AnalysisCommandHandler', () => {
       };
       await handler.addAnalysisPredictor(predictor as IdbPredictor);
 
-      expect(group.predictorVariables).toHaveLength(1);
-      expect(group.predictorVariables[0].id).toBe('p-1');
       expect(analysisDb.updateWithObservable).toHaveBeenCalledTimes(1);
+      const persisted = analysisDb.updateWithObservable.mock.calls[0][0];
+      expect(persisted.groups[0].predictorVariables).toHaveLength(1);
+      expect(persisted.groups[0].predictorVariables[0].id).toBe('p-1');
+      // original store item is not mutated
+      expect(group.predictorVariables).toHaveLength(0);
     });
 
     it('does not modify analysis items belonging to a different facility', async () => {
@@ -92,7 +95,7 @@ describe('AnalysisCommandHandler', () => {
   });
 
   describe('updateAnalysisPredictor', () => {
-    it('patches predictor name/production/unit in analysis groups', async () => {
+    it('patches predictor name/production/unit in analysis groups without mutating the original', async () => {
       const pVar = { id: 'p-1', name: 'Old', production: false, unit: 'old' };
       const group = { predictorVariables: [pVar], models: undefined };
       const analysisItem = { facilityId: FACILITY, groups: [group] };
@@ -101,14 +104,18 @@ describe('AnalysisCommandHandler', () => {
 
       await handler.updateAnalysisPredictor({ guid: 'p-1', facilityId: FACILITY, name: 'New', production: true, unit: 'kWh' } as IdbPredictor);
 
-      expect(pVar.name).toBe('New');
-      expect(pVar.production).toBe(true);
-      expect(pVar.unit).toBe('kWh');
+      expect(analysisDb.updateWithObservable).toHaveBeenCalledTimes(1);
+      const persisted = analysisDb.updateWithObservable.mock.calls[0][0];
+      expect(persisted.groups[0].predictorVariables[0].name).toBe('New');
+      expect(persisted.groups[0].predictorVariables[0].production).toBe(true);
+      expect(persisted.groups[0].predictorVariables[0].unit).toBe('kWh');
+      // original store item is not mutated
+      expect(pVar.name).toBe('Old');
     });
   });
 
   describe('deleteAnalysisPredictor', () => {
-    it('removes the predictor variable from groups', async () => {
+    it('removes the predictor variable from groups without mutating the original', async () => {
       const pVar = { id: 'p-1' };
       const group = { predictorVariables: [pVar], analysisType: 'standard', models: undefined };
       const analysisItem = { facilityId: FACILITY, groups: [group] };
@@ -117,8 +124,11 @@ describe('AnalysisCommandHandler', () => {
 
       await handler.deleteAnalysisPredictor({ guid: 'p-1', facilityId: FACILITY } as IdbPredictor);
 
-      expect(group.predictorVariables).toHaveLength(0);
       expect(analysisDb.updateWithObservable).toHaveBeenCalledTimes(1);
+      const persisted = analysisDb.updateWithObservable.mock.calls[0][0];
+      expect(persisted.groups[0].predictorVariables).toHaveLength(0);
+      // original store item is not mutated
+      expect(group.predictorVariables).toHaveLength(1);
     });
 
     it('clears all regression models when selected model used the deleted predictor', async () => {
@@ -137,9 +147,13 @@ describe('AnalysisCommandHandler', () => {
 
       await handler.deleteAnalysisPredictor({ guid: 'p-1', facilityId: FACILITY } as IdbPredictor);
 
-      expect(group.models).toBeUndefined();
-      expect(group.selectedModelId).toBeUndefined();
-      expect(group.regressionModelYear).toBeUndefined();
+      const persisted = analysisDb.updateWithObservable.mock.calls[0][0];
+      expect(persisted.groups[0].models).toBeUndefined();
+      expect(persisted.groups[0].selectedModelId).toBeUndefined();
+      expect(persisted.groups[0].regressionModelYear).toBeUndefined();
+      // original store item is not mutated
+      expect(group.models).toHaveLength(1);
+      expect(group.selectedModelId).toBe('m-1');
     });
   });
 });

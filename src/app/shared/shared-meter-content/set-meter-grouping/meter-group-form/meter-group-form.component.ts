@@ -106,30 +106,23 @@ export class MeterGroupFormComponent {
 
   async saveChanges() {
     this.meterGroup.name = this.groupForm.controls['name'].value;
-    if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
-      await this.meterGroupHandler.changeGroupType(this.meterGroup.guid, this.groupForm.controls['groupType'].value, this.meterGroup.groupType);
-    }
-    this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
+    const newGroupType: 'Energy' | 'Water' | 'Other' = this.groupForm.controls['groupType'].value;
+    const groupTypeChanged = this.meterGroup.groupType !== newGroupType;
+    const oldGroupType = this.meterGroup.groupType;
+    this.meterGroup.groupType = newGroupType;
     this.meterGroup.description = this.groupForm.controls['description'].value;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const meterGroup = this.meterGroup;
-    const meterGroupOptions = this.meterGroupOptions;
     const meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
+    const metersToAdd = this.meterGroupOptions
+      .filter(opt => opt.includeInGroup)
+      .map(opt => meters.find(m => m.guid === opt.guid));
+    const metersToRemove = this.meterGroupOptions
+      .filter(opt => !opt.includeInGroup && meters.find(m => m.guid === opt.guid)?.groupId === meterGroup.guid)
+      .map(opt => meters.find(m => m.guid === opt.guid));
     await this.commandBoundary.execute(
       { entityKind: 'meterGroup', changeKind: 'update', entityGuid: meterGroup.guid, label: 'Save Meter Group' },
-      async () => {
-        await this.meterHandler.updateMeterGroup(meterGroup, accountGuid);
-        for (const groupOption of meterGroupOptions) {
-          const meter = meters.find(m => m.guid == groupOption.guid);
-          if (groupOption.includeInGroup) {
-            meter.groupId = meterGroup.guid;
-            await this.meterHandler.updateMeter(meter, accountGuid);
-          } else if (meter.groupId == meterGroup.guid) {
-            meter.groupId = undefined;
-            await this.meterHandler.updateMeter(meter, accountGuid);
-          }
-        }
-      }
+      () => this.meterGroupHandler.saveMeterGroup(meterGroup, groupTypeChanged, oldGroupType, metersToAdd, metersToRemove, accountGuid)
     );
     this.toastNoticationService.showToast("Meter Group Changes Saved!", undefined, undefined, false, "alert-success");
     this.selectionsChanged = false;
@@ -236,7 +229,7 @@ export class MeterGroupFormComponent {
           meter.groupId = undefined;
           await this.meterHandler.updateMeter(meter, accountGuid);
         }
-        await this.meterGroupHandler.deleteGroup(meterGroup.guid);
+        await this.meterGroupHandler.deleteGroup(meterGroup);
       }
     );
     this.closeDeleteGroup();

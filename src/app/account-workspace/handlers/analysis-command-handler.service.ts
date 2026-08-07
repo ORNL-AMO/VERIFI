@@ -7,7 +7,6 @@ import { AccountAnalysisDbService } from '../../indexedDB/account-analysis-db.se
 import { AnalysisDbService } from '../../indexedDB/analysis-db.service';
 import { IdbAccountAnalysisItem } from '../../models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '../../models/idbModels/analysisItem';
-import { JStatRegressionModel } from '../../models/analysis';
 import { IdbPredictor } from '../../models/idbModels/predictor';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { AccountWorkspaceStore } from '../account-workspace.store';
@@ -72,17 +71,22 @@ export class AnalysisCommandHandler {
     const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
       .filter(item => item.facilityId === newPredictor.facilityId);
     for (const analysisItem of facilityAnalysisItems) {
-      analysisItem.groups.forEach(group => {
-        group.predictorVariables.push({
-          id: newPredictor.guid,
-          name: newPredictor.name,
-          production: newPredictor.production,
-          productionInAnalysis: newPredictor.productionInAnalysis,
-          regressionCoefficient: undefined,
-          unit: newPredictor.unit
-        });
-      });
-      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+      const newPredictorVar = {
+        id: newPredictor.guid,
+        name: newPredictor.name,
+        production: newPredictor.production,
+        productionInAnalysis: newPredictor.productionInAnalysis,
+        regressionCoefficient: undefined,
+        unit: newPredictor.unit
+      };
+      const updated = {
+        ...analysisItem,
+        groups: analysisItem.groups.map(group => ({
+          ...group,
+          predictorVariables: [...group.predictorVariables, newPredictorVar]
+        }))
+      };
+      await firstValueFrom(this.analysisDb.updateWithObservable(updated));
     }
   }
 
@@ -94,27 +98,26 @@ export class AnalysisCommandHandler {
     const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
       .filter(item => item.facilityId === predictor.facilityId);
     for (const analysisItem of facilityAnalysisItems) {
-      analysisItem.groups.forEach(group => {
-        group.predictorVariables.forEach(pVariable => {
-          if (pVariable.id === predictor.guid) {
-            pVariable.name = predictor.name;
-            pVariable.production = predictor.production;
-            pVariable.unit = predictor.unit;
-          }
-        });
-        if (group.models) {
-          group.models.forEach(model => {
-            model.predictorVariables.forEach(pVariable => {
-              if (pVariable.id === predictor.guid) {
-                pVariable.name = predictor.name;
-                pVariable.production = predictor.production;
-                pVariable.unit = predictor.unit;
-              }
-            });
-          });
-        }
-      });
-      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+      const updated = {
+        ...analysisItem,
+        groups: analysisItem.groups.map(group => ({
+          ...group,
+          predictorVariables: group.predictorVariables.map(pVar =>
+            pVar.id === predictor.guid
+              ? { ...pVar, name: predictor.name, production: predictor.production, unit: predictor.unit }
+              : pVar
+          ),
+          models: group.models?.map(model => ({
+            ...model,
+            predictorVariables: model.predictorVariables.map(pVar =>
+              pVar.id === predictor.guid
+                ? { ...pVar, name: predictor.name, production: predictor.production, unit: predictor.unit }
+                : pVar
+            )
+          }))
+        }))
+      };
+      await firstValueFrom(this.analysisDb.updateWithObservable(updated));
     }
   }
 
@@ -127,33 +130,39 @@ export class AnalysisCommandHandler {
     const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
       .filter(item => item.facilityId === predictorToDelete.facilityId);
     for (const analysisItem of facilityAnalysisItems) {
-      analysisItem.groups.forEach(group => {
-        group.predictorVariables = group.predictorVariables.filter(
-          pVariable => pVariable.id !== predictorToDelete.guid
-        );
-        if (group.analysisType === 'regression' && group.models) {
-          const selectedModel: JStatRegressionModel | undefined = group.models.find(
-            model => model.modelId === group.selectedModelId
+      const updated = {
+        ...analysisItem,
+        groups: analysisItem.groups.map(group => {
+          const predictorVariables = group.predictorVariables.filter(
+            pVar => pVar.id !== predictorToDelete.guid
           );
-          if (selectedModel) {
-            const includesDeleted = selectedModel.predictorVariables.some(
-              mv => mv.id === predictorToDelete.guid
-            );
-            if (includesDeleted) {
-              group.models = undefined;
-              group.selectedModelId = undefined;
-              group.regressionModelYear = undefined;
-              group.regressionConstant = undefined;
-              group.dateModelsGenerated = undefined;
-            } else {
-              group.models = group.models.filter(model =>
-                !model.predictorVariables.some(mv => mv.id === predictorToDelete.guid)
-              );
-            }
+          if (group.analysisType !== 'regression' || !group.models) {
+            return { ...group, predictorVariables };
           }
-        }
-      });
-      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+          const selectedModel = group.models.find(m => m.modelId === group.selectedModelId);
+          if (!selectedModel) {
+            return { ...group, predictorVariables };
+          }
+          const selectedUsesDeleted = selectedModel.predictorVariables.some(
+            mv => mv.id === predictorToDelete.guid
+          );
+          if (selectedUsesDeleted) {
+            return {
+              ...group, predictorVariables,
+              models: undefined, selectedModelId: undefined,
+              regressionModelYear: undefined, regressionConstant: undefined,
+              dateModelsGenerated: undefined
+            };
+          }
+          return {
+            ...group, predictorVariables,
+            models: group.models.filter(m =>
+              !m.predictorVariables.some(mv => mv.id === predictorToDelete.guid)
+            )
+          };
+        })
+      };
+      await firstValueFrom(this.analysisDb.updateWithObservable(updated));
     }
   }
 

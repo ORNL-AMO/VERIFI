@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AccountReportDbService } from '../../indexedDB/account-report-db.service';
 import { FacilityReportsDbService } from '../../indexedDB/facility-reports-db.service';
+import { AccountWorkspaceStore } from '../account-workspace.store';
 import { IdbAccountReport } from '../../models/idbModels/accountReport';
 import { IdbFacilityReport } from '../../models/idbModels/facilityReport';
 import { IndexedDbTransactionService } from '../../indexedDB/indexed-db-transaction.service';
@@ -15,6 +16,7 @@ export class ReportCommandHandler {
   constructor(
     private readonly facilityReportDb: FacilityReportsDbService,
     private readonly accountReportDb: AccountReportDbService,
+    private readonly accountWorkspaceStore: AccountWorkspaceStore,
     private readonly transactions: IndexedDbTransactionService
   ) { }
 
@@ -97,7 +99,35 @@ export class ReportCommandHandler {
    * (betterClimate and dataOverview report types).
    */
   async updateReportsRemoveGroup(groupId: string): Promise<void> {
-    await this.accountReportDb.updateReportsRemoveGroup(groupId);
+    for (const report of this.accountWorkspaceStore.accountReports()) {
+      let changed = false;
+      let updated: IdbAccountReport = { ...report };
+      if (report.reportType === 'betterClimate' && report.betterClimateReportSetup?.includedFacilityGroups) {
+        const updatedGroups = report.betterClimateReportSetup.includedFacilityGroups.map(fg => {
+          const filtered = fg.groups.filter(g => g.groupId !== groupId);
+          if (filtered.length !== fg.groups.length) { changed = true; }
+          return { ...fg, groups: filtered };
+        });
+        updated = {
+          ...updated,
+          betterClimateReportSetup: { ...report.betterClimateReportSetup, includedFacilityGroups: updatedGroups }
+        };
+      }
+      if (report.reportType === 'dataOverview' && report.dataOverviewReportSetup?.includedFacilities) {
+        const updatedFacilities = report.dataOverviewReportSetup.includedFacilities.map(fg => {
+          const filtered = fg.includedGroups.filter(g => g.groupId !== groupId);
+          if (filtered.length !== fg.includedGroups.length) { changed = true; }
+          return { ...fg, includedGroups: filtered };
+        });
+        updated = {
+          ...updated,
+          dataOverviewReportSetup: { ...report.dataOverviewReportSetup, includedFacilities: updatedFacilities }
+        };
+      }
+      if (changed) {
+        await firstValueFrom(this.accountReportDb.updateWithObservable(updated));
+      }
+    }
   }
 
   /**
@@ -105,7 +135,23 @@ export class ReportCommandHandler {
    * (dataOverview and betterClimate included-facility lists).
    */
   async updateReportsRemoveFacility(facilityId: string): Promise<void> {
-    await this.accountReportDb.updateReportsRemoveFacility(facilityId);
+    for (const report of this.accountWorkspaceStore.accountReports()) {
+      const doFacilities = report.dataOverviewReportSetup?.includedFacilities ?? [];
+      const filteredDo = doFacilities.filter(f => f.facilityId !== facilityId);
+      const bcGroups = report.betterClimateReportSetup?.includedFacilityGroups ?? [];
+      const filteredBc = bcGroups.filter(f => f.facilityId !== facilityId);
+      const doChanged = filteredDo.length !== doFacilities.length;
+      const bcChanged = filteredBc.length !== bcGroups.length;
+      if (!doChanged && !bcChanged) { continue; }
+      const updated: IdbAccountReport = {
+        ...report,
+        dataOverviewReportSetup: { ...report.dataOverviewReportSetup, includedFacilities: filteredDo },
+        betterClimateReportSetup: report.betterClimateReportSetup
+          ? { ...report.betterClimateReportSetup, includedFacilityGroups: filteredBc }
+          : report.betterClimateReportSetup
+      };
+      await firstValueFrom(this.accountReportDb.updateWithObservable(updated));
+    }
   }
 
   // ---------------------------------------------------------------------------

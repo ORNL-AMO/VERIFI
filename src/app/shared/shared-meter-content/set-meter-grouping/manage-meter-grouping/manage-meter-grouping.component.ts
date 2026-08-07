@@ -122,7 +122,7 @@ export class ManageMeterGroupingComponent {
           meter.groupId = undefined;
           await this.meterHandler.updateMeter(meter, accountGuid);
         }
-        await this.meterGroupHandler.deleteGroup(groupToDelete.guid);
+        await this.meterGroupHandler.deleteGroup(groupToDelete);
       }
     );
     this.closeDeleteGroup();
