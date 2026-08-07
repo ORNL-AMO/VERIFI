@@ -6,7 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -23,6 +22,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -59,11 +59,11 @@ export class FacilityPredictorComponent {
     private activatedRoute: ActivatedRoute,
     private commandBoundary: WorkspaceCommandBoundary,
     private predictorHandler: PredictorCommandHandler,
+    private analysisHandler: AnalysisCommandHandler,
     private toastNotificationService: ToastNotificationsService,
     private router: Router,
     private editPredictorFormService: EditPredictorFormService,
     private loadingService: LoadingService,
-    private analysisDbService: AnalysisDbService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private routerGuardService: RouterGuardService
@@ -121,7 +121,7 @@ export class FacilityPredictorComponent {
         if (predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
           await this.updateWeatherData();
         }
-        await this.analysisDbService.updateAnalysisPredictor(predictor);
+        await this.analysisHandler.updateAnalysisPredictor(predictor);
       }
     );
     this.loadingService.setLoadingStatus(false);
@@ -225,7 +225,7 @@ export class FacilityPredictorComponent {
         for (const data of predictorData) {
           await this.predictorHandler.deletePredictorData(data.id);
         }
-        await this.analysisDbService.deleteAnalysisPredictor(predictor);
+        await this.analysisHandler.deleteAnalysisPredictor(predictor);
       }
     );
     this.loadingService.setLoadingStatus(false);

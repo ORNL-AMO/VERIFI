@@ -2,6 +2,7 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { MeterGroupCommandHandler } from 'src/app/account-workspace/handlers/meter-group-command-handler.service';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
@@ -13,8 +14,6 @@ import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
@@ -56,13 +55,12 @@ export class MeterGroupFormComponent {
   constructor(
     private commandBoundary: WorkspaceCommandBoundary,
     private meterHandler: MeterCommandHandler,
+    private meterGroupHandler: MeterGroupCommandHandler,
     private formBuilder: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private loadingService: LoadingService,
     private toastNoticationService: ToastNotificationsService,
-    private accountReportDbService: AccountReportDbService,
-    private analysisDbService: AnalysisDbService,
     private routerGuardService: RouterGuardService
   ) {
 
@@ -109,7 +107,7 @@ export class MeterGroupFormComponent {
   async saveChanges() {
     this.meterGroup.name = this.groupForm.controls['name'].value;
     if (this.meterGroup.groupType != this.groupForm.controls['groupType'].value) {
-      await this.analysisDbService.changeGroupType(this.meterGroup.guid, this.groupForm.controls['groupType'].value, this.meterGroup.groupType);
+      await this.meterGroupHandler.changeGroupType(this.meterGroup.guid, this.groupForm.controls['groupType'].value, this.meterGroup.groupType);
     }
     this.meterGroup.groupType = this.groupForm.controls['groupType'].value;
     this.meterGroup.description = this.groupForm.controls['description'].value;
@@ -238,8 +236,7 @@ export class MeterGroupFormComponent {
           meter.groupId = undefined;
           await this.meterHandler.updateMeter(meter, accountGuid);
         }
-        await this.analysisDbService.deleteGroup(meterGroup.guid);
-        await this.accountReportDbService.updateReportsRemoveGroup(meterGroup.guid);
+        await this.meterGroupHandler.deleteGroup(meterGroup.guid);
       }
     );
     this.closeDeleteGroup();

@@ -2,13 +2,12 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { MeterGroupCommandHandler } from 'src/app/account-workspace/handlers/meter-group-command-handler.service';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -42,10 +41,9 @@ export class ManageMeterGroupingComponent {
   constructor(
     private commandBoundary: WorkspaceCommandBoundary,
     private meterHandler: MeterCommandHandler,
+    private meterGroupHandler: MeterGroupCommandHandler,
     private router: Router,
     private loadingService: LoadingService,
-    private analysisDbService: AnalysisDbService,
-    private accountReportDbService: AccountReportDbService,
     private toastNoticationService: ToastNotificationsService,
     private activatedRoute: ActivatedRoute,
     private injector: Injector
@@ -89,7 +87,7 @@ export class ManageMeterGroupingComponent {
       { entityKind: 'meterGroup', changeKind: 'add', label: 'Add Meter Group' },
       async () => {
         const added = await this.meterHandler.addMeterGroup(newGroup, this.accountWorkspaceStore.account()?.guid);
-        await this.analysisDbService.addGroup(added.guid, added.groupType);
+        await this.meterGroupHandler.addGroup(added);
         return added;
       }
     );
@@ -124,8 +122,7 @@ export class ManageMeterGroupingComponent {
           meter.groupId = undefined;
           await this.meterHandler.updateMeter(meter, accountGuid);
         }
-        await this.analysisDbService.deleteGroup(groupToDelete.guid);
-        await this.accountReportDbService.updateReportsRemoveGroup(groupToDelete.guid);
+        await this.meterGroupHandler.deleteGroup(groupToDelete.guid);
       }
     );
     this.closeDeleteGroup();

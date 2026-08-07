@@ -6,9 +6,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -38,6 +38,7 @@ export class EditPredictorComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly predictorHandler = inject(PredictorCommandHandler);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
 
   addOrEdit: 'edit' | 'add';
   predictor: IdbPredictor;
@@ -62,7 +63,6 @@ export class EditPredictorComponent {
     private router: Router,
     private editPredictorFormService: EditPredictorFormService,
     private loadingService: LoadingService,
-    private analysisDbService: AnalysisDbService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private routerGuardService: RouterGuardService
@@ -154,9 +154,9 @@ export class EditPredictorComponent {
           }
         }
         if (this.addOrEdit == 'add') {
-          await this.analysisDbService.addAnalysisPredictor(this.predictor);
+          await this.analysisHandler.addAnalysisPredictor(this.predictor);
         } else {
-          await this.analysisDbService.updateAnalysisPredictor(this.predictor);
+          await this.analysisHandler.updateAnalysisPredictor(this.predictor);
         }
       }
     );

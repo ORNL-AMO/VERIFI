@@ -1,5 +1,5 @@
 /**
- * Persistence-only handler for facility-analysis and account-analysis commands.
+ * Handler for facility-analysis, account-analysis, and predictor-analysis commands.
  */
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -7,13 +7,17 @@ import { AccountAnalysisDbService } from '../../indexedDB/account-analysis-db.se
 import { AnalysisDbService } from '../../indexedDB/analysis-db.service';
 import { IdbAccountAnalysisItem } from '../../models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '../../models/idbModels/analysisItem';
+import { JStatRegressionModel } from '../../models/analysis';
+import { IdbPredictor } from '../../models/idbModels/predictor';
 import { WorkspaceWriteError } from '../workspace-commands.models';
+import { AccountWorkspaceStore } from '../account-workspace.store';
 
 @Injectable({ providedIn: 'root' })
 export class AnalysisCommandHandler {
   constructor(
     private readonly analysisDb: AnalysisDbService,
-    private readonly accountAnalysisDb: AccountAnalysisDbService
+    private readonly accountAnalysisDb: AccountAnalysisDbService,
+    private readonly accountWorkspaceStore: AccountWorkspaceStore
   ) { }
 
   // ---------------------------------------------------------------------------
@@ -54,6 +58,103 @@ export class AnalysisCommandHandler {
     this.assertOwnership(analysis.accountId, activeAccountGuid, 'account analysis');
     await firstValueFrom(this.accountAnalysisDb.deleteWithObservable(analysis.id));
     return analysis.id;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Predictor-analysis compound operations
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Adds the given predictor as a variable to every facility-analysis group
+   * that belongs to the same facility.
+   */
+  async addAnalysisPredictor(newPredictor: IdbPredictor): Promise<void> {
+    const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
+      .filter(item => item.facilityId === newPredictor.facilityId);
+    for (const analysisItem of facilityAnalysisItems) {
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables.push({
+          id: newPredictor.guid,
+          name: newPredictor.name,
+          production: newPredictor.production,
+          productionInAnalysis: newPredictor.productionInAnalysis,
+          regressionCoefficient: undefined,
+          unit: newPredictor.unit
+        });
+      });
+      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+    }
+  }
+
+  /**
+   * Propagates a predictor's renamed/updated fields to every analysis group
+   * and regression model that references it.
+   */
+  async updateAnalysisPredictor(predictor: IdbPredictor): Promise<void> {
+    const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
+      .filter(item => item.facilityId === predictor.facilityId);
+    for (const analysisItem of facilityAnalysisItems) {
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables.forEach(pVariable => {
+          if (pVariable.id === predictor.guid) {
+            pVariable.name = predictor.name;
+            pVariable.production = predictor.production;
+            pVariable.unit = predictor.unit;
+          }
+        });
+        if (group.models) {
+          group.models.forEach(model => {
+            model.predictorVariables.forEach(pVariable => {
+              if (pVariable.id === predictor.guid) {
+                pVariable.name = predictor.name;
+                pVariable.production = predictor.production;
+                pVariable.unit = predictor.unit;
+              }
+            });
+          });
+        }
+      });
+      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+    }
+  }
+
+  /**
+   * Removes the deleted predictor from every facility-analysis group variable
+   * list. Clears regression models that included the predictor in their
+   * selected model; models that did not use it are pruned but selection kept.
+   */
+  async deleteAnalysisPredictor(predictorToDelete: IdbPredictor): Promise<void> {
+    const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
+      .filter(item => item.facilityId === predictorToDelete.facilityId);
+    for (const analysisItem of facilityAnalysisItems) {
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables = group.predictorVariables.filter(
+          pVariable => pVariable.id !== predictorToDelete.guid
+        );
+        if (group.analysisType === 'regression' && group.models) {
+          const selectedModel: JStatRegressionModel | undefined = group.models.find(
+            model => model.modelId === group.selectedModelId
+          );
+          if (selectedModel) {
+            const includesDeleted = selectedModel.predictorVariables.some(
+              mv => mv.id === predictorToDelete.guid
+            );
+            if (includesDeleted) {
+              group.models = undefined;
+              group.selectedModelId = undefined;
+              group.regressionModelYear = undefined;
+              group.regressionConstant = undefined;
+              group.dateModelsGenerated = undefined;
+            } else {
+              group.models = group.models.filter(model =>
+                !model.predictorVariables.some(mv => mv.id === predictorToDelete.guid)
+              );
+            }
+          }
+        }
+      });
+      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+    }
   }
 
   // ---------------------------------------------------------------------------

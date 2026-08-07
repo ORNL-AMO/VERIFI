@@ -1,5 +1,5 @@
 /**
- * Persistence-only handler for facility-report and account-report commands.
+ * Handler for facility-report, account-report, and report group/facility cascade commands.
  */
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -86,6 +86,26 @@ export class ReportCommandHandler {
       }
       return deleted;
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Report cascade operations
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Strips the given group from all account reports that reference it
+   * (betterClimate and dataOverview report types).
+   */
+  async updateReportsRemoveGroup(groupId: string): Promise<void> {
+    await this.accountReportDb.updateReportsRemoveGroup(groupId);
+  }
+
+  /**
+   * Strips the given facility from all account reports that reference it
+   * (dataOverview and betterClimate included-facility lists).
+   */
+  async updateReportsRemoveFacility(facilityId: string): Promise<void> {
+    await this.accountReportDb.updateReportsRemoveFacility(facilityId);
   }
 
   // ---------------------------------------------------------------------------
