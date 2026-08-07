@@ -5,9 +5,9 @@ import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
 import { getSelectedRegressionModel } from '../../shared-analysis/calculations/regression-model-recovery';
 import { WeatherStation } from 'src/app/models/degreeDays';
@@ -38,10 +38,10 @@ export class PredictorTableComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private commandBoundary: WorkspaceCommandBoundary = inject(WorkspaceCommandBoundary);
   private predictorHandler: PredictorCommandHandler = inject(PredictorCommandHandler);
+  private analysisHandler: AnalysisCommandHandler = inject(AnalysisCommandHandler);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
   private weatherDataService: WeatherDataService = inject(WeatherDataService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
 
@@ -136,7 +136,7 @@ export class PredictorTableComponent {
         for (const data of predictorData) {
           await this.predictorHandler.deletePredictorData(data.id);
         }
-        await this.analysisDbService.deleteAnalysisPredictor(predictor);
+        await this.analysisHandler.deleteAnalysisPredictor(predictor);
       }
     );
     this.loadingService.setLoadingStatus(false);
@@ -173,7 +173,7 @@ export class PredictorTableComponent {
         { entityKind: 'predictor', changeKind: 'add', label: 'Add Predictor' },
         async () => {
           const added = await this.predictorHandler.addPredictor(newPredictor, this.accountWorkspaceStore.account()?.guid);
-          await this.analysisDbService.addAnalysisPredictor(added);
+          await this.analysisHandler.addAnalysisPredictor(added);
           return added;
         }
       );

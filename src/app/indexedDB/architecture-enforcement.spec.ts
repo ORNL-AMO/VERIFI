@@ -111,3 +111,46 @@ function formatViolations(files: string[], label: string): string {
   const paths = files.map(f => f.replace(APP_ROOT, 'src/app')).join('\n  ');
   return `Files that ${label}:\n  ${paths}`;
 }
+
+// ---------------------------------------------------------------------------
+// Component-layer db-service import prohibition
+// ---------------------------------------------------------------------------
+
+/**
+ * These db services contain compound domain methods that now belong in command
+ * handlers. Components must import only handlers, not these services.
+ */
+const PROHIBITED_COMPONENT_DB_IMPORTS: { serviceClass: string; description: string }[] = [
+  {
+    serviceClass: 'AnalysisDbService',
+    description: 'AnalysisDbService compound methods have moved to AnalysisCommandHandler',
+  },
+  {
+    serviceClass: 'AccountReportDbService',
+    description: 'AccountReportDbService compound methods have moved to ReportCommandHandler / MeterGroupCommandHandler',
+  },
+];
+
+/** Returns true if the file looks like an Angular component (not a db service or handler). */
+function isComponentFile(filePath: string): boolean {
+  const normalised = filePath.replace(/\\/g, '/');
+  if (/indexedDB\//.test(normalised)) { return false; }
+  if (/account-workspace\/handlers\//.test(normalised)) { return false; }
+  if (/account-workspace\/workspace-command-boundary/.test(normalised)) { return false; }
+  return normalised.endsWith('.component.ts');
+}
+
+describe('component-layer db-service import prohibition', () => {
+  const componentFiles = collectSourceFiles(APP_ROOT).filter(isComponentFile);
+
+  for (const { serviceClass, description } of PROHIBITED_COMPONENT_DB_IMPORTS) {
+    it(`no component imports ${serviceClass} (${description})`, () => {
+      const pattern = new RegExp(`import[^;]+${serviceClass}`);
+      const violators = componentFiles.filter(f => {
+        const content = readFileSync(f, 'utf8');
+        return pattern.test(content);
+      });
+      expect(violators, formatViolations(violators, `imports ${serviceClass}`)).toHaveLength(0);
+    });
+  }
+});

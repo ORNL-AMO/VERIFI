@@ -1,6 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
@@ -28,9 +26,7 @@ export class AnalysisFacilityReportComponent {
   showTitle: boolean = false;
   reportTitle: string;
 
-  constructor(private accountReportDbService: AccountReportDbService,
-    private facilityReportsDbService: FacilityReportsDbService
-  ) { }
+  constructor() { }
 
   ngOnChanges() {
     this.setReportTitle();
