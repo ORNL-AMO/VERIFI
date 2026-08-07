@@ -5,11 +5,13 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
     selector: 'app-facility-settings',
@@ -28,9 +30,10 @@ export class FacilitySettingsComponent implements OnInit {
     private router: Router,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
-    private dbChangesService: DbChangesService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private facilityHandler: FacilityCommandHandler,
     private injector: Injector
 
   ) { }
@@ -59,9 +62,19 @@ export class FacilitySettingsComponent implements OnInit {
   }
 
   async facilityDelete() {
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    this.dbChangesService.deleteFacilityMessages();
-    await this.dbChangesService.deleteFacility(this.selectedFacility, selectedAccount);
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    for (const message of FACILITY_DELETION_MESSAGES) {
+      this.loadingService.addLoadingMessage(message);
+    }
+    this.loadingService.setContext('delete-facility');
+    this.loadingService.setTitle('Deleting Facility');
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'delete', entityGuid: this.selectedFacility.guid, label: 'Deleting facility' },
+      () => this.facilityHandler.delete(this.selectedFacility, selectedAccount.guid, phase => {
+        this.loadingService.setCurrentLoadingIndex(phase.index);
+      })
+    );
+    this.loadingService.isLoadingComplete.next(true);
   }
 
   openDeleteFacility() {
@@ -87,3 +100,5 @@ export class FacilitySettingsComponent implements OnInit {
   }
 
 }
+
+

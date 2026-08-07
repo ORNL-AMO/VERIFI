@@ -1,10 +1,10 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -21,7 +21,6 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
   styleUrl: './set-meter-grouping.component.css'
 })
 export class SetMeterGroupingComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMetersSub: Subscription;
@@ -35,11 +34,11 @@ export class SetMeterGroupingComponent {
   calanderizationWorker: Worker;
 
   constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
     private router: Router,
     private meterGroupingDataService: MeterGroupingDataService,
     private injector: Injector
-
   ) {
   }
 
@@ -75,10 +74,12 @@ export class SetMeterGroupingComponent {
 
   async addMeter() {
     let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(this.facility.guid, this.facility.accountId, true, this.facility.energyUnit);
-    newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
     let account: IdbAccount = this.accountWorkspaceStore.account();
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + newMeter.guid);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'add', label: 'Add Meter' },
+      () => this.meterHandler.addMeter(newMeter, this.accountWorkspaceStore.account()?.guid)
+    );
+    this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + result.value.guid);
   }
 
 

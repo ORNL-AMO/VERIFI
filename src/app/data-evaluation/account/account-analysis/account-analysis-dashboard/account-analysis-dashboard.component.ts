@@ -2,9 +2,10 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -21,6 +22,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class AccountAnalysisDashboardComponent implements OnInit {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
 
   selectedAccount: IdbAccount;
   routerSub: Subscription;
@@ -31,7 +34,6 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   analysisType: 'Energy' | 'Water';
   constructor(
     private router: Router,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
     private analyticsService: AnalyticsService
   ) { }
@@ -55,8 +57,10 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   async createAnalysis() {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let newItem: IdbAccountAnalysisItem = getNewIdbAccountAnalysisItem(this.newAnalysisCategory, this.selectedAccount, accountFacilities);
-    let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedItem } = await this.commandBoundary.execute(
+      { entityKind: 'accountAnalysis', changeKind: 'add', label: 'Create Account Analysis' },
+      () => this.analysisHandler.addAccountAnalysis(newItem, this.accountWorkspaceStore.account()?.guid)
+    );
     this.analyticsService.sendEvent('create_account_analysis');
     this.accountWorkspaceService.selectAccountAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");

@@ -3,12 +3,13 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -35,9 +36,9 @@ export class FacilitiesListComponent {
     private sharedDataService: SharedDataService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
-    private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private facilityHandler: FacilityCommandHandler,
     private injector: Injector
   ) { }
 
@@ -71,14 +72,20 @@ export class FacilitiesListComponent {
 
   async addFacility() {
     this.loadingService.setLoadingStatus(true);
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
     for (let i = 0; i < this.numberOfFacilities; i++) {
       this.loadingService.setLoadingMessage('Creating Facility ' + (i + 1) + '...');
-      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-      let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
-      let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
-      await this.dbChangesService.updateDataNewFacility(newFacility, false);
+      const idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'add', label: 'Adding facility' },
+        () => this.facilityHandler.add(
+          idbFacility,
+          selectedAccount.guid,
+          this.accountWorkspaceStore.accountAnalyses(),
+          this.accountWorkspaceStore.accountReports()
+        )
+      );
     }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     if (this.numberOfFacilities > 1) {
       this.toastNotificationService.showToast(this.numberOfFacilities + ' Facilities Added!', undefined, undefined, false, 'alert-success');
@@ -113,11 +120,21 @@ export class FacilitiesListComponent {
   }
 
   async confirmDeleteFacility() {
-    let facilityToDelete: IdbFacility = this.facilityToDelete;
+    const facilityToDelete: IdbFacility = this.facilityToDelete;
     this.cancelFacilityDelete();
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    this.dbChangesService.deleteFacilityMessages();
-    await this.dbChangesService.deleteFacility(facilityToDelete, selectedAccount);
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    for (const message of FACILITY_DELETION_MESSAGES) {
+      this.loadingService.addLoadingMessage(message);
+    }
+    this.loadingService.setContext('delete-facility');
+    this.loadingService.setTitle('Deleting Facility');
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'delete', entityGuid: facilityToDelete.guid, label: 'Deleting facility' },
+      () => this.facilityHandler.delete(facilityToDelete, selectedAccount.guid, phase => {
+        this.loadingService.setCurrentLoadingIndex(phase.index);
+      })
+    );
+    this.loadingService.isLoadingComplete.next(true);
   }
 
   goToFacility(facility: IdbFacility) {
@@ -135,15 +152,20 @@ export class FacilitiesListComponent {
   }
 
   async setFacilityOrder(facility: IdbFacility) {
-    await this.dbChangesService.updateFacility(facility);
-    for (let i = 0; i < this.facilities.length; i++) {
-      if (this.facilities[i].guid != facility.guid) {
-        if (this.facilities[i].facilityOrder && this.facilities[i].facilityOrder == facility.facilityOrder) {
-          this.facilities[i].facilityOrder = undefined;
-          await this.dbChangesService.updateFacility(this.facilities[i]);
-        }
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility order' },
+      () => this.facilityHandler.update(facility, activeAccountGuid)
+    );
+    for (const other of this.facilities) {
+      if (other.guid !== facility.guid && other.facilityOrder === facility.facilityOrder) {
+        const cleared = { ...other, facilityOrder: undefined };
+        await this.commandBoundary.execute(
+          { entityKind: 'facility', changeKind: 'update', entityGuid: other.guid, label: 'Updating facility order' },
+          () => this.facilityHandler.update(cleared, activeAccountGuid)
+        );
       }
-    };
+    }
   }
 
   goToUploadData() {

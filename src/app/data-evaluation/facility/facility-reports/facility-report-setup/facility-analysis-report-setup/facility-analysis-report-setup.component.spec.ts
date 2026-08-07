@@ -6,7 +6,8 @@ import { vi } from 'vitest';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceSnapshot } from 'src/app/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -32,6 +33,53 @@ export class FacilityReportAnalysisSelectionStubComponent {
 class FacilityAnalysisReportSetupTestModule { }
 
 describe('FacilityAnalysisReportSetupComponent', () => {
+  it('saves through the boundary and reselects the committed report', async () => {
+    const store = new AccountWorkspaceStore();
+    const facility = { id: 2, guid: 'facility-a', accountId: 'account-a', name: 'Facility A' } as any;
+    const report = { ...getNewIdbFacilityReport('facility-a', 'account-a', 'analysis', []), id: 4 };
+    const analysis = { id: 3, guid: 'analysis-a', facilityId: 'facility-a', accountId: 'account-a', name: 'Analysis A' } as any;
+    const snapshot = {
+      account: { id: 1, guid: 'account-a', name: 'Account A' },
+      facilities: [facility],
+      meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
+      facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [report],
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    } as unknown as AccountWorkspaceSnapshot;
+    store.publish(snapshot, { facility, facilityReport: report });
+
+    const execute = vi.fn().mockImplementation(async (_options, persist) => {
+      const value = await persist();
+      return { value, change: {} };
+    });
+    const selectFacilityReport = vi.fn();
+    const updateFacilityReport = vi.fn(async (value: IdbFacilityReport) => ({ ...value }));
+
+    TestBed.configureTestingModule({
+      imports: [FacilityAnalysisReportSetupTestModule],
+      providers: [
+        { provide: AccountWorkspaceStore, useValue: store },
+        { provide: AccountWorkspaceService, useValue: { selectFacilityReport, reloadActiveWorkspace: vi.fn() } },
+        { provide: WorkspaceCommandBoundary, useValue: { execute } },
+        { provide: ReportCommandHandler, useValue: { updateFacilityReport } },
+        { provide: CalanderizationService, useValue: { calanderizedMeters: new BehaviorSubject([]), getYearOptions: vi.fn().mockReturnValue([2024]) } }
+      ]
+    });
+    const injector = TestBed.inject(Injector);
+    const component = TestBed.runInInjectionContext(() => new FacilityAnalysisReportSetupComponent(
+      TestBed.inject(CalanderizationService),
+      injector
+    ));
+
+    component.ngOnInit();
+    await component.save();
+
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(updateFacilityReport).toHaveBeenCalledWith(component.facilityReport, 'account-a');
+    expect(selectFacilityReport).toHaveBeenCalledWith(report.guid);
+
+    component.ngOnDestroy();
+  });
+
   it('initializes a new report from workspace signals before observable emissions run', () => {
     const store = new AccountWorkspaceStore();
     const facility = { id: 2, guid: 'facility-a', accountId: 'account-a', name: 'Facility A' } as any;
@@ -61,13 +109,13 @@ describe('FacilityAnalysisReportSetupComponent', () => {
       providers: [
         { provide: AccountWorkspaceStore, useValue: store },
         { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn() } },
-        { provide: FacilityReportsDbService, useValue: { updateWithObservable: vi.fn(value => of(value)) } },
+        { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } },
+        { provide: ReportCommandHandler, useValue: { updateFacilityReport: vi.fn(v => Promise.resolve(v)) } },
         { provide: CalanderizationService, useValue: calendarization }
       ]
     });
     const injector = TestBed.inject(Injector);
     const component = TestBed.runInInjectionContext(() => new FacilityAnalysisReportSetupComponent(
-      TestBed.inject(FacilityReportsDbService),
       TestBed.inject(CalanderizationService),
       injector
     ));

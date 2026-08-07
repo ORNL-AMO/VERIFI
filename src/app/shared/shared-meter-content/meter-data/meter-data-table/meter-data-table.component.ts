@@ -1,11 +1,10 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -23,9 +22,9 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
   standalone: false
 })
 export class MeterDataTableComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private utilityMeterDataDbService: UtilityMeterDatadbService = inject(UtilityMeterDatadbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly meterHandler = inject(MeterCommandHandler);
   private router: Router = inject(Router);
   private loadingService: LoadingService = inject(LoadingService);
   private toastNoticationService: ToastNotificationsService = inject(ToastNotificationsService);
@@ -110,12 +109,15 @@ export class MeterDataTableComponent {
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);
     const checkedGuids = this.checkedItemGuids();
-    const meterData = this.meterData();
-    let meterDataItemsToDelete: Array<IdbUtilityMeterData> = meterData.filter(dataItem => checkedGuids.has(dataItem.guid));
-    for (let index = 0; index < meterDataItemsToDelete.length; index++) {
-      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id));
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const meterDataItemsToDelete = this.meterData().filter(dataItem => checkedGuids.has(dataItem.guid));
+    await this.commandBoundary.execute(
+      { entityKind: 'meterData', changeKind: 'bulk', label: 'Delete Meter Data' },
+      async () => {
+        for (const item of meterDataItemsToDelete) {
+          await this.meterHandler.deleteMeterData(item.id);
+        }
+      }
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -136,11 +138,11 @@ export class MeterDataTableComponent {
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);
     this.showIndividualDelete = false;
-    await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id));
-    this.loadingService.setLoadingMessage("Meter Data Deleted...");
-    this.loadingService.setLoadingMessage("Setting Meter Data...");
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.loadingService.setLoadingMessage("Meter Data Set...");
+    const idToDelete = this.meterDataToDelete.id;
+    await this.commandBoundary.execute(
+      { entityKind: 'meterData', changeKind: 'delete', label: 'Delete Meter Data' },
+      () => this.meterHandler.deleteMeterData(idToDelete)
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
     this.cancelDelete();
@@ -190,20 +192,23 @@ export class MeterDataTableComponent {
     this.loadingService.setLoadingStatus(true);
     try {
       const accountMeterData = [...this.accountWorkspaceStore.meterData()];
-      for (const missingMonth of missingMonths) {
-        const newMeterData = getNewIdbUtilityMeterData(selectedMeter, accountMeterData);
-        delete newMeterData.id;
-        newMeterData.day = 1;
-        newMeterData.month = missingMonth.month;
-        newMeterData.year = missingMonth.year;
-        newMeterData.totalEnergyUse = 0;
-        newMeterData.totalVolume = 0;
-        newMeterData.totalCost = 0;
-        newMeterData.isEstimated = false;
-        await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(newMeterData));
-      }
-
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      await this.commandBoundary.execute(
+        { entityKind: 'meterData', changeKind: 'bulk', label: 'Fill Missing Meter Data' },
+        async () => {
+          for (const missingMonth of missingMonths) {
+            const newMeterData = getNewIdbUtilityMeterData(selectedMeter, accountMeterData);
+            delete newMeterData.id;
+            newMeterData.day = 1;
+            newMeterData.month = missingMonth.month;
+            newMeterData.year = missingMonth.year;
+            newMeterData.totalEnergyUse = 0;
+            newMeterData.totalVolume = 0;
+            newMeterData.totalCost = 0;
+            newMeterData.isEstimated = false;
+            await this.meterHandler.addMeterData(newMeterData, this.accountWorkspaceStore.account()?.guid);
+          }
+        }
+      );
       this.cancelFillMissingDataModal();
       this.toastNoticationService.showToast(
         `${missingMonths.length} Missing Month${missingMonths.length === 1 ? '' : 's'} Filled!`,
@@ -213,11 +218,6 @@ export class MeterDataTableComponent {
         "alert-success"
       );
     } catch {
-      try {
-        await this.accountWorkspaceService.reloadActiveWorkspace(true);
-      } catch {
-        // The original save error is the useful error to report to the user.
-      }
       this.toastNoticationService.showToast(
         "Unable to Fill Missing Meter Data",
         "Some missing months may not have been added. Review the list and try again.",

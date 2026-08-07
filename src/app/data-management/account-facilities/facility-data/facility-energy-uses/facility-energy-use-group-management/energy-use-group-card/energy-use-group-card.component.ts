@@ -1,12 +1,10 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { EnergyUseCommandHandler } from 'src/app/account-workspace/handlers/energy-use-command-handler.service';
 import { Component, computed, inject, Input, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilityEnergyUseEquipmentDbService } from 'src/app/indexedDB/facility-energy-use-equipment-db.service';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -22,17 +20,16 @@ import { getGUID } from 'src/app/shared/sharedHelperFunctions';
     styleUrl: './energy-use-group-card.component.css'
 })
 export class EnergyUseGroupCardComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly energyUseHandler = inject(EnergyUseCommandHandler);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
     @Input({ required: true })
     group: IdbFacilityEnergyUseGroup;
 
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService = inject(FacilityEnergyUseGroupsDbService);
     private router: Router = inject(Router);
     private sharedDataService: SharedDataService = inject(SharedDataService);
     private loadingService: LoadingService = inject(LoadingService);
     private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
-    private facilityEnergyUseEquipmentDbService: FacilityEnergyUseEquipmentDbService = inject(FacilityEnergyUseEquipmentDbService);
 
 
     facilityEnergyUseEquipment: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.facilityEnergyUseEquipment()]);
@@ -76,8 +73,11 @@ export class EnergyUseGroupCardComponent {
         let account: IdbAccount = this.accountWorkspaceStore.account();
         let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         energyUseGroup.sidebarOpen = true;
-        await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
-        await this.accountWorkspaceService.reloadActiveWorkspace(true);
+        const activeAccountGuid = account?.guid;
+        await this.commandBoundary.execute(
+          { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Updating energy use group' },
+          () => this.energyUseHandler.updateGroup(energyUseGroup, activeAccountGuid)
+        );
         this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + energyUseGroup.guid);
     }
 
@@ -86,9 +86,12 @@ export class EnergyUseGroupCardComponent {
         delete copyGroup.id;
         copyGroup.guid = getGUID();
         copyGroup.name = copyGroup.name + ' (copy)';
-        copyGroup = await firstValueFrom(this.facilityEnergyUseGroupsDbService.addWithObservable(copyGroup));
-        await this.accountWorkspaceService.reloadActiveWorkspace(true);
-        this.editGroup(copyGroup);
+        const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+        const result = await this.commandBoundary.execute(
+          { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Copying energy use group' },
+          () => this.energyUseHandler.addGroup(copyGroup, this.accountWorkspaceStore.account()?.guid)
+        );
+        this.editGroup(result.value);
     }
 
     showDeleteModal: boolean = false;
@@ -103,18 +106,21 @@ export class EnergyUseGroupCardComponent {
     }
 
     async deleteGroup() {
-        let deleteGroupId: number = this.group.id;
         let deleteGroupGuid: string = this.group.guid;
         this.loadingService.setLoadingMessage('Deleting Energy Use Group...')
         this.loadingService.setLoadingStatus(true);
-        //delete groups
-        await firstValueFrom(this.facilityEnergyUseGroupsDbService.deleteWithObservable(deleteGroupId));
-        //delete equipment associated with group
-        await this.facilityEnergyUseEquipmentDbService.deleteEnergyUseGroup(deleteGroupGuid);
-        //set groups
-        await this.accountWorkspaceService.reloadActiveWorkspace(true);
-        //set equipment
-        await this.accountWorkspaceService.reloadActiveWorkspace(true);
+        const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+        const groupEquipment = this.facilityEnergyUseEquipment().filter(e => e.energyUseGroupId === deleteGroupGuid);
+        const group = this.group;
+        await this.commandBoundary.execute(
+          { entityKind: 'energyUseGroup', changeKind: 'delete', label: 'Deleting energy use group' },
+          async () => {
+            for (const equipment of groupEquipment) {
+              await this.energyUseHandler.deleteEquipment(equipment, activeAccountGuid);
+            }
+            return this.energyUseHandler.deleteGroup(group, activeAccountGuid);
+          }
+        );
         this.cancelDelete();
         this.loadingService.setLoadingStatus(false);
         this.toastNotificationsService.showToast("Energy Use Group Deleted", undefined, undefined, false, "alert-success");

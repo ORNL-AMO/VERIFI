@@ -2,15 +2,15 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
+import { from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
@@ -51,13 +51,13 @@ export class FacilityMeterComponent {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private utilityMeterDbService: UtilityMeterdbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
     private editMeterFormService: EditMeterFormService,
     private router: Router,
     private sharedDataService: SharedDataService,
     private toastNotificationsService: ToastNotificationsService,
     private loadingService: LoadingService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private toastNotificationService: ToastNotificationsService,
     private routerGuardService: RouterGuardService,
     private injector: Injector
@@ -117,23 +117,23 @@ export class FacilityMeterComponent {
     this.meterForm.markAsPristine();
     this.utilityMeter = this.accountWorkspaceQuery.getMeterByGuid(this.utilityMeter.guid);
     this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
-    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.utilityMeter));
-    await this.updateMeterData(this.utilityMeter);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const meter = this.utilityMeter;
+    const meterDataUpdates = this.getMeterDataUpdates(meter);
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Save Meter' },
+      () => this.meterHandler.updateMeterWithData(meter, meterDataUpdates, accountGuid)
+    );
     this.loadingService.setLoadingStatus(false);
-  }
-
-  async updateMeterData(meter: IdbUtilityMeter) {
-    this.loadingService.setLoadingMessage('Updating Meter Data...')
-    this.loadingService.setLoadingStatus(true);
-    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(meter.guid);
-    let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData);
-    if (dataNeedsUpdate.length > 0) {
-      for (let i = 0; i < dataNeedsUpdate.length; i++) {
-        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]));
-      }
+    if (meterDataUpdates.length > 0) {
       this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
     }
+  }
+
+  private getMeterDataUpdates(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    this.loadingService.setLoadingMessage('Updating Meter Data...')
+    const meterData = structuredClone(this.accountWorkspaceQuery.getMeterData(meter.guid));
+    return updateMeterDataCharges(meter, meterData);
   }
 
   showDelete() {
@@ -151,19 +151,18 @@ export class FacilityMeterComponent {
     this.meterForm.markAsPristine();
     this.loadingService.setLoadingMessage('Deleting Meters and Data...')
     this.loadingService.setLoadingStatus(true);
-    //delete meter
-    await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(this.utilityMeter.id));
-    //delete meter data
-    let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAll());
-    let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == this.utilityMeter.guid });
-    for (let index = 0; index < meterData.length; index++) {
-      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterData[index].id));
-    }
-
-    //set meters
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    //set meter data
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const meter = this.utilityMeter;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(meter.guid);
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'delete', entityGuid: meter.guid, label: 'Delete Meter and Data' },
+      async () => {
+        await this.meterHandler.deleteMeter(meter, accountGuid);
+        for (const data of meterData) {
+          await this.meterHandler.deleteMeterData(data.id);
+        }
+      }
+    );
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");

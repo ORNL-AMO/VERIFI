@@ -1,6 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -32,7 +31,6 @@ interface FacilityActionGroup {
 })
 export class DataManagementHomeComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
 
   account: IdbAccount;
   accountSub: Subscription;
@@ -129,7 +127,6 @@ export class DataManagementHomeComponent {
   }
 
   async showToast() {
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     let hasWarning = this.weatherPredictorManagementService.hasWarning;
     if (hasWarning) {
       this.toastNotificationService.showToast("Weather Predictors Updated", "One or more entries were calculated with gaps in data. Be sure to double check your predictor data for errors.", undefined, false, "alert-warning")

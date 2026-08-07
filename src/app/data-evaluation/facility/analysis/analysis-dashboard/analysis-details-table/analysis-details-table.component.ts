@@ -3,13 +3,11 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -49,13 +47,12 @@ export class AnalysisDetailsTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private router: Router = inject(Router);
-  private dbChangesService: DbChangesService = inject(DbChangesService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
+  private readonly reportHandler = inject(ReportCommandHandler);
+  private readonly facilityHandler = inject(FacilityCommandHandler);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
-  private facilityReportsDbService: FacilityReportsDbService = inject(FacilityReportsDbService);
-  private facilityDbService: FacilitydbService = inject(FacilitydbService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private calendarizationService: CalanderizationService = inject(CalanderizationService);
   private loadingService: LoadingService = inject(LoadingService);
@@ -234,13 +231,17 @@ export class AnalysisDetailsTableComponent {
     const canSelectItem: boolean = this.getCanSelectItem(selectedAccount, selectedFacility, analysisItem);
     if (canSelectItem) {
 
+      const updatedFacility: IdbFacility = { ...selectedFacility };
       if (analysisItem.analysisCategory == 'energy') {
-        selectedFacility.selectedEnergyAnalysisId = analysisItem.guid;
+        (updatedFacility as any).selectedEnergyAnalysisId = analysisItem.guid;
       } else if (analysisItem.analysisCategory == 'water') {
-        selectedFacility.selectedWaterAnalysisId = analysisItem.guid;
+        (updatedFacility as any).selectedWaterAnalysisId = analysisItem.guid;
       }
-      await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
-      await this.dbChangesService.updateFacility(selectedFacility);
+      const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility' },
+        () => this.facilityHandler.update(updatedFacility, activeAccountGuid)
+      );
     } else {
       this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
     }
@@ -283,8 +284,10 @@ export class AnalysisDetailsTableComponent {
     let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(analysisItem.facilityId);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(analysisItem.facilityId, analysisItem.accountId, 'analysis', groups);
     newReport.analysisItemId = analysisItem.guid;
-    newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
+      () => this.reportHandler.addFacilityReport(newReport, this.accountWorkspaceStore.account()?.guid)
+    );
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
     this.goToReport(newReport.guid);
   }
@@ -308,8 +311,10 @@ export class AnalysisDetailsTableComponent {
     delete newItem.id;
     newItem.name = newItem.name + " (Copy)";
     newItem.guid = Math.random().toString(36).substr(2, 9);
-    let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedItem } = await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' },
+      () => this.analysisHandler.addFacilityAnalysis(newItem, this.accountWorkspaceStore.account()?.guid)
+    );
     this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility().guid + '/analysis/run-analysis');
@@ -321,30 +326,34 @@ export class AnalysisDetailsTableComponent {
   }
 
   async confirmDelete(analysisDetailsTableRow: AnalysisDetailsTableRow, isBulkDelete: boolean = false) {
-    await firstValueFrom(this.analysisDbService.deleteWithObservable(analysisDetailsTableRow.analysisItem.id));
-    //update account analysis items
     const selectedFacility: IdbFacility = this.selectedFacility();
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems();
-    for (let index = 0; index < accountAnalysisItems.length; index++) {
-      let updated: boolean = false;
-      accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
-        if (item.facilityId == selectedFacility.guid && item.analysisItemId == analysisDetailsTableRow.analysisItem.guid) {
-          item.analysisItemId = undefined;
-          updated = true;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'delete', entityGuid: analysisDetailsTableRow.analysisItem.guid, label: 'Delete Facility Analysis' },
+      async () => {
+        const deleted = await this.analysisHandler.deleteFacilityAnalysis(analysisDetailsTableRow.analysisItem, activeAccountGuid);
+        const accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems();
+        for (let index = 0; index < accountAnalysisItems.length; index++) {
+          let updated: boolean = false;
+          const updatedItem = { ...accountAnalysisItems[index], facilityAnalysisItems: accountAnalysisItems[index].facilityAnalysisItems.map(item => {
+            if (item.facilityId == selectedFacility.guid && item.analysisItemId == analysisDetailsTableRow.analysisItem.guid) {
+              updated = true;
+              return { ...item, analysisItemId: undefined };
+            }
+            return { ...item };
+          }) };
+          if (updated) {
+            await this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid);
+          }
         }
-      });
-      if (updated) {
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+        if (selectedFacility.selectedEnergyAnalysisId == analysisDetailsTableRow.analysisItem.guid) {
+          await this.facilityHandler.update({ ...selectedFacility, selectedEnergyAnalysisId: undefined }, activeAccountGuid);
+        } else if (selectedFacility.selectedWaterAnalysisId == analysisDetailsTableRow.analysisItem.guid) {
+          await this.facilityHandler.update({ ...selectedFacility, selectedWaterAnalysisId: undefined }, activeAccountGuid);
+        }
+        return deleted;
       }
-    }
-    if (selectedFacility.selectedEnergyAnalysisId == analysisDetailsTableRow.analysisItem.guid) {
-      selectedFacility.selectedEnergyAnalysisId = undefined;
-      await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
-    } else if (selectedFacility.selectedWaterAnalysisId == analysisDetailsTableRow.analysisItem.guid) {
-      selectedFacility.selectedWaterAnalysisId = undefined;
-      await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    );
     if (!isBulkDelete) {
       this.displayDeleteModal = false;
       this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");

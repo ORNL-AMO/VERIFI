@@ -3,14 +3,15 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom, skip, take } from 'rxjs';
+import { Subscription, skip, take } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -59,13 +60,13 @@ export class AccountSettingsComponent implements OnInit {
   downloadAsZip: boolean = false;
   constructor(
     private router: Router,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
+    private facilityHandler: FacilityCommandHandler,
     private electronService: ElectronService,
     private cd: ChangeDetectorRef,
     private automaticBackupsService: AutomaticBackupsService,
@@ -112,10 +113,18 @@ export class AccountSettingsComponent implements OnInit {
   async addNewFacility() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Creating Facility...');
-    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
-    let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
-    let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
-    await this.dbChangesService.updateDataNewFacility(newFacility);
+    const selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    const idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'add', label: 'Adding facility' },
+      () => this.facilityHandler.add(
+        idbFacility,
+        selectedAccount.guid,
+        this.accountWorkspaceStore.accountAnalyses(),
+        this.accountWorkspaceStore.accountReports()
+      )
+    );
+    const newFacility = result.value.facility;
     this.accountWorkspaceService.selectFacility(newFacility.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
@@ -124,17 +133,27 @@ export class AccountSettingsComponent implements OnInit {
 
 
   async facilityDelete() {
-    this.dbChangesService.deleteFacilityMessages();
-    await this.dbChangesService.deleteFacility(this.facilityToDelete, this.selectedAccount);
+    for (const message of FACILITY_DELETION_MESSAGES) {
+      this.loadingService.addLoadingMessage(message);
+    }
+    this.loadingService.setContext('delete-facility');
+    this.loadingService.setTitle('Deleting Facility');
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'delete', entityGuid: this.facilityToDelete.guid, label: 'Deleting facility' },
+      () => this.facilityHandler.delete(this.facilityToDelete, this.selectedAccount.guid, phase => {
+        this.loadingService.setCurrentLoadingIndex(phase.index);
+      })
+    );
+    this.loadingService.isLoadingComplete.next(true);
   }
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    await firstValueFrom(this.accountDbService.updateWithObservable({
-      ...this.selectedAccount,
-      deleteAccount: true
-    }));
-    const accounts = await this.applicationLifecycleService.refreshAccountCatalog();
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'delete', entityGuid: this.selectedAccount.guid, label: 'Deleting account' },
+      () => this.accountHandler.update({ ...this.selectedAccount, deleteAccount: true }, this.selectedAccount.guid)
+    );
+    const accounts = await this.applicationLifecycleService.handleMarkedAccountDeletion(this.selectedAccount.guid);
     let nonDeleteAccounts: Array<IdbAccount> = accounts.filter(acc => {
       return acc.deleteAccount == false;
     })
@@ -189,12 +208,19 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   async setFacilityOrder(facility: IdbFacility) {
-    await this.dbChangesService.updateFacility(facility);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility order' },
+      () => this.facilityHandler.update(facility, activeAccountGuid)
+    );
     for (let i = 0; i < this.facilityList.length; i++) {
       if (this.facilityList[i].guid != facility.guid) {
         if (this.facilityList[i].facilityOrder && this.facilityList[i].facilityOrder == facility.facilityOrder) {
           this.facilityList[i].facilityOrder = undefined;
-          await this.dbChangesService.updateFacility(this.facilityList[i]);
+          await this.commandBoundary.execute(
+            { entityKind: 'facility', changeKind: 'update', entityGuid: this.facilityList[i].guid, label: 'Updating facility order' },
+            () => this.facilityHandler.update(this.facilityList[i], activeAccountGuid)
+          );
         }
       }
     };
@@ -228,7 +254,10 @@ export class AccountSettingsComponent implements OnInit {
       if (this.applySettingsOptions.sustainabilityQuestions) {
         facility.sustainabilityQuestions = accountCopy.sustainabilityQuestions
       }
-      await this.dbChangesService.updateFacility(facility);
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility settings' },
+        () => this.facilityHandler.update(facility, this.selectedAccount.guid)
+      );
     }
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "alert-success");
@@ -253,12 +282,18 @@ export class AccountSettingsComponent implements OnInit {
     this.selectedAccount.dataBackupFilePath = savedFilePath;
     this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
     this.updatingFilePath = false;
-    await this.dbChangesService.updateAccount(this.selectedAccount);
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+      () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
+    );
     this.cd.detectChanges();
   }
 
   async saveChanges() {
-    await this.dbChangesService.updateAccount(this.selectedAccount);
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+      () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
+    );
   }
 
   async changeIsShared() {

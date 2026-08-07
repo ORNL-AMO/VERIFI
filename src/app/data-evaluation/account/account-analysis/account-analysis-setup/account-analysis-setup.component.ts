@@ -2,11 +2,11 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { debounceTime, firstValueFrom } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -36,9 +36,9 @@ import { AccountAnalysisStatusCheck } from 'src/app/calculations/status-check-ca
 export class AccountAnalysisSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly accountAnalysisDbService = inject(AccountAnalysisDbService);
   private readonly router = inject(Router);
-  private readonly analysisDbService = inject(AnalysisDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private readonly calendarizationService = inject(CalanderizationService);
   private readonly accountAnalysisService = inject(AccountAnalysisService);
   private readonly loadingService = inject(LoadingService);
@@ -201,8 +201,11 @@ export class AccountAnalysisSetupComponent {
       waterUnit: raw.waterUnit,
       baselineYear: raw.baselineYear ?? item.baselineYear,
     };
-    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Account Analysis' },
+      () => this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
   }
 
@@ -229,8 +232,11 @@ export class AccountAnalysisSetupComponent {
         analysisItemId: undefined,
       })),
     };
-    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(clearedItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid2 = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Account Analysis' },
+      () => this.analysisHandler.updateAccountAnalysis(clearedItem, activeAccountGuid2)
+    );
     this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
@@ -253,43 +259,46 @@ export class AccountAnalysisSetupComponent {
     const accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     const facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     const analysisType = this.analysisTypeControl.value;
-    let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
-    for (let i = 0; i < facilities.length; i++) {
-      const facility: IdbFacility = facilities[i];
-      this.accountWorkspaceService.selectFacility(facility.guid);
-      let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, analysisItem.analysisCategory);
-      newIdbItem.energyIsSource = analysisItem.energyIsSource;
-      let facilityBaselineYear: number;
-      if (analysisItem.analysisCategory == 'energy') {
-        facilityBaselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
-      } else if (analysisItem.analysisCategory == 'water') {
-        facilityBaselineYear = facility.sustainabilityQuestions.waterReductionBaselineYear;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value: updatedItem } = await this.commandBoundary.execute(
+      { entityKind: 'accountAnalysis', changeKind: 'bulk', label: 'Create Bulk Facility Analyses' },
+      async () => {
+        let updatedFacilityAnalysisItems = analysisItem.facilityAnalysisItems.map(fi => ({ ...fi }));
+        for (let i = 0; i < facilities.length; i++) {
+          const facility: IdbFacility = facilities[i];
+          let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, analysisItem.analysisCategory);
+          newIdbItem.energyIsSource = analysisItem.energyIsSource;
+          let facilityBaselineYear: number;
+          if (analysisItem.analysisCategory == 'energy') {
+            facilityBaselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+          } else if (analysisItem.analysisCategory == 'water') {
+            facilityBaselineYear = facility.sustainabilityQuestions.waterReductionBaselineYear;
+          }
+          if (facility.isNewFacility && (facilityBaselineYear > analysisItem.baselineYear)) {
+            newIdbItem.baselineYear = facilityBaselineYear;
+          } else {
+            newIdbItem.baselineYear = analysisItem.baselineYear;
+          }
+          if (analysisItem.name != '') {
+            newIdbItem.name = analysisItem.name;
+          }
+          newIdbItem.groups.forEach(group => {
+            group.analysisType = analysisType;
+          });
+          newIdbItem = await this.analysisHandler.addFacilityAnalysis(newIdbItem, this.accountWorkspaceStore.account()?.guid);
+          updatedFacilityAnalysisItems = updatedFacilityAnalysisItems.map(fi =>
+            fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
+          );
+        }
+        const updatedAnalysisItem: IdbAccountAnalysisItem = {
+          ...analysisItem,
+          isAnalysisVisited: false,
+          facilityAnalysisItems: updatedFacilityAnalysisItems,
+        };
+        return await this.analysisHandler.updateAccountAnalysis(updatedAnalysisItem, activeAccountGuid);
       }
-      if (facility.isNewFacility && (facilityBaselineYear > analysisItem.baselineYear)) {
-        newIdbItem.baselineYear = facilityBaselineYear;
-      } else {
-        newIdbItem.baselineYear = analysisItem.baselineYear;
-      }
-      if (analysisItem.name != '') {
-        newIdbItem.name = analysisItem.name;
-      }
-      newIdbItem.groups.forEach(group => {
-        group.analysisType = analysisType;
-      });
-      newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-      updatedFacilityAnalysisItems = updatedFacilityAnalysisItems.map(fi =>
-        fi.facilityId === facility.guid ? { ...fi, analysisItemId: newIdbItem.guid } : fi
-      );
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    const updatedItem: IdbAccountAnalysisItem = {
-      ...analysisItem,
-      isAnalysisVisited: false,
-      facilityAnalysisItems: updatedFacilityAnalysisItems,
-    };
-    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(updatedItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
+    );
+    this.accountWorkspaceService.selectAccountAnalysis(updatedItem?.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
     this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');

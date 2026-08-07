@@ -1,11 +1,13 @@
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { firstValueFrom, skip, take } from 'rxjs';
+import { skip, take } from 'rxjs';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 
 @Component({
   selector: 'app-edit-connect-bill',
@@ -33,10 +35,12 @@ export class EditConnectBillComponent {
   meterDataToSave: IdbUtilityMeterData;
 
   constructor(
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
     private utilityMeterDataService: UtilityMeterDataService,
     private electronService: ElectronService,
-    private cd: ChangeDetectorRef) { }
+    private cd: ChangeDetectorRef,
+    private accountWorkspaceStore: AccountWorkspaceStore) { }
 
   ngOnInit(): void {
     this.key = this.editMeterData.guid;
@@ -51,7 +55,10 @@ export class EditConnectBillComponent {
           this.meterDataToSave = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm, this.editMeterData.uploadedFilePath);
         }
         if (this.addOrEdit == 'edit') {
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
+          await this.commandBoundary.execute(
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
+        );
         }
       }
       this.cd.detectChanges();
@@ -67,7 +74,10 @@ export class EditConnectBillComponent {
           this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm, 'Deleted');
         }
         if (this.addOrEdit == 'edit') {
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
+          await this.commandBoundary.execute(
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
+        );
         }
       }
       this.cd.detectChanges();
@@ -102,7 +112,10 @@ export class EditConnectBillComponent {
             this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm, this.editMeterData.uploadedFilePath);
           }
           if (this.addOrEdit == 'edit') {
-            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
+            await this.commandBoundary.execute(
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
+        );
           }
         }
         this.cd.detectChanges();
@@ -125,7 +138,10 @@ export class EditConnectBillComponent {
           this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm, 'Deleted');
         }
         if (this.addOrEdit == 'edit') {
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
+          await this.commandBoundary.execute(
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
+        );
         }
         console.warn('File does not exist or has been deleted.');
       }
@@ -144,7 +160,10 @@ export class EditConnectBillComponent {
         this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm, 'Deleted');
       }
       if (this.addOrEdit == 'edit') {
-        firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(this.meterDataToSave));
+        await this.commandBoundary.execute(
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
+        );
       }
       this.cd.detectChanges();
     }

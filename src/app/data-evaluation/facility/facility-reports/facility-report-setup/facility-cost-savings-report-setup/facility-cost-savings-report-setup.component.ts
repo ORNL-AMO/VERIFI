@@ -1,12 +1,13 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
-import { distinctUntilChanged, firstValueFrom, startWith, Subscription } from 'rxjs';
+import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { MonthlyData } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -25,6 +26,8 @@ import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from 'src/app/sha
 export class FacilityCostSavingsReportSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -55,7 +58,6 @@ export class FacilityCostSavingsReportSetupComponent {
   missingCostData: { [meterId: string]: Date[] } = {};
 
   constructor(
-    private facilityReportsDbService: FacilityReportsDbService,
     private calanderizationService: CalanderizationService,
     private injector: Injector
   ) {
@@ -162,9 +164,13 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   async save() {
-    this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value: updatedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' },
+      () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
+    );
+    this.facilityReport = updatedReport;
+    this.accountWorkspaceService.selectFacilityReport(this.facilityReport?.guid);
   }
 
   setYearOptions() {

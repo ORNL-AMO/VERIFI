@@ -1,10 +1,11 @@
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { EMPTY, firstValueFrom, map, startWith, switchMap, tap } from 'rxjs';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { EMPTY, map, startWith, switchMap, tap } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -25,7 +26,8 @@ export class AccountSavingsReportSetupComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountReportDbService: AccountReportDbService = inject(AccountReportDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
   private accountReportsService: AccountReportsService = inject(AccountReportsService);
   private analysisService: AnalysisService = inject(AnalysisService);
 
@@ -99,8 +101,11 @@ export class AccountSavingsReportSetupComponent {
 
     let selectedReport: IdbAccountReport = this.selectedReport();
     selectedReport.accountSavingsReportSetup = this.accountReportsService.updateAccountSavingsReportFromForm(selectedReport.accountSavingsReportSetup, this.accountSavingsReportForm());
-    await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'update', entityGuid: selectedReport.guid, label: 'Save Report' },
+      () => this.reportHandler.updateAccountReport(selectedReport, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);
   }
 

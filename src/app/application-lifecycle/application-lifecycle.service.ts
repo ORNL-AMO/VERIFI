@@ -91,6 +91,59 @@ export class ApplicationLifecycleService {
     this.writableState.set({ status: 'ready' });
   }
 
+  async createAccount(account: IdbAccount): Promise<IdbAccount> {
+    const created = await firstValueFrom(this.accounts.addWithObservable({ ...account }));
+    await this.activatePersistedAccount(created.guid);
+    return created;
+  }
+
+  async replaceActiveAccount(importReplacement: () => Promise<IdbAccount>): Promise<IdbAccount> {
+    const previousAccount = this.workspaceStore.account();
+    if (!previousAccount?.guid) {
+      throw new Error('An active account is required before replacing it.');
+    }
+
+    const replacement = await importReplacement();
+    await this.activatePersistedAccount(replacement.guid);
+
+    try {
+      await firstValueFrom(this.accounts.updateWithObservable({ ...previousAccount, deleteAccount: true }));
+      await this.refreshAccountCatalog();
+    } catch (error) {
+      console.warn('Replacement account activated, but the previous account could not be marked for deletion.', error);
+    }
+
+    return replacement;
+  }
+
+  async handleMarkedAccountDeletion(accountGuid: string): Promise<readonly IdbAccount[]> {
+    const accounts = await this.refreshAccountCatalog();
+    const usableAccounts = this.usableAccounts();
+    if (this.workspaceStore.account()?.guid !== accountGuid) {
+      if (usableAccounts.length === 0) {
+        this.workspace.clear();
+        this.selectionStorage.clearAccount();
+        this.writableState.set({ status: 'empty', message: 'No accounts are available.' });
+      }
+      return accounts;
+    }
+
+    const replacement = resolveInitialAccount(usableAccounts, this.selectionStorage.read().accountId);
+    if (!replacement) {
+      this.workspace.clear();
+      this.selectionStorage.clearAccount();
+      this.writableState.set({ status: 'empty', message: 'No accounts are available.' });
+      return accounts;
+    }
+
+    const result = await this.workspace.selectAccount(replacement.guid);
+    if (result !== 'published') {
+      throw new Error('The replacement account workspace was superseded before it could be loaded.');
+    }
+    this.writableState.set({ status: 'ready' });
+    return accounts;
+  }
+
   async updateApplicationMetadata(
     update: (current: ApplicationInstanceData) => ApplicationInstanceData
   ): Promise<ApplicationInstanceData> {

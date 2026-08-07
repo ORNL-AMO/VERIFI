@@ -4,14 +4,15 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -24,6 +25,8 @@ export class FacilityOverviewBannerComponent implements OnInit {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
 
   @ViewChild('navTabs') navTabs: ElementRef;
   modalOpenSub: Subscription;
@@ -43,7 +46,6 @@ export class FacilityOverviewBannerComponent implements OnInit {
   constructor(
     private sharedDataService: SharedDataService,
     private router: Router,
-    private facilityReportDbService: FacilityReportsDbService,
     private cd: ChangeDetectorRef,
     private facilityOverviewService: FacilityOverviewService,
     private injector: Injector
@@ -102,9 +104,12 @@ export class FacilityOverviewBannerComponent implements OnInit {
   }
 
   async createReport() {
-    this.facilityReport = await firstValueFrom(this.facilityReportDbService.addWithObservable(this.facilityReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.accountWorkspaceService.selectFacilityReport((this.facilityReport)?.guid);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Creating facility report' },
+      () => this.reportHandler.addFacilityReport(this.facilityReport, this.accountWorkspaceStore.account()?.guid)
+    );
+    this.facilityReport = result.value;
+    this.accountWorkspaceService.selectFacilityReport(this.facilityReport?.guid);
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/reports/setup');
   }
 

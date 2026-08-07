@@ -2,12 +2,11 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { firstValueFrom } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -34,9 +33,9 @@ interface FacilityAnalysisListItem {
 export class SelectItemTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private accountAnalysisDbService: AccountAnalysisDbService = inject(AccountAnalysisDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private router: Router = inject(Router);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
   private loadingService: LoadingService = inject(LoadingService);
   private analysisService: AnalysisService = inject(AnalysisService);
   private sharedDataService: SharedDataService = inject(SharedDataService);
@@ -119,9 +118,18 @@ export class SelectItemTableComponent {
   async save(analysisItemId: string) {
     const selectedAnalysisItem = this.selectedAnalysisItem();
     const facility = this.selectedFacility();
-    selectedAnalysisItem.isAnalysisVisited = false;
-    await this.accountAnalysisDbService.updateFacilityItemSelection(selectedAnalysisItem, analysisItemId, facility.guid);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const updatedItem: IdbAccountAnalysisItem = {
+      ...selectedAnalysisItem,
+      isAnalysisVisited: false,
+      facilityAnalysisItems: selectedAnalysisItem.facilityAnalysisItems.map(item =>
+        item.facilityId === facility.guid ? { ...item, analysisItemId } : { ...item }
+      )
+    };
+    await this.commandBoundary.execute(
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Update Analysis Selection' },
+      () => this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid)
+    );
   }
 
 
@@ -162,18 +170,30 @@ export class SelectItemTableComponent {
     this.loadingService.setLoadingMessage('Creating Facility Analysis...')
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
-    this.accountWorkspaceService.selectFacility(facility.guid);
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = [...this.accountWorkspaceStore.meterGroups()];
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, facility, accountMeterGroups, accountPredictors, selectedAnalysisItem.analysisCategory);
     newIdbItem.energyIsSource = selectedAnalysisItem.energyIsSource;
-    newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    await this.save(newIdbItem.guid);
-    this.accountWorkspaceService.selectFacilityAnalysis((newIdbItem)?.guid);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value } = await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'bulk', label: 'Create Facility Analysis' },
+      async () => {
+        const added = await this.analysisHandler.addFacilityAnalysis(newIdbItem, activeAccountGuid);
+        const updatedAccountAnalysisItem: IdbAccountAnalysisItem = {
+          ...selectedAnalysisItem,
+          isAnalysisVisited: false,
+          facilityAnalysisItems: selectedAnalysisItem.facilityAnalysisItems.map(item =>
+            item.facilityId === facility.guid ? { ...item, analysisItemId: added.guid } : { ...item }
+          )
+        };
+        await this.analysisHandler.updateAccountAnalysis(updatedAccountAnalysisItem, activeAccountGuid);
+        return { addedItem: added, updatedAccountAnalysisItem };
+      }
+    );
+    this.accountWorkspaceService.selectFacilityAnalysis(value.addedItem?.guid);
     this.loadingService.setLoadingStatus(false);
-    this.analysisService.accountAnalysisItem.next(selectedAnalysisItem);
+    this.analysisService.accountAnalysisItem.next(value.updatedAccountAnalysisItem);
     this.router.navigateByUrl("/data-evaluation/facility/" + facility.guid + "/analysis/run-analysis/analysis-setup");
   }
 }

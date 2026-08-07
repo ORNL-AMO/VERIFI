@@ -4,8 +4,9 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { Subscription } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -23,6 +24,8 @@ export class AccountReportsDataCheckComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   selectedReport: IdbAccountReport;
   account: IdbAccount;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -31,7 +34,6 @@ export class AccountReportsDataCheckComponent {
   facilityAnalysisItemsSub: Subscription;
 
   constructor(
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private regressionModelsService: RegressionModelsService,
     private injector: Injector
@@ -58,9 +60,12 @@ export class AccountReportsDataCheckComponent {
   async setAnalysisVisited() {
     if (this.selectedAnalysisItem) {
       this.selectedAnalysisItem.isAnalysisVisited = true;
-      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
-      this.accountWorkspaceService.selectAccountAnalysis((this.selectedAnalysisItem)?.guid);
+      const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Account Analysis' },
+        () => this.analysisHandler.updateAccountAnalysis(this.selectedAnalysisItem, activeAccountGuid)
+      );
+      this.accountWorkspaceService.selectAccountAnalysis(this.selectedAnalysisItem?.guid);
     }
   }
 

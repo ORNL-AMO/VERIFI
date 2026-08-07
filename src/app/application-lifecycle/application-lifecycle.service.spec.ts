@@ -68,6 +68,30 @@ describe('ApplicationLifecycleService', () => {
     expect(dependencies.workspace.selectAccount).toHaveBeenLastCalledWith('imported-account');
   });
 
+  it('creates an account through the lifecycle boundary and activates it', async () => {
+    const dependencies = createDependencies([]);
+    dependencies.accounts.getAll.mockReturnValueOnce(of([]));
+    dependencies.accounts.addWithObservable.mockReturnValue(
+      of({ id: 2, guid: 'new-account', name: 'New Account' })
+    );
+    const lifecycle = createLifecycle(dependencies);
+
+    await expect(lifecycle.initialize()).resolves.toMatchObject({ status: 'empty' });
+
+    dependencies.accounts.getAll.mockReturnValue(
+      of([{ id: 2, guid: 'new-account', name: 'New Account' }])
+    );
+    await expect(lifecycle.createAccount({ guid: 'new-account', name: 'New Account' } as any))
+      .resolves.toMatchObject({ id: 2, guid: 'new-account' });
+
+    expect(dependencies.accounts.addWithObservable).toHaveBeenCalledWith({
+      guid: 'new-account',
+      name: 'New Account'
+    });
+    expect(dependencies.workspace.selectAccount).toHaveBeenLastCalledWith('new-account');
+    expect(lifecycle.state()).toEqual({ status: 'ready' });
+  });
+
   it('reports a blocking step error and retries successfully', async () => {
     const dependencies = createDependencies([]);
     dependencies.migrations.runMigrations.mockRejectedValueOnce(new Error('migration failed'));
@@ -144,6 +168,7 @@ function createDependencies(order: string[]) {
         order.push('account-catalog');
         return of([{ id: 1, guid: 'account-a', name: 'Account A' }]);
       }),
+      addWithObservable: vi.fn(value => of(value)),
       updateWithObservable: vi.fn(value => of(value))
     },
     facilities: { updateWithObservable: vi.fn(value => of(value)) },

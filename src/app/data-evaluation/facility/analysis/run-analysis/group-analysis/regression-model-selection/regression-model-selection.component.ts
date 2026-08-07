@@ -2,8 +2,8 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisService } from '../../../analysis.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -32,7 +32,8 @@ export class RegressionModelSelectionComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private analysisService: AnalysisService = inject(AnalysisService);
-  private analysisDbService: AnalysisDbService = inject(AnalysisDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private calanderizationService: CalanderizationService = inject(CalanderizationService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private regressionModelState = inject(RegressionModelStateService);
@@ -205,8 +206,11 @@ export class RegressionModelSelectionComponent {
     const updatedGroups = [..._analysisItemCurrent.groups];
     updatedGroups[groupIndex] = _group;
     const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
-    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' },
+      () => this.analysisHandler.updateFacilityAnalysis(analysisItem, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);
     this.analysisService.selectedGroup.next(_group);
   }

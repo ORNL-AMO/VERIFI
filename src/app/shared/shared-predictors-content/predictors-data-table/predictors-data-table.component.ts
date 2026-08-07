@@ -1,11 +1,7 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -22,6 +18,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 
 type OrderDataField = 'date' | 'amount';
 
@@ -32,11 +30,10 @@ type OrderDataField = 'date' | 'amount';
   standalone: false
 })
 export class PredictorsDataTableComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private predictorDbService: PredictorDbService = inject(PredictorDbService);
-  private predictorDataDbService: PredictorDataDbService = inject(PredictorDataDbService);
+  private commandBoundary: WorkspaceCommandBoundary = inject(WorkspaceCommandBoundary);
+  private predictorHandler: PredictorCommandHandler = inject(PredictorCommandHandler);
   private sharedDataService: SharedDataService = inject(SharedDataService);
   private router: Router = inject(Router);
   private copyTableService: CopyTableService = inject(CopyTableService);
@@ -155,10 +152,12 @@ export class PredictorsDataTableComponent {
     const predictorData: Array<IdbPredictorData> = this.predictorData();
     if (this.inDataManagement) {
       let newEntry: IdbPredictorData = getNewIdbPredictorData(predictor, predictorData);
-      newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
-      await this.accountWorkspaceService.reloadActiveWorkspace(true);
+      const result = await this.commandBoundary.execute(
+        { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' },
+        () => this.predictorHandler.addPredictorData(newEntry, this.accountWorkspaceStore.account()?.guid)
+      );
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
-      this.setEditPredictorData(newEntry);
+      this.setEditPredictorData(result.value);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + predictor.guid + '/add-entry');
     }
@@ -171,7 +170,11 @@ export class PredictorsDataTableComponent {
   async confirmDeletePredictorData() {
     this.loadingService.setLoadingMessage('Deleting Predictor Entry...');
     this.loadingService.setLoadingStatus(true);
-    await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(this.predictorDataToDelete.id));
+    const idToDelete = this.predictorDataToDelete.id;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: 'delete', label: 'Delete Predictor Entry' },
+      () => this.predictorHandler.deletePredictorData(idToDelete)
+    );
     this.cancelDeletePredictorData();
     await this.finishDelete();
   }
@@ -220,16 +223,20 @@ export class PredictorsDataTableComponent {
     this.loadingService.setLoadingStatus(true);
     const checkedIds = this.checkedItemGuids();
     const checkedItems = this.predictorData().filter(entry => checkedIds.has(entry.guid));
-    for (let index = 0; index < checkedItems.length; index++) {
-      await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(checkedItems[index].id));
-    }
+    await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: 'bulk', label: 'Delete Predictor Entries' },
+      async () => {
+        for (const item of checkedItems) {
+          await this.predictorHandler.deletePredictorData(item.id);
+        }
+      }
+    );
     this.allChecked = false;
     this.checkedItemGuids.set(new Set());
     await this.finishDelete();
   }
 
   async finishDelete() {
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
   }
@@ -320,8 +327,11 @@ export class PredictorsDataTableComponent {
   async setIgnoreWeatherDataWarning() {
     const predictor = this.predictor();
     predictor.ignoreWeatherDataWarning = !predictor.ignoreWeatherDataWarning;
-    await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Weather Warning' },
+      () => this.predictorHandler.updatePredictor(predictor, accountGuid)
+    );
   }
 
   openIgnoreWarningModal() {
