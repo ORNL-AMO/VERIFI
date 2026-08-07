@@ -3,7 +3,6 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
@@ -11,8 +10,7 @@ import { Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { BackupPreparationService } from 'src/app/shared/helper-services/backup-preparation.service';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
 
 @Component({
   selector: 'app-home-page',
@@ -29,14 +27,12 @@ export class HomePageComponent {
   currentPageNumber: number = 1;
   loadingSub: Subscription;
   constructor(private loadingService: LoadingService,
-    private backupDataService: BackupDataService,
-    private backupPreparationService: BackupPreparationService,
+    private backupImportCoordinator: BackupImportCoordinator,
     private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
-    private commandBoundary: WorkspaceCommandBoundary,
     private titleService: Title,
     private metaService: Meta,
-    private accountHandler: AccountCommandHandler) { }
+  ) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('VERIFI | Industrial Utility & Energy Analytics');
@@ -74,15 +70,8 @@ export class HomePageComponent {
       reader.readAsText(request.response);
       reader.onloadend = async () => {
         try {
-          let test = JSON.parse(JSON.stringify(reader.result));
-          let tmpBackupFile = this.backupPreparationService.prepare(JSON.parse(test));
-          this.backupDataService.accountBackupMessages();
-          let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
-          await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
-          await this.commandBoundary.execute(
-            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
-            () => this.accountHandler.update(newAccount, newAccount.guid)
-          );
+          const tmpBackupFile = this.backupImportCoordinator.prepareTextBackup(String(reader.result));
+          await this.backupImportCoordinator.importNewAccount(tmpBackupFile);
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);

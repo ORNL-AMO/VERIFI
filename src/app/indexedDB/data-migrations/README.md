@@ -81,7 +81,7 @@ Replace `N` with numeric literals in the real migration and use the repository's
 
 [`data-migration-runner.service.ts`](data-migration-runner.service.ts) runs before persisted application state is published. Each version step reads the canonical dataset, applies the pure transform, reconciles changed collections, and updates application metadata in one native transaction. A failed request rolls back both the records and the version, and a later call may retry.
 
-[`../../shared/helper-services/backup-preparation.service.ts`](../../shared/helper-services/backup-preparation.service.ts) clones an external backup, validates its envelope and version, defaults supported missing collections, runs the same registry, and validates core GUID relationships before import code can remap GUIDs, delete replacement data, or write records.
+[`../../backup/backup-preparation.service.ts`](../../backup/backup-preparation.service.ts) clones an external backup, validates its envelope and version, defaults supported missing collections, runs the same registry, and validates core GUID relationships before import code can remap GUIDs, delete replacement data, or write records.
 
 Keep `BackupFile.dataVersion` optional because supported legacy backups are unversioned and are treated as version zero. New account and facility exports must always write `CURRENT_DATA_VERSION`. Never mutate the parsed backup object during preparation or GUID remapping.
 

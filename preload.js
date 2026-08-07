@@ -22,6 +22,13 @@ contextBridge.exposeInMainWorld(
                 // Deliberately strip event as it includes `sender` 
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }
-         }
+         },
+        invoke: (channel, data) => {
+            let validChannels = ["backup:chooseSavePath", "backup:exists", "backup:read", "backup:write"];
+            if (validChannels.includes(channel)) {
+                return ipcRenderer.invoke(channel, data);
+            }
+            return Promise.reject(new Error(`Channel ${channel} is not allowed.`));
+        }
     }
 );

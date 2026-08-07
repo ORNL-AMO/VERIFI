@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { BackupFile } from '../shared/helper-services/backup-data.service';
+import { BackupFile } from '../backup/backup-data.service';
 import { exists } from 'fs-jetpack';
 
 @Injectable({
@@ -206,6 +206,46 @@ export class ElectronService {
       fileName: dataBackupFilePath
     }
     window["electronAPI"].send("getDataFile", args);
+  }
+
+  async chooseBackupSavePath(defaultPath: string): Promise<string | undefined> {
+    if (!window["electronAPI"]?.invoke) {
+      return undefined;
+    }
+    return window["electronAPI"].invoke('backup:chooseSavePath', { defaultPath });
+  }
+
+  async backupFileExists(path: string): Promise<boolean> {
+    if (!window["electronAPI"]?.invoke || !path) {
+      return false;
+    }
+    const result = await window["electronAPI"].invoke('backup:exists', { path });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? 'VERIFI could not check the backup file.');
+    }
+    return Boolean(result.exists);
+  }
+
+  async readBackupFile(path: string): Promise<unknown> {
+    if (!window["electronAPI"]?.invoke || !path) {
+      return undefined;
+    }
+    const result = await window["electronAPI"].invoke('backup:read', { path });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? 'VERIFI could not read the backup file.');
+    }
+    this.accountLatestBackupFile.next(result.data);
+    return result.data;
+  }
+
+  async writeBackupFile(path: string, backup: BackupFile): Promise<void> {
+    if (!window["electronAPI"]?.invoke || !path) {
+      return;
+    }
+    const result = await window["electronAPI"].invoke('backup:write', { path, backup });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? 'VERIFI could not write the backup file.');
+    }
   }
 
   selectFile(key: string, folderPath: string, meterNumber: string, date: string) {

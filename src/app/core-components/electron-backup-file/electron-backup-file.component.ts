@@ -5,16 +5,18 @@ import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupFile } from 'src/app/backup/backup-data.service';
+import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { LoadingService } from '../loading/loading.service';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
-import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
-import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { BackupPreparationService, PreparedBackupFile } from 'src/app/backup/backup-preparation.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -25,7 +27,6 @@ import { AccountCommandHandler } from 'src/app/account-workspace/handlers/accoun
 export class ElectronBackupFileComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
-  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
 
   latestBackupFileSub: Subscription;
@@ -42,13 +43,15 @@ export class ElectronBackupFileComponent {
   constructor(private electronService: ElectronService,
     private automaticBackupsService: AutomaticBackupsService,
     private toastNotificationService: ToastNotificationsService,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
+    private backupImportCoordinator: BackupImportCoordinator,
     private loadingService: LoadingService,
     private cd: ChangeDetectorRef,
     private deleteDataService: DeleteDataService,
     private backupPreparationService: BackupPreparationService,
     private commandBoundary: WorkspaceCommandBoundary,
     private accountHandler: AccountCommandHandler,
+    private backupGateway: ElectronBackupFileGateway,
     private injector: Injector) {
 
   }
@@ -135,13 +138,13 @@ export class ElectronBackupFileComponent {
 
   async confirmActions() {
     if (this.archiveOption == 'justOnce' || ((this.account.archiveOption != this.archiveOption) && this.archiveOption == 'always')) {
-      this.createArchive();
+      await this.createArchive();
     }
 
     let needUpdate: boolean = this.account.archiveOption != this.archiveOption;
     if (this.differingBackups) {
       if (this.overwriteOption == 'overwriteFile') {
-        this.automaticBackupsService.overwriteFile();
+        await this.overwriteFile();
       } else if (this.overwriteOption == 'updateAccount') {
         this.showModal = false;
         this.loadingService.setContext('electron-overwrite-account');
@@ -151,23 +154,26 @@ export class ElectronBackupFileComponent {
           let backupPath: string = this.account.dataBackupFilePath;
           let sharedFileAuthor: string = this.account.sharedFileAuthor;
           let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-          this.backupDataService.accountBackupMessages();
-          let newAccount: IdbAccount = await this.applicationLifecycleService.replaceActiveAccount(
-            () => this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1)
+          const newAccount = await this.backupImportCoordinator.replaceActiveAccount(this.latestBackupFile);
+          await this.commandBoundary.execute(
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
+            () => this.accountHandler.update({
+              ...newAccount,
+              dataBackupFilePath: backupPath,
+              sharedFileAuthor: sharedFileAuthor,
+              isSharedBackupFile: isSharedBackupFile
+            }, newAccount.guid)
           );
-          newAccount = {
+          const replacement = {
             ...newAccount,
             dataBackupFilePath: backupPath,
             sharedFileAuthor: sharedFileAuthor,
             isSharedBackupFile: isSharedBackupFile
           };
-
-          await this.commandBoundary.execute(
-            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
-            () => this.accountHandler.update(newAccount, newAccount.guid)
-          );
+          if (replacement.dataBackupId) {
+            await this.automaticBackupsService.addOrUpdateFile(replacement.dataBackupId, replacement.guid);
+          }
           needUpdate = false;
-
           this.loadingService.isLoadingComplete.next(true);
         } finally {
           await this.deleteDataService.resumeQueuedDeletion();
@@ -192,10 +198,12 @@ export class ElectronBackupFileComponent {
   }
 
 
-  createArchive() {
+  async createArchive() {
+    if (!this.account?.dataBackupFilePath) {
+      throw new Error('An attached backup file is required before creating an archive.');
+    }
     let dataBackupFilePath: string = this.account.dataBackupFilePath;
-    let archiveBackup: BackupFile = this.backupDataService.getAccountBackupFile();
-    archiveBackup.account = JSON.parse(JSON.stringify(archiveBackup.account));
+    let archiveBackup: BackupFile = this.backupExportCoordinator.buildActiveAccountBackup();
     let sub: string = dataBackupFilePath.substring(0, dataBackupFilePath.length - 5);
     let date: Date = new Date(archiveBackup.timeStamp);
 
@@ -207,8 +215,22 @@ export class ElectronBackupFileComponent {
     displayHours = displayHours ? displayHours : 12; // 0 should be 12
     let timeStr = `${displayHours}_${minutes.toString().padStart(2, '0')}_${ampm}`;
     let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear() + '_' + timeStr;
-    archiveBackup.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
-    this.electronService.sendSaveData(archiveBackup, true);
-    this.toastNotificationService.showToast('Archive Created', archiveBackup.account.dataBackupFilePath + ' created!', undefined, false, 'alert-success');
+    const archivePath = sub + '_' + dateStr + '.json';
+    await this.backupGateway.write(archivePath, archiveBackup);
+    this.toastNotificationService.showToast('Archive Created', archivePath + ' created!', undefined, false, 'alert-success');
+  }
+
+  private async overwriteFile(): Promise<void> {
+    if (!this.account?.dataBackupFilePath) {
+      throw new Error('An attached backup file is required before overwriting it.');
+    }
+    const exists = await this.backupGateway.exists(this.account.dataBackupFilePath);
+    if (!exists) {
+      this.automaticBackupsService.alertFileDoesNotExist();
+      return;
+    }
+    const backupFile = this.backupExportCoordinator.buildActiveAccountBackup();
+    await this.backupGateway.write(this.account.dataBackupFilePath, backupFile);
+    await this.automaticBackupsService.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
   }
 }

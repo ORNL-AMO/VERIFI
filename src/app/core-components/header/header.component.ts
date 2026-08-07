@@ -11,7 +11,6 @@ import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.s
 import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { environment } from 'src/environments/environment';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { LoadingService } from '../loading/loading.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
@@ -21,6 +20,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-header',
@@ -60,7 +60,7 @@ export class HeaderComponent implements OnInit {
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     private importBackupModalService: ImportBackupModalService,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
     private loadingService: LoadingService,
     private accountWorkspaceService: AccountWorkspaceService,
     private electronService: ElectronService,
@@ -150,7 +150,7 @@ export class HeaderComponent implements OnInit {
   }
 
   async backupAccount() {
-    this.backupDataService.backupAccount();
+    await this.backupExportCoordinator.exportActiveAccount();
     const selectedAccount = this.accountWorkspaceStore.account();
     if (!selectedAccount) { return; }
     await this.commandBoundary.execute(
@@ -190,9 +190,9 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/manage-accounts']);
   }
 
-  checkLatestFile() {
+  async checkLatestFile() {
     this.automaticBackupService.forceModal = true;
-    this.electronService.getDataFile(this.activeAccount.dataBackupFilePath);
+    await this.electronService.readBackupFile(this.activeAccount.dataBackupFilePath);
   }
 
   goHome() {

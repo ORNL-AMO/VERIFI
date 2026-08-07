@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService } from 'src/app/backup/backup-data.service';
 import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
 import { Router } from '@angular/router';
@@ -16,12 +16,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
-import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
-import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
+import { FutureBackupVersionError, PreparedBackupFile } from 'src/app/backup/backup-preparation.service';
+import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -33,7 +29,6 @@ export class ImportBackupModalComponent implements OnInit {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
-  private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
 
   inFacility: boolean;
   backupFile: PreparedBackupFile;
@@ -62,10 +57,7 @@ export class ImportBackupModalComponent implements OnInit {
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private deleteDataService: DeleteDataService,
-    private backupPreparationService: BackupPreparationService,
-    private commandBoundary: WorkspaceCommandBoundary,
-    private accountHandler: AccountCommandHandler,
-    private facilityHandler: FacilityCommandHandler
+    private backupImportCoordinator: BackupImportCoordinator
   ) { }
 
   ngOnInit(): void {
@@ -132,7 +124,7 @@ export class ImportBackupModalComponent implements OnInit {
         fr.readAsText(files[0]);
         fr.onloadend = () => {
           try {
-            let testBackup = this.backupPreparationService.prepare(JSON.parse(String(fr.result)));
+            let testBackup = this.backupImportCoordinator.prepareTextBackup(String(fr.result));
             this.backupFile = testBackup;
             this.backupFacilities = testBackup.facilities;
             this.facilityImportSelections = {};
@@ -246,52 +238,19 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewAccount(backupFile: PreparedBackupFile) {
-    this.deleteDataService.suspendQueuedDeletion();
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile, 0);
-    await this.accountHandler.update(newAccount, newAccount.guid);
-    await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
-    await this.deleteDataService.resumeQueuedDeletion();
+    await this.backupImportCoordinator.importNewAccount(backupFile);
   }
 
   async importExistingAccount(backupFile: PreparedBackupFile) {
-    this.deleteDataService.suspendQueuedDeletion();
-    try {
-      await this.applicationLifecycleService.replaceActiveAccount(
-        () => this.backupDataService.importAccountBackupFile(backupFile, 0)
-      );
-    } finally {
-      await this.deleteDataService.resumeQueuedDeletion();
-    }
+    await this.backupImportCoordinator.replaceActiveAccount(backupFile);
   }
 
   async importNewFacility(backupFile: PreparedBackupFile, currIdx?: number) {
-    let idx = currIdx !== undefined ? currIdx : 0;
-    const result = await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'add', label: 'Importing facility' },
-      async () => {
-        const { facility: newFacility } = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid, idx);
-        return newFacility;
-      }
-    );
-    this.accountWorkspaceService.selectFacility(result.value.guid);
+    await this.backupImportCoordinator.importNewFacility(backupFile, this.selectedAccount.guid, currIdx);
   }
 
   async importExistingFacility(backupFile: PreparedBackupFile) {
-    const overwriteFacility = this.overwriteFacility;
-    const selectedAccount = this.selectedAccount;
-    await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'bulk', label: 'Replacing facility' },
-      async () => {
-        FACILITY_DELETION_MESSAGES.forEach(msg => this.loadingService.addLoadingMessage(msg));
-        this.loadingService.setContext('import-facility-backup');
-        this.loadingService.setTitle('Replacing facility');
-        let currIdx = 0;
-        await this.facilityHandler.delete(overwriteFacility, selectedAccount.guid, phase => {
-          currIdx = phase.index;
-        });
-        await this.backupDataService.importFacilityBackupFile(backupFile, selectedAccount.guid, currIdx);
-      }
-    );
+    await this.backupImportCoordinator.replaceFacility(backupFile, this.selectedAccount, this.overwriteFacility);
   }
 
   clearSelectedFacilities() {
@@ -358,134 +317,20 @@ export class ImportBackupModalComponent implements OnInit {
     const preparedFacilities = this.selectedFacilitiesToImport.map(facility => {
       return {
         selectedFacility: facility,
-        backup: this.backupPreparationService.extractFacility(backupFile, facility.guid)
+        backup: this.backupImportCoordinator.extractFacility(backupFile, facility.guid)
       };
     });
-
-    await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'bulk', label: 'Importing facilities' },
-      async () => {
-        // delete facilities to be replaced
-        for (let { selectedFacility: facility } of preparedFacilities) {
-          let importSelection = this.facilityImportSelections[facility.name];
-          if (importSelection.importAs === 'replace' && importSelection.replacedFacility) {
-            const facilityToReplace = this.accountFacilities.find(f => f.name === importSelection.replacedFacility);
-            if (facilityToReplace) {
-              await this.facilityHandler.delete(facilityToReplace, this.selectedAccount.guid);
-            }
-          }
-        }
-
-        // import selected facilities
-        let idx = 1;
-        for (let { backup: facilityBackupFile } of preparedFacilities) {
-          this.loadingService.setCurrentLoadingIndex(idx);
-          const { facility: newFacility, index } = await this.backupDataService.importFacilityBackupFile(facilityBackupFile, this.selectedAccount.guid, idx);
-          idx = index + 1;
-        }
-      }
+    await this.backupImportCoordinator.importSelectedFacilities(
+      this.selectedAccount,
+      preparedFacilities,
+      this.facilityImportSelections,
+      this.accountFacilities
     );
   }
 
   checkDifferences() {
-    this.differencesList = [];
-    let backupData = this.backupFile;
-    let facilityMapping = new Map<string, { backupFacility: IdbFacility, accountFacility: IdbFacility }>();
-    for (let facility of backupData.facilities) {
-      let accountFacility = this.accountFacilities.find(f => f.name === facility.name);
-      facilityMapping.set(facility.name, { backupFacility: facility, accountFacility });
-    }
-    let backupGroups: Array<IdbUtilityMeterGroup> = backupData.groups || [];
-
-    facilityMapping.forEach(f => {
-      let differences: Array<string> = [];
-      if (!f.accountFacility) {
-        differences.push('New Facility');
-      }
-      else {
-        // check for differences in groups
-        let facilityBackupGroups: Array<IdbUtilityMeterGroup> = backupGroups.filter(g => g.facilityId === f.backupFacility.guid);
-        let facilityAccountGroups = this.accountGroups.filter(g => g.facilityId === f.accountFacility.guid);
-        const groupDifferenceFound =
-          facilityBackupGroups.some(bg => !facilityAccountGroups.some(ag => ag.name === bg.name && ag.groupType === bg.groupType)) ||
-          facilityAccountGroups.some(ag => !facilityBackupGroups.some(bg => bg.name === ag.name && bg.groupType === ag.groupType));
-
-        if (groupDifferenceFound) {
-          differences.push('Meter Groups');
-        }
-
-        // check for differences in meters
-        let facilityBackupMeters: Array<IdbUtilityMeter> = backupData.meters?.filter(m => m.facilityId === f.backupFacility.guid);
-        let facilityAccountMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(f.accountFacility.guid);
-        const meterDifferenceFound =
-          facilityBackupMeters.some(bm => !facilityAccountMeters.some(am => am.name === bm.name && am.meterNumber === bm.meterNumber)) ||
-          facilityAccountMeters.some(am => !facilityBackupMeters.some(bm => bm.name === am.name && bm.meterNumber === am.meterNumber));
-
-        if (meterDifferenceFound) {
-          differences.push('Meters');
-        }
-
-        // check for differences in meter data
-        let facilityBackupMeterData: Array<IdbUtilityMeterData> = backupData.meterData?.filter(md => md.facilityId === f.backupFacility.guid);
-        let facilityAccountMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getFacilityMeterData(f.accountFacility.guid);
-
-        const meterDataDifferenceFound =
-          facilityBackupMeterData.some(bmd => !facilityAccountMeterData.some(amd => {
-            const bmdYMD = this.getYMD(bmd);
-            return amd.totalEnergyUse === bmd.totalEnergyUse &&
-              amd.meterNumber === bmd.meterNumber &&
-              bmdYMD.year === amd.year &&
-              bmdYMD.month === amd.month &&
-              bmdYMD.day === amd.day;
-          })) ||
-          facilityAccountMeterData.some(amd => !facilityBackupMeterData.some(bmd => {
-            const bmdYMD = this.getYMD(bmd);
-            return amd.totalEnergyUse === bmd.totalEnergyUse &&
-              bmd.meterNumber === amd.meterNumber &&
-              bmdYMD.year === amd.year &&
-              bmdYMD.month === amd.month &&
-              bmdYMD.day === amd.day;
-          }));
-
-        if (meterDataDifferenceFound) {
-          differences.push('Meter Data');
-        }
-
-
-        // check for differences in predictors
-        let facilityBackupPredictors: Array<IdbPredictor> = backupData.predictors?.filter(p => p.facilityId === f.backupFacility.guid);
-        let facilityAccountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(f.accountFacility.guid);
-        const predictorDifferenceFound =
-          facilityBackupPredictors.some(bp => !facilityAccountPredictors.some(ap => ap.name === bp.name)) ||
-          facilityAccountPredictors.some(ap => !facilityBackupPredictors.some(bp => bp.name === ap.name));
-        if (predictorDifferenceFound) {
-          differences.push('Predictors');
-        }
-
-        // check for differences in predictor data
-        let facilityBackupPredictorData: Array<IdbPredictorData> = backupData.predictorDataV2?.filter(pd => pd.facilityId === f.backupFacility.guid);
-        let facilityAccountPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(f.accountFacility.guid);
-
-        const predictorDataDifferenceFound =
-          facilityBackupPredictorData.some(bpd => !facilityAccountPredictorData.some(apd => {
-            const bpdYM = this.getPredictorYM(bpd);
-            return apd.amount === bpd.amount &&
-              apd.year === bpdYM.year &&
-              apd.month === bpdYM.month;
-          })) ||
-          facilityAccountPredictorData.some(apd => !facilityBackupPredictorData.some(bpd => {
-            const bpdYM = this.getPredictorYM(bpd);
-            return apd.amount === bpd.amount &&
-              apd.year === bpdYM.year &&
-              apd.month === bpdYM.month;
-          }));
-
-        if (predictorDataDifferenceFound) {
-          differences.push('Predictor Data');
-        }
-      }
-      this.differencesList.push({ facilityName: f.backupFacility.name, differences });
-    });
+    this.differencesList = this.backupImportCoordinator.comparePreparedAccountBackup(this.backupFile)
+      .map(entry => ({ facilityName: entry.facilityName, differences: [...entry.differences] }));
   }
 
   getYMD(md: any) {

@@ -10,7 +10,7 @@ import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facil
 import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-facility-setup',
@@ -27,7 +27,7 @@ export class FacilitySetupComponent {
   selectedFacility: IdbFacility;
   constructor(
     private router: Router,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
     private importBackupModalService: ImportBackupModalService,
     private loadingService: LoadingService,
     private commandBoundary: WorkspaceCommandBoundary,
@@ -77,8 +77,8 @@ export class FacilitySetupComponent {
     this.showDeleteFacility = undefined;
   }
 
-  backupFacility() {
-    this.backupDataService.backupFacility(this.selectedFacility);
+  async backupFacility() {
+    await this.backupExportCoordinator.exportFacility(this.selectedFacility.guid);
   }
 
   openImportBackup() {

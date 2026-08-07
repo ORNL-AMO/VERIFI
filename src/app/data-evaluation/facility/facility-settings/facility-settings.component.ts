@@ -3,7 +3,6 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -12,6 +11,7 @@ import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facil
 import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
 @Component({
     selector: 'app-facility-settings',
@@ -28,7 +28,7 @@ export class FacilitySettingsComponent implements OnInit {
   loadingSub: Subscription;
   constructor(
     private router: Router,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
     private importBackupModalService: ImportBackupModalService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
@@ -90,8 +90,8 @@ export class FacilitySettingsComponent implements OnInit {
     this.showDeleteFacility = undefined;
   }
 
-  backupFacility() {
-    this.backupDataService.backupFacility(this.selectedFacility);
+  async backupFacility() {
+    await this.backupExportCoordinator.exportFacility(this.selectedFacility.guid);
   }
 
   openImportBackup() {
@@ -100,5 +100,3 @@ export class FacilitySettingsComponent implements OnInit {
   }
 
 }
-
-

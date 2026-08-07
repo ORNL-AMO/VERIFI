@@ -6,11 +6,13 @@ import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupFile } from 'src/app/backup/backup-data.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-account-setup',
@@ -24,9 +26,6 @@ export class AccountSetupComponent {
 
 
   showDeleteAccount: boolean = false;
-  savedFilePath: string;
-  savedFilePathSub: Subscription;
-  updatingFilePath: boolean = false;
   isElectron: boolean;
   backupFile: BackupFile;
   selectedAccount: IdbAccount;
@@ -34,7 +33,8 @@ export class AccountSetupComponent {
   downloadAsZip: boolean = false;
   constructor(private router: Router,
     private electronService: ElectronService,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
+    private backupGateway: ElectronBackupFileGateway,
     private commandBoundary: WorkspaceCommandBoundary,
     private accountHandler: AccountCommandHandler,
     private automaticBackupsService: AutomaticBackupsService,
@@ -48,21 +48,10 @@ export class AccountSetupComponent {
     this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
       this.selectedAccount = val;
     });
-
-    if (this.isElectron) {
-      this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
-        if (this.updatingFilePath) {
-          this.updateFilePath(savedFilePath)
-        }
-      });
-    }
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
-    if (this.savedFilePathSub) {
-      this.savedFilePathSub.unsubscribe();
-    }
   }
 
   next() {
@@ -90,21 +79,17 @@ export class AccountSetupComponent {
   }
 
   async automaticBackup() {
-    this.updatingFilePath = true;
-    this.backupFile = this.backupDataService.getAccountBackupFile();
-    this.electronService.openDialog(this.backupFile);
-  }
-
-  async updateFilePath(savedFilePath: string) {
-    console.log('update file path')
-    this.automaticBackupsService.initializingAccount = false;
-    this.automaticBackupsService.creatingFile = true;
+    this.backupFile = this.backupExportCoordinator.buildActiveAccountBackup();
+    const defaultPath = this.selectedAccount?.dataBackupFilePath ?? `${this.selectedAccount?.name}.json`;
+    const savedFilePath = await this.backupGateway.chooseSavePath(defaultPath);
+    if (!savedFilePath) { return; }
+    await this.backupGateway.write(savedFilePath, this.backupFile);
+    await this.automaticBackupsService.addOrUpdateFile(this.backupFile.dataBackupId, this.selectedAccount.guid);
     const updatedAccount: IdbAccount = {
       ...this.selectedAccount,
       dataBackupFilePath: savedFilePath,
       dataBackupId: this.backupFile.dataBackupId
     };
-    this.updatingFilePath = false;
     await this.commandBoundary.execute(
       { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account' },
       () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
@@ -129,7 +114,7 @@ export class AccountSetupComponent {
     this.importBackupModalService.showModal.next(true);
   }
 
-  backupAccount() {
-    this.backupDataService.backupAccount(this.downloadAsZip);
+  async backupAccount() {
+    await this.backupExportCoordinator.exportActiveAccount({ downloadAsZip: this.downloadAsZip });
   }
 }

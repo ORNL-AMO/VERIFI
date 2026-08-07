@@ -4,7 +4,7 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, skip, take } from 'rxjs';
-import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService, BackupFile } from 'src/app/backup/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -14,9 +14,11 @@ import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facil
 import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
+import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -50,9 +52,6 @@ export class AccountSettingsComponent implements OnInit {
       financialReporting: true
     };
 
-  savedFilePath: string;
-  savedFilePathSub: Subscription;
-  updatingFilePath: boolean = false;
   isElectron: boolean;
   backupFile: BackupFile;
   folderPath: string;
@@ -62,12 +61,14 @@ export class AccountSettingsComponent implements OnInit {
     private router: Router,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
     private commandBoundary: WorkspaceCommandBoundary,
     private accountHandler: AccountCommandHandler,
     private facilityHandler: FacilityCommandHandler,
     private electronService: ElectronService,
+    private backupGateway: ElectronBackupFileGateway,
     private cd: ChangeDetectorRef,
     private automaticBackupsService: AutomaticBackupsService,
     private injector: Injector
@@ -84,12 +85,6 @@ export class AccountSettingsComponent implements OnInit {
       this.setOrderOptions();
     });
     if (this.isElectron) {
-      this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
-        if (this.updatingFilePath) {
-          this.updateFilePath(savedFilePath)
-        }
-      });
-
       this.electronService.getFolderPath().subscribe(path => {
         this.folderPath = path;
         this.cd.detectChanges();
@@ -100,9 +95,6 @@ export class AccountSettingsComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
-    if (this.savedFilePathSub) {
-      this.savedFilePathSub.unsubscribe();
-    }
   }
 
   switchFacility(facility: IdbFacility) {
@@ -188,8 +180,8 @@ export class AccountSettingsComponent implements OnInit {
     this.facilityToDelete = undefined;
   }
 
-  backupAccount() {
-    this.backupDataService.backupAccount(this.downloadAsZip);
+  async backupAccount() {
+    await this.backupExportCoordinator.exportActiveAccount({ downloadAsZip: this.downloadAsZip });
   }
 
   openImportBackup() {
@@ -270,18 +262,14 @@ export class AccountSettingsComponent implements OnInit {
 
 
   async automaticBackup() {
-    this.updatingFilePath = true;
-    this.backupFile = this.backupDataService.getAccountBackupFile();
-    this.electronService.openDialog(this.backupFile);
-  }
-
-  async updateFilePath(savedFilePath: string) {
-    console.log('update file path')
-    this.automaticBackupsService.initializingAccount = false;
-    this.automaticBackupsService.creatingFile = true;
+    this.backupFile = this.backupExportCoordinator.buildActiveAccountBackup();
+    const defaultPath = this.selectedAccount?.dataBackupFilePath ?? `${this.selectedAccount?.name}.json`;
+    const savedFilePath = await this.backupGateway.chooseSavePath(defaultPath);
+    if (!savedFilePath) { return; }
+    await this.backupGateway.write(savedFilePath, this.backupFile);
+    await this.automaticBackupsService.addOrUpdateFile(this.backupFile.dataBackupId, this.selectedAccount.guid);
     this.selectedAccount.dataBackupFilePath = savedFilePath;
     this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
-    this.updatingFilePath = false;
     await this.commandBoundary.execute(
       { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
       () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)

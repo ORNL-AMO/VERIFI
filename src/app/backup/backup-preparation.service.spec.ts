@@ -1,4 +1,4 @@
-import { BackupFile } from '../../models/backup-file';
+import { BackupFile } from '../models/backup-file';
 import { BackupPreparationService, BackupRelationshipError, FutureBackupVersionError, InvalidBackupError } from './backup-preparation.service';
 
 describe('BackupPreparationService', () => {

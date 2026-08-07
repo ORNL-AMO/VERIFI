@@ -31,6 +31,7 @@ describe('account switching loading ownership', () => {
       setLoadingStatus: vi.fn()
     };
     const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
+    const backupExportCoordinator = { exportActiveAccount: vi.fn() };
     const electron = {
       isElectron: false,
       accountLatestBackupFile: { next: vi.fn() }
@@ -43,7 +44,7 @@ describe('account switching loading ownership', () => {
       {} as any,
       {} as any,
       {} as any,
-      {} as any,
+      backupExportCoordinator as any,
       loading as any,
       workspace as any,
       electron as any,
@@ -106,13 +107,10 @@ describe('account switching loading ownership', () => {
 
   it('publishes the requested workspace before backing up or exporting an account', async () => {
     const events: string[] = [];
-    const workspace = {
-      selectAccount: vi.fn(async () => {
-        events.push('workspace');
-        return 'published';
-      })
+    const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
+    const backupExportCoordinator = {
+      exportAccountByGuid: vi.fn(async () => events.push('backup'))
     };
-    const backupData = { backupAccount: vi.fn(() => events.push('backup')) };
     const exportService = {
       setExportFacilityDataMessages: vi.fn(),
       exportFacilityData: vi.fn(() => events.push('export'))
@@ -129,14 +127,15 @@ describe('account switching loading ownership', () => {
     };
     const manageAccounts = createManageAccounts({
       workspace,
-      backupData,
+      backupExportCoordinator,
       exportService,
       commandBoundary,
       lifecycle
     });
 
     await manageAccounts.backupAccount(account);
-    expect(events).toEqual(['workspace', 'backup', 'account-update']);
+    expect(events).toEqual(['backup', 'account-update']);
+    expect(backupExportCoordinator.exportAccountByGuid).toHaveBeenCalledWith('account-b');
     expect(commandBoundary.execute).toHaveBeenCalledWith(
       expect.objectContaining({ entityKind: 'account', changeKind: 'update' }),
       expect.any(Function)
@@ -190,10 +189,10 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
   const accountDb = overrides.accountDb ?? {
     allAccounts: new BehaviorSubject<IdbAccount[]>([])
   };
-  const loading = overrides.loading ?? {
-    setLoadingMessage: vi.fn(),
-    setLoadingStatus: vi.fn(),
-    setContext: vi.fn(),
+    const loading = overrides.loading ?? {
+      setLoadingMessage: vi.fn(),
+      setLoadingStatus: vi.fn(),
+      setContext: vi.fn(),
     setTitle: vi.fn(),
     setCurrentLoadingIndex: vi.fn(),
     clearLoadingMessages: vi.fn(),
@@ -206,7 +205,7 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
     (overrides.accountHandler ?? { update: vi.fn(), add: vi.fn().mockImplementation(a => Promise.resolve({ ...a, id: 99, guid: 'new-guid' })) }) as any,
     (overrides.router ?? { navigateByUrl: vi.fn() }) as any,
     (overrides.toasts ?? { showToast: vi.fn() }) as any,
-    (overrides.backupData ?? { backupAccount: vi.fn() }) as any,
+    (overrides.backupExportCoordinator ?? { exportAccountByGuid: vi.fn(), exportActiveAccount: vi.fn() }) as any,
     (overrides.exportService ?? {
       setExportFacilityDataMessages: vi.fn(),
       exportFacilityData: vi.fn()

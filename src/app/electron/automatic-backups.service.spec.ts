@@ -6,7 +6,7 @@ import { AccountWorkspaceStore } from '../account-workspace/account-workspace.st
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { AccountCommandHandler } from '../account-workspace/handlers/account-command-handler.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
-import { BackupDataService } from '../shared/helper-services/backup-data.service';
+import { BackupDataService } from '../backup/backup-data.service';
 import { AutomaticBackupsService } from './automatic-backups.service';
 import { ElectronService } from './electron.service';
 

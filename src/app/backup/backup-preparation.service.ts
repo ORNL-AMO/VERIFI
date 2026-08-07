@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BackupFile } from '../../models/backup-file';
-import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '../../indexedDB/data-migrations/data-migration.errors';
-import { DATA_MIGRATIONS } from '../../indexedDB/data-migrations/data-migration.registry';
-import { CURRENT_DATA_VERSION, MigrationData } from '../../indexedDB/data-migrations/data-migration.models';
+import { BackupFile } from '../models/backup-file';
+import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '../indexedDB/data-migrations/data-migration.errors';
+import { DATA_MIGRATIONS } from '../indexedDB/data-migrations/data-migration.registry';
+import { CURRENT_DATA_VERSION, MigrationData } from '../indexedDB/data-migrations/data-migration.models';
 
 export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION };
 

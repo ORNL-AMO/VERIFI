@@ -1,6 +1,6 @@
 import { effect, Injectable } from '@angular/core';
 import { ElectronService } from './electron.service';
-import { BackupDataService, BackupFile } from '../shared/helper-services/backup-data.service';
+import { BackupDataService, BackupFile } from '../backup/backup-data.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { AccountCommandHandler } from '../account-workspace/handlers/account-command-handler.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
@@ -62,12 +62,10 @@ export class AutomaticBackupsService {
   }
 
   async saveBackup() {
-
     if (this.account && this.account.dataBackupFilePath && !this.initializingAccount) {
       this.saving.next(true);
       this.clearBackupTimer();
       if (!this.creatingFile) {
-        //backup 3 seconds after changes finish..
         this.backupTimer = setTimeout(() => {
           this.electronService.checkFileExists(this.account.dataBackupFilePath);
           setTimeout(() => {
@@ -76,14 +74,12 @@ export class AutomaticBackupsService {
               void this.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
               this.electronService.sendSaveData(backupFile)
             } else {
-              console.log('tried to save but there is no file')
               this.alertFileDoesNotExist();
             }
             this.saving.next(false);
           }, 500);
         }, 3000);
       } else {
-        console.log('create file')
         let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
         void this.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
         this.electronService.sendSaveData(backupFile, false, true);

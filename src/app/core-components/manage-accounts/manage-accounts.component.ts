@@ -7,12 +7,12 @@ import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-co
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import { ExportToExcelTemplateV3Service } from 'src/app/shared/helper-services/export-to-excel-template-v3.service';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { DatabaseResetService } from 'src/app/application-lifecycle/database-reset.service';
+import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -38,7 +38,7 @@ export class ManageAccountsComponent {
     private accountHandler: AccountCommandHandler,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
     private exportToExcelTemplateV3Service: ExportToExcelTemplateV3Service,
     private accountWorkspaceService: AccountWorkspaceService,
     private applicationLifecycleService: ApplicationLifecycleService,
@@ -86,8 +86,7 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingMessage("Backing up accounts...");
     this.loadingService.setLoadingStatus(true);
     try {
-      await this.selectAccountWorkspace(account);
-      this.backupDataService.backupAccount();
+      await this.backupExportCoordinator.exportAccountByGuid(account.guid);
       await this.commandBoundary.execute(
         { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Recording backup date' },
         () => this.accountHandler.update({ ...account, lastBackup: new Date() }, account.guid)
