@@ -57,6 +57,71 @@ describe('AccountWorkspaceStore', () => {
     expect(store.revision()).toBe(1);
     expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
   });
+
+  describe('pending operation tracking', () => {
+    it('starts with no pending operations', () => {
+      const store = new AccountWorkspaceStore();
+      expect(store.hasPending()).toBe(false);
+      expect(store.pendingOperations()).toEqual([]);
+    });
+
+    it('sets a pending operation and exposes it via hasPending and isPending', () => {
+      const store = new AccountWorkspaceStore();
+      store.setPending({ id: 1, label: 'Saving meter' });
+
+      expect(store.hasPending()).toBe(true);
+      expect(store.isPending(1)).toBe(true);
+      expect(store.isPending(99)).toBe(false);
+    });
+
+    it('clears a pending operation by id', () => {
+      const store = new AccountWorkspaceStore();
+      store.setPending({ id: 1, label: 'Saving meter' });
+      store.setPending({ id: 2, label: 'Saving facility' });
+      store.clearPending(1);
+
+      expect(store.hasPending()).toBe(true);
+      expect(store.isPending(1)).toBe(false);
+      expect(store.isPending(2)).toBe(true);
+    });
+
+    it('hasPending returns false after all operations are cleared', () => {
+      const store = new AccountWorkspaceStore();
+      store.setPending({ id: 1, label: 'Saving meter' });
+      store.clearPending(1);
+
+      expect(store.hasPending()).toBe(false);
+    });
+
+    it('multiple pending operations are each visible independently', () => {
+      const store = new AccountWorkspaceStore();
+      store.setPending({ id: 1, label: 'Op 1' });
+      store.setPending({ id: 2, label: 'Op 2' });
+      store.setPending({ id: 3, label: 'Op 3' });
+
+      expect(store.pendingOperations()).toHaveLength(3);
+      expect(store.isPending(2)).toBe(true);
+    });
+
+    it('publish resets pending operations', () => {
+      const store = new AccountWorkspaceStore();
+      const snapshot = createSnapshot();
+      store.setPending({ id: 1, label: 'Op 1' });
+      store.publish(snapshot);
+
+      expect(store.hasPending()).toBe(false);
+    });
+
+    it('publishCommitted preserves in-flight pending operations', () => {
+      const store = new AccountWorkspaceStore();
+      const snapshot = createSnapshot();
+      store.publish(snapshot);
+      store.setPending({ id: 1, label: 'Op 1' });
+      store.publishCommitted(snapshot, {});
+
+      expect(store.isPending(1)).toBe(true);
+    });
+  });
 });
 
 function createSnapshot(): AccountWorkspaceSnapshot {

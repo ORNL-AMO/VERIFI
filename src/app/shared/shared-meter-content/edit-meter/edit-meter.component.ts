@@ -1,10 +1,7 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
@@ -14,6 +11,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
 import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 
 @Component({
   selector: 'app-edit-meter',
@@ -25,7 +24,6 @@ import { RouterGuardService } from '../../shared-router-guard-modal/router-guard
   }
 })
 export class EditMeterComponent implements OnInit {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -45,14 +43,14 @@ export class EditMeterComponent implements OnInit {
   }
 
   constructor(
-    private utilityMeterDbService: UtilityMeterdbService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private routerGuardService: RouterGuardService
+    private routerGuardService: RouterGuardService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler
   ) { }
 
   ngOnInit(): void {
@@ -99,19 +97,27 @@ export class EditMeterComponent implements OnInit {
     this.loadingService.setLoadingMessage('Saving Meter...');
     this.loadingService.setLoadingStatus(true);
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
-    if (this.addOrEdit == 'edit') {
-      await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meterToSave));
-      await this.updateMeterData(meterToSave);
-    } else if (this.addOrEdit == 'add') {
-      delete meterToSave.id;
-      meterToSave = await firstValueFrom(this.utilityMeterDbService.addWithObservable(meterToSave));
-    }
-    await this.utilityMeterDbService.updateWithObservable(meterToSave);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const meterDataUpdates = this.getMeterDataUpdates(meterToSave);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', label: 'Saving meter' },
+      async () => {
+        if (this.addOrEdit == 'edit') {
+          await this.meterHandler.updateMeterWithData(meterToSave, meterDataUpdates, activeAccountGuid);
+        } else {
+          delete meterToSave.id;
+          meterToSave = await this.meterHandler.addMeter(meterToSave, this.accountWorkspaceStore.account()?.guid);
+        }
+        return meterToSave;
+      }
+    );
     this.meterForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "alert-success");
+    if (this.addOrEdit === 'edit' && meterDataUpdates.length > 0) {
+      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
+    }
   }
 
   cancel() {
@@ -123,17 +129,14 @@ export class EditMeterComponent implements OnInit {
     this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.guid + '/utility/energy-consumption/utility-meter/' + this.editMeter.guid + '/data-table');
   }
 
-  async updateMeterData(meter: IdbUtilityMeter) {
-    this.loadingService.setLoadingMessage('Updating Meter Data...')
-    this.loadingService.setLoadingStatus(true);
-    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
-    let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData)
-    if (dataNeedsUpdate.length > 0) {
-      for (let i = 0; i < dataNeedsUpdate.length; i++) {
-        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]));
-      }
-      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
+  private getMeterDataUpdates(meter: IdbUtilityMeter): Array<IdbUtilityMeterData> {
+    if (this.addOrEdit !== 'edit') {
+      return [];
     }
+
+    this.loadingService.setLoadingMessage('Updating Meter Data...')
+    const meterData = structuredClone(this.accountWorkspaceQuery.getMeterData(this.editMeter.guid));
+    return updateMeterDataCharges(meter, meterData);
   }
 
   canDeactivate(): Observable<boolean> {

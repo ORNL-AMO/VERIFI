@@ -1,15 +1,15 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
+import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 
 @Component({
   selector: 'app-facility-predictor-data-entry',
@@ -21,7 +21,6 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorDataEntryComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -46,9 +45,9 @@ export class FacilityPredictorDataEntryComponent {
     private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
     private router: Router,
-    private predictorDataDbService: PredictorDataDbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private predictorHandler: PredictorCommandHandler,
     private routerGuardService: RouterGuardService
-
   ) {
   }
 
@@ -77,8 +76,11 @@ export class FacilityPredictorDataEntryComponent {
 
   async save() {
     this.isSaved = true;
-    await firstValueFrom(this.predictorDataDbService.updateWithObservable(this.predictorData));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: 'update', entityGuid: this.predictorData.guid, label: 'Save Predictor Data' },
+      () => this.predictorHandler.updatePredictorData(this.predictorData, accountGuid)
+    );
   }
 
   async saveAndQuit() {
@@ -91,9 +93,11 @@ export class FacilityPredictorDataEntryComponent {
     await this.save();
     let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor, predictorData);
-    newPredictorData = await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    this.router.navigateByUrl('data-management/' + newPredictorData.accountId + '/facilities/' + newPredictorData.facilityId + '/predictors/' + newPredictorData.predictorId + '/predictor-data/edit-entry/' + newPredictorData.guid);
+    const result = await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' },
+      () => this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid)
+    );
+    this.router.navigateByUrl('data-management/' + result.value.accountId + '/facilities/' + result.value.facilityId + '/predictors/' + result.value.predictorId + '/predictor-data/edit-entry/' + result.value.guid);
     this.toastNotificationService.showToast('Predictor entry added!', undefined, undefined, undefined, 'alert-success');
   }
 

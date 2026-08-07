@@ -2,19 +2,19 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from '../loading/loading.service';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
 import { BackupPreparationService, PreparedBackupFile } from 'src/app/shared/helper-services/backup-preparation.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -40,15 +40,16 @@ export class ElectronBackupFileComponent {
   electronBackup: IdbElectronBackup;
   forceModal: boolean = false;
   constructor(private electronService: ElectronService,
-    private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
     private cd: ChangeDetectorRef,
     private deleteDataService: DeleteDataService,
-    private backupPreparationService: BackupPreparationService, private injector: Injector) {
+    private backupPreparationService: BackupPreparationService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
+    private injector: Injector) {
 
   }
 
@@ -146,27 +147,31 @@ export class ElectronBackupFileComponent {
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
         this.deleteDataService.suspendQueuedDeletion();
-        await firstValueFrom(this.accountDbService.updateWithObservable({
-          ...this.account,
-          deleteAccount: true
-        }));
-        await this.applicationLifecycleService.refreshAccountCatalog();
+        try {
+          let backupPath: string = this.account.dataBackupFilePath;
+          let sharedFileAuthor: string = this.account.sharedFileAuthor;
+          let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
+          this.backupDataService.accountBackupMessages();
+          let newAccount: IdbAccount = await this.applicationLifecycleService.replaceActiveAccount(
+            () => this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1)
+          );
+          newAccount = {
+            ...newAccount,
+            dataBackupFilePath: backupPath,
+            sharedFileAuthor: sharedFileAuthor,
+            isSharedBackupFile: isSharedBackupFile
+          };
 
-        let backupPath: string = this.account.dataBackupFilePath;
-        let sharedFileAuthor: string = this.account.sharedFileAuthor;
-        let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-        this.backupDataService.accountBackupMessages();
-        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1);
-        newAccount.dataBackupFilePath = backupPath;
-        newAccount.sharedFileAuthor = sharedFileAuthor;
-        newAccount.isSharedBackupFile = isSharedBackupFile;
+          await this.commandBoundary.execute(
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
+            () => this.accountHandler.update(newAccount, newAccount.guid)
+          );
+          needUpdate = false;
 
-        await this.dbChangesService.updateAccount(newAccount);
-        await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
-        await this.deleteDataService.resumeQueuedDeletion();
-        needUpdate = false;
-
-        this.loadingService.isLoadingComplete.next(true);
+          this.loadingService.isLoadingComplete.next(true);
+        } finally {
+          await this.deleteDataService.resumeQueuedDeletion();
+        }
       }
     }
 
@@ -177,7 +182,10 @@ export class ElectronBackupFileComponent {
       } else {
         this.account.archiveOption = this.archiveOption;
       }
-      await this.dbChangesService.updateAccount(this.account);
+      await this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: this.account.guid, label: 'Saving account' },
+        () => this.accountHandler.update({ ...this.account }, this.account.guid)
+      );
     }
 
     this.hideModal();

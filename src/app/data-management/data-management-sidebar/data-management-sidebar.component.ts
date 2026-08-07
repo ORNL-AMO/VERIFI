@@ -2,21 +2,23 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject, computed, Injector } from '@angular/core';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '../data-management.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
+import { EnergyUseCommandHandler } from 'src/app/account-workspace/handlers/energy-use-command-handler.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacilityEnergyUseGroup } from 'src/app/models/idbModels/facilityEnergyUseGroups';
-import { FacilityEnergyUseGroupsDbService } from 'src/app/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 
 @Component({
@@ -73,11 +75,13 @@ export class DataManagementSidebarComponent {
 
   constructor(
     private dataManagementService: DataManagementService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictorDbService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
+    private facilityHandler: FacilityCommandHandler,
+    private meterHandler: MeterCommandHandler,
+    private predictorHandler: PredictorCommandHandler,
+    private energyUseHandler: EnergyUseCommandHandler,
     private router: Router,
-    private facilityEnergyUseGroupsDbService: FacilityEnergyUseGroupsDbService,
     private injector: Injector
 
   ) {
@@ -153,10 +157,11 @@ export class DataManagementSidebarComponent {
   }
 
   async toggleFacilitiesOpen() {
-    await this.dbChangesService.updateAccount({
-      ...this.account,
-      sidebarFacilitiesOpen: !this.account.sidebarFacilitiesOpen
-    });
+    const account = { ...this.account, sidebarFacilitiesOpen: !this.account.sidebarFacilitiesOpen };
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Toggling sidebar' },
+      () => this.accountHandler.update(account, account.guid)
+    );
   }
 
   async toggleFacilityOpen(facility: IdbFacility) {
@@ -165,9 +170,11 @@ export class DataManagementSidebarComponent {
   }
 
   async toggleMeterOpen(meter: IdbUtilityMeter) {
-    meter.sidebarOpen = !meter.sidebarOpen;
-    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const updated = { ...meter, sidebarOpen: !meter.sidebarOpen };
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Toggling sidebar' },
+      () => this.meterHandler.updateMeter(updated, this.account?.guid)
+    );
   }
 
   async toggleFacilityMetersOpen(facility: IdbFacility) {
@@ -176,7 +183,10 @@ export class DataManagementSidebarComponent {
   }
 
   async saveFacility(facility: IdbFacility) {
-    await this.dbChangesService.updateFacility({ ...facility });
+    await this.commandBoundary.execute(
+      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility' },
+      () => this.facilityHandler.update({ ...facility }, this.account?.guid)
+    );
   }
 
   async toggleFacilityPredictorsOpen(facility: IdbFacility) {
@@ -185,16 +195,19 @@ export class DataManagementSidebarComponent {
   }
 
   async togglePredictorOpen(predictor: IdbPredictor) {
-    predictor.sidebarOpen = !predictor.sidebarOpen;
-    await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const updated = { ...predictor, sidebarOpen: !predictor.sidebarOpen };
+    await this.commandBoundary.execute(
+      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Toggling sidebar' },
+      () => this.predictorHandler.updatePredictor(updated, this.account?.guid)
+    );
   }
 
   async toggleCustomDataOpen() {
-    await this.dbChangesService.updateAccount({
-      ...this.account,
-      sidebarCustomDataOpen: !this.account.sidebarCustomDataOpen
-    });
+    const account = { ...this.account, sidebarCustomDataOpen: !this.account.sidebarCustomDataOpen };
+    await this.commandBoundary.execute(
+      { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Toggling sidebar' },
+      () => this.accountHandler.update(account, account.guid)
+    );
   }
 
   async toggleFacilityEnergyUsesOpen(facility: IdbFacility) {
@@ -203,9 +216,11 @@ export class DataManagementSidebarComponent {
   }
 
   async toggleEnergyUseGroupOpen(energyUseGroup: IdbFacilityEnergyUseGroup) {
-    energyUseGroup.sidebarOpen = !energyUseGroup.sidebarOpen;
-    await firstValueFrom(this.facilityEnergyUseGroupsDbService.updateWithObservable(energyUseGroup));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const updated = { ...energyUseGroup, sidebarOpen: !energyUseGroup.sidebarOpen };
+    await this.commandBoundary.execute(
+      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Toggling sidebar' },
+      () => this.energyUseHandler.updateGroup(updated, this.account?.guid)
+    );
   }
 
   toggleSidebar() {

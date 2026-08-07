@@ -11,7 +11,9 @@ import { FacilityClassification, FacilityClassifications } from 'src/app/models/
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { GeneralInformationService } from './general-information.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({
@@ -22,7 +24,9 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 })
 export class GeneralInformationFormComponent implements OnInit {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly dbChangesService = inject(DbChangesService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly accountHandler = inject(AccountCommandHandler);
+  private readonly facilityHandler = inject(FacilityCommandHandler);
   private readonly applicationLifecycleService = inject(ApplicationLifecycleService);
   @Input()
   inAccount: boolean;
@@ -150,11 +154,17 @@ export class GeneralInformationFormComponent implements OnInit {
     this.isFormChange = true;
     if (!this.inAccount) {
       this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
-      await this.dbChangesService.updateFacility({ ...this.selectedFacility });
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' },
+        () => this.facilityHandler.update({ ...this.selectedFacility }, this.accountWorkspaceStore.account()?.guid)
+      );
     }
     if (this.inAccount) {
       this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
-      await this.dbChangesService.updateAccount({ ...this.selectedAccount });
+      await this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+        () => this.accountHandler.update({ ...this.selectedAccount }, this.selectedAccount.guid)
+      );
       await this.applicationLifecycleService.refreshAccountCatalog();
     }
   }

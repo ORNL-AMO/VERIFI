@@ -1,12 +1,11 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewAccountCustomFuel, IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
@@ -27,7 +26,9 @@ import { convertHeatCapacity } from 'src/app/shared/sharedHelperFunctions';
 })
 export class CustomFuelDataFormComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly customDataHandler = inject(CustomDataCommandHandler);
+  private readonly meterHandler = inject(MeterCommandHandler);
 
   isAdd: boolean;
   editCustomFuel: IdbCustomFuel;
@@ -43,10 +44,8 @@ export class CustomFuelDataFormComponent {
 
   constructor(
     private router: Router,
-    private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
-    private formBuilder: FormBuilder,
-    private utilityMeterDbService: UtilityMeterdbService
+    private formBuilder: FormBuilder
   ) {
 
   }
@@ -140,23 +139,28 @@ export class CustomFuelDataFormComponent {
 
     this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
     this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     if (this.isAdd) {
-      await firstValueFrom(this.customFuelDbService.addWithObservable(this.editCustomFuel));
+      await this.commandBoundary.execute(
+        { entityKind: 'customFuel', changeKind: 'add', label: 'Adding custom fuel' },
+        () => this.customDataHandler.addCustomFuel(this.editCustomFuel, activeAccountGuid)
+      );
     } else {
-      if (this.isFuelInUse && this.editCustomFuel.value != this.previousValue) {
-        //update meters
-        let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
-        for (let i = 0; i < accountMeters.length; i++) {
-          if (accountMeters[i].fuel == this.previousValue) {
-            accountMeters[i].fuel = this.editCustomFuel.value;
-            //TODO: Update heat capacity and corresponding energy use in meter data....
-            await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
+      await this.commandBoundary.execute(
+        { entityKind: 'customFuel', changeKind: 'update', entityGuid: this.editCustomFuel.guid, label: 'Saving custom fuel' },
+        async () => {
+          if (this.isFuelInUse && this.editCustomFuel.value != this.previousValue) {
+            const accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
+            for (const meter of accountMeters) {
+              if (meter.fuel == this.previousValue) {
+                await this.meterHandler.updateMeter({ ...meter, fuel: this.editCustomFuel.value }, activeAccountGuid);
+              }
+            }
           }
+          return this.customDataHandler.updateCustomFuel(this.editCustomFuel, activeAccountGuid);
         }
-      }
-      await firstValueFrom(this.customFuelDbService.updateWithObservable(this.editCustomFuel));
+      );
     }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 

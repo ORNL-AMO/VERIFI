@@ -1,10 +1,9 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewAccountCustomGWP, IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
@@ -17,8 +16,9 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
     standalone: false
 })
 export class CustomGwpFormComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly customDataHandler = inject(CustomDataCommandHandler);
 
   isAdd: boolean;
   editCustomGWP: IdbCustomGWP;
@@ -34,7 +34,6 @@ export class CustomGwpFormComponent {
 
   constructor(
     private router: Router,
-    private customGWPDbService: CustomGWPDbService,
     private activatedRoute: ActivatedRoute,
     private formBuilder: FormBuilder
   ) {
@@ -96,30 +95,19 @@ export class CustomGwpFormComponent {
     this.editCustomGWP.gwp_ar5 = this.form.controls.gwp.value;
     this.editCustomGWP.gwp_ar6 = this.form.controls.gwp.value;
     this.editCustomGWP.display = this.form.controls.gwpLabel.value;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
 
     if (this.isAdd) {
-      await firstValueFrom(this.customGWPDbService.addWithObservable(this.editCustomGWP));
+      await this.commandBoundary.execute(
+        { entityKind: 'customGWP', changeKind: 'add', label: 'Adding custom GWP' },
+        () => this.customDataHandler.addCustomGWP(this.editCustomGWP, activeAccountGuid)
+      );
     } else {
-      if (this.isGWPInUse) {
-        // //update meters
-        // let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
-        // let needsUpdate: boolean = false;
-        // for (let i = 0; i < accountMeters.length; i++) {
-        //   if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
-        //     needsUpdate = true;
-        //     // accountMeters[i].globalWarmingPotential = this.editCustomGWP.gwp;
-        //     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
-        //   }
-        // }
-        // let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
-        // let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
-        //   return meter.accountId == this.selectedAccount.guid;
-        // });
-        // this.utilityMeterDbService.accountMeters.next(accountMetersUpdates);
-      }
-      await firstValueFrom(this.customGWPDbService.updateWithObservable(this.editCustomGWP));
+      await this.commandBoundary.execute(
+        { entityKind: 'customGWP', changeKind: 'update', entityGuid: this.editCustomGWP.guid, label: 'Saving custom GWP' },
+        () => this.customDataHandler.updateCustomGWP(this.editCustomGWP, activeAccountGuid)
+      );
     }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.navigateHome();
   }
 

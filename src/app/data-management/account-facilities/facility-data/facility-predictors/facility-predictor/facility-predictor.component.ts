@@ -1,15 +1,12 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
+import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -24,6 +21,8 @@ import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalcula
 import { getDateFromPredictorData } from 'src/app/shared/dateHelperFunctions';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -35,7 +34,6 @@ import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/rou
   }
 })
 export class FacilityPredictorComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
@@ -59,17 +57,16 @@ export class FacilityPredictorComponent {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private predictorDbService: PredictorDbService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private predictorHandler: PredictorCommandHandler,
     private toastNotificationService: ToastNotificationsService,
     private router: Router,
     private editPredictorFormService: EditPredictorFormService,
     private loadingService: LoadingService,
-    private predictorDataDbService: PredictorDataDbService,
     private analysisDbService: AnalysisDbService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private routerGuardService: RouterGuardService
-
   ) {
   }
 
@@ -115,15 +112,18 @@ export class FacilityPredictorComponent {
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.editPredictorFormService.setPredictorDataFromForm(this.predictor, this.predictorForm);
     this.predictorForm.markAsPristine();
-    await firstValueFrom(this.predictorDbService.updateWithObservable(this.predictor));
-    if (this.predictor.predictorType == 'Weather') {
-      if (needsWeatherDataUpdate) {
-        await this.updateWeatherData();
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const predictor = this.predictor;
+    await this.commandBoundary.execute(
+      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Predictor' },
+      async () => {
+        await this.predictorHandler.updatePredictor(predictor, accountGuid);
+        if (predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
+          await this.updateWeatherData();
+        }
+        await this.analysisDbService.updateAnalysisPredictor(predictor);
       }
-    }
-
-    await this.analysisDbService.updateAnalysisPredictor(this.predictor);
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
   }
@@ -159,13 +159,14 @@ export class FacilityPredictorComponent {
             newPredictorData.year = newDate.getFullYear();
             newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
             newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-            await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
+            await this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid);
           } else {
             predictorExists.month = newDate.getMonth() + 1;
             predictorExists.year = newDate.getFullYear();
             predictorExists.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
             predictorExists.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-            await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorExists));
+            const accountGuid = this.accountWorkspaceStore.account()?.guid;
+            await this.predictorHandler.updatePredictorData(predictorExists, accountGuid);
           }
           startDate.setMonth(startDate.getMonth() + 1);
         }
@@ -180,7 +181,7 @@ export class FacilityPredictorComponent {
         return (pDataDate.getTime() < startDateFilter.getTime() || pDataDate.getTime() > endDateFilter.getTime());
       });
       for (let i = 0; i < filterData.length; i++) {
-        await firstValueFrom(this.predictorDataDbService.deleteIndexWithObservable(filterData[i].id))
+        await this.predictorHandler.deletePredictorData(filterData[i].id)
       }
     }
   }
@@ -214,16 +215,19 @@ export class FacilityPredictorComponent {
     this.showDeletePredictor = false;
     this.loadingService.setLoadingMessage('Deleting Predictor Data...');
     this.loadingService.setLoadingStatus(true);
-    //delete predictor
-    await firstValueFrom(this.predictorDbService.deleteWithObservable(this.predictor.id));
-    //delete predictor data
-    let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
-    await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
-    //set values in services
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
-    //update analysis items
-    this.loadingService.setLoadingMessage('Updating analysis items...');
-    await this.analysisDbService.deleteAnalysisPredictor(this.predictor);
+    const predictor = this.predictor;
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
+    await this.commandBoundary.execute(
+      { entityKind: 'predictor', changeKind: 'delete', entityGuid: predictor.guid, label: 'Delete Predictor' },
+      async () => {
+        await this.predictorHandler.deletePredictor(predictor, accountGuid);
+        for (const data of predictorData) {
+          await this.predictorHandler.deletePredictorData(data.id);
+        }
+        await this.analysisDbService.deleteAnalysisPredictor(predictor);
+      }
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.goToManagePredictors();

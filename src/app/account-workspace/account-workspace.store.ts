@@ -6,6 +6,7 @@ import { computed, Injectable, signal } from '@angular/core';
 import {
   AccountWorkspaceSnapshot,
   AccountWorkspaceState,
+  PendingOperation,
   WorkspaceError,
   WorkspaceSelections,
   WorkspaceSelectionError
@@ -15,7 +16,8 @@ import { IdbFacility } from '../models/idbModels/facility';
 const INITIAL_WORKSPACE_STATE: AccountWorkspaceState = {
   status: 'idle',
   selections: {},
-  revision: 0
+  revision: 0,
+  pendingOperations: []
 };
 
 @Injectable({ providedIn: 'root' })
@@ -68,6 +70,27 @@ export class AccountWorkspaceStore {
   readonly facilityEnergyUseGroups = computed(() => this.forSelectedFacility(this.energyUseGroups()));
   readonly facilityEnergyUseEquipment = computed(() => this.forSelectedFacility(this.energyUseEquipment()));
 
+  readonly pendingOperations = computed(() => this.state().pendingOperations);
+  readonly hasPending = computed(() => this.state().pendingOperations.length > 0);
+
+  isPending(id: number): boolean {
+    return this.state().pendingOperations.some(op => op.id === id);
+  }
+
+  setPending(op: PendingOperation): void {
+    this.writableState.update(state => ({
+      ...state,
+      pendingOperations: [...state.pendingOperations, op]
+    }));
+  }
+
+  clearPending(id: number): void {
+    this.writableState.update(state => ({
+      ...state,
+      pendingOperations: state.pendingOperations.filter(op => op.id !== id)
+    }));
+  }
+
   beginLoad(switching: boolean): AccountWorkspaceState {
     const previous = this.state();
     this.writableState.set({
@@ -86,7 +109,8 @@ export class AccountWorkspaceStore {
       selections: validateSelections(normalizedSnapshot, selections),
       revision: 0,
       committedRevision: undefined,
-      error: undefined
+      error: undefined,
+      pendingOperations: []
     });
   }
 
@@ -102,7 +126,8 @@ export class AccountWorkspaceStore {
         accountGuid: normalizedSnapshot.account.guid,
         revision: nextRevision
       },
-      error: undefined
+      error: undefined,
+      pendingOperations: this.state().pendingOperations
     });
   }
 
@@ -119,7 +144,8 @@ export class AccountWorkspaceStore {
       status: 'error',
       selections: {},
       revision: 0,
-      error
+      error,
+      pendingOperations: []
     });
   }
 

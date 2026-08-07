@@ -4,7 +4,7 @@ This guide explains how feature code should read, select, edit, and persist data
 
 The central rule is:
 
-> Read the active account through workspace signals. Persist through an IndexedDB repository or transaction. Publish one coherent workspace refresh only after the logical write commits.
+> Read the active account through workspace signals. Persist through `WorkspaceCommandBoundary` for ordinary user writes, or through `IndexedDbTransactionService` for infrastructure-owned atomic workflows. Publish one coherent committed workspace refresh only after the logical write commits.
 
 ## The data layers
 
@@ -13,10 +13,9 @@ The central rule is:
 | `ApplicationLifecycleService` | Startup, persistence readiness, the complete account catalog, usable accounts, application metadata | Active facility or feature selections |
 | `AccountWorkspaceStore` | One atomic, readonly snapshot for the active account; validated selections; facility-derived collections; committed revision | IndexedDB writes or account switching |
 | `AccountWorkspaceService` | Account loading and switching, selection by GUID, selection hints, hydration and committed refreshes | Business-form editing or object-store implementation |
+| `WorkspaceCommandBoundary` | Pending-state tracking, stale-workspace guards, one committed reload, and one committed-change event per successful user operation | Direct repository writes, account selection, or domain validation beyond the supplied handler |
 | IndexedDB services | Queries and persistence for their object store | Active UI collections, selections, navigation, notifications, or local-storage hints |
 | `IndexedDbTransactionService` | Atomic operations across one or more stores | Calls to ordinary repositories inside its transaction |
-
-`DbChangesService` is a temporary compatibility facade for existing account and facility workflows. Do not use it as a general application-state service or add repository-style subjects to it. The typed write boundary planned in issue #2577 will replace this seam.
 
 ## Decide which API to use
 
@@ -29,10 +28,10 @@ The central rule is:
 | Switch accounts | `AccountWorkspaceService.selectAccount(accountGuid)` |
 | List all accounts, including deletion-marked accounts | `ApplicationLifecycleService.accountCatalog` |
 | List accounts available for normal navigation | `ApplicationLifecycleService.usableAccounts` |
-| Persist one object-store record | The record's IndexedDB service |
+| Persist one user-initiated workspace write | `WorkspaceCommandBoundary.execute(...)` with the matching command handler |
 | Commit one logical operation across stores | `IndexedDbTransactionService` |
 | Query an inactive account for an infrastructure workflow | An indexed repository method scoped by account GUID |
-| Refresh active state after a successful user change | `AccountWorkspaceService.reloadActiveWorkspace(true)` exactly once |
+| Refresh active state after a successful user change | Let `WorkspaceCommandBoundary` perform the committed reload |
 | Republish data during hydration or repair without signaling a user change | `reloadActiveWorkspace(false)` |
 
 ## Reading active data

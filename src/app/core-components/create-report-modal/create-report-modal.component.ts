@@ -3,9 +3,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
+import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
@@ -25,6 +26,8 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 export class CreateReportModalComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
 
   showModalSub: Subscription;
   showModal: boolean;
@@ -37,7 +40,6 @@ export class CreateReportModalComponent {
   constructor(
     private sharedDataService: SharedDataService,
     private router: Router,
-    private accountReportDbService: AccountReportDbService,
     private accountOverviewService: AccountOverviewService,
     private toastNotificationService: ToastNotificationsService,
     private facilityOverviewService: FacilityOverviewService,
@@ -80,8 +82,10 @@ export class CreateReportModalComponent {
     } else if (this.router.url.includes('account/analysis')) {
       navigateToStr = '/data-evaluation/account/reports/better-plants-report';
     }
-    let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(this.accountReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedReport } = await this.commandBoundary.execute(
+      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
+      () => this.reportHandler.addAccountReport(this.accountReport, this.accountWorkspaceStore.account()?.guid)
+    );
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.sharedDataService.openCreateReportModal.next(false);

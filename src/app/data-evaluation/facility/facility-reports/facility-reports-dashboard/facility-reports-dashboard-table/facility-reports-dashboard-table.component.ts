@@ -4,11 +4,11 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from 'src/app/account-workspace/handlers/report-command-handler.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -45,7 +45,8 @@ export class FacilityReportsDashboardTableComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  private facilityDbReportsService: FacilityReportsDbService = inject(FacilityReportsDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private analyticsService: AnalyticsService = inject(AnalyticsService);
   private router: Router = inject(Router);
@@ -125,8 +126,10 @@ export class FacilityReportsDashboardTableComponent {
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(raw.facilityId, raw.accountId, raw.facilityReportType, groups);
     newReport.name = raw.name + ' (Copy)';
     newReport.analysisItemId = raw.analysisItemId;
-    let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const { value: addedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
+      () => this.reportHandler.addFacilityReport(newReport, this.account()?.guid)
+    );
     this.analyticsService.sendEvent('create_facility_analysis', undefined);
     this.accountWorkspaceService.selectFacilityReport((addedReport)?.guid);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, 'alert-success');
@@ -149,8 +152,11 @@ export class FacilityReportsDashboardTableComponent {
   async confirmDelete() {
     const report = this.deletedReport();
     if (!report) return;
-    await firstValueFrom(this.facilityDbReportsService.deleteWithObservable(report.id));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'delete', entityGuid: report.guid, label: 'Delete Facility Report' },
+      () => this.reportHandler.deleteFacilityReport(report, activeAccountGuid)
+    );
     this.displayDeleteModal.set(false);
     this.deletedReport.set(undefined);
     this.toastNotificationService.showToast('Report Item Deleted', undefined, undefined, false, 'alert-success');
@@ -204,10 +210,16 @@ export class FacilityReportsDashboardTableComponent {
     const itemsToDelete = this.checkedItems();
     this.loadingService.setLoadingMessage('Deleting Reports...');
     this.loadingService.setLoadingStatus(true);
-    for (const item of itemsToDelete) {
-      await firstValueFrom(this.facilityDbReportsService.deleteWithObservable(item.id));
-    }
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'bulk', label: 'Delete Facility Reports' },
+      () => this.reportHandler.bulkDeleteFacilityReports(
+        itemsToDelete
+          .map(item => this.facilityReports().find(r => r.guid === item.guid))
+          .filter((report): report is IdbFacilityReport => !!report),
+        activeAccountGuid
+      )
+    );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Report Items Deleted!', undefined, undefined, false, 'alert-success');
     this.selectedReportType.set('');

@@ -2,7 +2,7 @@ import { effect, Injectable } from '@angular/core';
 import { ElectronService } from './electron.service';
 import { BackupDataService, BackupFile } from '../shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { DbChangesService } from '../indexedDB/db-changes.service';
+import { AccountCommandHandler } from '../account-workspace/handlers/account-command-handler.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { IdbAccount } from '../models/idbModels/account';
@@ -29,7 +29,7 @@ export class AutomaticBackupsService {
     private electronService: ElectronService,
     private backupDataService: BackupDataService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
+    private accountHandler: AccountCommandHandler,
     private electronBackupsDbService: ElectronBackupsDbService,
     private workspaceStore: AccountWorkspaceStore
   ) {
@@ -173,7 +173,7 @@ export class AutomaticBackupsService {
 
   alertFileDoesNotExist() {
     this.toastNotificationService.showToast('Missing Backup File', 'The file selected to backup this account no longer exists. Please navigate to the settings page for the account to update the file selection.', 10000, false, 'alert-danger')
-    this.account.dataBackupFilePath = undefined;
-    this.dbChangesService.updateAccount(this.account);
+    this.account = { ...this.account, dataBackupFilePath: undefined };
+    void this.accountHandler.update(this.account, this.account.guid);
   }
 }

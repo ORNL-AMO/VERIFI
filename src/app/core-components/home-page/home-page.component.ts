@@ -3,12 +3,11 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { Router } from '@angular/router';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
@@ -28,12 +27,12 @@ export class HomePageComponent {
   accounts: Array<IdbAccount>;
   currentPageNumber: number = 1;
   loadingSub: Subscription;
-  constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
+  constructor(private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private backupPreparationService: BackupPreparationService,
     private toastNotificationService: ToastNotificationsService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
     private titleService: Title,
     private metaService: Meta) { }
 
@@ -77,8 +76,11 @@ export class HomePageComponent {
           let tmpBackupFile = this.backupPreparationService.prepare(JSON.parse(test));
           this.backupDataService.accountBackupMessages();
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile, -1);
-          await this.dbChangesService.updateAccount(newAccount);
           await this.applicationLifecycleService.activatePersistedAccount(newAccount.guid);
+          await this.commandBoundary.execute(
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
+            () => this.accountHandler.update(newAccount, newAccount.guid)
+          );
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
@@ -103,9 +105,7 @@ export class HomePageComponent {
   }
 
   async createNewAccount() {
-    let account: IdbAccount = getNewIdbAccount();
-    account = await firstValueFrom(this.accountDbService.addWithObservable(account));
-    await this.applicationLifecycleService.activatePersistedAccount(account.guid);
+    const account = await this.applicationLifecycleService.createAccount(getNewIdbAccount());
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
 

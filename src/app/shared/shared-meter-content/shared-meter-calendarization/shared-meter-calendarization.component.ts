@@ -1,13 +1,13 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, SimpleChanges, inject } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { Subscription } from 'rxjs';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
@@ -26,7 +26,6 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
   standalone: false
 })
 export class SharedMeterCalendarizationComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   @Input({ required: true })
@@ -56,8 +55,9 @@ export class SharedMeterCalendarizationComponent {
   calanderizingMeterData: boolean | 'error' = false;
   constructor(
     private calanderizationService: CalanderizationService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private dbChangesService: DbChangesService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
+    private facilityHandler: FacilityCommandHandler,
     private sharedDataService: SharedDataService,
     private eGridService: EGridService,
     private router: Router
@@ -278,9 +278,13 @@ export class SharedMeterCalendarizationComponent {
   }
 
   async setDataApplication() {
-    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter));
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const meter = this.dataApplicationMeter;
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Update Data Application' },
+      () => this.meterHandler.updateMeter(meter, accountGuid)
+    );
     this.selectedMeter = this.dataApplicationMeter;
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
     this.setCalanderizedMeterData();
   }
 
@@ -292,8 +296,12 @@ export class SharedMeterCalendarizationComponent {
 
   async setFacilityEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedFacility.energyIsSource != energyIsSource) {
-      this.selectedFacility.energyIsSource = energyIsSource;
-      await this.dbChangesService.updateFacility(this.selectedFacility);
+      const updatedFacility: IdbFacility = { ...this.selectedFacility, energyIsSource };
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' },
+        () => this.facilityHandler.update(updatedFacility, accountGuid)
+      );
       this.setCalanderizedMeterData();
     }
   }

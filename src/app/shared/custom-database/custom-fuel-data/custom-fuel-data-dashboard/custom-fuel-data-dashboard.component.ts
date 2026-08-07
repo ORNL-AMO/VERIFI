@@ -1,10 +1,10 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { Subscription } from 'rxjs';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -16,8 +16,9 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
   standalone: false
 })
 export class CustomFuelDataDashboardComponent {
-  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly customDataHandler = inject(CustomDataCommandHandler);
 
   customFuels: Array<IdbCustomFuel>;
   customFuelsSub: Subscription;
@@ -26,7 +27,6 @@ export class CustomFuelDataDashboardComponent {
   itemToDelete: IdbCustomFuel;
   deleteFuelInUse: boolean = false;
   constructor(
-    private customFuelDbService: CustomFuelDbService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private injector: Injector
@@ -73,8 +73,10 @@ export class CustomFuelDataDashboardComponent {
   }
 
   async confirmDelete() {
-    await firstValueFrom(this.customFuelDbService.deleteWithObservable(this.itemToDelete.id));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    await this.commandBoundary.execute(
+      { entityKind: 'customFuel', changeKind: 'delete', entityGuid: this.itemToDelete.guid, label: 'Deleting custom fuel' },
+      () => this.customDataHandler.deleteCustomFuel(this.itemToDelete, this.accountWorkspaceStore.account()?.guid)
+    );
     this.cancelDelete();
   }
 

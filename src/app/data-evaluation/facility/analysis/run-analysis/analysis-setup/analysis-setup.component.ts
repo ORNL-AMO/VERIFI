@@ -3,11 +3,12 @@ import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { AnalysisService } from '../../analysis.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, firstValueFrom } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -31,7 +32,8 @@ export class AnalysisSetupComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly fb = inject(FormBuilder);
-  private readonly analysisDbService = inject(AnalysisDbService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly analysisHandler = inject(AnalysisCommandHandler);
   private readonly analysisService = inject(AnalysisService);
   private readonly router = inject(Router);
   private readonly calanderizationService = inject(CalanderizationService);
@@ -250,8 +252,11 @@ export class AnalysisSetupComponent {
       baselineYear: raw.baselineYear ?? item.baselineYear,
       bankedAnalysisItemId: raw.hasBanking ? (raw.bankedAnalysisItemId ?? undefined) : undefined,
     };
-    await firstValueFrom(this.analysisDbService.updateWithObservable(updatedItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Facility Analysis' },
+      () => this.analysisHandler.updateFacilityAnalysis(updatedItem, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectFacilityAnalysis((updatedItem)?.guid);
   }
 
@@ -284,8 +289,11 @@ export class AnalysisSetupComponent {
         })),
       })),
     };
-    await firstValueFrom(this.analysisDbService.updateWithObservable(clearedItem));
-    await this.accountWorkspaceService.reloadActiveWorkspace(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Facility Analysis' },
+      () => this.analysisHandler.updateFacilityAnalysis(clearedItem, activeAccountGuid)
+    );
     this.accountWorkspaceService.selectFacilityAnalysis((clearedItem)?.guid);
     this.displayEnableForm = false;
   }
