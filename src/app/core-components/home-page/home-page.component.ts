@@ -12,6 +12,7 @@ import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupPreparationService } from 'src/app/shared/helper-services/backup-preparation.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 
 @Component({
   selector: 'app-home-page',
@@ -34,7 +35,8 @@ export class HomePageComponent {
     private importBackupModalService: ImportBackupModalService, private router: Router,
     private commandBoundary: WorkspaceCommandBoundary,
     private titleService: Title,
-    private metaService: Meta) { }
+    private metaService: Meta,
+    private accountHandler: AccountCommandHandler) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('VERIFI | Industrial Utility & Energy Analytics');
