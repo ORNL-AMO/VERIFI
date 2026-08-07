@@ -22,6 +22,7 @@ export interface TableSlide {
     subHeaders?: Array<string | TableHeaderCell>;
     rows: Array<Array<string | number>>;
     note?: string;
+    columnWidths?: Array<number>;
 }
 
 export interface ChartSlide {

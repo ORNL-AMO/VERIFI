@@ -16,6 +16,8 @@ import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shar
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportAdapter } from './analysis-report.adapter';
 import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { PptReportService } from 'src/app/shared/ppt-report/ppt-report.service';
+import { AnalysisReportPptAdapter } from './analysis-report-ppt.adapter';
 
 @Component({
   selector: 'app-analysis-report',
@@ -45,8 +47,9 @@ export class AnalysisReportComponent {
     private regressionModelsService: RegressionModelsService,
     private analysisReportAdapter: AnalysisReportAdapter,
     private exportReportPdfService: ExportReportPdfService,
-    private injector: Injector
-  ) { }
+    private injector: Injector,
+    private pptReportService: PptReportService,
+    private analysisReportPptAdapter: AnalysisReportPptAdapter) { }
 
   ngOnInit(): void {
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
@@ -137,4 +140,15 @@ export class AnalysisReportComponent {
       this.isExportingPdf = false;
     }
   }
+
+  async downloadPpt(): Promise<void> {
+    const document = this.analysisReportPptAdapter.buildDocument({
+      account: this.account,
+      report: this.selectedReport,
+      executiveSummaryItems: this.executiveSummaryItems,
+      facilityAnalysisItems: this.facilityAnalysisItems
+    });
+    await this.pptReportService.buildPowerpoint(document, `Modeling Report - ${this.selectedReport?.name}.pptx`);
+  }
 }
+

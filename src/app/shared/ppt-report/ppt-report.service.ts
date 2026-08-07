@@ -126,6 +126,7 @@ export class PptReportService {
       x: fullContent.x,
       y: firstPageY,
       w: fullContent.w,
+      colW: model.columnWidths,
       border: { type: 'solid', color: 'DDDDDD', pt: 0.5 },
       autoPage: true,
       autoPageSlideStartY: overflowPageY,

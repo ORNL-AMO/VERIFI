@@ -13,7 +13,7 @@
         <span class="fa fa-file-pdf"></span>
       </button>
     </div>
-    @if (selectedReport.reportType == 'accountSavings' || selectedReport.reportType == 'dataOverview') {
+    @if (selectedReport.reportType == 'accountSavings' || selectedReport.reportType == 'dataOverview' || selectedReport.reportType == 'analysis') {
     <button class="btn action-btn" (click)="generatePPT()" title="Generate PowerPoint Report">
       <span class="fa fa-file-powerpoint"></span>
     </button>

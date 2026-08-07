@@ -3,12 +3,11 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, TitleSlide } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { IdbFacilityReport, ModelingReportSettings } from 'src/app/models/idbModels/facilityReport';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { UserDefineModelDateRangePipe } from 'src/app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
 import { RegressionNumberPipe } from 'src/app/shared/helper-pipes/regression-number.pipe';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 
 export interface FacilityModelingReportPptInput {
     report: IdbFacilityReport;
@@ -17,9 +16,8 @@ export interface FacilityModelingReportPptInput {
 
 @Injectable({ providedIn: 'root' })
 export class FacilityModelingReportPptAdapter {
+    private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe = inject(CustomNumberPipe);
-    utilityMeterGroupDbService = inject(UtilityMeterGroupdbService);
-    facilitydbService = inject(FacilitydbService);
     userDefinedModelDateRange = inject(UserDefineModelDateRangePipe);
     regressionNumberPipe = inject(RegressionNumberPipe);
 
@@ -35,7 +33,7 @@ export class FacilityModelingReportPptAdapter {
     buildDocument(data: FacilityModelingReportPptInput): PptDocument {
         const slides: PptSlide[] = [];
         this.reportSettings = data.report.modelingReportSettings;
-        this.facility = this.facilitydbService.getFacilityById(data.report.facilityId);
+        this.facility = this.accountWorkspaceQuery.getFacilityByGuid(data.report.facilityId);
         slides.push({
             type: 'title',
             title: data.report.name,
@@ -73,37 +71,29 @@ export class FacilityModelingReportPptAdapter {
                 slides.push(titleSlide);
                 if (this.regressionGroupItems.length > 0) {
                     if (this.criticalItems.length > 0) {
-                        const tableSlide = this.buildCriticalIssuesSlides();
+                        const tableSlide = this.buildCriticalIssuesSlides(this.criticalItems);
                         if (tableSlide) {
                             slides.push(tableSlide);
                         }
                     }
                     if (this.moderateItems.length > 0) {
-                        const tableSlide = this.buildModerateIssuesSlides();
+                        const tableSlide = this.buildModerateIssuesSlides(this.moderateItems);
                         if (tableSlide) {
                             slides.push(tableSlide);
                         }
                     }
                     if (this.minorItems.length > 0) {
-                        const tableSlide = this.buildMinorIssuesSlides();
+                        const tableSlide = this.buildMinorIssuesSlides(this.minorItems);
                         if (tableSlide) {
                             slides.push(tableSlide);
                         }
                     }
                 }
                 if (this.regressionGroupItems.length === 0) {
-                    slides.push({
-                        type: 'title',
-                        title: 'Issues Summary Not Available',
-                        layout: 'section'
-                    });
+                    slides.push(this.buildTitleSlide('Issues Summary Not Available'));
                 }
-                else if (this.criticalItems.length === 0 && this.moderateItems.length === 0 && this.minorItems.length === 0) {
-                    slides.push({
-                        type: 'title',
-                        title: 'No Issues Found',
-                        subtitle: ''
-                    });
+                else if (this.regressionGroupItems.length > 0 && this.criticalItems.length === 0 && this.moderateItems.length === 0 && this.minorItems.length === 0) {
+                    slides.push(this.buildTitleSlide('No Issues Found'));
                 }
             }
 
@@ -113,19 +103,19 @@ export class FacilityModelingReportPptAdapter {
                     slides.push(titleSlide);
                 }
                 if (this.regressionGroupItems.length > 0) {
-                    const tableSlide = this.buildModelDetailsTable();
+                    const tableSlide = this.buildModelDetailsTable(this.regressionGroupItems, false);
                     if (tableSlide) {
                         slides.push(tableSlide);
                     }
                 }
                 if (this.classicIntensityGroupItems.length > 0) {
-                    const tableSlide = this.buildClassicIntensityTable();
+                    const tableSlide = this.buildClassicIntensityTable(this.classicIntensityGroupItems);
                     if (tableSlide) {
                         slides.push(tableSlide);
                     }
                 }
                 if (this.absoluteGroupItems.length > 0) {
-                    const tableSlide = this.buildAbsoluteTable();
+                    const tableSlide = this.buildAbsoluteTable(this.absoluteGroupItems);
                     if (tableSlide) {
                         slides.push(tableSlide);
                     }
@@ -139,7 +129,7 @@ export class FacilityModelingReportPptAdapter {
                 }
                 if (this.regressionGroupItems.length > 0) {
                     for (const item of this.regressionGroupItems) {
-                        const tableSlide = this.buildModelDetailsTable(item);
+                        const tableSlide = this.buildModelDetailsTable([item], true);
                         if (tableSlide) {
                             slides.push(tableSlide);
                         }
@@ -150,11 +140,7 @@ export class FacilityModelingReportPptAdapter {
                     }
                 }
                 if (this.regressionGroupItems.length === 0) {
-                    slides.push({
-                        type: 'title',
-                        title: 'Data Validation Tables Not Available',
-                        layout: 'section'
-                    });
+                    slides.push(this.buildTitleSlide('Data Validation Tables Not Available'));
                 }
             }
         }
@@ -165,7 +151,7 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildTitleSlide(title: string): TitleSlide {
+    buildTitleSlide(title: string): TitleSlide {
         return {
             type: 'title',
             title,
@@ -173,14 +159,14 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildCriticalIssuesSlides(): TableSlide {
+    buildCriticalIssuesSlides(criticalItems: Array<FacilityGroupAnalysisItem>): TableSlide {
         const title: string = 'Critical Issues';
         const headers: Array<string> = ['Facility', 'Group', 'Model Validation Failures'];
         let rows: string[][] = [];
-        this.criticalItems.forEach(item => {
+        criticalItems.forEach(item => {
             let row: string[] = [];
-            row.push(this.facility.name);
-            row.push(this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId) || '-');
+            row.push(this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name || '-');
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-');
             row.push(item.selectedModel.modelValidationNotes.join('\n'));
             rows.push(row);
         });
@@ -192,14 +178,14 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildModerateIssuesSlides(): TableSlide {
+    buildModerateIssuesSlides(moderateItems: Array<FacilityGroupAnalysisItem>): TableSlide {
         const title: string = 'Moderate Issues';
         const headers: Array<string> = ['Facility', 'Group', 'Data Validation Failures'];
         let rows: string[][] = [];
-        this.moderateItems.forEach(item => {
+        moderateItems.forEach(item => {
             let row: string[] = [];
-            row.push(this.facility.name);
-            row.push(this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId) || '-');
+            row.push(this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name || '-');
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-');
             row.push(item.selectedModel.dataValidationNotes.join('\n'));
             rows.push(row);
         });
@@ -211,14 +197,14 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildMinorIssuesSlides(): TableSlide {
+    buildMinorIssuesSlides(minorItems: Array<FacilityGroupAnalysisItem>): TableSlide {
         const title: string = 'Minor Issues';
         const headers: Array<string> = ['Facility', 'Group', 'Model Notes'];
         let rows: string[][] = [];
-        this.minorItems.forEach(item => {
+        minorItems.forEach(item => {
             let row: string[] = [];
-            row.push(this.facility.name);
-            row.push(this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId) || '-');
+            row.push(this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name || '-');
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-');
             row.push(item.selectedModel.modelNotes.join('\n'));
             rows.push(row);
         });
@@ -230,21 +216,19 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildModelDetailsTable(item?: FacilityGroupAnalysisItem): TableSlide {
+    buildModelDetailsTable(regressionGroupItems: Array<FacilityGroupAnalysisItem>, isDataValidation: boolean): TableSlide {
         let title: string = 'Analysis Type: Regression';
         const headers: Array<string> = ['Facility', 'Group', 'Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Model Notes'];
         const rows: string[][] = [];
-        let filteredRegressionItems: Array<FacilityGroupAnalysisItem> = this.regressionGroupItems;
-        if (item) {
-            title = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
-            filteredRegressionItems = [item];
+        if (isDataValidation) {
+            title = this.accountWorkspaceQuery.getMeterGroupName(regressionGroupItems[0].group.idbGroupId) || '-';
         }
 
-        filteredRegressionItems.forEach(item => {
+        regressionGroupItems.forEach(item => {
             const row: string[] = [];
             const groupName = item.selectedModel?.isUserDefinedModel
-                ? `${this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId)} *`
-                : this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+                ? `${this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-'} *`
+                : this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-';
 
             const modelYear = item.selectedModel?.isUserDefinedModel
                 ? this.userDefinedModelDateRange.transform(item.group)
@@ -269,7 +253,7 @@ export class FacilityModelingReportPptAdapter {
             const formula = this.buildFormula(item);
             const modelNotes = item.selectedModel?.modelNotes?.length ? item.selectedModel.modelNotes.join('\n') : '—';
 
-            row.push(this.facility.name);
+            row.push(this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name || '-');
             row.push(groupName || '-');
             row.push(modelYear);
             row.push(variablePValues);
@@ -286,18 +270,19 @@ export class FacilityModelingReportPptAdapter {
             title,
             headers,
             rows,
+            columnWidths: [0.8, 0.8, 0.8, 1.2, 0.55, 0.7, 0.7, 1.75, 1.75],
             note: this.hasUserDefinedModel() ? '* User Defined Model' : ''
         };
     }
 
-    private buildClassicIntensityTable(): TableSlide {
+    buildClassicIntensityTable(classicIntensityGroupItems: FacilityGroupAnalysisItem[]): TableSlide {
         const title: string = 'Analysis Type: Classic Intensity';
         const headers: Array<string> = ['Facility', 'Group', 'Baseline Year', 'Predictor Variables'];
         const rows: string[][] = [];
-        this.classicIntensityGroupItems.forEach(item => {
+        classicIntensityGroupItems.forEach(item => {
             const row: string[] = [];
-            row.push(this.facility.name);
-            row.push(this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId) || '-');
+            row.push(this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name || '-');
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-');
             row.push(item.baselineYear.toString());
             let predictorVariables: string = '';
             item.group.predictorVariables?.forEach(predictor => {
@@ -316,14 +301,14 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildAbsoluteTable(): TableSlide {
+    buildAbsoluteTable(absoluteGroupItems: FacilityGroupAnalysisItem[]): TableSlide {
         const title: string = 'Analysis Type: Absolute';
         const headers: Array<string> = ['Facility', 'Group', 'Baseline Year'];
         const rows: string[][] = [];
-        this.absoluteGroupItems.forEach(item => {
+        absoluteGroupItems.forEach(item => {
             const row: string[] = [];
-            row.push(this.facility.name);
-            row.push(this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId) || '-');
+            row.push(this.accountWorkspaceQuery.getFacilityByGuid(item.facilityId)?.name || '-');
+            row.push(this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-');
             row.push(item.baselineYear.toString());
             rows.push(row);
         });
@@ -335,8 +320,8 @@ export class FacilityModelingReportPptAdapter {
         };
     }
 
-    private buildSEPValidationTable(item: FacilityGroupAnalysisItem): TableSlide {
-        const title: string = this.utilityMeterGroupDbService.getGroupName(item.group.idbGroupId);
+    buildSEPValidationTable(item: FacilityGroupAnalysisItem): TableSlide {
+        const title: string = this.accountWorkspaceQuery.getMeterGroupName(item.group.idbGroupId) || '-';
         let headers: Array<string> = ['', ''];
         item.selectedModel?.SEPValidation?.forEach(variable => {
             headers.push(variable.predictorVariable);
