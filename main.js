@@ -153,39 +153,6 @@ app.on('window-all-closed', function () {
     app.quit();
 });
 
-
-ipcMain.on("saveData", (event, arg) => {
-    log.info('saveData called');
-    delete arg.fileData.account.dataBackupFilePath;
-    if (jetpack.exists(arg.fileName)) {
-        log.info('saved existing')
-        jetpack.writeAsync(arg.fileName, arg.fileData);
-    } else if (arg.isArchive) {
-        log.info('createArchiveFile')
-        jetpack.writeAsync(arg.fileName, arg.fileData);
-    } else if (arg.isCreateNewFile) {
-        log.info('createNewFile')
-        jetpack.writeAsync(arg.fileName, arg.fileData);
-    }
-});
-
-ipcMain.on("openDialog", (event, arg) => {
-    log.info('openDialog');
-    let saveDialogOptions = {
-        filters: [{
-            name: "JSON Files",
-            extensions: ["json"]
-        }],
-        defaultPath: arg.fileName
-    }
-    dialog.showSaveDialog(win, saveDialogOptions).then(results => {
-        win.webContents.send('file-path', results.filePath);
-        // log.info('save new')
-        // jetpack.writeAsync(results.filePath, arg.fileData);
-    });
-
-});
-
 ipcMain.on("selectFolder", async (event) => {
     try {
         const result = await dialog.showOpenDialog({
@@ -287,17 +254,6 @@ ipcMain.on("utilityFileExists", (event, path) => {
     log.info('Checking if file exists');
     const exists = fs.existsSync(path);
     win.webContents.send('utility-file-exists', exists);
-});
-
-ipcMain.on("fileExists", (event, arg) => {
-    log.info("check for data");
-    let results = jetpack.exists(arg.fileName);
-    win.webContents.send('file-exists', results);
-})
-
-ipcMain.on("getDataFile", (event, arg) => {
-    let dataFile = jetpack.read(arg.fileName, 'json');
-    win.webContents.send('data-file', dataFile);
 });
 
 ipcMain.handle("backup:chooseSavePath", async (_event, arg) => {

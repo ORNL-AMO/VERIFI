@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BackupFile } from '../backup/backup-data.service';
+import { BackupFile } from '../models/backup-file';
 
 interface BackupGatewayExistsResult {
   ok: boolean;

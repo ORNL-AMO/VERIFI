@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { BackupDataService } from 'src/app/backup/backup-data.service';
+import { addAccountBackupMessages, addFacilityBackupMessages } from 'src/app/backup/backup-loading-messages';
 import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
 import { Router } from '@angular/router';
@@ -52,7 +52,6 @@ export class ImportBackupModalComponent implements OnInit {
   accountFacilityNames: Array<string> = [];
   constructor(
     private loadingService: LoadingService,
-    private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService,
     private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -195,13 +194,13 @@ export class ImportBackupModalComponent implements OnInit {
         this.loadingService.setContext('import-account-backup');
         this.loadingService.setTitle("Importing account backup file");
         this.loadingService.addLoadingMessage("Adding account");
-        this.backupDataService.accountBackupMessages();
+        addAccountBackupMessages(this.loadingService);
         this.loadingService.setCurrentLoadingIndex(0);
       }
     } else {
       this.loadingService.setContext('import-facility-backup');
       this.loadingService.setTitle("Importing facility backup file");
-      this.backupDataService.facilityBackupMessages();
+      addFacilityBackupMessages(this.loadingService);
     }
     try {
       let tmpBackupFile: PreparedBackupFile = structuredClone(this.backupFile);
@@ -309,7 +308,7 @@ export class ImportBackupModalComponent implements OnInit {
     for (let facility of this.selectedFacilitiesToImport) {
       const name = facility.name;
       this.loadingService.addLoadingMessage("Adding facility: " + name);
-      this.backupDataService.facilityBackupMessages();
+      addFacilityBackupMessages(this.loadingService);
     }
   }
 

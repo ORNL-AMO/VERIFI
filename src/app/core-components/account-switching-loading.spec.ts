@@ -1,3 +1,4 @@
+import '@angular/compiler';
 import { CommonModule } from '@angular/common';
 import { Injector, NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -107,8 +108,10 @@ describe('account switching loading ownership', () => {
 
   it('publishes the requested workspace before backing up or exporting an account', async () => {
     const events: string[] = [];
-    const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
-    const backupExportCoordinator = {
+  const workspace = {
+    selectAccount: vi.fn(async () => { events.push('workspace'); return 'published'; })
+  };
+  const backupExportCoordinator = {
       exportAccountByGuid: vi.fn(async () => events.push('backup'))
     };
     const exportService = {

@@ -54,7 +54,7 @@ const WRITE_ALLOWLIST_PATTERNS: RegExp[] = [
   // Application lifecycle manages startup/catalog writes
   /application-lifecycle\//,
   // Backup data service is called inside boundary persist functions
-  /shared\/helper-services\/backup-data\.service/,
+  /backup\/backup-data\.service/,
   // Spreadsheet upload service is called inside boundary persist functions
   /data-management\/data-management-import\/import-services\/upload-data\.service/,
   // AccountWorkspaceService and loader are infrastructure

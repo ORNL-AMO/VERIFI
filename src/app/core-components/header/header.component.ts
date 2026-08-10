@@ -191,8 +191,7 @@ export class HeaderComponent implements OnInit {
   }
 
   async checkLatestFile() {
-    this.automaticBackupService.forceModal = true;
-    await this.electronService.readBackupFile(this.activeAccount.dataBackupFilePath);
+    await this.automaticBackupService.requestReview();
   }
 
   goHome() {

@@ -4,7 +4,6 @@ import { AccountWorkspaceService } from 'src/app/account-workspace/account-works
 import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, skip, take } from 'rxjs';
-import { BackupDataService, BackupFile } from 'src/app/backup/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -17,6 +16,7 @@ import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.serv
 import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
+import { BackupFile } from 'src/app/models/backup-file';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
@@ -60,7 +60,6 @@ export class AccountSettingsComponent implements OnInit {
   constructor(
     private router: Router,
     private loadingService: LoadingService,
-    private backupDataService: BackupDataService,
     private backupExportCoordinator: BackupExportCoordinator,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
@@ -274,6 +273,7 @@ export class AccountSettingsComponent implements OnInit {
       { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
       () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
     );
+    await this.automaticBackupsService.inspectCurrentAccountFile();
     this.cd.detectChanges();
   }
 

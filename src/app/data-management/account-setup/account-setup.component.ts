@@ -10,7 +10,7 @@ import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { BackupFile } from 'src/app/backup/backup-data.service';
+import { BackupFile } from 'src/app/models/backup-file';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 
@@ -94,6 +94,7 @@ export class AccountSetupComponent {
       { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account' },
       () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
     );
+    await this.automaticBackupsService.inspectCurrentAccountFile();
     this.cd.detectChanges();
   }
 
