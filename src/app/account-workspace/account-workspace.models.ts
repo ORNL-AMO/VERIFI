@@ -42,6 +42,31 @@ export interface AccountWorkspaceSnapshot {
   readonly energyUseEquipment: readonly WorkspaceEntity<IdbFacilityEnergyUseEquipment>[];
 }
 
+export type AccountWorkspaceCollectionKey = {
+  [K in keyof AccountWorkspaceSnapshot]: AccountWorkspaceSnapshot[K] extends readonly WorkspaceEntity<unknown>[] ? K : never
+}[keyof AccountWorkspaceSnapshot];
+
+export type AccountWorkspaceCollectionRecord<K extends AccountWorkspaceCollectionKey> =
+  AccountWorkspaceSnapshot[K] extends readonly (infer T)[] ? T : never;
+
+export interface WorkspacePatchRecord {
+  readonly id?: number;
+  readonly guid?: string;
+  readonly accountId?: string;
+}
+
+export interface WorkspaceCollectionPatch<K extends AccountWorkspaceCollectionKey = AccountWorkspaceCollectionKey> {
+  readonly collection: K;
+  readonly upsert?: readonly WorkspacePatchRecord[];
+  readonly deleteIds?: readonly number[];
+  readonly deleteGuids?: readonly string[];
+}
+
+export interface WorkspacePatch {
+  readonly account?: WorkspaceEntity<IdbAccount>;
+  readonly collections?: readonly WorkspaceCollectionPatch[];
+}
+
 export interface WorkspaceSelections {
   readonly facility?: WorkspaceEntity<IdbFacility>;
   readonly meter?: WorkspaceEntity<IdbUtilityMeter>;

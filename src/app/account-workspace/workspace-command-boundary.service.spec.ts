@@ -1,8 +1,9 @@
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { AccountWorkspaceSnapshot } from './account-workspace.models';
+import { upsertWorkspaceRecords } from './account-workspace-patches';
 import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
-import { WorkspaceWriteError } from './workspace-commands.models';
+import { WorkspaceChangeKind, WorkspaceEntityKind, WorkspaceWriteError } from './workspace-commands.models';
 
 describe('WorkspaceCommandBoundary', () => {
   it('rejects a command when the workspace is not ready', async () => {
@@ -92,6 +93,65 @@ describe('WorkspaceCommandBoundary', () => {
       entityGuid: 'meter-guid-1',
       accountGuid: 'account-a'
     });
+  });
+
+  it('publishes a committed patch without reloading the workspace', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+
+    const savedData = {
+      id: 1,
+      guid: 'data-a',
+      accountId: 'account-a',
+      facilityId: 'facility-a',
+      meterId: 'meter-a'
+    } as any;
+
+    const result = await boundary.execute(
+      {
+        ...makeOptions('meterData', 'add', savedData.guid),
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('meterData', [value])
+        }
+      },
+      () => Promise.resolve(savedData)
+    );
+
+    expect(result.value).toBe(savedData);
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.meterData()).toEqual([savedData]);
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
+    expect(store.hasPending()).toBe(false);
+  });
+
+  it('falls back to a committed reload when patch publication fails', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+
+    const foreignData = {
+      id: 1,
+      guid: 'data-a',
+      accountId: 'account-b',
+      facilityId: 'facility-a',
+      meterId: 'meter-a'
+    } as any;
+
+    await boundary.execute(
+      {
+        ...makeOptions('meterData', 'add', foreignData.guid),
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('meterData', [value])
+        }
+      },
+      () => Promise.resolve(foreignData)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
+    expect(store.hasPending()).toBe(false);
   });
 
   it('emits no committed-change event when a command fails', async () => {
@@ -213,8 +273,8 @@ function makeSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
 }
 
 function makeOptions(
-  entityKind = 'meter' as const,
-  changeKind = 'update' as const,
+  entityKind: WorkspaceEntityKind = 'meter',
+  changeKind: WorkspaceChangeKind = 'update',
   entityGuid?: string
 ) {
   return { entityKind, changeKind, entityGuid, label: 'Saving' };

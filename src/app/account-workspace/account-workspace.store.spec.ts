@@ -58,6 +58,79 @@ describe('AccountWorkspaceStore', () => {
     expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
   });
 
+  it('publishes a committed patch without replacing unchanged collections', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot, { facility: snapshot.facilities[0] });
+
+    const updatedData = {
+      ...snapshot.meterData[0],
+      totalEnergyUse: 42
+    } as any;
+    const addedData = {
+      id: 2,
+      guid: 'data-b',
+      facilityId: 'facility-a',
+      accountId: 'account-a',
+      meterId: 'meter-a'
+    } as any;
+
+    store.publishCommittedPatch({
+      collections: [{
+        collection: 'meterData',
+        upsert: [updatedData, addedData]
+      }]
+    });
+
+    expect(store.meterData()).toEqual([updatedData, addedData]);
+    expect(store.facilityMeterData()).toEqual([updatedData, addedData]);
+    expect(store.meters()).toEqual(snapshot.meters);
+    expect(store.revision()).toBe(1);
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
+  });
+
+  it('removes records with a committed patch and clears invalid selections', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot, {
+      facility: snapshot.facilities[0],
+      meter: snapshot.meters[0]
+    });
+
+    store.publishCommittedPatch({
+      collections: [{
+        collection: 'meters',
+        deleteGuids: ['meter-a']
+      }]
+    });
+
+    expect(store.meters()).toEqual([snapshot.meters[1]]);
+    expect(store.selectedFacility()).toBe(snapshot.facilities[0]);
+    expect(store.selectedMeter()).toBeUndefined();
+    expect(store.revision()).toBe(1);
+  });
+
+  it('rejects a committed patch that contains another account', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot);
+
+    expect(() => store.publishCommittedPatch({
+      collections: [{
+        collection: 'meterData',
+        upsert: [{
+          id: 2,
+          guid: 'foreign-data',
+          facilityId: 'facility-a',
+          accountId: 'account-b'
+        } as any]
+      }]
+    })).toThrow('belonging to another account');
+
+    expect(store.revision()).toBe(0);
+    expect(store.meterData()).toEqual(snapshot.meterData);
+  });
+
   describe('pending operation tracking', () => {
     it('starts with no pending operations', () => {
       const store = new AccountWorkspaceStore();
