@@ -139,7 +139,7 @@ export class AccountWorkspaceStore {
       throw new WorkspaceSelectionError('A workspace must be loaded before publishing a patch.');
     }
 
-    const patchedSnapshot = applyWorkspacePatch(snapshot, patch);
+    const patchedSnapshot = applyWorkspacePatch(snapshot, copyWorkspacePatch(patch));
     const nextRevision = this.state().revision + 1;
     this.writableState.set({
       status: 'ready',
@@ -256,6 +256,18 @@ function applyWorkspacePatch(snapshot: AccountWorkspaceSnapshot, patch: Workspac
     );
   }
   return next;
+}
+
+function copyWorkspacePatch(patch: WorkspacePatch): WorkspacePatch {
+  return {
+    account: patch.account ? structuredClone(patch.account) : undefined,
+    collections: patch.collections?.map(collectionPatch => ({
+      collection: collectionPatch.collection,
+      upsert: collectionPatch.upsert?.map(record => structuredClone(record)),
+      deleteIds: collectionPatch.deleteIds ? [...collectionPatch.deleteIds] : undefined,
+      deleteGuids: collectionPatch.deleteGuids ? [...collectionPatch.deleteGuids] : undefined
+    }))
+  };
 }
 
 function applyCollectionPatch<T extends { id?: number; guid?: string }>(

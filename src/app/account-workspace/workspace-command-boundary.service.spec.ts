@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { AccountWorkspaceSnapshot } from './account-workspace.models';
-import { upsertWorkspaceRecords } from './account-workspace-patches';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from './account-workspace-patches';
 import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
 import { WorkspaceChangeKind, WorkspaceEntityKind, WorkspaceWriteError } from './workspace-commands.models';
 
@@ -125,9 +125,10 @@ describe('WorkspaceCommandBoundary', () => {
     expect(store.hasPending()).toBe(false);
   });
 
-  it('uses a committed patch by default when an add command returns a workspace record', async () => {
+  it('reloads by default when an add command returns a workspace record', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
 
     const savedPredictorData = {
       id: 3,
@@ -142,14 +143,15 @@ describe('WorkspaceCommandBoundary', () => {
       () => Promise.resolve(savedPredictorData)
     );
 
-    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
-    expect(store.predictorData()).toEqual([savedPredictorData]);
-    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
+    expect(store.predictorData()).toEqual([]);
   });
 
-  it('uses a committed patch by default when an update command returns a workspace record', async () => {
+  it('reloads by default when an update command returns a workspace record', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     const snapshot = publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
     const updatedFacility = {
       ...snapshot.facilities[0],
       name: 'Updated Facility'
@@ -160,18 +162,42 @@ describe('WorkspaceCommandBoundary', () => {
       () => Promise.resolve(updatedFacility)
     );
 
-    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
-    expect(store.facilities()).toEqual([updatedFacility, snapshot.facilities[1]]);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
+    expect(store.facilities()).toEqual(snapshot.facilities);
   });
 
-  it('uses a committed patch by default when a delete command returns a numeric id', async () => {
+  it('reloads by default when a delete command returns a numeric id', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    const snapshot = makeSnapshot('account-a');
+    const report = { id: 7, guid: 'report-a', accountId: 'account-a' } as any;
+    store.publish({ ...snapshot, facilityReports: [report] }, {});
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+
+    await boundary.execute(
+      makeOptions('facilityReport', 'delete', report.guid),
+      () => Promise.resolve(report.id)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
+    expect(store.facilityReports()).toEqual([report]);
+  });
+
+  it('uses an explicit committed patch for delete commands when provided', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     const snapshot = makeSnapshot('account-a');
     const report = { id: 7, guid: 'report-a', accountId: 'account-a' } as any;
     store.publish({ ...snapshot, facilityReports: [report] }, {});
 
     await boundary.execute(
-      makeOptions('facilityReport', 'delete', report.guid),
+      {
+        ...makeOptions('facilityReport', 'delete', report.guid),
+        publication: {
+          mode: 'patch',
+          buildPatch: () => deleteWorkspaceRecords('facilityReports', { ids: [report.id] })
+        }
+      },
       () => Promise.resolve(report.id)
     );
 
@@ -179,9 +205,10 @@ describe('WorkspaceCommandBoundary', () => {
     expect(store.facilityReports()).toEqual([]);
   });
 
-  it('uses a committed account patch by default for account updates', async () => {
+  it('reloads by default for account updates', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     const snapshot = publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
     const updatedAccount = {
       ...snapshot.account,
       name: 'Renamed Account'
@@ -192,8 +219,9 @@ describe('WorkspaceCommandBoundary', () => {
       () => Promise.resolve(updatedAccount)
     );
 
-    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
-    expect(store.account()).toEqual(updatedAccount);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledOnce();
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
+    expect(store.account()).toEqual(snapshot.account);
   });
 
   it('reloads by default for bulk commands and ambiguous result shapes', async () => {

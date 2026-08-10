@@ -110,6 +110,47 @@ describe('AccountWorkspaceStore', () => {
     expect(store.revision()).toBe(1);
   });
 
+  it('isolates committed patch payload objects from later caller mutation', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot);
+
+    const patchedAccount = {
+      ...snapshot.account,
+      name: 'Patched Account',
+      metadata: { source: 'patch' }
+    } as any;
+    const patchedData = {
+      ...snapshot.meterData[0],
+      totalEnergyUse: 42,
+      details: { normalized: true }
+    } as any;
+
+    store.publishCommittedPatch({
+      account: patchedAccount,
+      collections: [{
+        collection: 'meterData',
+        upsert: [patchedData]
+      }]
+    });
+
+    patchedAccount.name = 'Mutated Account';
+    patchedAccount.metadata.source = 'mutated';
+    patchedData.totalEnergyUse = 999;
+    patchedData.details.normalized = false;
+
+    expect(store.account()).toMatchObject({
+      guid: snapshot.account.guid,
+      name: 'Patched Account'
+    });
+    expect((store.account() as any).metadata.source).toBe('patch');
+    expect(store.meterData()[0]).toMatchObject({
+      guid: snapshot.meterData[0].guid,
+      totalEnergyUse: 42
+    });
+    expect((store.meterData()[0] as any).details.normalized).toBe(true);
+  });
+
   it('rejects a committed patch that contains another account', () => {
     const store = new AccountWorkspaceStore();
     const snapshot = createSnapshot();

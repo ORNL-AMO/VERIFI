@@ -14,12 +14,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { AccountWorkspaceService } from './account-workspace.service';
 import { AccountWorkspaceStore } from './account-workspace.store';
-import { deleteWorkspaceRecords, upsertWorkspaceRecords } from './account-workspace-patches';
-import {
-  AccountWorkspaceCollectionKey,
-  WorkspacePatch,
-  WorkspacePatchRecord
-} from './account-workspace.models';
+import { WorkspacePatch } from './account-workspace.models';
 import {
   WorkspaceChangeKind,
   WorkspaceCommittedChange,
@@ -29,24 +24,6 @@ import {
 } from './workspace-commands.models';
 
 let nextOperationId = 0;
-
-const ENTITY_COLLECTIONS: Partial<Record<WorkspaceEntityKind, AccountWorkspaceCollectionKey>> = {
-  facility: 'facilities',
-  meter: 'meters',
-  meterData: 'meterData',
-  meterGroup: 'meterGroups',
-  predictor: 'predictors',
-  predictorData: 'predictorData',
-  facilityAnalysis: 'facilityAnalyses',
-  accountAnalysis: 'accountAnalyses',
-  facilityReport: 'facilityReports',
-  accountReport: 'accountReports',
-  customEmissions: 'customEmissions',
-  customFuel: 'customFuels',
-  customGWP: 'customGWPs',
-  energyUseGroup: 'energyUseGroups',
-  energyUseEquipment: 'energyUseEquipment'
-};
 
 export interface WorkspaceCommandOptions {
   readonly entityKind: WorkspaceEntityKind;
@@ -231,66 +208,9 @@ export class WorkspaceCommandBoundary {
       }
     }
 
-    const patch = this.buildDefaultPatch(options, value);
-    if (patch) {
-      try {
-        this.store.publishCommittedPatch(patch);
-        return 'published' as const;
-      } catch {
-        return this.reloadCommittedWorkspace(opId, options);
-      }
-    }
-
     // Reload the workspace. If this fails, the persistence already committed —
     // re-throw so the caller can report a partial failure.
     return this.reloadCommittedWorkspace(opId, options);
-  }
-
-  private buildDefaultPatch<T>(
-    options: WorkspaceCommandOptions,
-    value: T
-  ): WorkspacePatch | undefined {
-    if (options.changeKind === 'bulk') {
-      return undefined;
-    }
-
-    if (options.entityKind === 'account') {
-      return this.buildDefaultAccountPatch(options.changeKind, value);
-    }
-
-    const collection = ENTITY_COLLECTIONS[options.entityKind];
-    if (!collection) {
-      return undefined;
-    }
-
-    if (options.changeKind === 'add' || options.changeKind === 'update') {
-      return isWorkspacePatchRecord(value)
-        ? upsertWorkspaceRecords(collection, [value as never])
-        : undefined;
-    }
-
-    if (options.changeKind === 'delete') {
-      if (options.entityKind === 'facility') {
-        return undefined;
-      }
-      return typeof value === 'number'
-        ? deleteWorkspaceRecords(collection, { ids: [value] })
-        : undefined;
-    }
-
-    return undefined;
-  }
-
-  private buildDefaultAccountPatch<T>(
-    changeKind: WorkspaceChangeKind,
-    value: T
-  ): WorkspacePatch | undefined {
-    if (changeKind !== 'add' && changeKind !== 'update') {
-      return undefined;
-    }
-    return isWorkspacePatchRecord(value)
-      ? { account: value as never }
-      : undefined;
   }
 
   private assertCommandStillCurrent(submittedAccountGuid: string, phase: string): void {
@@ -309,10 +229,4 @@ export class WorkspaceCommandBoundary {
       );
     }
   }
-}
-
-function isWorkspacePatchRecord(value: unknown): value is WorkspacePatchRecord {
-  return typeof value === 'object'
-    && value !== null
-    && typeof (value as WorkspacePatchRecord).guid === 'string';
 }
