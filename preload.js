@@ -11,17 +11,24 @@ contextBridge.exposeInMainWorld(
     "electronAPI", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["ready", "update", "relaunch", "saveData", "fileExists", "openDialog", "getDataFile", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder", "disconnectBill"];
+            let validChannels = ["ready", "update", "relaunch", "uploadFileDialog", "openUploadedFileLocation", "utilityFileExists", "openBillsFolder", "checkFolderExists", "selectFolder", "disconnectBill"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
         },
         on: (channel, func) => {
-            let validChannels = ["release-info", "available", "error", "update-downloaded", "file-path", "file-exists", "data-file", "utility-file-path", "utility-file-exists", "folder-exists", "folder-selected", "bill-disconnected"];
+            let validChannels = ["release-info", "available", "error", "update-downloaded", "utility-file-path", "utility-file-exists", "folder-exists", "folder-selected", "bill-disconnected"];
             if (validChannels.includes(channel)) {
                 // Deliberately strip event as it includes `sender` 
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }
-         }
+         },
+        invoke: (channel, data) => {
+            let validChannels = ["backup:chooseSavePath", "backup:exists", "backup:read", "backup:write"];
+            if (validChannels.includes(channel)) {
+                return ipcRenderer.invoke(channel, data);
+            }
+            return Promise.reject(new Error(`Channel ${channel} is not allowed.`));
+        }
     }
 );

@@ -1,3 +1,4 @@
+import '@angular/compiler';
 import { CommonModule } from '@angular/common';
 import { Injector, NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -31,6 +32,7 @@ describe('account switching loading ownership', () => {
       setLoadingStatus: vi.fn()
     };
     const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
+    const backupExportCoordinator = { exportActiveAccount: vi.fn() };
     const electron = {
       isElectron: false,
       accountLatestBackupFile: { next: vi.fn() }
@@ -43,7 +45,7 @@ describe('account switching loading ownership', () => {
       {} as any,
       {} as any,
       {} as any,
-      {} as any,
+      backupExportCoordinator as any,
       loading as any,
       workspace as any,
       electron as any,
@@ -104,15 +106,20 @@ describe('account switching loading ownership', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account/home');
   });
 
-  it('publishes the requested workspace before backing up or exporting an account', async () => {
+  it('records inactive-account backup timestamps without publishing a workspace command', async () => {
     const events: string[] = [];
     const workspace = {
-      selectAccount: vi.fn(async () => {
-        events.push('workspace');
-        return 'published';
+      selectAccount: vi.fn(async () => { events.push('workspace'); return 'published'; })
+    };
+    const backupExportCoordinator = {
+      exportAccountByGuid: vi.fn(async () => events.push('backup'))
+    };
+    const accountHandler = {
+      update: vi.fn(async (updatedAccount: IdbAccount) => {
+        events.push('catalog-update');
+        return updatedAccount;
       })
     };
-    const backupData = { backupAccount: vi.fn(() => events.push('backup')) };
     const exportService = {
       setExportFacilityDataMessages: vi.fn(),
       exportFacilityData: vi.fn(() => events.push('export'))
@@ -128,19 +135,22 @@ describe('account switching loading ownership', () => {
       refreshAccountCatalog: vi.fn().mockResolvedValue([account])
     };
     const manageAccounts = createManageAccounts({
+      accountHandler,
       workspace,
-      backupData,
+      backupExportCoordinator,
       exportService,
       commandBoundary,
       lifecycle
     });
 
     await manageAccounts.backupAccount(account);
-    expect(events).toEqual(['workspace', 'backup', 'account-update']);
-    expect(commandBoundary.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ entityKind: 'account', changeKind: 'update' }),
-      expect.any(Function)
-    );
+    expect(events).toEqual(['backup', 'catalog-update']);
+    expect(backupExportCoordinator.exportAccountByGuid).toHaveBeenCalledWith('account-b');
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(accountHandler.update).toHaveBeenCalledWith(expect.objectContaining({
+      guid: 'account-b',
+      lastBackup: expect.any(Date)
+    }), 'account-b');
 
     events.length = 0;
     await manageAccounts.exportToExcel(account);
@@ -188,12 +198,13 @@ describe('account switching loading ownership', () => {
 
 function createManageAccounts(overrides: Record<string, any> = {}): ManageAccountsComponent {
   const accountDb = overrides.accountDb ?? {
-    allAccounts: new BehaviorSubject<IdbAccount[]>([])
+    allAccounts: new BehaviorSubject<IdbAccount[]>([]),
+    updateWithObservable: vi.fn(() => of({}))
   };
-  const loading = overrides.loading ?? {
-    setLoadingMessage: vi.fn(),
-    setLoadingStatus: vi.fn(),
-    setContext: vi.fn(),
+    const loading = overrides.loading ?? {
+      setLoadingMessage: vi.fn(),
+      setLoadingStatus: vi.fn(),
+      setContext: vi.fn(),
     setTitle: vi.fn(),
     setCurrentLoadingIndex: vi.fn(),
     clearLoadingMessages: vi.fn(),
@@ -206,7 +217,7 @@ function createManageAccounts(overrides: Record<string, any> = {}): ManageAccoun
     (overrides.accountHandler ?? { update: vi.fn(), add: vi.fn().mockImplementation(a => Promise.resolve({ ...a, id: 99, guid: 'new-guid' })) }) as any,
     (overrides.router ?? { navigateByUrl: vi.fn() }) as any,
     (overrides.toasts ?? { showToast: vi.fn() }) as any,
-    (overrides.backupData ?? { backupAccount: vi.fn() }) as any,
+    (overrides.backupExportCoordinator ?? { exportAccountByGuid: vi.fn(), exportActiveAccount: vi.fn() }) as any,
     (overrides.exportService ?? {
       setExportFacilityDataMessages: vi.fn(),
       exportFacilityData: vi.fn()

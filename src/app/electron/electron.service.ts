@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { BackupFile } from '../shared/helper-services/backup-data.service';
-import { exists } from 'fs-jetpack';
+import { BackupFile } from '../models/backup-file';
 
 @Injectable({
   providedIn: 'root'
@@ -14,21 +13,15 @@ export class ElectronService {
   updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
   updateError: BehaviorSubject<boolean>;
   isElectron: boolean;
-  savedFilePath: BehaviorSubject<string>;
   savedUtilityFilePath: { [key: string]: BehaviorSubject<string> } = {};
   fileDeletedSubject: { [key: string]: BehaviorSubject<boolean> } = {};
-  fileExists: BehaviorSubject<boolean>;
   folderPathSubject: BehaviorSubject<string>;
   folderErrorSubject: BehaviorSubject<string>;;
   currentKey: string;
-  accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
-    this.savedFilePath = new BehaviorSubject<string>(undefined);
-    this.accountLatestBackupFile = new BehaviorSubject<BackupFile>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
-    this.fileExists = new BehaviorSubject<boolean>(false);
     this.folderPathSubject = new BehaviorSubject<string>(null);
     this.folderErrorSubject = new BehaviorSubject<string>(null);
     this.isElectron = window["electronAPI"]
@@ -69,19 +62,6 @@ export class ElectronService {
     window["electronAPI"].on("update-downloaded", (data) => {
       console.log('update-downloaded');
       console.log(data)
-    });
-
-    window["electronAPI"].on("file-path", (data) => {
-      console.log('electron service file-path...')
-      this.savedFilePath.next(data);
-    });
-
-    window["electronAPI"].on("file-exists", (data) => {
-      this.fileExists.next(data == 'file');
-    });
-
-    window["electronAPI"].on("data-file", (data) => {
-      this.accountLatestBackupFile.next(data);
     });
 
     window["electronAPI"].on("utility-file-path", (path) => {
@@ -153,59 +133,43 @@ export class ElectronService {
     window["electronAPI"].send("relaunch");
   }
 
-
-  sendSaveData(backupFile: BackupFile, isArchive?: boolean, isCreateNewFile?: boolean) {
-    if (!window["electronAPI"] || !backupFile) {
-      return;
+  async chooseBackupSavePath(defaultPath: string): Promise<string | undefined> {
+    if (!window["electronAPI"]?.invoke) {
+      return undefined;
     }
-    let args: { fileName: string, fileData: any, isArchive: boolean, isCreateNewFile: boolean } = {
-      fileName: undefined,
-      fileData: backupFile,
-      isArchive: isArchive,
-      isCreateNewFile: isCreateNewFile
-    }
-    if (backupFile.account.dataBackupFilePath || isArchive) {
-      args.fileName = backupFile.account.dataBackupFilePath;
-    } else {
-      args.fileName = backupFile.account.name + '.json';
-    }
-    window["electronAPI"].send("saveData", args);
+    return window["electronAPI"].invoke('backup:chooseSavePath', { defaultPath });
   }
 
-  checkFileExists(dataBackupFilePath: string) {
-    if (!window["electronAPI"] || !dataBackupFilePath) {
-      return;
+  async backupFileExists(path: string): Promise<boolean> {
+    if (!window["electronAPI"]?.invoke || !path) {
+      return false;
     }
-    let args: { fileName: string } = {
-      fileName: dataBackupFilePath
+    const result = await window["electronAPI"].invoke('backup:exists', { path });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? 'VERIFI could not check the backup file.');
     }
-    window["electronAPI"].send("fileExists", args);
+    return Boolean(result.exists);
   }
 
-  openDialog(backupFile: BackupFile) {
-    if (!window["electronAPI"]) {
-      return;
+  async readBackupFile(path: string): Promise<unknown> {
+    if (!window["electronAPI"]?.invoke || !path) {
+      return undefined;
     }
-    let args: { fileName: string, fileData: any } = {
-      fileName: undefined,
-      fileData: backupFile
+    const result = await window["electronAPI"].invoke('backup:read', { path });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? 'VERIFI could not read the backup file.');
     }
-    if (backupFile.account.dataBackupFilePath) {
-      args.fileName = backupFile.account.dataBackupFilePath;
-    } else {
-      args.fileName = backupFile.account.name + '.json';
-    }
-    window["electronAPI"].send("openDialog", args);
+    return result.data;
   }
 
-  getDataFile(dataBackupFilePath: string) {
-    if (!window["electronAPI"]) {
+  async writeBackupFile(path: string, backup: BackupFile): Promise<void> {
+    if (!window["electronAPI"]?.invoke || !path) {
       return;
     }
-    let args: { fileName: string } = {
-      fileName: dataBackupFilePath
+    const result = await window["electronAPI"].invoke('backup:write', { path, backup });
+    if (!result?.ok) {
+      throw new Error(result?.error ?? 'VERIFI could not write the backup file.');
     }
-    window["electronAPI"].send("getDataFile", args);
   }
 
   selectFile(key: string, folderPath: string, meterNumber: string, date: string) {

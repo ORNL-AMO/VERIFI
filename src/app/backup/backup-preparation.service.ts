@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BackupFile } from '../../models/backup-file';
-import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '../../indexedDB/data-migrations/data-migration.errors';
-import { DATA_MIGRATIONS } from '../../indexedDB/data-migrations/data-migration.registry';
-import { CURRENT_DATA_VERSION, MigrationData } from '../../indexedDB/data-migrations/data-migration.models';
+import { BackupFile } from '../models/backup-file';
+import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '../indexedDB/data-migrations/data-migration.errors';
+import { DATA_MIGRATIONS } from '../indexedDB/data-migrations/data-migration.registry';
+import { CURRENT_DATA_VERSION, MigrationData } from '../indexedDB/data-migrations/data-migration.models';
 
 export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION };
 
@@ -72,6 +72,7 @@ export class BackupPreparationService {
       throw new BackupMigrationError(error);
     }
 
+    sanitizeMachineLocalAccountFields(backup);
     backup.dataVersion = CURRENT_DATA_VERSION;
     validateCoreRelationships(backup);
     return backup as PreparedBackupFile;
@@ -221,4 +222,13 @@ function validateCoreRelationships(backup: BackupFile): void {
 
 function requireAll<T>(items: Array<T>, predicate: (item: T) => boolean, message: string): void {
   if (!items.every(predicate)) { throw new BackupRelationshipError(message); }
+}
+
+function sanitizeMachineLocalAccountFields(backup: BackupFile): void {
+  if (backup.backupFileType !== 'Account') {
+    return;
+  }
+  delete backup.account.dataBackupFilePath;
+  delete backup.account.dataBackupId;
+  delete backup.account.lastBackup;
 }

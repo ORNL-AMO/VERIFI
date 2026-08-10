@@ -1,4 +1,4 @@
-import { BackupFile } from '../../models/backup-file';
+import { BackupFile } from '../models/backup-file';
 import { BackupPreparationService, BackupRelationshipError, FutureBackupVersionError, InvalidBackupError } from './backup-preparation.service';
 
 describe('BackupPreparationService', () => {
@@ -39,6 +39,23 @@ describe('BackupPreparationService', () => {
     expect(prepared.facilityReports).toEqual([]);
     expect(prepared.facilityEnergyUseEquipment).toEqual([]);
     expect(prepared.account.selectedEnergyAnalysisId).toBe('missing-optional-analysis');
+  });
+
+  it('sanitizes machine-local account backup fields but preserves top-level backup metadata', () => {
+    const input = accountBackup();
+    input.account.dataBackupFilePath = '/tmp/legacy-machine-path.json';
+    input.account.dataBackupId = 'legacy-machine-backup-id';
+    input.account.lastBackup = new Date('2026-08-01T00:00:00.000Z');
+
+    const prepared = service.prepare(input);
+
+    expect(prepared.account.dataBackupFilePath).toBeUndefined();
+    expect(prepared.account.dataBackupId).toBeUndefined();
+    expect(prepared.account.lastBackup).toBeUndefined();
+    expect(prepared.dataBackupId).toBe('backup');
+    expect(input.account.dataBackupFilePath).toBe('/tmp/legacy-machine-path.json');
+    expect(input.account.dataBackupId).toBe('legacy-machine-backup-id');
+    expect(input.account.lastBackup).toEqual(new Date('2026-08-01T00:00:00.000Z'));
   });
 
   it('rejects future, invalid, and broken core relationships', () => {

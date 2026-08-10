@@ -153,39 +153,6 @@ app.on('window-all-closed', function () {
     app.quit();
 });
 
-
-ipcMain.on("saveData", (event, arg) => {
-    log.info('saveData called');
-    delete arg.fileData.account.dataBackupFilePath;
-    if (jetpack.exists(arg.fileName)) {
-        log.info('saved existing')
-        jetpack.writeAsync(arg.fileName, arg.fileData);
-    } else if (arg.isArchive) {
-        log.info('createArchiveFile')
-        jetpack.writeAsync(arg.fileName, arg.fileData);
-    } else if (arg.isCreateNewFile) {
-        log.info('createNewFile')
-        jetpack.writeAsync(arg.fileName, arg.fileData);
-    }
-});
-
-ipcMain.on("openDialog", (event, arg) => {
-    log.info('openDialog');
-    let saveDialogOptions = {
-        filters: [{
-            name: "JSON Files",
-            extensions: ["json"]
-        }],
-        defaultPath: arg.fileName
-    }
-    dialog.showSaveDialog(win, saveDialogOptions).then(results => {
-        win.webContents.send('file-path', results.filePath);
-        // log.info('save new')
-        // jetpack.writeAsync(results.filePath, arg.fileData);
-    });
-
-});
-
 ipcMain.on("selectFolder", async (event) => {
     try {
         const result = await dialog.showOpenDialog({
@@ -289,13 +256,66 @@ ipcMain.on("utilityFileExists", (event, path) => {
     win.webContents.send('utility-file-exists', exists);
 });
 
-ipcMain.on("fileExists", (event, arg) => {
-    log.info("check for data");
-    let results = jetpack.exists(arg.fileName);
-    win.webContents.send('file-exists', results);
-})
+ipcMain.handle("backup:chooseSavePath", async (_event, arg) => {
+    const defaultPath = typeof arg?.defaultPath === 'string' ? arg.defaultPath : undefined;
+    const result = await dialog.showSaveDialog(win, {
+        filters: [{ name: "JSON Files", extensions: ["json"] }],
+        defaultPath
+    });
+    return result.canceled ? undefined : result.filePath;
+});
 
-ipcMain.on("getDataFile", (event, arg) => {
-    let dataFile = jetpack.read(arg.fileName, 'json');
-    win.webContents.send('data-file', dataFile);
+ipcMain.handle("backup:exists", async (_event, arg) => {
+    if (!arg?.path || typeof arg.path !== 'string') {
+        return { ok: false, error: 'A backup file path is required.' };
+    }
+    return { ok: true, exists: fs.existsSync(arg.path) };
+});
+
+ipcMain.handle("backup:read", async (_event, arg) => {
+    if (!arg?.path || typeof arg.path !== 'string') {
+        return { ok: false, error: 'A backup file path is required.' };
+    }
+    if (!fs.existsSync(arg.path)) {
+        return { ok: false, error: 'The selected backup file does not exist.' };
+    }
+    try {
+        const raw = await fs.promises.readFile(arg.path, 'utf8');
+        return { ok: true, data: JSON.parse(raw) };
+    } catch (error) {
+        return { ok: false, error: error instanceof Error ? error.message : 'The backup file could not be read.' };
+    }
+});
+
+ipcMain.handle("backup:write", async (_event, arg) => {
+    const backupPath = typeof arg?.path === 'string' ? arg.path : undefined;
+    const backup = arg?.backup;
+    if (!backupPath) {
+        return { ok: false, error: 'A backup file path is required.' };
+    }
+    if (!backup || typeof backup !== 'object') {
+        return { ok: false, error: 'Backup data is required.' };
+    }
+
+    const tempPath = `${backupPath}.tmp`;
+    try {
+        const sanitizedBackup = JSON.parse(JSON.stringify(backup));
+        if (sanitizedBackup?.account) {
+            delete sanitizedBackup.account.dataBackupFilePath;
+        }
+
+        await fs.promises.mkdir(path.dirname(backupPath), { recursive: true });
+        await fs.promises.writeFile(tempPath, JSON.stringify(sanitizedBackup), 'utf8');
+        await fs.promises.rename(tempPath, backupPath);
+        return { ok: true };
+    } catch (error) {
+        try {
+            if (fs.existsSync(tempPath)) {
+                await fs.promises.unlink(tempPath);
+            }
+        } catch (_cleanupError) {
+            // Ignore temp cleanup failure and return the original write error.
+        }
+        return { ok: false, error: error instanceof Error ? error.message : 'The backup file could not be written.' };
+    }
 });
