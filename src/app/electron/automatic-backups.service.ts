@@ -104,7 +104,11 @@ export class AutomaticBackupsService {
     if (!account?.dataBackupFilePath) {
       throw new Error('An automatic backup file must be selected before overwriting it.');
     }
+    const token = this.accountSessionToken;
     const exists = await this.backupGateway.exists(account.dataBackupFilePath);
+    if (token !== this.accountSessionToken) {
+      return;
+    }
     if (!exists) {
       this.latestBackupFile.next(undefined);
       this.setStatus('error');
@@ -113,7 +117,13 @@ export class AutomaticBackupsService {
     }
     const backup = this.backupExportCoordinator.buildActiveAccountBackup();
     await this.backupGateway.write(account.dataBackupFilePath, backup);
+    if (token !== this.accountSessionToken) {
+      return;
+    }
     await this.addOrUpdateFile(backup.dataBackupId, account.guid);
+    if (token !== this.accountSessionToken) {
+      return;
+    }
     this.latestBackupFile.next(this.backupPreparation.prepare(backup));
     this.setStatus('ready');
   }
@@ -236,11 +246,11 @@ export class AutomaticBackupsService {
         error instanceof Error ? error.message : 'VERIFI could not save the automatic backup file.'
       );
     } finally {
-      this.activeWrite = false;
-      this.saving.next(false);
       if (token !== this.accountSessionToken) {
         return;
       }
+      this.activeWrite = false;
+      this.saving.next(false);
       if (this.queuedRevisionKey && this.queuedRevisionKey !== revisionKey) {
         const queued = this.queuedRevisionKey;
         this.queuedRevisionKey = undefined;
@@ -281,7 +291,7 @@ export class AutomaticBackupsService {
       if (!registry || registry.dataBackupId !== prepared.dataBackupId) {
         this.setStatus('conflict');
       } else {
-        this.setStatus(this.reviewRequested.value ? 'conflict' : 'ready');
+        this.setStatus('ready');
       }
     } catch (error) {
       if (token !== this.accountSessionToken) {
