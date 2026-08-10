@@ -27,7 +27,6 @@ export class ExportToExcelTemplateV3Service {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
-  alphabet: Array<string>;
   exportBlob: Blob;
   exportFileName: string;
 
@@ -36,7 +35,6 @@ export class ExportToExcelTemplateV3Service {
   ) { }
 
   exportFacilityData(includeWeatherData: boolean, facilityId?: string) {
-    this.setAlphabet();
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
     request.open('GET', 'assets/csv_templates/VERIFI-Import-Data.xlsx', true);
@@ -810,18 +808,27 @@ export class ExportToExcelTemplateV3Service {
     rowIndex++;
   }
 
-  setAlphabet() {
-    let alpha = Array.from(Array(26)).map((i) => i + 65);
-    this.alphabet = alpha.map(x => { return String.fromCharCode(x) });
-    let additionalAlphabet: Array<string> = alpha.map(x => { return 'A' + String.fromCharCode(x) });
-    this.alphabet = this.alphabet.concat(additionalAlphabet);
-    additionalAlphabet = alpha.map(x => { return 'B' + String.fromCharCode(x) });
-    this.alphabet = this.alphabet.concat(additionalAlphabet);
+  getNextAlpha(alpha: string): string {
+    return this.getColumnLabel(this.getColumnNumber(alpha) + 1);
   }
 
-  getNextAlpha(alpha: string): string {
-    let alphaIndex: number = this.alphabet.findIndex(a => { return a === alpha });
-    return this.alphabet[alphaIndex + 1];
+  private getColumnNumber(alpha: string): number {
+    return alpha
+      .toUpperCase()
+      .split('')
+      .reduce((columnNumber, character) => {
+        return (columnNumber * 26) + (character.charCodeAt(0) - 64);
+      }, 0);
+  }
+
+  private getColumnLabel(columnNumber: number): string {
+    let label: string = '';
+    while (columnNumber > 0) {
+      let remainder: number = (columnNumber - 1) % 26;
+      label = String.fromCharCode(65 + remainder) + label;
+      columnNumber = Math.floor((columnNumber - 1) / 26);
+    }
+    return label;
   }
 
   //===== Predictors =====//
