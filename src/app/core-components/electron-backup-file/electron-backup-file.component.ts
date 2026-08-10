@@ -76,6 +76,9 @@ export class ElectronBackupFileComponent {
 
       this.latestBackupFileSub = this.automaticBackupsService.latestBackupFile.subscribe(val => {
         this.latestBackupFile = val;
+        if (val && this.archiveOption == 'always' && this.backupStatus == 'checking') {
+          void this.createArchive();
+        }
         this.checkShowModal();
       });
 
@@ -120,8 +123,8 @@ export class ElectronBackupFileComponent {
   }
 
   hideModal() {
-    this.showModal = false;
     this.automaticBackupsService.clearReviewRequest();
+    this.showModal = false;
   }
 
   async confirmActions() {
@@ -158,9 +161,7 @@ export class ElectronBackupFileComponent {
             sharedFileAuthor: sharedFileAuthor,
             isSharedBackupFile: isSharedBackupFile
           };
-          if (replacement.dataBackupId) {
-            await this.automaticBackupsService.addOrUpdateFile(replacement.dataBackupId, replacement.guid);
-          }
+          await this.automaticBackupsService.addOrUpdateFile(this.latestBackupFile.dataBackupId, replacement.guid);
           await this.automaticBackupsService.inspectCurrentAccountFile();
           needUpdate = false;
           this.loadingService.isLoadingComplete.next(true);

@@ -230,11 +230,7 @@ export class AutomaticBackupsService {
         return;
       }
       this.latestBackupFile.next(this.backupPreparation.prepare(backup));
-      if (this.reviewRequested.value) {
-        this.setStatus('conflict');
-      } else {
-        this.setStatus('ready');
-      }
+      this.setStatus('ready');
     } catch (error) {
       if (token !== this.accountSessionToken) {
         return;

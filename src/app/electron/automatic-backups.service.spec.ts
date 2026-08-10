@@ -170,6 +170,39 @@ describe('AutomaticBackupsService', () => {
     expect(service.status.value).toBe('ready');
   });
 
+  it('keeps status ready when an automatic write finishes during an active review request', async () => {
+    service.accountBackups = [{
+      id: 1,
+      guid: 'electron-backup-a',
+      accountId: 'account-a',
+      dataBackupId: 'registry-id',
+      createdDate: new Date('2026-08-07T09:00:00.000Z'),
+      modifiedDate: new Date('2026-08-07T09:00:00.000Z'),
+      timeStamp: new Date('2026-08-07T10:00:00.000Z')
+    }];
+    gateway.read.mockResolvedValue({
+      dataBackupId: 'registry-id',
+      backupFileType: 'Account',
+      origin: 'VERIFI',
+      account: { guid: 'account-a', name: 'Account A' }
+    });
+
+    store.publish(snapshot('account-a'));
+    service.subscribeData();
+    await flushAsync();
+    await service.requestReview();
+    await flushAsync();
+
+    store.publishCommitted(snapshot('account-a', { name: 'Changed' }), {});
+    await flushAsync();
+    await vi.runAllTimersAsync();
+    await flushAsync();
+
+    expect(service.reviewRequested.value).toBe(true);
+    expect(gateway.write).toHaveBeenCalledTimes(1);
+    expect(service.status.value).toBe('ready');
+  });
+
   it('overwriteFile skips backup build when account switches during exists check', async () => {
     store.publish(snapshot('account-a'));
     service.subscribeData();

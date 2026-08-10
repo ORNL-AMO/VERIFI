@@ -267,11 +267,14 @@ export class AccountSettingsComponent implements OnInit {
     if (!savedFilePath) { return; }
     await this.backupGateway.write(savedFilePath, this.backupFile);
     await this.automaticBackupsService.addOrUpdateFile(this.backupFile.dataBackupId, this.selectedAccount.guid);
-    this.selectedAccount.dataBackupFilePath = savedFilePath;
-    this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
+    const updatedAccount: IdbAccount = {
+      ...this.selectedAccount,
+      dataBackupFilePath: savedFilePath,
+      dataBackupId: this.backupFile.dataBackupId
+    };
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
-      () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
+      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Saving account' },
+      () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
     );
     await this.automaticBackupsService.inspectCurrentAccountFile();
     this.cd.detectChanges();
