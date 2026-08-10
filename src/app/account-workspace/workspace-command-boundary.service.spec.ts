@@ -125,6 +125,113 @@ describe('WorkspaceCommandBoundary', () => {
     expect(store.hasPending()).toBe(false);
   });
 
+  it('uses a committed patch by default when an add command returns a workspace record', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+
+    const savedPredictorData = {
+      id: 3,
+      guid: 'predictor-data-a',
+      accountId: 'account-a',
+      facilityId: 'facility-a',
+      predictorId: 'predictor-a'
+    } as any;
+
+    await boundary.execute(
+      makeOptions('predictorData', 'add', savedPredictorData.guid),
+      () => Promise.resolve(savedPredictorData)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.predictorData()).toEqual([savedPredictorData]);
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
+  });
+
+  it('uses a committed patch by default when an update command returns a workspace record', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    const snapshot = publishReady(store);
+    const updatedFacility = {
+      ...snapshot.facilities[0],
+      name: 'Updated Facility'
+    } as any;
+
+    await boundary.execute(
+      makeOptions('facility', 'update', updatedFacility.guid),
+      () => Promise.resolve(updatedFacility)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.facilities()).toEqual([updatedFacility, snapshot.facilities[1]]);
+  });
+
+  it('uses a committed patch by default when a delete command returns a numeric id', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    const snapshot = makeSnapshot('account-a');
+    const report = { id: 7, guid: 'report-a', accountId: 'account-a' } as any;
+    store.publish({ ...snapshot, facilityReports: [report] }, {});
+
+    await boundary.execute(
+      makeOptions('facilityReport', 'delete', report.guid),
+      () => Promise.resolve(report.id)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.facilityReports()).toEqual([]);
+  });
+
+  it('uses a committed account patch by default for account updates', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    const snapshot = publishReady(store);
+    const updatedAccount = {
+      ...snapshot.account,
+      name: 'Renamed Account'
+    } as any;
+
+    await boundary.execute(
+      makeOptions('account', 'update', updatedAccount.guid),
+      () => Promise.resolve(updatedAccount)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).not.toHaveBeenCalled();
+    expect(store.account()).toEqual(updatedAccount);
+  });
+
+  it('reloads by default for bulk commands and ambiguous result shapes', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+
+    await boundary.execute(
+      makeOptions('meterData', 'bulk'),
+      () => Promise.resolve({ count: 2 })
+    );
+    await boundary.execute(
+      makeOptions('facility', 'add'),
+      () => Promise.resolve({ facility: { id: 1, guid: 'facility-a', accountId: 'account-a' } })
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(2);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenNthCalledWith(1, true);
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenNthCalledWith(2, true);
+  });
+
+  it('reloads by default for account and facility delete commands', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+
+    await boundary.execute(
+      makeOptions('account', 'delete', 'account-a'),
+      () => Promise.resolve(1)
+    );
+    await boundary.execute(
+      makeOptions('facility', 'delete', 'facility-a'),
+      () => Promise.resolve(2)
+    );
+
+    expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledTimes(2);
+  });
+
   it('falls back to a committed reload when patch publication fails', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     publishReady(store);
@@ -254,7 +361,10 @@ function publishReady(store: AccountWorkspaceStore, accountGuid = 'account-a'): 
 function makeSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
   return {
     account: { id: 1, guid: accountGuid, name: 'Test Account' } as any,
-    facilities: [],
+    facilities: [
+      { id: 1, guid: 'facility-a', accountId: accountGuid, name: 'Facility A' },
+      { id: 2, guid: 'facility-b', accountId: accountGuid, name: 'Facility B' }
+    ] as any,
     meters: [],
     meterData: [],
     meterGroups: [],

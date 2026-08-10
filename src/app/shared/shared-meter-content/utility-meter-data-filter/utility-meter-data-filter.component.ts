@@ -204,7 +204,13 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     }
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: 'update', entityGuid: this.meter.guid, label: 'Update Meter Charges' },
+      {
+        entityKind: 'meter',
+        changeKind: 'update',
+        entityGuid: this.meter.guid,
+        label: 'Update Meter Charges',
+        publication: { mode: 'reload' }
+      },
       () => this.meterHandler.updateMeterWithFacility(this.meter, selectedFacility, accountGuid)
     );
     this.accountWorkspaceService.selectMeter(this.meter?.guid);

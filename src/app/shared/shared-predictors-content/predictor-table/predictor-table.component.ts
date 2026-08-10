@@ -170,7 +170,12 @@ export class PredictorTableComponent {
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       const result = await this.commandBoundary.execute(
-        { entityKind: 'predictor', changeKind: 'add', label: 'Add Predictor' },
+        {
+          entityKind: 'predictor',
+          changeKind: 'add',
+          label: 'Add Predictor',
+          publication: { mode: 'reload' }
+        },
         async () => {
           const added = await this.predictorHandler.addPredictor(newPredictor, this.accountWorkspaceStore.account()?.guid);
           await this.analysisHandler.addAnalysisPredictor(added);

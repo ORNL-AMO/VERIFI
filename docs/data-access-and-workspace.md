@@ -192,7 +192,7 @@ async renameMeter(meterGuid: string, name: string): Promise<void> {
 
 If persistence fails, do not publish the draft or increment the committed revision. Report the failure and leave the current coherent snapshot in place.
 
-Use the command boundary's patch publication for safe narrow writes where the persisted record is enough to update the active snapshot. Keep the committed reload path for account switching, imports, repair, cascade deletes, and multi-store changes whose affected workspace records are not all known to the caller.
+The command boundary automatically uses patch publication for safe narrow add, update, and delete commands when the persisted result is enough to update one active-workspace collection: add/update commands that return the persisted GUID record, account updates that return the active account record, and delete commands that return the deleted numeric IndexedDB id. Keep the committed reload path for account switching, imports, repair, cascade deletes, bulk commands, and multi-store changes whose affected workspace records are not all known to the caller. Use `publication: { mode: 'reload' }` when a command returns a single record but also updates related records, and use explicit patch publication for bulk or multi-record commands when the caller knows the complete affected set.
 
 For an add, use the model's factory so required GUID relationships and defaults are created consistently:
 
@@ -259,7 +259,7 @@ Account and facility cascade deletes already use `IndexedDbCascadeDeleteService`
 
 `reloadActiveWorkspace(true)` means that a logical persistence operation committed and the active workspace should be rebuilt from IndexedDB. It atomically reloads all active-account collections, preserves only still-valid selections, increments the revision once, and publishes `committedRevision`.
 
-For safe narrow writes, `WorkspaceCommandBoundary` can instead publish a committed patch after persistence. A committed patch updates the active snapshot in memory, preserves only still-valid selections, increments the revision once, and publishes `committedRevision` without reloading every account-scoped collection. If patch validation fails, the boundary falls back to the committed reload path.
+For safe narrow writes, `WorkspaceCommandBoundary` publishes a committed patch after persistence. A committed patch updates the active snapshot in memory, preserves only still-valid selections, increments the revision once, and publishes `committedRevision` without reloading every account-scoped collection. Add/update commands patch automatically when the persisted value is a GUID record for the command's entity kind, and delete commands patch automatically when the persisted value is the deleted numeric IndexedDB id. Bulk commands, account and facility deletes, and ambiguous result shapes use the committed reload path unless the caller supplies an explicit patch. If patch validation fails, the boundary falls back to the committed reload path.
 
 Automatic backups observe committed revisions. Therefore:
 
