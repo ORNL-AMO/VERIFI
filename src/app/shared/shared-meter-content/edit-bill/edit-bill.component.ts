@@ -1,6 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -120,14 +121,31 @@ export class EditBillComponent implements OnInit {
     if (this.addOrEdit == 'edit') {
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'meterData', changeKind: 'update', entityGuid: meterDataToSave.guid, label: 'Save Reading' },
+        {
+          entityKind: 'meterData',
+          changeKind: 'update',
+          entityGuid: meterDataToSave.guid,
+          label: 'Save Reading',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('meterData', [value])
+          }
+        },
         () => this.meterHandler.updateMeterData(meterDataToSave, accountGuid)
       );
     } else {
       delete meterDataToSave.id;
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'meterData', changeKind: 'add', label: 'Add Reading' },
+        {
+          entityKind: 'meterData',
+          changeKind: 'add',
+          label: 'Add Reading',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('meterData', [value])
+          }
+        },
         () => this.meterHandler.addMeterData(meterDataToSave, accountGuid)
       );
     }
@@ -149,7 +167,15 @@ export class EditBillComponent implements OnInit {
     delete meterDataToSave.id;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const result = await this.commandBoundary.execute(
-      { entityKind: 'meterData', changeKind: 'add', label: 'Add Reading' },
+      {
+        entityKind: 'meterData',
+        changeKind: 'add',
+        label: 'Add Reading',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('meterData', [value])
+        }
+      },
       () => this.meterHandler.addMeterData(meterDataToSave, accountGuid)
     );
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];

@@ -1,6 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -111,7 +112,18 @@ export class MeterDataTableComponent {
     const checkedGuids = this.checkedItemGuids();
     const meterDataItemsToDelete = this.meterData().filter(dataItem => checkedGuids.has(dataItem.guid));
     await this.commandBoundary.execute(
-      { entityKind: 'meterData', changeKind: 'bulk', label: 'Delete Meter Data' },
+      {
+        entityKind: 'meterData',
+        changeKind: 'bulk',
+        label: 'Delete Meter Data',
+        publication: {
+          mode: 'patch',
+          buildPatch: () => deleteWorkspaceRecords(
+            'meterData',
+            { ids: meterDataItemsToDelete.map(item => item.id) }
+          )
+        }
+      },
       async () => {
         for (const item of meterDataItemsToDelete) {
           await this.meterHandler.deleteMeterData(item.id);
@@ -140,7 +152,15 @@ export class MeterDataTableComponent {
     this.showIndividualDelete = false;
     const idToDelete = this.meterDataToDelete.id;
     await this.commandBoundary.execute(
-      { entityKind: 'meterData', changeKind: 'delete', label: 'Delete Meter Data' },
+      {
+        entityKind: 'meterData',
+        changeKind: 'delete',
+        label: 'Delete Meter Data',
+        publication: {
+          mode: 'patch',
+          buildPatch: () => deleteWorkspaceRecords('meterData', { ids: [idToDelete] })
+        }
+      },
       () => this.meterHandler.deleteMeterData(idToDelete)
     );
     this.loadingService.setLoadingStatus(false);
@@ -193,8 +213,17 @@ export class MeterDataTableComponent {
     try {
       const accountMeterData = [...this.accountWorkspaceStore.meterData()];
       await this.commandBoundary.execute(
-        { entityKind: 'meterData', changeKind: 'bulk', label: 'Fill Missing Meter Data' },
+        {
+          entityKind: 'meterData',
+          changeKind: 'bulk',
+          label: 'Fill Missing Meter Data',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('meterData', value)
+          }
+        },
         async () => {
+          const addedMeterData: IdbUtilityMeterData[] = [];
           for (const missingMonth of missingMonths) {
             const newMeterData = getNewIdbUtilityMeterData(selectedMeter, accountMeterData);
             delete newMeterData.id;
@@ -205,8 +234,10 @@ export class MeterDataTableComponent {
             newMeterData.totalVolume = 0;
             newMeterData.totalCost = 0;
             newMeterData.isEstimated = false;
-            await this.meterHandler.addMeterData(newMeterData, this.accountWorkspaceStore.account()?.guid);
+            const added = await this.meterHandler.addMeterData(newMeterData, this.accountWorkspaceStore.account()?.guid);
+            addedMeterData.push(added);
           }
+          return addedMeterData;
         }
       );
       this.cancelFillMissingDataModal();
