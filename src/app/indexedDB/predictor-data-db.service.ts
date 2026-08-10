@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
@@ -75,12 +75,4 @@ export class PredictorDataDbService {
         this.loadingService.setLoadingMessage('Deleting Facility Predictor Data...');
         await this.indexedDbAccess.deleteAllByIndex('predictorData', 'facilityId', facilityId);
     }
-
-    async deletePredictorDataAsync(predictorData: Array<IdbPredictorData>) {
-        for (let i = 0; i < predictorData.length; i++) {
-            this.loadingService.setLoadingMessage('Deleting Predictor Data (' + i + '/' + predictorData.length + ')...');
-            await firstValueFrom(this.deleteIndexWithObservable(predictorData[i].id));
-        }
-    }
-
 }

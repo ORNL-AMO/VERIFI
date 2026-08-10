@@ -19,7 +19,6 @@ describe('AccountAnalysisDbService', () => {
     };
     service = TestBed.runInInjectionContext(() => new AccountAnalysisDbService(
       dbService as any,
-      {} as any,
       new IndexedDbAccessService(dbService as any)
     ));
   });

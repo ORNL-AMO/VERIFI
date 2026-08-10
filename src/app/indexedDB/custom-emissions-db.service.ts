@@ -1,8 +1,6 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Observable } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,8 +8,7 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class CustomEmissionsDbService {
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+  constructor(private dbService: NgxIndexedDBService,
     private indexedDbAccess: IndexedDbAccessService) {
   }
 
@@ -49,14 +46,6 @@ export class CustomEmissionsDbService {
 
   deleteWithObservable(id: number): Observable<any> {
     return this.dbService.delete('customEmissionsItems', id);
-  }
-
-  async deleteAccountEmissionsItems() {
-    let accountEmissionsItems: Array<IdbCustomEmissionsItem> = [...this.accountWorkspaceStore.customEmissions()];
-    for (let i = 0; i < accountEmissionsItems.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Emissions Items (' + i + '/' + accountEmissionsItems.length + ')...');
-      await this.deleteWithObservable(accountEmissionsItems[i].id);
-    }
   }
 
   updateWithObservable(values: IdbCustomEmissionsItem): Observable<IdbCustomEmissionsItem> {
