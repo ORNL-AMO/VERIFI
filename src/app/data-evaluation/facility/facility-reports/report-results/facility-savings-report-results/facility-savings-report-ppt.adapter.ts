@@ -7,6 +7,8 @@ import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityModelingReportPptAdapter } from '../facility-modeling-report-results/facility-modeling-report-ppt.adapter';
 
 export interface FacilitySavingsReportPptInput {
     facility: IdbFacility;
@@ -26,12 +28,19 @@ export interface FacilitySavingsReportPptInput {
 
 @Injectable({ providedIn: 'root' })
 export class FacilitySavingsReportPptAdapter {
-  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+    private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
+    regressionModelsService = inject(RegressionModelsService);
+    facilityModelingReportPptAdapter = inject(FacilityModelingReportPptAdapter);
 
     analysisTableColumns: AnalysisTableColumns;
     analysisItem: IdbAnalysisItem;
     reportSettings: SavingsFacilityReportSettings;
+    executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
+    regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
+    criticalIssues: Array<FacilityGroupAnalysisItem> = [];
+    moderateIssues: Array<FacilityGroupAnalysisItem> = [];
+    minorIssues: Array<FacilityGroupAnalysisItem> = [];
 
     buildDocument(data: FacilitySavingsReportPptInput): PptDocument {
         const slides: PptSlide[] = [];
@@ -44,6 +53,57 @@ export class FacilitySavingsReportPptAdapter {
             title: data.report.name,
             subtitle: data.facility.name,
             date: new Date().toISOString(),
+        });
+
+        this.analysisItem.groups.forEach(group => {
+            if (group.analysisType == 'regression') {
+                let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, data.facility, this.analysisItem, this.reportSettings.endYear);
+                if (groupItem) {
+                    this.executiveSummaryItems.push(groupItem);
+                }
+            } else if (group.analysisType != 'skip') {
+                this.executiveSummaryItems.push({
+                    group: group,
+                    facilityId: data.facility.guid,
+                    baselineYear: this.analysisItem.baselineYear,
+                    selectedModel: undefined
+                });
+            }
+        });
+
+        this.regressionGroupItems = this.executiveSummaryItems.filter(item => item.group.analysisType == 'regression');
+        this.criticalIssues = this.regressionGroupItems.filter(item => {
+            return (item.group.analysisType == 'regression' && !item.selectedModel.isValid);
+        });
+        this.moderateIssues = this.regressionGroupItems.filter(item => {
+            return (item.group.analysisType == 'regression' && !item.selectedModel.SEPValidationPass && item.selectedModel.dataValidationNotes && item.selectedModel.dataValidationNotes.length > 0);
+        });
+        this.minorIssues = this.regressionGroupItems.filter(item => {
+            return (item.group.analysisType == 'regression' && item.selectedModel.modelNotes && item.selectedModel.modelNotes.length > 0);
+        });
+
+        let dataCheckSlides: PptSlide[] = [];
+        if (this.criticalIssues?.length > 0) {
+            dataCheckSlides.push(this.facilityModelingReportPptAdapter.buildCriticalIssuesSlides(this.criticalIssues));
+        }
+        if (this.moderateIssues?.length > 0) {
+            dataCheckSlides.push(this.facilityModelingReportPptAdapter.buildModerateIssuesSlides(this.moderateIssues));
+        }
+        if (this.minorIssues?.length > 0) {
+            dataCheckSlides.push(this.facilityModelingReportPptAdapter.buildMinorIssuesSlides(this.minorIssues));
+        }
+        if (dataCheckSlides.length > 0) {
+            slides.push({
+                type: 'title',
+                title: 'Model Validation Check',
+                layout: 'section'
+            });
+            slides.push(...dataCheckSlides);
+        }
+        slides.push({
+            type: 'title',
+            title: 'Facility Results',
+            layout: 'section'
         });
 
         if (this.reportSettings.facilityAnnualResults && ((this.reportSettings.facilityAnnualResultsTable) || (this.reportSettings.facilityMonthlyResults && (this.reportSettings.facilityMonthlyResultsTable || this.reportSettings.facilityMonthlyResultsGraphs || this.reportSettings.facilityTrailingTwelveMonthsConsumption || this.reportSettings.facilityTrailingTwelveMonthsSavings)))) {
@@ -516,7 +576,7 @@ export class FacilitySavingsReportPptAdapter {
 
     private buildMonthlySavingsChart(data: Array<MonthlyAnalysisSummaryData>): ChartSlide {
         const allValues = data.flatMap(m => [m.rolling12MonthImprovement ?? 0]).filter(v => isFinite(v) && !isNaN(v));
-        const axis = getPptAxisSpec(allValues, {isPercent: true});
+        const axis = getPptAxisSpec(allValues, { isPercent: true });
         return {
             type: 'chart',
             title: 'Monthly Facility Savings',
