@@ -40,6 +40,8 @@ export class ElectronBackupFileComponent {
   electronBackup: IdbElectronBackup;
   forceModal: boolean = false;
   backupStatus: AutomaticBackupStatus = 'disabled';
+  showArchiveDecision: boolean = false;
+  private pendingArchiveDecision: boolean = false;
   constructor(private electronService: ElectronService,
     private automaticBackupsService: AutomaticBackupsService,
     private toastNotificationService: ToastNotificationsService,
@@ -62,6 +64,7 @@ export class ElectronBackupFileComponent {
         //initialize account or account change
         if (val) {
           if (!this.account || (this.account.guid != val.guid)) {
+            this.pendingArchiveDecision = false;
             this.account = val;
             if (this.account) {
               this.electronBackup = this.automaticBackupsService.accountBackups.find(backup => {
@@ -76,6 +79,11 @@ export class ElectronBackupFileComponent {
 
       this.latestBackupFileSub = this.automaticBackupsService.latestBackupFile.subscribe(val => {
         this.latestBackupFile = val;
+        if (!val) {
+          this.pendingArchiveDecision = false;
+        } else if (this.backupStatus == 'checking') {
+          this.pendingArchiveDecision = true;
+        }
         if (val && this.archiveOption == 'always' && this.backupStatus == 'checking') {
           void this.createArchive();
         }
@@ -114,9 +122,11 @@ export class ElectronBackupFileComponent {
       });
       this.differingBackups = this.backupStatus === 'conflict';
       const needsArchiveDecision = this.archiveOption == 'skip' || this.archiveOption == 'justOnce';
-      this.showModal = this.differingBackups || needsArchiveDecision || this.forceModal;
+      this.showArchiveDecision = this.differingBackups || (needsArchiveDecision && this.pendingArchiveDecision) || this.forceModal;
+      this.showModal = this.differingBackups || this.showArchiveDecision || this.forceModal;
       this.cd.detectChanges();
     } else if (this.backupStatus === 'error' || this.backupStatus === 'disabled') {
+      this.showArchiveDecision = false;
       this.showModal = false;
       this.cd.detectChanges();
     }
@@ -124,6 +134,8 @@ export class ElectronBackupFileComponent {
 
   hideModal() {
     this.automaticBackupsService.clearReviewRequest();
+    this.pendingArchiveDecision = false;
+    this.showArchiveDecision = false;
     this.showModal = false;
   }
 
