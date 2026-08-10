@@ -124,20 +124,23 @@ export class HeaderComponent implements OnInit {
   }
 
   async addNewAccount() {
-    // let account: IdbAccount = getNewIdbAccount();
-    // account = await firstValueFrom(this.accountdbService.addWithObservable(account));
-    // let accounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
-    // this.accountdbService.allAccounts.next(accounts);
     this.router.navigateByUrl('/welcome');
   }
 
   async switchAccount(account: IdbAccount) {
+    if (this.accountWorkspaceStore.isSwitching() || this.activeAccount?.guid === account.guid) {
+      return;
+    }
+
     try {
-      await this.accountWorkspaceService.selectAccount(account.guid);
+      const result = await this.accountWorkspaceService.selectAccount(account.guid);
+      if (result !== 'published') {
+        return;
+      }
       if (this.inDataEvaluation) {
         this.goToDashboard(true);
       } else {
-        this.goToDataEntry(true);
+        this.goToDataEntry(true, account.guid);
       }
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
@@ -204,30 +207,37 @@ export class HeaderComponent implements OnInit {
     this.displayToggle = url.includes('welcome') == false;
   }
 
-  goToDataEntry(forceNavigation: boolean = false) {
+  goToDataEntry(forceNavigation: boolean = false, accountGuid: string = this.activeAccount?.guid) {
+    if (!accountGuid) {
+      return;
+    }
     if (this.inDataEvaluation || forceNavigation) {
       let url: string = this.router.url;
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
         if(selectedFacility){
-          this.router.navigateByUrl(`/data-management/${this.activeAccount.guid}/facilities/${selectedFacility.guid}`)
+          this.router.navigateByUrl(`/data-management/${accountGuid}/facilities/${selectedFacility.guid}`)
         }else{
-          this.router.navigateByUrl(`/data-management/${this.activeAccount.guid}`)
+          this.router.navigateByUrl(`/data-management/${accountGuid}`)
         }
       } else if (url.includes('weather-data')) {
-        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/weather-data');
+        this.router.navigateByUrl('/data-management/' + accountGuid + '/weather-data');
       } else if (url.includes('custom-data')) {
         if (url.includes('emissions')) {
-          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-grid-factors');
+          this.router.navigateByUrl('/data-management/' + accountGuid + '/account-custom-data/custom-grid-factors');
         } else if (url.includes('fuels')) {
-          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-fuels');
+          this.router.navigateByUrl('/data-management/' + accountGuid + '/account-custom-data/custom-fuels');
         } else if (url.includes('gwp')) {
-          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-gwps');
+          this.router.navigateByUrl('/data-management/' + accountGuid + '/account-custom-data/custom-gwps');
         }
       } else {
-        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid)
+        this.router.navigateByUrl('/data-management/' + accountGuid)
       }
     }
+  }
+
+  isAccountSwitching(): boolean {
+    return this.accountWorkspaceStore.isSwitching();
   }
 
   goToDashboard(forceNavigation: boolean = false) {

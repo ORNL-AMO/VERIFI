@@ -5,10 +5,10 @@ import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
-import { IdbAccount } from '../models/idbModels/account';
-import { OrderByPipe } from '../shared/helper-pipes/order-by.pipe';
-import { HeaderComponent } from './header/header.component';
-import { ManageAccountsComponent } from './manage-accounts/manage-accounts.component';
+import { IdbAccount } from '../../models/idbModels/account';
+import { OrderByPipe } from '../../shared/helper-pipes/order-by.pipe';
+import { HeaderComponent } from './header.component';
+import { ManageAccountsComponent } from '../manage-accounts/manage-accounts.component';
 
 @NgModule({
   imports: [CommonModule, FormsModule],
@@ -19,6 +19,7 @@ class AccountSwitchingLoadingTestModule { }
 
 describe('account switching loading ownership', () => {
   const account = { guid: 'account-b', name: 'Account B' } as IdbAccount;
+  const activeAccount = { guid: 'account-a', name: 'Account A' } as IdbAccount;
 
   it('switches from the header through workspace state without opening legacy loading', async () => {
     const router = {
@@ -54,7 +55,7 @@ describe('account switching loading ownership', () => {
       automaticBackups as any,
       { resetAndRestart: vi.fn() } as any,
       { accountCatalog: signal([account]) } as any,
-      { account: signal(account), selectedFacility: signal(undefined) } as any,
+      { account: signal(activeAccount), selectedFacility: signal(undefined), isSwitching: signal(false) } as any,
       { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } as any,
       { update: vi.fn() } as any,
       TestBed.inject(Injector)
@@ -70,7 +71,86 @@ describe('account switching loading ownership', () => {
     expect(loading.setLoadingStatus).not.toHaveBeenCalled();
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account');
     expect(header.accountList).toEqual([account]);
-    expect(header.activeAccount).toEqual(account);
+    expect(header.activeAccount).toEqual(activeAccount);
+    header.ngOnDestroy();
+  });
+
+  it('uses the requested account guid for first-click data-management navigation', async () => {
+    const router = {
+      url: '/data-management/account-a/weather-data',
+      events: of(),
+      navigate: vi.fn(),
+      navigateByUrl: vi.fn()
+    };
+    const workspace = { selectAccount: vi.fn().mockResolvedValue('published') };
+    const header = new HeaderComponent(
+      router as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      { exportActiveAccount: vi.fn() } as any,
+      { setLoadingMessage: vi.fn(), setLoadingStatus: vi.fn() } as any,
+      workspace as any,
+      { isElectron: false, accountLatestBackupFile: { next: vi.fn() } } as any,
+      { showToast: vi.fn() } as any,
+      { detectChanges: vi.fn() } as any,
+      {} as any,
+      { resetAndRestart: vi.fn() } as any,
+      { accountCatalog: signal([activeAccount, account]) } as any,
+      { account: signal(activeAccount), selectedFacility: signal(undefined), isSwitching: signal(false) } as any,
+      { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } as any,
+      { update: vi.fn() } as any,
+      TestBed.inject(Injector)
+    );
+    header.ngOnInit();
+    TestBed.tick();
+    header.inDataEvaluation = false;
+
+    await header.switchAccount(account);
+
+    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/data-management/account-b/weather-data');
+    header.ngOnDestroy();
+  });
+
+  it('does not navigate when a header account switch is superseded', async () => {
+    const router = {
+      url: '/data-management/account-a',
+      events: of(),
+      navigate: vi.fn(),
+      navigateByUrl: vi.fn()
+    };
+    const workspace = { selectAccount: vi.fn().mockResolvedValue('superseded') };
+    const header = new HeaderComponent(
+      router as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      { exportActiveAccount: vi.fn() } as any,
+      { setLoadingMessage: vi.fn(), setLoadingStatus: vi.fn() } as any,
+      workspace as any,
+      { isElectron: false, accountLatestBackupFile: { next: vi.fn() } } as any,
+      { showToast: vi.fn() } as any,
+      { detectChanges: vi.fn() } as any,
+      {} as any,
+      { resetAndRestart: vi.fn() } as any,
+      { accountCatalog: signal([activeAccount, account]) } as any,
+      { account: signal(activeAccount), selectedFacility: signal(undefined), isSwitching: signal(false) } as any,
+      { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } as any,
+      { update: vi.fn() } as any,
+      TestBed.inject(Injector)
+    );
+    header.ngOnInit();
+    TestBed.tick();
+
+    await header.switchAccount(account);
+
+    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
     header.ngOnDestroy();
   });
 

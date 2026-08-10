@@ -14,9 +14,10 @@
   <div class="ms-auto">
     <div class="dropdown">
       @if (activeAccount) {
-      <button class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span
+      <button class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+        [disabled]="isAccountSwitching()" [attr.aria-busy]="isAccountSwitching()"><span
           class="fa fa-building"></span>
-        {{activeAccount.name}}
+        {{isAccountSwitching() ? 'Switching accounts...' : activeAccount.name}}
       </button>
       }
       @if (!activeAccount) {
@@ -27,8 +28,10 @@
       <ul class="dropdown-menu dropdown-menu-end ">
         <li>
           @for (account of accountList| orderBy:'name':'asc'; track account.guid) {
-          <a [class.active]="activeAccount?.id === account.id" class="dropdown-item" (click)="switchAccount(account)">
-            {{account.name}}</a>
+          <button type="button" [class.active]="activeAccount?.guid === account.guid" class="dropdown-item"
+            [disabled]="isAccountSwitching() || activeAccount?.guid === account.guid"
+            (click)="switchAccount(account)">
+            {{account.name}}</button>
           }
         </li>
         <li>

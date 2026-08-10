@@ -4,7 +4,6 @@ import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '../loading/loading.service';
 import { Router } from '@angular/router';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
@@ -39,12 +38,7 @@ export class HomePageComponent {
     this.metaService.updateTag({ name: 'description', content: 'VERIFI is a free tool for tracking and analyzing industrial utility consumption data at corporate and facility levels, enabling energy performance analysis and DOE Better Plants reporting.' });
     this.metaService.updateTag({ property: 'og:title', content: 'VERIFI | Industrial Utility & Energy Analytics' });
     this.metaService.updateTag({ property: 'og:url', content: 'https://verifi.ornl.gov/welcome' });
-    this.accounts = [...this.applicationLifecycleService.accountCatalog()].filter(account => {
-      return !account.deleteAccount;
-    });
-    this.accounts = _.orderBy(this.accounts, (account: IdbAccount) => {
-      return new Date(account.modifiedDate).getTime();
-    }, 'desc');
+    this.setAccounts();
 
     this.loadingSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
       if (context == 'load-example-data') {
@@ -71,7 +65,9 @@ export class HomePageComponent {
       reader.onloadend = async () => {
         try {
           const tmpBackupFile = this.backupImportCoordinator.prepareTextBackup(String(reader.result));
-          await this.backupImportCoordinator.importNewAccount(tmpBackupFile);
+          const newAccount: IdbAccount = await this.backupImportCoordinator.importNewAccount(tmpBackupFile);
+          this.setAccounts();
+          this.goToAccountHome(newAccount);
           this.loadingService.isLoadingComplete.next(true);
         } catch (err) {
           console.log(err);
@@ -87,7 +83,7 @@ export class HomePageComponent {
   }
 
   navigateToAccount() {
-    this.router.navigateByUrl('/data-evaluation/account');
+    this.router.navigateByUrl('/data-evaluation/account/home');
   }
 
   openImportBackup() {
@@ -106,6 +102,15 @@ export class HomePageComponent {
 
   cancelTestData() {
     this.showTestDataModal = false;
+  }
+
+  private setAccounts(): void {
+    this.accounts = [...this.applicationLifecycleService.accountCatalog()].filter(account => {
+      return !account.deleteAccount;
+    });
+    this.accounts = _.orderBy(this.accounts, (account: IdbAccount) => {
+      return new Date(account.modifiedDate).getTime();
+    }, 'desc');
   }
 
   async goToAccountHome(account: IdbAccount) {
