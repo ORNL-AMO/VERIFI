@@ -118,7 +118,7 @@ Electron conflict reconciliation compares the file `dataBackupId` against the pe
 
 Every JSON restore path first clones and prepares the file through [`backup-preparation.service.ts`](src/app/backup/backup-preparation.service.ts): validate the envelope and data version, run the same ordered migrations as local data, validate core GUID relationships, then remap GUIDs and persist. [`BackupImportCoordinator`](src/app/backup/backup-import-coordinator.service.ts) is the single coordinated restore entry point for account import, facility import, replacement, selective facility import, example-data loading, and Electron conflict flows. Missing version metadata means version `0`; future versions are rejected before replacement or import mutation.
 
-For import/export changes, define compatibility before editing, keep parsers pure where possible, and verify a representative round trip from import through persistence to export.
+See [Backup workflows and services](docs/data-access-and-workspace.md#backup-workflows-and-services) for developer-facing service responsibilities and the expected manual, restore, and automatic Electron backup flows. For import/export changes, define compatibility before editing, keep parsers pure where possible, and verify a representative round trip from import through persistence to export.
 
 ## Web and Electron boundary
 
