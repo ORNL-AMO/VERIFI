@@ -10,6 +10,9 @@ import { AccountSavingsReportSetup } from 'src/app/models/overview-report';
 import { PptDocument } from 'src/app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from 'src/app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from 'src/app/shared/helper-pipes/custom-number.pipe';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { FacilityModelingReportPptAdapter } from 'src/app/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-ppt.adapter';
 
 export interface AccountSavingsReportPptInput {
     report: IdbAccountReport;
@@ -33,9 +36,18 @@ export interface AccountSavingsReportPptInput {
 @Injectable({ providedIn: 'root' })
 export class AccountSavingsReportPptAdapter {
     customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
+    accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+    regressionModelsService = inject(RegressionModelsService);
+    facilityModelingReportPptAdapter = inject(FacilityModelingReportPptAdapter);
 
     analysisTableColumns: AnalysisTableColumns;
     accountAnalysisItem: IdbAccountAnalysisItem;
+    facilityAnalysisItems: Array<IdbAnalysisItem> = [];
+    executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
+    regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
+    criticalItems: Array<FacilityGroupAnalysisItem> = [];
+    moderateItems: Array<FacilityGroupAnalysisItem> = [];
+    minorItems: Array<FacilityGroupAnalysisItem> = [];
 
     buildDocument(data: AccountSavingsReportPptInput): PptDocument {
         const slides: PptSlide[] = [];
@@ -47,6 +59,31 @@ export class AccountSavingsReportPptAdapter {
             title: data.report.name,
             subtitle: data.account.name,
             date: new Date().toISOString(),
+        });
+
+        this.getDataCheckItems(data);
+        let dataCheckSlides: PptSlide[] = [];
+        if (this.criticalItems?.length > 0) {
+            dataCheckSlides.push(this.facilityModelingReportPptAdapter.buildCriticalIssuesSlides(this.criticalItems));
+        }
+        if (this.moderateItems?.length > 0) {
+            dataCheckSlides.push(this.facilityModelingReportPptAdapter.buildModerateIssuesSlides(this.moderateItems));
+        }
+        if (this.minorItems?.length > 0) {
+            dataCheckSlides.push(this.facilityModelingReportPptAdapter.buildMinorIssuesSlides(this.minorItems));
+        }
+        if (dataCheckSlides.length > 0) {
+            slides.push({
+                type: 'title',
+                title: 'Model Validation Check',
+                layout: 'section'
+            });
+            slides.push(...dataCheckSlides);
+        }
+        slides.push({
+            type: 'title',
+            title: 'Account Results',
+            layout: 'section'
         });
 
         if (data.setup.includeAnnualResults && (data.setup.includeAnnualResultsTable || data.setup.includeAnnualResultsGraph || data.setup.includeAccountMonthlyTable || data.setup.includeAccountMonthlyResults)) {
@@ -181,6 +218,39 @@ export class AccountSavingsReportPptAdapter {
             metadata: { title: data.report.name, subtitle: data.account.name },
             slides,
         };
+    }
+
+    getDataCheckItems(data: AccountSavingsReportPptInput) {
+        this.facilityAnalysisItems = data.facilitySummaries.map(fs => fs.analysisItem);
+        this.facilityAnalysisItems.forEach(facilityAnalysisItem => {
+            let facility: IdbFacility = this.accountWorkspaceQuery.getFacilityByGuid(facilityAnalysisItem.facilityId);
+            facilityAnalysisItem.groups.forEach(group => {
+                if (group.analysisType == 'regression') {
+                    let groupItem: FacilityGroupAnalysisItem = this.regressionModelsService.getGroupModelItem(group, facility, facilityAnalysisItem, data.report.reportYear);
+                    if (groupItem) {
+                        this.executiveSummaryItems.push(groupItem);
+                    }
+                } else if (group.analysisType != 'skip') {
+                    this.executiveSummaryItems.push({
+                        group: group,
+                        facilityId: facility.guid,
+                        baselineYear: facilityAnalysisItem.baselineYear,
+                        selectedModel: undefined
+                    });
+                }
+            });
+        });
+
+        this.regressionGroupItems = this.executiveSummaryItems.filter(item => item.group.analysisType == 'regression');
+        this.criticalItems = this.regressionGroupItems.filter(item => {
+            return (item.group.analysisType == 'regression' && !item.selectedModel.isValid);
+        });
+        this.moderateItems = this.regressionGroupItems.filter(item => {
+            return (item.group.analysisType == 'regression' && !item.selectedModel.SEPValidationPass && item.selectedModel.dataValidationNotes && item.selectedModel.dataValidationNotes.length > 0);
+        });
+        this.minorItems = this.regressionGroupItems.filter(item => {
+            return (item.group.analysisType == 'regression' && item.selectedModel.modelNotes && item.selectedModel.modelNotes.length > 0);
+        });
     }
 
     private buildAnnualConsumptionTable(summaries: Array<AnnualAnalysisSummary>, latestMonthSummary: MonthlyAnalysisSummaryData): TableSlide {
