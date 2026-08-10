@@ -159,7 +159,8 @@ export class MeterGroupingResultsTableComponent {
       const updatedFacility: IdbFacility = { ...this.selectedFacility, energyIsSource };
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' },
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
         () => this.facilityHandler.update(updatedFacility, accountGuid)
       );
     }

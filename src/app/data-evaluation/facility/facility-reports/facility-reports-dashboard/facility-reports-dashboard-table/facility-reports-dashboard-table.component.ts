@@ -127,7 +127,8 @@ export class FacilityReportsDashboardTableComponent {
     newReport.name = raw.name + ' (Copy)';
     newReport.analysisItemId = raw.analysisItemId;
     const { value: addedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
       () => this.reportHandler.addFacilityReport(newReport, this.account()?.guid)
     );
     this.analyticsService.sendEvent('create_facility_analysis', undefined);
@@ -154,7 +155,8 @@ export class FacilityReportsDashboardTableComponent {
     if (!report) return;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'delete', entityGuid: report.guid, label: 'Delete Facility Report' },
+      { entityKind: 'facilityReport', changeKind: 'delete', entityGuid: report.guid, label: 'Delete Facility Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', deleteIds: [value] }] }) }},
       () => this.reportHandler.deleteFacilityReport(report, activeAccountGuid)
     );
     this.displayDeleteModal.set(false);

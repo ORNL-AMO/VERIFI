@@ -203,7 +203,8 @@ export class AccountAnalysisSetupComponent {
     };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Account Analysis' },
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Account Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid)
     );
     this.accountWorkspaceService.selectAccountAnalysis((updatedItem)?.guid);
@@ -234,7 +235,8 @@ export class AccountAnalysisSetupComponent {
     };
     const activeAccountGuid2 = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Account Analysis' },
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Account Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateAccountAnalysis(clearedItem, activeAccountGuid2)
     );
     this.accountWorkspaceService.selectAccountAnalysis((clearedItem)?.guid);

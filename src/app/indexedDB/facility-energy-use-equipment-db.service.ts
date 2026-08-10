@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { firstValueFrom, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IdbFacilityEnergyUseEquipment } from '../models/idbModels/facilityEnergyUseEquipment';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -51,22 +51,5 @@ export class FacilityEnergyUseEquipmentDbService {
 
   deleteWithObservable(energyUseEquipmentId: number): Observable<any> {
     return this.dbService.delete('facilityEnergyUseEquipment', energyUseEquipmentId)
-  }
-
-  async deleteAllFacilityEnergyUseEquipment(facilityId: string) {
-    await this.indexedDbAccess.deleteAllByIndex('facilityEnergyUseEquipment', 'facilityId', facilityId);
-  }
-
-
-  async deleteEnergyUseEquipmentAsync(energyUseEquipment: Array<IdbFacilityEnergyUseEquipment>) {
-    for (let i = 0; i < energyUseEquipment.length; i++) {
-      await firstValueFrom(this.deleteWithObservable(energyUseEquipment[i].id));
-    }
-  }
-
-  async deleteEnergyUseGroup(groupId: string){
-    const equipmentToDelete = (await firstValueFrom(this.getAll()))
-      .filter(equipment => equipment.energyUseGroupId === groupId);
-    await this.deleteEnergyUseEquipmentAsync(equipmentToDelete);
   }
 }

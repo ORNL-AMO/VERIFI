@@ -52,7 +52,8 @@ export class FacilityReportSetupComponent {
     facilityReport.name = this.reportName;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     const { value: updatedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: facilityReport.guid, label: 'Save Report' },
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: facilityReport.guid, label: 'Save Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
       () => this.reportHandler.updateFacilityReport(facilityReport, activeAccountGuid)
     );
     this.accountWorkspaceService.selectFacilityReport(updatedReport?.guid);

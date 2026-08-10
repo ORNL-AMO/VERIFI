@@ -121,7 +121,13 @@ export class FacilityMeterComponent {
     const meter = this.utilityMeter;
     const meterDataUpdates = this.getMeterDataUpdates(meter);
     await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Save Meter' },
+      {
+        entityKind: 'meter',
+        changeKind: 'update',
+        entityGuid: meter.guid,
+        label: 'Save Meter',
+        publication: { mode: 'reload' }
+      },
       () => this.meterHandler.updateMeterWithData(meter, meterDataUpdates, accountGuid)
     );
     this.loadingService.setLoadingStatus(false);

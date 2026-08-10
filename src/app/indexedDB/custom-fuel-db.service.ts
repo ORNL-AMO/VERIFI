@@ -1,8 +1,6 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbCustomFuel } from '../models/idbModels/customFuel';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,8 +8,7 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class CustomFuelDbService {
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+  constructor(private dbService: NgxIndexedDBService,
     private indexedDbAccess: IndexedDbAccessService) {
   }
 
@@ -45,14 +42,6 @@ export class CustomFuelDbService {
 
   deleteWithObservable(id: number): Observable<any> {
     return this.dbService.delete('customFuels', id);
-  }
-
-  async deleteAccountCustomFuels() {
-    let accountCustomFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
-    for (let i = 0; i < accountCustomFuels.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Custom Fuels (' + i + '/' + accountCustomFuels.length + ')...');
-      await this.deleteWithObservable(accountCustomFuels[i].id);
-    }
   }
 
   updateWithObservable(values: IdbCustomFuel): Observable<IdbCustomFuel> {

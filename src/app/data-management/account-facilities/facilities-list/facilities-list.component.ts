@@ -154,14 +154,16 @@ export class FacilitiesListComponent {
   async setFacilityOrder(facility: IdbFacility) {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility order' },
+      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility order' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
       () => this.facilityHandler.update(facility, activeAccountGuid)
     );
     for (const other of this.facilities) {
       if (other.guid !== facility.guid && other.facilityOrder === facility.facilityOrder) {
         const cleared = { ...other, facilityOrder: undefined };
         await this.commandBoundary.execute(
-          { entityKind: 'facility', changeKind: 'update', entityGuid: other.guid, label: 'Updating facility order' },
+          { entityKind: 'facility', changeKind: 'update', entityGuid: other.guid, label: 'Updating facility order' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
           () => this.facilityHandler.update(cleared, activeAccountGuid)
         );
       }

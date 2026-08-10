@@ -1,19 +1,14 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { Observable, firstValueFrom } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
+import { Observable } from 'rxjs';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
-import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountReportDbService {
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   constructor(private dbService: NgxIndexedDBService,
-    private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
     //subscribe after initialization
   }
@@ -55,77 +50,4 @@ export class AccountReportDbService {
     values.modifiedDate = new Date();
     return this.dbService.update('accountReports', values);
   }
-
-  async updateReportsRemoveFacility(facilityId: string) {
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    for (let i = 0; i < accountReports.length; i++) {
-      let report: IdbAccountReport = accountReports[i];
-      report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-      if (report.betterClimateReportSetup && report.betterClimateReportSetup.includedFacilityGroups) {
-        report.betterClimateReportSetup.includedFacilityGroups = report.betterClimateReportSetup.includedFacilityGroups.filter(facility => { return facility.facilityId != facilityId });
-      }
-      this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...');
-      await firstValueFrom(this.updateWithObservable(report));
-    }
-  }
-
-  async updateReportsRemoveGroup(groupId: string) {
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    for (let i = 0; i < accountReports.length; i++) {
-      let report: IdbAccountReport = accountReports[i];
-      if (report.reportType == 'betterClimate' && report.betterClimateReportSetup.includedFacilityGroups) {
-        for (let facilityIndex: number = 0; facilityIndex < report.betterClimateReportSetup.includedFacilityGroups.length; facilityIndex++) {
-          report.betterClimateReportSetup.includedFacilityGroups[facilityIndex].groups = report.betterClimateReportSetup.includedFacilityGroups[facilityIndex].groups.filter(group => { return group.groupId != groupId });
-        }
-      }
-      if (report.reportType == 'dataOverview' && report.dataOverviewReportSetup.includedFacilities) {
-        for (let facilityIndex: number = 0; facilityIndex < report.dataOverviewReportSetup.includedFacilities.length; facilityIndex++) {
-          report.dataOverviewReportSetup.includedFacilities[facilityIndex].includedGroups = report.dataOverviewReportSetup.includedFacilities[facilityIndex].includedGroups.filter(group => { return group.groupId != groupId });
-        }
-      }
-      this.loadingService.setLoadingMessage('Removing Group From Reports (' + i + '/' + accountReports.length + ')...');
-      await firstValueFrom(this.updateWithObservable(report));
-    }
-  }
-
-  async deleteAccountReports() {
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    await this.deleteReports(accountReports);
-  }
-
-  async deleteReports(accountReports: Array<IdbAccountReport>) {
-    for (let i = 0; i < accountReports.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Reports (' + i + '/' + accountReports.length + ')...');
-      await this.deleteWithObservable(accountReports[i].id);
-    }
-  }
-
-  async addGroup(group: IdbUtilityMeterGroup) {
-    let accountReports: Array<IdbAccountReport> = [...this.accountWorkspaceStore.accountReports()];
-    for (let i = 0; i < accountReports.length; i++) {
-      let report: IdbAccountReport = accountReports[i];
-      if (report.reportType == 'betterClimate') {
-        report.betterClimateReportSetup.includedFacilityGroups.forEach(facilityGroup => {
-          if (facilityGroup.facilityId == group.facilityId) {
-            facilityGroup.groups.push({
-              groupId: group.guid,
-              include: true
-            })
-          }
-        })
-      }
-      if (report.reportType == 'dataOverview') {
-        report.dataOverviewReportSetup.includedFacilities.forEach(facilityGroup => {
-          if (facilityGroup.facilityId == group.facilityId) {
-            facilityGroup.includedGroups.push({
-              groupId: group.guid,
-              include: true
-            })
-          }
-        })
-      }
-      await firstValueFrom(this.updateWithObservable(report));
-    }
-  }
-
 }

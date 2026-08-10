@@ -125,7 +125,8 @@ export class FacilityReportAnalysisSelectionComponent {
     this.selectedAnalysisItem.isAnalysisVisited = false;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Facility Analysis' },
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Facility Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateFacilityAnalysis(this.selectedAnalysisItem, activeAccountGuid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis(this.selectedAnalysisItem?.guid);

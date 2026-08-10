@@ -207,7 +207,8 @@ export class AccountAnalysisDetailsTableComponent {
       }
       const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Update Account' },
+        { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Update Account' ,
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
         () => this.accountHandler.update(updatedAccount, activeAccountGuid)
       );
     } else {

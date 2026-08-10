@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LoadingService } from '../core-components/loading/loading.service';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
 @Injectable({
@@ -11,7 +10,6 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 export class PredictorDbService {
 
     constructor(private dbService: NgxIndexedDBService,
-        private loadingService: LoadingService,
         private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbPredictor>> {
@@ -54,10 +52,4 @@ export class PredictorDbService {
     deleteWithObservable(predictorId: number): Observable<any> {
         return this.dbService.delete('predictor', predictorId)
     }
-
-    async deleteAllFacilityPredictors(facilityId: string) {
-        this.loadingService.setLoadingMessage('Deleting Facility Predictors...');
-        await this.indexedDbAccess.deleteAllByIndex('predictor', 'facilityId', facilityId);
-    }
-
 }

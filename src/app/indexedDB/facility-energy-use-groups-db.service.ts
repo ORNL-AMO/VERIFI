@@ -53,8 +53,4 @@ export class FacilityEnergyUseGroupsDbService {
   deleteWithObservable(energyUseGroupId: number): Observable<any> {
     return this.dbService.delete('facilityEnergyUseGroups', energyUseGroupId)
   }
-
-  async deleteAllFacilityEnergyUseGroups(facilityId: string) {
-    await this.indexedDbAccess.deleteAllByIndex('facilityEnergyUseGroups', 'facilityId', facilityId);
-  }
 }

@@ -1,8 +1,6 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { Observable, firstValueFrom } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
+import { Observable } from 'rxjs';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,10 +8,7 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class AccountAnalysisDbService {
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-
   constructor(private dbService: NgxIndexedDBService,
-    private loadingService: LoadingService,
     private indexedDbAccess: IndexedDbAccessService) {
     //subscribe after initialization
   }
@@ -64,26 +59,4 @@ export class AccountAnalysisDbService {
     delete persistableItem.calculatedReportYear;
     return persistableItem;
   }
-
-  async deleteAccountAnalysisItems() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
-    await this.deleteAnalysisItems(accountAnalysisItems);
-  }
-
-  async deleteAnalysisItems(analysisItems: Array<IdbAccountAnalysisItem>) {
-    for (let i = 0; i < analysisItems.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Account Analysis Items (' + i + '/' + analysisItems.length + ')...');
-      await firstValueFrom(this.deleteWithObservable(analysisItems[i].id));
-    }
-  }
-
-  async updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
-    analysiItem.facilityAnalysisItems.forEach(item => {
-      if (item.facilityId == facilityId) {
-        item.analysisItemId = analysisItemId;
-      }
-    });
-    await firstValueFrom(this.updateWithObservable(analysiItem));
-  }
-
 }

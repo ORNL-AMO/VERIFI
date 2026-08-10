@@ -19,7 +19,6 @@ describe('IndexedDB in Chromium', () => {
     harness = await IndexedDbTestHarness.create('indexed-db');
     analysisDbService = TestBed.runInInjectionContext(() => new AnalysisDbService(
       harness.dbService,
-      {} as any,
       new IndexedDbAccessService(harness.dbService)
     ));
   });
@@ -181,16 +180,14 @@ describe('IndexedDB in Chromium', () => {
       facilityId: accountAFixture.facility.guid,
       predictorId: 'other-predictor-a'
     }));
-    const loadingService = { setLoadingMessage: () => undefined };
     const indexedDbAccess = new IndexedDbAccessService(harness.dbService);
     const meterDataService = new UtilityMeterDatadbService(
       harness.dbService,
-      loadingService as any,
       indexedDbAccess
     );
     const predictorDataService = new PredictorDataDbService(
       harness.dbService,
-      loadingService as any,
+      { setLoadingMessage: () => undefined } as any,
       indexedDbAccess
     );
 
@@ -199,7 +196,7 @@ describe('IndexedDB in Chromium', () => {
     await expect(predictorDataService.getStoredPredictorData(accountAFixture.predictor.guid as string))
       .resolves.toEqual([accountAFixture.predictorData]);
 
-    await meterDataService.deleteAllFacilityMeterData(accountAFixture.facility.guid as string);
+    await indexedDbAccess.deleteAllByIndex('utilityMeterData', 'facilityId', accountAFixture.facility.guid as string);
     await predictorDataService.deleteAllFacilityPredictorData(accountAFixture.facility.guid as string);
     expect(await harness.getAll('utilityMeterData')).toEqual([accountBFixture.meterData]);
     expect(await harness.getAll('predictorData')).toEqual([accountBFixture.predictorData]);

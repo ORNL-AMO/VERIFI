@@ -1,7 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -11,7 +10,6 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 export class UtilityMeterdbService {
 
     constructor(private dbService: NgxIndexedDBService,
-        private loadingService: LoadingService,
         private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbUtilityMeter>> {
@@ -54,10 +52,4 @@ export class UtilityMeterdbService {
     deleteIndexWithObservable(utilityMeterId: number): Observable<any> {
         return this.dbService.delete('utilityMeter', utilityMeterId)
     }
-
-    async deleteAllFacilityMeters(facilityId: string) {
-        this.loadingService.setLoadingMessage('Deleting Facility Meters...');
-        await this.indexedDbAccess.deleteAllByIndex('utilityMeter', 'facilityId', facilityId);
-    }
-
 }

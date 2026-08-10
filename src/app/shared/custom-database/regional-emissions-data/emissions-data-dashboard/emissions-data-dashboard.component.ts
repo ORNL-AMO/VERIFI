@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { deleteWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -90,7 +91,16 @@ export class EmissionsDataDashboardComponent implements OnInit {
 
   async confirmDelete() {
     await this.commandBoundary.execute(
-      { entityKind: 'customEmissions', changeKind: 'delete', entityGuid: this.itemToDelete.guid, label: 'Deleting custom emissions' },
+      {
+        entityKind: 'customEmissions',
+        changeKind: 'delete',
+        entityGuid: this.itemToDelete.guid,
+        label: 'Deleting custom emissions',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => deleteWorkspaceRecords('customEmissions', { ids: [value] })
+        }
+      },
       () => this.customDataHandler.deleteCustomEmissions(this.itemToDelete, this.accountWorkspaceStore.account()?.guid)
     );
     this.cancelDelete();

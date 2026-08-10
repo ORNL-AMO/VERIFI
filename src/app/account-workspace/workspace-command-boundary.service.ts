@@ -14,6 +14,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { AccountWorkspaceService } from './account-workspace.service';
 import { AccountWorkspaceStore } from './account-workspace.store';
+import { WorkspacePatch } from './account-workspace.models';
 import {
   WorkspaceChangeKind,
   WorkspaceCommittedChange,
@@ -31,6 +32,17 @@ export interface WorkspaceCommandOptions {
   /** Human-readable label shown while the operation is in-flight. */
   readonly label: string;
 }
+
+export type WorkspacePublication<T> =
+  | { readonly mode?: 'reload' }
+  | {
+    readonly mode: 'patch';
+    readonly buildPatch: (value: T) => WorkspacePatch;
+  };
+
+export type WorkspaceCommandRequest<T> = WorkspaceCommandOptions & {
+  readonly publication?: WorkspacePublication<T>;
+};
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceCommandBoundary {
@@ -57,7 +69,10 @@ export class WorkspaceCommandBoundary {
    * @throws WorkspaceWriteError when the workspace is not ready, the account is stale, or
    *   persistence fails.
    */
-  execute<T>(options: WorkspaceCommandOptions, persist: () => Promise<T>): Promise<WorkspaceCommandResult<T>> {
+  execute<T>(
+    options: WorkspaceCommandRequest<T>,
+    persist: () => Promise<T>
+  ): Promise<WorkspaceCommandResult<T>> {
     let accountGuid: string;
     try {
       accountGuid = this.guardReady();
@@ -100,7 +115,7 @@ export class WorkspaceCommandBoundary {
 
   private async run<T>(
     submittedAccountGuid: string,
-    options: WorkspaceCommandOptions,
+    options: WorkspaceCommandRequest<T>,
     persist: () => Promise<T>
   ): Promise<WorkspaceCommandResult<T>> {
     this.assertCommandStillCurrent(submittedAccountGuid, 'before execution');
@@ -128,9 +143,7 @@ export class WorkspaceCommandBoundary {
       throw error;
     }
 
-    // Reload the workspace. If this fails, the persistence already committed —
-    // re-throw so the caller can report a partial failure.
-    const reloadResult = await this.reloadCommittedWorkspace(opId, options);
+    const reloadResult = await this.publishCommittedWorkspace(opId, options, value);
 
     if (reloadResult !== 'published') {
       this.store.clearPending(opId);
@@ -174,6 +187,30 @@ export class WorkspaceCommandBoundary {
         error
       );
     }
+  }
+
+  private async publishCommittedWorkspace<T>(
+    opId: number,
+    options: WorkspaceCommandRequest<T>,
+    value: T
+  ) {
+    const explicitPublication = options.publication;
+    if (explicitPublication?.mode === 'reload') {
+      return this.reloadCommittedWorkspace(opId, options);
+    }
+
+    if (explicitPublication?.mode === 'patch') {
+      try {
+        this.store.publishCommittedPatch(explicitPublication.buildPatch(value));
+        return 'published' as const;
+      } catch {
+        return this.reloadCommittedWorkspace(opId, options);
+      }
+    }
+
+    // Reload the workspace. If this fails, the persistence already committed —
+    // re-throw so the caller can report a partial failure.
+    return this.reloadCommittedWorkspace(opId, options);
   }
 
   private assertCommandStillCurrent(submittedAccountGuid: string, phase: string): void {

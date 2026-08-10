@@ -91,7 +91,8 @@ export class AccountSetupComponent {
       dataBackupId: this.backupFile.dataBackupId
     };
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Updating account' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
     );
     await this.automaticBackupsService.inspectCurrentAccountFile();
@@ -100,7 +101,8 @@ export class AccountSetupComponent {
 
   async saveChanges() {
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
     );
   }

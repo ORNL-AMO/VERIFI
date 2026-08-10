@@ -69,7 +69,8 @@ export class AccountOverviewOptions {
 
   async setAccountEnergyIsSource() {
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Updating account' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Updating account' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update({ ...this.selectedAccount }, this.selectedAccount.guid)
     );
   }

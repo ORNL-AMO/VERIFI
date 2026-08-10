@@ -100,7 +100,12 @@ export class EditMeterComponent implements OnInit {
     const meterDataUpdates = this.getMeterDataUpdates(meterToSave);
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', label: 'Saving meter' },
+      {
+        entityKind: 'meter',
+        changeKind: this.addOrEdit === 'add' ? 'add' : 'update',
+        label: 'Saving meter',
+        publication: this.addOrEdit === 'edit' ? { mode: 'reload' } : undefined
+      },
       async () => {
         if (this.addOrEdit == 'edit') {
           await this.meterHandler.updateMeterWithData(meterToSave, meterDataUpdates, activeAccountGuid);

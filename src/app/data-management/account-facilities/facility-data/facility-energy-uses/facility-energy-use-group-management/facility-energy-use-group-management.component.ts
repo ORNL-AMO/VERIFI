@@ -26,7 +26,8 @@ export class FacilityEnergyUseGroupManagementComponent {
     let facility: IdbFacility = this.facility();
     let newEnergyUseGroup: IdbFacilityEnergyUseGroup = getNewIdbFacilityEnergyUseGroup(facility.accountId, facility.guid);
     const result = await this.commandBoundary.execute(
-      { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Adding energy use group' },
+      { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Adding energy use group' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseGroups', upsert: [value] }] }) }},
       () => this.energyUseHandler.addGroup(newEnergyUseGroup, this.accountWorkspaceStore.account()?.guid)
     );
     this.selectEditGroup(result.value);
@@ -38,7 +39,8 @@ export class FacilityEnergyUseGroupManagementComponent {
     energyUseGroup.sidebarOpen = true;
     const activeAccountGuid = account?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Updating energy use group' },
+      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Updating energy use group' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseGroups', upsert: [value] }] }) }},
       () => this.energyUseHandler.updateGroup(energyUseGroup, activeAccountGuid)
     );
     this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + energyUseGroup.guid);

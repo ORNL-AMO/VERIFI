@@ -83,7 +83,8 @@ export class CreateReportModalComponent {
       navigateToStr = '/data-evaluation/account/reports/better-plants-report';
     }
     const { value: addedReport } = await this.commandBoundary.execute(
-      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
+      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountReports', upsert: [value] }] }) }},
       () => this.reportHandler.addAccountReport(this.accountReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);

@@ -75,7 +75,8 @@ export class EnergyUseGroupCardComponent {
         energyUseGroup.sidebarOpen = true;
         const activeAccountGuid = account?.guid;
         await this.commandBoundary.execute(
-          { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Updating energy use group' },
+          { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Updating energy use group' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseGroups', upsert: [value] }] }) }},
           () => this.energyUseHandler.updateGroup(energyUseGroup, activeAccountGuid)
         );
         this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/energy-uses/' + energyUseGroup.guid);
@@ -88,7 +89,8 @@ export class EnergyUseGroupCardComponent {
         copyGroup.name = copyGroup.name + ' (copy)';
         const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
         const result = await this.commandBoundary.execute(
-          { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Copying energy use group' },
+          { entityKind: 'energyUseGroup', changeKind: 'add', label: 'Copying energy use group' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseGroups', upsert: [value] }] }) }},
           () => this.energyUseHandler.addGroup(copyGroup, this.accountWorkspaceStore.account()?.guid)
         );
         this.editGroup(result.value);

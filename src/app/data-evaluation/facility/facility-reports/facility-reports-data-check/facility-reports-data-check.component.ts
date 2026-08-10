@@ -88,7 +88,8 @@ export class FacilityReportsDataCheckComponent {
       this.analysisItem.dataCheckedDate = new Date();
       const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: this.analysisItem.guid, label: 'Save Facility Analysis' },
+        { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: this.analysisItem.guid, label: 'Save Facility Analysis' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
         () => this.analysisHandler.updateFacilityAnalysis(this.analysisItem, activeAccountGuid)
       );
       this.accountWorkspaceService.selectFacilityAnalysis(this.analysisItem?.guid);

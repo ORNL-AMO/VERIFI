@@ -6,7 +6,9 @@ import { computed, Injectable, signal } from '@angular/core';
 import {
   AccountWorkspaceSnapshot,
   AccountWorkspaceState,
+  AccountWorkspaceCollectionKey,
   PendingOperation,
+  WorkspacePatch,
   WorkspaceError,
   WorkspaceSelections,
   WorkspaceSelectionError
@@ -131,6 +133,28 @@ export class AccountWorkspaceStore {
     });
   }
 
+  publishCommittedPatch(patch: WorkspacePatch, selections: WorkspaceSelections = this.selections()): void {
+    const snapshot = this.snapshot();
+    if (!snapshot) {
+      throw new WorkspaceSelectionError('A workspace must be loaded before publishing a patch.');
+    }
+
+    const patchedSnapshot = applyWorkspacePatch(snapshot, copyWorkspacePatch(patch));
+    const nextRevision = this.state().revision + 1;
+    this.writableState.set({
+      status: 'ready',
+      snapshot: patchedSnapshot,
+      selections: preservePatchSelections(patchedSnapshot, selections),
+      revision: nextRevision,
+      committedRevision: {
+        accountGuid: patchedSnapshot.account.guid,
+        revision: nextRevision
+      },
+      error: undefined,
+      pendingOperations: this.state().pendingOperations
+    });
+  }
+
   restore(previous: AccountWorkspaceState, error: WorkspaceError): void {
     if (previous.status === 'ready' && previous.snapshot) {
       this.writableState.set({ ...previous, error });
@@ -211,6 +235,92 @@ function copySnapshot(snapshot: AccountWorkspaceSnapshot): AccountWorkspaceSnaps
   };
 }
 
+function applyWorkspacePatch(snapshot: AccountWorkspaceSnapshot, patch: WorkspacePatch): AccountWorkspaceSnapshot {
+  const account = patch.account ?? snapshot.account;
+  if (account.guid !== snapshot.account.guid) {
+    throw new WorkspaceSelectionError('A workspace patch cannot replace the active account.');
+  }
+
+  const next = copySnapshot({
+    ...snapshot,
+    account
+  });
+  for (const collectionPatch of patch.collections ?? []) {
+    const records = collectionPatch.upsert ?? [];
+    validatePatchOwnership(account.guid, collectionPatch.collection, records);
+    (next as any)[collectionPatch.collection] = applyCollectionPatch(
+      (next as any)[collectionPatch.collection],
+      records,
+      collectionPatch.deleteIds,
+      collectionPatch.deleteGuids
+    );
+  }
+  return next;
+}
+
+function copyWorkspacePatch(patch: WorkspacePatch): WorkspacePatch {
+  return {
+    account: patch.account ? structuredClone(patch.account) : undefined,
+    collections: patch.collections?.map(collectionPatch => ({
+      collection: collectionPatch.collection,
+      upsert: collectionPatch.upsert?.map(record => structuredClone(record)),
+      deleteIds: collectionPatch.deleteIds ? [...collectionPatch.deleteIds] : undefined,
+      deleteGuids: collectionPatch.deleteGuids ? [...collectionPatch.deleteGuids] : undefined
+    }))
+  };
+}
+
+function applyCollectionPatch<T extends { id?: number; guid?: string }>(
+  current: readonly T[],
+  upsert: readonly T[] = [],
+  deleteIds: readonly number[] = [],
+  deleteGuids: readonly string[] = []
+): readonly T[] {
+  const idsToDelete = new Set(deleteIds);
+  const guidsToDelete = new Set(deleteGuids);
+  let next = current.filter(item => {
+    return (item.id === undefined || !idsToDelete.has(item.id))
+      && (item.guid === undefined || !guidsToDelete.has(item.guid));
+  });
+
+  for (const record of upsert) {
+    const index = next.findIndex(item => {
+      if (record.id !== undefined && item.id === record.id) {
+        return true;
+      }
+      return record.guid !== undefined && item.guid === record.guid;
+    });
+    if (index === -1) {
+      next = [...next, record];
+    } else {
+      next = [
+        ...next.slice(0, index),
+        record,
+        ...next.slice(index + 1)
+      ];
+    }
+  }
+
+  return sortByLocalId(next);
+}
+
+function validatePatchOwnership(
+  accountGuid: string,
+  collection: AccountWorkspaceCollectionKey,
+  records: readonly { accountId?: string }[]
+): void {
+  if (records.some(record => record.accountId !== undefined && record.accountId !== accountGuid)) {
+    throw new WorkspaceSelectionError(`The ${collection} patch contains data belonging to another account.`);
+  }
+}
+
+function sortByLocalId<T extends { id?: number; guid?: string }>(items: readonly T[]): readonly T[] {
+  return [...items].sort((first, second) => {
+    const idResult = (first.id ?? Number.MAX_SAFE_INTEGER) - (second.id ?? Number.MAX_SAFE_INTEGER);
+    return idResult || (first.guid ?? '').localeCompare(second.guid ?? '');
+  });
+}
+
 function validateSelections(
   snapshot: AccountWorkspaceSnapshot,
   selections: WorkspaceSelections
@@ -248,6 +358,51 @@ function validateSelections(
       'energy-use equipment'
     )
   };
+}
+
+function preservePatchSelections(
+  snapshot: AccountWorkspaceSnapshot,
+  selections: WorkspaceSelections
+): WorkspaceSelections {
+  const facility = findSelectionByGuid(snapshot.facilities, selections.facility);
+  const facilityGuid = facility?.guid;
+  return {
+    facility,
+    meter: findFacilitySelectionByGuid(snapshot.meters, selections.meter, facilityGuid),
+    predictor: findFacilitySelectionByGuid(snapshot.predictors, selections.predictor, facilityGuid),
+    facilityAnalysis: findFacilitySelectionByGuid(
+      snapshot.facilityAnalyses,
+      selections.facilityAnalysis,
+      facilityGuid
+    ),
+    accountAnalysis: findSelectionByGuid(snapshot.accountAnalyses, selections.accountAnalysis),
+    accountReport: findSelectionByGuid(snapshot.accountReports, selections.accountReport),
+    facilityReport: findFacilitySelectionByGuid(snapshot.facilityReports, selections.facilityReport, facilityGuid),
+    energyUseGroup: findFacilitySelectionByGuid(snapshot.energyUseGroups, selections.energyUseGroup, facilityGuid),
+    energyUseEquipment: findFacilitySelectionByGuid(
+      snapshot.energyUseEquipment,
+      selections.energyUseEquipment,
+      facilityGuid
+    )
+  };
+}
+
+function findSelectionByGuid<T extends { guid?: string }>(
+  items: readonly T[],
+  selected: T | undefined
+): T | undefined {
+  return selected ? items.find(item => item.guid === selected.guid) : undefined;
+}
+
+function findFacilitySelectionByGuid<T extends { guid?: string; facilityId?: string }>(
+  items: readonly T[],
+  selected: T | undefined,
+  facilityGuid: string | undefined
+): T | undefined {
+  if (!selected || !facilityGuid) {
+    return undefined;
+  }
+  return items.find(item => item.guid === selected.guid && item.facilityId === facilityGuid);
 }
 
 function findSelection<T extends { guid?: string }>(

@@ -38,7 +38,8 @@ export class AccountReportsDashboardComponent {
     let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     newReport.reportType = this.newReportType;
     const { value: addedReport } = await this.commandBoundary.execute(
-      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
+      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountReports', upsert: [value] }] }) }},
       () => this.reportHandler.addAccountReport(newReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_report');

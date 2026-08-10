@@ -281,7 +281,8 @@ export class SharedMeterCalendarizationComponent {
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const meter = this.dataApplicationMeter;
     await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Update Data Application' },
+      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Update Data Application' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
       () => this.meterHandler.updateMeter(meter, accountGuid)
     );
     this.selectedMeter = this.dataApplicationMeter;
@@ -299,7 +300,8 @@ export class SharedMeterCalendarizationComponent {
       const updatedFacility: IdbFacility = { ...this.selectedFacility, energyIsSource };
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' },
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
         () => this.facilityHandler.update(updatedFacility, accountGuid)
       );
       this.setCalanderizedMeterData();

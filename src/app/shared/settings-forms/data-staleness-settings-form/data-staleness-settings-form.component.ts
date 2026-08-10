@@ -100,13 +100,15 @@ export class DataStalenessSettingsFormComponent implements OnInit, OnDestroy {
 
         if (this.inAccount) {
             await this.commandBoundary.execute(
-              { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+              { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' ,
+                publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
               () => this.accountHandler.update({ ...this.selectedAccount, dataStalenessSettings: settings }, this.selectedAccount.guid)
             );
             await this.applicationLifecycleService.refreshAccountCatalog();
         } else {
             await this.commandBoundary.execute(
-              { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' },
+              { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' ,
+                publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
               () => this.facilityHandler.update({ ...this.selectedFacility, dataStalenessSettings: settings }, this.accountWorkspaceStore.account()?.guid)
             );
         }

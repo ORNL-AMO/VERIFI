@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { deleteWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -74,7 +75,16 @@ export class CustomGwpDashboardComponent {
 
   async confirmDelete() {
     await this.commandBoundary.execute(
-      { entityKind: 'customGWP', changeKind: 'delete', entityGuid: this.itemToDelete.guid, label: 'Deleting custom GWP' },
+      {
+        entityKind: 'customGWP',
+        changeKind: 'delete',
+        entityGuid: this.itemToDelete.guid,
+        label: 'Deleting custom GWP',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => deleteWorkspaceRecords('customGWPs', { ids: [value] })
+        }
+      },
       () => this.customDataHandler.deleteCustomGWP(this.itemToDelete, this.accountWorkspaceStore.account()?.guid)
     );
     this.cancelDelete();

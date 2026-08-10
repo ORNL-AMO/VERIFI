@@ -208,7 +208,8 @@ export class RegressionModelSelectionComponent {
     const analysisItem: IdbAnalysisItem = { ..._analysisItemCurrent, isAnalysisVisited: false, groups: updatedGroups };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' },
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: analysisItem.guid, label: 'Save Facility Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateFacilityAnalysis(analysisItem, activeAccountGuid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis((analysisItem)?.guid);

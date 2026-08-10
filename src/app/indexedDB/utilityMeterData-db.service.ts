@@ -1,7 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
-import { LoadingService } from '../core-components/loading/loading.service';
+import { Observable } from 'rxjs';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,7 +9,7 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
 })
 export class UtilityMeterDatadbService {
 
-    constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+    constructor(private dbService: NgxIndexedDBService,
         private indexedDbAccess: IndexedDbAccessService) { }
 
     getAll(): Observable<Array<IdbUtilityMeterData>> {
@@ -66,19 +65,4 @@ export class UtilityMeterDatadbService {
     deleteWithObservable(meterDataId: number): Observable<any> {
         return this.dbService.delete('utilityMeterData', meterDataId);
     }
-
-    async deleteAllFacilityMeterData(facilityId: string) {
-        this.loadingService.setLoadingMessage('Deleting Facility Meter Data...');
-        await this.indexedDbAccess.deleteAllByIndex('utilityMeterData', 'facilityId', facilityId);
-    }
-
-    async deleteMeterDataEntriesAsync(meterDataEntries: Array<IdbUtilityMeterData>) {
-        for (let i = 0; i < meterDataEntries.length; i++) {
-            if (i % 25 == 0 || i == 1) {
-                this.loadingService.setLoadingMessage('Deleting Meter Data Entries (' + i + '/' + meterDataEntries.length + ')...');
-            }
-            await firstValueFrom(this.deleteWithObservable(meterDataEntries[i].id));
-        }
-    }
-
 }

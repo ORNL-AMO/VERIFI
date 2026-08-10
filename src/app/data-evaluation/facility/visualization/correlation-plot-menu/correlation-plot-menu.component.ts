@@ -82,7 +82,8 @@ export class CorrelationPlotMenuComponent {
 
   async saveSiteOrSource() {
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: this.facility.guid, label: 'Updating facility' },
+      { entityKind: 'facility', changeKind: 'update', entityGuid: this.facility.guid, label: 'Updating facility' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
       () => this.facilityHandler.update({ ...this.facility }, this.accountWorkspaceStore.account()?.guid)
     );
   }

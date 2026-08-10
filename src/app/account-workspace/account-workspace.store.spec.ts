@@ -58,6 +58,120 @@ describe('AccountWorkspaceStore', () => {
     expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
   });
 
+  it('publishes a committed patch without replacing unchanged collections', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot, { facility: snapshot.facilities[0] });
+
+    const updatedData = {
+      ...snapshot.meterData[0],
+      totalEnergyUse: 42
+    } as any;
+    const addedData = {
+      id: 2,
+      guid: 'data-b',
+      facilityId: 'facility-a',
+      accountId: 'account-a',
+      meterId: 'meter-a'
+    } as any;
+
+    store.publishCommittedPatch({
+      collections: [{
+        collection: 'meterData',
+        upsert: [updatedData, addedData]
+      }]
+    });
+
+    expect(store.meterData()).toEqual([updatedData, addedData]);
+    expect(store.facilityMeterData()).toEqual([updatedData, addedData]);
+    expect(store.meters()).toEqual(snapshot.meters);
+    expect(store.revision()).toBe(1);
+    expect(store.committedRevision()).toEqual({ accountGuid: 'account-a', revision: 1 });
+  });
+
+  it('removes records with a committed patch and clears invalid selections', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot, {
+      facility: snapshot.facilities[0],
+      meter: snapshot.meters[0]
+    });
+
+    store.publishCommittedPatch({
+      collections: [{
+        collection: 'meters',
+        deleteGuids: ['meter-a']
+      }]
+    });
+
+    expect(store.meters()).toEqual([snapshot.meters[1]]);
+    expect(store.selectedFacility()).toBe(snapshot.facilities[0]);
+    expect(store.selectedMeter()).toBeUndefined();
+    expect(store.revision()).toBe(1);
+  });
+
+  it('isolates committed patch payload objects from later caller mutation', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot);
+
+    const patchedAccount = {
+      ...snapshot.account,
+      name: 'Patched Account',
+      metadata: { source: 'patch' }
+    } as any;
+    const patchedData = {
+      ...snapshot.meterData[0],
+      totalEnergyUse: 42,
+      details: { normalized: true }
+    } as any;
+
+    store.publishCommittedPatch({
+      account: patchedAccount,
+      collections: [{
+        collection: 'meterData',
+        upsert: [patchedData]
+      }]
+    });
+
+    patchedAccount.name = 'Mutated Account';
+    patchedAccount.metadata.source = 'mutated';
+    patchedData.totalEnergyUse = 999;
+    patchedData.details.normalized = false;
+
+    expect(store.account()).toMatchObject({
+      guid: snapshot.account.guid,
+      name: 'Patched Account'
+    });
+    expect((store.account() as any).metadata.source).toBe('patch');
+    expect(store.meterData()[0]).toMatchObject({
+      guid: snapshot.meterData[0].guid,
+      totalEnergyUse: 42
+    });
+    expect((store.meterData()[0] as any).details.normalized).toBe(true);
+  });
+
+  it('rejects a committed patch that contains another account', () => {
+    const store = new AccountWorkspaceStore();
+    const snapshot = createSnapshot();
+    store.publish(snapshot);
+
+    expect(() => store.publishCommittedPatch({
+      collections: [{
+        collection: 'meterData',
+        upsert: [{
+          id: 2,
+          guid: 'foreign-data',
+          facilityId: 'facility-a',
+          accountId: 'account-b'
+        } as any]
+      }]
+    })).toThrow('belonging to another account');
+
+    expect(store.revision()).toBe(0);
+    expect(store.meterData()).toEqual(snapshot.meterData);
+  });
+
   describe('pending operation tracking', () => {
     it('starts with no pending operations', () => {
       const store = new AccountWorkspaceStore();

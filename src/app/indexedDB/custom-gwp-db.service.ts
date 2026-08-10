@@ -1,8 +1,6 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
 import { IndexedDbAccessService } from './indexed-db-access.service';
 
@@ -10,8 +8,7 @@ import { IndexedDbAccessService } from './indexed-db-access.service';
   providedIn: 'root'
 })
 export class CustomGWPDbService {
-  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService,
+  constructor(private dbService: NgxIndexedDBService,
     private indexedDbAccess: IndexedDbAccessService) {
   }
 
@@ -45,14 +42,6 @@ export class CustomGWPDbService {
 
   deleteWithObservable(id: number): Observable<any> {
     return this.dbService.delete('customGWP', id);
-  }
-
-  async deleteAccountCustomGWP() {
-    let accountCustomGWP: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
-    for (let i = 0; i < accountCustomGWP.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Custom GWPs (' + i + '/' + accountCustomGWP.length + ')...');
-      await this.deleteWithObservable(accountCustomGWP[i].id);
-    }
   }
 
   updateWithObservable(values: IdbCustomGWP): Observable<IdbCustomGWP> {

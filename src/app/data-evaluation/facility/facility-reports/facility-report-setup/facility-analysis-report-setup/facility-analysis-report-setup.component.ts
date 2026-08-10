@@ -106,7 +106,8 @@ export class FacilityAnalysisReportSetupComponent {
     this.facilityReport.analysisReportSettings.analysisTableColumns = this.analysisTableColumns;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     const { value: updatedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' },
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
       () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
     );
     this.facilityReport = updatedReport;

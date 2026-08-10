@@ -7,6 +7,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
@@ -154,7 +155,15 @@ export class EmissionsDataFormComponent implements OnInit {
       this.loadingService.setLoadingMessage('Adding Subgregion...');
       this.loadingService.setLoadingStatus(true);
       await this.commandBoundary.execute(
-        { entityKind: 'customEmissions', changeKind: 'add', label: 'Adding custom emissions' },
+        {
+          entityKind: 'customEmissions',
+          changeKind: 'add',
+          label: 'Adding custom emissions',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('customEmissions', [value])
+          }
+        },
         () => this.customDataHandler.addCustomEmissions(this.editCustomEmissions, activeAccountGuid)
       );
       successMessage = 'Custom Emissions Added!';

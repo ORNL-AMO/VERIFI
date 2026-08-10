@@ -147,7 +147,8 @@ export class ElectronBackupFileComponent {
           let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
           const newAccount = await this.backupImportCoordinator.replaceActiveAccount(this.latestBackupFile);
           await this.commandBoundary.execute(
-            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' },
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' ,
+              publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
             () => this.accountHandler.update({
               ...newAccount,
               dataBackupFilePath: backupPath,
@@ -179,7 +180,8 @@ export class ElectronBackupFileComponent {
         this.account.archiveOption = this.archiveOption;
       }
       await this.commandBoundary.execute(
-        { entityKind: 'account', changeKind: 'update', entityGuid: this.account.guid, label: 'Saving account' },
+        { entityKind: 'account', changeKind: 'update', entityGuid: this.account.guid, label: 'Saving account' ,
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
         () => this.accountHandler.update({ ...this.account }, this.account.guid)
       );
     }

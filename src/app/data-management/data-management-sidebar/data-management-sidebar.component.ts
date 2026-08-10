@@ -159,7 +159,8 @@ export class DataManagementSidebarComponent {
   async toggleFacilitiesOpen() {
     const account = { ...this.account, sidebarFacilitiesOpen: !this.account.sidebarFacilitiesOpen };
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Toggling sidebar' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Toggling sidebar' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update(account, account.guid)
     );
   }
@@ -172,7 +173,8 @@ export class DataManagementSidebarComponent {
   async toggleMeterOpen(meter: IdbUtilityMeter) {
     const updated = { ...meter, sidebarOpen: !meter.sidebarOpen };
     await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Toggling sidebar' },
+      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Toggling sidebar' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
       () => this.meterHandler.updateMeter(updated, this.account?.guid)
     );
   }
@@ -184,7 +186,8 @@ export class DataManagementSidebarComponent {
 
   async saveFacility(facility: IdbFacility) {
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility' },
+      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
       () => this.facilityHandler.update({ ...facility }, this.account?.guid)
     );
   }
@@ -197,7 +200,8 @@ export class DataManagementSidebarComponent {
   async togglePredictorOpen(predictor: IdbPredictor) {
     const updated = { ...predictor, sidebarOpen: !predictor.sidebarOpen };
     await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Toggling sidebar' },
+      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Toggling sidebar' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'predictors', upsert: [value] }] }) }},
       () => this.predictorHandler.updatePredictor(updated, this.account?.guid)
     );
   }
@@ -205,7 +209,8 @@ export class DataManagementSidebarComponent {
   async toggleCustomDataOpen() {
     const account = { ...this.account, sidebarCustomDataOpen: !this.account.sidebarCustomDataOpen };
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Toggling sidebar' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Toggling sidebar' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update(account, account.guid)
     );
   }
@@ -218,7 +223,8 @@ export class DataManagementSidebarComponent {
   async toggleEnergyUseGroupOpen(energyUseGroup: IdbFacilityEnergyUseGroup) {
     const updated = { ...energyUseGroup, sidebarOpen: !energyUseGroup.sidebarOpen };
     await this.commandBoundary.execute(
-      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Toggling sidebar' },
+      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: energyUseGroup.guid, label: 'Toggling sidebar' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseGroups', upsert: [value] }] }) }},
       () => this.energyUseHandler.updateGroup(updated, this.account?.guid)
     );
   }

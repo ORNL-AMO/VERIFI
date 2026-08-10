@@ -56,7 +56,8 @@ export class EditConnectBillComponent {
         }
         if (this.addOrEdit == 'edit') {
           await this.commandBoundary.execute(
-          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meterData', upsert: [value] }] }) }},
           () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
         );
         }
@@ -75,7 +76,8 @@ export class EditConnectBillComponent {
         }
         if (this.addOrEdit == 'edit') {
           await this.commandBoundary.execute(
-          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meterData', upsert: [value] }] }) }},
           () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
         );
         }
@@ -113,7 +115,8 @@ export class EditConnectBillComponent {
           }
           if (this.addOrEdit == 'edit') {
             await this.commandBoundary.execute(
-          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meterData', upsert: [value] }] }) }},
           () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
         );
           }
@@ -139,7 +142,8 @@ export class EditConnectBillComponent {
         }
         if (this.addOrEdit == 'edit') {
           await this.commandBoundary.execute(
-          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meterData', upsert: [value] }] }) }},
           () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
         );
         }
@@ -161,7 +165,8 @@ export class EditConnectBillComponent {
       }
       if (this.addOrEdit == 'edit') {
         await this.commandBoundary.execute(
-          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' },
+          { entityKind: 'meterData', changeKind: 'update', label: 'Update Bill File' ,
+            publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meterData', upsert: [value] }] }) }},
           () => this.meterHandler.updateMeterData(this.meterDataToSave, this.accountWorkspaceStore.account()?.guid)
         );
       }

@@ -58,7 +58,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
     let newItem: IdbAccountAnalysisItem = getNewIdbAccountAnalysisItem(this.newAnalysisCategory, this.selectedAccount, accountFacilities);
     const { value: addedItem } = await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'add', label: 'Create Account Analysis' },
+      { entityKind: 'accountAnalysis', changeKind: 'add', label: 'Create Account Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.addAccountAnalysis(newItem, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_account_analysis');

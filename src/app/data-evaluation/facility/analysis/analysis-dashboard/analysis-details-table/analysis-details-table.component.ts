@@ -239,7 +239,8 @@ export class AnalysisDetailsTableComponent {
       }
       const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility' },
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
         () => this.facilityHandler.update(updatedFacility, activeAccountGuid)
       );
     } else {
@@ -285,7 +286,8 @@ export class AnalysisDetailsTableComponent {
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(analysisItem.facilityId, analysisItem.accountId, 'analysis', groups);
     newReport.analysisItemId = analysisItem.guid;
     const { value: addedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
       () => this.reportHandler.addFacilityReport(newReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
@@ -312,7 +314,8 @@ export class AnalysisDetailsTableComponent {
     newItem.name = newItem.name + " (Copy)";
     newItem.guid = Math.random().toString(36).substr(2, 9);
     const { value: addedItem } = await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' },
+      { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.addFacilityAnalysis(newItem, this.accountWorkspaceStore.account()?.guid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis((addedItem)?.guid);

@@ -254,7 +254,8 @@ export class AnalysisSetupComponent {
     };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Facility Analysis' },
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Save Facility Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateFacilityAnalysis(updatedItem, activeAccountGuid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis((updatedItem)?.guid);
@@ -291,7 +292,8 @@ export class AnalysisSetupComponent {
     };
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Facility Analysis' },
+      { entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: clearedItem.guid, label: 'Save Facility Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateFacilityAnalysis(clearedItem, activeAccountGuid)
     );
     this.accountWorkspaceService.selectFacilityAnalysis((clearedItem)?.guid);

@@ -155,7 +155,8 @@ export class PredictorTableComponent {
       predictor.sidebarOpen = true;
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Open Predictor' },
+        { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Open Predictor' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'predictors', upsert: [value] }] }) }},
         () => this.predictorHandler.updatePredictor(predictor, accountGuid)
       );
       this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
@@ -170,7 +171,12 @@ export class PredictorTableComponent {
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       const result = await this.commandBoundary.execute(
-        { entityKind: 'predictor', changeKind: 'add', label: 'Add Predictor' },
+        {
+          entityKind: 'predictor',
+          changeKind: 'add',
+          label: 'Add Predictor',
+          publication: { mode: 'reload' }
+        },
         async () => {
           const added = await this.predictorHandler.addPredictor(newPredictor, this.accountWorkspaceStore.account()?.guid);
           await this.analysisHandler.addAnalysisPredictor(added);

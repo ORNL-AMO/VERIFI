@@ -80,7 +80,8 @@ export class AnalysisDashboardComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
     const { value: addedItem } = await this.commandBoundary.execute(
-      { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' },
+      { entityKind: 'facilityAnalysis', changeKind: 'add', label: 'Create Facility Analysis' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.addFacilityAnalysis(newIdbItem, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_facility_analysis', undefined)

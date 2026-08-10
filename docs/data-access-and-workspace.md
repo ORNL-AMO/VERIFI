@@ -4,7 +4,7 @@ This guide explains how feature code should read, select, edit, and persist data
 
 The central rule is:
 
-> Read the active account through workspace signals. Persist through `WorkspaceCommandBoundary` for ordinary user writes, or through `IndexedDbTransactionService` for infrastructure-owned atomic workflows. Publish one coherent committed workspace refresh only after the logical write commits.
+> Read the active account through workspace signals. Persist through `WorkspaceCommandBoundary` for ordinary user writes, or through `IndexedDbTransactionService` for infrastructure-owned atomic workflows. Publish one coherent committed workspace change only after the logical write commits.
 
 ## The data layers
 
@@ -13,7 +13,7 @@ The central rule is:
 | `ApplicationLifecycleService` | Startup, persistence readiness, the complete account catalog, usable accounts, application metadata | Active facility or feature selections |
 | `AccountWorkspaceStore` | One atomic, readonly snapshot for the active account; validated selections; facility-derived collections; committed revision | IndexedDB writes or account switching |
 | `AccountWorkspaceService` | Account loading and switching, selection by GUID, selection hints, hydration and committed refreshes | Business-form editing or object-store implementation |
-| `WorkspaceCommandBoundary` | Pending-state tracking, stale-workspace guards, one committed reload, and one committed-change event per successful user operation | Direct repository writes, account selection, or domain validation beyond the supplied handler |
+| `WorkspaceCommandBoundary` | Pending-state tracking, stale-workspace guards, one committed publication, and one committed-change event per successful user operation | Direct repository writes, account selection, or domain validation beyond the supplied handler |
 | IndexedDB services | Queries and persistence for their object store | Active UI collections, selections, navigation, notifications, or local-storage hints |
 | `IndexedDbTransactionService` | Atomic operations across one or more stores | Calls to ordinary repositories inside its transaction |
 
@@ -31,7 +31,7 @@ The central rule is:
 | Persist one user-initiated workspace write | `WorkspaceCommandBoundary.execute(...)` with the matching command handler |
 | Commit one logical operation across stores | `IndexedDbTransactionService` |
 | Query an inactive account for an infrastructure workflow | An indexed repository method scoped by account GUID |
-| Refresh active state after a successful user change | Let `WorkspaceCommandBoundary` perform the committed reload |
+| Refresh active state after a successful user change | Let `WorkspaceCommandBoundary` perform the committed publication |
 | Republish data during hydration or repair without signaling a user change | `reloadActiveWorkspace(false)` |
 
 ## Reading active data
@@ -169,7 +169,7 @@ The safe order is:
 1. Read or copy the current entity.
 2. Build the updated record without mutating workspace state.
 3. Await the repository write.
-4. After it succeeds, request one committed workspace refresh.
+4. After it succeeds, publish one committed workspace change.
 
 ```ts
 import { firstValueFrom } from 'rxjs';
@@ -191,6 +191,8 @@ async renameMeter(meterGuid: string, name: string): Promise<void> {
 ```
 
 If persistence fails, do not publish the draft or increment the committed revision. Report the failure and leave the current coherent snapshot in place.
+
+The command boundary reloads by default after persistence. Use explicit patch publication only when the caller can provide a complete affected-record patch for the logical command. Keep the committed reload path for account switching, imports, repair, cascade deletes, bulk commands, and multi-store changes whose affected workspace records are not all known to the caller. Use explicit patch publication for bulk or multi-record commands only when the caller knows the complete affected set.
 
 For an add, use the model's factory so required GUID relationships and defaults are created consistently:
 
@@ -255,14 +257,16 @@ Account and facility cascade deletes already use `IndexedDbCascadeDeleteService`
 
 ## Committed refreshes and backups
 
-`reloadActiveWorkspace(true)` means that a logical persistence operation committed. It atomically reloads all active-account collections, preserves only still-valid selections, increments the revision once, and publishes `committedRevision`.
+`reloadActiveWorkspace(true)` means that a logical persistence operation committed and the active workspace should be rebuilt from IndexedDB. It atomically reloads all active-account collections, preserves only still-valid selections, increments the revision once, and publishes `committedRevision`.
+
+`WorkspaceCommandBoundary` reloads committed workspace data after persistence by default. A committed patch updates the active snapshot in memory, preserves only still-valid selections, increments the revision once, and publishes `committedRevision` without reloading every account-scoped collection. Use `publication: { mode: 'patch', buildPatch: ... }` only when the command owns the full affected-record set. If patch validation fails, the boundary falls back to the committed reload path.
 
 Automatic backups observe committed revisions. Therefore:
 
-- Call one committed refresh after a successful logical change.
-- Do not call a committed refresh after a failed or rolled-back operation.
-- Do not call a committed refresh for selection-only changes.
-- Do not call it once per collection in a multi-collection workflow.
+- Publish one committed workspace change after a successful logical change.
+- Do not publish a committed workspace change after a failed or rolled-back operation.
+- Do not publish a committed change for selection-only changes.
+- Do not publish once per collection in a multi-collection workflow.
 
 `reloadActiveWorkspace(false)` is for hydration or repair that must not represent a new user change, such as startup selection repair. It replaces the snapshot without incrementing the revision or scheduling a backup. New user-initiated write paths should normally use `true`.
 
@@ -405,7 +409,7 @@ Before submitting a data-related change, confirm:
 - Editable records are copied before modification.
 - GUID ownership is preserved across account, facility, and child records.
 - Persistence completes before workspace publication.
-- One logical commit produces one committed refresh.
+- One logical commit produces one committed publication.
 - Hydration and selection changes do not produce committed revisions.
 - Multi-store atomic work uses only the transaction context.
 - Repositories remain persistence-only.
