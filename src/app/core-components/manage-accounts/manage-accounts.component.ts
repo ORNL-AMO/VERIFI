@@ -87,10 +87,7 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingStatus(true);
     try {
       await this.backupExportCoordinator.exportAccountByGuid(account.guid);
-      await this.commandBoundary.execute(
-        { entityKind: 'account', changeKind: 'update', entityGuid: account.guid, label: 'Recording backup date' },
-        () => this.accountHandler.update({ ...account, lastBackup: new Date() }, account.guid)
-      );
+      await this.accountHandler.update({ ...account, lastBackup: new Date() }, account.guid);
       this.accounts = [...await this.applicationLifecycleService.refreshAccountCatalog()];
       this.toastNotificationService.showToast(account.name + 'Backup Successful', undefined, undefined, false, 'alert-success');
     } catch (err) {

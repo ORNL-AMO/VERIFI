@@ -270,6 +270,42 @@ Automatic backups observe committed revisions. Therefore:
 
 `reloadActiveWorkspace(false)` is for hydration or repair that must not represent a new user change, such as startup selection repair. It replaces the snapshot without incrementing the revision or scheduling a backup. New user-initiated write paths should normally use `true`.
 
+## Backup workflows and services
+
+Backup code is centered under [`src/app/backup/`](../src/app/backup). Use the coordinators there as workflow boundaries instead of assembling or restoring backup files from components.
+
+The two main flows are:
+
+```text
+Workspace snapshot -> backup builder -> serializer -> browser download or Electron file gateway
+Backup file -> parse -> validate -> migrate -> compare -> user decision -> transactional import -> workspace publication
+```
+
+| Need | Use |
+| --- | --- |
+| Download the active account backup | `BackupExportCoordinator.exportActiveAccount(...)` |
+| Download an inactive account backup | `BackupExportCoordinator.exportAccountByGuid(...)` |
+| Download one active-workspace facility backup | `BackupExportCoordinator.exportFacility(facilityGuid)` |
+| Build a backup object without downloading it | `BackupExportCoordinator.buildActiveAccountBackup()`, `buildAccountBackupByGuid(...)`, or `buildFacilityBackup(...)` |
+| Parse, migrate, validate, and normalize incoming JSON | `BackupImportCoordinator.prepareTextBackup(...)` or `prepareParsedBackup(...)` |
+| Compare a prepared account backup with current data | `BackupImportCoordinator.comparePreparedAccountBackup(...)` |
+| Import or replace an account or facility | `BackupImportCoordinator` |
+| Write, read, or inspect Electron backup files | `ElectronBackupFileGateway` through `AutomaticBackupsService` or the Electron backup UI |
+
+Manual exports should flow through `BackupExportCoordinator`. The coordinator reads one coherent workspace snapshot. Active-account and facility exports use `AccountWorkspaceStore.snapshot()`. Inactive-account exports use `AccountWorkspaceLoaderService.load(accountGuid)` so exporting an account from account management does not switch the active account. `WorkspaceBackupSnapshotBuilder` owns the JSON shape, data version, account/facility filtering, machine-local account-field removal, and trimmed derived fields. `JsonBackupSerializer` and `BrowserBackupDownloadService` own file names, JSON serialization, ZIP creation, and browser downloads.
+
+Manual imports should flow through `BackupImportCoordinator`. First prepare the file with `prepareTextBackup` or `prepareParsedBackup`; preparation clones the file, verifies the VERIFI envelope, treats missing `dataVersion` as version `0`, rejects future versions, runs ordered data migrations, removes machine-local account backup fields, and validates core GUID relationships. After that, use the coordinator method for the requested workflow: `importNewAccount`, `replaceActiveAccount`, `importNewFacility`, `replaceFacility`, or `importSelectedFacilities`. These methods preserve the existing loading, analytics, delete-suspension, workspace refresh, account activation, and selection behavior.
+
+`BackupImportCommandService` is the low-level persistence writer for prepared backup files. It remaps GUID relationships and writes the participating records in native IndexedDB transactions. Do not call it from UI code and do not bypass preparation. If a new backup restore path is needed, add a focused method to `BackupImportCoordinator` so validation, transaction usage, refresh behavior, and selection behavior stay in one place.
+
+`BackupDataService` still contains legacy compatibility paths from the pre-coordinator flow. Do not add new consumers of those legacy import or direct-download methods. New code should inject the coordinator, builder, serializer, or gateway that owns the needed responsibility directly.
+
+Automatic Electron backups are coordinated by `AutomaticBackupsService`. `ApplicationLifecycleService` initializes Electron backup metadata and then starts observing after startup has published usable workspace state. The service only reacts to `committedRevision`, so hydration, startup repair, selection changes, failed writes, and account switches do not create backup writes. When a committed revision lands for an account with `dataBackupFilePath`, the service debounces briefly, builds an account backup through `BackupExportCoordinator`, writes through `ElectronBackupFileGateway`, and records the latest `dataBackupId` in the `electronBackups` store.
+
+Electron backup file access must stay behind `ElectronBackupFileGateway`. Renderer code should not call Electron IPC backup channels directly. The gateway owns request/response error handling for choosing a path, checking existence, reading, and writing. `AutomaticBackupsService` uses account-session tokens so account switches cancel stale inspections and saves; it also queues one follow-up save when a newer committed revision arrives during an active write.
+
+Conflict review compares the prepared file's `dataBackupId` with the account's `electronBackups` registry entry. A missing registry entry or mismatched ID means the selected file may not reflect the latest known saved state for that account. Missing files, invalid files, future-version files, and write failures should be surfaced through the automatic-backup service so each issue is warned once per account session.
+
 ## Querying repositories directly
 
 Repository reads are appropriate when the data is not the active UI workspace or when infrastructure needs a targeted IndexedDB query. Prefer indexed, relationship-specific methods:

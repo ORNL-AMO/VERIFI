@@ -106,13 +106,19 @@ describe('account switching loading ownership', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/data-evaluation/account/home');
   });
 
-  it('publishes the requested workspace before backing up or exporting an account', async () => {
+  it('records inactive-account backup timestamps without publishing a workspace command', async () => {
     const events: string[] = [];
-  const workspace = {
-    selectAccount: vi.fn(async () => { events.push('workspace'); return 'published'; })
-  };
-  const backupExportCoordinator = {
+    const workspace = {
+      selectAccount: vi.fn(async () => { events.push('workspace'); return 'published'; })
+    };
+    const backupExportCoordinator = {
       exportAccountByGuid: vi.fn(async () => events.push('backup'))
+    };
+    const accountHandler = {
+      update: vi.fn(async (updatedAccount: IdbAccount) => {
+        events.push('catalog-update');
+        return updatedAccount;
+      })
     };
     const exportService = {
       setExportFacilityDataMessages: vi.fn(),
@@ -129,6 +135,7 @@ describe('account switching loading ownership', () => {
       refreshAccountCatalog: vi.fn().mockResolvedValue([account])
     };
     const manageAccounts = createManageAccounts({
+      accountHandler,
       workspace,
       backupExportCoordinator,
       exportService,
@@ -137,12 +144,13 @@ describe('account switching loading ownership', () => {
     });
 
     await manageAccounts.backupAccount(account);
-    expect(events).toEqual(['backup', 'account-update']);
+    expect(events).toEqual(['backup', 'catalog-update']);
     expect(backupExportCoordinator.exportAccountByGuid).toHaveBeenCalledWith('account-b');
-    expect(commandBoundary.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ entityKind: 'account', changeKind: 'update' }),
-      expect.any(Function)
-    );
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(accountHandler.update).toHaveBeenCalledWith(expect.objectContaining({
+      guid: 'account-b',
+      lastBackup: expect.any(Date)
+    }), 'account-b');
 
     events.length = 0;
     await manageAccounts.exportToExcel(account);
@@ -190,7 +198,8 @@ describe('account switching loading ownership', () => {
 
 function createManageAccounts(overrides: Record<string, any> = {}): ManageAccountsComponent {
   const accountDb = overrides.accountDb ?? {
-    allAccounts: new BehaviorSubject<IdbAccount[]>([])
+    allAccounts: new BehaviorSubject<IdbAccount[]>([]),
+    updateWithObservable: vi.fn(() => of({}))
   };
     const loading = overrides.loading ?? {
       setLoadingMessage: vi.fn(),
