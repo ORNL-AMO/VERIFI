@@ -114,11 +114,10 @@ describe('account switching loading ownership', () => {
     const backupExportCoordinator = {
       exportAccountByGuid: vi.fn(async () => events.push('backup'))
     };
-    const accountDb = {
-      allAccounts: new BehaviorSubject<IdbAccount[]>([]),
-      updateWithObservable: vi.fn((updatedAccount: IdbAccount) => {
+    const accountHandler = {
+      update: vi.fn(async (updatedAccount: IdbAccount) => {
         events.push('catalog-update');
-        return of(updatedAccount);
+        return updatedAccount;
       })
     };
     const exportService = {
@@ -136,7 +135,7 @@ describe('account switching loading ownership', () => {
       refreshAccountCatalog: vi.fn().mockResolvedValue([account])
     };
     const manageAccounts = createManageAccounts({
-      accountDb,
+      accountHandler,
       workspace,
       backupExportCoordinator,
       exportService,
@@ -148,10 +147,10 @@ describe('account switching loading ownership', () => {
     expect(events).toEqual(['backup', 'catalog-update']);
     expect(backupExportCoordinator.exportAccountByGuid).toHaveBeenCalledWith('account-b');
     expect(commandBoundary.execute).not.toHaveBeenCalled();
-    expect(accountDb.updateWithObservable).toHaveBeenCalledWith(expect.objectContaining({
+    expect(accountHandler.update).toHaveBeenCalledWith(expect.objectContaining({
       guid: 'account-b',
       lastBackup: expect.any(Date)
-    }));
+    }), 'account-b');
 
     events.length = 0;
     await manageAccounts.exportToExcel(account);
