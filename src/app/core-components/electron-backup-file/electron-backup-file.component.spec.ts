@@ -82,7 +82,6 @@ describe('ElectronBackupFileComponent', () => {
       inspectCurrentAccountFile: vi.fn().mockResolvedValue(undefined),
       overwriteFile: vi.fn().mockResolvedValue(undefined)
     };
-
     TestBed.configureTestingModule({
       imports: [ElectronBackupFileTestModule],
       providers: [
@@ -134,6 +133,35 @@ describe('ElectronBackupFileComponent', () => {
     automaticBackupsService.latestBackupFile.next(buildPreparedBackupFile());
 
     expect(createArchiveSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps the archive prompt dismissed after automatic saves update the latest backup file', () => {
+    electronService.isElectron = true;
+    component.ngOnInit();
+    component.account = {
+      guid: 'account-a',
+      archiveOption: 'skip'
+    } as unknown as ElectronBackupFileComponent['account'];
+    component.archiveOption = 'skip';
+
+    automaticBackupsService.status.next('checking');
+    automaticBackupsService.latestBackupFile.next(buildPreparedBackupFile());
+    automaticBackupsService.status.next('ready');
+
+    expect(component.showModal).toBe(true);
+    expect(component.showArchiveDecision).toBe(true);
+
+    component.hideModal();
+
+    automaticBackupsService.status.next('saving');
+    automaticBackupsService.latestBackupFile.next({
+      ...buildPreparedBackupFile(),
+      dataBackupId: 'automatic-save-id'
+    });
+    automaticBackupsService.status.next('ready');
+
+    expect(component.showModal).toBe(false);
+    expect(component.showArchiveDecision).toBe(false);
   });
 
   it('renders a conflict message when the backup registry entry is missing', () => {

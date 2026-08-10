@@ -89,7 +89,7 @@
             Backup Timestamp: {{latestBackupFile.timeStamp | date:'medium'}}
           </p>
         }
-        @if (differingBackups || (account.archiveOption != 'always' && account.archiveOption != 'never') || forceModal) {
+        @if (showArchiveDecision) {
           <label class="semibold">
             Would you like to create a version history file of this account before uploading latest backup
           file? If selected, a copy of this account will be saved as a backup file with a time stamp. </label>
