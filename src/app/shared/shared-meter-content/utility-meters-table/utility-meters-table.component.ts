@@ -102,7 +102,8 @@ export class UtilityMetersTableComponent {
       const facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
       const result = await this.commandBoundary.execute(
-        { entityKind: 'meter', changeKind: 'add', label: 'Add Meter' },
+        { entityKind: 'meter', changeKind: 'add', label: 'Add Meter',
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
         () => this.meterHandler.addMeter(newMeter, this.accountWorkspaceStore.account()?.guid)
       );
       await this.selectEditMeter(result.value);
@@ -173,7 +174,8 @@ export class UtilityMetersTableComponent {
       const facility: IdbFacility = this.selectedFacility();
       meter.sidebarOpen = true;
       await this.commandBoundary.execute(
-        { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Open Meter' },
+        { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Open Meter' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
         () => this.meterHandler.updateMeter(meter, account?.guid)
       );
       this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + facility.guid + '/meters/' + meter.guid);
@@ -203,7 +205,8 @@ export class UtilityMetersTableComponent {
     copyMeter.guid = Math.random().toString(36).substr(2, 9);
     copyMeter.name = copyMeter.name + ' (copy)';
     const result = await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: 'add', label: 'Copy Meter' },
+      { entityKind: 'meter', changeKind: 'add', label: 'Copy Meter' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
       () => this.meterHandler.addMeter(copyMeter, this.accountWorkspaceStore.account()?.guid)
     );
     this.selectEditMeter(result.value);

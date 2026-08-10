@@ -105,7 +105,8 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   async createReport() {
     const result = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'add', label: 'Creating facility report' },
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Creating facility report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
       () => this.reportHandler.addFacilityReport(this.facilityReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.facilityReport = result.value;

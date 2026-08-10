@@ -84,7 +84,8 @@ export class FacilityEnergyUseGroupComponent {
     this.energyUseGroup = this.facilityEnergyUseGroupFormService.updateEnergyUseGroupFromForm(this.energyUseGroup, this.form);
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: this.energyUseGroup.guid, label: 'Saving energy use group' },
+      { entityKind: 'energyUseGroup', changeKind: 'update', entityGuid: this.energyUseGroup.guid, label: 'Saving energy use group' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseGroups', upsert: [value] }] }) }},
       () => this.energyUseHandler.updateGroup(this.energyUseGroup, activeAccountGuid)
     );
     this.loadingService.setLoadingStatus(false);
@@ -151,7 +152,8 @@ export class FacilityEnergyUseGroupComponent {
     let latestYear: number = getLatestYearWithData(calanderizedMeters, [facility]);
     let newEquipment: IdbFacilityEnergyUseEquipment = getNewIdbFacilityEnergyUseEquipment(this.energyUseGroup, latestYear);
     await this.commandBoundary.execute(
-      { entityKind: 'energyUseEquipment', changeKind: 'add', label: 'Adding energy use equipment' },
+      { entityKind: 'energyUseEquipment', changeKind: 'add', label: 'Adding energy use equipment' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'energyUseEquipment', upsert: [value] }] }) }},
       () => this.energyUseHandler.addEquipment(newEquipment, this.accountWorkspaceStore.account()?.guid)
     );
     let account: IdbAccount = this.accountWorkspaceStore.account();

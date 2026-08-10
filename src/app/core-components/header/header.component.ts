@@ -154,7 +154,8 @@ export class HeaderComponent implements OnInit {
     const selectedAccount = this.accountWorkspaceStore.account();
     if (!selectedAccount) { return; }
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: selectedAccount.guid, label: 'Recording backup date' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: selectedAccount.guid, label: 'Recording backup date' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update({ ...selectedAccount, lastBackup: new Date() }, selectedAccount.guid)
     );
     await this.applicationLifecycleService.refreshAccountCatalog();

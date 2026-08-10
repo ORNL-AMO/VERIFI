@@ -78,7 +78,8 @@ export class FacilityPredictorDataEntryComponent {
     this.isSaved = true;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'predictorData', changeKind: 'update', entityGuid: this.predictorData.guid, label: 'Save Predictor Data' },
+      { entityKind: 'predictorData', changeKind: 'update', entityGuid: this.predictorData.guid, label: 'Save Predictor Data' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'predictorData', upsert: [value] }] }) }},
       () => this.predictorHandler.updatePredictorData(this.predictorData, accountGuid)
     );
   }
@@ -94,7 +95,8 @@ export class FacilityPredictorDataEntryComponent {
     let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
     let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor, predictorData);
     const result = await this.commandBoundary.execute(
-      { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' },
+      { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'predictorData', upsert: [value] }] }) }},
       () => this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid)
     );
     this.router.navigateByUrl('data-management/' + result.value.accountId + '/facilities/' + result.value.facilityId + '/predictors/' + result.value.predictorId + '/predictor-data/edit-entry/' + result.value.guid);

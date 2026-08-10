@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -82,7 +83,16 @@ export class FacilityEnergyUseEquipmentComponent {
     this.loadingService.setLoadingStatus(true);
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'energyUseEquipment', changeKind: 'update', entityGuid: this.energyUseEquipment.guid, label: 'Saving energy use equipment' },
+      {
+        entityKind: 'energyUseEquipment',
+        changeKind: 'update',
+        entityGuid: this.energyUseEquipment.guid,
+        label: 'Saving energy use equipment',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('energyUseEquipment', [value])
+        }
+      },
       () => this.energyUseHandler.updateEquipment(this.energyUseEquipment, activeAccountGuid)
     );
     this.loadingService.setLoadingStatus(false);
@@ -106,7 +116,15 @@ export class FacilityEnergyUseEquipmentComponent {
     this.loadingService.setLoadingStatus(true);
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'energyUseEquipment', changeKind: 'delete', label: 'Deleting energy use equipment' },
+      {
+        entityKind: 'energyUseEquipment',
+        changeKind: 'delete',
+        label: 'Deleting energy use equipment',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => deleteWorkspaceRecords('energyUseEquipment', { ids: [value] })
+        }
+      },
       () => this.energyUseHandler.deleteEquipment(this.energyUseEquipment, activeAccountGuid)
     );
     this.cancelDelete();

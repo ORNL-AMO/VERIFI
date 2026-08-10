@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -142,7 +143,15 @@ export class CustomFuelDataFormComponent {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     if (this.isAdd) {
       await this.commandBoundary.execute(
-        { entityKind: 'customFuel', changeKind: 'add', label: 'Adding custom fuel' },
+        {
+          entityKind: 'customFuel',
+          changeKind: 'add',
+          label: 'Adding custom fuel',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('customFuels', [value])
+          }
+        },
         () => this.customDataHandler.addCustomFuel(this.editCustomFuel, activeAccountGuid)
       );
     } else {

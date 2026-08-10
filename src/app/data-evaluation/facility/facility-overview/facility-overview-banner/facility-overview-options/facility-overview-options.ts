@@ -77,7 +77,8 @@ export class FacilityOverviewOptions {
 
   async setFacilityEnergyIsSource() {
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Updating facility' },
+      { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Updating facility' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
       () => this.facilityHandler.update({ ...this.selectedFacility }, this.account?.guid)
     );
   }

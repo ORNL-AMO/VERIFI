@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
+import { deleteWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -74,7 +75,16 @@ export class CustomFuelDataDashboardComponent {
 
   async confirmDelete() {
     await this.commandBoundary.execute(
-      { entityKind: 'customFuel', changeKind: 'delete', entityGuid: this.itemToDelete.guid, label: 'Deleting custom fuel' },
+      {
+        entityKind: 'customFuel',
+        changeKind: 'delete',
+        entityGuid: this.itemToDelete.guid,
+        label: 'Deleting custom fuel',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => deleteWorkspaceRecords('customFuels', { ids: [value] })
+        }
+      },
       () => this.customDataHandler.deleteCustomFuel(this.itemToDelete, this.accountWorkspaceStore.account()?.guid)
     );
     this.cancelDelete();

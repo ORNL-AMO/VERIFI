@@ -18,6 +18,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 
@@ -153,7 +154,15 @@ export class PredictorsDataTableComponent {
     if (this.inDataManagement) {
       let newEntry: IdbPredictorData = getNewIdbPredictorData(predictor, predictorData);
       const result = await this.commandBoundary.execute(
-        { entityKind: 'predictorData', changeKind: 'add', label: 'Add Predictor Entry' },
+        {
+          entityKind: 'predictorData',
+          changeKind: 'add',
+          label: 'Add Predictor Entry',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('predictorData', [value])
+          }
+        },
         () => this.predictorHandler.addPredictorData(newEntry, this.accountWorkspaceStore.account()?.guid)
       );
       this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
@@ -172,7 +181,15 @@ export class PredictorsDataTableComponent {
     this.loadingService.setLoadingStatus(true);
     const idToDelete = this.predictorDataToDelete.id;
     await this.commandBoundary.execute(
-      { entityKind: 'predictorData', changeKind: 'delete', label: 'Delete Predictor Entry' },
+      {
+        entityKind: 'predictorData',
+        changeKind: 'delete',
+        label: 'Delete Predictor Entry',
+        publication: {
+          mode: 'patch',
+          buildPatch: () => deleteWorkspaceRecords('predictorData', { ids: [idToDelete] })
+        }
+      },
       () => this.predictorHandler.deletePredictorData(idToDelete)
     );
     this.cancelDeletePredictorData();
@@ -223,8 +240,17 @@ export class PredictorsDataTableComponent {
     this.loadingService.setLoadingStatus(true);
     const checkedIds = this.checkedItemGuids();
     const checkedItems = this.predictorData().filter(entry => checkedIds.has(entry.guid));
+    const checkedItemIds = checkedItems.map(item => item.id).filter((id): id is number => id !== undefined);
     await this.commandBoundary.execute(
-      { entityKind: 'predictorData', changeKind: 'bulk', label: 'Delete Predictor Entries' },
+      {
+        entityKind: 'predictorData',
+        changeKind: 'bulk',
+        label: 'Delete Predictor Entries',
+        publication: {
+          mode: 'patch',
+          buildPatch: () => deleteWorkspaceRecords('predictorData', { ids: checkedItemIds })
+        }
+      },
       async () => {
         for (const item of checkedItems) {
           await this.predictorHandler.deletePredictorData(item.id);
@@ -329,7 +355,16 @@ export class PredictorsDataTableComponent {
     predictor.ignoreWeatherDataWarning = !predictor.ignoreWeatherDataWarning;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Weather Warning' },
+      {
+        entityKind: 'predictor',
+        changeKind: 'update',
+        entityGuid: predictor.guid,
+        label: 'Update Weather Warning',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('predictors', [value])
+        }
+      },
       () => this.predictorHandler.updatePredictor(predictor, accountGuid)
     );
   }

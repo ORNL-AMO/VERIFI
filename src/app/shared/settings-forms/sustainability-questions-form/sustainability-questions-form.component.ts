@@ -78,7 +78,8 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
     if (!this.inAccount) {
       this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' },
+        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
         () => this.facilityHandler.update({ ...this.selectedFacility }, this.accountWorkspaceStore.account()?.guid)
       );
     }
@@ -86,7 +87,8 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
       this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value;
       await this.commandBoundary.execute(
-        { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+        { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' ,
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
         () => this.accountHandler.update({ ...this.selectedAccount }, this.selectedAccount.guid)
       );
       await this.applicationLifecycleService.refreshAccountCatalog();

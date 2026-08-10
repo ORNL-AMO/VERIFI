@@ -118,7 +118,8 @@ export class AccountReportsDashboardTableComponent {
     newReport.name = newReport.name + ' (Copy)';
     newReport.guid = getGUID();
     const { value: addedReport } = await this.commandBoundary.execute(
-      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' },
+      { entityKind: 'accountReport', changeKind: 'add', label: 'Create Account Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountReports', upsert: [value] }] }) }},
       () => this.reportHandler.addAccountReport(newReport, this.selectedAccount()?.guid)
     );
     this.accountWorkspaceService.selectAccountReport((addedReport)?.guid);
@@ -144,7 +145,8 @@ export class AccountReportsDashboardTableComponent {
     if (!report) return;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'accountReport', changeKind: 'delete', entityGuid: report.guid, label: 'Delete Account Report' },
+      { entityKind: 'accountReport', changeKind: 'delete', entityGuid: report.guid, label: 'Delete Account Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountReports', deleteIds: [value] }] }) }},
       () => this.reportHandler.deleteAccountReport(report, activeAccountGuid)
     );
     this.displayDeleteModal.set(false);

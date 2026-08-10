@@ -127,7 +127,8 @@ export class SelectItemTableComponent {
       )
     };
     await this.commandBoundary.execute(
-      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Update Analysis Selection' },
+      { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: updatedItem.guid, label: 'Update Analysis Selection' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
       () => this.analysisHandler.updateAccountAnalysis(updatedItem, activeAccountGuid)
     );
   }

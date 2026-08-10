@@ -62,7 +62,8 @@ export class AccountReportsDataCheckComponent {
       this.selectedAnalysisItem.isAnalysisVisited = true;
       const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Account Analysis' },
+        { entityKind: 'accountAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Account Analysis' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountAnalyses', upsert: [value] }] }) }},
         () => this.analysisHandler.updateAccountAnalysis(this.selectedAnalysisItem, activeAccountGuid)
       );
       this.accountWorkspaceService.selectAccountAnalysis(this.selectedAnalysisItem?.guid);

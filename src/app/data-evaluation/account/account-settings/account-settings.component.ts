@@ -201,7 +201,8 @@ export class AccountSettingsComponent implements OnInit {
   async setFacilityOrder(facility: IdbFacility) {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility order' },
+      { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility order' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
       () => this.facilityHandler.update(facility, activeAccountGuid)
     );
     for (let i = 0; i < this.facilityList.length; i++) {
@@ -209,7 +210,8 @@ export class AccountSettingsComponent implements OnInit {
         if (this.facilityList[i].facilityOrder && this.facilityList[i].facilityOrder == facility.facilityOrder) {
           this.facilityList[i].facilityOrder = undefined;
           await this.commandBoundary.execute(
-            { entityKind: 'facility', changeKind: 'update', entityGuid: this.facilityList[i].guid, label: 'Updating facility order' },
+            { entityKind: 'facility', changeKind: 'update', entityGuid: this.facilityList[i].guid, label: 'Updating facility order' ,
+              publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
             () => this.facilityHandler.update(this.facilityList[i], activeAccountGuid)
           );
         }
@@ -246,7 +248,8 @@ export class AccountSettingsComponent implements OnInit {
         facility.sustainabilityQuestions = accountCopy.sustainabilityQuestions
       }
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility settings' },
+        { entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Updating facility settings' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
         () => this.facilityHandler.update(facility, this.selectedAccount.guid)
       );
     }
@@ -273,7 +276,8 @@ export class AccountSettingsComponent implements OnInit {
       dataBackupId: this.backupFile.dataBackupId
     };
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Saving account' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: updatedAccount.guid, label: 'Saving account' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
     );
     await this.automaticBackupsService.inspectCurrentAccountFile();
@@ -282,7 +286,8 @@ export class AccountSettingsComponent implements OnInit {
 
   async saveChanges() {
     await this.commandBoundary.execute(
-      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+      { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' ,
+        publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
       () => this.accountHandler.update(this.selectedAccount, this.selectedAccount.guid)
     );
   }

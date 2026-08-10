@@ -86,7 +86,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     }
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: selectedFacility.guid, label: 'Save Table Filters' },
+      { entityKind: 'facility', changeKind: 'update', entityGuid: selectedFacility.guid, label: 'Save Table Filters' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
       () => this.facilityHandler.update(selectedFacility, accountGuid)
     );
   }

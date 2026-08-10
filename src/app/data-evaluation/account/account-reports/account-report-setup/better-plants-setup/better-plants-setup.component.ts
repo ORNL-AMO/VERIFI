@@ -80,7 +80,8 @@ export class BetterPlantsSetupComponent {
     }
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
-      { entityKind: 'accountReport', changeKind: 'update', entityGuid: selectedReport.guid, label: 'Save Report' },
+      { entityKind: 'accountReport', changeKind: 'update', entityGuid: selectedReport.guid, label: 'Save Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'accountReports', upsert: [value] }] }) }},
       () => this.reportHandler.updateAccountReport(selectedReport, activeAccountGuid)
     );
     this.accountWorkspaceService.selectAccountReport(({ ...selectedReport })?.guid);

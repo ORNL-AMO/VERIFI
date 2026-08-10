@@ -105,7 +105,8 @@ export class DefaultUnitsFormComponent implements OnInit {
       this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
       this.selectedAccount.displayEmissions = this.form.controls.displayEmissions.value;
       await this.commandBoundary.execute(
-        { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' },
+        { entityKind: 'account', changeKind: 'update', entityGuid: this.selectedAccount.guid, label: 'Saving account' ,
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
         () => this.accountHandler.update({ ...this.selectedAccount }, this.selectedAccount.guid)
       );
       await this.applicationLifecycleService.refreshAccountCatalog();
@@ -113,7 +114,8 @@ export class DefaultUnitsFormComponent implements OnInit {
     if (!this.inAccount) {
       this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' },
+        { entityKind: 'facility', changeKind: 'update', entityGuid: this.selectedFacility.guid, label: 'Saving facility' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
         () => this.facilityHandler.update({ ...this.selectedFacility }, this.accountWorkspaceStore.account()?.guid)
       );
     }

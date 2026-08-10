@@ -47,7 +47,8 @@ export class FacilityReportsDashboardComponent {
     let groups: Array<IdbUtilityMeterGroup> = this.accountWorkspaceQuery.getFacilityMeterGroups(selectedFacility.guid);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(selectedFacility.guid, selectedFacility.accountId, this.newReportType, groups);
     const { value: addedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' },
+      { entityKind: 'facilityReport', changeKind: 'add', label: 'Create Facility Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
       () => this.reportHandler.addFacilityReport(newReport, this.accountWorkspaceStore.account()?.guid)
     );
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
