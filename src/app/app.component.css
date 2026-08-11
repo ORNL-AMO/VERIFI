@@ -90,33 +90,16 @@
     height: 100vh;
 }
 
-
-.content{
-  background-image: url('src/assets/images/industrial-skyline.svg');
-  background-position: bottom;
-  background-repeat: no-repeat;
-  background-size: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  transition: background-color .7s;
+.app-route-content,
+.app-startup-content {
+    max-width: 100%;
+    overflow: auto;
 }
-
-
-.content.data-management {
-    /* background-color: #373A36; */
-    background-color: #005776;
-}
-
 
 @media print {
     .container-fluid{
         height: 100%;
         overflow-y: visible;
-    }
-    
-    
-    .content{
-      background-image: none;
     }
 }
 

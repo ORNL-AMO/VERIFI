@@ -1,0 +1,31 @@
+<section class="p1-workspace" aria-labelledby="p1-title">
+  <header class="p1-workspace__header">
+    <div>
+      <p class="p1-workspace__eyebrow">Prototype 1</p>
+      <h1 id="p1-title">Adaptive workspace concept</h1>
+      <p class="p1-workspace__summary">
+        A clean route for exploring VERIFI redesign workflows without inheriting the existing application shell.
+      </p>
+    </div>
+    <div class="p1-workspace__facility" aria-label="Prototype facility context">
+      <span>{{ workspace.companyName }}</span>
+      <strong>{{ workspace.facilityName }}</strong>
+      <span>{{ workspace.reportingYear }}</span>
+    </div>
+  </header>
+
+  <div class="p1-workspace__grid" aria-label="Prototype workspace summary">
+    <article>
+      <span>Facilities</span>
+      <strong>{{ workspace.facilityCount }}</strong>
+    </article>
+    <article>
+      <span>Meters</span>
+      <strong>{{ workspace.meterCount }}</strong>
+    </article>
+    <article>
+      <span>Analyses</span>
+      <strong>{{ workspace.analysisCount }}</strong>
+    </article>
+  </div>
+</section>

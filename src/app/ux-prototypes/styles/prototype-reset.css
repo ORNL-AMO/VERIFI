@@ -1,0 +1,41 @@
+.verifi-prototype,
+.verifi-prototype * {
+  box-sizing: border-box;
+}
+
+.verifi-prototype {
+  --prototype-bg: #f7f8f5;
+  --prototype-surface: #ffffff;
+  --prototype-surface-muted: #eef4f1;
+  --prototype-panel: #f8faf9;
+  --prototype-text: #17231f;
+  --prototype-muted: #5f6f68;
+  --prototype-border: #d7dfda;
+  --prototype-accent: #147568;
+  --prototype-accent-strong: #0b4f48;
+  --prototype-warning: #9a6212;
+  --prototype-danger: #a53f36;
+  --prototype-focus: #246bfe;
+
+  min-height: 100%;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+
+.verifi-prototype a {
+  color: var(--prototype-accent-strong);
+}
+
+.verifi-prototype button,
+.verifi-prototype input,
+.verifi-prototype select,
+.verifi-prototype textarea {
+  font: inherit;
+}
+
+.verifi-prototype :focus-visible {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}

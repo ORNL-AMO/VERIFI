@@ -1,0 +1,5 @@
+.verifi-prototype {
+  min-height: 100%;
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
+}

@@ -1,11 +1,8 @@
 <div class="container-fluid p-0 m-0">
   <div class="d-flex flex-column h-100">
-    <div #header>
-      <app-header class="hide-print" [dataInitialized]="persistenceReady()"></app-header>
-    </div>
     <div class="d-flex overflow-hidden flex-grow-1">
       @if (startupState().status === 'initializing') {
-        <div class="content w-100" aria-live="polite" aria-busy="true">
+        <main class="app-startup-content w-100" aria-live="polite" aria-busy="true">
           <div class="loading-screen">
             <div class="spinner" aria-hidden="true">
               <div class="bounce1"></div>
@@ -14,27 +11,21 @@
             </div>
             <h1>{{ startupState().message }}</h1>
           </div>
-        </div>
+        </main>
       } @else {
-        <div class="content w-100" role="main" [ngClass]="{'data-management': inDataManagement}">
+        <main class="app-route-content w-100" role="main">
           @if (startupState().status === 'error') {
-            <section class="alert alert-danger m-4" role="alert" aria-live="assertive">
-              <h1 class="h4">Application data could not be initialized</h1>
-              <p>{{ startupState().error?.message }}</p>
-              <p class="mb-3"><strong>Failed step:</strong> {{ startupState().error?.step }}</p>
-              <button class="btn btn-primary me-2" type="button" (click)="retryStartup()">Retry</button>
-              <a class="btn btn-outline-secondary me-2" routerLink="/feedback">Feedback</a>
-              <a class="btn btn-outline-secondary" routerLink="/privacy">Privacy</a>
-            </section>
+          <section class="alert alert-danger m-4" role="alert" aria-live="assertive">
+            <h1 class="h4">Application data could not be initialized</h1>
+            <p>{{ startupState().error?.message }}</p>
+            <p class="mb-3"><strong>Failed step:</strong> {{ startupState().error?.step }}</p>
+            <button class="btn btn-primary me-2" type="button" (click)="retryStartup()">Retry</button>
+            <a class="btn btn-outline-secondary me-2" routerLink="/feedback">Feedback</a>
+            <a class="btn btn-outline-secondary" routerLink="/privacy">Privacy</a>
+          </section>
           }
           <router-outlet></router-outlet>
-          @if (persistenceReady()) {
-            <app-import-backup-modal class="hide-print"></app-import-backup-modal>
-            <app-create-report-modal class="hide-print"></app-create-report-modal>
-            <app-deleting-account-data class="hide-print"></app-deleting-account-data>
-          }
-          <app-toast-notifications class="hide-print"></app-toast-notifications>
-        </div>
+        </main>
       }
     </div>
     @if (workspaceStatus() === 'switching') {

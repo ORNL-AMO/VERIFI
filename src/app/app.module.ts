@@ -29,6 +29,8 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
 import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
 import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-modal/shared-router-guard-modal.component';
 import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-list-subscribe.module";
+import { UxPrototypesModule } from './ux-prototypes/ux-prototypes.module';
+import { ExistingUxShellComponent } from './existing-ux-shell/existing-ux-shell.component';
 
 @NgModule({
     declarations: [
@@ -45,7 +47,8 @@ import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-li
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
         HomePageComponent,
-        SharedRouterGuardModalComponent
+        SharedRouterGuardModalComponent,
+        ExistingUxShellComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -63,7 +66,8 @@ import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-li
     DataManagementModule,
     DataEvaluationModule,
     NgbPaginationModule,
-    EmailListSubscribeModule
+    EmailListSubscribeModule,
+    UxPrototypesModule
 ],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })

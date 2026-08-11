@@ -1,0 +1,16 @@
+<div class="d-flex flex-column h-100 existing-ux-shell">
+  <div>
+    <app-header class="hide-print" [dataInitialized]="persistenceReady()"></app-header>
+  </div>
+  <div class="d-flex overflow-hidden flex-grow-1">
+    <div class="content w-100" [ngClass]="{'data-management': inDataManagement}">
+      <router-outlet></router-outlet>
+      @if (persistenceReady()) {
+      <app-import-backup-modal class="hide-print"></app-import-backup-modal>
+      <app-create-report-modal class="hide-print"></app-create-report-modal>
+      <app-deleting-account-data class="hide-print"></app-deleting-account-data>
+      }
+      <app-toast-notifications class="hide-print"></app-toast-notifications>
+    </div>
+  </div>
+</div>
