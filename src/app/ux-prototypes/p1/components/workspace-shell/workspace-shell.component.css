@@ -1,3 +1,7 @@
+:host {
+  display: block;
+}
+
 .p1-shell {
   display: grid;
   grid-template-columns: 4.25rem minmax(14rem, 18rem) minmax(0, 1fr) minmax(18rem, 22rem);
@@ -5,6 +9,10 @@
   min-height: 42rem;
   background: var(--prototype-bg);
   overflow: hidden;
+}
+
+.p1-shell--panel-closed {
+  grid-template-columns: 4.25rem minmax(14rem, 18rem) minmax(0, 1fr);
 }
 
 @media (max-width: 1160px) {

@@ -7,12 +7,14 @@
     [contextMode]="contextMode"
     [isWorkspaceOpen]="isWorkspaceOpen"
     [darkMode]="darkMode"
+    [isRightPanelOpen]="isRightPanelOpen"
     (welcomeRequested)="showWelcome()"
     (workspaceRequested)="openWorkspace()"
     (contextChange)="setContext($event)"
     (facilityChange)="setFacility($event)"
     (accountChange)="switchAccount($event)"
-    (darkModeChange)="darkMode = $event">
+    (darkModeChange)="darkMode = $event"
+    (rightPanelToggle)="toggleRightPanel()">
   </app-p1-header-banner>
 
   @if (!isWorkspaceOpen) {

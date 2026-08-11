@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import {
   P1AccountSummary,
   P1ContextMode,
@@ -22,7 +22,4 @@ export class P1WorkspaceMainComponent {
   @Input() account: P1AccountSummary;
   @Input() facility: P1FacilitySummary;
   @Input() facilities: Array<P1FacilitySummary> = [];
-  @Input() isRightPanelOpen = true;
-
-  @Output() rightPanelToggle = new EventEmitter<void>();
 }

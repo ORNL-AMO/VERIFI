@@ -143,6 +143,28 @@
   box-shadow: 0 .25rem .75rem rgba(44, 56, 107, .1);
 }
 
+/* ── Panel toggle button ───────────────────────────────────────── */
+
+.p1-header__panel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.p1-header__panel-btn:hover {
+  border-color: var(--prototype-blue);
+  color: var(--prototype-blue);
+  background: var(--prototype-surface);
+}
+
 /* ── App settings button ───────────────────────────────────────── */
 
 .p1-header__app-btn {

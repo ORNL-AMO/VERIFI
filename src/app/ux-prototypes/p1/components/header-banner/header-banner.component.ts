@@ -15,6 +15,7 @@ export class P1HeaderBannerComponent {
   @Input() contextMode: P1ContextMode = 'account';
   @Input() isWorkspaceOpen = false;
   @Input() darkMode = false;
+  @Input() isRightPanelOpen = true;
 
   @Output() welcomeRequested = new EventEmitter<void>();
   @Output() workspaceRequested = new EventEmitter<void>();
@@ -22,6 +23,7 @@ export class P1HeaderBannerComponent {
   @Output() facilityChange = new EventEmitter<string>();
   @Output() accountChange = new EventEmitter<string>();
   @Output() darkModeChange = new EventEmitter<boolean>();
+  @Output() rightPanelToggle = new EventEmitter<void>();
 
   accountMenuOpen = false;
   facilityMenuOpen = false;

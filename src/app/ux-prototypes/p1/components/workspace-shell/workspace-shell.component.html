@@ -1,4 +1,4 @@
-<main class="p1-shell" aria-label="Account workspace">
+<main class="p1-shell" [class.p1-shell--panel-closed]="!isRightPanelOpen" aria-label="Account workspace">
   <app-p1-primary-rail
     [sections]="sections"
     [activeSection]="activeSection"
@@ -25,9 +25,7 @@
     [contextMode]="contextMode"
     [account]="account"
     [facility]="facility"
-    [facilities]="facilities"
-    [isRightPanelOpen]="isRightPanelOpen"
-    (rightPanelToggle)="rightPanelToggle.emit()">
+    [facilities]="facilities">
   </app-p1-workspace-main>
 
   @if (isRightPanelOpen) {
