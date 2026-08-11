@@ -77,7 +77,8 @@
               "src/styles/printing.css",
               "src/styles/plotly.css",
               "src/styles/dataManagement.css",
-              "src/styles/reports.css"
+              "src/styles/reports.css",
+              "src/app/ux-prototypes/styles/prototype-reset.css"
             ],
             "scripts": [
               "node_modules/plotly.js-dist-min/plotly.min.js",

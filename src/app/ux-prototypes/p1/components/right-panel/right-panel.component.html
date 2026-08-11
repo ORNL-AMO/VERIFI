@@ -1,0 +1,71 @@
+<aside class="p1-panel" aria-label="Workspace support panel">
+  <div class="p1-panel__header">
+    <div>
+      <span>{{ contextMode }} support</span>
+      <strong>{{ activeSection }}</strong>
+    </div>
+    <button type="button" (click)="rightPanelToggle.emit()" aria-label="Hide support panel">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </div>
+
+  <div class="p1-panel__tabs" role="tablist" aria-label="Support panel tabs">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activePanelTab === tab.id"
+        [class.active]="activePanelTab === tab.id"
+        (click)="panelTabChange.emit(tab.id)">
+        <span class="fa {{ tab.icon }}"></span>
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <div class="p1-panel__content">
+    @if (activePanelTab === 'help') {
+      <section aria-label="Help content">
+        @for (item of panelContent.help; track item) {
+          <p>{{ item }}</p>
+        }
+      </section>
+    }
+
+    @if (activePanelTab === 'todos') {
+      <section class="p1-panel__list" aria-label="Todo items">
+        @for (todo of panelContent.todos; track todo.title) {
+          <article [class]="'p1-panel__item p1-panel__item--' + todo.tone">
+            <span>{{ todo.meta }}</span>
+            <h2>{{ todo.title }}</h2>
+            <p>{{ todo.summary }}</p>
+          </article>
+        }
+      </section>
+    }
+
+    @if (activePanelTab === 'results') {
+      <section class="p1-panel__results" aria-label="Results summary">
+        @for (result of panelContent.results; track result.label) {
+          <article [class]="'p1-panel__result p1-panel__result--' + result.tone">
+            <span>{{ result.label }}</span>
+            <strong>{{ result.value }}</strong>
+            <small>{{ result.trend }}</small>
+          </article>
+        }
+      </section>
+    }
+
+    @if (activePanelTab === 'details') {
+      <section class="p1-panel__list" aria-label="Detailed support content">
+        @for (detail of panelContent.details; track detail.title) {
+          <article [class]="'p1-panel__item p1-panel__item--' + detail.tone">
+            <span>{{ detail.meta }}</span>
+            <h2>{{ detail.title }}</h2>
+            <p>{{ detail.summary }}</p>
+          </article>
+        }
+      </section>
+    }
+  </div>
+</aside>

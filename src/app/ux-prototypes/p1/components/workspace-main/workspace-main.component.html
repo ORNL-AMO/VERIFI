@@ -1,0 +1,80 @@
+<section class="p1-main" [attr.aria-labelledby]="'p1-main-title-' + activeSection">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 [id]="'p1-main-title-' + activeSection">{{ content.title }}</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ contextMode === 'account' ? account.facilityCount + ' facilities' : facility.location }}</span>
+      <button type="button">
+        {{ content.primaryAction }}
+      </button>
+      <button type="button" class="p1-main__panel-toggle" (click)="rightPanelToggle.emit()" [attr.aria-pressed]="isRightPanelOpen">
+        <span class="fa fa-circle-question"></span>
+        Support
+      </button>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>{{ content.summary }}</p>
+  </div>
+
+  <div class="p1-main__metrics" aria-label="Workspace metrics">
+    @for (metric of content.metrics; track metric.label) {
+      <article [class]="'p1-main__metric p1-main__metric--' + metric.tone">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.trend }}</small>
+      </article>
+    }
+  </div>
+
+  <div class="p1-main__body">
+    <section class="p1-main__cards" aria-label="Workspace cards">
+      @for (card of content.cards; track card.title) {
+        <article [class]="'p1-main__card p1-main__card--' + card.tone">
+          <span>{{ card.meta }}</span>
+          <h2>{{ card.title }}</h2>
+          <p>{{ card.summary }}</p>
+        </article>
+      }
+    </section>
+
+    <aside class="p1-main__activity" aria-label="Recent activity">
+      <div class="p1-main__activity-header">
+        <h2>Recent activity</h2>
+        <span>{{ contextMode === 'account' ? account.lastModified : facility.status }}</span>
+      </div>
+      <ol>
+        @for (activity of content.activity; track activity) {
+          <li>{{ activity }}</li>
+        }
+      </ol>
+    </aside>
+  </div>
+
+  @if (activeSection === 'data') {
+    <section class="p1-main__table" aria-label="Data section facility snapshot">
+      <div class="p1-main__table-heading">
+        <h2>{{ contextMode === 'account' ? 'Facility data snapshot' : 'Facility data details' }}</h2>
+        <span>Current workspace</span>
+      </div>
+      <div class="p1-main__rows">
+        @for (item of facilities; track item.id) {
+          <div class="p1-main__row">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.meters }} meters</span>
+            <span>{{ item.predictors }} predictors</span>
+            <span>{{ item.footprint }}</span>
+            <em>{{ item.status }}</em>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</section>

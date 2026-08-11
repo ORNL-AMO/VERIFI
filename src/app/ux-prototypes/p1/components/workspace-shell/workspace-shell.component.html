@@ -1,0 +1,43 @@
+<main class="p1-shell" aria-label="Account workspace">
+  <app-p1-primary-rail
+    [sections]="sections"
+    [activeSection]="activeSection"
+    (sectionChange)="sectionChange.emit($event)">
+  </app-p1-primary-rail>
+
+  <app-p1-section-nav
+    [navGroups]="navGroups"
+    [activeDetailId]="activeDetailId"
+    [activeSection]="activeSection"
+    [contextMode]="contextMode"
+    [account]="account"
+    [facility]="facility"
+    [facilities]="facilities"
+    (detailChange)="detailChange.emit($event)"
+    (contextChange)="contextChange.emit($event)"
+    (facilityChange)="facilityChange.emit($event)">
+  </app-p1-section-nav>
+
+  <app-p1-workspace-main
+    [content]="content"
+    [activeSection]="activeSection"
+    [activeNavItem]="activeNavItem"
+    [contextMode]="contextMode"
+    [account]="account"
+    [facility]="facility"
+    [facilities]="facilities"
+    [isRightPanelOpen]="isRightPanelOpen"
+    (rightPanelToggle)="rightPanelToggle.emit()">
+  </app-p1-workspace-main>
+
+  @if (isRightPanelOpen) {
+    <app-p1-right-panel
+      [panelContent]="panelContent"
+      [activePanelTab]="activePanelTab"
+      [contextMode]="contextMode"
+      [activeSection]="activeSection"
+      (panelTabChange)="panelTabChange.emit($event)"
+      (rightPanelToggle)="rightPanelToggle.emit()">
+    </app-p1-right-panel>
+  }
+</main>

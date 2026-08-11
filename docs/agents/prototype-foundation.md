@@ -32,6 +32,7 @@ Designs may reorganize how the workflow is presented, but they must preserve the
 - Use existing production components, forms, tables, help text, validation states, and neighboring workflow screens as content references. For example, a redesigned meter form should preserve the established meter fields, options, required states, units, and actions even when the layout changes.
 - Make setup progress, validation status, next actions, and blocked work visible without requiring users to hunt through separate screens.
 - Design for dense industrial data: long facility names, wide tables, unit-bearing values, charts, reports, and multi-facility portfolios.
+- Account scale varies widely. Prototype layouts should work for accounts with one facility or portfolios of roughly 50 facilities, and for meters, predictors, analyses, reports, and other data objects that may range from a few records to much larger sets.
 - Provide an intentional help pattern for dense guidance, especially calculation explanations, validation details, weather-data context, and reporting assumptions.
 - Include loading, empty, validation, warning, error, disabled, and success states when a prototype introduces an interaction pattern.
 - Preserve import, backup, weather data, calculation, Worker, and report contracts unless the task explicitly moves from visual prototype into production workflow implementation.
@@ -123,6 +124,7 @@ Use realistic manufacturing examples that include:
 
 - account and facility names;
 - facility, meter, predictor, weather data, analysis, and report counts;
+- small and larger portfolio examples so layouts are not tuned only to one facility, a few meters, or a single analysis;
 - current setup/status indicators;
 - recent activity or modified dates when useful;
 - representative utility, production, and weather-related values with units.

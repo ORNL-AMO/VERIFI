@@ -1,0 +1,19 @@
+<nav class="p1-rail" aria-label="Primary workspace sections">
+  <div class="p1-rail__group">
+    @for (section of primarySections; track section.id) {
+      <button type="button" [class.active]="activeSection === section.id" (click)="sectionChange.emit(section.id)" [attr.aria-label]="section.label">
+        <span class="fa {{ section.icon }}"></span>
+        <small>{{ section.shortLabel }}</small>
+      </button>
+    }
+  </div>
+
+  <div class="p1-rail__group p1-rail__group--utility">
+    @for (section of utilitySections; track section.id) {
+      <button type="button" [class.active]="activeSection === section.id" (click)="sectionChange.emit(section.id)" [attr.aria-label]="section.label">
+        <span class="fa {{ section.icon }}"></span>
+        <small>{{ section.shortLabel }}</small>
+      </button>
+    }
+  </div>
+</nav>

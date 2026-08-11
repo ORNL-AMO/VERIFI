@@ -1,0 +1,40 @@
+<header class="p1-header" aria-label="VERIFI header banner">
+  <div class="p1-header__brand">
+    <button type="button" class="p1-header__logo" (click)="welcomeRequested.emit()" aria-label="Show welcome screen">
+      <strong class="p1-header__verifi">VERIFI</strong>
+    </button>
+  </div>
+
+  @if (isWorkspaceOpen) {
+    <div class="p1-header__workspace" aria-label="Active workspace context">
+      <div class="p1-header__account">
+        <span>Active account</span>
+        <strong>{{ account.name }}</strong>
+      </div>
+
+      <div class="p1-header__context" role="group" aria-label="Switch workspace context">
+        <button type="button" [class.active]="contextMode === 'account'" (click)="contextChange.emit('account')">
+          <span class="fa fa-building"></span>
+          Account
+        </button>
+        <button type="button" [class.active]="contextMode === 'facility'" (click)="contextChange.emit('facility')">
+          <span class="fa fa-industry"></span>
+          {{ facility.name }}
+        </button>
+      </div>
+
+      <div class="p1-header__facility-list" aria-label="Facility shortcuts">
+        @for (item of facilities; track item.id) {
+          <button type="button" [class.active]="contextMode === 'facility' && item.id === facility.id" (click)="facilityChange.emit(item.id)">
+            {{ item.name }}
+          </button>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- <button type="button" class="p1-header__primary" (click)="workspaceRequested.emit()">
+      Open workspace
+      <span class="fa fa-arrow-right"></span>
+    </button> -->
+  }
+</header>

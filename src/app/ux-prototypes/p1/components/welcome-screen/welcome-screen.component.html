@@ -1,0 +1,112 @@
+<main class="p1-welcome" aria-labelledby="p1-welcome-title">
+  <section class="p1-welcome__hero">
+    <div class="p1-welcome__copy">
+      <p class="p1-welcome__eyebrow">Utility tracking and analysis</p>
+      <h1 id="p1-welcome-title">VERIFI</h1>
+      <p>
+        Track corporate and facility utility data, evaluate performance, and prepare reports from one practical manufacturing workspace.
+      </p>
+      <div class="p1-welcome__hero-actions">
+        <button type="button" (click)="workspaceRequested.emit(accounts[0].id)">
+          Return to recent account
+          <span class="fa fa-arrow-right"></span>
+        </button>
+        <a href="https://industrialresources.ornl.gov/verifi/home" target="_blank" rel="noreferrer">
+          ORNL Industrial Resources
+        </a>
+      </div>
+    </div>
+    <div class="p1-welcome__snapshot" aria-label="Recent workspace snapshot">
+      <span>Recent workspace</span>
+      <strong>{{ accounts[0].name }}</strong>
+      <dl>
+        <div>
+          <dt>Facilities</dt>
+          <dd>{{ accounts[0].facilityCount }}</dd>
+        </div>
+        <div>
+          <dt>Energy (MMBtu/yr)</dt>
+          <dd>{{ accounts[0].annualEnergy }}</dd>
+        </div>
+        <div>
+          <dt>Cost ($/yr)</dt>
+          <dd>{{ accounts[0].annualCost }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="p1-welcome__actions" aria-labelledby="p1-start-title">
+    <div>
+      <p class="p1-welcome__eyebrow mb-0">Get started</p>
+    </div>
+    <div class="p1-welcome__action-grid">
+      @for (action of actions; track action.title) {
+        <article [class]="'p1-welcome__action p1-welcome__action--' + action.tone">
+          <div>
+            <span class="fa {{ action.icon }}"></span>
+          </div>
+          <h3>{{ action.title }}</h3>
+          <p>{{ action.summary }}</p>
+          <button type="button" (click)="workspaceRequested.emit(accounts[0].id)">
+            {{ action.cta }}
+          </button>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="p1-welcome__portfolio" aria-labelledby="p1-portfolio-title">
+    <div class="p1-welcome__section-heading">
+      <div>
+        <p class="p1-welcome__eyebrow mb-0">Account portfolio</p>
+      </div>
+      <span>{{ accounts.length }} accounts</span>
+    </div>
+
+    <div class="p1-welcome__accounts">
+      @for (account of accounts; track account.id) {
+        <button type="button" class="p1-welcome__account" (click)="workspaceRequested.emit(account.id)">
+          <span>{{ account.status }}</span>
+          <strong>{{ account.name }}</strong>
+          <small>{{ account.industry }} / Last modified {{ account.lastModified }}</small>
+          <div>
+            <span>{{ account.facilityCount }} facilities</span>
+            <span>{{ account.annualEnergy }}</span>
+          </div>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="p1-welcome__support" aria-label="Help, email list, and feedback">
+    <article>
+      <h2>ORNL Industrial Resources</h2>
+      <p>
+        For more information about VERIFI and related resources, visit
+        <a href="https://industrialresources.ornl.gov/verifi/home" target="_blank" rel="noreferrer">ORNL's Industrial Resources</a>.
+      </p>
+      <p>
+        Dynamic help is available throughout VERIFI through the <span class="fa fa-question-circle"></span> help icon.
+      </p>
+    </article>
+    <article>
+      <h2>Email List</h2>
+      <p>Subscribe for updates, release notes, and training resources.</p>
+      <form class="p1-welcome__subscribe" aria-label="Email list signup">
+        <label for="p1-email-signup">Email address</label>
+        <div>
+          <input id="p1-email-signup" type="email" placeholder="name@company.com">
+          <button type="button">Subscribe</button>
+        </div>
+      </form>
+    </article>
+    <article>
+      <h2>Contact and Feedback</h2>
+      <p>
+        If you have feedback or would like to contact the team behind VERIFI, reach out at
+        <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.
+      </p>
+    </article>
+  </section>
+</main>

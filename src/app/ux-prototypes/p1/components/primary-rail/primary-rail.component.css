@@ -1,0 +1,70 @@
+.p1-rail {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .65rem .45rem;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  background: var(--prototype-blue);
+  color: #fff;
+}
+
+.p1-rail__group {
+  display: grid;
+  gap: .35rem;
+}
+
+.p1-rail button {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+  min-height: 3.75rem;
+  place-items: center;
+  padding: .35rem .2rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, .72);
+}
+
+.p1-rail button:hover,
+.p1-rail button.active {
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+}
+
+.p1-rail button.active {
+  box-shadow: inset 3px 0 0 var(--prototype-orange);
+}
+
+.p1-rail .fa {
+  font-size: 1.05rem;
+}
+
+.p1-rail small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: .62rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 820px) {
+  .p1-rail {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .p1-rail__group {
+    display: flex;
+  }
+
+  .p1-rail__group--utility {
+    margin-left: auto;
+  }
+
+  .p1-rail button {
+    width: 4.25rem;
+  }
+}

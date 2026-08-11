@@ -16,6 +16,9 @@
   --prototype-warning: #9a6212;
   --prototype-danger: #a53f36;
   --prototype-focus: #246bfe;
+  --prototype-orange: #ff6000;
+  --prototype-green: #145a32;
+  --prototype-blue: #2c386b;
 
   min-height: 100%;
   margin: 0;

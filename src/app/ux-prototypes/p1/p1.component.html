@@ -1,31 +1,43 @@
-<section class="p1-workspace" aria-labelledby="p1-title">
-  <header class="p1-workspace__header">
-    <div>
-      <p class="p1-workspace__eyebrow">Prototype 1</p>
-      <h1 id="p1-title">Adaptive workspace concept</h1>
-      <p class="p1-workspace__summary">
-        A clean route for exploring VERIFI redesign workflows without inheriting the existing application shell.
-      </p>
-    </div>
-    <div class="p1-workspace__facility" aria-label="Prototype facility context">
-      <span>{{ workspace.companyName }}</span>
-      <strong>{{ workspace.facilityName }}</strong>
-      <span>{{ workspace.reportingYear }}</span>
-    </div>
-  </header>
+<section class="p1-prototype" aria-label="VERIFI workspace concept">
+  <app-p1-header-banner
+    [account]="selectedAccount"
+    [facility]="selectedFacility"
+    [facilities]="accountFacilities"
+    [contextMode]="contextMode"
+    [isWorkspaceOpen]="isWorkspaceOpen"
+    (welcomeRequested)="showWelcome()"
+    (workspaceRequested)="openWorkspace()"
+    (contextChange)="setContext($event)"
+    (facilityChange)="setFacility($event)">
+  </app-p1-header-banner>
 
-  <div class="p1-workspace__grid" aria-label="Prototype workspace summary">
-    <article>
-      <span>Facilities</span>
-      <strong>{{ workspace.facilityCount }}</strong>
-    </article>
-    <article>
-      <span>Meters</span>
-      <strong>{{ workspace.meterCount }}</strong>
-    </article>
-    <article>
-      <span>Analyses</span>
-      <strong>{{ workspace.analysisCount }}</strong>
-    </article>
-  </div>
+  @if (!isWorkspaceOpen) {
+    <app-p1-welcome-screen
+      [accounts]="data.accounts"
+      [actions]="data.welcomeActions"
+      (workspaceRequested)="openWorkspace($event)">
+    </app-p1-welcome-screen>
+  } @else {
+    <app-p1-workspace-shell
+      [sections]="data.sections"
+      [activeSection]="activeSection"
+      [contextMode]="contextMode"
+      [account]="selectedAccount"
+      [facility]="selectedFacility"
+      [facilities]="accountFacilities"
+      [navGroups]="data.nav[contextMode][activeSection]"
+      [activeDetailId]="activeDetailId"
+      [activeNavItem]="activeNavItem"
+      [content]="data.content[contextMode][activeSection]"
+      [panelContent]="data.panel[contextMode][activeSection]"
+      [activePanelTab]="activePanelTab"
+      [isRightPanelOpen]="isRightPanelOpen"
+      (sectionChange)="setSection($event)"
+      (detailChange)="setDetail($event)"
+      (contextChange)="setContext($event)"
+      (facilityChange)="setFacility($event)"
+      (panelTabChange)="setPanelTab($event)"
+      (rightPanelToggle)="toggleRightPanel()">
+    </app-p1-workspace-shell>
+  }
 </section>
