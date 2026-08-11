@@ -1,4 +1,9 @@
 <header class="p1-header" aria-label="VERIFI header banner">
+  <!-- Backdrop closes any open menu -->
+  @if (hasBackdrop) {
+    <div class="p1-header__backdrop" (click)="closeAll()" aria-hidden="true"></div>
+  }
+
   <div class="p1-header__brand">
     <button type="button" class="p1-header__logo" (click)="welcomeRequested.emit()" aria-label="Show welcome screen">
       <strong class="p1-header__verifi">VERIFI</strong>
@@ -7,34 +12,121 @@
 
   @if (isWorkspaceOpen) {
     <div class="p1-header__workspace" aria-label="Active workspace context">
-      <div class="p1-header__account">
-        <span>Active account</span>
-        <strong>{{ account.name }}</strong>
+
+      <!-- Account switcher -->
+      <div class="p1-header__zone">
+        <button type="button" class="p1-header__account-btn" (click)="toggleAccountMenu()"
+          [class.open]="accountMenuOpen" aria-haspopup="true" [attr.aria-expanded]="accountMenuOpen">
+          <span class="fa fa-building"></span>
+          <span class="p1-header__account-name">{{ account.name }}</span>
+          <span class="fa fa-chevron-down p1-header__chevron"></span>
+        </button>
+
+        @if (accountMenuOpen) {
+          <div class="p1-header__dropdown" role="menu">
+            <div class="p1-header__dropdown-section">
+              <span class="p1-header__dropdown-label">Switch account</span>
+              @for (a of accounts; track a.id) {
+                <button type="button" class="p1-header__dropdown-item" role="menuitem"
+                  [class.active]="a.id === account.id" (click)="selectAccount(a.id)">
+                  <span class="fa fa-check p1-header__check"></span>
+                  <span>
+                    {{ a.name }}
+                    <small>{{ a.industry }}</small>
+                  </span>
+                </button>
+              }
+            </div>
+            <div class="p1-header__dropdown-divider"></div>
+            <div class="p1-header__dropdown-section">
+              <button type="button" class="p1-header__dropdown-item" role="menuitem" (click)="closeAll()">
+                <span class="fa fa-plus"></span> Add new account
+              </button>
+              <button type="button" class="p1-header__dropdown-item" role="menuitem" (click)="closeAll()">
+                <span class="fa fa-upload"></span> Import backup
+              </button>
+              <button type="button" class="p1-header__dropdown-item" role="menuitem" (click)="closeAll()">
+                <span class="fa fa-gears"></span> Manage accounts
+              </button>
+            </div>
+          </div>
+        }
       </div>
 
+      <!-- Context + facility switcher -->
       <div class="p1-header__context" role="group" aria-label="Switch workspace context">
-        <button type="button" [class.active]="contextMode === 'account'" (click)="contextChange.emit('account')">
+        <button type="button" [class.active]="contextMode === 'account'" (click)="switchToAccountContext()">
           <span class="fa fa-building"></span>
           Account
         </button>
-        <button type="button" [class.active]="contextMode === 'facility'" (click)="contextChange.emit('facility')">
-          <span class="fa fa-industry"></span>
-          {{ facility.name }}
-        </button>
-      </div>
 
-      <div class="p1-header__facility-list" aria-label="Facility shortcuts">
-        @for (item of facilities; track item.id) {
-          <button type="button" [class.active]="contextMode === 'facility' && item.id === facility.id" (click)="facilityChange.emit(item.id)">
-            {{ item.name }}
+        @if (facilities.length === 0) {
+          <button type="button" disabled>
+            <span class="fa fa-industry"></span>
+            No facilities
           </button>
+        } @else if (facilities.length === 1) {
+          <!-- Single facility: direct toggle, no dropdown -->
+          <button type="button" [class.active]="contextMode === 'facility'" (click)="switchToSingleFacility()">
+            <span class="fa fa-industry"></span>
+            {{ facilities[0].name }}
+          </button>
+        } @else {
+          <!-- Multiple facilities: dropdown picker -->
+          <div class="p1-header__zone">
+            <button type="button" [class.active]="contextMode === 'facility'"
+              [class.open]="facilityMenuOpen" (click)="toggleFacilityMenu()"
+              aria-haspopup="true" [attr.aria-expanded]="facilityMenuOpen">
+              <span class="fa fa-industry"></span>
+              {{ contextMode === 'facility' ? facility.name : 'Facility' }}
+              <span class="fa fa-chevron-down p1-header__chevron"></span>
+            </button>
+
+            @if (facilityMenuOpen) {
+              <div class="p1-header__dropdown p1-header__dropdown--facility" role="menu">
+                <div class="p1-header__dropdown-section">
+                  <span class="p1-header__dropdown-label">Switch facility</span>
+                  @for (f of facilities; track f.id) {
+                    <button type="button" class="p1-header__dropdown-item" role="menuitem"
+                      [class.active]="f.id === facility.id" (click)="selectFacility(f.id)">
+                      <span class="fa fa-check p1-header__check"></span>
+                      <span>
+                        {{ f.name }}
+                        <small>{{ f.location }}</small>
+                      </span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
         }
       </div>
+
+      <!-- App settings -->
+      <div class="p1-header__zone p1-header__zone--app">
+        <button type="button" class="p1-header__app-btn" (click)="toggleAppMenu()"
+          [class.open]="appMenuOpen" aria-label="Application settings" aria-haspopup="true"
+          [attr.aria-expanded]="appMenuOpen">
+          <span class="fa fa-gear"></span>
+        </button>
+
+        @if (appMenuOpen) {
+          <div class="p1-header__app-menu" role="menu">
+            <div class="p1-header__dropdown-section">
+              <span class="p1-header__dropdown-label">Settings</span>
+              <label class="p1-header__setting-row">
+                <span>Dark mode</span>
+                <button type="button" class="p1-header__toggle" [class.on]="darkMode"
+                  (click)="darkModeChange.emit(!darkMode)" [attr.aria-label]="darkMode ? 'Disable dark mode' : 'Enable dark mode'">
+                  <span class="p1-header__toggle-thumb"></span>
+                </button>
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+
     </div>
-  } @else {
-    <!-- <button type="button" class="p1-header__primary" (click)="workspaceRequested.emit()">
-      Open workspace
-      <span class="fa fa-arrow-right"></span>
-    </button> -->
   }
 </header>

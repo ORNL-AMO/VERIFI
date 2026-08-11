@@ -25,6 +25,7 @@ export class P1Component {
   activePanelTab: P1PanelTabId = 'help';
   activeDetailId = this.getFirstDetailId('account', 'home');
   isRightPanelOpen = true;
+  darkMode = false;
 
   get selectedAccount(): P1AccountSummary {
     return this.data.accounts.find(account => account.id === this.selectedAccountId) || this.data.accounts[0];
@@ -49,6 +50,14 @@ export class P1Component {
     const firstFacility = this.accountFacilities[0] || this.data.facilities[0];
     this.selectedFacilityId = firstFacility.id;
     this.isWorkspaceOpen = true;
+    this.setContext('account');
+    this.setSection('home');
+  }
+
+  switchAccount(accountId: string): void {
+    this.selectedAccountId = accountId;
+    const facilities = this.data.facilities.filter(f => f.accountId === accountId);
+    this.selectedFacilityId = facilities.length > 0 ? facilities[0].id : this.data.facilities[0].id;
     this.setContext('account');
     this.setSection('home');
   }

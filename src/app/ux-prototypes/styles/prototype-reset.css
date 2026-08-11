@@ -42,3 +42,21 @@
   outline: 3px solid var(--prototype-focus);
   outline-offset: 2px;
 }
+
+/* ── Dark mode overrides ──────────────────────────────────────── */
+
+.p1-dark {
+  --prototype-bg: #0f1512;
+  --prototype-surface: #1a2420;
+  --prototype-surface-muted: #1f2c27;
+  --prototype-panel: #162019;
+  --prototype-text: #dde8e2;
+  --prototype-muted: #7d9488;
+  --prototype-border: #2d3f38;
+  --prototype-accent: #3db896;
+  --prototype-accent-strong: #5ecfad;
+  --prototype-warning: #d4a24a;
+  --prototype-danger: #e06b62;
+  --prototype-focus: #5a9aff;
+  --prototype-blue: #8fa3e8;
+}

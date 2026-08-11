@@ -1,14 +1,18 @@
-<section class="p1-prototype" aria-label="VERIFI workspace concept">
+<section class="p1-prototype" [class.p1-dark]="darkMode" aria-label="VERIFI workspace concept">
   <app-p1-header-banner
     [account]="selectedAccount"
+    [accounts]="data.accounts"
     [facility]="selectedFacility"
     [facilities]="accountFacilities"
     [contextMode]="contextMode"
     [isWorkspaceOpen]="isWorkspaceOpen"
+    [darkMode]="darkMode"
     (welcomeRequested)="showWelcome()"
     (workspaceRequested)="openWorkspace()"
     (contextChange)="setContext($event)"
-    (facilityChange)="setFacility($event)">
+    (facilityChange)="setFacility($event)"
+    (accountChange)="switchAccount($event)"
+    (darkModeChange)="darkMode = $event">
   </app-p1-header-banner>
 
   @if (!isWorkspaceOpen) {
