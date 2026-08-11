@@ -61,6 +61,12 @@ Prototype styling must remain scoped under `.verifi-prototype`. Use semantic tok
 
 Dark mode support is a foundation requirement for prototype direction. A prototype does not need a working theme switch unless requested, but color choices, contrast, shadows, borders, charts, and state indicators should be planned so both light and dark palettes are viable.
 
+## Component and style structure
+
+Prototype pages should be composed from focused, prototype-owned components where that improves clarity. Use child components for major workspace regions, repeated cards or rows, dense forms, chart/table panels, help content, status summaries, and interaction-heavy sections. Keep the route component responsible for page layout and mock-data wiring instead of concentrating a full workflow in one `pN.component` file set.
+
+Prototype styles should be easy to adjust as the redesign direction evolves. Prefer scoped CSS custom properties and semantic class names for shared concepts such as shell, panel, toolbar, field group, status, help, table, chart, and action areas. Keep styles local to the prototype area and avoid global CSS unless a prototype is intentionally being promoted into a production pattern.
+
 ## Responsive design
 
 Prototype screens must be responsive by default. Design the same workflow to work in the browser and Electron window without assuming a fixed desktop canvas.

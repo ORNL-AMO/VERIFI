@@ -76,6 +76,15 @@ Specify the interaction:
 - Cover responsive layout, keyboard access, visible focus, labels, focus order, contrast, and screen-reader semantics.
 - Reuse Bootstrap, ng-bootstrap, Font Awesome, Plotly, shared components, and established style layers where practical.
 
+For redesign prototype work:
+
+- Read the [prototype design foundation](prototype-foundation.md) before proposing or reviewing prototype screens.
+- Preserve established workflow content, fields, options, help text, validation states, data relationships, calculations, weather-data behavior, imports, backups, and reports while improving layout, hierarchy, and interaction.
+- Use existing production components and neighboring screens as content references, then translate them into the prototype's visual direction rather than inventing new functionality.
+- Check that the design supports responsive layouts, dense help content, light and dark mode viability, and the required VERIFI brand colors.
+- Identify meaningful prototype component boundaries for complex pages so implementation does not collapse major forms, tables, help panels, and status regions into one route component.
+- Make prototype assumptions explicit, especially when using static mock data or when a production workflow is represented only visually.
+
 Deliver:
 
 - For design-only tasks, provide implementation-ready interaction notes, annotated wireframes, or a state matrix without editing code.
