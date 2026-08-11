@@ -1,0 +1,25 @@
+.p1-main__placeholder {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  padding: .9rem;
+  border: 1px dashed var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+}
+
+.p1-main__placeholder > span {
+  color: var(--prototype-green);
+  font-size: 1.35rem;
+}
+
+.p1-main__placeholder strong {
+  display: block;
+  margin-bottom: .2rem;
+  text-transform: capitalize;
+}
+
+.p1-main__placeholder p {
+  margin: 0;
+  color: var(--prototype-muted);
+}

@@ -6,13 +6,15 @@ export type P1StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral'
 export interface P1AccountSummary {
   id: string;
   name: string;
-  industry: string;
+  descriptor: string;
   lastModified: string;
-  facilityCount: number;
-  annualEnergy: string;
-  annualCost: string;
-  annualEmissions: string;
+  facilityCount?: number;
+  facilityCountLabel: string;
+  meterCountLabel: string;
+  predictorCountLabel: string;
+  reportCountLabel: string;
   status: string;
+  isActive: boolean;
 }
 
 export interface P1FacilitySummary {
@@ -22,10 +24,11 @@ export interface P1FacilitySummary {
   location: string;
   status: string;
   meters: number;
+  meterReadings: number;
   predictors: number;
   analyses: number;
-  annualEnergy: string;
-  annualCost: string;
+  reports: number;
+  equipment: number;
   footprint: string;
 }
 
@@ -88,7 +91,17 @@ export interface P1PanelContent {
   details: Array<P1ContentCard>;
 }
 
+export type P1ViewStatus = 'loading' | 'empty' | 'error' | 'ready';
+
+export interface P1ViewState {
+  status: P1ViewStatus;
+  message: string;
+}
+
 export interface P1PrototypeData {
+  state: P1ViewState;
+  selectedAccountId?: string;
+  selectedFacilityId?: string;
   accounts: Array<P1AccountSummary>;
   facilities: Array<P1FacilitySummary>;
   welcomeActions: Array<P1WelcomeAction>;

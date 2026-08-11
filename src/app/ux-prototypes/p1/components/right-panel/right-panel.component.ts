@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { P1ContextMode, P1PanelContent, P1PanelTabId, P1SectionId } from '../../p1.models';
+import { Component, inject } from '@angular/core';
+import { P1PanelTabId } from '../../p1.models';
+import { P1RouteFacade } from '../../p1-route.facade';
 
 interface P1PanelTab {
   id: P1PanelTabId;
@@ -14,13 +15,7 @@ interface P1PanelTab {
   standalone: false
 })
 export class P1RightPanelComponent {
-  @Input() panelContent: P1PanelContent;
-  @Input() activePanelTab: P1PanelTabId = 'help';
-  @Input() contextMode: P1ContextMode = 'account';
-  @Input() activeSection: P1SectionId = 'home';
-
-  @Output() panelTabChange = new EventEmitter<P1PanelTabId>();
-  @Output() rightPanelToggle = new EventEmitter<void>();
+  readonly facade = inject(P1RouteFacade);
 
   readonly tabs: Array<P1PanelTab> = [
     { id: 'help', label: 'Help', icon: 'fa-circle-question' },

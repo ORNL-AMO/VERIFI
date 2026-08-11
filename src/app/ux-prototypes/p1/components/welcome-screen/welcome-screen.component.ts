@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { P1AccountSummary, P1WelcomeAction } from '../../p1.models';
+import { Component, inject } from '@angular/core';
+import { P1AccountSummary } from '../../p1.models';
+import { P1RouteFacade } from '../../p1-route.facade';
 
 @Component({
   selector: 'app-p1-welcome-screen',
@@ -8,8 +9,17 @@ import { P1AccountSummary, P1WelcomeAction } from '../../p1.models';
   standalone: false
 })
 export class P1WelcomeScreenComponent {
-  @Input() accounts: Array<P1AccountSummary> = [];
-  @Input() actions: Array<P1WelcomeAction> = [];
+  readonly facade = inject(P1RouteFacade);
 
-  @Output() workspaceRequested = new EventEmitter<string>();
+  get recentAccount(): P1AccountSummary | undefined {
+    const accounts = this.facade.accounts();
+    return accounts.find(account => account.isActive) || accounts[0];
+  }
+
+  openRecentAccount(): void {
+    const account = this.recentAccount;
+    if (account) {
+      void this.facade.openWorkspace(account.id);
+    }
+  }
 }

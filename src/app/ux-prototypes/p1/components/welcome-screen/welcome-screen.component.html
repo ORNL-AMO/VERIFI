@@ -1,4 +1,6 @@
 <main class="p1-welcome" aria-labelledby="p1-welcome-title">
+  @let state = facade.state();
+  @let accounts = facade.accounts();
   <section class="p1-welcome__hero">
     <div class="p1-welcome__copy">
       <p class="p1-welcome__eyebrow">Utility tracking and analysis</p>
@@ -7,7 +9,7 @@
         Track corporate and facility utility data, evaluate performance, and prepare reports from one practical manufacturing workspace.
       </p>
       <div class="p1-welcome__hero-actions">
-        <button type="button" (click)="workspaceRequested.emit(accounts[0].id)">
+        <button type="button" [disabled]="!recentAccount || state.status === 'loading'" (click)="openRecentAccount()">
           Return to recent account
           <span class="fa fa-arrow-right"></span>
         </button>
@@ -17,22 +19,36 @@
       </div>
     </div>
     <div class="p1-welcome__snapshot" aria-label="Recent workspace snapshot">
-      <span>Recent workspace</span>
-      <strong>{{ accounts[0].name }}</strong>
-      <dl>
-        <div>
-          <dt>Facilities</dt>
-          <dd>{{ accounts[0].facilityCount }}</dd>
-        </div>
-        <div>
-          <dt>Energy (MMBtu/yr)</dt>
-          <dd>{{ accounts[0].annualEnergy }}</dd>
-        </div>
-        <div>
-          <dt>Cost ($/yr)</dt>
-          <dd>{{ accounts[0].annualCost }}</dd>
-        </div>
-      </dl>
+      @if (state.status === 'loading') {
+        <span>Workspace data</span>
+        <strong>Loading accounts</strong>
+        <p>{{ state.message }}</p>
+      } @else if (state.status === 'error') {
+        <span>Workspace data</span>
+        <strong>Unable to load accounts</strong>
+        <p>{{ state.message }}</p>
+      } @else if (!recentAccount) {
+        <span>Workspace data</span>
+        <strong>No accounts available</strong>
+        <p>{{ state.message }}</p>
+      } @else {
+        <span>Recent workspace</span>
+        <strong>{{ recentAccount.name }}</strong>
+        <dl>
+          <div>
+            <dt>Facilities</dt>
+            <dd>{{ recentAccount.facilityCountLabel }}</dd>
+          </div>
+          <div>
+            <dt>Meters</dt>
+            <dd>{{ recentAccount.meterCountLabel }}</dd>
+          </div>
+          <div>
+            <dt>Reports</dt>
+            <dd>{{ recentAccount.reportCountLabel }}</dd>
+          </div>
+        </dl>
+      }
     </div>
   </section>
 
@@ -41,14 +57,14 @@
       <p class="p1-welcome__eyebrow mb-0">Get started</p>
     </div>
     <div class="p1-welcome__action-grid">
-      @for (action of actions; track action.title) {
+      @for (action of facade.welcomeActions(); track action.title) {
         <article [class]="'p1-welcome__action p1-welcome__action--' + action.tone">
           <div>
             <span class="fa {{ action.icon }}"></span>
           </div>
           <h3>{{ action.title }}</h3>
           <p>{{ action.summary }}</p>
-          <button type="button" (click)="workspaceRequested.emit(accounts[0].id)">
+          <button type="button" disabled>
             {{ action.cta }}
           </button>
         </article>
@@ -65,16 +81,23 @@
     </div>
 
     <div class="p1-welcome__accounts">
-      @for (account of accounts; track account.id) {
-        <button type="button" class="p1-welcome__account" (click)="workspaceRequested.emit(account.id)">
+      @if (accounts.length === 0) {
+        <div class="p1-welcome__empty" role="status">
+          <strong>{{ state.status === 'error' ? 'Workspace data could not load' : 'No accounts found' }}</strong>
+          <span>{{ state.message }}</span>
+        </div>
+      } @else {
+        @for (account of accounts; track account.id) {
+        <button type="button" class="p1-welcome__account" (click)="facade.openWorkspace(account.id)">
           <span>{{ account.status }}</span>
           <strong>{{ account.name }}</strong>
-          <small>{{ account.industry }} / Last modified {{ account.lastModified }}</small>
+          <small>{{ account.descriptor }} / Last modified {{ account.lastModified }}</small>
           <div>
-            <span>{{ account.facilityCount }} facilities</span>
-            <span>{{ account.annualEnergy }}</span>
+            <span>{{ account.facilityCountLabel }}</span>
+            <span>{{ account.meterCountLabel }}</span>
           </div>
         </button>
+        }
       }
     </div>
   </section>

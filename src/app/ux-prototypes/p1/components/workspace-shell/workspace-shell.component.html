@@ -1,41 +1,35 @@
-<main class="p1-shell" [class.p1-shell--panel-closed]="!isRightPanelOpen" aria-label="Account workspace">
-  <app-p1-primary-rail
-    [sections]="sections"
-    [activeSection]="activeSection"
-    (sectionChange)="sectionChange.emit($event)">
-  </app-p1-primary-rail>
+<main class="p1-shell" [class.p1-shell--panel-closed]="!facade.isRightPanelOpen()" aria-label="Account workspace">
+  @let state = facade.state();
+  @if (state.status === 'loading') {
+    <section class="p1-shell__state" aria-live="polite">
+      <span class="fa fa-circle-notch"></span>
+      <h1>Loading workspace data</h1>
+      <p>{{ state.message }}</p>
+    </section>
+  } @else if (state.status === 'error') {
+    <section class="p1-shell__state" aria-live="polite">
+      <span class="fa fa-triangle-exclamation"></span>
+      <h1>Workspace data could not load</h1>
+      <p>{{ state.message }}</p>
+    </section>
+  } @else if (state.status === 'empty') {
+    <section class="p1-shell__state" aria-live="polite">
+      <span class="fa fa-building"></span>
+      <h1>No accounts found</h1>
+      <p>{{ state.message }}</p>
+      <button type="button" (click)="facade.showWelcome()">Return to welcome</button>
+    </section>
+  } @else {
+  <app-p1-primary-rail></app-p1-primary-rail>
 
-  <app-p1-section-nav
-    [navGroups]="navGroups"
-    [activeDetailId]="activeDetailId"
-    [activeSection]="activeSection"
-    [contextMode]="contextMode"
-    [account]="account"
-    [facility]="facility"
-    [facilities]="facilities"
-    (detailChange)="detailChange.emit($event)"
-    (contextChange)="contextChange.emit($event)"
-    (facilityChange)="facilityChange.emit($event)">
-  </app-p1-section-nav>
+  <app-p1-section-nav></app-p1-section-nav>
 
-  <app-p1-workspace-main
-    [content]="content"
-    [activeSection]="activeSection"
-    [activeNavItem]="activeNavItem"
-    [contextMode]="contextMode"
-    [account]="account"
-    [facility]="facility"
-    [facilities]="facilities">
-  </app-p1-workspace-main>
+  <section class="p1-shell__main" aria-label="Workspace content">
+    <router-outlet></router-outlet>
+  </section>
 
-  @if (isRightPanelOpen) {
-    <app-p1-right-panel
-      [panelContent]="panelContent"
-      [activePanelTab]="activePanelTab"
-      [contextMode]="contextMode"
-      [activeSection]="activeSection"
-      (panelTabChange)="panelTabChange.emit($event)"
-      (rightPanelToggle)="rightPanelToggle.emit()">
-    </app-p1-right-panel>
+  @if (facade.isRightPanelOpen()) {
+    <app-p1-right-panel></app-p1-right-panel>
+  }
   }
 </main>

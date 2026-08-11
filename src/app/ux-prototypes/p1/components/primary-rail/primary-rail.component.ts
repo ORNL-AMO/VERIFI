@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { P1SectionDefinition, P1SectionId } from '../../p1.models';
+import { P1RouteFacade } from '../../p1-route.facade';
 
 @Component({
   selector: 'app-p1-primary-rail',
@@ -8,16 +9,17 @@ import { P1SectionDefinition, P1SectionId } from '../../p1.models';
   standalone: false
 })
 export class P1PrimaryRailComponent {
-  @Input() sections: Array<P1SectionDefinition> = [];
-  @Input() activeSection: P1SectionId = 'home';
-
-  @Output() sectionChange = new EventEmitter<P1SectionId>();
+  readonly facade = inject(P1RouteFacade);
 
   get primarySections(): Array<P1SectionDefinition> {
-    return this.sections.filter(section => !section.utility);
+    return this.facade.sections().filter(section => !section.utility);
   }
 
   get utilitySections(): Array<P1SectionDefinition> {
-    return this.sections.filter(section => section.utility);
+    return this.facade.sections().filter(section => section.utility);
+  }
+
+  isActive(sectionId: P1SectionId): boolean {
+    return this.facade.activeSection() === sectionId;
   }
 }

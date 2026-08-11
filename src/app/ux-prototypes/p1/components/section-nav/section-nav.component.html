@@ -1,34 +1,26 @@
-<aside [class]="'p1-nav p1-nav--' + contextMode" aria-label="Section navigation">
+<aside [class]="'p1-nav p1-nav--' + facade.contextMode()" aria-label="Section navigation">
+  @let contextMode = facade.contextMode();
+  @let account = facade.selectedAccount();
+  @let facility = facade.selectedFacility();
   <div class="p1-nav__context">
     <span>{{ contextMode === 'account' ? 'Account context' : 'Facility context' }}</span>
-    <strong>{{ contextMode === 'account' ? account.name : facility.name }}</strong>
+    <strong>{{ contextMode === 'account' ? account?.name : facility?.name }}</strong>
     <div role="group" aria-label="Context selection">
-      <button type="button" [class.active]="contextMode === 'account'" (click)="contextChange.emit('account')">
+      <button type="button" [class.active]="contextMode === 'account'" (click)="facade.setContext('account')">
         Account
       </button>
-      <button type="button" [class.active]="contextMode === 'facility'" (click)="contextChange.emit('facility')">
+      <button type="button" [class.active]="contextMode === 'facility'" (click)="facade.setContext('facility')">
         Facility
       </button>
     </div>
   </div>
 
-  <!-- @if (contextMode === 'facility') {
-    <div class="p1-nav__facility-list" aria-label="Facility selection">
-      @for (item of facilities; track item.id) {
-        <button type="button" [class.active]="facility.id === item.id" (click)="facilityChange.emit(item.id)">
-          <strong>{{ item.name }}</strong>
-          <span>{{ item.status }}</span>
-        </button>
-      }
-    </div>
-  } -->
-
   <div class="p1-nav__groups">
-    @for (group of navGroups; track group.title) {
+    @for (group of facade.navGroups(); track group.title) {
       <section class="p1-nav__group" [attr.aria-label]="group.title">
         <h2>{{ group.title }}</h2>
         @for (item of group.items; track item.id) {
-          <button type="button" [class.active]="activeDetailId === item.id" (click)="detailChange.emit(item.id)">
+          <button type="button" [class.active]="facade.activeDetailId() === item.id" (click)="facade.setDetail(item.id)">
             <span>{{ item.label }}</span>
             @if (item.meta) {
               <small>{{ item.meta }}</small>

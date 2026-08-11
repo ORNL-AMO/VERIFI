@@ -1,10 +1,12 @@
 <aside class="p1-panel" aria-label="Workspace support panel">
+  @let panelContent = facade.panelContent();
+  @let activePanelTab = facade.activePanelTab();
   <div class="p1-panel__header">
     <div>
-      <span>{{ contextMode }} support</span>
-      <strong>{{ activeSection }}</strong>
+      <span>{{ facade.contextMode() }} support</span>
+      <strong>{{ facade.activeSection() }}</strong>
     </div>
-    <button type="button" (click)="rightPanelToggle.emit()" aria-label="Hide support panel">
+    <button type="button" (click)="facade.hideRightPanel()" aria-label="Hide support panel">
       <span class="fa fa-xmark"></span>
     </button>
   </div>
@@ -16,7 +18,7 @@
         role="tab"
         [attr.aria-selected]="activePanelTab === tab.id"
         [class.active]="activePanelTab === tab.id"
-        (click)="panelTabChange.emit(tab.id)">
+        (click)="facade.setPanelTab(tab.id)">
         <span class="fa {{ tab.icon }}"></span>
         {{ tab.label }}
       </button>

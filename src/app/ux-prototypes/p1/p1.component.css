@@ -3,3 +3,29 @@
   background: var(--prototype-bg);
   color: var(--prototype-text);
 }
+
+.p1-prototype__state {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.p1-prototype__state span {
+  color: var(--prototype-orange);
+  font-size: 2rem;
+}
+
+.p1-prototype__state h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.p1-prototype__state p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--prototype-muted);
+}
