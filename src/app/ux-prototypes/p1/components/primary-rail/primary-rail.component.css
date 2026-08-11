@@ -14,9 +14,9 @@
   overflow-y: auto;
   gap: 1rem;
   padding: .65rem .45rem;
-  border-right: 1px solid rgba(255, 255, 255, .08);
-  background: var(--prototype-blue);
-  color: #fff;
+  border-right: 1px solid var(--prototype-border);
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
 }
 
 .p1-rail__group {
@@ -34,17 +34,22 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: rgba(255, 255, 255, .72);
+  color: var(--prototype-muted);
 }
 
-.p1-rail button:hover,
-.p1-rail button.active {
-  background: rgba(255, 255, 255, .12);
-  color: #fff;
+.p1-rail button:hover {
+  background: var(--prototype-surface-muted);
+  color: var(--prototype-text);
 }
 
 .p1-rail button.active {
-  box-shadow: inset 3px 0 0 var(--prototype-orange);
+  background: var(--prototype-surface-muted);
+  color: var(--prototype-orange);
+  /* box-shadow: inset 3px 0 0 var(--prototype-orange); */
+  border-left: 3px solid var(--prototype-orange);
+  border-right: 3px solid var(--prototype-orange);
+  border-top: 1px solid var(--prototype-orange);
+  border-bottom: 1px solid var(--prototype-orange);
 }
 
 .p1-rail .fa {

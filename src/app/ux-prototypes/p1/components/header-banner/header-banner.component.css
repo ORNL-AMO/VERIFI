@@ -119,7 +119,7 @@
   display: inline-flex;
   gap: .4rem;
   align-items: center;
-  height: 2rem;
+  /* height: 2rem; */
   padding: .3rem .6rem;
   border: 0;
   border-radius: 6px;
@@ -141,6 +141,13 @@
   background: var(--prototype-surface);
   color: var(--prototype-blue);
   box-shadow: 0 .25rem .75rem rgba(44, 56, 107, .1);
+}
+
+.p1-header__context button.active {
+  border-left: 3px solid var(--prototype-orange);
+  border-right: 3px solid var(--prototype-orange);
+  border-top: 1px solid var(--prototype-orange);
+  border-bottom: 1px solid var(--prototype-orange);
 }
 
 /* ── Panel toggle button ───────────────────────────────────────── */
@@ -258,6 +265,7 @@
 .p1-header__dropdown-item.active {
   color: var(--prototype-blue);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--prototype-orange);
 }
 
 .p1-header__check {

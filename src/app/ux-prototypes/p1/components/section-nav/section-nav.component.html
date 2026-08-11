@@ -1,4 +1,4 @@
-<aside class="p1-nav" aria-label="Section navigation">
+<aside [class]="'p1-nav p1-nav--' + contextMode" aria-label="Section navigation">
   <div class="p1-nav__context">
     <span>{{ contextMode === 'account' ? 'Account context' : 'Facility context' }}</span>
     <strong>{{ contextMode === 'account' ? account.name : facility.name }}</strong>
@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  @if (contextMode === 'facility') {
+  <!-- @if (contextMode === 'facility') {
     <div class="p1-nav__facility-list" aria-label="Facility selection">
       @for (item of facilities; track item.id) {
         <button type="button" [class.active]="facility.id === item.id" (click)="facilityChange.emit(item.id)">
@@ -21,7 +21,7 @@
         </button>
       }
     </div>
-  }
+  } -->
 
   <div class="p1-nav__groups">
     @for (group of navGroups; track group.title) {

@@ -65,8 +65,33 @@
   text-align: center;
 }
 
+/* Context-aware: account = green, facility = blue */
+
+.p1-nav--account .p1-nav__context {
+  border-left: 3px solid var(--prototype-green);
+}
+
+.p1-nav--facility .p1-nav__context {
+  border-left: 3px solid var(--prototype-blue);
+}
+
+.p1-nav--account .p1-nav__context > span {
+  color: var(--prototype-green);
+}
+
+.p1-nav--facility .p1-nav__context > span {
+  color: var(--prototype-blue);
+}
+
 .p1-nav__context div button.active {
   background: var(--prototype-surface);
+}
+
+.p1-nav--account .p1-nav__context div button.active {
+  color: var(--prototype-green);
+}
+
+.p1-nav--facility .p1-nav__context div button.active {
   color: var(--prototype-blue);
 }
 
@@ -85,8 +110,8 @@
 }
 
 .p1-nav__facility-list button.active {
-  border-color: var(--prototype-green);
-  box-shadow: inset 3px 0 0 var(--prototype-green);
+  border-color: var(--prototype-blue);
+  box-shadow: inset 3px 0 0 var(--prototype-blue);
 }
 
 .p1-nav__groups {
@@ -125,7 +150,11 @@
 
 .p1-nav__group button.active {
   color: var(--prototype-blue);
-  box-shadow: inset 3px 0 0 var(--prototype-orange);
+  /* box-shadow: inset 3px 0 0 var(--prototype-orange); */
+  border-left: 3px solid var(--prototype-orange);
+  border-right: 3px solid var(--prototype-orange);
+  border-top: 1px solid var(--prototype-orange);
+  border-bottom: 1px solid var(--prototype-orange);
 }
 
 .p1-nav__group button > span {

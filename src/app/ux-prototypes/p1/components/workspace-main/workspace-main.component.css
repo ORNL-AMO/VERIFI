@@ -108,8 +108,23 @@
 }
 
 .p1-main__intro strong {
-  color: var(--prototype-blue);
   font-size: 1.1rem;
+}
+
+.p1-main--account .p1-main__intro strong {
+  color: var(--prototype-green);
+}
+
+.p1-main--facility .p1-main__intro strong {
+  color: var(--prototype-blue);
+}
+
+.p1-main--account .p1-main__intro {
+  border-left: 3px solid var(--prototype-green);
+}
+
+.p1-main--facility .p1-main__intro {
+  border-left: 3px solid var(--prototype-blue);
 }
 
 .p1-main__intro p {
