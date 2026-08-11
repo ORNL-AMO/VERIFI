@@ -2,6 +2,8 @@
 
 The VERIFI redesign replaces separate Data Management and Data Evaluation modes with one cohesive workspace for data entry, visualization, analysis, and reporting. Prototype work should explore that future experience without changing proven calculations, persisted relationships, backups, imports, exports, or report outputs.
 
+Read the [prototype design foundation](prototype-foundation.md) before creating or changing a prototype screen. It defines the preserved product workflow, welcome-screen content model, visual direction, brand colors, weather-data expectations, and light/dark mode intent for prototype work.
+
 ## Routing
 
 - Each prototype uses a temporary top-level route named `/pN`, such as `/p1`, `/p2`, and `/p3`.
@@ -11,13 +13,14 @@ The VERIFI redesign replaces separate Data Management and Data Evaluation modes 
 ## Data
 
 - Use static mock data by default and colocate it with the prototype that consumes it.
-- Do not read from or write to IndexedDB, backup services, import/export services, Web Workers, calculation services, or report writers unless the task explicitly changes from a visual prototype into production workflow implementation.
+- Do not read from or write to IndexedDB, weather services, backup services, import/export services, Web Workers, calculation services, or report writers unless the task explicitly changes from a visual prototype into production workflow implementation.
 - When a prototype needs realistic values, model only the minimum shape needed to render the screen.
 
 ## Styling
 
 - Put prototype screens under the `.verifi-prototype` root provided by the prototype shell.
 - Use prototype-owned component CSS and the scoped prototype reset/tokens. Do not add prototype styles to `angular.json` or the global `src/styles/` bundle.
+- Build responsive layouts by default and check mobile, tablet, desktop, and practical Electron window sizes for new prototype patterns.
 - Avoid legacy global class names such as `.content`, `.measur-wrapper`, `.breadcrumbs`, data-management classes, report classes, and shared table/form classes unless the task intentionally copies a specific pattern into prototype-owned CSS.
 - Inspect neighboring production screens for workflow context, then copy only the pieces that are deliberately part of the new design direction.
 
