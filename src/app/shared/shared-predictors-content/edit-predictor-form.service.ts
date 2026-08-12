@@ -10,14 +10,15 @@ export class EditPredictorFormService {
   constructor(private formBuilder: FormBuilder) { }
 
   getFormFromPredictor(predictor: IdbPredictor): FormGroup {
+    const isWeather = predictor.predictorType == 'Weather';
     const weatherSelections = this.formBuilder.group({
-      cdd: [predictor.weatherDataType == 'CDD'],
-      hdd: [predictor.weatherDataType == 'HDD'],
-      relativeHumidity: [predictor.weatherDataType == 'relativeHumidity'],
-      dryBulbTemp: [predictor.weatherDataType == 'dryBulbTemp'],
-      wetBulbTemp: [predictor.weatherDataType == 'wetBulbTemp'],
-      dewPointTemp: [predictor.weatherDataType == 'dewPointTemp'],
-      precipitation: [predictor.weatherDataType == 'precipitation']
+      cdd: [isWeather && predictor.weatherDataType == 'CDD'],
+      hdd: [isWeather && predictor.weatherDataType == 'HDD'],
+      relativeHumidity: [isWeather && predictor.weatherDataType == 'relativeHumidity'],
+      dryBulbTemp: [isWeather && predictor.weatherDataType == 'dryBulbTemp'],
+      wetBulbTemp: [isWeather && predictor.weatherDataType == 'wetBulbTemp'],
+      dewPointTemp: [isWeather && predictor.weatherDataType == 'dewPointTemp'],
+      precipitation: [isWeather && predictor.weatherDataType == 'precipitation']
     });
     let predictorForm: FormGroup = this.formBuilder.group({
       'name': [predictor.name, [Validators.required]],
