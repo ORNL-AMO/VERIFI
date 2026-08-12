@@ -74,7 +74,7 @@ export class EditPredictorFormService {
       weatherSelections?.setValidators([this.isAnyWeatherOptionSelected()]);
 
       const selectedTypes = this.getSelectedWeatherTypes(predictorForm);
-      if (selectedTypes.length === 1) {
+      if (selectedTypes.length > 0) {
         predictorForm.controls.weatherDataType.patchValue(selectedTypes[0], { emitEvent: false });
       }
 
