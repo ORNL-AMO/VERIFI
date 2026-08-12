@@ -1,0 +1,87 @@
+@let _account = account();
+
+<section class="p1-main p1-main--account p1-settings" aria-labelledby="p1-account-settings-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>Account settings</p>
+      <h1 id="p1-account-settings-title">{{ _account?.name || 'Account settings' }}</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      @if (saveError) {
+        <span class="p1-settings__save p1-settings__save--error">{{ saveError }}</span>
+      } @else if (saveMessage) {
+        <span class="p1-settings__save">{{ saveMessage }}</span>
+      }
+    </div>
+  </div>
+
+  @if (!_account) {
+    <div class="p1-settings__state" role="status">
+      <span class="fa fa-building"></span>
+      <h2>No account loaded</h2>
+      <p>Open an account workspace to edit account settings.</p>
+    </div>
+  } @else {
+    @if (!canWrite()) {
+      <div class="p1-settings__notice" role="status">
+        <span class="fa fa-lock"></span>
+        Settings are unavailable while the workspace is loading or switching.
+      </div>
+    }
+
+    @switch (activeDetail) {
+      @case ('profile') {
+        <app-p1-account-settings-profile class="w-100" [page]="page"></app-p1-account-settings-profile>
+      }
+      @case ('units') {
+        <app-p1-account-settings-units class="w-100" [page]="page"></app-p1-account-settings-units>
+      }
+      @case ('goals') {
+        <app-p1-account-settings-goals class="w-100" [page]="page"></app-p1-account-settings-goals>
+      }
+      @case ('financial') {
+        <app-p1-account-settings-financial class="w-100" [page]="page"></app-p1-account-settings-financial>
+      }
+      @case ('staleness') {
+        <app-p1-account-settings-staleness class="w-100" [page]="page"></app-p1-account-settings-staleness>
+      }
+      @case ('backup') {
+        <section class="p1-settings__panel">
+          <div class="p1-settings__panel-heading">
+            <div>
+              <span>Concept only</span>
+              <h2>Backup and import</h2>
+            </div>
+            <small>File actions stay in production flows for this pass</small>
+          </div>
+          <div class="p1-settings__cards">
+            <article>
+              <h3>Automatic account backup</h3>
+              <p>Automatic backup selection, archive policy, and shared-file authoring remain available from the current account setup workflow.</p>
+              <a [routerLink]="backupRoute">Open current setup</a>
+            </article>
+            <article>
+              <h3>Manual backup and import</h3>
+              <p>The prototype shows the future location for these actions without invoking backup export or import coordinators.</p>
+              <button type="button" disabled>Backup account</button>
+              <button type="button" disabled>Import backup file</button>
+            </article>
+          </div>
+        </section>
+      }
+      @case ('delete') {
+        <section class="p1-settings__panel p1-settings__panel--danger">
+          <div class="p1-settings__panel-heading">
+            <div>
+              <span>Safety</span>
+              <h2>Delete account</h2>
+            </div>
+            <small>Disabled in P1</small>
+          </div>
+          <p>Deleting an account permanently removes the account and all related facilities, meters, predictors, analyses, reports, and settings. This prototype page is non-destructive.</p>
+          <button type="button" disabled>Delete account</button>
+        </section>
+      }
+    }
+  }
+</section>

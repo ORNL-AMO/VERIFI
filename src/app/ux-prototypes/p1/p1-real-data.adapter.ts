@@ -327,7 +327,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
       visualization: [{ title: 'Explore', items: [{ id: 'time-series', label: 'Time series' }, { id: 'trends', label: 'Utility trends' }, { id: 'compare', label: 'Facility comparison' }] }],
       analysis: [{ title: 'Account Analysis', items: [{ id: 'rollup', label: 'Account rollup', status: toneForCount(account.accountAnalyses) }, { id: 'savings', label: 'Savings summary' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
       reports: [{ title: 'Reports', items: [{ id: 'setup', label: 'Report setup' }, { id: 'data-checks', label: 'Data checks' }, { id: 'generated', label: 'Generated reports', meta: String(account.accountReports + account.facilityReports) }, { id: 'footprint-report', label: 'Footprint outputs' }] }],
-      settings: [{ title: 'Account Settings', items: [{ id: 'profile', label: 'Account profile' }, { id: 'fuels', label: 'Custom fuels' }, { id: 'emissions', label: 'Emissions factors' }, { id: 'gwp', label: 'GWP factors' }] }],
+      settings: [{ title: 'Account Settings', items: [{ id: 'profile', label: 'Corporate information' }, { id: 'units', label: 'Units and emissions' }, { id: 'goals', label: 'Reduction goals' }, { id: 'financial', label: 'Financial reporting' }, { id: 'staleness', label: 'Data staleness' }, { id: 'backup', label: 'Backup and import' }, { id: 'delete', label: 'Delete account' }] }],
       imports: [
         { title: 'Import', items: [{ id: 'template', label: 'Upload template' }, { id: 'general', label: 'Upload general file' }, { id: 'backup', label: 'Upload account backup' }] },
         { title: 'Backup', items: [{ id: 'export', label: 'Export account' }, { id: 'example', label: 'Load example account' }] }
@@ -339,7 +339,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
       visualization: [{ title: 'Facility Charts', items: [{ id: 'time-series', label: 'Time series' }, { id: 'correlation', label: 'Correlation plots' }, { id: 'heatmap', label: 'Heatmaps' }] }],
       analysis: [{ title: 'Facility Analysis', items: [{ id: 'setup', label: 'Analysis setup', status: toneForCount(facility.facilityAnalyses) }, { id: 'results', label: 'Results' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
       reports: [{ title: 'Facility Reports', items: [{ id: 'overview-report', label: 'Overview report' }, { id: 'analysis-report', label: 'Analysis report' }, { id: 'quality-report', label: 'Data quality report' }, { id: 'footprint-report', label: 'Footprint output' }] }],
-      settings: [{ title: 'Facility Settings', items: [{ id: 'profile', label: 'Facility profile' }, { id: 'preferences', label: 'Preferences' }, { id: 'inherited', label: 'Inherited account factors' }] }],
+      settings: [{ title: 'Facility Settings', items: [{ id: 'profile', label: 'Facility information' }, { id: 'units', label: 'Units and emissions' }, { id: 'goals', label: 'Reduction goals' }, { id: 'financial', label: 'Financial reporting' }, { id: 'staleness', label: 'Data staleness' }, { id: 'backup', label: 'Backup and import' }, { id: 'delete', label: 'Delete facility' }] }],
       imports: [
         { title: 'Facility Import', items: [{ id: 'meter-import', label: 'Meter readings' }, { id: 'predictor-import', label: 'Predictor data' }, { id: 'footprint-import', label: 'Footprint data' }] },
         { title: 'Backup', items: [{ id: 'account-backup', label: 'Account backup status' }] }

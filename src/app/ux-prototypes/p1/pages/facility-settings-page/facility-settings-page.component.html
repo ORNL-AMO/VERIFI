@@ -1,0 +1,89 @@
+@let _account = account();
+@let _facility = facility();
+
+<section class="p1-main p1-main--facility p1-settings p1-settings--facility" aria-labelledby="p1-facility-settings-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>Facility settings</p>
+      <h1 id="p1-facility-settings-title">{{ _facility?.name || 'Facility settings' }}</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      @if (saveError) {
+        <span class="p1-settings__save p1-settings__save--error">{{ saveError }}</span>
+      } @else if (saveMessage) {
+        <span class="p1-settings__save">{{ saveMessage }}</span>
+      }
+    </div>
+  </div>
+
+  @if (!_facility || !_account) {
+    <div class="p1-settings__state" role="status">
+      <span class="fa fa-industry"></span>
+      <h2>No facility selected</h2>
+      <p>Select a facility to edit facility settings.</p>
+    </div>
+  } @else {
+
+    @if (!canWrite()) {
+      <div class="p1-settings__notice" role="status">
+        <span class="fa fa-lock"></span>
+        Settings are unavailable while the workspace is loading or switching.
+      </div>
+    }
+
+    @switch (activeDetail) {
+      @case ('profile') {
+        <app-p1-facility-settings-profile class="w-100" [page]="page"></app-p1-facility-settings-profile>
+      }
+      @case ('units') {
+        <app-p1-facility-settings-units class="w-100" [page]="page"></app-p1-facility-settings-units>
+      }
+      @case ('goals') {
+        <app-p1-facility-settings-goals class="w-100" [page]="page"></app-p1-facility-settings-goals>
+      }
+      @case ('financial') {
+        <app-p1-facility-settings-financial class="w-100" [page]="page"></app-p1-facility-settings-financial>
+      }
+      @case ('staleness') {
+        <app-p1-facility-settings-staleness class="w-100" [page]="page"></app-p1-facility-settings-staleness>
+      }
+      @case ('backup') {
+        <section class="p1-settings__panel w-100">
+          <div class="p1-settings__panel-heading">
+            <div>
+              <span>Concept only</span>
+              <h2>Backup and import</h2>
+            </div>
+            <small>File actions stay in production flows for this pass</small>
+          </div>
+          <div class="p1-settings__cards">
+            <article>
+              <h3>Facility export</h3>
+              <p>The prototype reserves this area for facility export and backup actions without invoking file flows.</p>
+              <a [routerLink]="backupRoute">Open current facility setup</a>
+            </article>
+            <article>
+              <h3>Import backup data</h3>
+              <p>Facility import remains in the existing backup workflow until prototype file actions are explicitly scoped.</p>
+              <button type="button" disabled>Import backup file</button>
+              <button type="button" disabled>Export facility</button>
+            </article>
+          </div>
+        </section>
+      }
+      @case ('delete') {
+        <section class="p1-settings__panel p1-settings__panel--danger w-100">
+          <div class="p1-settings__panel-heading">
+            <div>
+              <span>Safety</span>
+              <h2>Delete facility</h2>
+            </div>
+            <small>Disabled in P1</small>
+          </div>
+          <p>Deleting a facility permanently removes its meters, predictors, analyses, reports, and related data. This prototype page is non-destructive.</p>
+          <button type="button" disabled>Delete facility</button>
+        </section>
+      }
+    }
+  }
+</section>

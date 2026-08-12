@@ -1,0 +1,102 @@
+@if (page.unitsForm) {
+  <form class="p1-settings p1-settings__panel" [formGroup]="page.unitsForm" aria-label="Account units">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Units</span>
+        <h2>Units and other impacts</h2>
+      </div>
+      <small>Controls analysis and display defaults</small>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label>
+        <span>Units of measure</span>
+        <select formControlName="unitsOfMeasure" (change)="page.setUnitsOfMeasure()">
+          <option [ngValue]="'Imperial'">Imperial</option>
+          <option [ngValue]="'Metric'">Metric</option>
+          <option [ngValue]="'Custom'">Custom</option>
+        </select>
+      </label>
+      <fieldset>
+        <legend>Boundary for analysis and display</legend>
+        <label class="p1-settings__choice">
+          <input type="radio" formControlName="energyIsSource" [value]="true"
+            (change)="page.saveUnits()">
+          <span>Source Energy</span>
+        </label>
+        <label class="p1-settings__choice">
+          <input type="radio" formControlName="energyIsSource" [value]="false"
+            (change)="page.saveUnits()">
+          <span>Site Energy</span>
+        </label>
+      </fieldset>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label>
+        <span>Result energy unit</span>
+        <select formControlName="energyUnit" (change)="page.saveUnits()">
+          @for (option of page.energyUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Electricity unit</span>
+        <select formControlName="electricityUnit" (change)="page.saveUnits()">
+          @for (option of page.energyUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Liquid volume unit</span>
+        <select formControlName="volumeLiquidUnit" (change)="page.saveUnits()">
+          @for (option of page.volumeLiquidOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Gas volume unit</span>
+        <select formControlName="volumeGasUnit" (change)="page.saveUnits()">
+          @for (option of page.volumeGasOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Mass unit</span>
+        <select formControlName="massUnit" (change)="page.saveUnits()">
+          @for (option of page.massUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>eGRID subregion</span>
+        <select formControlName="eGridSubregion" (change)="page.saveUnits()">
+          @for (subregion of page.subregionOptions; track subregion) {
+            <option [ngValue]="subregion">{{ subregion }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label class="p1-settings__choice p1-settings__choice--block">
+        <input type="checkbox" formControlName="displayEmissions" (change)="page.saveUnits()">
+        <span>Assess other impacts of operations</span>
+      </label>
+      <fieldset>
+        <legend>IPCC assessment report version</legend>
+        @for (version of ['AR4', 'AR5', 'AR6']; track version) {
+          <label class="p1-settings__choice">
+            <input type="radio" formControlName="assessmentReportVersion" [value]="version" (change)="page.saveUnits()">
+            <span>{{ version }}</span>
+          </label>
+        }
+      </fieldset>
+    </div>
+  </form>
+}

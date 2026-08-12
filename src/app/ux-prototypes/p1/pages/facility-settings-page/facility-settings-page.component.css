@@ -1,0 +1,17 @@
+.p1-settings--facility .p1-settings__panel {
+  border-left-color: var(--prototype-blue);
+}
+
+.p1-settings--facility.p1-settings__panel {
+  border-left-color: var(--prototype-blue);
+}
+
+.p1-settings--facility .p1-settings__state > span {
+  color: var(--prototype-blue);
+}
+
+.p1-settings__disabled-region {
+  display: grid;
+  gap: .85rem;
+  opacity: .62;
+}
