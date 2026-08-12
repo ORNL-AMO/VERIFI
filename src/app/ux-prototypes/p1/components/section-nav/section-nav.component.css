@@ -20,98 +20,225 @@
 
 .p1-nav__context {
   display: grid;
-  gap: .55rem;
-  padding: .75rem;
-  border: 1px solid var(--prototype-border);
-  border-radius: 8px;
-  background: var(--prototype-surface);
-}
-
-.p1-nav__context > span,
-.p1-nav__facility-list span,
-.p1-nav small {
-  color: var(--prototype-muted);
-  font-size: .74rem;
-  font-weight: 700;
-}
-
-.p1-nav__context strong {
-  font-size: .95rem;
-  line-height: 1.2;
-}
-
-.p1-nav__context div {
-  display: grid;
   grid-template-columns: 1fr 1fr;
   gap: .25rem;
   padding: .25rem;
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--prototype-surface-muted);
+  border: 1px solid var(--prototype-border);
 }
 
-.p1-nav__context div button,
-.p1-nav__facility-list button,
-.p1-nav__group button {
+.p1-nav__context button {
+  display: inline-flex;
+  gap: .4rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: .3rem .5rem;
   border: 0;
   border-radius: 6px;
+  background: transparent;
+  color: var(--prototype-muted);
+  font-size: .82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.p1-nav__context button:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.p1-nav--account .p1-nav__context button.active {
+  background: var(--prototype-surface);
+  color: var(--prototype-green);
+  border: 1px solid currentColor;
+}
+
+.p1-nav--facility .p1-nav__context button.active {
+  background: var(--prototype-surface);
+  color: var(--prototype-blue);
+  border: 1px solid currentColor;
+}
+
+/* ── Facility zone ─────────────────────────────────────────────── */
+
+.p1-nav__facility-zone {
+  position: relative;
+}
+
+.p1-nav__facility-single {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  padding: .5rem .65rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+/* Picker trigger button */
+.p1-nav__picker-wrap {
+  position: relative;
+}
+
+.p1-nav__picker-btn {
+  display: flex;
+  gap: .45rem;
+  align-items: center;
+  width: 100%;
+  padding: .5rem .65rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
   text-align: left;
 }
 
-.p1-nav__context div button {
-  min-height: 2rem;
-  background: transparent;
-  color: var(--prototype-muted);
-  font-weight: 800;
-  text-align: center;
-}
-
-/* Context-aware: account = green, facility = blue */
-
-.p1-nav--account .p1-nav__context {
-  border-left: 3px solid var(--prototype-green);
-}
-
-.p1-nav--facility .p1-nav__context {
-  border-left: 3px solid var(--prototype-blue);
-}
-
-.p1-nav--account .p1-nav__context > span {
-  color: var(--prototype-green);
-}
-
-.p1-nav--facility .p1-nav__context > span {
-  color: var(--prototype-blue);
-}
-
-.p1-nav__context div button.active {
-  background: var(--prototype-surface);
-}
-
-.p1-nav--account .p1-nav__context div button.active {
-  color: var(--prototype-green);
-}
-
-.p1-nav--facility .p1-nav__context div button.active {
-  color: var(--prototype-blue);
-}
-
-.p1-nav__facility-list {
-  display: grid;
-  gap: .4rem;
-}
-
-.p1-nav__facility-list button {
-  display: grid;
-  gap: .15rem;
-  padding: .6rem .7rem;
-  border: 1px solid var(--prototype-border);
-  background: var(--prototype-surface);
-  color: var(--prototype-text);
-}
-
-.p1-nav__facility-list button.active {
+.p1-nav__picker-btn:hover,
+.p1-nav__picker-wrap.open .p1-nav__picker-btn {
   border-color: var(--prototype-blue);
-  box-shadow: inset 3px 0 0 var(--prototype-blue);
+  background: var(--prototype-surface);
+}
+
+.p1-nav__picker-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p1-nav__picker-section-label {
+  display: block;
+  padding: .3rem .55rem .2rem;
+  color: var(--prototype-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.p1-nav__picker-chevron {
+  font-size: .65rem;
+  opacity: .6;
+  flex-shrink: 0;
+}
+
+/* Picker backdrop */
+.p1-nav__picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+/* Picker dropdown */
+.p1-nav__picker-dropdown {
+  position: absolute;
+  top: calc(100% + .35rem);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: .4rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 10px;
+  background: var(--prototype-surface);
+  box-shadow: 0 .75rem 2rem rgba(23, 35, 31, .12);
+}
+
+.p1-nav__picker-search {
+  position: relative;
+  padding: .35rem .4rem;
+  border-bottom: 1px solid var(--prototype-border);
+}
+
+.p1-nav__picker-search-icon {
+  position: absolute;
+  left: .85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--prototype-muted);
+  font-size: .8rem;
+  pointer-events: none;
+}
+
+.p1-nav__picker-search-input {
+  width: 100%;
+  padding: .3rem .5rem .3rem 1.85rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 6px;
+  background: var(--prototype-surface-muted);
+  color: var(--prototype-text);
+  font-size: .83rem;
+  outline: none;
+}
+
+.p1-nav__picker-search-input:focus {
+  border-color: var(--prototype-blue);
+  background: var(--prototype-surface);
+}
+
+.p1-nav__picker-list {
+  max-height: 18rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+}
+
+.p1-nav__picker-item {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  width: 100%;
+  padding: .45rem .55rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--prototype-text);
+  font-size: .85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.p1-nav__picker-item small {
+  display: block;
+  color: var(--prototype-muted);
+  font-size: .75rem;
+}
+
+.p1-nav__picker-item:hover {
+  background: var(--prototype-surface-muted);
+}
+
+.p1-nav__picker-item.active {
+  color: var(--prototype-blue);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 currentColor;
+}
+
+.p1-nav__picker-check {
+  margin-top: .15rem;
+  color: var(--prototype-blue);
+  font-size: .8rem;
+  opacity: 0;
+  flex-shrink: 0;
+}
+
+.p1-nav__picker-item.active .p1-nav__picker-check {
+  opacity: 1;
+}
+
+.p1-nav__picker-empty {
+  display: block;
+  padding: .5rem .55rem;
+  color: var(--prototype-muted);
+  font-size: .82rem;
 }
 
 .p1-nav__groups {
@@ -139,8 +266,11 @@
   gap: .1rem;
   min-height: 2.65rem;
   padding: .45rem 1.5rem .45rem .6rem;
+  border: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--prototype-text);
+  text-align: left;
 }
 
 .p1-nav__group button:hover,
@@ -149,12 +279,16 @@
 }
 
 .p1-nav__group button.active {
+  background: var(--prototype-surface);
+  border: 1px solid currentColor;
+}
+
+.p1-nav--account .p1-nav__group button.active {
+  color: var(--prototype-green);
+}
+
+.p1-nav--facility .p1-nav__group button.active {
   color: var(--prototype-blue);
-  /* box-shadow: inset 3px 0 0 var(--prototype-orange); */
-  border-left: 3px solid var(--prototype-orange);
-  border-right: 3px solid var(--prototype-orange);
-  border-top: 1px solid var(--prototype-orange);
-  border-bottom: 1px solid var(--prototype-orange);
 }
 
 .p1-nav__group button > span {

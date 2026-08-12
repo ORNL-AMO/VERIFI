@@ -1,0 +1,18 @@
+<div class="p1-nav__groups">
+  @for (group of groups; track group.title) {
+    <section class="p1-nav__group" [attr.aria-label]="group.title">
+      <h2>{{ group.title }}</h2>
+      @for (item of group.items; track item.id) {
+        <a [routerLink]="navLink(item.id)" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <span>{{ item.label }}</span>
+          @if (item.meta) {
+            <small>{{ item.meta }}</small>
+          }
+          @if (item.status) {
+            <i [class]="'p1-nav__status p1-nav__status--' + item.status" aria-hidden="true"></i>
+          }
+        </a>
+      }
+    </section>
+  }
+</div>

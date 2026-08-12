@@ -1,36 +1,96 @@
 <aside [class]="'p1-nav p1-nav--' + facade.contextMode()" aria-label="Section navigation">
   @let contextMode = facade.contextMode();
-  @let account = facade.selectedAccount();
   @let facility = facade.selectedFacility();
-  <div class="p1-nav__context">
-    <span>{{ contextMode === 'account' ? 'Account context' : 'Facility context' }}</span>
-    <strong>{{ contextMode === 'account' ? account?.name : facility?.name }}</strong>
-    <div role="group" aria-label="Context selection">
-      <button type="button" [class.active]="contextMode === 'account'" (click)="facade.setContext('account')">
-        Account
-      </button>
-      <button type="button" [class.active]="contextMode === 'facility'" (click)="facade.setContext('facility')">
-        Facility
-      </button>
-    </div>
+  @let facilities = facade.accountFacilities();
+
+  <!-- Context toggle -->
+  <div class="p1-nav__context" role="group" aria-label="Switch workspace context">
+    <button type="button" [class.active]="contextMode === 'account'" (click)="facade.setContext('account')">
+      <span class="fa fa-building"></span>
+      Account
+    </button>
+    <button type="button" [class.active]="contextMode === 'facility'" [disabled]="facilities.length === 0"
+      (click)="switchToFacilityContext()">
+      <span class="fa fa-industry"></span>
+      Facility
+    </button>
   </div>
 
-  <div class="p1-nav__groups">
-    @for (group of facade.navGroups(); track group.title) {
-      <section class="p1-nav__group" [attr.aria-label]="group.title">
-        <h2>{{ group.title }}</h2>
-        @for (item of group.items; track item.id) {
-          <button type="button" [class.active]="facade.activeDetailId() === item.id" (click)="facade.setDetail(item.id)">
-            <span>{{ item.label }}</span>
-            @if (item.meta) {
-              <small>{{ item.meta }}</small>
-            }
-            @if (item.status) {
-              <i [class]="'p1-nav__status p1-nav__status--' + item.status" aria-hidden="true"></i>
-            }
-          </button>
+  <!-- Facility picker (facility context only) -->
+  @if (contextMode === 'facility' && facilities.length > 0) {
+  <div class="p1-nav__facility-zone">
+    @if (facilities.length === 1) {
+    <div class="p1-nav__facility-single">
+      <span class="fa fa-industry"></span>
+      <span>{{ facilities[0].name }}</span>
+    </div>
+    } @else {
+    <div class="p1-nav__picker-wrap" [class.open]="facilityPickerOpen">
+      <button type="button" class="p1-nav__picker-btn" (click)="toggleFacilityPicker()"
+        [attr.aria-expanded]="facilityPickerOpen" aria-haspopup="true">
+        <span class="fa fa-industry"></span>
+        <span class="p1-nav__picker-label">{{ facility?.name ?? 'Select facility' }}</span>
+        <span class="fa fa-chevron-down p1-nav__picker-chevron"></span>
+      </button>
+
+      @if (facilityPickerOpen) {
+      <!-- Backdrop -->
+      <div class="p1-nav__picker-backdrop" (click)="facilityPickerOpen = false" aria-hidden="true"></div>
+      <div class="p1-nav__picker-dropdown" role="menu">
+        @if (showFacilitySearch) {
+        <div class="p1-nav__picker-search">
+          <span class="fa fa-search p1-nav__picker-search-icon" aria-hidden="true"></span>
+          <input
+            class="p1-nav__picker-search-input"
+            type="search"
+            placeholder="Search facilities…"
+            aria-label="Search facilities"
+            autocomplete="off"
+            [(ngModel)]="facilitySearch"
+          />
+        </div>
         }
-      </section>
+        <div class="p1-nav__picker-list">
+          <span class="p1-nav__picker-section-label">Switch facility</span>
+          @for (f of filteredFacilities; track f.id) {
+          <button type="button" class="p1-nav__picker-item" role="menuitem"
+            [class.active]="f.id === facility?.id" (click)="selectFacility(f.id)">
+            <span class="fa fa-check p1-nav__picker-check"></span>
+            <span>
+              {{ f.name }}
+              @if (f.location) { <small>{{ f.location }}</small> }
+            </span>
+          </button>
+          }
+          @if (filteredFacilities.length === 0) {
+          <span class="p1-nav__picker-empty">No facilities match</span>
+          }
+        </div>
+      </div>
+      }
+    </div>
     }
   </div>
+  }
+
+  @switch (facade.activeSection()) {
+    @case ('home') {
+      <app-p1-home-section-nav></app-p1-home-section-nav>
+    }
+    @case ('data') {
+      <app-p1-data-section-nav></app-p1-data-section-nav>
+    }
+    @case ('visualization') {
+      <app-p1-visuals-section-nav></app-p1-visuals-section-nav>
+    }
+    @case ('analysis') {
+      <app-p1-analysis-section-nav></app-p1-analysis-section-nav>
+    }
+    @case ('reports') {
+      <app-p1-reports-section-nav></app-p1-reports-section-nav>
+    }
+    @default {
+      <app-p1-utility-section-nav></app-p1-utility-section-nav>
+    }
+  }
 </aside>

@@ -57,7 +57,9 @@
     </div>
 
     <!-- Context + facility switcher -->
-    <div class="p1-header__context" role="group" aria-label="Switch workspace context">
+    <div class="p1-header__context" role="group" aria-label="Switch workspace context"
+      [class.p1-header__context--account]="contextMode === 'account'"
+      [class.p1-header__context--facility]="contextMode === 'facility'">
       <button type="button" [class.active]="contextMode === 'account'" (click)="switchToAccountContext()">
         <span class="fa fa-building"></span>
         Account

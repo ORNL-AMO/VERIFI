@@ -9,6 +9,16 @@
   min-height: 42rem;
   background: var(--prototype-bg);
   overflow: hidden;
+  border-top: 3px solid var(--prototype-border);
+  transition: border-color 400ms ease;
+}
+
+.p1-shell--account {
+  border-top-color: var(--prototype-green);
+}
+
+.p1-shell--facility {
+  border-top-color: var(--prototype-blue);
 }
 
 .p1-shell--panel-closed {

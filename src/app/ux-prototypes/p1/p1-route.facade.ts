@@ -23,6 +23,26 @@ import {
 
 const DEFAULT_SECTION: P1SectionId = 'home';
 const DEFAULT_PANEL_TAB: P1PanelTabId = 'help';
+const DEFAULT_DETAILS: Record<P1ContextMode, Record<P1SectionId, string>> = {
+  account: {
+    home: 'overview',
+    data: 'meters',
+    visualization: 'time-series',
+    analysis: 'rollup',
+    reports: 'setup',
+    settings: 'profile',
+    imports: 'template'
+  },
+  facility: {
+    home: 'overview',
+    data: 'meters',
+    visualization: 'time-series',
+    analysis: 'setup',
+    reports: 'overview-report',
+    settings: 'profile',
+    imports: 'meter-import'
+  }
+};
 const VALID_SECTIONS: ReadonlyArray<P1SectionId> = [
   'home',
   'data',
@@ -119,7 +139,11 @@ export class P1RouteFacade {
   readonly navGroups = computed(() => this.data().nav[this.contextMode()][this.activeSection()]);
   readonly activeNavItem = computed<P1NavItem>(() => {
     const items = this.navGroups().flatMap(group => group.items);
-    return items.find(item => item.id === this.activeDetailId()) || items[0];
+    const detailId = this.activeDetailId();
+    return items.find(item => item.id === detailId) || {
+      id: detailId,
+      label: this.getDetailLabel(detailId)
+    };
   });
   readonly content = computed<P1WorkspaceContent>(() => this.data().content[this.contextMode()][this.activeSection()]);
   readonly panelContent = computed<P1PanelContent>(() => this.data().panel[this.contextMode()][this.activeSection()]);
@@ -334,12 +358,19 @@ export class P1RouteFacade {
   }
 
   private getValidDetail(contextMode: P1ContextMode, sectionId: P1SectionId, detailId?: string): string {
-    const items = this.data().nav[contextMode][sectionId].flatMap(group => group.items);
-    return items.find(item => item.id === detailId)?.id || items[0].id;
+    return detailId || this.getFirstDetail(contextMode, sectionId);
   }
 
   private getFirstDetail(contextMode: P1ContextMode, sectionId: P1SectionId): string {
-    return this.data().nav[contextMode][sectionId][0].items[0].id;
+    return DEFAULT_DETAILS[contextMode][sectionId];
+  }
+
+  private getDetailLabel(detailId: string): string {
+    return detailId
+      .split('-')
+      .filter(Boolean)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
   }
 
   private buildCanonicalUrl(

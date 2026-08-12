@@ -1,4 +1,8 @@
-<main class="p1-shell" [class.p1-shell--panel-closed]="!facade.isRightPanelOpen()" aria-label="Account workspace">
+<main class="p1-shell"
+  [class.p1-shell--panel-closed]="!facade.isRightPanelOpen()"
+  [class.p1-shell--account]="facade.contextMode() === 'account'"
+  [class.p1-shell--facility]="facade.contextMode() === 'facility'"
+  aria-label="Account workspace">
   @let state = facade.state();
   @if (state.status === 'loading') {
     <section class="p1-shell__state" aria-live="polite">

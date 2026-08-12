@@ -1,4 +1,7 @@
-<nav class="p1-rail" aria-label="Primary workspace sections">
+<nav class="p1-rail"
+  [class.p1-rail--account]="facade.contextMode() === 'account'"
+  [class.p1-rail--facility]="facade.contextMode() === 'facility'"
+  aria-label="Primary workspace sections">
   <div class="p1-rail__group">
     @for (section of primarySections; track section.id) {
       <button type="button" [class.active]="isActive(section.id)" (click)="facade.setSection(section.id)" [attr.aria-label]="section.label">

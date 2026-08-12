@@ -44,12 +44,15 @@
 
 .p1-rail button.active {
   background: var(--prototype-surface-muted);
-  color: var(--prototype-orange);
-  /* box-shadow: inset 3px 0 0 var(--prototype-orange); */
-  border-left: 3px solid var(--prototype-orange);
-  border-right: 3px solid var(--prototype-orange);
-  border-top: 1px solid var(--prototype-orange);
-  border-bottom: 1px solid var(--prototype-orange);
+  border: 1px solid currentColor;
+}
+
+.p1-rail--account button.active {
+  color: var(--prototype-green);
+}
+
+.p1-rail--facility button.active {
+  color: var(--prototype-blue);
 }
 
 .p1-rail .fa {

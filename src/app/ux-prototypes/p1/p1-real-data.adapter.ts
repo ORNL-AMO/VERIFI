@@ -323,10 +323,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
   return {
     account: {
       home: [{ title: 'Workspace', items: [{ id: 'overview', label: 'Overview', meta: 'Portfolio' }, { id: 'progress', label: 'Setup progress', status: toneForCount(account.facilities) }, { id: 'activity', label: 'Workspace notes' }] }],
-      data: [
-        { title: 'Portfolio Data', items: [{ id: 'facilities', label: 'Facilities', meta: `${account.facilities} active` }, { id: 'meters', label: 'Meters', meta: `${account.meters} total` }, { id: 'readings', label: 'Meter readings', status: toneForCount(account.meterData) }] },
-        { title: 'Context Data', items: [{ id: 'predictors', label: 'Predictors', meta: String(account.predictors) }, { id: 'weather', label: 'Weather data' }, { id: 'equipment', label: 'Energy-use equipment', status: toneForCount(account.energyUseEquipment) }] }
-      ],
+      data: [{ title: 'Account Data', items: [{ id: 'meters', label: 'Meters', meta: `${account.meters} total`, status: toneForCount(account.meters) }, { id: 'predictors', label: 'Predictors', meta: String(account.predictors), status: toneForCount(account.predictors) }, { id: 'energy-uses', label: 'Energy Uses', meta: String(account.energyUseEquipment), status: toneForCount(account.energyUseEquipment) }, { id: 'events', label: 'Events' }] }],
       visualization: [{ title: 'Explore', items: [{ id: 'time-series', label: 'Time series' }, { id: 'trends', label: 'Utility trends' }, { id: 'compare', label: 'Facility comparison' }] }],
       analysis: [{ title: 'Account Analysis', items: [{ id: 'rollup', label: 'Account rollup', status: toneForCount(account.accountAnalyses) }, { id: 'savings', label: 'Savings summary' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
       reports: [{ title: 'Reports', items: [{ id: 'setup', label: 'Report setup' }, { id: 'data-checks', label: 'Data checks' }, { id: 'generated', label: 'Generated reports', meta: String(account.accountReports + account.facilityReports) }, { id: 'footprint-report', label: 'Footprint outputs' }] }],
@@ -338,10 +335,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
     },
     facility: {
       home: [{ title: 'Facility Workspace', items: [{ id: 'overview', label: 'Overview' }, { id: 'progress', label: 'Facility progress', status: toneForCount(facility.meters) }, { id: 'activity', label: 'Workspace notes' }] }],
-      data: [
-        { title: 'Utility Data', items: [{ id: 'meters', label: 'Meters', meta: String(facility.meters) }, { id: 'readings', label: 'Meter readings', status: toneForCount(facility.meterData) }, { id: 'groups', label: 'Meter groups', meta: String(facility.meterGroups) }] },
-        { title: 'Drivers and Equipment', items: [{ id: 'predictors', label: 'Predictors', meta: String(facility.predictors) }, { id: 'weather', label: 'Weather data' }, { id: 'equipment', label: 'Energy-use equipment', status: toneForCount(facility.energyUseEquipment) }] }
-      ],
+      data: [{ title: 'Facility Data', items: [{ id: 'meters', label: 'Meters', meta: String(facility.meters), status: toneForCount(facility.meters) }, { id: 'predictors', label: 'Predictors', meta: String(facility.predictors), status: toneForCount(facility.predictors) }, { id: 'energy-uses', label: 'Energy Uses', meta: String(facility.energyUseEquipment), status: toneForCount(facility.energyUseEquipment) }, { id: 'events', label: 'Events' }] }],
       visualization: [{ title: 'Facility Charts', items: [{ id: 'time-series', label: 'Time series' }, { id: 'correlation', label: 'Correlation plots' }, { id: 'heatmap', label: 'Heatmaps' }] }],
       analysis: [{ title: 'Facility Analysis', items: [{ id: 'setup', label: 'Analysis setup', status: toneForCount(facility.facilityAnalyses) }, { id: 'results', label: 'Results' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
       reports: [{ title: 'Facility Reports', items: [{ id: 'overview-report', label: 'Overview report' }, { id: 'analysis-report', label: 'Analysis report' }, { id: 'quality-report', label: 'Data quality report' }, { id: 'footprint-report', label: 'Footprint output' }] }],
