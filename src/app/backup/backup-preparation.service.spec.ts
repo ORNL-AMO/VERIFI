@@ -69,6 +69,35 @@ describe('BackupPreparationService', () => {
     expect(() => service.prepare(wrongAccount)).toThrow(BackupRelationshipError);
   });
 
+  it('strips stale predictor variable references from analysis groups instead of rejecting the backup', () => {
+    const input = accountBackup() as any;
+    input.predictors.push({ guid: 'pred-live', accountId: 'account', facilityId: 'facility' });
+    input.facilityAnalysisItems.push({
+      guid: 'analysis', accountId: 'account', facilityId: 'facility',
+      groups: [
+        {
+          predictorVariables: [
+            { id: 'pred-live', name: 'Live' },
+            { id: 'pred-deleted', name: 'Deleted' }
+          ],
+          models: [
+            {
+              modelId: 'm1',
+              predictorVariables: [
+                { id: 'pred-live', name: 'Live' },
+                { id: 'pred-deleted', name: 'Deleted' }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+    const prepared = service.prepare(input);
+    const group = prepared.facilityAnalysisItems[0].groups[0];
+    expect(group.predictorVariables.map((v: any) => v.id)).toEqual(['pred-live']);
+    expect(group.models[0].predictorVariables.map((v: any) => v.id)).toEqual(['pred-live']);
+  });
+
   it('extracts every facility-scoped collection without cross-facility records', () => {
     const input = accountBackup();
     input.facilities.push({ guid: 'other-facility', accountId: 'account', name: 'Other' } as any);
