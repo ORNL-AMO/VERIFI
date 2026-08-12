@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { P1AnalysisSectionNavComponent } from './p1/components/section-nav/analysis-section-nav/analysis-section-nav.component';
 import { P1DataSectionNavComponent } from './p1/components/section-nav/data-section-nav/data-section-nav.component';
@@ -21,7 +22,13 @@ import { P1AccountPredictorsDataPageComponent } from './p1/pages/account-data-pa
 import { P1AccountPlaceholderPageComponent } from './p1/pages/account-placeholder-page/account-placeholder-page.component';
 import { P1FacilityEnergyUsesDataPageComponent } from './p1/pages/facility-data-pages/facility-energy-uses-data-page/facility-energy-uses-data-page.component';
 import { P1FacilityEventsDataPageComponent } from './p1/pages/facility-data-pages/facility-events-data-page/facility-events-data-page.component';
+import { P1FacilityMeterBillEditorComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/bill-editor/bill-editor.component';
 import { P1FacilityMetersDataPageComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/facility-meters-data-page.component';
+import { P1FacilityMeterGroupsComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-groups/meter-groups.component';
+import { P1FacilityMeterIndexComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-index/meter-index.component';
+import { P1FacilityMeterMonthlyDataComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-monthly-data/meter-monthly-data.component';
+import { P1FacilityMeterReadingsComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-readings/meter-readings.component';
+import { P1FacilityMeterSetupComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-setup/meter-setup.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
 import { P1FacilityPlaceholderPageComponent } from './p1/pages/facility-placeholder-page/facility-placeholder-page.component';
 import { P1Component } from './p1/p1.component';
@@ -50,6 +57,12 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1AccountEventsDataPageComponent,
     P1AccountPlaceholderPageComponent,
     P1FacilityMetersDataPageComponent,
+    P1FacilityMeterIndexComponent,
+    P1FacilityMeterSetupComponent,
+    P1FacilityMeterReadingsComponent,
+    P1FacilityMeterMonthlyDataComponent,
+    P1FacilityMeterBillEditorComponent,
+    P1FacilityMeterGroupsComponent,
     P1FacilityPredictorsDataPageComponent,
     P1FacilityEnergyUsesDataPageComponent,
     P1FacilityEventsDataPageComponent,
@@ -59,6 +72,6 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     PrototypeShellComponent,
     P1Component
   ],
-  imports: [RouterModule, FormsModule]
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule]
 })
 export class UxPrototypesModule { }

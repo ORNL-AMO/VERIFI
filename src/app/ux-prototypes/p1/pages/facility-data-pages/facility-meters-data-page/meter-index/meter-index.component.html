@@ -1,0 +1,53 @@
+<aside class="p1-meter-index" aria-label="Facility meter list">
+  <div class="p1-meter-index__tools">
+    <label>
+      <span class="fa fa-search"></span>
+      <input type="search" placeholder="Find meter, source, group" [value]="search()"
+        (input)="setSearch($any($event.target).value)">
+    </label>
+    <div class="p1-meter-index__filters">
+      <select aria-label="Filter by source" [value]="source()" (change)="setSource($any($event.target).value)">
+        <option value="all">All sources</option>
+        @for (sourceOption of sources; track sourceOption) {
+          <option [value]="sourceOption">{{ sourceOption }}</option>
+        }
+      </select>
+      <select aria-label="Filter by status" [value]="status()" (change)="setStatus($any($event.target).value)">
+        <option value="all">All status</option>
+        <option value="good">Good</option>
+        <option value="warning">Warnings</option>
+        <option value="error">Errors</option>
+        <option value="outdated">Outdated</option>
+        <option value="noData">No data</option>
+      </select>
+      <select aria-label="Filter by group" [value]="group()" (change)="setGroup($any($event.target).value)">
+        <option value="all">All groups</option>
+        <option value="grouped">Grouped</option>
+        <option value="ungrouped">Ungrouped</option>
+        @for (meterGroup of groups; track meterGroup.guid) {
+          <option [value]="meterGroup.guid">{{ meterGroup.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="p1-meter-index__list" role="list">
+    @for (row of filteredRows(); track row.meter.guid) {
+      <button type="button" role="listitem" [class.active]="row.meter.guid === selectedMeterGuid"
+        (click)="selectMeter.emit(row.meter)">
+        <span class="p1-meter-index__status" [class]="'p1-meter-index__status p1-meter-index__status--' + (row.status?.status || (row.readingCount ? 'good' : 'error'))"></span>
+        <span class="p1-meter-index__name">{{ row.meter.name }}</span>
+        <small>{{ row.meter.source }} · {{ row.group?.name || 'Ungrouped' }}</small>
+        <em>
+          @if (row.latestReading) {
+            {{ row.latestReading.month }}/{{ row.latestReading.year }}
+          } @else {
+            No readings
+          }
+        </em>
+      </button>
+    } @empty {
+      <p class="p1-meter-index__empty">No meters match these filters.</p>
+    }
+  </div>
+</aside>

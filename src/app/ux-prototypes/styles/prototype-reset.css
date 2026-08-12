@@ -60,3 +60,7 @@
   --prototype-focus: #5a9aff;
   --prototype-blue: #8fa3e8;
 }
+
+.verifi-prototype button .fa {
+  color: inherit;
+}

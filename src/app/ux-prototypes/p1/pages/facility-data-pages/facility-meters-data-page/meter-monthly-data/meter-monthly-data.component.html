@@ -1,0 +1,276 @@
+@let _meter = meter;
+@let _calanderizedMeter = calanderizedMeter;
+@let _isRECs = isRECs();
+
+<section class="p1-monthly" aria-label="Monthly meter data">
+  @if (!_meter) {
+    <div class="p1-monthly__empty">
+      <span class="fa fa-calendar-xmark"></span>
+      <h3>No meter selected</h3>
+    </div>
+  } @else if (readingCount === 0) {
+    <div class="p1-monthly__empty">
+      <span class="fa fa-file-invoice"></span>
+      <h3>No bills found for {{ _meter.name }}</h3>
+      <p>Add a new bill or import multiple bills from the Readings tab before reviewing monthly data.</p>
+    </div>
+  } @else if (!hasMethod()) {
+    <div class="p1-monthly__method-gate">
+      <header>
+        <span class="p1-monthly__eyebrow">Calendarization method required</span>
+        <h3>{{ _meter.name }} Calendarized Data</h3>
+        <p>Select how this meter’s bill data should be allocated into monthly reporting periods.</p>
+      </header>
+
+      <div class="p1-monthly__method-grid">
+        @for (option of methodOptions; track option.value) {
+          <button type="button" class="p1-monthly__method-card" (click)="selectMethod(option.value)" [disabled]="!canWrite">
+            <span>{{ option.label }}</span>
+            <small>{{ option.summary }}</small>
+          </button>
+        }
+      </div>
+
+      <p class="p1-monthly__note">
+        Calendarization allocates utility data to consistent use periods so reporting and comparisons use fair monthly values.
+      </p>
+    </div>
+  } @else {
+    <header class="p1-monthly__header">
+      <div class="p1-monthly__header-top">
+        <div>
+          <span class="p1-monthly__eyebrow">Calendarized meter data</span>
+          <h3>
+            {{ _meter.name }}
+            <span>{{ _meter.source }}</span>
+          </h3>
+        </div>
+        <div class="p1-monthly__view-toggle" aria-label="Monthly data view">
+          <button type="button" [class.active]="view() === 'table'" (click)="view.set('table')">
+            <span class="fa fa-table"></span>
+            Table
+          </button>
+          <button type="button" [class.active]="view() === 'graph'" (click)="view.set('graph')">
+            <span class="fa fa-chart-column"></span>
+            Graph
+          </button>
+        </div>
+      </div>
+
+      <div class="p1-monthly__toolbar">
+        <label>
+          <span>Calendarization Method</span>
+          <select [ngModel]="_meter.meterReadingDataApplication" (ngModelChange)="selectMethod($event)" [disabled]="!canWrite">
+            @for (option of methodOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        <div class="p1-monthly__method-note">
+          {{ methodOptions[0].value === _meter.meterReadingDataApplication ? methodOptions[0].summary : '' }}
+          {{ methodOptions[1].value === _meter.meterReadingDataApplication ? methodOptions[1].summary : '' }}
+          {{ methodOptions[2].value === _meter.meterReadingDataApplication ? methodOptions[2].summary : '' }}
+        </div>
+      </div>
+    </header>
+
+    @if (!_calanderizedMeter || _calanderizedMeter.monthlyData.length === 0) {
+      <div class="p1-monthly__empty p1-monthly__empty--compact">
+        <span class="fa fa-calendar-xmark"></span>
+        <h3>No calendarized months available</h3>
+        @if (_meter.meterReadingDataApplication !== 'fullYear' && readingCount < 3) {
+          <p>Three meter readings are needed to calendarize meter data.</p>
+        }
+      </div>
+    } @else if (view() === 'table') {
+      <div class="p1-monthly__table-wrap">
+        <table class="p1-monthly__table">
+          <thead>
+            <tr>
+              <th [attr.colspan]="tableColumnCount()">
+                {{ _calanderizedMeter.meter.name }}
+                <span>{{ _calanderizedMeter.meter.source }}</span>
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <button type="button" [class.active]="orderDataField === 'date'" (click)="setOrderDataField('date')">
+                  Month
+                </button>
+              </th>
+              @if (_calanderizedMeter.showConsumption && !_isRECs) {
+                <th class="numeric">
+                  <button type="button" [class.active]="orderDataField === 'energyConsumption'"
+                    (click)="setOrderDataField('energyConsumption')">
+                    Total {{ consumptionLabel() }}<br>({{ _calanderizedMeter.consumptionUnit }})
+                  </button>
+                </th>
+              }
+              @if (_calanderizedMeter.showEnergyUse && !_isRECs) {
+                <th class="numeric">
+                  <button type="button" [class.active]="orderDataField === 'energyUse'" (click)="setOrderDataField('energyUse')">
+                    Total Energy<br>({{ _calanderizedMeter.energyUnit }})
+                  </button>
+                </th>
+              }
+
+              @if (displayEmissions) {
+                @if (_calanderizedMeter.showElectricalEmissions) {
+                  @if (!_isRECs) {
+                    <th class="numeric">
+                      <button type="button" [class.active]="orderDataField === 'totalWithMarketEmissions'"
+                        (click)="setOrderDataField('totalWithMarketEmissions')">
+                        Total Market-Based<br>Emissions (tonne CO<sub>2</sub>e)
+                      </button>
+                    </th>
+                    <th class="numeric">
+                      <button type="button" [class.active]="orderDataField === 'totalWithLocationEmissions'"
+                        (click)="setOrderDataField('totalWithLocationEmissions')">
+                        Total Location-Based<br>Emissions (tonne CO<sub>2</sub>e)
+                      </button>
+                    </th>
+                  }
+                  @if (_isRECs) {
+                    <th class="numeric">
+                      <button type="button" [class.active]="orderDataField === 'RECs'" (click)="setOrderDataField('RECs')">
+                        RECs<br>(MWh)
+                      </button>
+                    </th>
+                    <th class="numeric">
+                      <button type="button" [class.active]="orderDataField === 'excessRECs'"
+                        (click)="setOrderDataField('excessRECs')">
+                        Excess RECs<br>(MWh)
+                      </button>
+                    </th>
+                    <th class="numeric">
+                      <button type="button" [class.active]="orderDataField === 'excessRECsEmissions'"
+                        (click)="setOrderDataField('excessRECsEmissions')">
+                        Excess RECs<br>Emissions (tonne CO<sub>2</sub>e)
+                      </button>
+                    </th>
+                  }
+                }
+                @if (_calanderizedMeter.showStationaryEmissions) {
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'stationaryBiogenicEmmissions'" (click)="setOrderDataField('stationaryBiogenicEmmissions')">Total Biogenic<br>Emissions</button></th>
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'stationaryCarbonEmissions'" (click)="setOrderDataField('stationaryCarbonEmissions')">Total Carbon<br>Emissions</button></th>
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'stationaryOtherEmissions'" (click)="setOrderDataField('stationaryOtherEmissions')">Total Other<br>Emissions</button></th>
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'stationaryEmissions'" (click)="setOrderDataField('stationaryEmissions')">Total<br>Emissions</button></th>
+                }
+                @if (_calanderizedMeter.showOtherScope2Emissions) {
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'otherScope2Emissions'" (click)="setOrderDataField('otherScope2Emissions')">Total<br>Emissions</button></th>
+                }
+                @if (_calanderizedMeter.showMobileEmissions) {
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'mobileBiogenicEmissions'" (click)="setOrderDataField('mobileBiogenicEmissions')">Mobile Biogenic<br>Emissions</button></th>
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'mobileCarbonEmissions'" (click)="setOrderDataField('mobileCarbonEmissions')">Mobile Carbon<br>Emissions</button></th>
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'mobileOtherEmissions'" (click)="setOrderDataField('mobileOtherEmissions')">Mobile Other<br>Emissions</button></th>
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'mobileTotalEmissions'" (click)="setOrderDataField('mobileTotalEmissions')">Mobile Total<br>Emissions</button></th>
+                }
+                @if (_calanderizedMeter.showFugitiveEmissions) {
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'fugitiveEmissions'" (click)="setOrderDataField('fugitiveEmissions')">Fugitive<br>Emissions</button></th>
+                }
+                @if (_calanderizedMeter.showProcessEmissions) {
+                  <th class="numeric"><button type="button" [class.active]="orderDataField === 'processEmissions'" (click)="setOrderDataField('processEmissions')">Process<br>Emissions</button></th>
+                }
+              }
+
+              <th class="numeric">
+                <button type="button" [class.active]="orderDataField === 'energyCost'" (click)="setOrderDataField('energyCost')">
+                  Total Cost
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (monthly of pagedMonthlyData(); track monthly.year + '-' + monthly.monthNumValue) {
+              <tr [class.p1-monthly__row--use-and-consumption]="monthly.energyConsumption && monthly.energyUse">
+                <td>{{ monthly.date | date: 'MMMM, y' }}</td>
+                @if (_calanderizedMeter.showConsumption && !_isRECs) {
+                  <td class="numeric">{{ monthly.energyConsumption | number:'1.0-2' }}</td>
+                }
+                @if (_calanderizedMeter.showEnergyUse && !_isRECs) {
+                  <td class="numeric">{{ monthly.energyUse | number:'1.0-2' }}</td>
+                }
+                @if (displayEmissions) {
+                  @if (_calanderizedMeter.showElectricalEmissions) {
+                    @if (!_isRECs) {
+                      <td class="numeric">{{ monthly.totalWithMarketEmissions | number:'1.0-2' }}</td>
+                      <td class="numeric">{{ monthly.totalWithLocationEmissions | number:'1.0-2' }}</td>
+                    }
+                    @if (_isRECs) {
+                      <td class="numeric">{{ monthly.RECs | number:'1.0-2' }}</td>
+                      <td class="numeric">{{ monthly.excessRECs | number:'1.0-2' }}</td>
+                      <td class="numeric">{{ monthly.excessRECsEmissions | number:'1.0-2' }}</td>
+                    }
+                  }
+                  @if (_calanderizedMeter.showStationaryEmissions) {
+                    <td class="numeric">{{ monthly.stationaryBiogenicEmmissions | number:'1.0-2' }}</td>
+                    <td class="numeric">{{ monthly.stationaryCarbonEmissions | number:'1.0-2' }}</td>
+                    <td class="numeric">{{ monthly.stationaryOtherEmissions | number:'1.0-2' }}</td>
+                    <td class="numeric">{{ monthly.stationaryEmissions | number:'1.0-2' }}</td>
+                  }
+                  @if (_calanderizedMeter.showOtherScope2Emissions) {
+                    <td class="numeric">{{ monthly.otherScope2Emissions | number:'1.0-2' }}</td>
+                  }
+                  @if (_calanderizedMeter.showMobileEmissions) {
+                    <td class="numeric">{{ monthly.mobileBiogenicEmissions | number:'1.0-2' }}</td>
+                    <td class="numeric">{{ monthly.mobileCarbonEmissions | number:'1.0-2' }}</td>
+                    <td class="numeric">{{ monthly.mobileOtherEmissions | number:'1.0-2' }}</td>
+                    <td class="numeric">{{ monthly.mobileTotalEmissions | number:'1.0-2' }}</td>
+                  }
+                  @if (_calanderizedMeter.showFugitiveEmissions) {
+                    <td class="numeric">{{ monthly.fugitiveEmissions | number:'1.0-2' }}</td>
+                  }
+                  @if (_calanderizedMeter.showProcessEmissions) {
+                    <td class="numeric">{{ monthly.processEmissions | number:'1.0-2' }}</td>
+                  }
+                }
+                <td class="numeric">{{ monthly.energyCost | currency:'USD':'symbol':'1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p1-monthly__pager" aria-label="Monthly table pagination">
+        <span>{{ monthlyData().length }} monthly rows</span>
+        <div>
+          <button type="button" class="p1-monthly__pager-btn" (click)="previousPage()" [disabled]="currentPageNumber === 1">
+            <span class="fa fa-chevron-left"></span>
+          </button>
+          <strong>Page {{ currentPageNumber }} of {{ lastPage() }}</strong>
+          <button type="button" class="p1-monthly__pager-btn" (click)="nextPage()" [disabled]="currentPageNumber === lastPage()">
+            <span class="fa fa-chevron-right"></span>
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="p1-monthly__trend" aria-label="Monthly energy and cost graph">
+        @for (monthly of trendMonthlyData(); track monthly.year + '-' + monthly.monthNumValue) {
+          <article>
+            <div class="p1-monthly__trend-label">
+              <strong>{{ monthly.date | date:'MMM y' }}</strong>
+            </div>
+            <div class="p1-monthly__trend-bars">
+              @if (_calanderizedMeter.showEnergyUse && !_isRECs) {
+                <div>
+                  <span class="p1-monthly__bar-label">Energy</span>
+                  <span class="p1-monthly__bar-track">
+                    <span class="p1-monthly__bar p1-monthly__bar--energy" [style.width.%]="energyWidth(monthly)"></span>
+                  </span>
+                  <span>{{ monthly.energyUse | number:'1.0-0' }}</span>
+                </div>
+              }
+              <div>
+                <span class="p1-monthly__bar-label">Cost</span>
+                <span class="p1-monthly__bar-track">
+                  <span class="p1-monthly__bar p1-monthly__bar--cost" [style.width.%]="costWidth(monthly)"></span>
+                </span>
+                <span>{{ monthly.energyCost | currency:'USD':'symbol':'1.0-0' }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>

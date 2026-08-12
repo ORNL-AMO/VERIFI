@@ -50,9 +50,12 @@ export interface P1SectionDefinition {
 
 export interface P1NavItem {
   id: string;
+  routeId?: string;
   label: string;
   meta?: string;
   status?: P1StatusTone;
+  queryParams?: Record<string, string | undefined>;
+  children?: Array<P1NavItem>;
 }
 
 export interface P1NavGroup {

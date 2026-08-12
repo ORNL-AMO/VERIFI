@@ -12,6 +12,18 @@
   gap: .25rem;
 }
 
+.p1-nav__item {
+  display: grid;
+  gap: .15rem;
+}
+
+.p1-nav__item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .2rem;
+  align-items: stretch;
+}
+
 .p1-nav__group h2 {
   margin: 0 0 .45rem;
   color: var(--prototype-muted);
@@ -35,6 +47,10 @@
   text-decoration: none;
 }
 
+.p1-nav__item-row > a {
+  min-width: 0;
+}
+
 .p1-nav__group a:hover,
 .p1-nav__group a.active {
   background: var(--prototype-surface);
@@ -42,6 +58,55 @@
 
 .p1-nav__group a.active {
   border: 1px solid currentColor;
+}
+
+.p1-nav__child-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.05rem;
+  min-height: 2.65rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--prototype-muted);
+  cursor: pointer;
+}
+
+.p1-nav__child-toggle:hover {
+  background: var(--prototype-surface);
+  color: var(--prototype-blue);
+}
+
+.p1-nav__child-toggle span {
+  font-size: .65rem;
+  transition: transform .16s ease;
+}
+
+.p1-nav__item--open .p1-nav__child-toggle span {
+  transform: rotate(90deg);
+}
+
+.p1-nav__children {
+  display: grid;
+  gap: .18rem;
+  margin: .05rem 0 .45rem .65rem;
+  padding-left: .65rem;
+  border-left: 1px solid var(--prototype-border);
+}
+
+.p1-nav__group a.p1-nav__child {
+  min-height: 2.25rem;
+  padding: .35rem 1.35rem .35rem .55rem;
+  color: var(--prototype-muted);
+}
+
+.p1-nav__group a.p1-nav__child:hover {
+  color: var(--prototype-text);
+}
+
+.p1-nav__group a.p1-nav__child.active {
+  color: var(--prototype-blue);
 }
 
 :host-context(.p1-nav--account) .p1-nav__group a.active {

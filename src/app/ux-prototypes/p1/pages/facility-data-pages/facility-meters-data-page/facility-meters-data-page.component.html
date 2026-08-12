@@ -1,1 +1,259 @@
-<!-- Intentionally empty for prototype iteration. -->
+@let _facility = facility();
+@let _selectedMeter = selectedMeter();
+@let _billEditor = billEditor();
+
+<section class="p1-meters" aria-label="Facility meters workbench">
+  @if (!_facility) {
+  <div class="p1-meters__state" aria-live="polite">
+    <span class="fa fa-building-circle-exclamation"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility to manage meters, readings, and analysis groups.</p>
+  </div>
+  } @else {
+  <header class="p1-meters__header">
+    <div class="p1-meters__title">
+      <span>Facility data</span>
+      <h1>{{ _facility.name }} Meters</h1>
+    </div>
+    <div class="p1-meters__metrics" aria-label="Meter summary">
+      <article>
+        <span>Meters</span>
+        <strong>{{ meters().length }}</strong>
+      </article>
+      <article>
+        <span>Readings</span>
+        <strong>{{ meterData().length }}</strong>
+      </article>
+      <article>
+        <span>Analysis Groups</span>
+        <strong>{{ meterGroups().length }}</strong>
+      </article>
+      <article [class.p1-meters__metric--warn]="issueCount() > 0">
+        <span>Issues</span>
+        <strong>{{ issueCount() }}</strong>
+      </article>
+    </div>
+    <div class="p1-meters__actions">
+      <button type="button" class="p1-btn p1-btn--quiet" (click)="uploadData()">
+        <span class="fa fa-upload"></span>
+        Import
+      </button>
+      <button type="button" class="p1-btn p1-btn--primary" (click)="addMeter()"
+        [disabled]="!canWrite() || hasPending()">
+        <span class="fa fa-plus"></span>
+        Add Meter
+      </button>
+    </div>
+  </header>
+
+  @if (meters().length === 0) {
+  <div class="p1-meters__empty">
+    <span class="fa fa-gauge-high"></span>
+    <h2>No meters yet</h2>
+    <p>Add the first meter for this facility or import meter data from the existing import workflow.</p>
+    <div>
+      <button type="button" class="p1-btn p1-btn--primary" (click)="addMeter()"
+        [disabled]="!canWrite() || hasPending()">
+        <span class="fa fa-plus"></span>
+        Add Meter
+      </button>
+      <button type="button" class="p1-btn p1-btn--quiet" (click)="uploadData()">
+        <span class="fa fa-upload"></span>
+        Import Data
+      </button>
+    </div>
+  </div>
+  } @else if (!_selectedMeter) {
+  <main class="p1-meters__home" aria-label="Meters home">
+    <div class="p1-meters__home-header">
+      <div>
+        <span class="p1-meters__title-kicker">Meters Home</span>
+        <h2>Select a meter or manage facility analysis groups.</h2>
+      </div>
+      <div class="p1-meters__home-toggle" aria-label="Meters home view">
+        <button type="button" [class.active]="homeView() === 'meters'" (click)="setHomeView('meters')">
+          <span class="fa fa-gauge-high"></span>
+          Meters
+        </button>
+        <button type="button" [class.active]="homeView() === 'analysis-groups'" (click)="setHomeView('analysis-groups')">
+          <span class="fa fa-layer-group"></span>
+          Analysis Groups
+        </button>
+      </div>
+    </div>
+
+    @if (homeView() === 'analysis-groups') {
+    <app-p1-facility-meter-groups [meters]="meters()" [meterData]="meterData()" [groups]="meterGroups()"
+      [activeEditor]="groupEditor()" [canWrite]="canWrite() && !hasPending()" (addGroup)="addGroup()"
+      (openGroupView)="openGroupView($event)" (saveGroup)="saveGroup($event)"
+      (deleteGroup)="requestDeleteGroup($event)">
+    </app-p1-facility-meter-groups>
+    } @else {
+    <div class="p1-meters__cards">
+      @for (row of meterRows(); track row.meter.guid) {
+      <button type="button" class="p1-meter-card" (click)="selectMeter(row.meter)">
+        <span class="p1-chip">{{ row.meter.source }}</span>
+        <strong>{{ row.meter.name }}</strong>
+        <small>
+          {{ row.readingCount }} readings
+          @if (row.group) {
+          <span> · {{ row.group.name }}</span>
+          } @else {
+          <span> · Ungrouped</span>
+          }
+        </small>
+        <dl>
+          <div>
+            <dt>Latest</dt>
+            <dd>
+              @if (row.latestReading) {
+              {{ row.latestReading.month }}/{{ row.latestReading.year }}
+              } @else {
+              No data
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd [class.p1-meter-card__status--warn]="row.status?.status !== 'good'">
+              {{ row.readingCount === 0 ? 'No data' : (row.status?.status || 'good') }}
+            </dd>
+          </div>
+        </dl>
+      </button>
+      }
+    </div>
+    }
+  </main>
+  } @else {
+  <main class="p1-meters__detail" aria-label="Selected meter workspace">
+    <div class="p1-meters__detail-header">
+      <div>
+        <button type="button" class="p1-meters__back" (click)="clearMeterSelection()">
+          <span class="fa fa-arrow-left"></span>
+          Meters
+        </button>
+        <span class="p1-chip ms-2">{{ _selectedMeter.source }}</span>
+        <h2>{{ _selectedMeter.name }}</h2>
+        <p>
+          {{ selectedMeterData().length }} readings
+          @if (_selectedMeter.groupId) {
+          <span> · {{ selectedMeterGroup()?.name || 'Grouped' }}</span>
+          } @else {
+          <span> · Ungrouped</span>
+          }
+        </p>
+      </div>
+      <div class="p1-meters__detail-actions">
+        <button type="button" class="p1-icon-btn" title="Copy meter" aria-label="Copy meter"
+          (click)="copyMeter(_selectedMeter)" [disabled]="!canWrite() || hasPending()">
+          <span class="fa fa-copy"></span>
+        </button>
+        <button type="button" class="p1-icon-btn p1-icon-btn--danger" title="Delete meter" aria-label="Delete meter"
+          (click)="requestDeleteMeter(_selectedMeter)" [disabled]="!canWrite() || hasPending()">
+          <span class="fa fa-trash"></span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="p1-meters__tabs" aria-label="Meter workspace sections">
+      <button type="button" [class.active]="activeTab() === 'setup'" (click)="setTab('setup')">
+        <span class="fa fa-sliders"></span>
+        Setup
+      </button>
+      <button type="button" [class.active]="activeTab() === 'readings'" (click)="setTab('readings')">
+        <span class="fa fa-table"></span>
+        Readings
+      </button>
+      <button type="button" [class.active]="activeTab() === 'monthlyData'" (click)="setTab('monthlyData')">
+        <span class="fa fa-calendar-days"></span>
+        Monthly Data
+      </button>
+    </nav>
+
+    <section class="p1-meters__tab-panel">
+      @if (activeTab() === 'setup') {
+      <app-p1-facility-meter-setup [meter]="_selectedMeter" [facility]="_facility"
+        [meterDataExists]="selectedMeterData().length > 0" [canWrite]="canWrite() && !hasPending()"
+        [groups]="meterGroups()"
+        (saveMeter)="saveMeter($event)"
+        (saveGroupAssignment)="saveMeterGroupAssignment($event)"
+        (openAnalysisGroups)="openAnalysisGroupsHome()">
+      </app-p1-facility-meter-setup>
+      }
+
+      @if (activeTab() === 'readings') {
+      <app-p1-facility-meter-readings [meter]="_selectedMeter" [meterData]="selectedMeterData()"
+        [meterStatus]="selectedMeterStatus()" [canWrite]="canWrite() && !hasPending()" (addBill)="openBillEditor('add')"
+        (editBill)="openBillEditor('edit', $event)" (deleteBill)="requestDeleteBill($event)"
+        (bulkDelete)="requestBulkDeleteBills($event)" (fillMissing)="fillMissingMonths()">
+      </app-p1-facility-meter-readings>
+      }
+
+      @if (activeTab() === 'monthlyData') {
+      <app-p1-facility-meter-monthly-data [meter]="_selectedMeter" [calanderizedMeter]="selectedCalanderizedMeter()"
+        [readingCount]="selectedMeterData().length" [displayEmissions]="account()?.displayEmissions"
+        [canWrite]="canWrite() && !hasPending()" (saveMethod)="saveCalendarizationMethod($event)">
+      </app-p1-facility-meter-monthly-data>
+      }
+
+    </section>
+  </main>
+  }
+  }
+</section>
+
+@if (_billEditor && _selectedMeter) {
+<app-p1-facility-meter-bill-editor [meter]="_selectedMeter" [meterData]="_billEditor.data" [allMeterData]="meterData()"
+  [mode]="_billEditor.mode" [canWrite]="canWrite() && !hasPending()" (closeEditor)="closeBillEditor()"
+  (saveBill)="saveBill($event)">
+</app-p1-facility-meter-bill-editor>
+}
+
+@if (meterToDelete()) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-meter-title">
+  <h2 id="delete-meter-title">Delete {{ meterToDelete().name }}</h2>
+  <p>Deleting this meter will also delete all meter readings and bills associated with it.</p>
+  <div>
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="meterToDelete.set(undefined)">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" (click)="deleteMeter()">Delete Meter</button>
+  </div>
+</section>
+}
+
+@if (billToDelete()) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-bill-title">
+  <h2 id="delete-bill-title">Delete Reading</h2>
+  <p>Deleting meter data cannot be undone.</p>
+  <div>
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="billToDelete.set(undefined)">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" (click)="deleteBill()">Delete Reading</button>
+  </div>
+</section>
+}
+
+@if (bulkBillDeleteGuids()) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="bulk-delete-bill-title">
+  <h2 id="bulk-delete-bill-title">Delete Selected Readings</h2>
+  <p>Deleting meter data cannot be undone.</p>
+  <div>
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="bulkBillDeleteGuids.set(undefined)">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" (click)="bulkDeleteBills()">Delete Readings</button>
+  </div>
+</section>
+}
+
+@if (groupToDelete()) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-group-title">
+  <h2 id="delete-group-title">Delete {{ groupToDelete().name }}</h2>
+  <p>Deleting this group cannot be undone. Analysis and report setup will be updated.</p>
+  <div>
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="groupToDelete.set(undefined)">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" (click)="deleteGroup()">Delete Analysis Group</button>
+  </div>
+</section>
+}

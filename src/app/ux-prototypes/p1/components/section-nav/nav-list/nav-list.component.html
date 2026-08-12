@@ -3,15 +3,44 @@
     <section class="p1-nav__group" [attr.aria-label]="group.title">
       <h2>{{ group.title }}</h2>
       @for (item of group.items; track item.id) {
-        <a [routerLink]="navLink(item.id)" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <span>{{ item.label }}</span>
-          @if (item.meta) {
-            <small>{{ item.meta }}</small>
+        <div class="p1-nav__item" [class.p1-nav__item--open]="isChildrenOpen(item)"
+          (mouseenter)="setChildrenHover(item, true)" (mouseleave)="setChildrenHover(item, false)">
+          <div class="p1-nav__item-row">
+            <a [routerLink]="navLink(item)" [queryParams]="queryParams(item)" [class.active]="isActive(item)"
+              [attr.aria-current]="isActive(item) ? 'page' : null">
+              <span>{{ item.label }}</span>
+              @if (item.meta) {
+                <small>{{ item.meta }}</small>
+              }
+              @if (item.status) {
+                <i [class]="'p1-nav__status p1-nav__status--' + item.status" aria-hidden="true"></i>
+              }
+            </a>
+            @if (hasChildren(item)) {
+              <button type="button" class="p1-nav__child-toggle" (click)="toggleChildren(item)"
+                [attr.aria-expanded]="isChildrenOpen(item)" [attr.aria-label]="'Show ' + item.label + ' items'">
+                <span class="fa fa-chevron-right" aria-hidden="true"></span>
+              </button>
+            }
+          </div>
+
+          @if (isChildrenOpen(item) && item.children?.length) {
+            <div class="p1-nav__children" [attr.aria-label]="item.label + ' items'">
+              @for (child of item.children; track child.id) {
+                <a class="p1-nav__child" [routerLink]="navLink(child)" [queryParams]="queryParams(child)"
+                  [class.active]="isChildActive(child)" [attr.aria-current]="isChildActive(child) ? 'page' : null">
+                  <span>{{ child.label }}</span>
+                  @if (child.meta) {
+                    <small>{{ child.meta }}</small>
+                  }
+                  @if (child.status) {
+                    <i [class]="'p1-nav__status p1-nav__status--' + child.status" aria-hidden="true"></i>
+                  }
+                </a>
+              }
+            </div>
           }
-          @if (item.status) {
-            <i [class]="'p1-nav__status p1-nav__status--' + item.status" aria-hidden="true"></i>
-          }
-        </a>
+        </div>
       }
     </section>
   }
