@@ -14,7 +14,7 @@
     <div class="col-3">
       <select name="startYear" [(ngModel)]="reportSettings.startYear" class="form-select" (change)="save()"
         [required]="true">
-        @for (year of baselineYears; track year) {
+        @for (year of baselineYears(); track year) {
         <option class="pe-2" [ngValue]="year">{{year}}
         </option>
         }
@@ -35,7 +35,7 @@
     <div class="col-3">
       <select name="endYear" [(ngModel)]="reportSettings.endYear" class="form-select" (change)="save()"
         [required]="true">
-        @for (year of reportYears; track year) {
+        @for (year of reportYears(); track year) {
         <option class="pe-2" [ngValue]="year">{{year}}
         </option>
         }
@@ -43,7 +43,7 @@
     </div>
   </div>
 
-  @if (invalidDateRange) {
+  @if (invalidDateRange()) {
   <div class="row justify-content-end">
     <span class="col-6 alert alert-danger small mt-2">
       Start date cannot be later than the end date.
@@ -101,7 +101,7 @@
             [(ngModel)]="reportSettings.includeCostsSection" (change)="save()">
           <label class="form-check-label" for="includeCostsSection">Costs</label>
         </div>
-        @if(account.displayEmissions){
+        @if(account()?.displayEmissions){
         <div class="form-check">
           <input type="checkbox" class="form-check-input" name="includeEmissionsSection" id="includeEmissionsSection"
             [(ngModel)]="reportSettings.includeEmissionsSection" (change)="save()">
