@@ -1,1 +1,132 @@
-<!-- Intentionally empty for prototype iteration. -->
+@let _account = account();
+@let _totals = totals();
+@let _summaries = filteredSummaries();
+
+<section class="p1-account-meters" aria-label="Account meters facility triage">
+  <header class="p1-account-meters__header">
+    <div class="p1-account-meters__title">
+      <span>Account data</span>
+      <h1>{{ _account?.name || 'Account' }} Meters</h1>
+      <p>Review facility meter coverage and open the facility workbench that needs attention.</p>
+    </div>
+
+    <div class="p1-account-meters__totals" aria-label="Account meter totals">
+      <article>
+        <span>Facilities</span>
+        <strong>{{ _totals.facilities }}</strong>
+      </article>
+      <article>
+        <span>Meters</span>
+        <strong>{{ _totals.meters }}</strong>
+      </article>
+      <article>
+        <span>Readings</span>
+        <strong>{{ _totals.readings }}</strong>
+      </article>
+      <article>
+        <span>Groups</span>
+        <strong>{{ _totals.groups }}</strong>
+      </article>
+      <article [class.p1-account-meters__total--warn]="_totals.attention > 0">
+        <span>Attention</span>
+        <strong>{{ _totals.attention }}</strong>
+      </article>
+    </div>
+  </header>
+
+  @if (_totals.facilities === 0) {
+  <div class="p1-account-meters__state" aria-live="polite">
+    <span class="fa fa-building-circle-exclamation"></span>
+    <h2>No facilities available</h2>
+    <p>Add facilities from account setup, then return here to review meter coverage across the account.</p>
+  </div>
+  } @else {
+  <div class="p1-account-meters__toolbar" aria-label="Facility meter filters">
+    <label class="p1-account-meters__search">
+      <span class="fa fa-search" aria-hidden="true"></span>
+      <input type="search" placeholder="Find facility, location, or source" [value]="search()"
+        (input)="setSearch($any($event.target).value)">
+    </label>
+
+    <label>
+      <span>Status</span>
+      <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+        <option value="all">All</option>
+        <option value="attention">Needs attention</option>
+        <option value="noMeters">No meters</option>
+        <option value="noReadings">No readings</option>
+        <option value="missingGroups">Missing groups</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Sort</span>
+      <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+        <option value="attention">Attention first</option>
+        <option value="facilityName">Facility name</option>
+        <option value="latestReading">Latest reading</option>
+      </select>
+    </label>
+  </div>
+
+  @if (_summaries.length === 0) {
+  <div class="p1-account-meters__state p1-account-meters__state--filter" aria-live="polite">
+    <span class="fa fa-filter-circle-xmark"></span>
+    <h2>No facilities match these filters</h2>
+    <p>Adjust the search or filter controls to return to the full facility list.</p>
+  </div>
+  } @else {
+  <div class="p1-account-meters__cards" role="list" aria-label="Facilities">
+    @for (summary of _summaries; track summary.facility.guid) {
+    <a class="p1-facility-meter-card" role="listitem"
+      [ngClass]="'p1-facility-meter-card--' + summary.statusTone"
+      [routerLink]="['/p1', 'workspace', 'facility', summary.facility.guid, 'data', 'meters', panelTab()]"
+      [attr.aria-label]="ariaLabel(summary)">
+      <div class="p1-facility-meter-card__top">
+        <div class="p1-facility-meter-card__identity">
+          <span class="p1-facility-meter-card__kicker">{{ summary.location }}</span>
+          <h2>{{ summary.facility.name }}</h2>
+        </div>
+        <span class="p1-facility-meter-card__status"
+          [ngClass]="'p1-facility-meter-card__status--' + summary.statusTone">
+          {{ summary.statusLabel }}
+        </span>
+      </div>
+
+      <div class="p1-facility-meter-card__sources" aria-label="Utility source mix">
+        @for (source of summary.sourceMix; track source) {
+        <span>{{ source }}</span>
+        }
+        @if (summary.extraSourceCount > 0) {
+        <span>+{{ summary.extraSourceCount }}</span>
+        }
+        @if (summary.sourceMix.length === 0) {
+        <span>No source mix</span>
+        }
+      </div>
+
+      <dl class="p1-facility-meter-card__metrics">
+        @for (metric of summary.metrics; track metric.label) {
+        <div>
+          <dt>{{ metric.label }}</dt>
+          <dd>{{ metric.value }}</dd>
+        </div>
+        }
+      </dl>
+
+      <div class="p1-facility-meter-card__footer">
+        <span>
+          <span class="fa fa-calendar-days" aria-hidden="true"></span>
+          Latest: {{ summary.latestReadingLabel }}
+        </span>
+        <!-- <strong>
+          {{ summary.nextAction }}
+          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+        </strong> -->
+      </div>
+    </a>
+    }
+  </div>
+  }
+  }
+</section>
