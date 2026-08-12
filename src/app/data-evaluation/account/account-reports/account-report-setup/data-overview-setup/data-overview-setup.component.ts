@@ -39,11 +39,11 @@ export class DataOverviewSetupComponent {
     this.selectedReportSub = toObservable(this.accountWorkspaceStore.selectedAccountReport, { injector: this.injector }).subscribe(val => {
       if (!this.isFormChange) {
         this.reportSetup = val.dataOverviewReportSetup;
+        this.setShowWater();
       } else {
         this.isFormChange = false;
       }
     });
-    this.setShowWater();
   }
 
   ngOnDestroy() {
@@ -68,7 +68,7 @@ export class DataOverviewSetupComponent {
     let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
-    if (!this.showWater && this.reportSetup.includeWaterSection) {
+    if (!this.showWater && this.reportSetup?.includeWaterSection) {
       this.reportSetup.includeWaterSection = false;
       this.save();
     }
