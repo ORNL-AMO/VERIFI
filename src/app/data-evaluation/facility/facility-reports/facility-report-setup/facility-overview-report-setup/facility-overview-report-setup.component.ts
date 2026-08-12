@@ -38,12 +38,12 @@ export class FacilityOverviewReportSetupComponent {
   });
   readonly baselineYears = this.reportYears;
 
-  readonly invalidDateRange = computed(() => {
+  get invalidDateRange(): boolean {
     const settings = this.reportSettings;
     if (!settings?.startYear || !settings?.endYear) return false;
     if (settings.startYear !== settings.endYear) return settings.startYear > settings.endYear;
     return settings.startMonth > settings.endMonth;
-  });
+  }
 
   private isFormChange = false;
 

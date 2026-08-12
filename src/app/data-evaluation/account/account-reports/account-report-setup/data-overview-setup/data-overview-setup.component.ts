@@ -33,9 +33,10 @@ export class DataOverviewSetupComponent {
   constructor() {
     effect(() => {
       const report = this.accountWorkspaceStore.selectedAccountReport();
+      const hasWater = this.showWater();
       if (!this.isFormChange) {
         this.reportSetup = report.dataOverviewReportSetup;
-        if (!this.showWater() && this.reportSetup?.includeWaterSection) {
+        if (!hasWater && this.reportSetup?.includeWaterSection) {
           this.reportSetup.includeWaterSection = false;
           this.save();
         }
