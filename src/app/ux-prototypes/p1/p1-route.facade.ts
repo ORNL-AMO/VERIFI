@@ -200,20 +200,25 @@ export class P1RouteFacade {
   }
 
   setContext(contextMode: P1ContextMode): void {
+    const section = this.activeSection();
+    const detail = this.activeDetailId();
+    const panelTab = this.activePanelTab();
     if (contextMode === 'facility') {
       const facilityGuid = this.selectedFacility()?.id || this.accountFacilities()[0]?.id;
       if (facilityGuid) {
-        void this.navigateToWorkspace('facility', DEFAULT_SECTION, facilityGuid, this.activePanelTab());
+        void this.navigateToWorkspace('facility', section, facilityGuid, panelTab, detail);
         return;
       }
     }
-    void this.navigateToWorkspace('account', DEFAULT_SECTION, undefined, this.activePanelTab());
+    void this.navigateToWorkspace('account', section, undefined, panelTab, detail);
   }
 
   setFacility(facilityGuid: string): void {
     const section = this.activeSection();
+    const detail = this.activeDetailId();
+    const panelTab = this.activePanelTab();
     void this.selectFacility(facilityGuid);
-    void this.navigateToWorkspace('facility', section, facilityGuid, this.activePanelTab());
+    void this.navigateToWorkspace('facility', section, facilityGuid, panelTab, detail);
   }
 
   setSection(sectionId: P1SectionId): void {
