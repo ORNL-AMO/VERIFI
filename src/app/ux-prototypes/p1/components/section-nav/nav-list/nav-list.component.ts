@@ -1,7 +1,7 @@
 import { Component, Input, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params } from '@angular/router';
-import { P1NavGroup, P1NavItem } from '../../../p1.models';
+import { P1NavActiveQueryValue, P1NavGroup, P1NavItem, P1NavQueryValue } from '../../../p1.models';
 import { P1RouteFacade } from '../../../p1-route.facade';
 
 @Component({
@@ -39,7 +39,7 @@ export class P1NavListComponent {
   }
 
   isActive(item: P1NavItem): boolean {
-    return this.facade.activeDetailId() === (item.routeId || item.id);
+    return this.isRouteActive(item) && this.matchesActiveQueryParams(item);
   }
 
   hasChildren(item: P1NavItem): boolean {
@@ -47,15 +47,10 @@ export class P1NavListComponent {
   }
 
   isChildActive(item: P1NavItem): boolean {
-    if (!this.isActive(item)) {
+    if (!this.isRouteActive(item)) {
       return false;
     }
-    const queryParams = item.queryParams;
-    if (!queryParams) {
-      return true;
-    }
-    const queryMap = this.queryParamMap();
-    return Object.entries(queryParams).every(([key, value]) => queryMap?.get(key) === value);
+    return this.matchesActiveQueryParams(item);
   }
 
   isChildrenOpen(item: P1NavItem): boolean {
@@ -93,5 +88,32 @@ export class P1NavListComponent {
       return;
     }
     this.hoveredChildId = isHovered ? item.id : undefined;
+  }
+
+  private isRouteActive(item: P1NavItem): boolean {
+    return this.facade.activeDetailId() === (item.routeId || item.id);
+  }
+
+  private matchesActiveQueryParams(item: P1NavItem): boolean {
+    const queryParams = item.activeQueryParams || item.queryParams;
+    if (!queryParams) {
+      return true;
+    }
+    const queryMap = this.queryParamMap();
+    return Object.entries(queryParams).every(([key, expected]) =>
+      this.matchesQueryParam(queryMap?.get(key), expected)
+    );
+  }
+
+  private matchesQueryParam(actual: string | null | undefined, expected: P1NavActiveQueryValue): boolean {
+    const values = Array.isArray(expected) ? expected : [expected];
+    return values.some(value => this.matchesQueryValue(actual, value));
+  }
+
+  private matchesQueryValue(actual: string | null | undefined, expected: P1NavQueryValue): boolean {
+    if (expected === undefined) {
+      return actual === null || actual === undefined;
+    }
+    return actual === expected;
   }
 }

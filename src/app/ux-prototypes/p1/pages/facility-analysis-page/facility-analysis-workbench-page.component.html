@@ -1,0 +1,174 @@
+@let _facility = facility();
+@let _analysis = selectedAnalysis();
+@let _step = currentStep();
+@let _group = selectedGroup();
+
+<section class="p1-analysis" aria-label="Facility analysis workbench">
+  @if (!_facility) {
+  <div class="p1-analysis__state" aria-live="polite">
+    <span class="fa fa-building-circle-exclamation"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility to open an analysis workbench.</p>
+  </div>
+  } @else if (!_analysis) {
+  <div class="p1-analysis__state" aria-live="polite">
+    <span class="fa fa-microscope"></span>
+    <h1>No analysis selected</h1>
+    <p>Create an analysis item before using the workbench.</p>
+    <button type="button" class="p1-btn p1-btn--primary" (click)="goToDashboard()">Return to Dashboard</button>
+  </div>
+  } @else {
+  <header class="p1-analysis__header">
+    <div class="p1-analysis__title">
+      <button type="button" class="p1-analysis__back" (click)="goToDashboard()">
+        <span class="fa fa-arrow-left"></span>
+        Dashboard
+      </button>
+      <span>Facility analysis workbench</span>
+      <h1>{{ _analysis.name }}</h1>
+    </div>
+    <div class="p1-analysis__metrics" aria-label="Selected analysis summary">
+      <article>
+        <span>Status</span>
+        <strong>{{ selectedStatus()?.status || 'Unknown' }}</strong>
+      </article>
+      <article>
+        <span>Baseline</span>
+        <strong>{{ _analysis.baselineYear || 'Unset' }}</strong>
+      </article>
+      <article>
+        <span>Groups</span>
+        <strong>{{ _analysis.groups.length }}</strong>
+      </article>
+      <article>
+        <span>Current Step</span>
+        <strong>{{ _step?.label || 'Setup' }}</strong>
+      </article>
+    </div>
+  </header>
+
+  <main class="p1-analysis__workbench">
+    <section class="p1-analysis__stage">
+      @if (_step?.id === 'setup') {
+      <div class="p1-analysis__detail-header">
+        <div>
+          <span class="p1-chip">Analysis</span>
+          <h2>Analysis Setup</h2>
+          <p>Baseline, unit, boundary, and banking settings for the selected facility analysis.</p>
+        </div>
+        <span [class]="'p1-status p1-status--' + (selectedStatus()?.status || 'neutral')">
+          {{ selectedStatus()?.status || 'unknown' }}
+        </span>
+      </div>
+      }
+
+      @if (isGroupStep() && _group) {
+      <div class="p1-analysis__detail-header">
+        <div>
+          <span class="p1-chip">Group</span>
+          <h2>{{ selectedGroupName() }}</h2>
+          <p>Setup, regression, and results for this analysis group.</p>
+        </div>
+        <span
+          [class]="'p1-status p1-status--' + (selectedGroupStatus()?.hasModelErrors ? 'danger' : selectedGroupStatus()?.status || 'neutral')">
+          {{ selectedGroupStatus()?.hasModelErrors ? 'model error' : selectedGroupStatus()?.status || 'unknown' }}
+        </span>
+      </div>
+      <nav class="p1-analysis__tabs" aria-label="Group analysis sections">
+        @for (tab of groupTabSteps(); track tab.id + '-' + (tab.groupId || 'facility')) {
+        <button type="button" [class.active]="tab === _step" [disabled]="tab.disabled" (click)="goToStep(tab)">
+          <span>{{ getLocalStepLabel(tab) }}</span>
+        </button>
+        }
+      </nav>
+      }
+
+      @if (isFacilityResultStep()) {
+      <div class="p1-analysis__detail-header">
+        <div>
+          <span class="p1-chip">Facility</span>
+          <h2>Final Results</h2>
+          <p>Annual and monthly results for the selected facility analysis.</p>
+        </div>
+        <span [class]="'p1-status p1-status--' + (selectedStatus()?.status || 'neutral')">
+          {{ selectedStatus()?.status || 'unknown' }}
+        </span>
+      </div>
+      <nav class="p1-analysis__tabs" aria-label="Facility result sections">
+        @for (tab of facilityResultTabSteps(); track tab.id) {
+        <button type="button" [class.active]="tab === _step" [disabled]="tab.disabled" (click)="goToStep(tab)">
+          <span>{{ getLocalStepLabel(tab) }}</span>
+        </button>
+        }
+      </nav>
+      }
+
+      @if (_step?.id === 'references') {
+      <div class="p1-analysis__detail-header">
+        <div>
+          <span class="p1-chip">References</span>
+          <h2>Used By</h2>
+          <p>Account analyses and reports that use results from this facility analysis.</p>
+        </div>
+        <span class="p1-chip">{{ linkedAccountAnalyses().length + linkedReports().length }} referenced</span>
+      </div>
+      }
+
+      <section class="p1-analysis__tab-panel" aria-label="Selected analysis section">
+      @switch (_step?.id) {
+      @case ('setup') {
+      <app-p1-facility-analysis-setup-panel [analysis]="_analysis" [facility]="_facility"
+        [baselineYears]="baselineYears()" [energyUnitOptions]="energyUnitOptions" [waterUnitOptions]="waterUnitOptions"
+        [bankingOptions]="bankingOptions()" [linkedAccountCount]="linkedAccountAnalyses().length"
+        [canWrite]="canWrite() && !hasPending()" (saveAnalysis)="saveAnalysis($event)">
+      </app-p1-facility-analysis-setup-panel>
+      }
+      @case ('group-setup') {
+      @if (_group) {
+      <app-p1-facility-analysis-group-setup-panel [analysis]="_analysis" [group]="_group"
+        [canWrite]="canWrite() && !hasPending()" (saveAnalysis)="saveAnalysis($event)">
+      </app-p1-facility-analysis-group-setup-panel>
+      }
+      }
+      @case ('regression') {
+      @if (_group) {
+      <app-p1-facility-analysis-regression-panel [analysis]="_analysis" [group]="_group"
+        [canWrite]="canWrite() && !hasPending()" (saveAnalysis)="saveAnalysis($event)">
+      </app-p1-facility-analysis-regression-panel>
+      }
+      }
+      @case ('group-annual') {
+      <app-p1-facility-analysis-results-panel [analysis]="_analysis" [group]="_group"
+        [level]="'group'" [period]="'annual'" [status]="selectedStatus()">
+      </app-p1-facility-analysis-results-panel>
+      }
+      @case ('group-monthly') {
+      <app-p1-facility-analysis-results-panel [analysis]="_analysis" [group]="_group"
+        [level]="'group'" [period]="'monthly'" [status]="selectedStatus()">
+      </app-p1-facility-analysis-results-panel>
+      }
+      @case ('facility-annual') {
+      <app-p1-facility-analysis-results-panel [analysis]="_analysis" [level]="'facility'" [period]="'annual'"
+        [status]="selectedStatus()">
+      </app-p1-facility-analysis-results-panel>
+      }
+      @case ('facility-monthly') {
+      <app-p1-facility-analysis-results-panel [analysis]="_analysis" [level]="'facility'" [period]="'monthly'"
+        [status]="selectedStatus()">
+      </app-p1-facility-analysis-results-panel>
+      }
+      @case ('references') {
+      <app-p1-facility-analysis-references-panel [analysis]="_analysis" [accountAnalyses]="linkedAccountAnalyses()"
+        [reports]="linkedReports()">
+      </app-p1-facility-analysis-references-panel>
+      }
+      }
+      </section>
+    </section>
+
+    <app-p1-facility-analysis-workbench-footer class="w-100" [previousLabel]="previousStep()?.label" [nextLabel]="nextStep()?.label"
+      [canGoPrevious]="!!previousStep()" [canGoNext]="!!nextStep()" (goPrevious)="goPrevious()" (goNext)="goNext()">
+    </app-p1-facility-analysis-workbench-footer>
+  </main>
+  }
+</section>

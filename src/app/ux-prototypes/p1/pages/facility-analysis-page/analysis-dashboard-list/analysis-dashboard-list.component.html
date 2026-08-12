@@ -1,0 +1,81 @@
+<div class="p1-analysis__cards" aria-label="Facility analysis items">
+  @for (row of rows; track row.analysis.guid) {
+  <article [class]="'p1-analysis-card p1-analysis-card--' + row.tone">
+    <div class="p1-analysis-card__summary">
+      <div class="p1-analysis-card__top">
+        <span class="p1-chip">{{ categoryLabel(row.analysis.analysisCategory) }}</span>
+        @if (row.isActiveForReporting) {
+        <span class="p1-chip p1-chip--success">
+          <span class="fa fa-star"></span>
+          Reporting
+        </span>
+        }
+      </div>
+      <button type="button" class="p1-analysis-card__title" (click)="openAnalysis.emit(row.analysis)">
+        {{ row.analysis.name }}
+      </button>
+    </div>
+    <dl class="p1-analysis-card__meta">
+      <div>
+        <dt>Status</dt>
+        <dd>{{ row.status?.status || 'unknown' }}</dd>
+      </div>
+      <div>
+        <dt>Baseline</dt>
+        <dd>{{ row.analysis.baselineYear || 'Unset' }}</dd>
+      </div>
+      <div>
+        <dt>Groups</dt>
+        <dd>{{ row.groupCount }}</dd>
+      </div>
+      <div>
+        <dt>Modified</dt>
+        <dd>{{ row.modifiedDate }}</dd>
+      </div>
+    </dl>
+    <div class="p1-analysis-card__links">
+      <span>
+        <span class="fa fa-building"></span>
+        {{ row.linkedAccountAnalyses.length }} account
+      </span>
+      <span>
+        <span class="fa fa-file-lines"></span>
+        {{ row.linkedReports.length }} reports
+      </span>
+      @if (row.linkedBankingAnalyses.length || row.isBankedByAnotherAnalysis) {
+      <span>
+        <span class="fa fa-piggy-bank"></span>
+        Banking
+      </span>
+      }
+    </div>
+    <div class="p1-analysis-card__actions">
+      <button type="button" class="p1-icon-btn" title="Open analysis" aria-label="Open analysis"
+        (click)="openAnalysis.emit(row.analysis)">
+        <span class="fa fa-arrow-right"></span>
+      </button>
+      <button type="button" class="p1-icon-btn" title="Set as active for reporting"
+        aria-label="Set as active for reporting" (click)="setActive.emit(row.analysis)"
+        [disabled]="row.isActiveForReporting || !canWrite || hasPending">
+        <span class="fa fa-star"></span>
+      </button>
+      <button type="button" class="p1-icon-btn" title="View details" aria-label="View details"
+        (click)="viewDetails.emit(row.analysis)">
+        <span class="fa fa-eye"></span>
+      </button>
+      <button type="button" class="p1-icon-btn" [class.active]="isCompared(row.analysis.guid)" title="Compare"
+        aria-label="Compare analysis" (click)="compareAnalysis.emit(row.analysis)">
+        <span class="fa fa-columns"></span>
+      </button>
+      <button type="button" class="p1-icon-btn" title="Copy" aria-label="Copy analysis"
+        (click)="copyAnalysis.emit(row.analysis)" [disabled]="!canWrite || hasPending">
+        <span class="fa fa-copy"></span>
+      </button>
+      <button type="button" class="p1-icon-btn p1-icon-btn--danger" title="Delete" aria-label="Delete analysis"
+        (click)="deleteAnalysis.emit(row)" [disabled]="!canWrite || hasPending">
+        <span class="fa fa-trash"></span>
+      </button>
+    </div>
+  </article>
+  }
+</div>

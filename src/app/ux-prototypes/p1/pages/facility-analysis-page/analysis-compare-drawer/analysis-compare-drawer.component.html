@@ -1,0 +1,56 @@
+<div class="p1-analysis-drawer__backdrop" (click)="closeCompare.emit()"></div>
+<aside class="p1-analysis__drawer p1-analysis__drawer--wide" role="dialog" aria-modal="true"
+  aria-label="Compare analysis items">
+  <div class="p1-analysis__drawer-header">
+    <div>
+      <span class="p1-chip">{{ compareRows.length }} selected</span>
+      <h2>Compare Analysis</h2>
+    </div>
+    <button type="button" class="p1-icon-btn" title="Close comparison" aria-label="Close comparison"
+      (click)="closeCompare.emit()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </div>
+
+  <label class="p1-analysis__compare-select">
+    <span>Second Analysis</span>
+    <select class="form-select" [ngModel]="''" (ngModelChange)="addAnalysis($event)"
+      [disabled]="compareRows.length >= 2 || availableRows.length === 0">
+      <option value="" disabled>Select an analysis to compare</option>
+      @for (row of availableRows; track row.analysis.guid) {
+      <option [value]="row.analysis.guid">{{ row.analysis.name }}</option>
+      }
+    </select>
+  </label>
+
+  @if (compareRows.length < 2) {
+  <div class="p1-analysis__notice">
+    <span class="fa fa-columns"></span>
+    Select one more analysis to compare side by side.
+  </div>
+  }
+
+  <div class="p1-analysis__compare-grid">
+    @for (row of compareRows; track row.analysis.guid) {
+    <article>
+      <div class="p1-analysis__compare-card-header">
+        <span>{{ categoryLabel(row.analysis.analysisCategory) }}</span>
+        <button type="button" class="p1-icon-btn" title="Remove from comparison" aria-label="Remove from comparison"
+          (click)="selectAnalysis.emit(row.analysis)">
+          <span class="fa fa-xmark"></span>
+        </button>
+      </div>
+      <strong>{{ row.analysis.name }}</strong>
+      <small>Baseline {{ row.analysis.baselineYear || 'unset' }} · {{ row.status?.status || 'unknown' }}</small>
+      <small>{{ row.groupCount }} groups · {{ row.regressionCount }} regression</small>
+      <small>{{ row.linkedAccountAnalyses.length }} account links · {{ row.linkedReports.length }} reports</small>
+    </article>
+    }
+  </div>
+
+  <div class="p1-analysis__compare-actions">
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="clearCompare.emit()">
+      Clear Comparison
+    </button>
+  </div>
+</aside>

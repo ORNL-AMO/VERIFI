@@ -48,13 +48,17 @@ export interface P1SectionDefinition {
   utility?: boolean;
 }
 
+export type P1NavQueryValue = string | undefined;
+export type P1NavActiveQueryValue = P1NavQueryValue | ReadonlyArray<P1NavQueryValue>;
+
 export interface P1NavItem {
   id: string;
   routeId?: string;
   label: string;
   meta?: string;
   status?: P1StatusTone;
-  queryParams?: Record<string, string | undefined>;
+  queryParams?: Record<string, P1NavQueryValue>;
+  activeQueryParams?: Record<string, P1NavActiveQueryValue>;
   children?: Array<P1NavItem>;
 }
 

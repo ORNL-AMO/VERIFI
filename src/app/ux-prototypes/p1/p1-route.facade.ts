@@ -37,7 +37,7 @@ const DEFAULT_DETAILS: Record<P1ContextMode, Record<P1SectionId, string>> = {
     home: 'overview',
     data: 'meters',
     visualization: 'time-series',
-    analysis: 'setup',
+    analysis: 'dashboard',
     reports: 'overview-report',
     settings: 'profile',
     imports: 'meter-import'

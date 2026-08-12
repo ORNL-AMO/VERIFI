@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { P1AnalysisSectionNavComponent } from './p1/components/section-nav/analysis-section-nav/analysis-section-nav.component';
 import { P1DataSectionNavComponent } from './p1/components/section-nav/data-section-nav/data-section-nav.component';
 import { P1HomeSectionNavComponent } from './p1/components/section-nav/home-section-nav/home-section-nav.component';
@@ -37,6 +38,17 @@ import { P1FacilityMeterMonthlyDataComponent } from './p1/pages/facility-data-pa
 import { P1FacilityMeterReadingsComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-readings/meter-readings.component';
 import { P1FacilityMeterSetupComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-setup/meter-setup.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
+import { P1FacilityAnalysisCompareDrawerComponent } from './p1/pages/facility-analysis-page/analysis-compare-drawer/analysis-compare-drawer.component';
+import { P1FacilityAnalysisDashboardListComponent } from './p1/pages/facility-analysis-page/analysis-dashboard-list/analysis-dashboard-list.component';
+import { P1FacilityAnalysisDashboardPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-dashboard-page.component';
+import { P1FacilityAnalysisDetailSummaryComponent } from './p1/pages/facility-analysis-page/analysis-detail-summary/analysis-detail-summary.component';
+import { P1FacilityAnalysisGroupSetupPanelComponent } from './p1/pages/facility-analysis-page/group-setup-panel/group-setup-panel.component';
+import { P1FacilityAnalysisRegressionPanelComponent } from './p1/pages/facility-analysis-page/regression-panel/regression-panel.component';
+import { P1FacilityAnalysisReferencesPanelComponent } from './p1/pages/facility-analysis-page/references-panel/references-panel.component';
+import { P1FacilityAnalysisResultsPanelComponent } from './p1/pages/facility-analysis-page/results-panel/results-panel.component';
+import { P1FacilityAnalysisSetupPanelComponent } from './p1/pages/facility-analysis-page/analysis-setup-panel/analysis-setup-panel.component';
+import { P1FacilityAnalysisWorkbenchFooterComponent } from './p1/pages/facility-analysis-page/workbench-footer/workbench-footer.component';
+import { P1FacilityAnalysisWorkbenchPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-workbench-page.component';
 import { P1FacilityPlaceholderPageComponent } from './p1/pages/facility-placeholder-page/facility-placeholder-page.component';
 import { P1FacilitySettingsFinancialComponent } from './p1/pages/facility-settings-page/financial/facility-settings-financial.component';
 import { P1FacilitySettingsGoalsComponent } from './p1/pages/facility-settings-page/goals/facility-settings-goals.component';
@@ -86,6 +98,17 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1FacilityPredictorsDataPageComponent,
     P1FacilityEnergyUsesDataPageComponent,
     P1FacilityEventsDataPageComponent,
+    P1FacilityAnalysisDashboardPageComponent,
+    P1FacilityAnalysisWorkbenchPageComponent,
+    P1FacilityAnalysisCompareDrawerComponent,
+    P1FacilityAnalysisDashboardListComponent,
+    P1FacilityAnalysisDetailSummaryComponent,
+    P1FacilityAnalysisSetupPanelComponent,
+    P1FacilityAnalysisGroupSetupPanelComponent,
+    P1FacilityAnalysisRegressionPanelComponent,
+    P1FacilityAnalysisResultsPanelComponent,
+    P1FacilityAnalysisReferencesPanelComponent,
+    P1FacilityAnalysisWorkbenchFooterComponent,
     P1FacilityPlaceholderPageComponent,
     P1FacilitySettingsPageComponent,
     P1FacilitySettingsProfileComponent,
@@ -98,6 +121,6 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     PrototypeShellComponent,
     P1Component
   ],
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule]
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, HelperPipesModule]
 })
 export class UxPrototypesModule { }

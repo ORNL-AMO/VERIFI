@@ -1,0 +1,167 @@
+@let _facility = facility();
+@let _rows = analysisRows();
+@let _filteredRows = filteredAnalysisRows();
+
+<section class="p1-analysis" aria-label="Facility analysis dashboard">
+  @if (!_facility) {
+  <div class="p1-analysis__state" aria-live="polite">
+    <span class="fa fa-building-circle-exclamation"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility to manage analysis workbench items.</p>
+  </div>
+  } @else {
+  <header class="p1-analysis__header">
+    <div class="p1-analysis__title">
+      <span>Facility analysis</span>
+      <h1>{{ _facility.name }} Analysis</h1>
+    </div>
+    <div class="p1-analysis__metrics" aria-label="Analysis summary">
+      <article>
+        <span>Analyses</span>
+        <strong>{{ _rows.length }}</strong>
+      </article>
+      <article>
+        <span>Issues</span>
+        <strong>{{ issueCount() }}</strong>
+      </article>
+      <article>
+        <span>Energy Active</span>
+        <strong>{{ activeEnergy()?.analysis.name || 'None' }}</strong>
+      </article>
+      <article>
+        <span>Water Active</span>
+        <strong>{{ activeWater()?.analysis.name || 'None' }}</strong>
+      </article>
+    </div>
+    <div class="p1-analysis__actions">
+      <button type="button" class="p1-btn p1-btn--quiet" (click)="openCreate('water')"
+        [disabled]="!canWrite() || hasPending()">
+        <span class="fa fa-droplet"></span>
+        Add Water
+      </button>
+      <button type="button" class="p1-btn p1-btn--primary" (click)="openCreate('energy')"
+        [disabled]="!canWrite() || hasPending()">
+        <span class="fa fa-plus"></span>
+        Add Energy
+      </button>
+    </div>
+  </header>
+
+  @if (_rows.length === 0) {
+  <div class="p1-analysis__empty">
+    <span class="fa fa-microscope"></span>
+    <h2>No facility analyses yet</h2>
+    <p>Create an energy or water analysis item from this facility's real meter groups and predictors.</p>
+    <div>
+      <button type="button" class="p1-btn p1-btn--primary" (click)="openCreate('energy')"
+        [disabled]="!canWrite() || hasPending()">
+        <span class="fa fa-plus"></span>
+        Add Energy Analysis
+      </button>
+      <button type="button" class="p1-btn p1-btn--quiet" (click)="openCreate('water')"
+        [disabled]="!canWrite() || hasPending()">
+        <span class="fa fa-droplet"></span>
+        Add Water Analysis
+      </button>
+    </div>
+  </div>
+  } @else {
+  <main class="p1-analysis__dashboard">
+    <header class="p1-analysis__dashboard-header">
+      <div class="p1-analysis__dashboard-title">
+        <span>Dashboard</span>
+        <h2>Analysis Items</h2>
+      </div>
+      <div class="p1-analysis__dashboard-filters" aria-label="Analysis dashboard filters">
+        <label class="p1-analysis__search">
+          <span class="fa fa-magnifying-glass" aria-hidden="true"></span>
+          <input type="search" class="form-control" placeholder="Search analyses" [ngModel]="analysisSearch()"
+            (ngModelChange)="analysisSearch.set($event)" aria-label="Search analyses">
+        </label>
+        <label>
+          <span>Category</span>
+          <select class="form-select" [ngModel]="categoryFilter()" (ngModelChange)="categoryFilter.set($event)">
+            <option [ngValue]="'all'">All Categories</option>
+            <option [ngValue]="'energy'">Energy</option>
+            <option [ngValue]="'water'">Water</option>
+          </select>
+        </label>
+        <label>
+          <span>Status</span>
+          <select class="form-select" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+            <option [ngValue]="'all'">All Statuses</option>
+            <option [ngValue]="'good'">Good</option>
+            <option [ngValue]="'warning'">Warning</option>
+            <option [ngValue]="'error'">Error</option>
+            <option [ngValue]="'issues'">Issues</option>
+            <option [ngValue]="'reporting'">Active For Reporting</option>
+          </select>
+        </label>
+        <span class="p1-chip">{{ _filteredRows.length }} of {{ _rows.length }}</span>
+        @if (hasDashboardFilters()) {
+        <button type="button" class="p1-btn p1-btn--quiet" (click)="resetDashboardFilters()">
+          Clear
+        </button>
+        }
+      </div>
+    </header>
+
+    @if (_filteredRows.length === 0) {
+    <div class="p1-analysis__empty-small">
+      <span class="fa fa-filter-circle-xmark"></span>
+      <strong>No matching analyses</strong>
+      <p>Adjust search or filters to show analysis items.</p>
+    </div>
+    } @else {
+    <app-p1-facility-analysis-dashboard-list [rows]="_filteredRows" [compareGuids]="compareGuids()" [canWrite]="canWrite()"
+      [hasPending]="hasPending()" (openAnalysis)="openAnalysis($event)" (setActive)="setActiveAnalysis($event)"
+      (viewDetails)="viewDetails($event)" (copyAnalysis)="copyAnalysis($event)" (deleteAnalysis)="requestDelete($event)"
+      (compareAnalysis)="toggleCompare($event)">
+    </app-p1-facility-analysis-dashboard-list>
+    }
+  </main>
+  }
+  }
+</section>
+
+@if (detailsRow()) {
+<app-p1-facility-analysis-detail-summary [row]="detailsRow()" (closeSummary)="detailsRow.set(undefined)"
+  (openAnalysis)="openAnalysis($event)">
+</app-p1-facility-analysis-detail-summary>
+}
+
+@if (isCompareDrawerOpen() && compareRows().length > 0) {
+<app-p1-facility-analysis-compare-drawer [rows]="_rows" [compareRows]="compareRows()"
+  (closeCompare)="closeComparison()" (clearCompare)="clearComparison()" (selectAnalysis)="toggleCompare($event)">
+</app-p1-facility-analysis-compare-drawer>
+}
+
+@if (showCreate()) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="create-analysis-title">
+  <h2 id="create-analysis-title">Create Analysis</h2>
+  <label>
+    <span>Analysis Category</span>
+    <select class="form-select" [ngModel]="newAnalysisCategory()" (ngModelChange)="newAnalysisCategory.set($event)">
+      <option [ngValue]="'energy'">Energy Analysis</option>
+      <option [ngValue]="'water'">Water Analysis</option>
+    </select>
+  </label>
+  <div>
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="showCreate.set(false)">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--primary" (click)="createAnalysis()">Create Analysis</button>
+  </div>
+</section>
+}
+
+@if (rowToDelete()) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-analysis-title">
+  <h2 id="delete-analysis-title">Delete {{ rowToDelete().analysis.name }}</h2>
+  <p>Deleting this analysis will remove the facility analysis item and clear account-analysis references to it.</p>
+  <div>
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="rowToDelete.set(undefined)">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" (click)="deleteAnalysis()">Delete Analysis</button>
+  </div>
+</section>
+}

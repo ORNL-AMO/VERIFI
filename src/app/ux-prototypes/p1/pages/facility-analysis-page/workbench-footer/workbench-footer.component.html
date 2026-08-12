@@ -1,0 +1,10 @@
+<footer class="p1-analysis-footer w-100" aria-label="Analysis step navigation">
+  <button type="button" class="p1-btn p1-btn--quiet" (click)="goPrevious.emit()" [disabled]="!canGoPrevious">
+    <span class="fa fa-arrow-left"></span>
+    {{ previousLabel || 'Back' }}
+  </button>
+  <button type="button" class="p1-btn p1-btn--primary" (click)="goNext.emit()" [disabled]="!canGoNext">
+    {{ nextLabel || 'Next' }}
+    <span class="fa fa-arrow-right"></span>
+  </button>
+</footer>

@@ -11,6 +11,8 @@ import { P1FacilityEnergyUsesDataPageComponent } from './p1/pages/facility-data-
 import { P1FacilityEventsDataPageComponent } from './p1/pages/facility-data-pages/facility-events-data-page/facility-events-data-page.component';
 import { P1FacilityMetersDataPageComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/facility-meters-data-page.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
+import { P1FacilityAnalysisDashboardPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-dashboard-page.component';
+import { P1FacilityAnalysisWorkbenchPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-workbench-page.component';
 import { P1FacilityPlaceholderPageComponent } from './p1/pages/facility-placeholder-page/facility-placeholder-page.component';
 import { P1FacilitySettingsPageComponent } from './p1/pages/facility-settings-page/facility-settings-page.component';
 import { P1Component } from './p1/p1.component';
@@ -95,6 +97,16 @@ export const PrototypeRoutes: Routes = [
             path: 'workspace/facility/:facilityGuid/settings/:detail/:panelTab',
             component: P1WorkspaceShellComponent,
             children: [{ path: '', component: P1FacilitySettingsPageComponent }]
+          },
+          {
+            path: 'workspace/facility/:facilityGuid/analysis/dashboard/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1FacilityAnalysisDashboardPageComponent }]
+          },
+          {
+            path: 'workspace/facility/:facilityGuid/analysis/workbench/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1FacilityAnalysisWorkbenchPageComponent }]
           },
           {
             path: 'workspace/facility/:facilityGuid/:section',

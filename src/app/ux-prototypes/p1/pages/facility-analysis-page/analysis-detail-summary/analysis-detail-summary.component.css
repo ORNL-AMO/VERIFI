@@ -1,0 +1,41 @@
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: block;
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.p1-analysis-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(13, 20, 18, .36);
+  pointer-events: auto;
+}
+
+.p1-analysis__drawer {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  width: min(42rem, 100vw);
+  max-height: none;
+  border: 0;
+  border-left: 1px solid var(--prototype-border);
+  border-radius: 0;
+  background: var(--prototype-surface);
+  box-shadow: -1rem 0 3rem rgba(0, 0, 0, .14);
+  pointer-events: auto;
+}
+
+@media (max-width: 560px) {
+  .p1-analysis__drawer {
+    width: 100vw;
+  }
+}
