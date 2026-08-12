@@ -114,9 +114,11 @@ Keep these content elements:
 
 The first viewport should make the user's next best action obvious. Existing users should quickly return to a recent account. New users should understand that setup begins by creating or importing an account; after entering that account, they add facilities, meters, predictors, analyses, reports, and other account-scoped data.
 
-## Prototype mock data
+## Prototype Data
 
-Use static mock data by default and colocate it with the prototype that consumes it. Mock only the minimum shape needed to render the screen. Use the existing models under `src/app/models/idbModels/` as references so prototype data includes the relevant account, facility, meter, predictor, analysis, report, weather, and GUID relationship fields without inventing incompatible shapes.
+Use static mock data by default for visual-only prototypes and colocate it with the prototype that consumes it. Mock only the minimum shape needed to render the screen. Use the existing models under `src/app/models/idbModels/` as references so prototype data includes the relevant account, facility, meter, predictor, analysis, report, weather, and GUID relationship fields without inventing incompatible shapes.
+
+P1 facility Data workbench sections are the current real-data prototype exception. They should read from `AccountWorkspaceStore` facility-scoped signals and write through existing workspace command boundaries and handlers so meters, predictors, energy uses, and events can be evaluated with real account data while preserving production persistence rules.
 
 When prototyping established workflows, inspect the existing production component for that workflow before drafting new content. Reuse its fields, labels, options, helper text, validation messages, empty states, and actions as the default content source, then improve the hierarchy, grouping, and interaction design in the prototype.
 
@@ -129,4 +131,4 @@ Use realistic manufacturing examples that include:
 - recent activity or modified dates when useful;
 - representative utility, production, and weather-related values with units.
 
-Do not read from or write to IndexedDB, weather services, backup services, import/export services, Web Workers, calculation services, or report writers unless the task explicitly changes from prototype exploration to production implementation.
+Do not read from or write to IndexedDB, weather services, backup services, import/export services, Web Workers, calculation services, or report writers unless the task explicitly changes from prototype exploration to production implementation or a documented real-data prototype path, such as the [P1 data workbench pattern](p1-data-workbench-pattern.md), applies.
