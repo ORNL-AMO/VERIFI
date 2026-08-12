@@ -28,7 +28,7 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
       groups: trimGroups(snapshot.meterGroups.map(item => structuredClone(item))),
       accountReports: snapshot.accountReports.map(item => structuredClone(item)),
       accountAnalysisItems: snapshot.accountAnalyses.map(item => structuredClone(item)),
-      facilityAnalysisItems: trimAnalysisModels(snapshot.facilityAnalyses, facilities),
+      facilityAnalysisItems: trimAnalysisModels(snapshot.facilityAnalyses, facilities, new Set(snapshot.predictors.map(p => p.guid))),
       predictorData: [],
       predictorDataV2: snapshot.predictorData.map(item => structuredClone(item)),
       predictors: snapshot.predictors.map(item => structuredClone(item)),
@@ -65,7 +65,8 @@ export class WorkspaceBackupSnapshotBuilder implements BackupSnapshotBuilder {
       accountAnalysisItems: [],
       facilityAnalysisItems: trimAnalysisModels(
         snapshot.facilityAnalyses.filter(item => item.facilityId === facilityGuid),
-        [clonedFacility]
+        [clonedFacility],
+        new Set(snapshot.predictors.filter(p => p.facilityId === facilityGuid).map(p => p.guid))
       ),
       predictorData: [],
       predictorDataV2: snapshot.predictorData.filter(item => item.facilityId === facilityGuid).map(item => structuredClone(item)),
@@ -103,7 +104,8 @@ function trimGroups(groups: Array<IdbUtilityMeterGroup>): Array<IdbUtilityMeterG
 
 function trimAnalysisModels(
   analysisItems: ReadonlyArray<Readonly<IdbAnalysisItem>>,
-  facilities: Array<IdbFacility>
+  facilities: Array<IdbFacility>,
+  predictorGuids: ReadonlySet<string>
 ): Array<IdbAnalysisItem> {
   return analysisItems.map(item => {
     const facility = facilities.find(candidate => candidate.guid === item.facilityId);
@@ -115,10 +117,20 @@ function trimAnalysisModels(
           facility,
           item.baselineYear
         ).group;
-        return {
+        const trimmedGroup = {
           ...normalizedGroup,
           models: normalizedGroup.models?.map(model => getTrimmedModel(structuredClone(model)))
         };
+        trimmedGroup.predictorVariables = trimmedGroup.predictorVariables?.filter(
+          v => !v.id || predictorGuids.has(v.id)
+        );
+        trimmedGroup.models = trimmedGroup.models?.map(model => ({
+          ...model,
+          predictorVariables: model.predictorVariables?.filter(
+            v => !v.id || predictorGuids.has(v.id)
+          )
+        }));
+        return trimmedGroup;
       })
     };
   });

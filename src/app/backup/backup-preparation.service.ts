@@ -209,12 +209,19 @@ function validateCoreRelationships(backup: BackupFile): void {
       if (group.idbGroupId && !groupIds.has(group.idbGroupId)) {
         throw new BackupRelationshipError('An analysis references a missing meter group.');
       }
-      const variables = [
-        ...(group.predictorVariables ?? []),
-        ...(group.models ?? []).flatMap(model => model.predictorVariables ?? [])
-      ];
-      if (variables.some(variable => variable.id && !predictorIds.has(variable.id))) {
-        throw new BackupRelationshipError('An analysis references a missing predictor.');
+      if (group.predictorVariables) {
+        group.predictorVariables = group.predictorVariables.filter(
+          variable => !variable.id || predictorIds.has(variable.id)
+        );
+      }
+      if (group.models) {
+        for (const model of group.models) {
+          if (model.predictorVariables) {
+            model.predictorVariables = model.predictorVariables.filter(
+              variable => !variable.id || predictorIds.has(variable.id)
+            );
+          }
+        }
       }
     }
   }
