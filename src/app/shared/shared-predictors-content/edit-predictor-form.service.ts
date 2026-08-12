@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { IdbPredictor, WeatherDataType } from 'src/app/models/idbModels/predictor';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +10,17 @@ export class EditPredictorFormService {
   constructor(private formBuilder: FormBuilder) { }
 
   getFormFromPredictor(predictor: IdbPredictor): FormGroup {
+    const weatherSelections = this.formBuilder.group({
+      cdd: [predictor.weatherDataType == 'CDD'],
+      hdd: [predictor.weatherDataType == 'HDD'],
+      relativeHumidity: [predictor.weatherDataType == 'relativeHumidity'],
+      dryBulbTemp: [predictor.weatherDataType == 'dryBulbTemp'],
+      wetBulbTemp: [predictor.weatherDataType == 'wetBulbTemp'],
+      dewPointTemp: [predictor.weatherDataType == 'dewPointTemp'],
+      precipitation: [predictor.weatherDataType == 'precipitation']
+    });
     let predictorForm: FormGroup = this.formBuilder.group({
-      'name': [predictor.name, [Validators.required ]],
+      'name': [predictor.name, [Validators.required]],
       'unit': [predictor.unit],
       'description': [predictor.description],
       'production': [predictor.production || false],
@@ -26,13 +35,14 @@ export class EditPredictorFormService {
       'heatingBaseTemperature': [predictor.heatingBaseTemperature],
       'coolingBaseTemperature': [predictor.coolingBaseTemperature],
       'weatherStationId': [predictor.weatherStationId],
+      'weatherSelections': weatherSelections,
       'createPredictorData': [true],
       //status settings
       'noLongerInUse': [predictor.noLongerInUse || false],
       'noLongerInUseMonth': [predictor.noLongerInUseMonth],
       'noLongerInUseYear': [predictor.noLongerInUseYear],
       'canBeNegative': [predictor.canBeNegative || false],
-      'ignoreDateStatusChecks': [predictor.ignoreDateStatusChecks || false]
+      'ignoreDateStatusChecks': [predictor.ignoreDateStatusChecks || false],
     });
     // this.setShowReferencePredictors()
     // this.setUnitOptions();
@@ -40,34 +50,45 @@ export class EditPredictorFormService {
     return predictorForm;
   }
 
+  isAnyWeatherOptionSelected(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const values = control.value || {};
+      return Object.values(values).some(Boolean) ? null : { noWeatherOptionSelected: true };
+    }
+  }
+
   setValidators(predictorForm: FormGroup) {
-    if (predictorForm.controls.predictorType.value == 'Standard') {
+    const isWeather = predictorForm.controls.predictorType.value == 'Weather';
+    const weatherSelections = predictorForm.get('weatherSelections');
+
+    if (!isWeather) {
+      weatherSelections?.setValidators([]);
       predictorForm.controls.heatingBaseTemperature.setValidators([]);
       predictorForm.controls.coolingBaseTemperature.setValidators([]);
       predictorForm.controls.weatherStationId.setValidators([]);
       predictorForm.controls.weatherDataType.setValidators([]);
-    } else if (predictorForm.controls.predictorType.value == 'Weather') {
-      predictorForm.controls.weatherStationId.setValidators([Validators.required]);
-      predictorForm.controls.weatherDataType.setValidators([Validators.required]);
-      if (predictorForm.controls.weatherDataType.value == 'HDD') {
-        predictorForm.controls.heatingBaseTemperature.setValidators([Validators.required]);
-        predictorForm.controls.coolingBaseTemperature.setValidators([]);
-      } else if (predictorForm.controls.weatherDataType.value == 'CDD') {
-        predictorForm.controls.heatingBaseTemperature.setValidators([]);
-        predictorForm.controls.coolingBaseTemperature.setValidators([Validators.required]);
-      } else {
-        predictorForm.controls.heatingBaseTemperature.setValidators([]);
-        predictorForm.controls.coolingBaseTemperature.setValidators([]);
-      }
     }
-    predictorForm.controls.heatingBaseTemperature.updateValueAndValidity();
-    predictorForm.controls.coolingBaseTemperature.updateValueAndValidity();
-    predictorForm.controls.weatherStationId.updateValueAndValidity();
-    predictorForm.controls.weatherDataType.updateValueAndValidity();
+    else {
+      predictorForm.controls.weatherStationId.setValidators([Validators.required]);
+      weatherSelections?.setValidators([this.isAnyWeatherOptionSelected()]);
+
+      const selectedTypes = this.getSelectedWeatherTypes(predictorForm);
+      if (selectedTypes.length === 1) {
+        predictorForm.controls.weatherDataType.patchValue(selectedTypes[0], { emitEvent: false });
+      }
+
+      predictorForm.controls.heatingBaseTemperature.setValidators(selectedTypes.includes('HDD') ? [Validators.required] : []);
+      predictorForm.controls.coolingBaseTemperature.setValidators(selectedTypes.includes('CDD') ? [Validators.required] : []);
+    }
+
+    predictorForm.controls.heatingBaseTemperature.updateValueAndValidity({ emitEvent: false });
+    predictorForm.controls.coolingBaseTemperature.updateValueAndValidity({ emitEvent: false });
+    predictorForm.controls.weatherStationId.updateValueAndValidity({ emitEvent: false });
+    predictorForm.controls.weatherDataType.updateValueAndValidity({ emitEvent: false });
+    weatherSelections?.updateValueAndValidity({ emitEvent: false });
   }
 
   setPredictorDataFromForm(predictor: IdbPredictor, predictorForm: FormGroup): boolean {
-    predictor.name = predictorForm.controls.name.value;
     predictor.unit = predictorForm.controls.unit.value;
     predictor.description = predictorForm.controls.description.value;
     predictor.production = predictorForm.controls.production.value;
@@ -79,11 +100,24 @@ export class EditPredictorFormService {
     // this.predictorData.mathAction = this.predictorForm.controls.name.value;
     // this.predictorData.mathAmount = this.predictorForm.controls.name.value;
 
+    const selectedWeatherTypes = this.getSelectedWeatherTypes(predictorForm);
     let weatherDataChange: boolean = false;
-    if (predictor.weatherDataType != predictorForm.controls.weatherDataType.value) {
-      weatherDataChange = true;
-      predictor.weatherDataType = predictorForm.controls.weatherDataType.value;
+    let nextWeatherType = predictorForm.controls.weatherDataType.value;
+    if (selectedWeatherTypes.length > 0) {
+      nextWeatherType = selectedWeatherTypes[0];
+      predictorForm.controls.weatherDataType.patchValue(nextWeatherType, { emitEvent: false });
     }
+    if (predictor.weatherDataType != nextWeatherType) {
+      weatherDataChange = true;
+      predictor.weatherDataType = nextWeatherType;
+    }
+
+    let name = predictorForm.controls.name.value;
+    if (predictorForm.controls.predictorType.value == 'Weather' && selectedWeatherTypes.length === 1) {
+      name = this.getWeatherNameForType(nextWeatherType, predictorForm);
+      predictorForm.controls.name.patchValue(name, { emitEvent: false });
+    }
+    predictor.name = name;
     if (predictor.heatingBaseTemperature != predictorForm.controls.heatingBaseTemperature.value) {
       weatherDataChange = true;
       predictor.heatingBaseTemperature = predictorForm.controls.heatingBaseTemperature.value;
@@ -103,5 +137,28 @@ export class EditPredictorFormService {
     predictor.canBeNegative = predictorForm.controls.canBeNegative.value;
     predictor.ignoreDateStatusChecks = predictorForm.controls.ignoreDateStatusChecks.value;
     return weatherDataChange;
+  }
+
+  getSelectedWeatherTypes(predictorForm: FormGroup): Array<WeatherDataType> {
+    const selections = predictorForm.get('weatherSelections')?.value || {};
+    const selected: Array<IdbPredictor['weatherDataType']> = [];
+    if (selections.cdd) selected.push('CDD');
+    if (selections.hdd) selected.push('HDD');
+    if (selections.relativeHumidity) selected.push('relativeHumidity');
+    if (selections.dryBulbTemp) selected.push('dryBulbTemp');
+    if (selections.wetBulbTemp) selected.push('wetBulbTemp');
+    if (selections.dewPointTemp) selected.push('dewPointTemp');
+    if (selections.precipitation) selected.push('precipitation');
+    return selected;
+  }
+
+  getWeatherNameForType(type: WeatherDataType, predictorForm: FormGroup): string {
+    if (type === 'CDD') return `CDD Generated (${predictorForm.controls.coolingBaseTemperature.value} \u00B0F)`;
+    if (type === 'HDD') return `HDD Generated (${predictorForm.controls.heatingBaseTemperature.value} \u00B0F)`;
+    if (type === 'relativeHumidity') return 'Relative Humidity';
+    if (type === 'dryBulbTemp') return 'Dry Bulb Temp';
+    if (type === 'wetBulbTemp') return 'Wet Bulb Temp';
+    if (type === 'dewPointTemp') return 'Dew Point Temp';
+    return 'Precipitation';
   }
 }

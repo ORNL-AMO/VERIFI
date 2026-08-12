@@ -90,6 +90,44 @@ export class AnalysisCommandHandler {
     }
   }
 
+  async addAnalysisPredictors(newPredictors: IdbPredictor[]): Promise<void> {
+    if (!newPredictors || newPredictors.length === 0) {
+      return;
+    }
+
+    const facilityId = newPredictors[0].facilityId;
+    const facilityPredictors = newPredictors.filter(p => p.facilityId === facilityId);
+
+    const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
+      .filter(item => item.facilityId === facilityId);
+
+    for (const analysisItem of facilityAnalysisItems) {
+      const updated = {
+        ...analysisItem,
+        groups: analysisItem.groups.map(group => {
+          const existingById = new Set(group.predictorVariables.map(v => v.id));
+          const varsToAdd = facilityPredictors
+            .filter(p => !existingById.has(p.guid))
+            .map(p => ({
+              id: p.guid,
+              name: p.name,
+              production: p.production,
+              productionInAnalysis: p.productionInAnalysis,
+              regressionCoefficient: undefined,
+              unit: p.unit
+            }));
+
+          return {
+            ...group,
+            predictorVariables: [...group.predictorVariables, ...varsToAdd]
+          };
+        })
+      };
+
+      await firstValueFrom(this.analysisDb.updateWithObservable(updated));
+    }
+  }
+
   /**
    * Propagates a predictor's renamed/updated fields to every analysis group
    * and regression model that references it.

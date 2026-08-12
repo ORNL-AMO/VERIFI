@@ -125,4 +125,26 @@ export class EditPredictorFormComponent {
       this.predictorForm.markAsDirty();
     }
   }
+
+  onWeatherSelectionChange(
+    key: 'cdd' | 'hdd' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp' | 'precipitation',
+    event: Event
+  ) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const group = this.predictorForm.get('weatherSelections') as FormGroup;
+    if (!group) return;
+
+    if (this.addOrEdit === 'edit' && checked) {
+      const keys = ['cdd', 'hdd', 'relativeHumidity', 'dryBulbTemp', 'wetBulbTemp', 'dewPointTemp', 'precipitation'];
+      for (const k of keys) {
+        if (k !== key) {
+          group.get(k)?.patchValue(false, { emitEvent: false });
+        }
+      }
+    }
+
+    group.get(key)?.patchValue(checked, { emitEvent: false });
+    this.setValidators();
+    this.predictorForm.markAsDirty();
+  }
 }

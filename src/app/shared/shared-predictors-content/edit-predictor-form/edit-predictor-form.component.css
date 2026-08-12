@@ -2,14 +2,46 @@ button span {
     color: white;
 }
 
-.float-right{
+.float-right {
     float: right;
 }
 
-.popup{
+.popup {
     top: 15px;
     left: 15px;
     right: 15px;
     bottom: 15px;
     width: auto;
+}
+
+.weather-alert {
+    margin-left: 15px;
+    margin-right: 15px;
+    border: 1px solid #d6dbe3;
+    border-left: 4px solid #6c757d;
+    background-color: #f8f9fb;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+
+.weather-alert-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2f3a4a;
+    margin-bottom: 4px;
+}
+
+.weather-alert-subtitle {
+    color: #5c6675;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.predictor-row {
+    min-height: 38px;
+    padding: 6px 4px;
+}
+
+.predictor-row label {
+    color: #2b3442;
 }

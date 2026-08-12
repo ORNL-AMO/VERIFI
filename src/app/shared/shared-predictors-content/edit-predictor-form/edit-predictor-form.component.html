@@ -52,22 +52,7 @@
         </select>
       </div>
     </div>
-    <!--weather-->
     @if (predictorForm.controls.predictorType.value == 'Weather') {
-    <div class="col-lg-6 col-md-12 col-sm-12">
-      <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
-      <div class="mb-3">
-        <select id="weatherDataType" class="form-select" formControlName="weatherDataType" (change)="setValidators()">
-          <option [value]="'HDD'">Heating Degree Days</option>
-          <option [value]="'CDD'">Cooling Degree Days</option>
-          <option [value]="'relativeHumidity'">Relative Humidity</option>
-          <option [value]="'dryBulbTemp'">Dry Bulb Temp</option>
-          <option [value]="'wetBulbTemp'">Wet Bulb Temp</option>
-          <option [value]="'dewPointTemp'">Dew Point Temp</option>
-          <option [value]="'precipitation'">Precipitation</option>
-        </select>
-      </div>
-    </div>
     <div class="col-lg-6 col-md-12 col-sm-12">
       <label class="semibold w-100" for="weatherStationId">Weather Station
         <a class="click-link float-right" (click)="openStationModal()">
@@ -86,40 +71,114 @@
         required</div>
       }
     </div>
-    @if (predictorForm.controls.weatherDataType.value == 'HDD') {
-    <div class="col-lg-6 col-md-12 col-sm-12">
-      <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
-      <div class="mb-3 input-group">
-        <input id="heatingBaseTemperature" class="form-control" type="number" formControlName="heatingBaseTemperature"
-          onfocus="this.select();" name="heatingBaseTemperature">
-        <span class="input-group-text">
-          &#8457;
-        </span>
+
+    @if (predictorForm.get('weatherStationId')?.value) {
+    <div class="col-12">
+      <div class="alert alert-secondary weather-alert mt-5 mb-5">
+        <div class="weather-alert-title">
+          Weather Data Options
+        </div>
+        <div class="weather-alert-subtitle">
+          Select at least one weather data type below to create predictors using the selected weather station and
+          temperature thresholds.
+        </div>
+        <div class="d-flex flex-column mb-3 mt-3" formGroupName="weatherSelections">
+          @if(predictorForm.get('weatherSelections.cdd')?.value || predictorForm.get('weatherSelections.hdd')?.value) {
+          <div class="row justify-content-end">
+            <div class="col-6">
+              <span class="fst-italic fw-bold">Base Temperature</span>
+            </div>
+          </div>
+          }
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-6">
+              <input type="checkbox" id="cdd" class="form-check-input" formControlName="cdd" (change)="onWeatherSelectionChange('cdd', $event)">
+              <label for="cdd" class="fw-bold ps-2">Cooling Degree Days</label>
+            </div>
+            @if(predictorForm.get('weatherSelections.cdd')?.value) {
+            <div class="col-6">
+              <div class="input-group">
+                <input type="number" class="form-control border-primary bg-light" name="cddBaseTemp"
+                  [formControl]="$any(predictorForm.get('coolingBaseTemperature'))">
+                <span class="input-group-text">&#8457;</span>
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-6">
+              <input type="checkbox" id="hdd" class="form-check-input" formControlName="hdd" (change)="onWeatherSelectionChange('hdd', $event)">
+              <label for="hdd" class="fw-bold ps-2">Heating Degree Days</label>
+            </div>
+            @if(predictorForm.get('weatherSelections.hdd')?.value) {
+            <div class="col-6">
+              <div class="input-group">
+                <input type="number" class="form-control border-primary bg-light" name="hddBaseTemp"
+                  [formControl]="$any(predictorForm.get('heatingBaseTemperature'))">
+                <span class="input-group-text">&#8457;</span>
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-12">
+              <input type="checkbox" id="relativeHumidity" class="form-check-input" formControlName="relativeHumidity"
+                (change)="onWeatherSelectionChange('relativeHumidity', $event)">
+              <label for="relativeHumidity" class="fw-bold ps-2">
+                Relative Humidity
+              </label>
+            </div>
+          </div>
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-12">
+              <input type="checkbox" id="dryBulbTemp" class="form-check-input" formControlName="dryBulbTemp"
+                (change)="onWeatherSelectionChange('dryBulbTemp', $event)">
+              <label for="dryBulbTemp" class="fw-bold ps-2">
+                Dry Bulb Temperature
+              </label>
+            </div>
+          </div>
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-12">
+              <input type="checkbox" id="wetBulbTemp" class="form-check-input" formControlName="wetBulbTemp"
+                (change)="onWeatherSelectionChange('wetBulbTemp', $event)">
+              <label for="wetBulbTemp" class="fw-bold ps-2">
+                Wet Bulb Temperature
+              </label>
+            </div>
+          </div>
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-12">
+              <input type="checkbox" id="dewPointTemp" class="form-check-input" formControlName="dewPointTemp"
+                (change)="onWeatherSelectionChange('dewPointTemp', $event)">
+              <label for="dewPointTemp" class="fw-bold ps-2">
+                Dew Point Temperature
+              </label>
+            </div>
+          </div>
+
+          <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
+            <div class="col-12">
+              <input type="checkbox" id="precipitation" class="form-check-input" formControlName="precipitation"
+                (change)="onWeatherSelectionChange('precipitation', $event)">
+              <label for="precipitation" class="fw-bold ps-2">
+                Precipitation
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
-      @if (predictorForm.get('heatingBaseTemperature').hasError('required')) {
-      <div class="alert alert-danger">Heating base
-        temperature is
-        required</div>
-      }
     </div>
     }
-    @if (predictorForm.controls.weatherDataType.value == 'CDD') {
-    <div class="col-lg-6 col-md-12 col-sm-12">
-      <label class="semibold" for="coolingBaseTemperature">Cooling Base Temperature</label>
-      <div class="mb-3 input-group">
-        <input id="coolingBaseTemperature" class="form-control" type="number" formControlName="coolingBaseTemperature"
-          onfocus="this.select();" name="coolingBaseTemperature">
-        <span class="input-group-text">
-          &#8457;
-        </span>
-      </div>
-      @if (predictorForm.get('coolingBaseTemperature').hasError('required')) {
-      <div class="alert alert-danger">Cooling base
-        temperature is
-        required</div>
-      }
-    </div>
     }
+    <!--weather-->
+    @if (predictorForm.controls.predictorType.value == 'Weather') {
     @if (addOrEdit == 'add' && firstMeterReading && latestMeterReading) {
     <div class="col-lg-6 col-md-12 col-sm-12">
       <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
@@ -145,8 +204,9 @@
       </div>
     </div>
     }
-    <!--Math/Conversion-->
-    <!-- <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
+  </div>
+  <!--Math/Conversion-->
+  <!-- <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
         <label class="semibold" for="referencePredictorId">Reference Predictor</label>
         <div class="mb-3">
           <select id="referencePredictorId" class="form-select" formControlName="referencePredictorId"
@@ -156,8 +216,8 @@
           </select>
         </div>
       </div> -->
-    <!--Conversion method not implemented yet-->
-    <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
+  <!--Conversion method not implemented yet-->
+  <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
       <div class="col-lg-6 col-md-12 col-sm-12">
         <label class="semibold" for="conversionType">Conversion Type</label>
         <div class="mb-3">
@@ -190,7 +250,7 @@
         </div>
       </div>
     </ng-container> -->
-    <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
+  <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
     <div class="col-lg-6 col-md-12 col-sm-12">
       <label class="semibold" for="mathAction">Math Action</label>
       <div class="mb-3">
@@ -228,6 +288,7 @@
       </div>
     </div>
   </ng-container> -->
+  <div class="row">
     <div class="col-12">
       <hr>
     </div>
