@@ -1,12 +1,15 @@
 import { Component, effect, inject, untracked } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { DATA_STALENESS_OPTIONS, DataStalenessMonths, DEFAULT_DATA_STALENESS_MONTHS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
+import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { Countries } from 'src/app/shared/form-data/countries';
 import { Months } from 'src/app/shared/form-data/months';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
@@ -29,6 +32,8 @@ export class P1FacilitySettingsPageComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly facilityHandler = inject(FacilityCommandHandler);
+  private readonly loadingService = inject(LoadingService);
+  private readonly router = inject(Router);
   private readonly settingsForms = inject(SettingsFormsService);
   private readonly eGridService = inject(EGridService);
   readonly facade = inject(P1RouteFacade);
@@ -54,7 +59,8 @@ export class P1FacilitySettingsPageComponent {
   financialForm: FormGroup;
   stalenessForm: FormGroup;
   subregionOptions: string[] = ['US Average'];
-  isSaving = false;
+  isDeletingFacility = false;
+  showDeleteFacilityConfirm = false;
   saveMessage = '';
   saveError = '';
   private skipNextWorkspaceRefresh = false;
@@ -240,6 +246,62 @@ export class P1FacilitySettingsPageComponent {
     await this.saveStaleness();
   }
 
+  openDeleteFacility(): void {
+    if (!this.account() || !this.facility() || !this.canWrite() || this.isDeletingFacility) {
+      return;
+    }
+    this.showDeleteFacilityConfirm = true;
+    this.saveError = '';
+  }
+
+  cancelDeleteFacility(): void {
+    if (this.isDeletingFacility) {
+      return;
+    }
+    this.showDeleteFacilityConfirm = false;
+  }
+
+  async confirmDeleteFacility(): Promise<void> {
+    const account = this.account();
+    const facility = this.facility();
+    if (!account || !facility || !this.canWrite() || this.isDeletingFacility) {
+      return;
+    }
+    this.showDeleteFacilityConfirm = false;
+    this.isDeletingFacility = true;
+    this.saveError = '';
+    this.saveMessage = 'Deleting facility';
+    this.loadingService.clearLoadingMessages();
+    for (const message of FACILITY_DELETION_MESSAGES) {
+      this.loadingService.addLoadingMessage(message);
+    }
+    this.loadingService.setCurrentLoadingIndex(0);
+    this.loadingService.setContext(undefined);
+    this.loadingService.setTitle('Deleting Facility');
+    this.loadingService.setLoadingComplete(false);
+    try {
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'delete', entityGuid: facility.guid, label: 'Deleting facility' },
+        () => this.facilityHandler.delete(facility, account.guid, phase => {
+          this.loadingService.setCurrentLoadingIndex(phase.index);
+        })
+      );
+      this.loadingService.setLoadingComplete(true);
+      this.saveMessage = 'Facility deleted';
+      await this.router.navigate(['/p1', 'workspace', 'account', 'home', 'overview', this.facade.activePanelTab()]);
+    } catch (error) {
+      this.loadingService.clearLoadingMessages();
+      this.loadingService.setLoadingComplete(false);
+      this.loadingService.setTitle('');
+      this.loadingService.setContext(undefined);
+      this.saveMessage = '';
+      this.saveError = 'Facility could not be deleted. Please try again.';
+      console.warn('P1 facility delete failed.', error);
+    } finally {
+      this.isDeletingFacility = false;
+    }
+  }
+
   private buildForms(facility: IdbFacility): void {
     this.profileForm = this.settingsForms.getGeneralInformationForm(facility);
     this.profileForm.addControl('classification', new FormControl(facility.classification || 'Manufacturing'));
@@ -351,7 +413,6 @@ export class P1FacilitySettingsPageComponent {
   }
 
   private async runSave(label: string, save: () => Promise<void>): Promise<void> {
-    this.isSaving = true;
     this.saveError = '';
     this.saveMessage = label;
     try {
@@ -362,8 +423,6 @@ export class P1FacilitySettingsPageComponent {
       this.skipNextWorkspaceRefresh = false;
       this.saveError = 'Changes could not be saved. Please try again.';
       console.warn('P1 facility settings save failed.', error);
-    } finally {
-      this.isSaving = false;
     }
   }
 }

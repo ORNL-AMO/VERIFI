@@ -78,12 +78,29 @@
               <span>Safety</span>
               <h2>Delete facility</h2>
             </div>
-            <small>Disabled in P1</small>
+            <small>Permanent action</small>
           </div>
-          <p>Deleting a facility permanently removes its meters, predictors, analyses, reports, and related data. This prototype page is non-destructive.</p>
-          <button type="button" disabled>Delete facility</button>
+          <p>Deleting a facility permanently removes its meters, predictors, analyses, reports, and related data. This action cannot be undone.</p>
+          <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingFacility"
+            (click)="openDeleteFacility()">Delete facility</button>
         </section>
       }
     }
   }
 </section>
+
+@if (showDeleteFacilityConfirm && _facility) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-facility-title">
+  <h2 id="delete-facility-title">Delete {{ _facility.name }}</h2>
+  <p>Deleting this facility will permanently remove its meters, predictors, analyses, reports, and related data.</p>
+  <p>This action cannot be undone. Create a facility export before continuing if this data may be needed later.</p>
+  <div class="p1-confirm__actions">
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="cancelDeleteFacility()">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingFacility"
+      (click)="confirmDeleteFacility()">
+      {{ isDeletingFacility ? 'Deleting...' : 'Delete facility' }}
+    </button>
+  </div>
+</section>
+}

@@ -76,12 +76,29 @@
               <span>Safety</span>
               <h2>Delete account</h2>
             </div>
-            <small>Disabled in P1</small>
+            <small>Permanent action</small>
           </div>
-          <p>Deleting an account permanently removes the account and all related facilities, meters, predictors, analyses, reports, and settings. This prototype page is non-destructive.</p>
-          <button type="button" disabled>Delete account</button>
+          <p>Deleting an account permanently removes the account and all related facilities, meters, predictors, analyses, reports, and settings. This action cannot be undone.</p>
+          <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingAccount"
+            (click)="openDeleteAccount()">Delete account</button>
         </section>
       }
     }
   }
 </section>
+
+@if (showDeleteAccountConfirm && _account) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+  <h2 id="delete-account-title">Delete {{ _account.name }}</h2>
+  <p>Deleting this account will permanently remove all facilities, meters, predictors, analyses, reports, and settings associated with it.</p>
+  <p>This action cannot be undone. Create a backup before continuing if this account data may be needed later.</p>
+  <div class="p1-confirm__actions">
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="cancelDeleteAccount()">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingAccount"
+      (click)="confirmDeleteAccount()">
+      {{ isDeletingAccount ? 'Deleting...' : 'Delete account' }}
+    </button>
+  </div>
+</section>
+}

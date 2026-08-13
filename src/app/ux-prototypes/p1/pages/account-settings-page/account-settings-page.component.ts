@@ -1,5 +1,6 @@
 import { Component, effect, inject, untracked } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
@@ -14,7 +15,7 @@ import { Months } from 'src/app/shared/form-data/months';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
-import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, MassUnitOptions, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { P1RouteFacade } from '../../p1-route.facade';
 
 @Component({
@@ -32,6 +33,7 @@ export class P1AccountSettingsPageComponent {
   private readonly accountHandler = inject(AccountCommandHandler);
   private readonly facilityHandler = inject(FacilityCommandHandler);
   private readonly lifecycle = inject(ApplicationLifecycleService);
+  private readonly router = inject(Router);
   private readonly settingsForms = inject(SettingsFormsService);
   private readonly eGridService = inject(EGridService);
   readonly facade = inject(P1RouteFacade);
@@ -55,7 +57,8 @@ export class P1AccountSettingsPageComponent {
   financialForm: FormGroup;
   stalenessForm: FormGroup;
   subregionOptions: string[] = ['US Average'];
-  isSaving = false;
+  isDeletingAccount = false;
+  showDeleteAccountConfirm = false;
   saveMessage = '';
   saveError = '';
   private skipNextWorkspaceRefresh = false;
@@ -202,6 +205,53 @@ export class P1AccountSettingsPageComponent {
     }));
   }
 
+  openDeleteAccount(): void {
+    if (!this.account() || !this.canWrite() || this.isDeletingAccount) {
+      return;
+    }
+    this.showDeleteAccountConfirm = true;
+    this.saveError = '';
+  }
+
+  cancelDeleteAccount(): void {
+    if (this.isDeletingAccount) {
+      return;
+    }
+    this.showDeleteAccountConfirm = false;
+  }
+
+  async confirmDeleteAccount(): Promise<void> {
+    const account = this.account();
+    if (!account || !this.canWrite() || this.isDeletingAccount) {
+      return;
+    }
+    this.showDeleteAccountConfirm = false;
+    this.isDeletingAccount = true;
+    this.saveError = '';
+    this.saveMessage = 'Deleting account';
+    try {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'account',
+          changeKind: 'delete',
+          entityGuid: account.guid,
+          label: 'Deleting account',
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
+        },
+        () => this.accountHandler.update({ ...account, deleteAccount: true }, account.guid)
+      );
+      const accounts = await this.lifecycle.handleMarkedAccountDeletion(account.guid);
+      const hasUsableAccount = accounts.some(item => !item.deleteAccount);
+      await this.router.navigateByUrl('/p1');
+    } catch (error) {
+      this.saveMessage = '';
+      this.saveError = 'Account could not be deleted. Please try again.';
+      console.warn('P1 account delete failed.', error);
+    } finally {
+      this.isDeletingAccount = false;
+    }
+  }
+
   private buildForms(account: IdbAccount): void {
     this.profileForm = this.settingsForms.getGeneralInformationForm(account);
     this.unitsForm = this.settingsForms.getUnitsForm(account);
@@ -314,7 +364,6 @@ export class P1AccountSettingsPageComponent {
   }
 
   private async runSave(label: string, save: () => Promise<void>): Promise<void> {
-    this.isSaving = true;
     this.saveError = '';
     this.saveMessage = label;
     try {
@@ -325,8 +374,6 @@ export class P1AccountSettingsPageComponent {
       this.skipNextWorkspaceRefresh = false;
       this.saveError = 'Changes could not be saved. Please try again.';
       console.warn('P1 account settings save failed.', error);
-    } finally {
-      this.isSaving = false;
     }
   }
 }

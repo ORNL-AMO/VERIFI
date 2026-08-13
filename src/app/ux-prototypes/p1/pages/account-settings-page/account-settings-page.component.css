@@ -244,6 +244,88 @@
   text-decoration: none;
 }
 
+.p1-btn {
+  display: inline-flex;
+  gap: .4rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: .48rem .75rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-surface);
+  color: var(--prototype-blue);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.p1-settings .p1-btn--danger,
+.p1-btn--danger {
+  border-color: #b42318;
+  background: #b42318;
+  color: #fff;
+}
+
+.p1-btn--quiet {
+  background: var(--prototype-panel);
+  color: var(--prototype-blue);
+}
+
+.p1-btn:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+.p1-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(13, 20, 18, .38);
+}
+
+.p1-confirm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 410;
+  display: grid;
+  gap: .85rem;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, .18);
+  transform: translate(-50%, -50%);
+}
+
+.p1-confirm h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0;
+}
+
+.p1-confirm p {
+  margin: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-confirm__actions {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.p1-confirm button:focus,
+.p1-confirm .p1-btn:focus {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
 @media (max-width: 980px) {
   .p1-settings__grid--4,
   .p1-settings__grid--3,
