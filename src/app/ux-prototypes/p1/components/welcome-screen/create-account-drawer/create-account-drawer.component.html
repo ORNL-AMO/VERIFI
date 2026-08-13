@@ -1,0 +1,142 @@
+<button type="button" class="p1-create-account__backdrop" aria-label="Close create account panel"
+  [disabled]="isCreating" (click)="close()"></button>
+
+<aside class="p1-create-account__drawer" role="dialog" aria-modal="true" aria-labelledby="p1-create-account-title">
+  <header class="p1-create-account__header">
+    <div>
+      <p class="p1-create-account__eyebrow">New workspace</p>
+      <h2 id="p1-create-account-title">Create Account</h2>
+    </div>
+    <button type="button" class="p1-create-account__icon-button" title="Close create account panel"
+      aria-label="Close create account panel" [disabled]="isCreating" (click)="close()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </header>
+
+  <p class="p1-create-account__intro">
+    Start with corporate information. After the account is created, VERIFI opens the account settings workspace so setup can continue from there.
+  </p>
+
+  @if (createError) {
+    <div class="p1-create-account__error" role="alert">
+      <span class="fa fa-circle-exclamation"></span>
+      {{ createError }}
+    </div>
+  }
+
+  <form class="p1-create-account__form p1-settings p1-settings__panel" [formGroup]="profileForm"
+    aria-label="Corporate information" (ngSubmit)="createAccount()">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Profile</span>
+        <h2>Corporate information</h2>
+      </div>
+      <small>Saved when account is created</small>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label>
+        <span>Account name <b>*</b></span>
+        <input type="text" formControlName="name" minlength="1" maxlength="42" required>
+        @if (accountNameInvalid) {
+          <em>Name is required.</em>
+        }
+      </label>
+      <label>
+        <span>Country</span>
+        <select formControlName="country">
+          @for (country of countries; track country.code) {
+            <option [ngValue]="country.code">{{ country.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="p1-settings__grid">
+      <label>
+        <span>Address</span>
+        <input type="text" formControlName="address">
+      </label>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>City</span>
+        <input type="text" formControlName="city">
+      </label>
+      @if (profileForm.controls['country'].value === 'US') {
+        <label>
+          <span>State</span>
+          <input type="text" formControlName="state">
+        </label>
+        <label>
+          <span>Zip</span>
+          <input type="text" formControlName="zip">
+        </label>
+      }
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>NAICS level 1</span>
+        <select formControlName="naics1" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of firstNaicsList; track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 2</span>
+        <select formControlName="naics2" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of secondNaicsOptions(profileForm.controls['naics1'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 3</span>
+        <select formControlName="naics3" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of thirdNaicsOptions(profileForm.controls['naics2'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      <span>Notes</span>
+      <textarea formControlName="notes"></textarea>
+    </label>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>Contact name</span>
+        <input type="text" formControlName="contactName" maxlength="60">
+      </label>
+      <label>
+        <span>Contact phone</span>
+        <input type="text" formControlName="contactPhone" maxlength="12" (input)="formatPhone($event)">
+      </label>
+      <label>
+        <span>Contact email</span>
+        <input type="email" formControlName="contactEmail" maxlength="85">
+      </label>
+    </div>
+
+    <div class="p1-create-account__actions">
+      <button type="button" class="p1-btn p1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
+      <button type="submit" class="p1-create-account__primary" [disabled]="isCreating || profileForm.invalid">
+        @if (isCreating) {
+          <span class="fa fa-spinner fa-spin"></span>
+          Creating
+        } @else {
+          Create Account
+          <span class="fa fa-arrow-right"></span>
+        }
+      </button>
+    </div>
+  </form>
+</aside>

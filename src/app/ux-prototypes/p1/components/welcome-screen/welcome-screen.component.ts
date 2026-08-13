@@ -53,6 +53,7 @@ export class P1WelcomeScreenComponent {
   ];
 
   isExampleDrawerOpen = false;
+  isCreateAccountDrawerOpen = false;
   loadingExamplePath: string | undefined;
 
   get recentAccount(): P1AccountSummary | undefined {
@@ -69,6 +70,18 @@ export class P1WelcomeScreenComponent {
 
   isLoadExampleAction(action: P1WelcomeAction): boolean {
     return action.title === 'Load Example Account';
+  }
+
+  isCreateAccountAction(action: P1WelcomeAction): boolean {
+    return action.title === 'Create New Account';
+  }
+
+  openCreateAccountDrawer(): void {
+    this.isCreateAccountDrawerOpen = true;
+  }
+
+  closeCreateAccountDrawer(): void {
+    this.isCreateAccountDrawerOpen = false;
   }
 
   openExampleDrawer(): void {

@@ -219,6 +219,12 @@
   color: #fff;
 }
 
+.p1-welcome__action--primary button:not(:disabled) {
+  border-color: var(--prototype-orange);
+  background: var(--prototype-orange);
+  color: #fff;
+}
+
 .p1-welcome__action button:not(:disabled):hover,
 .p1-welcome__action button:not(:disabled):focus-visible,
 .p1-welcome__account:focus-visible,

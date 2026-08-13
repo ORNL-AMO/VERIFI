@@ -240,8 +240,6 @@ export class P1AccountSettingsPageComponent {
         },
         () => this.accountHandler.update({ ...account, deleteAccount: true }, account.guid)
       );
-      const accounts = await this.lifecycle.handleMarkedAccountDeletion(account.guid);
-      const hasUsableAccount = accounts.some(item => !item.deleteAccount);
       await this.router.navigateByUrl('/p1');
     } catch (error) {
       this.saveMessage = '';

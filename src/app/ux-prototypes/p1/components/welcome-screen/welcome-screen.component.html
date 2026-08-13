@@ -64,7 +64,12 @@
           </div>
           <h3>{{ action.title }}</h3>
           <p>{{ action.summary }}</p>
-          @if (isLoadExampleAction(action)) {
+          @if (isCreateAccountAction(action)) {
+          <button type="button" [disabled]="state.status === 'loading' || state.status === 'error'"
+            (click)="openCreateAccountDrawer()">
+            {{ action.cta }}
+          </button>
+          } @else if (isLoadExampleAction(action)) {
           <button type="button" [disabled]="!!loadingExamplePath" (click)="openExampleDrawer()">
             {{ action.cta }}
           </button>
@@ -138,6 +143,10 @@
       </p>
     </article>
   </section>
+
+  @if (isCreateAccountDrawerOpen) {
+    <app-p1-create-account-drawer (closed)="closeCreateAccountDrawer()"></app-p1-create-account-drawer>
+  }
 
   @if (isExampleDrawerOpen) {
   <div class="p1-welcome__drawer-layer">

@@ -15,6 +15,7 @@ import { P1HeaderBannerComponent } from './p1/components/header-banner/header-ba
 import { P1PrimaryRailComponent } from './p1/components/primary-rail/primary-rail.component';
 import { P1RightPanelComponent } from './p1/components/right-panel/right-panel.component';
 import { P1SectionNavComponent } from './p1/components/section-nav/section-nav.component';
+import { P1CreateAccountDrawerComponent } from './p1/components/welcome-screen/create-account-drawer/create-account-drawer.component';
 import { P1WelcomeScreenComponent } from './p1/components/welcome-screen/welcome-screen.component';
 import { P1WorkspaceShellComponent } from './p1/components/workspace-shell/workspace-shell.component';
 import { P1AccountEnergyUsesDataPageComponent } from './p1/pages/account-data-pages/account-energy-uses-data-page/account-energy-uses-data-page.component';
@@ -65,6 +66,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1Component,
     P1HeaderBannerComponent,
     P1WelcomeScreenComponent,
+    P1CreateAccountDrawerComponent,
     P1WorkspaceShellComponent,
     P1PrimaryRailComponent,
     P1SectionNavComponent,
