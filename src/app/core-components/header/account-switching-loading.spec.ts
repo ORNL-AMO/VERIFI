@@ -6,13 +6,13 @@ import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
 import { IdbAccount } from '../../models/idbModels/account';
-import { OrderByPipe } from '../../shared/helper-pipes/order-by.pipe';
+import { HelperPipesModule } from '../../shared/helper-pipes/_helper-pipes.module';
 import { HeaderComponent } from './header.component';
 import { ManageAccountsComponent } from '../manage-accounts/manage-accounts.component';
 
 @NgModule({
-  imports: [CommonModule, FormsModule],
-  declarations: [HeaderComponent, ManageAccountsComponent, OrderByPipe],
+  imports: [CommonModule, FormsModule, HelperPipesModule],
+  declarations: [HeaderComponent, ManageAccountsComponent],
   schemas: [NO_ERRORS_SCHEMA]
 })
 class AccountSwitchingLoadingTestModule { }

@@ -50,6 +50,54 @@
   margin: 0;
 }
 
+.p1-create-account__scale {
+  display: grid;
+  gap: .65rem;
+  margin: 0;
+  padding: .9rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: .5rem;
+  background: var(--prototype-surface-muted);
+}
+
+.p1-create-account__scale legend {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 .35rem;
+  color: var(--prototype-muted);
+  font-size: .82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.p1-create-account__scale label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .65rem;
+  align-items: start;
+  margin: 0;
+}
+
+.p1-create-account__scale input {
+  margin-top: .25rem;
+}
+
+.p1-create-account__scale strong,
+.p1-create-account__scale small {
+  display: block;
+}
+
+.p1-create-account__scale small {
+  color: var(--prototype-muted);
+}
+
+.p1-create-account__scale p {
+  margin: 0;
+  color: var(--prototype-muted);
+  font-size: .85rem;
+}
+
 .p1-create-account__actions {
   display: flex;
   flex-wrap: wrap;

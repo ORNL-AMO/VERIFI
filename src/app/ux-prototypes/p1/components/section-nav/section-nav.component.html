@@ -3,21 +3,23 @@
   @let facility = facade.selectedFacility();
   @let facilities = facade.accountFacilities();
 
-  <!-- Context toggle -->
-  <div class="p1-nav__context" role="group" aria-label="Switch workspace context">
-    <button type="button" [class.active]="contextMode === 'account'" (click)="facade.setContext('account')">
-      <span class="fa fa-building"></span>
-      Account
-    </button>
-    <button type="button" [class.active]="contextMode === 'facility'" [disabled]="facilities.length === 0"
-      (click)="switchToFacilityContext()">
-      <span class="fa fa-industry"></span>
-      Facility
-    </button>
-  </div>
+  @if (!facade.isSingleFacilityCompany()) {
+    <!-- Context toggle -->
+    <div class="p1-nav__context" role="group" aria-label="Switch workspace context">
+      <button type="button" [class.active]="contextMode === 'account'" (click)="facade.setContext('account')">
+        <span class="fa fa-building"></span>
+        Account
+      </button>
+      <button type="button" [class.active]="contextMode === 'facility'" [disabled]="facilities.length === 0"
+        (click)="switchToFacilityContext()">
+        <span class="fa fa-industry"></span>
+        Facility
+      </button>
+    </div>
+  }
 
   <!-- Facility picker (facility context only) -->
-  @if (contextMode === 'facility' && facilities.length > 0) {
+  @if (!facade.isSingleFacilityCompany() && contextMode === 'facility' && facilities.length > 0) {
   <div class="p1-nav__facility-zone">
     @if (facilities.length === 1) {
     <div class="p1-nav__facility-single">

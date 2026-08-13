@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { DATA_STALENESS_OPTIONS, DataStalenessMonths, DEFAULT_DATA_STALENESS_MONTHS } from 'src/app/calculations/status-check-calculations/statusCheckModels';
 import { FACILITY_DELETION_MESSAGES } from 'src/app/indexedDB/facility-deletion.config';
 import { DataStalenessSettings } from 'src/app/models/idbModels/accountAndFacility';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { Countries } from 'src/app/shared/form-data/countries';
@@ -17,6 +19,11 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { EnergyUnitOptions, MassUnitOptions, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { P1RouteFacade } from '../../p1-route.facade';
+
+interface P1SingleFacilitySettingsSaveResult {
+  readonly facility: IdbFacility;
+  readonly account?: IdbAccount;
+}
 
 @Component({
   selector: 'app-p1-facility-settings-page',
@@ -31,6 +38,7 @@ import { P1RouteFacade } from '../../p1-route.facade';
 export class P1FacilitySettingsPageComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly accountHandler = inject(AccountCommandHandler);
   private readonly facilityHandler = inject(FacilityCommandHandler);
   private readonly loadingService = inject(LoadingService);
   private readonly router = inject(Router);
@@ -61,6 +69,8 @@ export class P1FacilitySettingsPageComponent {
   subregionOptions: string[] = ['US Average'];
   isDeletingFacility = false;
   showDeleteFacilityConfirm = false;
+  isDeletingAccount = false;
+  showDeleteAccountConfirm = false;
   saveMessage = '';
   saveError = '';
   private skipNextWorkspaceRefresh = false;
@@ -112,6 +122,9 @@ export class P1FacilitySettingsPageComponent {
   get backupRoute(): Array<string> {
     const account = this.account();
     const facility = this.facility();
+    if (this.facade.isSingleFacilityCompany()) {
+      return account ? ['/data-management', account.guid, 'account-setup'] : ['/p1'];
+    }
     return account && facility ? ['/data-management', account.guid, 'facilities', facility.guid] : ['/p1'];
   }
 
@@ -132,7 +145,9 @@ export class P1FacilitySettingsPageComponent {
       const updated = this.settingsForms.updateFacilityFromGeneralInformationForm(this.profileForm, facility);
       updated.classification = this.profileForm.controls['classification'].value;
       return updated;
-    });
+    }, account =>
+      this.settingsForms.updateAccountFromGeneralInformationForm(this.profileForm, account)
+    );
   }
 
   checkNAICS(): void {
@@ -173,7 +188,8 @@ export class P1FacilitySettingsPageComponent {
     this.unitsForm = this.settingsForms.checkCustom(this.unitsForm);
     this.applyFormAvailability(this.canWrite());
     await this.saveFacility('Saving facility units', facility =>
-      this.settingsForms.updateFacilityFromUnitsForm(this.unitsForm, facility)
+      this.settingsForms.updateFacilityFromUnitsForm(this.unitsForm, facility),
+      account => this.settingsForms.updateAccountFromUnitsForm(this.unitsForm, account)
     );
   }
 
@@ -191,7 +207,9 @@ export class P1FacilitySettingsPageComponent {
       const updated = this.settingsForms.updateFacilityFromSustainabilityQuestionsForm(this.goalsForm, facility);
       updated.isNewFacility = this.goalsForm.controls['isNewFacility'].value;
       return updated;
-    });
+    }, account =>
+      this.settingsForms.updateAccountFromSustainabilityQuestionsForm(this.goalsForm, account)
+    );
   }
 
   async useAccountGoals(): Promise<void> {
@@ -211,7 +229,8 @@ export class P1FacilitySettingsPageComponent {
 
   async saveFinancial(): Promise<void> {
     await this.saveFacility('Saving facility financial reporting', facility =>
-      this.settingsForms.updateFacilityFromFiscalForm(this.financialForm, facility)
+      this.settingsForms.updateFacilityFromFiscalForm(this.financialForm, facility),
+      account => this.settingsForms.updateAccountFromFiscalForm(this.financialForm, account)
     );
   }
 
@@ -233,6 +252,12 @@ export class P1FacilitySettingsPageComponent {
     await this.saveFacility('Saving facility staleness settings', facility => ({
       ...facility,
       dataStalenessSettings: settings
+    }), account => ({
+      ...account,
+      dataStalenessSettings: {
+        enabled: settings.enabled,
+        thresholdMonths: settings.thresholdMonths
+      }
     }));
   }
 
@@ -254,11 +279,56 @@ export class P1FacilitySettingsPageComponent {
     this.saveError = '';
   }
 
+  openDeleteAccount(): void {
+    if (!this.account() || !this.canWrite() || this.isDeletingAccount) {
+      return;
+    }
+    this.showDeleteAccountConfirm = true;
+    this.saveError = '';
+  }
+
   cancelDeleteFacility(): void {
     if (this.isDeletingFacility) {
       return;
     }
     this.showDeleteFacilityConfirm = false;
+  }
+
+  cancelDeleteAccount(): void {
+    if (this.isDeletingAccount) {
+      return;
+    }
+    this.showDeleteAccountConfirm = false;
+  }
+
+  async confirmDeleteAccount(): Promise<void> {
+    const account = this.account();
+    if (!account || !this.canWrite() || this.isDeletingAccount) {
+      return;
+    }
+    this.showDeleteAccountConfirm = false;
+    this.isDeletingAccount = true;
+    this.saveError = '';
+    this.saveMessage = 'Deleting account';
+    try {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'account',
+          changeKind: 'delete',
+          entityGuid: account.guid,
+          label: 'Deleting account',
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
+        },
+        () => this.accountHandler.update({ ...account, deleteAccount: true }, account.guid)
+      );
+      await this.router.navigateByUrl('/p1');
+    } catch (error) {
+      this.saveMessage = '';
+      this.saveError = 'Account could not be deleted. Please try again.';
+      console.warn('P1 single-facility account delete failed.', error);
+    } finally {
+      this.isDeletingAccount = false;
+    }
   }
 
   async confirmDeleteFacility(): Promise<void> {
@@ -391,23 +461,45 @@ export class P1FacilitySettingsPageComponent {
     }
   }
 
-  private async saveFacility(label: string, buildFacility: (facility: IdbFacility) => IdbFacility): Promise<void> {
+  private async saveFacility(
+    label: string,
+    buildFacility: (facility: IdbFacility) => IdbFacility,
+    buildAccount?: (account: IdbAccount) => IdbAccount
+  ): Promise<void> {
     const facility = this.facility();
     const account = this.account();
     if (!facility || !account || !this.canWrite()) {
       return;
     }
     const updatedFacility = buildFacility(structuredClone(facility));
+    const updatedAccount = this.facade.isSingleFacilityCompany() && buildAccount
+      ? buildAccount(structuredClone(account))
+      : undefined;
     await this.runSave(label, async () => {
       await this.commandBoundary.execute(
         {
-          entityKind: 'facility',
+          entityKind: updatedAccount ? 'account' : 'facility',
           changeKind: 'update',
-          entityGuid: updatedFacility.guid,
+          entityGuid: updatedAccount?.guid ?? updatedFacility.guid,
           label,
-          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }
+          publication: {
+            mode: 'patch',
+            buildPatch: value => ({
+              account: value.account,
+              collections: [{ collection: 'facilities', upsert: [value.facility] }]
+            })
+          }
         },
-        () => this.facilityHandler.update({ ...updatedFacility }, account.guid)
+        async (): Promise<P1SingleFacilitySettingsSaveResult> => {
+          const savedAccount = updatedAccount
+            ? await this.accountHandler.update({ ...updatedAccount }, account.guid)
+            : undefined;
+          const savedFacility = await this.facilityHandler.update({ ...updatedFacility }, account.guid);
+          return {
+            account: savedAccount,
+            facility: savedFacility
+          };
+        }
       );
     });
   }

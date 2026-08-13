@@ -56,6 +56,7 @@
       }
     </div>
 
+    @if(!account.isSingleFacilityCompany){
     <!-- Context + facility switcher -->
     <div class="p1-header__context" role="group" aria-label="Switch workspace context"
       [class.p1-header__context--account]="contextMode === 'account'"
@@ -91,21 +92,15 @@
           @if (showFacilitySearch) {
           <div class="p1-header__facility-search">
             <span class="fa fa-search p1-header__facility-search-icon" aria-hidden="true"></span>
-            <input
-              class="p1-header__facility-search-input"
-              type="search"
-              placeholder="Search facilities…"
-              aria-label="Search facilities"
-              autocomplete="off"
-              [(ngModel)]="facilitySearch"
-            />
+            <input class="p1-header__facility-search-input" type="search" placeholder="Search facilities…"
+              aria-label="Search facilities" autocomplete="off" [(ngModel)]="facilitySearch" />
           </div>
           }
           <div class="p1-header__dropdown-section p1-header__dropdown-section--scroll">
             <span class="p1-header__dropdown-label">Switch facility</span>
             @for (f of filteredFacilities; track f.id) {
-            <button type="button" class="p1-header__dropdown-item" role="menuitem" [class.active]="f.id === facility?.id"
-              (click)="selectFacility(f.id)">
+            <button type="button" class="p1-header__dropdown-item" role="menuitem"
+              [class.active]="f.id === facility?.id" (click)="selectFacility(f.id)">
               <span class="fa fa-check p1-header__check"></span>
               <span>
                 {{ f.name }}
@@ -122,6 +117,7 @@
       </div>
       }
     </div>
+    }
 
 
     <!-- App settings -->

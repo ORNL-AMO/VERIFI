@@ -226,7 +226,7 @@ describe('ElectronBackupFileComponent', () => {
 
 function buildPreparedBackupFile(): PreparedBackupFile {
   return {
-    dataVersion: 1,
+    dataVersion: 2,
     origin: 'VERIFI',
     backupFileType: 'Account',
     dataBackupId: 'backup-id',

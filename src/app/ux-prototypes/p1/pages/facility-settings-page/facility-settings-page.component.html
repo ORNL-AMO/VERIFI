@@ -52,22 +52,36 @@
           <div class="p1-settings__panel-heading">
             <div>
               <span>Concept only</span>
-              <h2>Backup and import</h2>
+              <h2>{{ facade.isSingleFacilityCompany() ? 'Account backup and import' : 'Backup and import' }}</h2>
             </div>
             <small>File actions stay in production flows for this pass</small>
           </div>
           <div class="p1-settings__cards">
-            <article>
-              <h3>Facility export</h3>
-              <p>The prototype reserves this area for facility export and backup actions without invoking file flows.</p>
-              <a [routerLink]="backupRoute">Open current facility setup</a>
-            </article>
-            <article>
-              <h3>Import backup data</h3>
-              <p>Facility import remains in the existing backup workflow until prototype file actions are explicitly scoped.</p>
-              <button type="button" disabled>Import backup file</button>
-              <button type="button" disabled>Export facility</button>
-            </article>
+            @if (facade.isSingleFacilityCompany()) {
+              <article>
+                <h3>Account backup</h3>
+                <p>For a single-facility company, backup protects the account and its facility data together.</p>
+                <a [routerLink]="backupRoute">Open current account setup</a>
+              </article>
+              <article>
+                <h3>Import account data</h3>
+                <p>The prototype shows the future location for account backup and restore actions without invoking file flows.</p>
+                <button type="button" disabled>Import account backup</button>
+                <button type="button" disabled>Backup account</button>
+              </article>
+            } @else {
+              <article>
+                <h3>Facility export</h3>
+                <p>The prototype reserves this area for facility export and backup actions without invoking file flows.</p>
+                <a [routerLink]="backupRoute">Open current facility setup</a>
+              </article>
+              <article>
+                <h3>Import backup data</h3>
+                <p>Facility import remains in the existing backup workflow until prototype file actions are explicitly scoped.</p>
+                <button type="button" disabled>Import backup file</button>
+                <button type="button" disabled>Export facility</button>
+              </article>
+            }
           </div>
         </section>
       }
@@ -76,18 +90,40 @@
           <div class="p1-settings__panel-heading">
             <div>
               <span>Safety</span>
-              <h2>Delete facility</h2>
+              <h2>{{ facade.isSingleFacilityCompany() ? 'Delete account' : 'Delete facility' }}</h2>
             </div>
             <small>Permanent action</small>
           </div>
-          <p>Deleting a facility permanently removes its meters, predictors, analyses, reports, and related data. This action cannot be undone.</p>
-          <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingFacility"
-            (click)="openDeleteFacility()">Delete facility</button>
+          @if (facade.isSingleFacilityCompany()) {
+            <p>Deleting this account permanently removes the company workspace, including its facility, meters, predictors, analyses, reports, and settings. This action cannot be undone.</p>
+            <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingAccount"
+              (click)="openDeleteAccount()">Delete account</button>
+          } @else {
+            <p>Deleting a facility permanently removes its meters, predictors, analyses, reports, and related data. This action cannot be undone.</p>
+            <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingFacility"
+              (click)="openDeleteFacility()">Delete facility</button>
+          }
         </section>
       }
     }
   }
 </section>
+
+@if (showDeleteAccountConfirm && _account) {
+<div class="p1-modal-backdrop"></div>
+<section class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+  <h2 id="delete-account-title">Delete {{ _account.name }}</h2>
+  <p>Deleting this account will permanently remove its facility, meters, predictors, analyses, reports, and settings.</p>
+  <p>This action cannot be undone. Create an account backup before continuing if this data may be needed later.</p>
+  <div class="p1-confirm__actions">
+    <button type="button" class="p1-btn p1-btn--quiet" (click)="cancelDeleteAccount()">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingAccount"
+      (click)="confirmDeleteAccount()">
+      {{ isDeletingAccount ? 'Deleting...' : 'Delete account' }}
+    </button>
+  </div>
+</section>
+}
 
 @if (showDeleteFacilityConfirm && _facility) {
 <div class="p1-modal-backdrop"></div>

@@ -21,7 +21,7 @@ describe('data migration runner in Chromium', () => {
     await runner.runMigrations();
     const metadata = await harness.getAll('application');
     expect(metadata).toHaveLength(1);
-    expect(metadata[0].dataVersion).toBe(1);
+    expect(metadata[0].dataVersion).toBe(2);
     expect(await harness.getAll('accounts')).toEqual([]);
   });
 
@@ -40,8 +40,8 @@ describe('data migration runner in Chromium', () => {
     await Promise.all([runner.runMigrations(), runner.runMigrations()]);
     await harness.reopen();
 
-    expect((await harness.getAll('application'))[0].dataVersion).toBe(1);
-    expect((await harness.getAll('accounts'))[0]).toMatchObject({ id: 1, guid: 'account', electricityUnit: 'kWh' });
+    expect((await harness.getAll('application'))[0].dataVersion).toBe(2);
+    expect((await harness.getAll('accounts'))[0]).toMatchObject({ id: 1, guid: 'account', electricityUnit: 'kWh', isSingleFacilityCompany: false });
     expect((await harness.getAll('utilityMeter'))[0]).toMatchObject({ id: 3, facilityId: 'facility', source: 'Water Intake' });
     expect((await harness.getAll('utilityMeterData'))[0]).toMatchObject({ id: 4, meterId: 'meter', year: 2024, month: 1, day: 31 });
   });
@@ -49,11 +49,11 @@ describe('data migration runner in Chromium', () => {
   it('does not rewrite current-version domain records', async () => {
     const account = { id: 1, guid: 'account', name: 'Current', unknown: 'preserved' };
     await harness.seed({
-      application: [{ id: 1, guid: 'application', dataVersion: 1 }],
-      accounts: [account]
+      application: [{ id: 1, guid: 'application', dataVersion: 2 }],
+      accounts: [{ ...account, isSingleFacilityCompany: false }]
     });
     await runner.runMigrations();
-    expect(await firstValueFrom(harness.dbService.getByKey('accounts', 1))).toEqual(account);
+    expect(await firstValueFrom(harness.dbService.getByKey('accounts', 1))).toEqual({ ...account, isSingleFacilityCompany: false });
   });
 
   it('rolls back a failed transaction and allows a later retry', async () => {
@@ -83,8 +83,9 @@ describe('data migration runner in Chromium', () => {
     expect((await harness.getAll('facilities'))[0].electricityUnit).toBeUndefined();
 
     await runner.runMigrations();
-    expect((await harness.getAll('application'))[0].dataVersion).toBe(1);
+    expect((await harness.getAll('application'))[0].dataVersion).toBe(2);
     expect((await harness.getAll('accounts'))[0].electricityUnit).toBe('kWh');
+    expect((await harness.getAll('accounts'))[0].isSingleFacilityCompany).toBe(false);
     expect((await harness.getAll('facilities'))[0].electricityUnit).toBe('kWh');
   });
 
@@ -111,5 +112,6 @@ describe('data migration runner in Chromium', () => {
     expect(migratedReadings).toHaveLength(500);
     expect(migratedReadings.every(reading => reading.meterId === 'meter' && reading.facilityId === 'facility')).toBe(true);
     expect(migratedReadings.every(reading => reading.migratedDates === true)).toBe(true);
+    expect((await harness.getAll('accounts'))[0].isSingleFacilityCompany).toBe(false);
   });
 });

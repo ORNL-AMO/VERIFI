@@ -1,8 +1,12 @@
 import { Component, EventEmitter, Output, inject } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
-import { getNewIdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { Countries } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
@@ -20,19 +24,30 @@ export class P1CreateAccountDrawerComponent {
   @Output() closed = new EventEmitter<void>();
 
   private readonly lifecycle = inject(ApplicationLifecycleService);
+  private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly facilityHandler = inject(FacilityCommandHandler);
   private readonly router = inject(Router);
   private readonly settingsForms = inject(SettingsFormsService);
 
   readonly countries = Countries;
   readonly firstNaicsList = FirstNaicsList;
   readonly profileForm: FormGroup = this.settingsForms.getGeneralInformationForm(getNewIdbAccount());
+  readonly companyScaleForm = new FormGroup({
+    isSingleFacilityCompany: new FormControl(true)
+  });
 
   isCreating = false;
   createError = '';
+  createdAccountGuid = '';
 
   get accountNameInvalid(): boolean {
     const nameControl = this.profileForm.controls['name'];
     return nameControl.hasError('required') && (nameControl.touched || nameControl.dirty);
+  }
+
+  get isSingleFacilityCompany(): boolean {
+    return this.companyScaleForm.controls.isSingleFacilityCompany.value === true;
   }
 
   close(): void {
@@ -80,6 +95,7 @@ export class P1CreateAccountDrawerComponent {
       return;
     }
     this.createError = '';
+    this.createdAccountGuid = '';
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
@@ -91,13 +107,64 @@ export class P1CreateAccountDrawerComponent {
         this.profileForm,
         structuredClone(getNewIdbAccount())
       );
-      await this.lifecycle.createAccount(account);
-      await this.router.navigateByUrl('/p1/workspace/account/settings/profile/help');
+      account.isSingleFacilityCompany = this.isSingleFacilityCompany;
+      const createdAccount = await this.lifecycle.createAccount(account);
+      this.createdAccountGuid = createdAccount.guid;
+
+      if (!account.isSingleFacilityCompany) {
+        await this.router.navigateByUrl('/p1/workspace/account/settings/profile/help');
+        return;
+      }
+
+      const facility = this.createPrimaryFacilityFromAccount(createdAccount);
+
+      const result = await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'add', entityGuid: facility.guid, label: 'Adding primary facility' },
+        () => this.facilityHandler.add(
+          facility,
+          createdAccount.guid,
+          this.workspace.accountAnalyses(),
+          this.workspace.accountReports()
+        )
+      );
+
+      await this.router.navigate([
+        '/p1',
+        'workspace',
+        'facility',
+        result.value.facility.guid,
+        'settings',
+        'profile',
+        'help'
+      ]);
     } catch (error) {
       console.warn('P1 prototype could not create an account.', error);
-      this.createError = 'Account could not be created. Please try again.';
+      this.createError = this.createdAccountGuid
+        ? 'Account was created, but the primary facility could not be created. Add a facility manually to continue setup.'
+        : 'Account could not be created. Please try again.';
     } finally {
       this.isCreating = false;
     }
+  }
+
+  private createPrimaryFacilityFromAccount(account: IdbAccount): IdbFacility {
+    const facility = getNewIdbFacility(account);
+    return {
+      ...facility,
+      name: account.name,
+      country: account.country,
+      address: account.address,
+      city: account.city,
+      state: account.state,
+      zip: account.zip,
+      size: account.size,
+      naics1: account.naics1,
+      naics2: account.naics2,
+      naics3: account.naics3,
+      notes: account.notes,
+      contactName: account.contactName,
+      contactEmail: account.contactEmail,
+      contactPhone: account.contactPhone
+    };
   }
 }

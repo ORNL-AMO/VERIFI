@@ -17,7 +17,7 @@ import { IdbUtilityMeterData } from '../../models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '../../models/idbModels/utilityMeterGroup';
 import { VerifiStoreName } from '../indexed-db-schema';
 
-export const CURRENT_DATA_VERSION = 1;
+export const CURRENT_DATA_VERSION = 2;
 
 export interface MigrationData {
   accounts: Array<IdbAccount>;

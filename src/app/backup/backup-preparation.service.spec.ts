@@ -22,8 +22,9 @@ describe('BackupPreparationService', () => {
   it('clones and migrates an unversioned account backup', () => {
     const input = accountBackup();
     const prepared = service.prepare(input);
-    expect(prepared.dataVersion).toBe(1);
+    expect(prepared.dataVersion).toBe(2);
     expect(prepared.account.electricityUnit).toBe('kWh');
+    expect(prepared.account.isSingleFacilityCompany).toBe(false);
     expect(prepared.meters[0].source).toBe('Water Intake');
     expect(prepared.meterData[0]).toMatchObject({ year: 2024, month: 1, day: 31 });
     expect(input.dataVersion).toBeUndefined();
@@ -59,7 +60,7 @@ describe('BackupPreparationService', () => {
   });
 
   it('rejects future, invalid, and broken core relationships', () => {
-    expect(() => service.prepare({ ...accountBackup(), dataVersion: 2 })).toThrow(FutureBackupVersionError);
+    expect(() => service.prepare({ ...accountBackup(), dataVersion: 3 })).toThrow(FutureBackupVersionError);
     expect(() => service.prepare({ ...accountBackup(), dataVersion: -1 })).toThrow(InvalidBackupError);
     const broken = accountBackup();
     broken.meterData[0].meterId = 'missing';

@@ -55,6 +55,43 @@ const VALID_SECTIONS: ReadonlyArray<P1SectionId> = [
   'imports'
 ];
 const VALID_PANEL_TABS: ReadonlyArray<P1PanelTabId> = ['help', 'todos', 'results', 'details'];
+const SINGLE_FACILITY_ACCOUNT_DETAIL_MAP: Partial<Record<P1SectionId, Record<string, string>>> = {
+  home: {
+    overview: 'overview',
+    'todo-list': 'todo-list',
+    activity: 'activity'
+  },
+  data: {
+    facilities: 'overview',
+    meters: 'meters',
+    predictors: 'predictors',
+    'energy-uses': 'energy-uses',
+    events: 'events'
+  },
+  visualization: {
+    'time-series': 'time-series'
+  },
+  analysis: {
+    'footprint-analysis': 'footprint-analysis'
+  },
+  reports: {
+    'footprint-report': 'footprint-report'
+  },
+  settings: {
+    profile: 'profile',
+    units: 'units',
+    goals: 'goals',
+    financial: 'financial',
+    staleness: 'staleness',
+    backup: 'backup',
+    delete: 'delete'
+  },
+  imports: {
+    template: 'meter-import',
+    backup: 'account-backup',
+    export: 'account-backup'
+  }
+};
 
 interface P1RawRouteState {
   view: 'welcome' | 'workspace';
@@ -130,6 +167,9 @@ export class P1RouteFacade {
     }
     return this.data().facilities.filter(facility => facility.accountId === account.id);
   });
+  readonly isSingleFacilityCompany = computed(() =>
+    !!this.selectedAccount()?.isSingleFacilityCompany && this.accountFacilities().length === 1
+  );
 
   readonly selectedFacility = computed<P1FacilitySummary | undefined>(() => {
     const routeState = this.routeState();
@@ -229,11 +269,25 @@ export class P1RouteFacade {
       return;
     }
     await this.selectAccount(targetAccountGuid);
+    if (this.isSingleFacilityCompany()) {
+      const facilityGuid = this.accountFacilities()[0]?.id;
+      if (facilityGuid) {
+        void this.navigateToWorkspace('facility', DEFAULT_SECTION, facilityGuid, DEFAULT_PANEL_TAB);
+        return;
+      }
+    }
     void this.navigateToWorkspace('account', DEFAULT_SECTION, undefined, DEFAULT_PANEL_TAB);
   }
 
   async switchAccount(accountGuid: string): Promise<void> {
     await this.selectAccount(accountGuid);
+    if (this.isSingleFacilityCompany()) {
+      const facilityGuid = this.accountFacilities()[0]?.id;
+      if (facilityGuid) {
+        void this.navigateToWorkspace('facility', DEFAULT_SECTION, facilityGuid, this.activePanelTab());
+        return;
+      }
+    }
     void this.navigateToWorkspace('account', DEFAULT_SECTION, undefined, this.activePanelTab());
   }
 
@@ -402,13 +456,23 @@ export class P1RouteFacade {
     const requestedFacility = raw.contextMode === 'facility' && raw.facilityGuid
       ? data.facilities.find(facility => facility.id === raw.facilityGuid)
       : undefined;
-    const contextMode: P1ContextMode = raw.contextMode === 'facility' && (!loaded || requestedFacility)
+    let contextMode: P1ContextMode = raw.contextMode === 'facility' && (!loaded || requestedFacility)
       ? 'facility'
       : 'account';
-    const facilityGuid = contextMode === 'facility' ? raw.facilityGuid : undefined;
-    const section = isP1Section(raw.section) ? raw.section : DEFAULT_SECTION;
-    const detail = this.getValidDetail(contextMode, section, raw.detail);
+    let facilityGuid = contextMode === 'facility' ? raw.facilityGuid : undefined;
+    let section = isP1Section(raw.section) ? raw.section : DEFAULT_SECTION;
+    let detail = this.getValidDetail(contextMode, section, raw.detail);
     const panelTab = isP1PanelTab(raw.panelTab) ? raw.panelTab : DEFAULT_PANEL_TAB;
+    const singleFacilityGuid = loaded ? this.getSingleFacilityGuid(data) : undefined;
+    if (contextMode === 'account' && singleFacilityGuid) {
+      const mapped = this.mapAccountRouteToSingleFacility(section, detail);
+      if (mapped) {
+        contextMode = 'facility';
+        facilityGuid = singleFacilityGuid;
+        section = mapped.section;
+        detail = mapped.detail;
+      }
+    }
     return {
       view: 'workspace',
       contextMode,
@@ -476,6 +540,28 @@ export class P1RouteFacade {
       return `/p1/workspace/facility/${facilityGuid}/${section}/${detail}/${panelTab}`;
     }
     return `/p1/workspace/account/${section}/${detail}/${panelTab}`;
+  }
+
+  private getSingleFacilityGuid(data: P1PrototypeData): string | undefined {
+    const account = data.accounts.find(item => item.id === data.selectedAccountId)
+      || data.accounts.find(item => item.isActive)
+      || data.accounts[0];
+    if (!account?.isSingleFacilityCompany) {
+      return undefined;
+    }
+    const facilities = data.facilities.filter(facility => facility.accountId === account.id);
+    return facilities.length === 1 ? facilities[0].id : undefined;
+  }
+
+  private mapAccountRouteToSingleFacility(section: P1SectionId, detail: string): { section: P1SectionId; detail: string } | undefined {
+    const mappedDetail = SINGLE_FACILITY_ACCOUNT_DETAIL_MAP[section]?.[detail];
+    if (!mappedDetail) {
+      return undefined;
+    }
+    if (section === 'data' && detail === 'facilities') {
+      return { section: 'home', detail: mappedDetail };
+    }
+    return { section, detail: mappedDetail };
   }
 
   private getPath(url: string): string {

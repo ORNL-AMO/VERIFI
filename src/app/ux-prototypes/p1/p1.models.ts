@@ -15,6 +15,7 @@ export interface P1AccountSummary {
   reportCountLabel: string;
   status: string;
   isActive: boolean;
+  isSingleFacilityCompany: boolean;
 }
 
 export interface P1FacilitySummary {

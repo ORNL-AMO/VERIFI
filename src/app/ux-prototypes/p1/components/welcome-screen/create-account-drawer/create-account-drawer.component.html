@@ -21,6 +21,9 @@
     <div class="p1-alert p1-alert--danger" role="alert">
       <span class="fa fa-circle-exclamation"></span>
       {{ createError }}
+      @if (createdAccountGuid) {
+        <a [routerLink]="['/p1', 'workspace', 'account', 'data', 'facilities', 'help']">Add facility manually</a>
+      }
     </div>
   }
 
@@ -33,6 +36,18 @@
       </div>
       <small>Saved when account is created</small>
     </div>
+
+    <fieldset class="p1-create-account__scale" [formGroup]="companyScaleForm">
+      <legend>Facility setup</legend>
+      <label>
+        <input type="checkbox" formControlName="isSingleFacilityCompany">
+        <span>
+          <strong>This company has one facility</strong>
+          <small>Use a simpler setup for one-site organizations. VERIFI will create the first facility from the information below.</small>
+        </span>
+      </label>
+      <p>Clear this option if the company manages multiple facilities.</p>
+    </fieldset>
 
     <div class="p1-settings__grid p1-settings__grid--2">
       <label>
@@ -128,12 +143,13 @@
 
     <div class="p1-create-account__actions">
       <button type="button" class="p1-btn p1-btn--ghost" [disabled]="isCreating" (click)="close()">Cancel</button>
-      <button type="submit" class="p1-btn p1-btn--success" [disabled]="isCreating || profileForm.invalid">
+      <button type="submit" class="p1-btn p1-btn--success"
+        [disabled]="isCreating || profileForm.invalid">
         @if (isCreating) {
           <span class="fa fa-spinner fa-spin"></span>
           Creating
         } @else {
-          Create Account
+          {{ isSingleFacilityCompany ? 'Create Company' : 'Create Account' }}
           <span class="fa fa-arrow-right"></span>
         }
       </button>

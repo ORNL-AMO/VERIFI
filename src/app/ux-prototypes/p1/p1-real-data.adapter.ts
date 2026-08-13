@@ -127,7 +127,8 @@ function mapAccount(account: IdbAccount, activeAccountGuid?: string, activeCount
     predictorCountLabel: isActive && activeCounts ? pluralize(activeCounts.predictors, 'predictor') : 'Open to load predictors',
     reportCountLabel: isActive && activeCounts ? pluralize(activeCounts.accountReports + activeCounts.facilityReports, 'report') : 'Open to load reports',
     status: isActive ? 'Active account' : 'Available account',
-    isActive
+    isActive,
+    isSingleFacilityCompany: !!account.isSingleFacilityCompany
   };
 }
 
