@@ -20,6 +20,7 @@ import { P1WelcomeScreenComponent } from './p1/components/welcome-screen/welcome
 import { P1WorkspaceShellComponent } from './p1/components/workspace-shell/workspace-shell.component';
 import { P1AccountEnergyUsesDataPageComponent } from './p1/pages/account-data-pages/account-energy-uses-data-page/account-energy-uses-data-page.component';
 import { P1AccountEventsDataPageComponent } from './p1/pages/account-data-pages/account-events-data-page/account-events-data-page.component';
+import { P1AccountFacilitiesDataPageComponent } from './p1/pages/account-data-pages/account-facilities-data-page/account-facilities-data-page.component';
 import { P1AccountMetersDataPageComponent } from './p1/pages/account-data-pages/account-meters-data-page/account-meters-data-page.component';
 import { P1AccountPredictorsDataPageComponent } from './p1/pages/account-data-pages/account-predictors-data-page/account-predictors-data-page.component';
 import { P1AccountHomePageComponent } from './p1/pages/account-home-page/account-home-page.component';
@@ -82,6 +83,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1UtilitySectionNavComponent,
     P1RightPanelComponent,
     P1AccountHomePageComponent,
+    P1AccountFacilitiesDataPageComponent,
     P1AccountMetersDataPageComponent,
     P1AccountPredictorsDataPageComponent,
     P1AccountEnergyUsesDataPageComponent,

@@ -32,9 +32,16 @@ export class P1DataSectionNavComponent {
     }
 
     // const counts = accountNavCounts(this.facade.accountFacilities());
+    const facilities = this.facade.accountFacilities();
     return [{
       title: 'Account Data',
       items: [
+        {
+          id: 'facilities',
+          label: 'Facilities',
+          meta: `${facilities.length} total`,
+          status: facilities.length === 0 ? 'warning' : 'success'
+        },
         { id: 'meters', label: 'Meters' },
         { id: 'predictors', label: 'Predictors' },
         { id: 'energy-uses', label: 'Energy Uses' },

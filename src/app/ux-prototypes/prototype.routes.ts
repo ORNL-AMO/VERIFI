@@ -3,6 +3,7 @@ import { P1WorkspaceShellComponent } from './p1/components/workspace-shell/works
 import { P1WelcomeScreenComponent } from './p1/components/welcome-screen/welcome-screen.component';
 import { P1AccountEnergyUsesDataPageComponent } from './p1/pages/account-data-pages/account-energy-uses-data-page/account-energy-uses-data-page.component';
 import { P1AccountEventsDataPageComponent } from './p1/pages/account-data-pages/account-events-data-page/account-events-data-page.component';
+import { P1AccountFacilitiesDataPageComponent } from './p1/pages/account-data-pages/account-facilities-data-page/account-facilities-data-page.component';
 import { P1AccountMetersDataPageComponent } from './p1/pages/account-data-pages/account-meters-data-page/account-meters-data-page.component';
 import { P1AccountPredictorsDataPageComponent } from './p1/pages/account-data-pages/account-predictors-data-page/account-predictors-data-page.component';
 import { P1AccountHomePageComponent } from './p1/pages/account-home-page/account-home-page.component';
@@ -38,6 +39,11 @@ export const PrototypeRoutes: Routes = [
             path: 'workspace/account/home/:detail/:panelTab',
             component: P1WorkspaceShellComponent,
             children: [{ path: '', component: P1AccountHomePageComponent }]
+          },
+          {
+            path: 'workspace/account/data/facilities/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1AccountFacilitiesDataPageComponent }]
           },
           {
             path: 'workspace/account/data/meters/:panelTab',

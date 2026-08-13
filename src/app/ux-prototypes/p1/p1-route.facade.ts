@@ -28,7 +28,7 @@ const DEFAULT_PANEL_TAB: P1PanelTabId = 'help';
 const DEFAULT_DETAILS: Record<P1ContextMode, Record<P1SectionId, string>> = {
   account: {
     home: 'overview',
-    data: 'meters',
+    data: 'facilities',
     visualization: 'time-series',
     analysis: 'rollup',
     reports: 'setup',
