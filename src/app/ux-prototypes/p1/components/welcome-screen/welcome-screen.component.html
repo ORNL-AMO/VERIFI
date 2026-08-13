@@ -64,9 +64,15 @@
           </div>
           <h3>{{ action.title }}</h3>
           <p>{{ action.summary }}</p>
+          @if (isLoadExampleAction(action)) {
+          <button type="button" [disabled]="!!loadingExamplePath" (click)="openExampleDrawer()">
+            {{ action.cta }}
+          </button>
+          } @else {
           <button type="button" disabled>
             {{ action.cta }}
           </button>
+          }
         </article>
       }
     </div>
@@ -132,4 +138,61 @@
       </p>
     </article>
   </section>
+
+  @if (isExampleDrawerOpen) {
+  <div class="p1-welcome__drawer-layer">
+    <button type="button" class="p1-welcome__drawer-backdrop" aria-label="Close example account panel"
+      (click)="closeExampleDrawer()"></button>
+    <aside class="p1-welcome__drawer" role="dialog" aria-modal="true" aria-labelledby="p1-example-drawer-title">
+      <header class="p1-welcome__drawer-header">
+        <div>
+          <p class="p1-welcome__eyebrow mb-0">Example accounts</p>
+          <h2 id="p1-example-drawer-title">Load Example Account</h2>
+        </div>
+        <button type="button" class="p1-welcome__icon-button" title="Close example account panel"
+          aria-label="Close example account panel" [disabled]="!!loadingExamplePath" (click)="closeExampleDrawer()">
+          <span class="fa fa-xmark"></span>
+        </button>
+      </header>
+
+      <p class="p1-welcome__drawer-intro">
+        Example accounts create a real VERIFI workspace with demonstration data so you can explore setup, utility data,
+        analysis, reports, and account navigation without building an account from scratch.
+      </p>
+
+      <div class="p1-welcome__example-list">
+        @for (example of examples; track example.assetPath) {
+        <article class="p1-welcome__example">
+          <div class="p1-welcome__example-header">
+            <div>
+              <h3>{{ example.title }}</h3>
+              <p>{{ example.summary }}</p>
+            </div>
+            <span class="fa fa-industry"></span>
+          </div>
+          <div class="p1-welcome__example-highlights" aria-label="Example contents">
+            @for (highlight of example.highlights; track highlight) {
+            <span>{{ highlight }}</span>
+            }
+          </div>
+          <div class="p1-welcome__example-details">
+            @for (detail of example.details; track detail) {
+            <p>{{ detail }}</p>
+            }
+          </div>
+          <button type="button" [disabled]="!!loadingExamplePath" (click)="loadExample(example)">
+            @if (loadingExamplePath === example.assetPath) {
+            <span class="fa fa-spinner fa-spin"></span>
+            Loading
+            } @else {
+            {{ example.cta }}
+            <span class="fa fa-arrow-right"></span>
+            }
+          </button>
+        </article>
+        }
+      </div>
+    </aside>
+  </div>
+  }
 </main>

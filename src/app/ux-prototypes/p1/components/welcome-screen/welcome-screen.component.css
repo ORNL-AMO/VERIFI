@@ -200,6 +200,10 @@
 }
 
 .p1-welcome__action button {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  justify-content: center;
   align-self: end;
   min-height: 2.35rem;
   width: fit-content;
@@ -207,6 +211,20 @@
   border: 1px solid var(--prototype-border);
   background: var(--prototype-surface);
   color: var(--prototype-blue);
+}
+
+.p1-welcome__action--success button:not(:disabled) {
+  border-color: var(--prototype-green);
+  background: var(--prototype-green);
+  color: #fff;
+}
+
+.p1-welcome__action button:not(:disabled):hover,
+.p1-welcome__action button:not(:disabled):focus-visible,
+.p1-welcome__account:focus-visible,
+.p1-welcome__drawer button:focus-visible {
+  outline: 3px solid rgba(255, 96, 0, .28);
+  outline-offset: 2px;
 }
 
 .p1-welcome__action--primary div {
@@ -296,6 +314,138 @@
   font-weight: 800;
 }
 
+.p1-welcome__drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+}
+
+.p1-welcome__drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(13, 20, 18, .36);
+}
+
+.p1-welcome__drawer {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 1rem;
+  width: min(42rem, 100vw);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-left: 1px solid var(--prototype-border);
+  background: var(--prototype-surface);
+  box-shadow: -1rem 0 3rem rgba(0, 0, 0, .16);
+  overflow: auto;
+}
+
+.p1-welcome__drawer-header,
+.p1-welcome__example-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.p1-welcome__drawer-header h2 {
+  margin: .25rem 0 0;
+  font-size: 1.5rem;
+}
+
+.p1-welcome__icon-button {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
+}
+
+.p1-welcome__drawer-intro {
+  margin: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-welcome__example-list {
+  display: grid;
+  gap: .85rem;
+  align-content: start;
+}
+
+.p1-welcome__example {
+  display: grid;
+  gap: .9rem;
+  padding: 1rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+}
+
+.p1-welcome__example-header h3 {
+  margin-bottom: .35rem;
+  color: var(--prototype-text);
+  font-size: 1.1rem;
+}
+
+.p1-welcome__example-header p,
+.p1-welcome__example-details p {
+  margin-bottom: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-welcome__example-header > span {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 7px;
+  background: rgba(20, 90, 50, .12);
+  color: var(--prototype-green);
+}
+
+.p1-welcome__example-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.p1-welcome__example-highlights span {
+  padding: .28rem .5rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 999px;
+  background: var(--prototype-surface);
+  color: var(--prototype-muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.p1-welcome__example-details {
+  display: grid;
+  gap: .45rem;
+}
+
+.p1-welcome__example button {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  min-height: 2.5rem;
+  padding: .55rem .8rem;
+  border: 1px solid var(--prototype-green);
+  border-radius: 7px;
+  background: var(--prototype-green);
+  color: #fff;
+}
+
 .p1-welcome__support {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -365,6 +515,19 @@
   }
 }
 
+@media (max-width: 560px) {
+  .p1-welcome__drawer {
+    width: 100vw;
+  }
+
+  .p1-welcome__example-header {
+    display: grid;
+  }
+
+  .p1-welcome__example button {
+    width: 100%;
+  }
+}
 
 .fa {
   color: inherit;
