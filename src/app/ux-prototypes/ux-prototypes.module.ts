@@ -22,6 +22,7 @@ import { P1AccountEnergyUsesDataPageComponent } from './p1/pages/account-data-pa
 import { P1AccountEventsDataPageComponent } from './p1/pages/account-data-pages/account-events-data-page/account-events-data-page.component';
 import { P1AccountMetersDataPageComponent } from './p1/pages/account-data-pages/account-meters-data-page/account-meters-data-page.component';
 import { P1AccountPredictorsDataPageComponent } from './p1/pages/account-data-pages/account-predictors-data-page/account-predictors-data-page.component';
+import { P1AccountHomePageComponent } from './p1/pages/account-home-page/account-home-page.component';
 import { P1AccountPlaceholderPageComponent } from './p1/pages/account-placeholder-page/account-placeholder-page.component';
 import { P1AccountSettingsFinancialComponent } from './p1/pages/account-settings-page/financial/account-settings-financial.component';
 import { P1AccountSettingsGoalsComponent } from './p1/pages/account-settings-page/goals/account-settings-goals.component';
@@ -39,6 +40,7 @@ import { P1FacilityMeterMonthlyDataComponent } from './p1/pages/facility-data-pa
 import { P1FacilityMeterReadingsComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-readings/meter-readings.component';
 import { P1FacilityMeterSetupComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-setup/meter-setup.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
+import { P1FacilityHomePageComponent } from './p1/pages/facility-home-page/facility-home-page.component';
 import { P1FacilityAnalysisCompareDrawerComponent } from './p1/pages/facility-analysis-page/analysis-compare-drawer/analysis-compare-drawer.component';
 import { P1FacilityAnalysisDashboardListComponent } from './p1/pages/facility-analysis-page/analysis-dashboard-list/analysis-dashboard-list.component';
 import { P1FacilityAnalysisDashboardPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-dashboard-page.component';
@@ -79,6 +81,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1SettingsSectionNavComponent,
     P1UtilitySectionNavComponent,
     P1RightPanelComponent,
+    P1AccountHomePageComponent,
     P1AccountMetersDataPageComponent,
     P1AccountPredictorsDataPageComponent,
     P1AccountEnergyUsesDataPageComponent,
@@ -111,6 +114,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1FacilityAnalysisResultsPanelComponent,
     P1FacilityAnalysisReferencesPanelComponent,
     P1FacilityAnalysisWorkbenchFooterComponent,
+    P1FacilityHomePageComponent,
     P1FacilityPlaceholderPageComponent,
     P1FacilitySettingsPageComponent,
     P1FacilitySettingsProfileComponent,

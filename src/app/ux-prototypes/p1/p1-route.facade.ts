@@ -16,6 +16,8 @@ import {
   P1PrototypeData,
   P1SectionDefinition,
   P1SectionId,
+  P1SetupSummary,
+  P1SetupTask,
   P1ViewState,
   P1WelcomeAction,
   P1WorkspaceContent
@@ -81,11 +83,13 @@ export class P1RouteFacade {
   private readonly workspaceStore = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly currentUrl = signal(this.router.url);
+  private readonly visitedReviewTaskIds = signal<ReadonlySet<string>>(new Set<string>());
   private lastSyncedAccountGuid: string | undefined;
   private lastSyncedFacilityGuid: string | undefined;
 
   readonly darkMode = signal(false);
   readonly isRightPanelOpen = signal(true);
+  readonly areCompletedTodoItemsHidden = signal(false);
 
   readonly data = computed<P1PrototypeData>(() => buildP1PrototypeData({
     accounts: this.lifecycle.usableAccounts(),
@@ -146,7 +150,22 @@ export class P1RouteFacade {
     };
   });
   readonly content = computed<P1WorkspaceContent>(() => this.data().content[this.contextMode()][this.activeSection()]);
-  readonly panelContent = computed<P1PanelContent>(() => this.data().panel[this.contextMode()][this.activeSection()]);
+  readonly panelContent = computed<P1PanelContent>(() => {
+    const content = this.data().panel[this.contextMode()][this.activeSection()];
+    const todos = content.todos
+      .map(task => this.applyVisitedTaskState(task))
+      .filter(task => !this.areCompletedTodoItemsHidden() || task.status !== 'complete');
+    return {
+      ...content,
+      todos
+    };
+  });
+  readonly completedPanelTodoCount = computed(() =>
+    this.data().panel[this.contextMode()][this.activeSection()].todos
+      .map(task => this.applyVisitedTaskState(task))
+      .filter(task => task.status === 'complete').length
+  );
+  readonly setup = computed<P1SetupSummary>(() => this.applyVisitedSetupState(this.data().setup));
 
   constructor() {
     this.router.events
@@ -177,6 +196,25 @@ export class P1RouteFacade {
       }
       untracked(() => {
         void this.syncWorkspaceSelection(state);
+      });
+    });
+
+    effect(() => {
+      const state = this.routeState();
+      if (state.view !== 'workspace' || this.data().state.status !== 'ready') {
+        return;
+      }
+      const visitedTask = this.data().setup.allTasks.find(task => this.isVisitedReviewTask(task, state));
+      if (!visitedTask) {
+        return;
+      }
+      untracked(() => {
+        this.visitedReviewTaskIds.update(ids => {
+          if (ids.has(visitedTask.id)) {
+            return ids;
+          }
+          return new Set([...ids, visitedTask.id]);
+        });
       });
     });
   }
@@ -240,6 +278,17 @@ export class P1RouteFacade {
     void this.navigateToWorkspace(context, this.activeSection(), facilityGuid, tabId, this.activeDetailId());
   }
 
+  setupTaskRoute(task: P1SetupTask): Array<string> {
+    if (task.contextMode === 'facility' && task.facilityId) {
+      return ['/p1', 'workspace', 'facility', task.facilityId, task.section, task.detail, task.panelTab];
+    }
+    return ['/p1', 'workspace', 'account', task.section, task.detail, task.panelTab];
+  }
+
+  clearCompletedTodoItems(): void {
+    this.areCompletedTodoItemsHidden.set(true);
+  }
+
   toggleRightPanel(): void {
     this.isRightPanelOpen.update(open => !open);
   }
@@ -297,6 +346,44 @@ export class P1RouteFacade {
     } catch (error) {
       console.warn('P1 prototype could not select facility.', error);
     }
+  }
+
+  private applyVisitedSetupState(setup: P1SetupSummary): P1SetupSummary {
+    const accountTasks = setup.accountTasks.map(task => this.applyVisitedTaskState(task));
+    const selectedFacilityTasks = setup.selectedFacilityTasks.map(task => this.applyVisitedTaskState(task));
+    const allTasks = setup.allTasks.map(task => this.applyVisitedTaskState(task));
+    const completeCount = allTasks.filter(task => task.status === 'complete').length;
+    return {
+      ...setup,
+      accountTasks,
+      selectedFacilityTasks,
+      allTasks,
+      completeCount,
+      nextTaskId: allTasks.find(task => task.status !== 'complete')?.id
+    };
+  }
+
+  private applyVisitedTaskState(task: P1SetupTask): P1SetupTask {
+    if (task.status !== 'ready' || !this.visitedReviewTaskIds().has(task.id)) {
+      return task;
+    }
+    return {
+      ...task,
+      meta: 'Complete',
+      tone: 'success',
+      status: 'complete',
+      statusLabel: 'Complete'
+    };
+  }
+
+  private isVisitedReviewTask(task: P1SetupTask, state: P1WorkspaceRouteState): boolean {
+    if (task.status !== 'ready' || task.contextMode !== state.contextMode) {
+      return false;
+    }
+    if (task.contextMode === 'facility' && task.facilityId !== state.facilityGuid) {
+      return false;
+    }
+    return task.section === state.section && task.detail === state.detail;
   }
 
   private normalizeRouteState(raw: P1RawRouteState, data: P1PrototypeData): P1WorkspaceRouteState {

@@ -1,6 +1,7 @@
 import { AppStartupState } from 'src/app/application-lifecycle/application-lifecycle.models';
 import { AccountWorkspaceSnapshot, WorkspaceError, WorkspaceStatus } from 'src/app/account-workspace/account-workspace.models';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import {
   P1AccountSummary,
   P1ContentCard,
@@ -11,6 +12,8 @@ import {
   P1PanelContent,
   P1PrototypeData,
   P1SectionId,
+  P1SetupSummary,
+  P1SetupTask,
   P1StatusTone,
   P1ViewState,
   P1WorkspaceContent
@@ -56,6 +59,7 @@ export function buildP1PrototypeData(input: P1RealDataInput): P1PrototypeData {
   const facilityCounts = snapshot && selectedFacility ? getFacilityCounts(selectedFacility.id, snapshot) : undefined;
   const accountContent = buildAccountContent(snapshot);
   const facilityContent = buildFacilityContent(snapshot, selectedFacility?.id);
+  const setup = buildSetupSummary(snapshot, selectedFacility?.id);
 
   return {
     state: viewState,
@@ -71,9 +75,10 @@ export function buildP1PrototypeData(input: P1RealDataInput): P1PrototypeData {
       facility: facilityContent
     },
     panel: {
-      account: buildPanels(accountContent),
-      facility: buildPanels(facilityContent)
-    }
+      account: buildPanels(accountContent, setup.accountTasks),
+      facility: buildPanels(facilityContent, setup.selectedFacilityTasks)
+    },
+    setup
   };
 }
 
@@ -322,7 +327,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
   const facility = facilityCounts || emptyCounts();
   return {
     account: {
-      home: [{ title: 'Workspace', items: [{ id: 'overview', label: 'Overview', meta: 'Portfolio' }, { id: 'progress', label: 'Setup progress', status: toneForCount(account.facilities) }, { id: 'activity', label: 'Workspace notes' }] }],
+      home: [{ title: 'Workspace', items: [{ id: 'overview', label: 'Overview', meta: 'Portfolio' }, { id: 'todo-list', label: 'Todo List', status: toneForCount(account.facilities) }, { id: 'activity', label: 'Workspace notes' }] }],
       data: [{ title: 'Account Data', items: [{ id: 'meters', label: 'Meters', meta: `${account.meters} total`, status: toneForCount(account.meters) }, { id: 'predictors', label: 'Predictors', meta: String(account.predictors), status: toneForCount(account.predictors) }, { id: 'energy-uses', label: 'Energy Uses', meta: String(account.energyUseEquipment), status: toneForCount(account.energyUseEquipment) }, { id: 'events', label: 'Events' }] }],
       visualization: [{ title: 'Explore', items: [{ id: 'time-series', label: 'Time series' }, { id: 'trends', label: 'Utility trends' }, { id: 'compare', label: 'Facility comparison' }] }],
       analysis: [{ title: 'Account Analysis', items: [{ id: 'rollup', label: 'Account rollup', status: toneForCount(account.accountAnalyses) }, { id: 'savings', label: 'Savings summary' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
@@ -334,7 +339,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
       ]
     },
     facility: {
-      home: [{ title: 'Facility Workspace', items: [{ id: 'overview', label: 'Overview' }, { id: 'progress', label: 'Facility progress', status: toneForCount(facility.meters) }, { id: 'activity', label: 'Workspace notes' }] }],
+      home: [{ title: 'Facility Workspace', items: [{ id: 'overview', label: 'Overview' }, { id: 'todo-list', label: 'Todo List', status: toneForCount(facility.meters) }, { id: 'activity', label: 'Workspace notes' }] }],
       data: [{ title: 'Facility Data', items: [{ id: 'meters', label: 'Meters', meta: String(facility.meters), status: toneForCount(facility.meters) }, { id: 'predictors', label: 'Predictors', meta: String(facility.predictors), status: toneForCount(facility.predictors) }, { id: 'energy-uses', label: 'Energy Uses', meta: String(facility.energyUseEquipment), status: toneForCount(facility.energyUseEquipment) }, { id: 'events', label: 'Events' }] }],
       visualization: [{ title: 'Facility Charts', items: [{ id: 'time-series', label: 'Time series' }, { id: 'correlation', label: 'Correlation plots' }, { id: 'heatmap', label: 'Heatmaps' }] }],
       analysis: [{ title: 'Facility Analysis', items: [{ id: 'setup', label: 'Analysis setup', status: toneForCount(facility.facilityAnalyses) }, { id: 'results', label: 'Results' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
@@ -348,29 +353,26 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
   };
 }
 
-function buildPanels(content: Record<P1SectionId, P1WorkspaceContent>): Record<P1SectionId, P1PanelContent> {
+function buildPanels(content: Record<P1SectionId, P1WorkspaceContent>, setupTasks: Array<P1SetupTask>): Record<P1SectionId, P1PanelContent> {
   return {
-    home: makePanel(content.home),
-    data: makePanel(content.data),
-    visualization: makePanel(content.visualization),
-    analysis: makePanel(content.analysis),
-    reports: makePanel(content.reports),
-    settings: makePanel(content.settings),
-    imports: makePanel(content.imports)
+    home: makePanel(content.home, setupTasks),
+    data: makePanel(content.data, setupTasks.filter(task => task.section === 'data')),
+    visualization: makePanel(content.visualization, setupTasks.filter(task => task.section === 'visualization')),
+    analysis: makePanel(content.analysis, setupTasks.filter(task => task.section === 'analysis')),
+    reports: makePanel(content.reports, setupTasks.filter(task => task.section === 'reports')),
+    settings: makePanel(content.settings, setupTasks.filter(task => task.section === 'settings')),
+    imports: makePanel(content.imports, setupTasks.filter(task => task.section === 'imports'))
   };
 }
 
-function makePanel(content: P1WorkspaceContent): P1PanelContent {
-  const todoCards = content.cards.filter(item => item.tone === 'warning' || item.tone === 'danger');
+function makePanel(content: P1WorkspaceContent, todoTasks: Array<P1SetupTask>): P1PanelContent {
   return {
     help: [
       `${content.title} is populated from existing VERIFI workspace data.`,
       'This prototype is read-only; actions are shown as concept labels and do not persist changes.',
       'Counts reflect records already loaded for the active account workspace.'
     ],
-    todos: todoCards.length > 0 ? todoCards : [
-      { title: 'No prototype blockers', summary: 'No write action is required from this read-only concept state.', meta: 'Read-only', tone: 'neutral' }
-    ],
+    todos: todoTasks,
     results: content.metrics,
     details: content.cards
   };
@@ -386,6 +388,288 @@ function metric(label: string, value: number | string, trend: string, tone: P1St
 
 function card(title: string, summary: string, meta: string, tone: P1StatusTone): P1ContentCard {
   return { title, summary, meta, tone };
+}
+
+function buildSetupSummary(snapshot?: AccountWorkspaceSnapshot, selectedFacilityGuid?: string): P1SetupSummary {
+  if (!snapshot) {
+    return {
+      accountTasks: [],
+      selectedFacilityTasks: [],
+      allTasks: [],
+      completeCount: 0,
+      totalCount: 0
+    };
+  }
+
+  const accountTasks = buildAccountSetupTasks(snapshot.account, getAccountCounts(snapshot));
+  const facilityTaskGroups = snapshot.facilities.map(facility =>
+    buildFacilitySetupTasks(facility, getFacilityCounts(facility.guid, snapshot))
+  );
+  const allFacilityTasks = facilityTaskGroups.flat();
+  const selectedFacilityTasks = selectedFacilityGuid
+    ? facilityTaskGroups[snapshot.facilities.findIndex(facility => facility.guid === selectedFacilityGuid)] || []
+    : facilityTaskGroups[0] || [];
+  const allTasks = [...accountTasks, ...allFacilityTasks];
+  const completeCount = allTasks.filter(task => task.status === 'complete').length;
+  return {
+    accountTasks,
+    selectedFacilityTasks,
+    allTasks,
+    completeCount,
+    totalCount: allTasks.length,
+    nextTaskId: allTasks.find(task => task.status !== 'complete')?.id
+  };
+}
+
+function buildAccountSetupTasks(account: IdbAccount, counts: P1Counts): Array<P1SetupTask> {
+  return [
+    setupTask({
+      id: 'account-profile',
+      contextMode: 'account',
+      group: 'Account settings',
+      title: 'Complete corporate information',
+      summary: 'Confirm the account name, location, NAICS code, notes, and contact information that identify this workspace.',
+      status: account.name && account.name !== 'New Account' ? 'complete' : 'ready',
+      section: 'settings',
+      detail: 'profile'
+    }),
+    setupTask({
+      id: 'account-units',
+      contextMode: 'account',
+      group: 'Account settings',
+      title: 'Review units and emissions',
+      summary: 'Set the default energy, mass, liquid, gas, electricity, source-energy, emissions, and assessment report preferences.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'units'
+    }),
+    setupTask({
+      id: 'account-goals',
+      contextMode: 'account',
+      group: 'Account settings',
+      title: 'Review reduction goals',
+      summary: 'Confirm energy, greenhouse gas, water, and Better Plants goal settings before building analyses and reports.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'goals'
+    }),
+    setupTask({
+      id: 'account-financial',
+      contextMode: 'account',
+      group: 'Account settings',
+      title: 'Review financial reporting',
+      summary: 'Choose the fiscal-year basis used by account and facility reporting workflows.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'financial'
+    }),
+    setupTask({
+      id: 'account-staleness',
+      contextMode: 'account',
+      group: 'Account settings',
+      title: 'Review data staleness rules',
+      summary: 'Set how VERIFI flags meter and predictor data that has not been updated recently.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'staleness'
+    }),
+    setupTask({
+      id: 'account-facilities',
+      contextMode: 'account',
+      group: 'Account setup',
+      title: counts.facilities > 0 ? 'Facility data is started' : 'Add or import facility data',
+      summary: counts.facilities > 0
+        ? `${pluralize(counts.facilities, 'facility')} available. Continue with facility-level settings and data setup.`
+        : 'Create a facility manually or use an import path so the account has somewhere to store meters, predictors, analyses, and reports.',
+      status: counts.facilities > 0 ? 'complete' : 'blocked',
+      section: 'home',
+      detail: 'todo-list'
+    })
+  ];
+}
+
+function buildFacilitySetupTasks(facility: IdbFacility, counts: P1Counts): Array<P1SetupTask> {
+  return [
+    setupTask({
+      id: `facility-${facility.guid}-profile`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: 'Complete facility information',
+      summary: 'Confirm facility name, location, classification, area, NAICS code, and local contact details.',
+      status: facility.name && facility.name !== 'New Facility' ? 'complete' : 'ready',
+      section: 'settings',
+      detail: 'profile'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-units`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: 'Review facility units',
+      summary: 'Confirm whether this facility inherits account settings or needs local unit and emissions preferences.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'units'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-goals`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: 'Review facility goals',
+      summary: 'Confirm local reduction goals and whether this facility is newly included in the reporting scope.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'goals'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-financial`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: 'Review facility financial reporting',
+      summary: 'Confirm the fiscal-year basis used by this facility for analysis and reporting.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'financial'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-staleness`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: 'Review facility staleness rules',
+      summary: 'Choose whether this facility uses account data-staleness settings or a local threshold.',
+      status: 'ready',
+      section: 'settings',
+      detail: 'staleness'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-meters`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: counts.meters > 0 ? 'Utility meters are started' : 'Add utility meters',
+      summary: counts.meters > 0
+        ? `${pluralize(counts.meters, 'meter')} available for this facility.`
+        : 'Add utility meters before entering readings, grouping meters, or running analyses.',
+      status: counts.meters > 0 ? 'complete' : 'blocked',
+      section: 'data',
+      detail: 'meters'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-meter-data`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: counts.meterData > 0 ? 'Meter readings are started' : 'Add meter readings',
+      summary: counts.meterData > 0
+        ? `${pluralize(counts.meterData, 'meter reading')} loaded for this facility.`
+        : 'Enter or import utility meter readings so dashboards, analyses, and reports have source data.',
+      status: counts.meterData > 0 ? 'complete' : counts.meters > 0 ? 'ready' : 'blocked',
+      section: 'data',
+      detail: 'meters'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-meter-groups`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: counts.meterGroups > 0 ? 'Meter groups are started' : 'Create meter groups',
+      summary: counts.meterGroups > 0
+        ? `${pluralize(counts.meterGroups, 'meter group')} available for analysis setup.`
+        : 'Group meters so VERIFI can organize facility analysis and reporting outputs.',
+      status: counts.meterGroups > 0 ? 'complete' : counts.meters > 0 ? 'ready' : 'blocked',
+      section: 'data',
+      detail: 'meters'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-predictors`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: counts.predictors > 0 ? 'Predictors are started' : 'Add predictors',
+      summary: counts.predictors > 0
+        ? `${pluralize(counts.predictors, 'predictor')} available for this facility.`
+        : 'Add production, weather, or other predictor data used to explain changes in resource use.',
+      status: counts.predictors > 0 ? 'complete' : 'ready',
+      section: 'data',
+      detail: 'predictors'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-analysis`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: counts.facilityAnalyses > 0 ? 'Facility analysis is started' : 'Create facility analysis',
+      summary: counts.facilityAnalyses > 0
+        ? `${pluralize(counts.facilityAnalyses, 'analysis')} available for this facility.`
+        : 'Create facility analysis after meters, readings, groups, and predictors are ready.',
+      status: counts.facilityAnalyses > 0 ? 'complete' : counts.meterData > 0 ? 'ready' : 'blocked',
+      section: 'analysis',
+      detail: 'dashboard'
+    }),
+    setupTask({
+      id: `facility-${facility.guid}-reports`,
+      contextMode: 'facility',
+      facilityId: facility.guid,
+      group: facility.name || 'Facility setup',
+      title: counts.facilityReports > 0 ? 'Facility reports are started' : 'Create facility reports',
+      summary: counts.facilityReports > 0
+        ? `${pluralize(counts.facilityReports, 'report')} available for this facility.`
+        : 'Create reports after analysis setup is available.',
+      status: counts.facilityReports > 0 ? 'complete' : counts.facilityAnalyses > 0 ? 'ready' : 'blocked',
+      section: 'reports',
+      detail: 'overview-report'
+    })
+  ];
+}
+
+function setupTask(config: {
+  id: string;
+  contextMode: P1ContextMode;
+  facilityId?: string;
+  group: string;
+  title: string;
+  summary: string;
+  status: 'complete' | 'ready' | 'blocked';
+  section: P1SectionId;
+  detail: string;
+  required?: boolean;
+}): P1SetupTask {
+  const tone = setupTone(config.status);
+  const panelTab = 'todos';
+  return {
+    id: config.id,
+    contextMode: config.contextMode,
+    facilityId: config.facilityId,
+    group: config.group,
+    title: config.title,
+    summary: config.summary,
+    meta: setupStatusLabel(config.status),
+    tone,
+    status: config.status,
+    statusLabel: setupStatusLabel(config.status),
+    required: config.required ?? true,
+    section: config.section,
+    detail: config.detail,
+    panelTab
+  };
+}
+
+function setupTone(status: 'complete' | 'ready' | 'blocked'): P1StatusTone {
+  if (status === 'complete') {
+    return 'success';
+  }
+  return status === 'blocked' ? 'danger' : 'warning';
+}
+
+function setupStatusLabel(status: 'complete' | 'ready' | 'blocked'): string {
+  if (status === 'complete') {
+    return 'Complete';
+  }
+  return status === 'blocked' ? 'Needs setup' : 'Review';
 }
 
 function getAccountCounts(snapshot: AccountWorkspaceSnapshot): P1Counts {

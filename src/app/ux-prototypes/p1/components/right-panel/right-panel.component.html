@@ -36,12 +36,26 @@
 
     @if (activePanelTab === 'todos') {
       <section class="p1-panel__list" aria-label="Todo items">
-        @for (todo of panelContent.todos; track todo.title) {
-          <article [class]="'p1-panel__item p1-panel__item--' + todo.tone">
-            <span>{{ todo.meta }}</span>
+        @if (facade.completedPanelTodoCount() > 0 && !facade.areCompletedTodoItemsHidden()) {
+          <div class="p1-panel__list-toolbar">
+            <span>{{ facade.completedPanelTodoCount() }} completed</span>
+            <button type="button" (click)="facade.clearCompletedTodoItems()">Clear completed</button>
+          </div>
+        }
+        @if (panelContent.todos.length === 0) {
+          <article class="p1-panel__item p1-panel__item--success">
+            <span>Complete</span>
+            <h2>{{ facade.areCompletedTodoItemsHidden() ? 'No open todo items' : 'No setup blockers' }}</h2>
+            <p>{{ facade.areCompletedTodoItemsHidden() ? 'Completed items have been cleared from this panel.' : 'This workspace area has no derived setup tasks that need attention.' }}</p>
+          </article>
+        }
+        @for (todo of panelContent.todos; track todo.id) {
+          <a [class]="'p1-panel__item p1-panel__item--' + todo.tone" [routerLink]="facade.setupTaskRoute(todo)"
+            [attr.aria-label]="'Open ' + todo.title">
+            <span>{{ todo.statusLabel }} / {{ todo.required ? 'Required' : 'Optional' }}</span>
             <h2>{{ todo.title }}</h2>
             <p>{{ todo.summary }}</p>
-          </article>
+          </a>
         }
       </section>
     }

@@ -1,0 +1,116 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.p1-home__todos,
+.p1-home__group,
+.p1-home__task,
+.p1-home__empty {
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+}
+
+.p1-home__todos {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.p1-home__todo-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--prototype-border);
+}
+
+.p1-home__todo-heading span,
+.p1-home__task span {
+  color: var(--prototype-orange);
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.p1-home__todo-heading h2,
+.p1-home__group h3,
+.p1-home__task h4 {
+  margin: .1rem 0 0;
+}
+
+.p1-home__todo-heading button,
+.p1-main__toolbar-actions button {
+  min-height: 2.35rem;
+  padding: .45rem .7rem;
+  border: 1px solid var(--prototype-blue);
+  border-radius: 7px;
+  background: var(--prototype-blue);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.p1-home__groups {
+  display: grid;
+  gap: .85rem;
+}
+
+.p1-home__group {
+  display: grid;
+  gap: .75rem;
+  padding: .9rem;
+  background: var(--prototype-panel);
+}
+
+.p1-home__task {
+  display: grid;
+  gap: .45rem;
+  padding: .85rem;
+  border-left: 4px solid var(--prototype-orange);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.p1-home__task:hover {
+  box-shadow: 0 .5rem 1rem rgba(44, 56, 107, .12);
+  transform: translateY(-1px);
+}
+
+.p1-home__task:focus-visible {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 3px;
+}
+
+.p1-home__task--success {
+  border-left-color: var(--prototype-green);
+}
+
+.p1-home__task--danger {
+  border-left-color: var(--prototype-danger);
+}
+
+.p1-home__task p,
+.p1-home__empty p {
+  margin: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-home__empty {
+  display: grid;
+  gap: .35rem;
+  padding: 1rem;
+}
+
+.p1-home__empty > span {
+  color: var(--prototype-green);
+}
+
+@media (max-width: 700px) {
+  .p1-home__todo-heading {
+    display: grid;
+  }
+}

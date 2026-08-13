@@ -81,6 +81,34 @@ export interface P1ContentCard {
   tone: P1StatusTone;
 }
 
+export type P1SetupStatus = 'complete' | 'ready' | 'blocked';
+
+export interface P1SetupTask {
+  id: string;
+  contextMode: P1ContextMode;
+  facilityId?: string;
+  group: string;
+  title: string;
+  summary: string;
+  meta: string;
+  tone: P1StatusTone;
+  status: P1SetupStatus;
+  statusLabel: string;
+  required: boolean;
+  section: P1SectionId;
+  detail: string;
+  panelTab: P1PanelTabId;
+}
+
+export interface P1SetupSummary {
+  accountTasks: Array<P1SetupTask>;
+  selectedFacilityTasks: Array<P1SetupTask>;
+  allTasks: Array<P1SetupTask>;
+  completeCount: number;
+  totalCount: number;
+  nextTaskId?: string;
+}
+
 export interface P1WorkspaceContent {
   eyebrow: string;
   title: string;
@@ -93,7 +121,7 @@ export interface P1WorkspaceContent {
 
 export interface P1PanelContent {
   help: Array<string>;
-  todos: Array<P1ContentCard>;
+  todos: Array<P1SetupTask>;
   results: Array<P1Metric>;
   details: Array<P1ContentCard>;
 }
@@ -116,4 +144,5 @@ export interface P1PrototypeData {
   nav: Record<P1ContextMode, Record<P1SectionId, Array<P1NavGroup>>>;
   content: Record<P1ContextMode, Record<P1SectionId, P1WorkspaceContent>>;
   panel: Record<P1ContextMode, Record<P1SectionId, P1PanelContent>>;
+  setup: P1SetupSummary;
 }
