@@ -176,4 +176,8 @@
     </div>
   </div>
   }
+
+  @if (isCreateFacilityDrawerOpen) {
+    <app-p1-create-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-p1-create-facility-drawer>
+  }
 </section>

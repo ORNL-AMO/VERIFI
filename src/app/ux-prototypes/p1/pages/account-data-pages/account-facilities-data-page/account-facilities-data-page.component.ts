@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { IdbFacility, getNewIdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacilityEnergyUseEquipment } from 'src/app/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
@@ -76,6 +76,7 @@ export class P1AccountFacilitiesDataPageComponent {
   readonly sortBy = signal<P1FacilitySort>('attention');
 
   facilityToDelete = signal<IdbFacility | undefined>(undefined);
+  isCreateFacilityDrawerOpen = false;
   actionMessage = '';
   actionError = '';
 
@@ -137,39 +138,16 @@ export class P1AccountFacilitiesDataPageComponent {
     void this.router.navigate(['/p1', 'workspace', 'facility', facility.guid, 'home', 'overview', this.panelTab()]);
   }
 
-  async addFacility(): Promise<void> {
-    const account = this.account();
-    if (!account || !this.canWrite() || this.hasPending()) {
+  addFacility(): void {
+    if (!this.canWrite() || this.hasPending()) {
       return;
     }
     this.actionError = '';
-    this.actionMessage = 'Adding facility';
-    try {
-      const facility = getNewIdbFacility(account);
-      const result = await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'add', entityGuid: facility.guid, label: 'Adding facility' },
-        () => this.facilityHandler.add(
-          facility,
-          account.guid,
-          this.workspace.accountAnalyses(),
-          this.workspace.accountReports()
-        )
-      );
-      this.actionMessage = 'Facility added';
-      await this.router.navigate([
-        '/p1',
-        'workspace',
-        'facility',
-        result.value.facility.guid,
-        'settings',
-        'profile',
-        this.panelTab()
-      ]);
-    } catch (error) {
-      this.actionMessage = '';
-      this.actionError = 'Facility could not be added. Please try again.';
-      console.warn('P1 facility add failed.', error);
-    }
+    this.isCreateFacilityDrawerOpen = true;
+  }
+
+  closeCreateFacilityDrawer(): void {
+    this.isCreateFacilityDrawerOpen = false;
   }
 
   openDeleteFacility(facility: IdbFacility): void {
