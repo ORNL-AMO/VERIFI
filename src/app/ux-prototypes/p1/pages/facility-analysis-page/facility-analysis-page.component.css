@@ -663,7 +663,6 @@ app-p1-facility-analysis-references-panel {
   background: rgba(15, 23, 42, .35);
 }
 
-.p1-chip,
 .p1-status {
   display: inline-flex;
   gap: .35rem;
@@ -681,14 +680,12 @@ app-p1-facility-analysis-references-panel {
   white-space: nowrap;
 }
 
-.p1-chip--success,
 .p1-status--good,
 .p1-status--success {
   border-color: color-mix(in srgb, var(--prototype-green) 55%, var(--prototype-border));
   color: var(--prototype-green);
 }
 
-.p1-chip--warning,
 .p1-status--warning {
   border-color: color-mix(in srgb, var(--prototype-orange) 55%, var(--prototype-border));
   color: var(--prototype-orange);

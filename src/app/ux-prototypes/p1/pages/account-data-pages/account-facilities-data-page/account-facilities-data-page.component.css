@@ -229,36 +229,6 @@
   justify-content: flex-start;
 }
 
-.p1-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.35rem;
-  padding: .18rem .45rem;
-  border: 1px solid var(--prototype-border);
-  border-radius: 999px;
-  background: var(--prototype-surface);
-  color: var(--prototype-muted);
-  font-size: .68rem;
-  font-weight: 900;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.p1-chip--success {
-  border-color: color-mix(in srgb, var(--prototype-green) 55%, var(--prototype-border));
-  color: var(--prototype-green);
-}
-
-.p1-chip--warning {
-  border-color: color-mix(in srgb, var(--prototype-orange) 65%, var(--prototype-border));
-  color: var(--prototype-warning);
-}
-
-.p1-chip--danger {
-  border-color: color-mix(in srgb, var(--prototype-danger) 60%, var(--prototype-border));
-  color: var(--prototype-danger);
-}
-
 .p1-facility-card__title {
   display: block;
   overflow: hidden;

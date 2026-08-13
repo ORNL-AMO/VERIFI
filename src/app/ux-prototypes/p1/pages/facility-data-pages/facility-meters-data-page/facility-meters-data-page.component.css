@@ -372,20 +372,6 @@
   color: var(--prototype-muted);
 }
 
-.p1-chip {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  min-height: 1.5rem;
-  padding: .15rem .45rem;
-  border: 1px solid color-mix(in srgb, var(--prototype-blue) 45%, var(--prototype-border));
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--prototype-blue) 10%, var(--prototype-surface));
-  color: var(--prototype-blue);
-  font-size: .72rem;
-  font-weight: 900;
-}
-
 .p1-modal-backdrop {
   position: fixed;
   inset: 0;
