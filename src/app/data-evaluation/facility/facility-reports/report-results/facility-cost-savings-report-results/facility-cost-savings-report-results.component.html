@@ -16,7 +16,7 @@
     @if (reportSettings.annualSavingsTable && reportSettings.includeFacility && reportSettings.includeAnnual) {
     <div>
         <h4 class="mb-0">
-            Annual Cost Savings
+            Annual Avoided Cost Savings
         </h4>
         <app-annual-savings-table [years]="years" [filteredGroups]="filteredGroups" [tableData]="costSavingsTable"
             [currencyPrefix]="true"></app-annual-savings-table>
@@ -34,7 +34,7 @@
     reportSettings.includeFacility && reportSettings.includeMonthly) {
     <div class="mt-4">
         <h4 class="mb-0">
-            Monthly Cost Savings
+            Monthly Avoided Cost Savings
         </h4>
 
         <app-monthly-savings-table [monthKeys]="monthKeys" [filteredGroups]="filteredGroups"
@@ -52,7 +52,7 @@
     @if(reportSettings.annualCumulativeSavingsTable && reportSettings.includeFacility && reportSettings.includeAnnual) {
     <div class="mt-4">
         <h4 class="mb-0">
-            Cumulative Annual Cost Savings
+            Cumulative Annual Avoided Cost Savings
         </h4>
         <app-annual-savings-table [years]="years" [filteredGroups]="filteredGroups"
             [tableData]="cumulativeCostSavingsTable" [currencyPrefix]="true"></app-annual-savings-table>
@@ -70,7 +70,7 @@
     reportSettings.includeFacility && reportSettings.includeMonthly) {
     <div class="mt-4">
         <h4 class="mb-0">
-            Cumulative Monthly Cost Savings
+            Cumulative Monthly Avoided Cost Savings
         </h4>
 
         <app-monthly-savings-table [monthKeys]="monthKeys" [filteredGroups]="filteredGroups"
@@ -130,6 +130,12 @@
     <h3 class="text-center fw-bold text-decoration-underline">
         {{ group.idbGroupId | groupName }}
     </h3>
+    @if (reportSettings.includeGroup && reportSettings.groupActualVsAdjustedTable) {
+    <h4 class="mt-5">
+        Actual vs Adjusted Costs
+    </h4>
+    <app-annual-actual-vs-adjusted-costs></app-annual-actual-vs-adjusted-costs>
+    }
     @if (reportSettings.includeGroup && reportSettings.groupAnnualTable) {
     <h4 class="mt-5">
         Annual Details

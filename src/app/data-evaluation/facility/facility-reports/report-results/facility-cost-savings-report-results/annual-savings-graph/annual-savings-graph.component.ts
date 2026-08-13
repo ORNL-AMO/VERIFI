@@ -117,7 +117,7 @@ export class AnnualSavingsGraphComponent {
           title: { font: { size: 16 }, hoverformat: "%b, %y" },
           type: 'category',
         },
-        yaxis: { title: { text: 'Savings ($)', font: { size: 16 }, standoff: 18 }, automargin: true },
+        yaxis: { title: { text: 'Avoided Cost Savings ($)', font: { size: 16 }, standoff: 18 }, automargin: true },
         margin: { r: 0, t: 50 }
       };
       var config = {

@@ -59,17 +59,18 @@
     </div>
     @if ((missingCostData | keyvalue).length > 0) {
     <div class="mt-4 text-center text-danger fw-bold">
-      You have cost data entered as 0 for the following meters and dates. If this is not as expected, please check your meter
+      You have cost data entered as 0 for the following meters and dates. If this is not as expected, please check your
+      meter
       data:
       <ul class="mb-0 mt-2">
         @for (entry of missingCostData | keyvalue; track entry.key) {
-          <span class="fw-bold text-decoration-underline">{{ getMeterName(entry.key) }}:</span>
-          <span>
-            @for (missingDate of entry.value; track $index) {
-            {{ missingDate | date:'MMM yyyy' }}@if (!$last) {, }
-            }
-          </span>
-          <br>
+        <span class="fw-bold text-decoration-underline">{{ getMeterName(entry.key) }}:</span>
+        <span>
+          @for (missingDate of entry.value; track $index) {
+          {{ missingDate | date:'MMM yyyy' }}@if (!$last) {, }
+          }
+        </span>
+        <br>
         }
       </ul>
     </div>
@@ -149,7 +150,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.annualSavingsTable" (change)="save()"
             id="annualSavingsTable">
           <label class="form-check-label" for="annualSavingsTable">
-            Annual Cost Savings Table
+            Annual Avoided Cost Savings Table
           </label>
         </div>
         <div class="form-check ms-4">
@@ -157,7 +158,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.annualSavingsGraph" (change)="save()"
             id="annualSavingsGraph">
           <label class="form-check-label" for="annualSavingsGraph">
-            Annual Cost Savings Graph
+            Annual Avoided Cost Savings Graph
           </label>
         </div>
         <div class="form-check ms-4">
@@ -165,7 +166,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.annualCumulativeSavingsTable" (change)="save()"
             id="annualCumulativeSavingsTable">
           <label class="form-check-label" for="annualCumulativeSavingsTable">
-            Cumulative Cost Savings Table
+            Cumulative Avoided Cost Savings Table
           </label>
         </div>
         <div class="form-check ms-4">
@@ -173,7 +174,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.annualCumulativeSavingsGraph" (change)="save()"
             id="annualCumulativeSavingsGraph">
           <label class="form-check-label" for="annualCumulativeSavingsGraph">
-            Cumulative Cost Savings Graph
+            Cumulative Avoided Cost Savings Graph
           </label>
         </div>
         }
@@ -189,7 +190,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.monthlySavingsTable" (change)="save()"
             id="monthlySavingsTable">
           <label class="form-check-label" for="monthlySavingsTable">
-            Monthly Cost Savings Table
+            Monthly Avoided Cost Savings Table
           </label>
         </div>
         <div class="form-check ms-4">
@@ -197,7 +198,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.monthlySavingsGraph" (change)="save()"
             id="monthlySavingsGraph">
           <label class="form-check-label" for="monthlySavingsGraph">
-            Monthly Cost Savings Graph
+            Monthly Avoided Cost Savings Graph
           </label>
         </div>
         <div class="form-check ms-4">
@@ -205,7 +206,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.monthlyCumulativeSavingsTable" (change)="save()"
             id="monthlyCumulativeSavingsTable">
           <label class="form-check-label" for="monthlyCumulativeSavingsTable">
-            Monthly Cumulative Cost Savings Table
+            Monthly Cumulative Avoided Cost Savings Table
           </label>
         </div>
         <div class="form-check ms-4">
@@ -213,7 +214,7 @@
             [(ngModel)]="facilityReport.costSavingsReportSettings.monthlyCumulativeSavingsGraph" (change)="save()"
             id="monthlyCumulativeSavingsGraph">
           <label class="form-check-label" for="monthlyCumulativeSavingsGraph">
-            Monthly Cumulative Cost Savings Graph
+            Monthly Cumulative Avoided Cost Savings Graph
           </label>
         </div>
         }
@@ -228,6 +229,13 @@
           </label>
         </div>
         @if (facilityReport.costSavingsReportSettings.includeGroup) {
+        <div class="form-check ms-2">
+          <input class="form-check-input" type="checkbox" name="groupActualVsAdjustedTable"
+            [(ngModel)]="facilityReport.costSavingsReportSettings.groupActualVsAdjustedTable" (change)="save()"
+            id="groupActualVsAdjustedTable">
+          <label class="form-check-label" for="groupActualVsAdjustedTable">Actual vs Adjusted Costs
+          </label>
+        </div>
         <div class="form-check ms-2">
           <input class="form-check-input" type="checkbox" name="groupAnnualTable"
             [(ngModel)]="facilityReport.costSavingsReportSettings.groupAnnualTable" (change)="save()"

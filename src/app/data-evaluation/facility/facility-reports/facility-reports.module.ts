@@ -46,6 +46,7 @@ import { AnnualSavingsTableComponent } from './report-results/facility-cost-savi
 import { MonthlySavingsGraphComponent } from './report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
 import { RegressionNumberPipe } from 'src/app/shared/helper-pipes/regression-number.pipe';
 import { UserDefineModelDateRangePipe } from 'src/app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
+import { AnnualActualVsAdjustedCostsComponent } from './report-results/facility-cost-savings-report-results/annual-actual-vs-adjusted-costs/annual-actual-vs-adjusted-costs.component';
 
 
 
@@ -81,7 +82,8 @@ import { UserDefineModelDateRangePipe } from 'src/app/shared/shared-analysis/dat
     MonthlySavingsTableComponent,
     GroupSavingsTableComponent,
     AnnualSavingsTableComponent,
-    MonthlySavingsGraphComponent
+    MonthlySavingsGraphComponent,
+    AnnualActualVsAdjustedCostsComponent
     
   ],
   imports: [
