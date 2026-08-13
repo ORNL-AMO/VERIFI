@@ -3,7 +3,7 @@
   @let accounts = facade.accounts();
   <section class="p1-welcome__hero">
     <div class="p1-welcome__copy">
-      <p class="p1-welcome__eyebrow">Utility tracking and analysis</p>
+      <p class="p1-eyebrow">Utility tracking and analysis</p>
       <h1 id="p1-welcome-title">VERIFI</h1>
       <p>
         Track corporate and facility utility data, evaluate performance, and prepare reports from one practical manufacturing workspace.
@@ -54,7 +54,7 @@
 
   <section class="p1-welcome__actions" aria-labelledby="p1-start-title">
     <div>
-      <p class="p1-welcome__eyebrow mb-0">Get started</p>
+      <p class="p1-eyebrow">Get started</p>
     </div>
     <div class="p1-welcome__action-grid">
       @for (action of facade.welcomeActions(); track action.title) {
@@ -86,7 +86,7 @@
   <section class="p1-welcome__portfolio" aria-labelledby="p1-portfolio-title">
     <div class="p1-welcome__section-heading">
       <div>
-        <p class="p1-welcome__eyebrow mb-0">Account portfolio</p>
+        <p class="p1-eyebrow">Account portfolio</p>
       </div>
       <span>{{ accounts.length }} accounts</span>
     </div>
@@ -149,57 +149,59 @@
   }
 
   @if (isExampleDrawerOpen) {
-  <div class="p1-welcome__drawer-layer">
-    <button type="button" class="p1-welcome__drawer-backdrop" aria-label="Close example account panel"
+  <div class="p1-drawer-layer">
+    <button type="button" class="p1-drawer-backdrop" aria-label="Close example account panel"
       (click)="closeExampleDrawer()"></button>
-    <aside class="p1-welcome__drawer" role="dialog" aria-modal="true" aria-labelledby="p1-example-drawer-title">
-      <header class="p1-welcome__drawer-header">
+    <aside class="p1-drawer" role="dialog" aria-modal="true" aria-labelledby="p1-example-drawer-title">
+      <header class="p1-drawer__header">
         <div>
-          <p class="p1-welcome__eyebrow mb-0">Example accounts</p>
+          <p class="p1-eyebrow">Example accounts</p>
           <h2 id="p1-example-drawer-title">Load Example Account</h2>
         </div>
-        <button type="button" class="p1-welcome__icon-button" title="Close example account panel"
+        <button type="button" class="p1-icon-btn" title="Close example account panel"
           aria-label="Close example account panel" [disabled]="!!loadingExamplePath" (click)="closeExampleDrawer()">
           <span class="fa fa-xmark"></span>
         </button>
       </header>
 
-      <p class="p1-welcome__drawer-intro">
-        Example accounts create a real VERIFI workspace with demonstration data so you can explore setup, utility data,
-        analysis, reports, and account navigation without building an account from scratch.
-      </p>
+      <div class="p1-drawer__body">
+        <p>
+          Example accounts create a real VERIFI workspace with demonstration data so you can explore setup, utility data,
+          analysis, reports, and account navigation without building an account from scratch.
+        </p>
 
-      <div class="p1-welcome__example-list">
-        @for (example of examples; track example.assetPath) {
-        <article class="p1-welcome__example">
-          <div class="p1-welcome__example-header">
-            <div>
-              <h3>{{ example.title }}</h3>
-              <p>{{ example.summary }}</p>
+        <div class="p1-welcome__example-list">
+          @for (example of examples; track example.assetPath) {
+          <article class="p1-welcome__example">
+            <div class="p1-welcome__example-header">
+              <div>
+                <h3>{{ example.title }}</h3>
+                <p>{{ example.summary }}</p>
+              </div>
+              <span class="fa fa-industry"></span>
             </div>
-            <span class="fa fa-industry"></span>
-          </div>
-          <div class="p1-welcome__example-highlights" aria-label="Example contents">
-            @for (highlight of example.highlights; track highlight) {
-            <span>{{ highlight }}</span>
-            }
-          </div>
-          <div class="p1-welcome__example-details">
-            @for (detail of example.details; track detail) {
-            <p>{{ detail }}</p>
-            }
-          </div>
-          <button type="button" [disabled]="!!loadingExamplePath" (click)="loadExample(example)">
-            @if (loadingExamplePath === example.assetPath) {
-            <span class="fa fa-spinner fa-spin"></span>
-            Loading
-            } @else {
-            {{ example.cta }}
-            <span class="fa fa-arrow-right"></span>
-            }
-          </button>
-        </article>
-        }
+            <div class="p1-welcome__example-highlights" aria-label="Example contents">
+              @for (highlight of example.highlights; track highlight) {
+              <span>{{ highlight }}</span>
+              }
+            </div>
+            <div class="p1-welcome__example-details">
+              @for (detail of example.details; track detail) {
+              <p>{{ detail }}</p>
+              }
+            </div>
+            <button type="button" [disabled]="!!loadingExamplePath" (click)="loadExample(example)">
+              @if (loadingExamplePath === example.assetPath) {
+              <span class="fa fa-spinner fa-spin"></span>
+              Loading
+              } @else {
+              {{ example.cta }}
+              <span class="fa fa-arrow-right"></span>
+              }
+            </button>
+          </article>
+          }
+        </div>
       </div>
     </aside>
   </div>

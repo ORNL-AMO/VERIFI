@@ -76,7 +76,7 @@
 }
 
 .p1-home__task:hover {
-  box-shadow: 0 .5rem 1rem rgba(44, 56, 107, .12);
+  box-shadow: 0 .5rem 1rem color-mix(in srgb, var(--prototype-blue) 12%, transparent);
   transform: translateY(-1px);
 }
 

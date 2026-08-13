@@ -9,7 +9,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: rgba(13, 20, 18, .36);
+  background: var(--prototype-backdrop);
   pointer-events: auto;
 }
 
@@ -36,7 +36,7 @@
   justify-content: space-between;
   padding: .85rem;
   border-bottom: 1px solid var(--prototype-border);
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-bill footer {
@@ -112,7 +112,7 @@
   padding: .4rem .5rem;
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
-  background: var(--prototype-surface);
+  background: var(--prototype-panel);
   color: var(--prototype-text);
 }
 
@@ -135,7 +135,7 @@
   padding: .55rem;
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-bill__error {
@@ -143,7 +143,7 @@
   padding: .55rem .65rem;
   border-left: 4px solid var(--prototype-danger);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
   color: var(--prototype-danger);
   font-weight: 900;
 }

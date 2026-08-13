@@ -1,6 +1,10 @@
 .verifi-prototype,
 .verifi-prototype * {
   box-sizing: border-box;
+  /* Override the global * { color: #333; font-size: 12px } in typography.css
+     so every element inherits these from its nearest token-setting ancestor. */
+  color: inherit;
+  font-size: inherit;
 }
 
 .verifi-prototype {
@@ -16,10 +20,13 @@
   --prototype-warning: #9a6212;
   --prototype-danger: #a53f36;
   --prototype-focus: #246bfe;
-  --prototype-orange: #ff6000;
-  --prototype-green: #145a32;
-  --prototype-blue: #2c386b;
+  --prototype-orange: #ff6000;   /* primary brand */
+  --prototype-green: #145a32;    /* account context */
+  --prototype-blue: #2c386b;     /* facility context */
+  --prototype-backdrop: rgba(13, 20, 18, .36);
 
+  /* Establish the base text colour for the whole prototype tree */
+  color: var(--prototype-text);
   min-height: 100%;
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -58,7 +65,11 @@
   --prototype-warning: #d4a24a;
   --prototype-danger: #e06b62;
   --prototype-focus: #5a9aff;
-  --prototype-blue: #8fa3e8;
+  /* brand / context colours — must stay semantically dominant on dark surfaces */
+  --prototype-orange: #ff7a28;   /* primary brand: vivid, punchy, unmistakably VERIFI */
+  --prototype-green: #4db87e;    /* account context: warm green, readable on dark bg */
+  --prototype-blue: #8fa3e8;     /* facility context: already correct */
+  --prototype-backdrop: rgba(0, 0, 0, .52);
 }
 
 .verifi-prototype button .fa {

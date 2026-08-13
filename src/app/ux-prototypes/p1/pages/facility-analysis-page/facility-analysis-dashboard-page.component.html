@@ -73,9 +73,9 @@
         <h2>Analysis Items</h2>
       </div>
       <div class="p1-analysis__dashboard-filters" aria-label="Analysis dashboard filters">
-        <label class="p1-analysis__search">
-          <span class="fa fa-magnifying-glass" aria-hidden="true"></span>
-          <input type="search" class="form-control" placeholder="Search analyses" [ngModel]="analysisSearch()"
+        <label class="p1-search">
+          <span class="p1-search__icon fa fa-magnifying-glass" aria-hidden="true"></span>
+          <input type="search" class="p1-input" placeholder="Search analyses" [ngModel]="analysisSearch()"
             (ngModelChange)="analysisSearch.set($event)" aria-label="Search analyses">
         </label>
         <label>

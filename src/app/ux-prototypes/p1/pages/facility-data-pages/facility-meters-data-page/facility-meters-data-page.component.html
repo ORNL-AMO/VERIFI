@@ -89,20 +89,31 @@
       (deleteGroup)="requestDeleteGroup($event)">
     </app-p1-facility-meter-groups>
     } @else {
-    <div class="p1-meters__cards">
+    <div class="p1-meters__cards" role="list" aria-label="Facility meters">
       @for (row of meterRows(); track row.meter.guid) {
-      <button type="button" class="p1-meter-card" (click)="selectMeter(row.meter)">
-        <span class="p1-chip">{{ row.meter.source }}</span>
-        <strong>{{ row.meter.name }}</strong>
-        <small>
-          {{ row.readingCount }} readings
-          @if (row.group) {
-          <span> · {{ row.group.name }}</span>
-          } @else {
-          <span> · Ungrouped</span>
-          }
-        </small>
-        <dl>
+      @let _status = row.readingCount === 0 ? 'error' : (row.status?.status || 'good');
+      @let _tone = _status === 'good' ? 'success' : _status === 'warning' ? 'warning' : 'danger';
+      <article class="p1-meter-card p1-meter-card--{{ _tone }}" role="listitem">
+
+        <div class="p1-meter-card__summary">
+          <div class="p1-meter-card__top">
+            <span class="p1-chip">{{ row.meter.source }}</span>
+            <span class="p1-chip p1-chip--{{ _tone }}">{{ _status }}</span>
+          </div>
+          <button type="button" class="p1-meter-card__title" (click)="selectMeter(row.meter)">
+            {{ row.meter.name }}
+          </button>
+          <span class="p1-meter-card__sub">
+            <span class="fa fa-layer-group" aria-hidden="true"></span>
+            {{ row.group?.name || 'Ungrouped' }}
+          </span>
+        </div>
+
+        <dl class="p1-meter-card__meta">
+          <div>
+            <dt>Readings</dt>
+            <dd>{{ row.readingCount }}</dd>
+          </div>
           <div>
             <dt>Latest</dt>
             <dd>
@@ -114,13 +125,28 @@
             </dd>
           </div>
           <div>
-            <dt>Status</dt>
-            <dd [class.p1-meter-card__status--warn]="row.status?.status !== 'good'">
-              {{ row.readingCount === 0 ? 'No data' : (row.status?.status || 'good') }}
-            </dd>
+            <dt>Scope</dt>
+            <dd>{{ row.meter.scope || '—' }}</dd>
           </div>
         </dl>
-      </button>
+
+        <div class="p1-meter-card__actions">
+          <button type="button" class="p1-icon-btn" title="Open meter" aria-label="Open meter"
+            (click)="selectMeter(row.meter)">
+            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="p1-icon-btn" title="Copy meter" aria-label="Copy meter"
+            (click)="copyMeter(row.meter)" [disabled]="!canWrite() || hasPending()">
+            <span class="fa fa-copy" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="p1-icon-btn p1-icon-btn--danger" title="Delete meter"
+            aria-label="Delete meter" (click)="requestDeleteMeter(row.meter)"
+            [disabled]="!canWrite() || hasPending()">
+            <span class="fa fa-trash" aria-hidden="true"></span>
+          </button>
+        </div>
+
+      </article>
       }
     </div>
     }

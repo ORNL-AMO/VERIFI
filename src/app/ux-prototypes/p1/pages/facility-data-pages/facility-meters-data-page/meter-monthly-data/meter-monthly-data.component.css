@@ -9,8 +9,8 @@
 
 .p1-monthly__header,
 .p1-monthly__summary {
-  border: 1px solid var(--p1-border, #d5dde5);
-  background: var(--p1-surface, #ffffff);
+  border: 1px solid var(--prototype-border);
+  background: var(--prototype-surface);
   border-radius: 8px;
 }
 
@@ -30,7 +30,7 @@
 
 .p1-monthly__eyebrow {
   display: block;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   font-size: .74rem;
   font-weight: 700;
   letter-spacing: 0;
@@ -39,7 +39,7 @@
 
 .p1-monthly h3 {
   margin: .15rem 0 0;
-  color: var(--p1-ink, #1f2933);
+  color: var(--prototype-text);
   font-size: 1.05rem;
 }
 
@@ -50,8 +50,8 @@
   margin-left: .45rem;
   padding: .15rem .45rem;
   border-radius: 999px;
-  background: #dfe8ed;
-  color: #385063;
+  background: var(--prototype-surface-muted);
+  color: var(--prototype-muted);
   font-size: .7rem;
   font-weight: 800;
   vertical-align: middle;
@@ -60,16 +60,16 @@
 .p1-monthly__method-gate {
   display: grid;
   gap: 1rem;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--p1-surface, #ffffff);
+  background: var(--prototype-surface);
   padding: 1rem;
 }
 
 .p1-monthly__method-gate header p,
 .p1-monthly__note {
   margin: .35rem 0 0;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
 }
 
 .p1-monthly__method-grid {
@@ -82,10 +82,10 @@
   display: grid;
   gap: .4rem;
   min-height: 8.5rem;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--p1-muted-surface, #f5f7f9);
-  color: var(--p1-ink, #1f2933);
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
   padding: .9rem;
   text-align: left;
 }
@@ -102,7 +102,7 @@
 
 .p1-monthly__method-card small,
 .p1-monthly__method-note {
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   line-height: 1.45;
 }
 
@@ -115,9 +115,9 @@
   display: inline-flex;
   gap: .25rem;
   padding: .2rem;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--p1-muted-surface, #f5f7f9);
+  background: var(--prototype-panel);
 }
 
 .p1-monthly__view-toggle button {
@@ -128,14 +128,14 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   font-weight: 700;
   padding: .35rem .65rem;
 }
 
 .p1-monthly__view-toggle button.active {
-  background: var(--p1-surface, #ffffff);
-  color: var(--p1-ink, #1f2933);
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
   box-shadow: 0 1px 2px rgba(21, 35, 48, .14);
 }
 
@@ -148,7 +148,7 @@
 .p1-monthly__summary article {
   min-width: 0;
   padding: .8rem .9rem;
-  border-right: 1px solid var(--p1-border, #d5dde5);
+  border-right: 1px solid var(--prototype-border);
 }
 
 .p1-monthly__summary article:last-child {
@@ -159,7 +159,7 @@
 .p1-monthly__summary small,
 .p1-monthly__toolbar span {
   display: block;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   font-size: .72rem;
   font-weight: 700;
   letter-spacing: 0;
@@ -169,7 +169,7 @@
 .p1-monthly__summary strong {
   display: block;
   min-width: 0;
-  color: var(--p1-ink, #1f2933);
+  color: var(--prototype-text);
   font-size: 1.25rem;
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -185,7 +185,7 @@
   align-items: end;
   gap: .75rem;
   padding-top: .75rem;
-  border-top: 1px solid var(--p1-border, #d5dde5);
+  border-top: 1px solid var(--prototype-border);
 }
 
 .p1-monthly__toolbar label {
@@ -196,10 +196,10 @@
 
 .p1-monthly__toolbar select {
   min-height: 2.15rem;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 6px;
-  background: var(--p1-surface, #ffffff);
-  color: var(--p1-ink, #1f2933);
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
   padding: .35rem .55rem;
 }
 
@@ -213,9 +213,9 @@
 
 .p1-monthly__table-wrap {
   overflow: auto;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--p1-surface, #ffffff);
+  background: var(--prototype-surface);
 }
 
 .p1-monthly__table {
@@ -227,8 +227,8 @@
 .p1-monthly__table th,
 .p1-monthly__table td {
   padding: .7rem .85rem;
-  border-bottom: 1px solid var(--p1-border, #d5dde5);
-  color: var(--p1-ink, #1f2933);
+  border-bottom: 1px solid var(--prototype-border);
+  color: var(--prototype-text);
   vertical-align: middle;
 }
 
@@ -236,8 +236,8 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--p1-muted-surface, #f5f7f9);
-  color: var(--p1-muted, #657282);
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
   font-size: .72rem;
   text-align: left;
   text-transform: uppercase;
@@ -285,7 +285,7 @@
 
 .p1-monthly__table td small {
   display: block;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
 }
 
 .p1-monthly__table .numeric {
@@ -302,7 +302,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   font-size: .85rem;
 }
 
@@ -317,10 +317,10 @@
   width: 2rem;
   height: 2rem;
   place-items: center;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 6px;
-  background: var(--p1-surface, #ffffff);
-  color: var(--p1-ink, #1f2933);
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
 }
 
 .p1-monthly__pager-btn:disabled {
@@ -331,9 +331,9 @@
 .p1-monthly__trend {
   display: grid;
   gap: .5rem;
-  border: 1px solid var(--p1-border, #d5dde5);
+  border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--p1-surface, #ffffff);
+  background: var(--prototype-surface);
   padding: .75rem;
 }
 
@@ -343,7 +343,7 @@
   gap: .75rem;
   align-items: center;
   padding: .6rem;
-  border-bottom: 1px solid var(--p1-border, #d5dde5);
+  border-bottom: 1px solid var(--prototype-border);
 }
 
 .p1-monthly__trend article:last-child {
@@ -356,7 +356,7 @@
 }
 
 .p1-monthly__trend-label span {
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   font-size: .82rem;
 }
 
@@ -370,7 +370,7 @@
   grid-template-columns: 4.5rem minmax(8rem, 1fr) 5rem;
   gap: .55rem;
   align-items: center;
-  color: var(--p1-muted, #657282);
+  color: var(--prototype-muted);
   font-size: .78rem;
 }
 
@@ -382,7 +382,7 @@
   display: block;
   height: .55rem;
   border-radius: 999px;
-  background: var(--p1-muted-surface, #eef2f5);
+  background: var(--prototype-panel);
   overflow: hidden;
 }
 
@@ -406,10 +406,10 @@
   gap: .45rem;
   min-height: 16rem;
   align-content: center;
-  border: 1px dashed var(--p1-border, #d5dde5);
+  border: 1px dashed var(--prototype-border);
   border-radius: 8px;
-  background: var(--p1-muted-surface, #f5f7f9);
-  color: var(--p1-muted, #657282);
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
   text-align: center;
   padding: 1.5rem;
 }
@@ -441,7 +441,7 @@
   }
 
   .p1-monthly__summary article {
-    border-bottom: 1px solid var(--p1-border, #d5dde5);
+    border-bottom: 1px solid var(--prototype-border);
   }
 }
 

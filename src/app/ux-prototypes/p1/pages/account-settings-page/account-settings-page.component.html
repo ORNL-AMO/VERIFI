@@ -94,7 +94,7 @@
   <p>Deleting this account will permanently remove all facilities, meters, predictors, analyses, reports, and settings associated with it.</p>
   <p>This action cannot be undone. Create a backup before continuing if this account data may be needed later.</p>
   <div class="p1-confirm__actions">
-    <button type="button" class="p1-btn p1-btn--quiet" (click)="cancelDeleteAccount()">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--ghost" (click)="cancelDeleteAccount()">Cancel</button>
     <button type="button" class="p1-btn p1-btn--danger" [disabled]="!canWrite() || isDeletingAccount"
       (click)="confirmDeleteAccount()">
       {{ isDeletingAccount ? 'Deleting...' : 'Delete account' }}

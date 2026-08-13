@@ -11,12 +11,12 @@
 }
 
 .p1-settings__save {
-  border-color: rgba(20, 90, 50, .25);
+  border-color: color-mix(in srgb, var(--prototype-green) 25%, transparent);
   color: var(--prototype-green);
 }
 
 .p1-settings__save--error {
-  border-color: rgba(184, 54, 43, .35);
+  border-color: color-mix(in srgb, var(--prototype-danger) 35%, transparent);
   color: var(--prototype-danger);
 }
 
@@ -244,43 +244,17 @@
   text-decoration: none;
 }
 
-.p1-btn {
-  display: inline-flex;
-  gap: .4rem;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.35rem;
-  padding: .48rem .75rem;
-  border: 1px solid var(--prototype-border);
-  border-radius: 7px;
-  background: var(--prototype-surface);
-  color: var(--prototype-blue);
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.p1-settings .p1-btn--danger,
-.p1-btn--danger {
-  border-color: #b42318;
-  background: #b42318;
+.p1-settings .p1-btn--danger {
+  border-color: var(--prototype-danger);
+  background: var(--prototype-danger);
   color: #fff;
-}
-
-.p1-btn--quiet {
-  background: var(--prototype-panel);
-  color: var(--prototype-blue);
-}
-
-.p1-btn:disabled {
-  cursor: not-allowed;
-  opacity: .62;
 }
 
 .p1-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 400;
-  background: rgba(13, 20, 18, .38);
+  background: var(--prototype-backdrop);
 }
 
 .p1-confirm {

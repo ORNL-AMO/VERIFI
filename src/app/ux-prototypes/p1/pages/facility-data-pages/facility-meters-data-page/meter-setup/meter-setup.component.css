@@ -70,7 +70,7 @@
   padding: .4rem .5rem;
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
-  background: var(--prototype-surface);
+  background: var(--prototype-panel);
   color: var(--prototype-text);
 }
 

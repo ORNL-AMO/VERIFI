@@ -43,7 +43,7 @@
   min-height: 2.15rem;
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
-  background: var(--prototype-surface);
+  background: var(--prototype-panel);
   color: var(--prototype-text);
   font-size: .84rem;
 }

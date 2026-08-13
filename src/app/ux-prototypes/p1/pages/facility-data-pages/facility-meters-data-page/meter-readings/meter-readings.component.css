@@ -21,7 +21,7 @@
   padding: .75rem;
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-readings h3 {
@@ -54,7 +54,7 @@
   border: 1px solid var(--prototype-border);
   border-left-width: 4px;
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-alert button {
@@ -92,7 +92,7 @@
   padding: .4rem .55rem .4rem 1.85rem;
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
-  background: var(--prototype-surface);
+  background: var(--prototype-panel);
   color: var(--prototype-text);
 }
 
@@ -125,7 +125,7 @@
 }
 
 .p1-readings__table th {
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
   color: var(--prototype-muted);
   font-size: .74rem;
   font-weight: 900;
@@ -146,7 +146,7 @@
   place-items: center;
   border: 1px solid var(--prototype-border);
   border-radius: 6px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
   color: var(--prototype-muted);
 }
 

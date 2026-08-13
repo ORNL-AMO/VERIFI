@@ -4,10 +4,10 @@
 <aside class="p1-create-account__drawer" role="dialog" aria-modal="true" aria-labelledby="p1-create-account-title">
   <header class="p1-create-account__header">
     <div>
-      <p class="p1-create-account__eyebrow">New workspace</p>
+      <p class="p1-eyebrow">New workspace</p>
       <h2 id="p1-create-account-title">Create Account</h2>
     </div>
-    <button type="button" class="p1-create-account__icon-button" title="Close create account panel"
+    <button type="button" class="p1-icon-btn" title="Close create account panel"
       aria-label="Close create account panel" [disabled]="isCreating" (click)="close()">
       <span class="fa fa-xmark"></span>
     </button>
@@ -18,7 +18,7 @@
   </p>
 
   @if (createError) {
-    <div class="p1-create-account__error" role="alert">
+    <div class="p1-alert p1-alert--danger" role="alert">
       <span class="fa fa-circle-exclamation"></span>
       {{ createError }}
     </div>
@@ -127,8 +127,8 @@
     </div>
 
     <div class="p1-create-account__actions">
-      <button type="button" class="p1-btn p1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
-      <button type="submit" class="p1-create-account__primary" [disabled]="isCreating || profileForm.invalid">
+      <button type="button" class="p1-btn p1-btn--ghost" [disabled]="isCreating" (click)="close()">Cancel</button>
+      <button type="submit" class="p1-btn p1-btn--success" [disabled]="isCreating || profileForm.invalid">
         @if (isCreating) {
           <span class="fa fa-spinner fa-spin"></span>
           Creating

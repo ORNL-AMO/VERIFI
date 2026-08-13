@@ -38,7 +38,7 @@
       </article>
     </div>
 
-    <button type="button" class="p1-account-facilities__add" (click)="addFacility()"
+    <button type="button" class="p1-btn p1-btn--primary" (click)="addFacility()"
       [disabled]="!canWrite() || hasPending()">
       <span class="fa fa-plus" aria-hidden="true"></span>
       Add Facility
@@ -56,7 +56,7 @@
     <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
     <h2>No facilities available</h2>
     <p>Add a facility to start entering meters, predictors, analyses, reports, and equipment data.</p>
-    <button type="button" class="p1-account-facilities__add" (click)="addFacility()"
+    <button type="button" class="p1-btn p1-btn--primary" (click)="addFacility()"
       [disabled]="!canWrite() || hasPending()">
       <span class="fa fa-plus" aria-hidden="true"></span>
       Add Facility
@@ -167,7 +167,7 @@
       <p>Deleting this facility also deletes its meters, predictors, analyses, reports, equipment, and related data.</p>
     </div>
     <div class="p1-confirm__actions">
-      <button type="button" class="p1-btn p1-btn--quiet" (click)="cancelDeleteFacility()" [disabled]="hasPending()">
+      <button type="button" class="p1-btn p1-btn--ghost" (click)="cancelDeleteFacility()" [disabled]="hasPending()">
         Cancel
       </button>
       <button type="button" class="p1-btn p1-btn--danger" (click)="confirmDeleteFacility()" [disabled]="hasPending()">

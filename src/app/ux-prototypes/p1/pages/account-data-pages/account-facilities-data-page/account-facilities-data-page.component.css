@@ -79,8 +79,9 @@
   gap: .1rem;
   min-width: 0;
   padding: .45rem .6rem;
-  border: 1px solid var(--prototype-border);
-  border-radius: 7px;
+  border: 0;
+  border-top: 2px solid var(--prototype-border);
+  border-radius: 4px;
   background: var(--prototype-panel);
 }
 
@@ -90,25 +91,7 @@
 }
 
 .p1-account-facilities__total--warn {
-  border-color: color-mix(in srgb, var(--prototype-orange) 70%, var(--prototype-border));
-}
-
-.p1-account-facilities__add,
-.p1-btn,
-.p1-icon-btn {
-  display: inline-flex;
-  gap: .4rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--prototype-border);
-  border-radius: 7px;
-  font-weight: 900;
-}
-
-.p1-account-facilities__add,
-.p1-btn {
-  min-height: 2.4rem;
-  padding: .5rem .8rem;
+  border-top-color: var(--prototype-orange);
 }
 
 .p1-account-facilities__add {
@@ -172,9 +155,6 @@
 
 .p1-account-facilities__toolbar input:focus,
 .p1-account-facilities__toolbar select:focus,
-.p1-account-facilities__add:focus,
-.p1-btn:focus,
-.p1-icon-btn:focus,
 .p1-facility-card__title:focus {
   outline: 3px solid color-mix(in srgb, var(--prototype-blue) 22%, transparent);
   border-color: var(--prototype-blue);
@@ -323,9 +303,10 @@
 .p1-facility-card__meta div {
   min-width: 0;
   padding: .45rem .55rem;
-  border: 1px solid var(--prototype-border);
-  border-radius: 7px;
-  background: var(--prototype-surface);
+  border: 0;
+  border-top: 2px solid var(--prototype-border);
+  border-radius: 4px;
+  background: var(--prototype-panel);
 }
 
 .p1-facility-card__meta dd {
@@ -350,36 +331,6 @@
 
 .p1-facility-card__actions {
   justify-content: flex-end;
-}
-
-.p1-icon-btn {
-  width: 2.2rem;
-  height: 2.2rem;
-  padding: 0;
-  background: var(--prototype-surface);
-  color: var(--prototype-text);
-}
-
-.p1-icon-btn--danger {
-  color: var(--prototype-danger);
-}
-
-.p1-btn--quiet {
-  background: var(--prototype-panel);
-  color: var(--prototype-text);
-}
-
-.p1-btn--danger {
-  border-color: color-mix(in srgb, var(--prototype-danger) 65%, var(--prototype-border));
-  background: var(--prototype-danger);
-  color: #fff;
-}
-
-.p1-account-facilities__add:disabled,
-.p1-btn:disabled,
-.p1-icon-btn:disabled {
-  cursor: not-allowed;
-  opacity: .48;
 }
 
 .p1-account-facilities__state {

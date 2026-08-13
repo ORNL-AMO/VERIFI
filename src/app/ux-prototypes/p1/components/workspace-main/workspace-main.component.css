@@ -65,10 +65,10 @@
 }
 
 .p1-main__toolbar-actions > span {
-  padding: .5rem .7rem;
-  border: 1px solid var(--prototype-border);
-  border-radius: 7px;
-  background: var(--prototype-surface);
+  padding: .35rem .65rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--prototype-surface-muted);
   color: var(--prototype-muted);
   font-size: .82rem;
   font-weight: 800;

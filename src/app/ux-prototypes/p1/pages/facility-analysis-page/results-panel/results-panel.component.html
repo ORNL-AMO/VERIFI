@@ -1,11 +1,11 @@
 <section class="p1-analysis-tab-content" aria-label="Analysis results">
   <div class="p1-analysis__tab-toolbar">
-    <div class="p1-analysis__segmented" aria-label="Result display">
-      <button type="button" [class.active]="display === 'table'" (click)="display = 'table'">
+    <div class="p1-segmented" aria-label="Result display">
+      <button type="button" class="p1-segmented__btn" [class.active]="display === 'table'" (click)="display = 'table'">
         <span class="fa fa-table"></span>
         Table
       </button>
-      <button type="button" [class.active]="display === 'graph'" (click)="display = 'graph'">
+      <button type="button" class="p1-segmented__btn" [class.active]="display === 'graph'" (click)="display = 'graph'">
         <span class="fa fa-chart-line"></span>
         Graph
       </button>

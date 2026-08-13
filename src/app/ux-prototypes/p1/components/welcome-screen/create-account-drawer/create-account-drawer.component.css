@@ -11,7 +11,7 @@
   inset: 0;
   border: 0;
   border-radius: 0;
-  background: rgba(13, 20, 18, .36);
+  background: var(--prototype-backdrop);
 }
 
 .p1-create-account__drawer {
@@ -40,42 +40,9 @@
   font-size: 1.5rem;
 }
 
-.p1-create-account__eyebrow {
-  margin: 0;
-  color: var(--prototype-orange);
-  font-size: .78rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.p1-create-account__icon-button {
-  display: grid;
-  flex: 0 0 auto;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border: 1px solid var(--prototype-border);
-  border-radius: 7px;
-  background: var(--prototype-panel);
-  color: var(--prototype-muted);
-}
-
 .p1-create-account__intro {
   margin: 0;
   color: var(--prototype-muted);
-}
-
-.p1-create-account__error {
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-  padding: .75rem .9rem;
-  border: 1px solid rgba(184, 54, 43, .35);
-  border-radius: 8px;
-  background: rgba(184, 54, 43, .08);
-  color: var(--prototype-danger);
-  font-weight: 800;
 }
 
 .p1-create-account__form {
@@ -92,36 +59,14 @@
   border-top: 1px solid var(--prototype-border);
 }
 
-.p1-create-account__primary {
-  display: inline-flex;
-  gap: .45rem;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.35rem;
-  padding: .48rem .8rem;
-  border: 1px solid var(--prototype-green);
-  border-radius: 7px;
-  background: var(--prototype-green);
-  color: #fff;
-  font-weight: 800;
-}
-
-.p1-create-account__backdrop:focus-visible,
-.p1-create-account__icon-button:focus-visible,
-.p1-create-account__primary:focus-visible {
+.p1-create-account__backdrop:focus-visible {
   outline: 3px solid var(--prototype-focus);
   outline-offset: 2px;
 }
 
-.p1-create-account__backdrop:disabled,
-.p1-create-account__icon-button:disabled,
-.p1-create-account__primary:disabled {
+.p1-create-account__backdrop:disabled {
   cursor: not-allowed;
   opacity: .62;
-}
-
-.fa {
-  color: inherit;
 }
 
 @media (max-width: 760px) {

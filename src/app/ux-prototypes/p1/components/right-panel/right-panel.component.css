@@ -81,7 +81,7 @@
 .p1-panel__tabs button.active {
   background: var(--prototype-surface);
   color: var(--prototype-blue);
-  box-shadow: 0 .35rem .9rem rgba(44, 56, 107, .08);
+  box-shadow: 0 .35rem .9rem color-mix(in srgb, var(--prototype-blue) 8%, transparent);
 }
 
 .p1-panel__content {
@@ -151,7 +151,7 @@ a.p1-panel__item {
 }
 
 a.p1-panel__item:hover {
-  box-shadow: 0 .45rem 1rem rgba(44, 56, 107, .12);
+  box-shadow: 0 .45rem 1rem color-mix(in srgb, var(--prototype-blue) 12%, transparent);
   transform: translateY(-1px);
 }
 

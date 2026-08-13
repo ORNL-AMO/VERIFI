@@ -20,7 +20,7 @@
   padding: .75rem;
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-groups h3,
@@ -70,7 +70,7 @@
   padding: .6rem;
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-groups__card strong {
@@ -142,7 +142,7 @@
   position: absolute;
   inset: 0;
   z-index: 20;
-  background: rgba(13, 20, 18, .32);
+  background: var(--prototype-backdrop);
 }
 
 .p1-groups__drawer {
@@ -210,7 +210,7 @@
   padding: .4rem .5rem;
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
-  background: var(--prototype-surface);
+  background: var(--prototype-panel);
   color: var(--prototype-text);
 }
 
@@ -221,7 +221,7 @@
   padding: .55rem .65rem;
   border-left: 4px solid var(--prototype-orange);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-groups__meter-options {
@@ -235,7 +235,7 @@
   padding: .55rem;
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface);
 }
 
 .p1-groups__meter-options input {

@@ -40,14 +40,14 @@
 }
 
 .p1-header__verifi {
-  color: #000;
+  color: var(--prototype-text);
   font-size: 36px;
   font-weight: 500;
   line-height: 1;
 }
 
 .p1-header__verifi::first-letter {
-  color: #ff6000;
+  color: var(--prototype-orange);
 }
 
 /* ── Workspace row ─────────────────────────────────────────────── */
@@ -139,7 +139,7 @@
 .p1-header__context button.active,
 .p1-header__context button.open {
   background: var(--prototype-surface);
-  box-shadow: 0 .25rem .75rem rgba(44, 56, 107, .1);
+  box-shadow: 0 .25rem .75rem color-mix(in srgb, var(--prototype-blue) 10%, transparent);
 }
 
 .p1-header__context button.active {
