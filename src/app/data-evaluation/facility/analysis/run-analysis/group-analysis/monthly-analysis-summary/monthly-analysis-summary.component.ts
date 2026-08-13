@@ -1,20 +1,15 @@
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, OnInit, inject, Injector } from '@angular/core';
+import { Component, DestroyRef, Signal, computed, effect, inject, signal } from '@angular/core';
 import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, MonthlyAnalysisSummary } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-monthly-analysis-summary',
@@ -22,64 +17,57 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   styleUrls: ['./monthly-analysis-summary.component.css'],
   standalone: false
 })
-export class MonthlyAnalysisSummaryComponent implements OnInit {
+export class MonthlyAnalysisSummaryComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly analysisService = inject(AnalysisService);
+  private readonly sharedDataService = inject(SharedDataService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  analysisItem: IdbAnalysisItem;
-  group: AnalysisGroup;
-  monthlyAnalysisSummary: MonthlyAnalysisSummary;
-  facility: IdbFacility;
-  itemsPerPage: number;
-  itemsPerPageSub: Subscription;
-  worker: Worker;
-  calculating: boolean | 'error';
-  analysisDisplay: 'graph' | 'table';
-  key: string;
-  facilitySub: Subscription;
+  readonly analysisItem: Signal<IdbAnalysisItem> = this.accountWorkspaceStore.selectedFacilityAnalysis;
+  readonly facility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  readonly selectedGroup: Signal<AnalysisGroup> = toSignal(this.analysisService.selectedGroup);
+  readonly itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage);
 
-  constructor(
-    private analysisService: AnalysisService,
-    private sharedDataService: SharedDataService,
-    private injector: Injector
-  ) { }
+  readonly key: Signal<string> = computed(() => 'monthly-' + this.facility()?.id);
+  readonly analysisDisplay = signal<'graph' | 'table'>('graph');
 
-  ngOnInit(): void {
-    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
-      this.itemsPerPage = val;
+  readonly monthlyAnalysisSummary = signal<MonthlyAnalysisSummary>(undefined);
+  readonly calculating = signal<boolean | 'error'>(false);
+
+  private worker: Worker;
+
+  constructor() {
+    effect(() => {
+      const key = this.key();
+      this.analysisDisplay.set(this.analysisService.getDisplaySubject(key, 'graph').getValue());
     });
 
-    this.analysisItem = this.accountWorkspaceStore.selectedFacilityAnalysis();
-    let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
-    this.group = this.analysisService.selectedGroup.getValue();
+    const analysisItem = this.analysisItem();
+    const facility = this.facility();
+    const group = this.selectedGroup();
+    const facilityMeters = [...this.accountWorkspaceStore.facilityMeters()];
+    const facilityMeterData = [...this.accountWorkspaceStore.facilityMeterData()];
+    const accountPredictorEntries = [...this.accountWorkspaceStore.predictorData()];
+    const accountAnalysisItems = [...this.accountWorkspaceStore.facilityAnalyses()];
+    const account = this.accountWorkspaceStore.account();
 
-    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
-      this.facility = val;
-      this.key = 'monthly-' + this.facility?.id;
-      this.analysisDisplay = this.analysisService.getDisplaySubject(this.key, 'graph').getValue();
-    });
-
-    let facilityMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.facilityMeters()];
-    let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
-    let accountPredictorEntries: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
-    let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
-          this.monthlyAnalysisSummary = data.monthlyAnalysisSummary;
-          this.calculating = false;
+          this.monthlyAnalysisSummary.set(data.monthlyAnalysisSummary);
+          this.calculating.set(false);
         } else {
-          this.monthlyAnalysisSummary = undefined;
-          this.calculating = 'error';
+          this.monthlyAnalysisSummary.set(undefined);
+          this.calculating.set('error');
         }
-
         this.worker.terminate();
       };
-      this.calculating = true;
+      this.calculating.set(true);
       this.worker.postMessage({
-        selectedGroup: this.group,
-        analysisItem: this.analysisItem,
-        facility: this.facility,
+        selectedGroup: group,
+        analysisItem: analysisItem,
+        facility: facility,
         meters: facilityMeters,
         meterData: facilityMeterData,
         accountPredictorEntries: accountPredictorEntries,
@@ -88,24 +76,21 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion, []);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountAnalysisItems);
-      this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
-      this.calculating = false;
+      const calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], [facility], account.assessmentReportVersion, []);
+      const monthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountAnalysisItems);
+      this.monthlyAnalysisSummary.set(monthlyAnalysisSummaryClass.getResults());
+      this.calculating.set(false);
     }
-  }
 
-  ngOnDestroy() {
-    if (this.worker) {
-      this.worker.terminate();
-    }
-    this.itemsPerPageSub.unsubscribe();
-    this.facilitySub.unsubscribe();
+    this.destroyRef.onDestroy(() => {
+      if (this.worker) {
+        this.worker.terminate();
+      }
+    });
   }
 
   setDataDisplay(display: 'table' | 'graph') {
-    this.analysisDisplay = display;
-    this.analysisService.getDisplaySubject(this.key, 'graph').next(this.analysisDisplay);
+    this.analysisDisplay.set(display);
+    this.analysisService.getDisplaySubject(this.key(), 'graph').next(display);
   }
-
 }
