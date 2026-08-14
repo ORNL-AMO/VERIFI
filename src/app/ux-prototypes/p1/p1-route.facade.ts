@@ -134,7 +134,7 @@ export class P1RouteFacade {
   readonly cornerStyle = signal<P1CornerStyle>('soft');
   readonly glowAccents = signal(false);
   readonly highContrast = signal(false);
-  readonly backgroundPattern = signal<P1BackgroundPattern>('none');
+  readonly backgroundPattern = signal<P1BackgroundPattern>('blueprint-grid');
   readonly isRightPanelOpen = signal(true);
   readonly areCompletedTodoItemsHidden = signal(false);
 
@@ -403,7 +403,7 @@ export class P1RouteFacade {
     if (palette === 'aurora') {
       return 'aurora-flow';
     }
-    return 'none';
+    return 'blueprint-grid';
   }
 
   private async navigateToWorkspace(

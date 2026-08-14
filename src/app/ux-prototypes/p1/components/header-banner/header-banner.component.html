@@ -118,11 +118,6 @@
       }
     </div>
     }
-    <!-- Panel toggle -->
-    <button type="button" class="p1-header__panel-btn" (click)="facade.toggleRightPanel()"
-      [attr.aria-pressed]="facade.isRightPanelOpen()" aria-label="Toggle support panel">
-      <span [class]="'fa ' + (facade.isRightPanelOpen() ? 'fa-chevron-right' : 'fa-chevron-left')"></span>
-    </button>
 
   </div>
   }
@@ -141,9 +136,8 @@
         <div class="p1-header__palette-row" role="group" aria-label="Color palette">
           @for (option of paletteOptions; track option.id) {
           <button type="button" class="p1-header__swatch" [ngClass]="option.swatchClass"
-            [class.active]="facade.palette() === option.id"
-            (click)="facade.setPalette(option.id)" [title]="option.label"
-            [attr.aria-label]="option.label + ' palette'"
+            [class.active]="facade.palette() === option.id" (click)="facade.setPalette(option.id)"
+            [title]="option.label" [attr.aria-label]="option.label + ' palette'"
             [attr.aria-pressed]="facade.palette() === option.id">
             <span class="p1-header__swatch-sample" aria-hidden="true"></span>
             <span>{{ option.label }}</span>
@@ -154,8 +148,8 @@
         <span class="p1-header__dropdown-label">Layout</span>
         <div class="p1-header__segment" role="group" aria-label="Workspace density">
           @for (option of densityOptions; track option.id) {
-          <button type="button" [class.active]="facade.density() === option.id"
-            (click)="facade.setDensity(option.id)" [attr.aria-pressed]="facade.density() === option.id">
+          <button type="button" [class.active]="facade.density() === option.id" (click)="facade.setDensity(option.id)"
+            [attr.aria-pressed]="facade.density() === option.id">
             <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
             <span>{{ option.label }}</span>
           </button>
@@ -175,8 +169,7 @@
         <label class="p1-header__setting-row">
           <span>Dark mode</span>
           <button type="button" class="p1-header__toggle" [class.on]="facade.darkMode()"
-            (click)="facade.toggleDarkMode()"
-            [attr.aria-pressed]="facade.darkMode()"
+            (click)="facade.toggleDarkMode()" [attr.aria-pressed]="facade.darkMode()"
             [attr.aria-label]="facade.darkMode() ? 'Disable dark mode' : 'Enable dark mode'">
             <span class="p1-header__toggle-thumb"></span>
           </button>
@@ -184,8 +177,7 @@
         <label class="p1-header__setting-row">
           <span>Glow accents</span>
           <button type="button" class="p1-header__toggle" [class.on]="facade.glowAccents()"
-            (click)="facade.toggleGlowAccents()"
-            [attr.aria-pressed]="facade.glowAccents()"
+            (click)="facade.toggleGlowAccents()" [attr.aria-pressed]="facade.glowAccents()"
             [attr.aria-label]="facade.glowAccents() ? 'Disable glow accents' : 'Enable glow accents'">
             <span class="p1-header__toggle-thumb"></span>
           </button>
@@ -193,8 +185,7 @@
         <label class="p1-header__setting-row">
           <span>Background pattern</span>
           <select class="p1-header__setting-select" [value]="facade.backgroundPattern()"
-            (change)="facade.setBackgroundPattern($any($event.target).value)"
-            aria-label="Background pattern">
+            (change)="facade.setBackgroundPattern($any($event.target).value)" aria-label="Background pattern">
             @for (option of patternOptions; track option.id) {
             <option [value]="option.id">{{ option.label }}</option>
             }
@@ -203,8 +194,7 @@
         <label class="p1-header__setting-row">
           <span>High contrast</span>
           <button type="button" class="p1-header__toggle" [class.on]="facade.highContrast()"
-            (click)="facade.toggleHighContrast()"
-            [attr.aria-pressed]="facade.highContrast()"
+            (click)="facade.toggleHighContrast()" [attr.aria-pressed]="facade.highContrast()"
             [attr.aria-label]="facade.highContrast() ? 'Disable high contrast' : 'Enable high contrast'">
             <span class="p1-header__toggle-thumb"></span>
           </button>
@@ -213,4 +203,14 @@
     </div>
     }
   </div>
+
+  @if (facade.isWorkspaceRoute() && facade.selectedAccount(); as account) {
+  <div>
+    <!-- Panel toggle -->
+    <button type="button" class="p1-header__panel-btn" (click)="facade.toggleRightPanel()"
+      [attr.aria-pressed]="facade.isRightPanelOpen()" aria-label="Toggle support panel">
+      <span [class]="'fa ' + (facade.isRightPanelOpen() ? 'fa-chevron-right' : 'fa-chevron-left')"></span>
+    </button>
+  </div>
+  }
 </header>
