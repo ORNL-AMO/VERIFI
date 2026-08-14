@@ -1,24 +1,16 @@
 @let content = facade.content();
-@let activeNavItem = facade.activeNavItem();
+@let account = facade.selectedAccount();
 @let setup = facade.setup();
 
 <section class="p1-main p1-main--account p1-home" aria-labelledby="p1-account-home-todo-list-title">
   <div class="p1-main__toolbar">
     <div>
       <p>{{ content.eyebrow }}</p>
-      <h1 id="p1-account-home-todo-list-title">{{ content.title }}</h1>
+      <h1 id="p1-account-home-todo-list-title">{{ account?.name || content.title }} Todo List</h1>
     </div>
     <div class="p1-main__toolbar-actions">
       <span>{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>
     </div>
-  </div>
-
-  <div class="p1-main__intro">
-    <div>
-      <span>Selected view</span>
-      <strong>{{ activeNavItem.label }}</strong>
-    </div>
-    <p>{{ content.summary }}</p>
   </div>
 
   <section class="p1-home__todos" aria-label="Account todo list">
@@ -26,10 +18,16 @@
       <div>
         <span>First-time setup</span>
         <h2>Todo List</h2>
+        <p>Corporate settings and account setup appear before site-specific readiness checks.</p>
+      </div>
+      <div class="p1-home__todo-progress" [style.--p1-home-progress]="completionPercent()"
+        aria-label="Setup progress">
+        <strong>{{ setup.completeCount }} / {{ setup.totalCount }}</strong>
+        <span>Complete</span>
       </div>
     </div>
 
-    @if (taskGroups().length === 0) {
+    @if (accountTaskGroups().length === 0 && facilityTaskGroups().length === 0) {
       <div class="p1-home__empty" role="status">
         <span class="fa fa-circle-check"></span>
         <strong>No setup items available</strong>
@@ -37,20 +35,79 @@
       </div>
     }
 
-    <div class="p1-home__groups">
-      @for (group of taskGroups(); track group.title) {
+    @if (accountTaskGroups().length > 0) {
+      <div class="p1-home__groups" aria-label="Account setup groups">
+        @for (group of accountTaskGroups(); track group.id) {
         <section class="p1-home__group" [attr.aria-label]="group.title">
-          <h3>{{ group.title }}</h3>
-          @for (task of group.tasks; track task.id) {
-            <a [class]="'p1-home__task p1-home__task--' + task.tone" [routerLink]="facade.setupTaskRoute(task)"
-              [attr.aria-label]="'Open ' + task.title">
-              <span>{{ task.statusLabel }}</span>
-              <h4>{{ task.title }}</h4>
-              <p>{{ task.summary }}</p>
-            </a>
-          }
+          <div class="p1-home__group-header">
+            <div>
+              <span>Account</span>
+              <h3>{{ group.title }}</h3>
+            </div>
+            <span [class]="'p1-chip p1-chip--' + group.tone">{{ group.statusSummary }}</span>
+          </div>
+          <div class="p1-home__task-list">
+            @for (task of group.tasks; track task.id) {
+              <a [class]="'p1-home__task p1-home__task--' + task.tone" [routerLink]="facade.setupTaskRoute(task)"
+                [attr.aria-label]="'Open ' + task.title">
+                <span [class]="'p1-home__status p1-home__status--' + task.tone">{{ task.statusLabel }}</span>
+                <div>
+                  <h4>{{ task.title }}</h4>
+                  <p>{{ task.summary }}</p>
+                </div>
+                <span class="fa fa-arrow-right" aria-hidden="true"></span>
+              </a>
+            }
+          </div>
         </section>
-      }
-    </div>
+        }
+      </div>
+    }
+
+    @if (facilityTaskGroups().length > 0) {
+      <section class="p1-home__facility-section" aria-labelledby="p1-account-facility-todos-title">
+        <div class="p1-home__facility-heading">
+          <div>
+            <span>Facility setup</span>
+            <h2 id="p1-account-facility-todos-title">Facility todo lists</h2>
+          </div>
+          <span class="p1-chip p1-chip--info">
+            {{ facilityOpenTaskCount() }} open across {{ facilityTaskGroups().length }}
+            {{ facilityTaskGroups().length === 1 ? 'facility' : 'facilities' }}
+          </span>
+        </div>
+
+        <div class="p1-home__facility-list">
+          @for (group of facilityTaskGroups(); track group.id) {
+          <details [class]="'p1-home__facility-group p1-home__facility-group--' + group.tone">
+            <summary>
+              <div>
+                <span>Facility</span>
+                <h3>{{ group.title }}</h3>
+              </div>
+              <div class="p1-home__facility-summary">
+                <span [class]="'p1-chip p1-chip--' + group.tone">{{ group.statusSummary }}</span>
+                <small>{{ group.taskCountLabel }}</small>
+                <span class="fa fa-chevron-right" aria-hidden="true"></span>
+              </div>
+            </summary>
+            <div class="p1-home__task-list p1-home__task-list--facility">
+              @for (task of group.tasks; track task.id) {
+                <a [class]="'p1-home__task p1-home__task--' + task.tone" [routerLink]="facade.setupTaskRoute(task)"
+                  [attr.aria-label]="'Open ' + task.title">
+                  <span [class]="'p1-home__status p1-home__status--' + task.tone">{{ task.statusLabel }}</span>
+                  <div>
+                    <h4>{{ task.title }}</h4>
+                    <p>{{ task.summary }}</p>
+                  </div>
+                  <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                </a>
+              }
+            </div>
+          </details>
+          }
+        </div>
+      </section>
+    }
   </section>
 </section>

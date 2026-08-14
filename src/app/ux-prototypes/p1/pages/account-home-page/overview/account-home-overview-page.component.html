@@ -7,7 +7,7 @@
   <div class="p1-main__toolbar">
     <div>
       <p>{{ content.eyebrow }}</p>
-      <h1 id="p1-account-home-overview-title">{{ content.title }}</h1>
+      <h1 id="p1-account-home-overview-title">{{ account?.name || content.title }} Overview</h1>
     </div>
     <div class="p1-main__toolbar-actions">
       <span>{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>

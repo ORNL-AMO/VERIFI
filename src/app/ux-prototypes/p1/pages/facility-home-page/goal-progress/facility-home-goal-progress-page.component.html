@@ -6,7 +6,7 @@
   <div class="p1-main__toolbar">
     <div>
       <p>{{ content.eyebrow }}</p>
-      <h1 id="p1-facility-home-goal-progress-title">Goal Progress</h1>
+      <h1 id="p1-facility-home-goal-progress-title">{{ facility?.name || content.title }} Goal Progress</h1>
     </div>
     <div class="p1-main__toolbar-actions">
       <span>{{ facility?.location }}</span>
