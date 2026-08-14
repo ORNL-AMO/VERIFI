@@ -13,6 +13,7 @@ interface WelcomeExample {
   details: Array<string>;
   highlights: Array<string>;
   cta: string;
+  isSingleFacilityCompany?: boolean;
 }
 
 @Component({
@@ -48,7 +49,8 @@ export class P1WelcomeScreenComponent {
         'It is useful for demonstrating the tool to new users who need to understand the basic workflow before scaling up.'
       ],
       highlights: ['1 facility', '5 meters', '2 analysis items', 'Focused walkthrough'],
-      cta: 'Load Single Facility Example'
+      cta: 'Load Single Facility Example',
+      isSingleFacilityCompany: true
     }
   ];
 
@@ -120,6 +122,9 @@ export class P1WelcomeScreenComponent {
     try {
       const backupText = await this.readExampleBackup(example.assetPath);
       const backupFile = this.backupImportCoordinator.prepareTextBackup(backupText);
+      if (backupFile.backupFileType === 'Account') {
+        backupFile.account.isSingleFacilityCompany = example.isSingleFacilityCompany === true;
+      }
       const newAccount: IdbAccount = await this.backupImportCoordinator.importNewAccount(backupFile);
       this.loadingService.isLoadingComplete.next(true);
       await this.facade.openWorkspace(newAccount.guid);
