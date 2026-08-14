@@ -189,22 +189,6 @@
   align-items: center;
   min-width: 0;
   padding: .85rem;
-  border: 1px solid var(--prototype-border);
-  border-left: 4px solid var(--prototype-border);
-  border-radius: 8px;
-  background: var(--prototype-panel);
-}
-
-.p1-facility-card--success {
-  border-left-color: var(--prototype-green);
-}
-
-.p1-facility-card--warning {
-  border-left-color: var(--prototype-orange);
-}
-
-.p1-facility-card--danger {
-  border-left-color: var(--prototype-danger);
 }
 
 .p1-facility-card__summary {

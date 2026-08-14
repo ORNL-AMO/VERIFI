@@ -367,6 +367,36 @@
   background: var(--prototype-panel);
 }
 
+.p1-db-item-card {
+  border: 1px solid var(--prototype-border);
+  border-left: 4px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-db-item-card);
+  box-shadow: 0 1px 4px var(--prototype-shadow);
+}
+
+.p1-db-item-card:hover,
+.p1-db-item-card:focus-within {
+  background: var(--prototype-db-item-card-hover);
+}
+
+.p1-db-item-card--success {
+  border-left-color: var(--prototype-green);
+}
+
+.p1-db-item-card--warning {
+  border-left-color: var(--prototype-orange);
+}
+
+.p1-db-item-card--danger,
+.p1-db-item-card--error {
+  border-left-color: var(--prototype-danger);
+}
+
+.p1-db-item-card--neutral {
+  border-left-color: var(--prototype-muted);
+}
+
 /* Left-accent coloured stripe */
 .p1-card--accent-left        { border-left: 4px solid var(--prototype-border); }
 .p1-card--accent-left-brand  { border-left-color: var(--prototype-orange); }

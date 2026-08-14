@@ -100,7 +100,8 @@
   } @else {
   <div class="p1-account-facilities__cards" role="list" aria-label="Facilities">
     @for (summary of _summaries; track summary.facility.guid) {
-    <article class="p1-facility-card" [ngClass]="'p1-facility-card--' + summary.statusTone" role="listitem">
+    <article class="p1-facility-card p1-db-item-card" [ngClass]="'p1-db-item-card--' + summary.statusTone"
+      role="listitem">
       <div class="p1-facility-card__summary">
         <div class="p1-facility-card__top">
           <span class="p1-chip">{{ summary.classification }}</span>

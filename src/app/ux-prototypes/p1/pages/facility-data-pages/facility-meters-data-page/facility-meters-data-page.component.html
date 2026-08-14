@@ -93,7 +93,7 @@
       @for (row of meterRows(); track row.meter.guid) {
       @let _status = row.readingCount === 0 ? 'error' : (row.status?.status || 'good');
       @let _tone = _status === 'good' ? 'success' : _status === 'warning' ? 'warning' : 'danger';
-      <article class="p1-meter-card p1-meter-card--{{ _tone }}" role="listitem">
+      <article class="p1-meter-card p1-db-item-card p1-db-item-card--{{ _tone }}" role="listitem">
 
         <div class="p1-meter-card__summary">
           <div class="p1-meter-card__top">

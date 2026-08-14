@@ -107,7 +107,6 @@
   flex-wrap: wrap;
 }
 
-.p1-meters__home,
 .p1-meters__detail {
   display: flex;
   flex-direction: column;
@@ -120,10 +119,13 @@
 }
 
 .p1-meters__home {
-  gap: 1rem;
-  padding: 1rem;
+  display: flex;
   flex: 1 1 auto;
-  overflow: auto;
+  flex-direction: column;
+  gap: .85rem;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .p1-meters__home-header {
@@ -131,6 +133,10 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  padding: .75rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
 }
 
 .p1-meters__home-header h2 {
@@ -173,6 +179,20 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: .65rem;
+  align-content: start;
+  align-items: start;
+  flex: 1 1 auto;
+  grid-auto-rows: max-content;
+  min-height: 0;
+  padding: .15rem .1rem .25rem;
+  overflow: auto;
+}
+
+.p1-meters__home > app-p1-facility-meter-groups {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .p1-meter-card {
@@ -182,15 +202,7 @@
   align-items: center;
   min-width: 0;
   padding: .85rem;
-  border: 1px solid var(--prototype-border);
-  border-left: 4px solid var(--prototype-border);
-  border-radius: 8px;
-  background: var(--prototype-panel);
 }
-
-.p1-meter-card--success { border-left-color: var(--prototype-green); }
-.p1-meter-card--warning { border-left-color: var(--prototype-orange); }
-.p1-meter-card--danger  { border-left-color: var(--prototype-danger); }
 
 .p1-meter-card__summary {
   display: grid;

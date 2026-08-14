@@ -1,6 +1,6 @@
 <div class="p1-analysis__cards" aria-label="Facility analysis items">
   @for (row of rows; track row.analysis.guid) {
-  <article [class]="'p1-analysis-card p1-analysis-card--' + row.tone">
+  <article [class]="'p1-analysis-card p1-db-item-card p1-db-item-card--' + row.tone">
     <div class="p1-analysis-card__summary">
       <div class="p1-analysis-card__top">
         <span class="p1-chip">{{ categoryLabel(row.analysis.analysisCategory) }}</span>
