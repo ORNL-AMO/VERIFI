@@ -8,6 +8,7 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 import { buildP1PrototypeData } from './p1-real-data.adapter';
 import {
   P1AccountSummary,
+  P1BackgroundPattern,
   P1ContextMode,
   P1CornerStyle,
   P1Density,
@@ -133,6 +134,7 @@ export class P1RouteFacade {
   readonly cornerStyle = signal<P1CornerStyle>('soft');
   readonly glowAccents = signal(false);
   readonly highContrast = signal(false);
+  readonly backgroundPattern = signal<P1BackgroundPattern>('none');
   readonly isRightPanelOpen = signal(true);
   readonly areCompletedTodoItemsHidden = signal(false);
 
@@ -365,6 +367,7 @@ export class P1RouteFacade {
 
   setPalette(palette: P1Palette): void {
     this.palette.set(palette);
+    this.backgroundPattern.set(this.getPaletteBackgroundPattern(palette));
   }
 
   setDensity(density: P1Density): void {
@@ -381,6 +384,26 @@ export class P1RouteFacade {
 
   toggleHighContrast(): void {
     this.highContrast.update(enabled => !enabled);
+  }
+
+  setBackgroundPattern(backgroundPattern: P1BackgroundPattern): void {
+    this.backgroundPattern.set(backgroundPattern);
+  }
+
+  private getPaletteBackgroundPattern(palette: P1Palette): P1BackgroundPattern {
+    if (palette === 'neon') {
+      return 'neon-grid';
+    }
+    if (palette === 'blueprint') {
+      return 'blueprint-grid';
+    }
+    if (palette === 'steel') {
+      return 'steel-hatch';
+    }
+    if (palette === 'aurora') {
+      return 'aurora-flow';
+    }
+    return 'none';
   }
 
   private async navigateToWorkspace(

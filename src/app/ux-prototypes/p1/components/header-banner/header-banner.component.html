@@ -191,6 +191,16 @@
           </button>
         </label>
         <label class="p1-header__setting-row">
+          <span>Background pattern</span>
+          <select class="p1-header__setting-select" [value]="facade.backgroundPattern()"
+            (change)="facade.setBackgroundPattern($any($event.target).value)"
+            aria-label="Background pattern">
+            @for (option of patternOptions; track option.id) {
+            <option [value]="option.id">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="p1-header__setting-row">
           <span>High contrast</span>
           <button type="button" class="p1-header__toggle" [class.on]="facade.highContrast()"
             (click)="facade.toggleHighContrast()"

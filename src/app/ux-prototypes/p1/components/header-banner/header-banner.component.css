@@ -514,6 +514,19 @@
   transform: translateX(1.2rem);
 }
 
+.p1-header__setting-select {
+  width: min(10rem, 58%);
+  min-height: 2rem;
+  padding: .3rem .45rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
 /* ── Responsive ────────────────────────────────────────────────── */
 
 @media (max-width: 980px) {

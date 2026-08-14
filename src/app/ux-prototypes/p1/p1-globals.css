@@ -615,7 +615,7 @@
    shell without changing production styles or persisted preferences.
    ──────────────────────────────────────────────────────────────── */
 
-.verifi-prototype .p1-prototype.p1-palette-neon {
+.verifi-prototype .p1-prototype.p1-background-pattern-neon-grid {
   background:
     linear-gradient(color-mix(in srgb, var(--prototype-accent) 14%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--prototype-accent) 10%, transparent) 1px, transparent 1px),
@@ -624,7 +624,7 @@
   background-size: 2.25rem 2.25rem, 2.25rem 2.25rem, auto, auto;
 }
 
-.verifi-prototype .p1-palette-neon .p1-shell {
+.verifi-prototype .p1-background-pattern-neon-grid .p1-shell {
   background:
     linear-gradient(color-mix(in srgb, var(--prototype-accent) 16%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--prototype-accent) 13%, transparent) 1px, transparent 1px),
@@ -633,7 +633,7 @@
   background-size: 2.25rem 2.25rem, 2.25rem 2.25rem, auto, auto;
 }
 
-.verifi-prototype .p1-prototype.p1-palette-blueprint {
+.verifi-prototype .p1-prototype.p1-background-pattern-blueprint-grid {
   background:
     linear-gradient(color-mix(in srgb, var(--prototype-blue) 10%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--prototype-blue) 10%, transparent) 1px, transparent 1px),
@@ -641,7 +641,7 @@
   background-size: 1.5rem 1.5rem, 1.5rem 1.5rem, auto;
 }
 
-.verifi-prototype .p1-palette-blueprint .p1-shell {
+.verifi-prototype .p1-background-pattern-blueprint-grid .p1-shell {
   background:
     linear-gradient(color-mix(in srgb, var(--prototype-blue) 12%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--prototype-blue) 12%, transparent) 1px, transparent 1px),
@@ -651,10 +651,127 @@
   background-size: 6rem 6rem, 6rem 6rem, 1.5rem 1.5rem, 1.5rem 1.5rem, auto;
 }
 
-.verifi-prototype .p1-prototype.p1-palette-aurora {
+.verifi-prototype .p1-prototype.p1-background-pattern-steel-hatch {
   background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 13%, transparent) 1px, transparent 1.7px),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--prototype-blue) 5%, transparent) 0 1px, transparent 1px 1.35rem),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--prototype-border) 22%, transparent) 0 1px, transparent 1px 2.8rem),
+    var(--prototype-bg);
+  background-size: 5.6rem 5.6rem, auto, auto, auto;
+}
+
+.verifi-prototype .p1-background-pattern-steel-hatch .p1-shell {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 18%, transparent) 1px, transparent 1.7px),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--prototype-blue) 7%, transparent) 0 1px, transparent 1px 1.15rem),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--prototype-border) 28%, transparent) 0 1px, transparent 1px 2.4rem),
+    linear-gradient(120deg, color-mix(in srgb, var(--prototype-surface) 34%, transparent), transparent 42%),
+    var(--prototype-bg);
+  background-size: 4.8rem 4.8rem, auto, auto, auto, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-aurora-flow {
+  background:
+    repeating-radial-gradient(ellipse at 50% -12%, transparent 0 3.3rem, color-mix(in srgb, var(--prototype-blue) 5%, transparent) 3.3rem 3.42rem, transparent 3.42rem 6.5rem),
+    linear-gradient(108deg, transparent 0 10%, color-mix(in srgb, var(--prototype-green) 11%, transparent) 19%, transparent 34%),
+    linear-gradient(75deg, transparent 0 52%, color-mix(in srgb, var(--prototype-blue) 10%, transparent) 61%, transparent 76%),
     radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--prototype-green) 18%, transparent), transparent 25rem),
     radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--prototype-blue) 16%, transparent), transparent 28rem),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-aurora-flow .p1-shell {
+  background:
+    repeating-radial-gradient(ellipse at 50% -18%, transparent 0 2.7rem, color-mix(in srgb, var(--prototype-blue) 7%, transparent) 2.7rem 2.82rem, transparent 2.82rem 5.7rem),
+    linear-gradient(105deg, transparent 0 12%, color-mix(in srgb, var(--prototype-green) 14%, transparent) 20%, transparent 34%),
+    linear-gradient(72deg, transparent 0 48%, color-mix(in srgb, var(--prototype-blue) 12%, transparent) 58%, transparent 73%),
+    linear-gradient(145deg, color-mix(in srgb, var(--prototype-green) 8%, transparent), transparent 46%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-isometric-mesh {
+  background:
+    linear-gradient(30deg, color-mix(in srgb, var(--prototype-blue) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(150deg, color-mix(in srgb, var(--prototype-green) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-border) 18%, transparent) 1px, transparent 1px),
+    var(--prototype-bg);
+  background-size: 3.8rem 6.6rem, 3.8rem 6.6rem, 3.8rem 6.6rem, auto;
+}
+
+.verifi-prototype .p1-background-pattern-isometric-mesh .p1-shell {
+  background:
+    linear-gradient(30deg, color-mix(in srgb, var(--prototype-blue) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(150deg, color-mix(in srgb, var(--prototype-green) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-border) 24%, transparent) 1px, transparent 1px),
+    linear-gradient(115deg, color-mix(in srgb, var(--prototype-surface) 28%, transparent), transparent 44%),
+    var(--prototype-bg);
+  background-size: 3.8rem 6.6rem, 3.8rem 6.6rem, 3.8rem 6.6rem, auto, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-circuit-traces {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 16%, transparent) 1px, transparent 1.8px),
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-green) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 46%, color-mix(in srgb, var(--prototype-orange) 5%, transparent) 46% 47%, transparent 47%),
+    var(--prototype-bg);
+  background-size: 4.25rem 4.25rem, 4.25rem 4.25rem, 4.25rem 4.25rem, 8.5rem 8.5rem, auto;
+}
+
+.verifi-prototype .p1-background-pattern-circuit-traces .p1-shell {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 20%, transparent) 1px, transparent 1.8px),
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-green) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 46%, color-mix(in srgb, var(--prototype-orange) 7%, transparent) 46% 47%, transparent 47%),
+    var(--prototype-bg);
+  background-size: 4.25rem 4.25rem, 4.25rem 4.25rem, 4.25rem 4.25rem, 8.5rem 8.5rem, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-topographic-contours {
+  background:
+    repeating-radial-gradient(ellipse at 18% 12%, transparent 0 2.35rem, color-mix(in srgb, var(--prototype-green) 7%, transparent) 2.35rem 2.48rem, transparent 2.48rem 4.9rem),
+    repeating-radial-gradient(ellipse at 84% 72%, transparent 0 2.8rem, color-mix(in srgb, var(--prototype-blue) 6%, transparent) 2.8rem 2.94rem, transparent 2.94rem 5.7rem),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-topographic-contours .p1-shell {
+  background:
+    repeating-radial-gradient(ellipse at 18% 12%, transparent 0 2.15rem, color-mix(in srgb, var(--prototype-green) 9%, transparent) 2.15rem 2.3rem, transparent 2.3rem 4.55rem),
+    repeating-radial-gradient(ellipse at 84% 72%, transparent 0 2.55rem, color-mix(in srgb, var(--prototype-blue) 8%, transparent) 2.55rem 2.7rem, transparent 2.7rem 5.2rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--prototype-surface) 22%, transparent), transparent 48%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-prism-facets {
+  background:
+    linear-gradient(132deg, color-mix(in srgb, var(--prototype-blue) 9%, transparent) 0 16%, transparent 16% 100%),
+    linear-gradient(38deg, transparent 0 54%, color-mix(in srgb, var(--prototype-green) 8%, transparent) 54% 68%, transparent 68% 100%),
+    linear-gradient(156deg, transparent 0 22%, color-mix(in srgb, var(--prototype-orange) 6%, transparent) 22% 32%, transparent 32% 100%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-prism-facets .p1-shell {
+  background:
+    linear-gradient(132deg, color-mix(in srgb, var(--prototype-blue) 11%, transparent) 0 16%, transparent 16% 100%),
+    linear-gradient(38deg, transparent 0 54%, color-mix(in srgb, var(--prototype-green) 10%, transparent) 54% 68%, transparent 68% 100%),
+    linear-gradient(156deg, transparent 0 22%, color-mix(in srgb, var(--prototype-orange) 8%, transparent) 22% 32%, transparent 32% 100%),
+    linear-gradient(110deg, color-mix(in srgb, var(--prototype-surface) 28%, transparent), transparent 46%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-signal-rings {
+  background:
+    repeating-radial-gradient(circle at 18% 30%, transparent 0 2.9rem, color-mix(in srgb, var(--prototype-accent) 7%, transparent) 2.9rem 3.05rem, transparent 3.05rem 6.1rem),
+    repeating-radial-gradient(circle at 92% 10%, transparent 0 3.5rem, color-mix(in srgb, var(--prototype-orange) 5%, transparent) 3.5rem 3.64rem, transparent 3.64rem 7.25rem),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-signal-rings .p1-shell {
+  background:
+    repeating-radial-gradient(circle at 18% 30%, transparent 0 2.55rem, color-mix(in srgb, var(--prototype-accent) 9%, transparent) 2.55rem 2.7rem, transparent 2.7rem 5.4rem),
+    repeating-radial-gradient(circle at 92% 10%, transparent 0 3.1rem, color-mix(in srgb, var(--prototype-orange) 7%, transparent) 3.1rem 3.25rem, transparent 3.25rem 6.45rem),
+    linear-gradient(125deg, color-mix(in srgb, var(--prototype-blue) 6%, transparent), transparent 50%),
     var(--prototype-bg);
 }
 

@@ -11,6 +11,15 @@
   [class.p1-corners-square]="facade.cornerStyle() === 'square'"
   [class.p1-effects-glow]="facade.glowAccents()"
   [class.p1-contrast-strong]="facade.highContrast()"
+  [class.p1-background-pattern-neon-grid]="facade.backgroundPattern() === 'neon-grid'"
+  [class.p1-background-pattern-blueprint-grid]="facade.backgroundPattern() === 'blueprint-grid'"
+  [class.p1-background-pattern-steel-hatch]="facade.backgroundPattern() === 'steel-hatch'"
+  [class.p1-background-pattern-aurora-flow]="facade.backgroundPattern() === 'aurora-flow'"
+  [class.p1-background-pattern-isometric-mesh]="facade.backgroundPattern() === 'isometric-mesh'"
+  [class.p1-background-pattern-circuit-traces]="facade.backgroundPattern() === 'circuit-traces'"
+  [class.p1-background-pattern-topographic-contours]="facade.backgroundPattern() === 'topographic-contours'"
+  [class.p1-background-pattern-prism-facets]="facade.backgroundPattern() === 'prism-facets'"
+  [class.p1-background-pattern-signal-rings]="facade.backgroundPattern() === 'signal-rings'"
   aria-label="VERIFI workspace concept">
   <app-p1-header-banner></app-p1-header-banner>
   <router-outlet></router-outlet>

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { P1RouteFacade } from '../../p1-route.facade';
-import { P1CornerStyle, P1Density, P1Palette } from '../../p1.models';
+import { P1BackgroundPattern, P1CornerStyle, P1Density, P1Palette } from '../../p1.models';
 
 interface P1PaletteOption {
   id: P1Palette;
@@ -12,6 +12,11 @@ interface P1SegmentOption<T> {
   id: T;
   label: string;
   icon: string;
+}
+
+interface P1PatternOption {
+  id: P1BackgroundPattern;
+  label: string;
 }
 
 @Component({
@@ -42,6 +47,19 @@ export class P1HeaderBannerComponent {
   readonly cornerOptions: Array<P1SegmentOption<P1CornerStyle>> = [
     { id: 'soft', label: 'Soft', icon: 'fa-square' },
     { id: 'square', label: 'Square', icon: 'fa-vector-square' }
+  ];
+
+  readonly patternOptions: Array<P1PatternOption> = [
+    { id: 'none', label: 'None' },
+    { id: 'neon-grid', label: 'Neon grid' },
+    { id: 'blueprint-grid', label: 'Blueprint grid' },
+    { id: 'steel-hatch', label: 'Machined hatch' },
+    { id: 'aurora-flow', label: 'Aurora flow' },
+    { id: 'isometric-mesh', label: 'Isometric mesh' },
+    { id: 'circuit-traces', label: 'Circuit traces' },
+    { id: 'topographic-contours', label: 'Topographic contours' },
+    { id: 'prism-facets', label: 'Prism facets' },
+    { id: 'signal-rings', label: 'Signal rings' }
   ];
 
   accountMenuOpen = false;

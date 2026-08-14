@@ -5,6 +5,17 @@ export type P1StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral'
 export type P1Palette = 'default' | 'ocean' | 'forest' | 'sunset' | 'neon' | 'blueprint' | 'steel' | 'aurora';
 export type P1Density = 'comfortable' | 'compact';
 export type P1CornerStyle = 'soft' | 'square';
+export type P1BackgroundPattern =
+  'none'
+  | 'neon-grid'
+  | 'blueprint-grid'
+  | 'steel-hatch'
+  | 'aurora-flow'
+  | 'isometric-mesh'
+  | 'circuit-traces'
+  | 'topographic-contours'
+  | 'prism-facets'
+  | 'signal-rings';
 
 export interface P1AccountSummary {
   id: string;
