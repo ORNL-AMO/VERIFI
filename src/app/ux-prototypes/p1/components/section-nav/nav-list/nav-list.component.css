@@ -57,7 +57,26 @@
 }
 
 .p1-nav__group a.active {
-  border: 1px solid currentColor;
+  border-radius: var(--prototype-active-row-radius);
+  color: var(--prototype-blue);
+  font-weight: 700;
+  overflow: hidden;
+  padding-left: .9rem;
+}
+
+.p1-nav__group a.active::before {
+  content: "";
+  position: absolute;
+  top: .45rem;
+  bottom: .45rem;
+  left: .35rem;
+  width: 3px;
+  border-radius: var(--prototype-active-marker-radius);
+  background: currentColor;
+}
+
+.p1-nav__group a.active small {
+  color: color-mix(in srgb, currentColor 72%, var(--prototype-muted));
 }
 
 .p1-nav__child-toggle {
@@ -107,13 +126,23 @@
 
 .p1-nav__group a.p1-nav__child.active {
   color: var(--prototype-blue);
+  padding-left: .85rem;
+}
+
+.p1-nav__group a.p1-nav__child.active::before {
+  top: .4rem;
+  bottom: .4rem;
+  left: .32rem;
+  width: 2px;
 }
 
 :host-context(.p1-nav--account) .p1-nav__group a.active {
+  background: color-mix(in srgb, var(--prototype-green) 10%, var(--prototype-surface));
   color: var(--prototype-green);
 }
 
 :host-context(.p1-nav--facility) .p1-nav__group a.active {
+  background: color-mix(in srgb, var(--prototype-blue) 10%, var(--prototype-surface));
   color: var(--prototype-blue);
 }
 

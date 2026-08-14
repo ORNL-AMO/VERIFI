@@ -2,7 +2,9 @@ export type P1SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'repo
 export type P1ContextMode = 'account' | 'facility';
 export type P1PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type P1StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
-export type P1Palette = 'default' | 'ocean' | 'forest' | 'sunset';
+export type P1Palette = 'default' | 'ocean' | 'forest' | 'sunset' | 'neon' | 'blueprint' | 'steel' | 'aurora';
+export type P1Density = 'comfortable' | 'compact';
+export type P1CornerStyle = 'soft' | 'square';
 
 export interface P1AccountSummary {
   id: string;

@@ -24,6 +24,10 @@
   --prototype-green: #145a32;    /* account context */
   --prototype-blue: #2c386b;     /* facility context */
   --prototype-backdrop: rgba(13, 20, 18, .36);
+  --prototype-glow: transparent;
+  --prototype-shadow: rgba(23, 35, 31, .12);
+  --prototype-active-row-radius: 6px;
+  --prototype-active-marker-radius: 999px;
 
   /* Establish the base text colour for the whole prototype tree */
   color: var(--prototype-text);
@@ -80,6 +84,79 @@
   --prototype-border:       #e8c99a;
 }
 
+/* ── Palette: Neon Grid (electric shop-floor console) ────────── */
+
+.p1-palette-neon {
+  --prototype-bg:           #081121;
+  --prototype-surface:      #101a2d;
+  --prototype-surface-muted:#172642;
+  --prototype-panel:        #0c1728;
+  --prototype-text:         #e8faff;
+  --prototype-muted:        #91b8c8;
+  --prototype-border:       #2a4964;
+  --prototype-accent:       #00cfe8;
+  --prototype-accent-strong:#3cffdd;
+  --prototype-warning:      #ffd166;
+  --prototype-danger:       #ff6b89;
+  --prototype-focus:        #ff40d4;
+  --prototype-orange:       #ff6a3d;
+  --prototype-green:        #42f58d;
+  --prototype-blue:         #8c8cff;
+  --prototype-backdrop:     rgba(3, 7, 18, .62);
+  --prototype-glow:         rgba(0, 207, 232, .34);
+  --prototype-shadow:       rgba(0, 0, 0, .35);
+}
+
+/* ── Palette: Blueprint (drafting-room blues) ────────────────── */
+
+.p1-palette-blueprint {
+  --prototype-bg:           #eaf3fb;
+  --prototype-surface:      #f7fbff;
+  --prototype-surface-muted:#d7eaff;
+  --prototype-panel:        #e1effc;
+  --prototype-text:         #102b45;
+  --prototype-muted:        #4d6a83;
+  --prototype-border:       #9ec2e4;
+  --prototype-accent:       #1d73b7;
+  --prototype-accent-strong:#0d4f82;
+  --prototype-focus:        #0b83ff;
+  --prototype-blue:         #174a7c;
+}
+
+/* ── Palette: Steel Lab (cool industrial neutrals) ───────────── */
+
+.p1-palette-steel {
+  --prototype-bg:           #eef1f2;
+  --prototype-surface:      #fbfcfc;
+  --prototype-surface-muted:#dfe5e8;
+  --prototype-panel:        #e8edf0;
+  --prototype-text:         #182329;
+  --prototype-muted:        #59676f;
+  --prototype-border:       #b9c5cb;
+  --prototype-accent:       #3c7280;
+  --prototype-accent-strong:#235360;
+  --prototype-focus:        #1677a8;
+  --prototype-blue:         #344f68;
+}
+
+/* ── Palette: Aurora (cool green with violet highlights) ─────── */
+
+.p1-palette-aurora {
+  --prototype-bg:           #f1f7f5;
+  --prototype-surface:      #fbfffd;
+  --prototype-surface-muted:#dff1ed;
+  --prototype-panel:        #e9f5f1;
+  --prototype-text:         #14251f;
+  --prototype-muted:        #5c7069;
+  --prototype-border:       #b8d8cf;
+  --prototype-accent:       #16896f;
+  --prototype-accent-strong:#0d6754;
+  --prototype-focus:        #8757d7;
+  --prototype-orange:       #f25c35;
+  --prototype-green:        #138852;
+  --prototype-blue:         #6957bd;
+}
+
 /* ── Dark mode overrides ──────────────────────────────────────── */
 
 .p1-dark {
@@ -100,6 +177,8 @@
   --prototype-green: #4db87e;    /* account context: warm green, readable on dark bg */
   --prototype-blue: #8fa3e8;     /* facility context: already correct */
   --prototype-backdrop: rgba(0, 0, 0, .52);
+  --prototype-glow: rgba(94, 207, 173, .22);
+  --prototype-shadow: rgba(0, 0, 0, .32);
 }
 
 .verifi-prototype button .fa {
@@ -134,4 +213,70 @@
   --prototype-surface-muted:#332214;
   --prototype-panel:        #20140a;
   --prototype-border:       #4a2e14;
+}
+
+.p1-dark.p1-palette-neon {
+  --prototype-bg:           #040814;
+  --prototype-surface:      #0b1324;
+  --prototype-surface-muted:#111f38;
+  --prototype-panel:        #070f1d;
+  --prototype-border:       #275f77;
+  --prototype-accent:       #00e7ff;
+  --prototype-accent-strong:#48ffd6;
+  --prototype-orange:       #ff7a45;
+  --prototype-green:        #5dff9f;
+  --prototype-blue:         #9ca1ff;
+  --prototype-glow:         rgba(0, 231, 255, .42);
+}
+
+.p1-dark.p1-palette-blueprint {
+  --prototype-bg:           #071626;
+  --prototype-surface:      #0e243b;
+  --prototype-surface-muted:#143356;
+  --prototype-panel:        #0a1d31;
+  --prototype-border:       #29577d;
+  --prototype-accent:       #56b9ff;
+  --prototype-accent-strong:#8fd1ff;
+  --prototype-blue:         #8fc8ff;
+}
+
+.p1-dark.p1-palette-steel {
+  --prototype-bg:           #10171b;
+  --prototype-surface:      #182227;
+  --prototype-surface-muted:#223035;
+  --prototype-panel:        #141d22;
+  --prototype-border:       #35454d;
+  --prototype-accent:       #75bac9;
+  --prototype-accent-strong:#9ed7e2;
+  --prototype-blue:         #a3bed3;
+}
+
+.p1-dark.p1-palette-aurora {
+  --prototype-bg:           #08130f;
+  --prototype-surface:      #10201a;
+  --prototype-surface-muted:#17332a;
+  --prototype-panel:        #0c1a15;
+  --prototype-border:       #28544a;
+  --prototype-accent:       #40d5a1;
+  --prototype-accent-strong:#88f2cb;
+  --prototype-green:        #69dfa1;
+  --prototype-blue:         #bd9cff;
+  --prototype-glow:         rgba(136, 242, 203, .26);
+}
+
+/* ── High contrast can layer over any palette/mode ────────────── */
+
+.p1-contrast-strong {
+  --prototype-surface-muted: color-mix(in srgb, var(--prototype-surface) 76%, var(--prototype-text));
+  --prototype-panel: color-mix(in srgb, var(--prototype-surface) 88%, var(--prototype-text));
+  --prototype-muted: color-mix(in srgb, var(--prototype-text) 82%, var(--prototype-surface));
+  --prototype-border: color-mix(in srgb, var(--prototype-text) 52%, var(--prototype-surface));
+  --prototype-focus: #005fcc;
+}
+
+.p1-dark.p1-contrast-strong,
+.p1-palette-neon.p1-contrast-strong {
+  --prototype-muted: color-mix(in srgb, var(--prototype-text) 78%, var(--prototype-bg));
+  --prototype-border: color-mix(in srgb, var(--prototype-text) 45%, var(--prototype-bg));
+  --prototype-focus: #f7ff6b;
 }

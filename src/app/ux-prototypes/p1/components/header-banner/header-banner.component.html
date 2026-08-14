@@ -118,62 +118,6 @@
       }
     </div>
     }
-
-
-    <!-- App settings -->
-    <div class="p1-header__zone p1-header__zone--app">
-      <button type="button" class="p1-header__app-btn" (click)="toggleAppMenu()" [class.open]="appMenuOpen"
-        aria-label="Application settings" aria-haspopup="true" [attr.aria-expanded]="appMenuOpen">
-        <span class="fa fa-gear"></span>
-      </button>
-
-      @if (appMenuOpen) {
-      <div class="p1-header__app-menu" role="menu">
-        <div class="p1-header__dropdown-section">
-          <span class="p1-header__dropdown-label">Appearance</span>
-          <!-- Palette swatches -->
-          <div class="p1-header__palette-row" role="group" aria-label="Color palette">
-            <button type="button" class="p1-header__swatch p1-header__swatch--default"
-              [class.active]="facade.palette() === 'default'"
-              (click)="facade.setPalette('default')" title="Default" aria-label="Default palette">
-              <span class="sr-only">Default</span>
-            </button>
-            <button type="button" class="p1-header__swatch p1-header__swatch--ocean"
-              [class.active]="facade.palette() === 'ocean'"
-              (click)="facade.setPalette('ocean')" title="Ocean" aria-label="Ocean palette">
-              <span class="sr-only">Ocean</span>
-            </button>
-            <button type="button" class="p1-header__swatch p1-header__swatch--forest"
-              [class.active]="facade.palette() === 'forest'"
-              (click)="facade.setPalette('forest')" title="Forest" aria-label="Forest palette">
-              <span class="sr-only">Forest</span>
-            </button>
-            <button type="button" class="p1-header__swatch p1-header__swatch--sunset"
-              [class.active]="facade.palette() === 'sunset'"
-              (click)="facade.setPalette('sunset')" title="Sunset" aria-label="Sunset palette">
-              <span class="sr-only">Sunset</span>
-            </button>
-          </div>
-          <div class="p1-header__palette-labels" aria-hidden="true">
-            <span>Default</span>
-            <span>Ocean</span>
-            <span>Forest</span>
-            <span>Sunset</span>
-          </div>
-          <!-- Dark mode toggle -->
-          <label class="p1-header__setting-row">
-            <span>Dark mode</span>
-            <button type="button" class="p1-header__toggle" [class.on]="facade.darkMode()"
-              (click)="facade.toggleDarkMode()"
-              [attr.aria-label]="facade.darkMode() ? 'Disable dark mode' : 'Enable dark mode'">
-              <span class="p1-header__toggle-thumb"></span>
-            </button>
-          </label>
-        </div>
-      </div>
-      }
-    </div>
-
     <!-- Panel toggle -->
     <button type="button" class="p1-header__panel-btn" (click)="facade.toggleRightPanel()"
       [attr.aria-pressed]="facade.isRightPanelOpen()" aria-label="Toggle support panel">
@@ -182,4 +126,81 @@
 
   </div>
   }
+
+  <!-- App settings -->
+  <div class="p1-header__zone p1-header__zone--app">
+    <button type="button" class="p1-header__app-btn" (click)="toggleAppMenu()" [class.open]="appMenuOpen"
+      aria-label="Application settings" aria-haspopup="true" [attr.aria-expanded]="appMenuOpen">
+      <span class="fa fa-gear"></span>
+    </button>
+
+    @if (appMenuOpen) {
+    <div class="p1-header__app-menu" role="menu">
+      <div class="p1-header__dropdown-section">
+        <span class="p1-header__dropdown-label">Appearance</span>
+        <div class="p1-header__palette-row" role="group" aria-label="Color palette">
+          @for (option of paletteOptions; track option.id) {
+          <button type="button" class="p1-header__swatch" [ngClass]="option.swatchClass"
+            [class.active]="facade.palette() === option.id"
+            (click)="facade.setPalette(option.id)" [title]="option.label"
+            [attr.aria-label]="option.label + ' palette'"
+            [attr.aria-pressed]="facade.palette() === option.id">
+            <span class="p1-header__swatch-sample" aria-hidden="true"></span>
+            <span>{{ option.label }}</span>
+          </button>
+          }
+        </div>
+
+        <span class="p1-header__dropdown-label">Layout</span>
+        <div class="p1-header__segment" role="group" aria-label="Workspace density">
+          @for (option of densityOptions; track option.id) {
+          <button type="button" [class.active]="facade.density() === option.id"
+            (click)="facade.setDensity(option.id)" [attr.aria-pressed]="facade.density() === option.id">
+            <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
+            <span>{{ option.label }}</span>
+          </button>
+          }
+        </div>
+        <div class="p1-header__segment" role="group" aria-label="Corner style">
+          @for (option of cornerOptions; track option.id) {
+          <button type="button" [class.active]="facade.cornerStyle() === option.id"
+            (click)="facade.setCornerStyle(option.id)" [attr.aria-pressed]="facade.cornerStyle() === option.id">
+            <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
+            <span>{{ option.label }}</span>
+          </button>
+          }
+        </div>
+
+        <span class="p1-header__dropdown-label">Effects</span>
+        <label class="p1-header__setting-row">
+          <span>Dark mode</span>
+          <button type="button" class="p1-header__toggle" [class.on]="facade.darkMode()"
+            (click)="facade.toggleDarkMode()"
+            [attr.aria-pressed]="facade.darkMode()"
+            [attr.aria-label]="facade.darkMode() ? 'Disable dark mode' : 'Enable dark mode'">
+            <span class="p1-header__toggle-thumb"></span>
+          </button>
+        </label>
+        <label class="p1-header__setting-row">
+          <span>Glow accents</span>
+          <button type="button" class="p1-header__toggle" [class.on]="facade.glowAccents()"
+            (click)="facade.toggleGlowAccents()"
+            [attr.aria-pressed]="facade.glowAccents()"
+            [attr.aria-label]="facade.glowAccents() ? 'Disable glow accents' : 'Enable glow accents'">
+            <span class="p1-header__toggle-thumb"></span>
+          </button>
+        </label>
+        <label class="p1-header__setting-row">
+          <span>High contrast</span>
+          <button type="button" class="p1-header__toggle" [class.on]="facade.highContrast()"
+            (click)="facade.toggleHighContrast()"
+            [attr.aria-pressed]="facade.highContrast()"
+            [attr.aria-label]="facade.highContrast() ? 'Disable high contrast' : 'Enable high contrast'">
+            <span class="p1-header__toggle-thumb"></span>
+          </button>
+        </label>
+      </div>
+    </div>
+    }
+  </div>
 </header>

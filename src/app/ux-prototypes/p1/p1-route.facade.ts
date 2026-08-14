@@ -9,6 +9,8 @@ import { buildP1PrototypeData } from './p1-real-data.adapter';
 import {
   P1AccountSummary,
   P1ContextMode,
+  P1CornerStyle,
+  P1Density,
   P1FacilitySummary,
   P1NavItem,
   P1Palette,
@@ -127,6 +129,10 @@ export class P1RouteFacade {
 
   readonly darkMode = signal(false);
   readonly palette = signal<P1Palette>('default');
+  readonly density = signal<P1Density>('comfortable');
+  readonly cornerStyle = signal<P1CornerStyle>('soft');
+  readonly glowAccents = signal(false);
+  readonly highContrast = signal(false);
   readonly isRightPanelOpen = signal(true);
   readonly areCompletedTodoItemsHidden = signal(false);
 
@@ -359,6 +365,22 @@ export class P1RouteFacade {
 
   setPalette(palette: P1Palette): void {
     this.palette.set(palette);
+  }
+
+  setDensity(density: P1Density): void {
+    this.density.set(density);
+  }
+
+  setCornerStyle(cornerStyle: P1CornerStyle): void {
+    this.cornerStyle.set(cornerStyle);
+  }
+
+  toggleGlowAccents(): void {
+    this.glowAccents.update(enabled => !enabled);
+  }
+
+  toggleHighContrast(): void {
+    this.highContrast.update(enabled => !enabled);
   }
 
   private async navigateToWorkspace(

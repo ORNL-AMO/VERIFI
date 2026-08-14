@@ -3,6 +3,14 @@
   [class.p1-palette-ocean]="facade.palette() === 'ocean'"
   [class.p1-palette-forest]="facade.palette() === 'forest'"
   [class.p1-palette-sunset]="facade.palette() === 'sunset'"
+  [class.p1-palette-neon]="facade.palette() === 'neon'"
+  [class.p1-palette-blueprint]="facade.palette() === 'blueprint'"
+  [class.p1-palette-steel]="facade.palette() === 'steel'"
+  [class.p1-palette-aurora]="facade.palette() === 'aurora'"
+  [class.p1-density-compact]="facade.density() === 'compact'"
+  [class.p1-corners-square]="facade.cornerStyle() === 'square'"
+  [class.p1-effects-glow]="facade.glowAccents()"
+  [class.p1-contrast-strong]="facade.highContrast()"
   aria-label="VERIFI workspace concept">
   <app-p1-header-banner></app-p1-header-banner>
   <router-outlet></router-outlet>

@@ -290,14 +290,30 @@
 
 .p1-nav__group button.active {
   background: var(--prototype-surface);
-  border: 1px solid currentColor;
+  border-radius: var(--prototype-active-row-radius);
+  font-weight: 700;
+  overflow: hidden;
+  padding-left: .9rem;
+}
+
+.p1-nav__group button.active::before {
+  content: "";
+  position: absolute;
+  top: .45rem;
+  bottom: .45rem;
+  left: .35rem;
+  width: 3px;
+  border-radius: var(--prototype-active-marker-radius);
+  background: currentColor;
 }
 
 .p1-nav--account .p1-nav__group button.active {
+  background: color-mix(in srgb, var(--prototype-green) 10%, var(--prototype-surface));
   color: var(--prototype-green);
 }
 
 .p1-nav--facility .p1-nav__group button.active {
+  background: color-mix(in srgb, var(--prototype-blue) 10%, var(--prototype-surface));
   color: var(--prototype-blue);
 }
 
