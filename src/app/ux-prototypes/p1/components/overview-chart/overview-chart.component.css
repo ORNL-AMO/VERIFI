@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.p1-facility-chart {
+  display: grid;
+  gap: .45rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.p1-facility-chart figcaption {
+  min-height: 1.1rem;
+  color: var(--prototype-muted);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.p1-facility-chart__plot {
+  min-height: 18rem;
+}

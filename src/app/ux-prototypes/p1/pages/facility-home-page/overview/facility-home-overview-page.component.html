@@ -1,6 +1,7 @@
 @let content = facade.content();
 @let facility = facade.selectedFacility();
 @let activeNavItem = facade.activeNavItem();
+@let setup = facade.setup();
 
 <section class="p1-main p1-main--facility p1-home" aria-labelledby="p1-facility-home-overview-title">
   <div class="p1-main__toolbar">
@@ -13,45 +14,152 @@
     </div>
   </div>
 
-  <div class="p1-main__intro">
-    <div>
-      <span>Selected view</span>
-      <strong>{{ activeNavItem.label }}</strong>
-    </div>
-    <p>{{ content.summary }}</p>
-  </div>
+  @if (facility) {
+    @let primary = primaryAction();
+    <div class="p1-facility-overview">
+      <div class="p1-facility-overview__hero">
+        <section class="p1-facility-overview__brief" aria-label="Facility overview summary">
+          <div class="p1-facility-overview__brief-header">
+            <div>
+              <span class="p1-eyebrow">Facility home</span>
+              <h2>Overview, readiness, and key places to go next</h2>
+              <p>{{ content.summary }}</p>
+            </div>
+            <span [class]="'p1-chip p1-chip--' + (facility.status === 'Ready' ? 'success' : 'warning')">{{ facility.status }}</span>
+          </div>
+          <div class="p1-facility-overview__meta" aria-label="Facility context">
+            <span class="p1-chip p1-chip--info">{{ activeNavItem.label }}</span>
+            <span class="p1-chip">{{ facility.location }}</span>
+            <span class="p1-chip">{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>
+          </div>
+        </section>
 
-  <div class="p1-main__metrics" aria-label="Facility workspace metrics">
-    @for (metric of content.metrics; track metric.label) {
-      <article [class]="'p1-main__metric p1-main__metric--' + metric.tone">
-        <span>{{ metric.label }}</span>
-        <strong>{{ metric.value }}</strong>
-        <small>{{ metric.trend }}</small>
-      </article>
-    }
-  </div>
-
-  <div class="p1-main__body">
-    <section class="p1-main__cards" aria-label="Facility workspace cards">
-      @for (card of content.cards; track card.title) {
-        <article [class]="'p1-main__card p1-main__card--' + card.tone">
-          <span>{{ card.meta }}</span>
-          <h2>{{ card.title }}</h2>
-          <p>{{ card.summary }}</p>
-        </article>
-      }
-    </section>
-
-    <aside class="p1-main__activity" aria-label="Setup snapshot">
-      <div class="p1-main__activity-header">
-        <h2>Setup snapshot</h2>
-        <span>{{ facility?.status }}</span>
+        <aside class="p1-facility-overview__primary" aria-label="Recommended next action">
+          <span class="p1-facility-overview__primary-icon" [ngClass]="['fa', primary.icon]" aria-hidden="true"></span>
+          <div>
+            <span class="p1-eyebrow">Recommended</span>
+            <h2>{{ primary.title }}</h2>
+            <p>{{ primary.summary }}</p>
+          </div>
+          <a class="p1-facility-overview__primary-action" [routerLink]="routeFor(primary, facility.id)">
+            <span [ngClass]="['fa', primary.icon]" aria-hidden="true"></span>
+            {{ primary.title }}
+          </a>
+        </aside>
       </div>
-      <ol>
-        @for (activity of content.activity; track activity) {
-          <li>{{ activity }}</li>
-        }
-      </ol>
-    </aside>
-  </div>
+      
+      <div class="p1-facility-overview__body">
+        <div class="p1-facility-overview__main-stack">
+          <section class="p1-facility-overview__panel" aria-label="Utility performance summary">
+            <div>
+              <span class="p1-eyebrow">Data Evaluation overview</span>
+              <h2>Utility performance at a glance</h2>
+              <p>Energy, cost, emissions, and water are grouped together so the main facility signals are visible from home.</p>
+            </div>
+            <div class="p1-facility-overview__utility-grid">
+              @for (utility of utilitySummaries(); track utility.label) {
+                <article [class]="'p1-facility-overview__utility-card p1-facility-overview__utility-card--' + utility.tone">
+                  <span>{{ utility.label }}</span>
+                  <strong>{{ utility.value }}</strong>
+                  <small>{{ utility.unit }} /yr
+                     <!-- &middot; {{ utility.trend }} -->
+
+                  </small>
+                </article>
+              }
+            </div>
+          </section>
+
+          <section class="p1-facility-overview__chart-panel" aria-label="Facility overview charts">
+            <div>
+              <span class="p1-eyebrow">Utility trends</span>
+              <h2>Overview charts</h2>
+            </div>
+            <div class="p1-facility-overview__chart-grid">
+              <app-p1-overview-chart
+                [config]="trendChart()"
+                [themeSignature]="themeSignature()">
+              </app-p1-overview-chart>
+              <app-p1-overview-chart
+                [config]="mixChart()"
+                [themeSignature]="themeSignature()">
+              </app-p1-overview-chart>
+            </div>
+          </section>
+
+          <section class="p1-facility-overview__launchpad" aria-labelledby="p1-facility-launchpad-title">
+            <div>
+              <span class="p1-eyebrow">Facility launchpad</span>
+              <h2 id="p1-facility-launchpad-title">Useful places from home</h2>
+              <p>Jump directly to the facility areas used for data setup, visualization, analysis, reporting, and settings.</p>
+            </div>
+            <div class="p1-facility-overview__launch-grid">
+              @for (action of launchpadActions(); track action.title) {
+                <a [class]="'p1-facility-overview__launch-card p1-facility-overview__launch-card--' + action.tone"
+                  [routerLink]="routeFor(action, facility.id)">
+                  <span class="p1-facility-overview__launch-icon" [ngClass]="['fa', action.icon]" aria-hidden="true"></span>
+                  <div>
+                    <span>{{ action.meta }}</span>
+                    <h3>{{ action.title }}</h3>
+                    <p>{{ action.summary }}</p>
+                  </div>
+                  <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                </a>
+              }
+            </div>
+          </section>
+        </div>
+
+        <aside class="p1-facility-overview__side-stack" aria-label="Facility readiness and activity">
+          <section class="p1-facility-overview__panel">
+            <div>
+              <span class="p1-eyebrow">Facility status</span>
+              <h2>Data readiness</h2>
+              <p>Meters, predictors, analysis, and reports are grouped by what needs attention next.</p>
+            </div>
+            <div class="p1-facility-overview__readiness">
+              @for (item of readinessItems(); track item.title) {
+                <article [class]="'p1-facility-overview__readiness-card p1-facility-overview__readiness-card--' + item.tone">
+                  <span [ngClass]="['fa', item.icon]" aria-hidden="true"></span>
+                  <div>
+                    <span>{{ item.statusLabel }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.summary }}</p>
+                  </div>
+                  <a class="p1-facility-overview__action" [routerLink]="routeFor(item.action, facility.id)">
+                    Open
+                  </a>
+                </article>
+              }
+            </div>
+          </section>
+
+          <section class="p1-facility-overview__chart-panel" aria-label="Facility setup readiness chart">
+            <app-p1-overview-chart
+              [config]="readinessChart()"
+              [themeSignature]="themeSignature()">
+            </app-p1-overview-chart>
+          </section>
+
+          <section class="p1-facility-overview__panel">
+            <div>
+              <span class="p1-eyebrow">Home tab content</span>
+              <h2>Setup snapshot</h2>
+            </div>
+            <ol>
+              @for (activity of content.activity; track activity) {
+                <li>{{ activity }}</li>
+              }
+            </ol>
+          </section>
+        </aside>
+      </div>
+    </div>
+  } @else {
+    <div class="p1-facility-overview__empty">
+      <span class="p1-eyebrow">Facility home</span>
+      <h2>No facility is selected</h2>
+      <p>Select or create a facility before reviewing facility overview content.</p>
+    </div>
+  }
 </section>

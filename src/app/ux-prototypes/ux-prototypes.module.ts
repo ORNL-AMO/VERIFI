@@ -47,6 +47,7 @@ import { P1FacilityMeterReadingsComponent } from './p1/pages/facility-data-pages
 import { P1FacilityMeterSetupComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-setup/meter-setup.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
 import { P1FacilityHomeGoalProgressPageComponent } from './p1/pages/facility-home-page/goal-progress/facility-home-goal-progress-page.component';
+import { P1OverviewChartComponent } from './p1/components/overview-chart/overview-chart.component';
 import { P1FacilityHomeOverviewPageComponent } from './p1/pages/facility-home-page/overview/facility-home-overview-page.component';
 import { P1FacilityHomeTodoListPageComponent } from './p1/pages/facility-home-page/todo-list/facility-home-todo-list-page.component';
 import { P1FacilityAnalysisCompareDrawerComponent } from './p1/pages/facility-analysis-page/analysis-compare-drawer/analysis-compare-drawer.component';
@@ -129,6 +130,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1FacilityAnalysisReferencesPanelComponent,
     P1FacilityAnalysisWorkbenchFooterComponent,
     P1FacilityHomeOverviewPageComponent,
+    P1OverviewChartComponent,
     P1FacilityHomeGoalProgressPageComponent,
     P1FacilityHomeTodoListPageComponent,
     P1FacilityPlaceholderPageComponent,
