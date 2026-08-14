@@ -59,7 +59,8 @@
   width: 100%;
   min-width: 0;
   padding: 1rem;
-  border-left: 3px solid var(--prototype-green);
+  border-left: 3px solid var(--prototype-accent);
+  overflow: hidden;
 }
 
 .p1-settings__panel--danger {
@@ -71,8 +72,17 @@
   gap: 1rem;
   align-items: flex-start;
   justify-content: space-between;
-  padding-bottom: .75rem;
+  /* Bleed to panel edges, then restore padding */
+  margin: -1rem -1rem 0;
+  padding: .75rem 1rem;
   border-bottom: 1px solid var(--prototype-border);
+  border-radius: 5px 5px 0 0;
+  background: var(--prototype-surface-muted);
+}
+
+.p1-settings__panel--danger .p1-settings__panel-heading {
+  border-bottom-color: color-mix(in srgb, var(--prototype-danger) 25%, var(--prototype-border));
+  background: color-mix(in srgb, var(--prototype-danger) 6%, var(--prototype-panel));
 }
 
 .p1-settings__panel-heading span,

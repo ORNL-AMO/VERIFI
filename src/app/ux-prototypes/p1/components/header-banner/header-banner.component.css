@@ -345,6 +345,60 @@
   min-width: 14rem;
 }
 
+/* ── Palette swatch picker ─────────────────────────────────────── */
+
+.p1-header__palette-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .35rem;
+  padding: .3rem .55rem .15rem;
+}
+
+.p1-header__swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color .15s, transform .1s;
+}
+
+.p1-header__swatch:hover {
+  transform: scale(1.08);
+}
+
+.p1-header__swatch.active {
+  border-color: var(--prototype-orange);
+  box-shadow: 0 0 0 1px var(--prototype-orange);
+}
+
+.p1-header__swatch--default {
+  background: linear-gradient(135deg, #f7f8f5 50%, #d7dfda 50%);
+}
+
+.p1-header__swatch--ocean {
+  background: linear-gradient(135deg, #f2f5fc 50%, #bfcde8 50%);
+}
+
+.p1-header__swatch--forest {
+  background: linear-gradient(135deg, #f0f6f2 50%, #b7d4be 50%);
+}
+
+.p1-header__swatch--sunset {
+  background: linear-gradient(135deg, #fdf4eb 50%, #e8c99a 50%);
+}
+
+.p1-header__palette-labels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .35rem;
+  padding: 0 .55rem .35rem;
+  text-align: center;
+  color: var(--prototype-muted);
+  font-size: .65rem;
+  font-weight: 700;
+}
+
 /* ── Settings row (dark mode toggle) ──────────────────────────── */
 
 .p1-header__setting-row {

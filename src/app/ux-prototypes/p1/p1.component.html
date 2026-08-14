@@ -1,4 +1,9 @@
-<section class="p1-prototype" [class.p1-dark]="facade.darkMode()" aria-label="VERIFI workspace concept">
+<section class="p1-prototype"
+  [class.p1-dark]="facade.darkMode()"
+  [class.p1-palette-ocean]="facade.palette() === 'ocean'"
+  [class.p1-palette-forest]="facade.palette() === 'forest'"
+  [class.p1-palette-sunset]="facade.palette() === 'sunset'"
+  aria-label="VERIFI workspace concept">
   <app-p1-header-banner></app-p1-header-banner>
   <router-outlet></router-outlet>
 </section>

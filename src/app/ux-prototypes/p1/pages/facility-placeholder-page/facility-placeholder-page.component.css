@@ -5,11 +5,11 @@
   padding: .9rem;
   border: 1px dashed var(--prototype-border);
   border-radius: 8px;
-  background: var(--prototype-panel);
+  background: var(--prototype-surface-muted);
 }
 
 .p1-main__placeholder > span {
-  color: var(--prototype-blue);
+  color: var(--prototype-accent);
   font-size: 1.35rem;
 }
 

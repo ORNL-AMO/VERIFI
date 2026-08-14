@@ -1,9 +1,9 @@
 .p1-settings--facility .p1-settings__panel {
-  border-left-color: var(--prototype-blue);
+  border-left-color: var(--prototype-accent);
 }
 
 .p1-settings--facility.p1-settings__panel {
-  border-left-color: var(--prototype-blue);
+  border-left-color: var(--prototype-accent);
 }
 
 .p1-settings--facility .p1-settings__state > span {

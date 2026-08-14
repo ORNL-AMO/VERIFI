@@ -50,6 +50,36 @@
   outline-offset: 2px;
 }
 
+/* ── Palette: Ocean (blue-tinted surfaces) ───────────────────── */
+
+.p1-palette-ocean {
+  --prototype-bg:           #f2f5fc;
+  --prototype-surface:      #f7f9ff;
+  --prototype-surface-muted:#dde7f7;
+  --prototype-panel:        #e8eefa;
+  --prototype-border:       #bfcde8;
+}
+
+/* ── Palette: Forest (green-tinted surfaces) ─────────────────── */
+
+.p1-palette-forest {
+  --prototype-bg:           #f0f6f2;
+  --prototype-surface:      #f6fbf7;
+  --prototype-surface-muted:#d9ecdf;
+  --prototype-panel:        #e6f2e9;
+  --prototype-border:       #b7d4be;
+}
+
+/* ── Palette: Sunset (warm amber/orange-tinted surfaces) ─────── */
+
+.p1-palette-sunset {
+  --prototype-bg:           #fdf4eb;
+  --prototype-surface:      #fffaf4;
+  --prototype-surface-muted:#f5e4ce;
+  --prototype-panel:        #faeddd;
+  --prototype-border:       #e8c99a;
+}
+
 /* ── Dark mode overrides ──────────────────────────────────────── */
 
 .p1-dark {
@@ -74,4 +104,34 @@
 
 .verifi-prototype button .fa {
   color: inherit;
+}
+
+/* ── Dark + palette combos ─────────────────────────────────────
+   Shift the dark neutrals toward each palette's hue. Only the
+   surface tokens need overriding; text/brand colours from .p1-dark
+   remain untouched.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-dark.p1-palette-ocean {
+  --prototype-bg:           #0d1320;
+  --prototype-surface:      #141c2e;
+  --prototype-surface-muted:#1c2840;
+  --prototype-panel:        #111828;
+  --prototype-border:       #263550;
+}
+
+.p1-dark.p1-palette-forest {
+  --prototype-bg:           #0c1610;
+  --prototype-surface:      #131e16;
+  --prototype-surface-muted:#1a2a1d;
+  --prototype-panel:        #101a13;
+  --prototype-border:       #243428;
+}
+
+.p1-dark.p1-palette-sunset {
+  --prototype-bg:           #1a1008;
+  --prototype-surface:      #261a10;
+  --prototype-surface-muted:#332214;
+  --prototype-panel:        #20140a;
+  --prototype-border:       #4a2e14;
 }

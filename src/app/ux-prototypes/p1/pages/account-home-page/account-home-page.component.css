@@ -45,9 +45,9 @@
 .p1-main__toolbar-actions button {
   min-height: 2.35rem;
   padding: .45rem .7rem;
-  border: 1px solid var(--prototype-blue);
+  border: 1px solid var(--prototype-accent);
   border-radius: 7px;
-  background: var(--prototype-blue);
+  background: var(--prototype-accent);
   color: #fff;
   font-weight: 800;
   text-decoration: none;
@@ -76,7 +76,7 @@
 }
 
 .p1-home__task:hover {
-  box-shadow: 0 .5rem 1rem color-mix(in srgb, var(--prototype-blue) 12%, transparent);
+  box-shadow: 0 .5rem 1rem color-mix(in srgb, var(--prototype-accent) 14%, transparent);
   transform: translateY(-1px);
 }
 
@@ -106,7 +106,7 @@
 }
 
 .p1-home__empty > span {
-  color: var(--prototype-green);
+  color: var(--prototype-accent);
 }
 
 @media (max-width: 700px) {

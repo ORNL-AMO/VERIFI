@@ -2,6 +2,7 @@ export type P1SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'repo
 export type P1ContextMode = 'account' | 'facility';
 export type P1PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type P1StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+export type P1Palette = 'default' | 'ocean' | 'forest' | 'sunset';
 
 export interface P1AccountSummary {
   id: string;

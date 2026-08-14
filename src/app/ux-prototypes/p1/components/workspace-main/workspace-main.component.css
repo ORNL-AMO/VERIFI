@@ -21,6 +21,10 @@
   gap: 1rem;
   align-items: flex-start;
   justify-content: space-between;
+  padding: .85rem 1rem;
+  border-radius: 8px;
+  background: var(--prototype-panel);
+  border: 1px solid var(--prototype-border);
 }
 
 .p1-main__toolbar p,
@@ -39,7 +43,7 @@
 
 .p1-main__toolbar p {
   margin: 0 0 .25rem;
-  color: var(--prototype-orange);
+  color: var(--prototype-accent);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -90,6 +94,7 @@
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
   background: var(--prototype-surface);
+  box-shadow: 0 1px 4px rgba(23, 35, 31, .05);
 }
 
 .p1-main__intro {
@@ -109,22 +114,15 @@
 
 .p1-main__intro strong {
   font-size: 1.1rem;
-}
-
-.p1-main--account .p1-main__intro strong {
-  color: var(--prototype-green);
-}
-
-.p1-main--facility .p1-main__intro strong {
-  color: var(--prototype-blue);
+  color: var(--prototype-accent-strong);
 }
 
 .p1-main--account .p1-main__intro {
-  border-left: 3px solid var(--prototype-green);
+  border-left: 3px solid var(--prototype-accent);
 }
 
 .p1-main--facility .p1-main__intro {
-  border-left: 3px solid var(--prototype-blue);
+  border-left: 3px solid var(--prototype-accent);
 }
 
 .p1-main__intro p {
@@ -157,18 +155,22 @@
 
 .p1-main__metric--success {
   border-top: 3px solid var(--prototype-green);
+  background: color-mix(in srgb, var(--prototype-accent) 5%, var(--prototype-surface));
 }
 
 .p1-main__metric--warning {
   border-top: 3px solid var(--prototype-orange);
+  background: color-mix(in srgb, var(--prototype-orange) 5%, var(--prototype-surface));
 }
 
 .p1-main__metric--info {
   border-top: 3px solid var(--prototype-blue);
+  background: color-mix(in srgb, var(--prototype-accent) 5%, var(--prototype-surface));
 }
 
 .p1-main__metric--danger {
   border-top: 3px solid var(--prototype-danger);
+  background: color-mix(in srgb, var(--prototype-danger) 5%, var(--prototype-surface));
 }
 
 .p1-main__body {

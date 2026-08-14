@@ -130,7 +130,37 @@
       @if (appMenuOpen) {
       <div class="p1-header__app-menu" role="menu">
         <div class="p1-header__dropdown-section">
-          <span class="p1-header__dropdown-label">Settings</span>
+          <span class="p1-header__dropdown-label">Appearance</span>
+          <!-- Palette swatches -->
+          <div class="p1-header__palette-row" role="group" aria-label="Color palette">
+            <button type="button" class="p1-header__swatch p1-header__swatch--default"
+              [class.active]="facade.palette() === 'default'"
+              (click)="facade.setPalette('default')" title="Default" aria-label="Default palette">
+              <span class="sr-only">Default</span>
+            </button>
+            <button type="button" class="p1-header__swatch p1-header__swatch--ocean"
+              [class.active]="facade.palette() === 'ocean'"
+              (click)="facade.setPalette('ocean')" title="Ocean" aria-label="Ocean palette">
+              <span class="sr-only">Ocean</span>
+            </button>
+            <button type="button" class="p1-header__swatch p1-header__swatch--forest"
+              [class.active]="facade.palette() === 'forest'"
+              (click)="facade.setPalette('forest')" title="Forest" aria-label="Forest palette">
+              <span class="sr-only">Forest</span>
+            </button>
+            <button type="button" class="p1-header__swatch p1-header__swatch--sunset"
+              [class.active]="facade.palette() === 'sunset'"
+              (click)="facade.setPalette('sunset')" title="Sunset" aria-label="Sunset palette">
+              <span class="sr-only">Sunset</span>
+            </button>
+          </div>
+          <div class="p1-header__palette-labels" aria-hidden="true">
+            <span>Default</span>
+            <span>Ocean</span>
+            <span>Forest</span>
+            <span>Sunset</span>
+          </div>
+          <!-- Dark mode toggle -->
           <label class="p1-header__setting-row">
             <span>Dark mode</span>
             <button type="button" class="p1-header__toggle" [class.on]="facade.darkMode()"

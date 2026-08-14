@@ -18,6 +18,16 @@
   overflow-y: auto;
 }
 
+.p1-nav--account {
+  background: var(--prototype-panel);
+  border-right-color: var(--prototype-border);
+}
+
+.p1-nav--facility {
+  background: var(--prototype-panel);
+  border-right-color: var(--prototype-border);
+}
+
 .p1-nav__context {
   display: grid;
   grid-template-columns: 1fr 1fr;

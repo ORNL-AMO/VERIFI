@@ -11,6 +11,7 @@ import {
   P1ContextMode,
   P1FacilitySummary,
   P1NavItem,
+  P1Palette,
   P1PanelContent,
   P1PanelTabId,
   P1PrototypeData,
@@ -125,6 +126,7 @@ export class P1RouteFacade {
   private lastSyncedFacilityGuid: string | undefined;
 
   readonly darkMode = signal(false);
+  readonly palette = signal<P1Palette>('default');
   readonly isRightPanelOpen = signal(true);
   readonly areCompletedTodoItemsHidden = signal(false);
 
@@ -353,6 +355,10 @@ export class P1RouteFacade {
 
   toggleDarkMode(): void {
     this.darkMode.update(enabled => !enabled);
+  }
+
+  setPalette(palette: P1Palette): void {
+    this.palette.set(palette);
   }
 
   private async navigateToWorkspace(

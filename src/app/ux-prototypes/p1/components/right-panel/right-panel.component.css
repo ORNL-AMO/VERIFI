@@ -23,6 +23,7 @@
   justify-content: space-between;
   padding: .9rem;
   border-bottom: 1px solid var(--prototype-border);
+  background: var(--prototype-panel);
 }
 
 .p1-panel__header div {
