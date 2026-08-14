@@ -16,8 +16,8 @@ export class P1HomeSectionNavComponent {
         title: 'Facility Workspace',
         items: [
           { id: 'overview', label: 'Overview' },
-          { id: 'goal-progress', label: 'Goal Progress' },
-          { id: 'todo-list', label: 'Todo List' }
+          { id: 'todo-list', label: 'Todo List' },
+          { id: 'goal-progress', label: 'Goal Progress' }
         ]
       }];
     }
@@ -26,8 +26,8 @@ export class P1HomeSectionNavComponent {
       title: 'Workspace',
       items: [
         { id: 'overview', label: 'Overview' },
+        { id: 'todo-list', label: 'Todo List' },
         { id: 'goal-progress', label: 'Goal Progress' },
-        { id: 'todo-list', label: 'Todo List' }
       ]
     }];
   }

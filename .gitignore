@@ -12,3 +12,6 @@ embedded.provisionprofile
 .vscode
 
 .DS_Store
+
+/output
+/tmp

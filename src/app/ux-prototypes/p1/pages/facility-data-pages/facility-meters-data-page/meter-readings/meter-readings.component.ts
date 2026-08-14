@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, computed, signal } from '@angular/core';
 import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -10,7 +10,7 @@ import { readingDateValue } from '../facility-meters-workbench.helpers';
   styleUrls: ['./meter-readings.component.css'],
   standalone: false
 })
-export class P1FacilityMeterReadingsComponent {
+export class P1FacilityMeterReadingsComponent implements OnChanges {
   @Input({ required: true }) meter: IdbUtilityMeter;
   @Input({ required: true }) meterData: IdbUtilityMeterData[] = [];
   @Input() meterStatus?: MeterStatusCheck;
@@ -24,14 +24,21 @@ export class P1FacilityMeterReadingsComponent {
   readonly search = signal('');
   readonly showEstimatedOnly = signal(false);
   readonly checked = signal<Set<string>>(new Set<string>());
+  private readonly meterDataVersion = signal(0);
 
   readonly filteredData = computed(() => {
+    this.meterDataVersion();
     const search = this.search().trim().toLowerCase();
     return [...this.meterData]
       .filter(data => !this.showEstimatedOnly() || data.isEstimated)
       .filter(data => !search || `${data.month}/${data.day}/${data.year}`.includes(search))
       .sort((first, second) => readingDateValue(second) - readingDateValue(first));
   });
+
+  ngOnChanges(): void {
+    this.meterDataVersion.update(version => version + 1);
+    this.pruneChecked();
+  }
 
   setSearch(value: string): void {
     this.search.set(value);
@@ -68,5 +75,13 @@ export class P1FacilityMeterReadingsComponent {
 
   totalCost(): number {
     return this.meterData.reduce((sum, data) => sum + (data.totalCost || 0), 0);
+  }
+
+  private pruneChecked(): void {
+    const visibleGuids = new Set(this.meterData.map(data => data.guid));
+    const next = new Set([...this.checked()].filter(guid => visibleGuids.has(guid)));
+    if (next.size !== this.checked().size) {
+      this.checked.set(next);
+    }
   }
 }

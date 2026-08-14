@@ -116,16 +116,19 @@
   color: var(--prototype-text);
 }
 
-.p1-bill__check {
-  display: flex;
+.p1-bill label.p1-bill__check {
+  display: inline-flex;
   gap: .45rem;
   align-items: center;
+  justify-self: start;
   font-weight: 900;
 }
 
-.p1-bill__check input {
+.p1-bill label.p1-bill__check input {
   width: auto;
   min-height: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .p1-bill__charge {
