@@ -62,8 +62,8 @@ const VALID_PANEL_TABS: ReadonlyArray<P1PanelTabId> = ['help', 'todos', 'results
 const SINGLE_FACILITY_ACCOUNT_DETAIL_MAP: Partial<Record<P1SectionId, Record<string, string>>> = {
   home: {
     overview: 'overview',
+    'goal-progress': 'goal-progress',
     'todo-list': 'todo-list',
-    activity: 'activity'
   },
   data: {
     facilities: 'overview',

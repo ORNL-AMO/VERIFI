@@ -25,7 +25,9 @@ import { P1AccountEventsDataPageComponent } from './p1/pages/account-data-pages/
 import { P1AccountFacilitiesDataPageComponent } from './p1/pages/account-data-pages/account-facilities-data-page/account-facilities-data-page.component';
 import { P1AccountMetersDataPageComponent } from './p1/pages/account-data-pages/account-meters-data-page/account-meters-data-page.component';
 import { P1AccountPredictorsDataPageComponent } from './p1/pages/account-data-pages/account-predictors-data-page/account-predictors-data-page.component';
-import { P1AccountHomePageComponent } from './p1/pages/account-home-page/account-home-page.component';
+import { P1AccountHomeGoalProgressPageComponent } from './p1/pages/account-home-page/goal-progress/account-home-goal-progress-page.component';
+import { P1AccountHomeOverviewPageComponent } from './p1/pages/account-home-page/overview/account-home-overview-page.component';
+import { P1AccountHomeTodoListPageComponent } from './p1/pages/account-home-page/todo-list/account-home-todo-list-page.component';
 import { P1AccountPlaceholderPageComponent } from './p1/pages/account-placeholder-page/account-placeholder-page.component';
 import { P1AccountSettingsFinancialComponent } from './p1/pages/account-settings-page/financial/account-settings-financial.component';
 import { P1AccountSettingsGoalsComponent } from './p1/pages/account-settings-page/goals/account-settings-goals.component';
@@ -43,7 +45,9 @@ import { P1FacilityMeterMonthlyDataComponent } from './p1/pages/facility-data-pa
 import { P1FacilityMeterReadingsComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-readings/meter-readings.component';
 import { P1FacilityMeterSetupComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/meter-setup/meter-setup.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
-import { P1FacilityHomePageComponent } from './p1/pages/facility-home-page/facility-home-page.component';
+import { P1FacilityHomeGoalProgressPageComponent } from './p1/pages/facility-home-page/goal-progress/facility-home-goal-progress-page.component';
+import { P1FacilityHomeOverviewPageComponent } from './p1/pages/facility-home-page/overview/facility-home-overview-page.component';
+import { P1FacilityHomeTodoListPageComponent } from './p1/pages/facility-home-page/todo-list/facility-home-todo-list-page.component';
 import { P1FacilityAnalysisCompareDrawerComponent } from './p1/pages/facility-analysis-page/analysis-compare-drawer/analysis-compare-drawer.component';
 import { P1FacilityAnalysisDashboardListComponent } from './p1/pages/facility-analysis-page/analysis-dashboard-list/analysis-dashboard-list.component';
 import { P1FacilityAnalysisDashboardPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-dashboard-page.component';
@@ -85,7 +89,9 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1SettingsSectionNavComponent,
     P1UtilitySectionNavComponent,
     P1RightPanelComponent,
-    P1AccountHomePageComponent,
+    P1AccountHomeOverviewPageComponent,
+    P1AccountHomeGoalProgressPageComponent,
+    P1AccountHomeTodoListPageComponent,
     P1AccountFacilitiesDataPageComponent,
     P1CreateFacilityDrawerComponent,
     P1AccountMetersDataPageComponent,
@@ -120,7 +126,9 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1FacilityAnalysisResultsPanelComponent,
     P1FacilityAnalysisReferencesPanelComponent,
     P1FacilityAnalysisWorkbenchFooterComponent,
-    P1FacilityHomePageComponent,
+    P1FacilityHomeOverviewPageComponent,
+    P1FacilityHomeGoalProgressPageComponent,
+    P1FacilityHomeTodoListPageComponent,
     P1FacilityPlaceholderPageComponent,
     P1FacilitySettingsPageComponent,
     P1FacilitySettingsProfileComponent,

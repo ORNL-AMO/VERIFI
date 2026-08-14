@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
-import { P1SetupTask } from '../../p1.models';
-import { P1RouteFacade } from '../../p1-route.facade';
+import { P1SetupTask } from '../../../p1.models';
+import { P1RouteFacade } from '../../../p1-route.facade';
 
 interface P1SetupTaskGroup {
   title: string;
@@ -8,15 +8,15 @@ interface P1SetupTaskGroup {
 }
 
 @Component({
-  selector: 'app-p1-account-home-page',
-  templateUrl: './account-home-page.component.html',
+  selector: 'app-p1-account-home-todo-list-page',
+  templateUrl: './account-home-todo-list-page.component.html',
   styleUrls: [
-    '../../components/workspace-main/workspace-main.component.css',
-    './account-home-page.component.css'
+    '../../../components/workspace-main/workspace-main.component.css',
+    '../account-home-page.component.css'
   ],
   standalone: false
 })
-export class P1AccountHomePageComponent {
+export class P1AccountHomeTodoListPageComponent {
   readonly facade = inject(P1RouteFacade);
   readonly taskGroups = computed<Array<P1SetupTaskGroup>>(() => this.groupTasks(this.facade.setup().allTasks));
 

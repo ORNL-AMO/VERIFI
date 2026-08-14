@@ -1,0 +1,56 @@
+@let content = facade.content();
+@let activeNavItem = facade.activeNavItem();
+@let setup = facade.setup();
+
+<section class="p1-main p1-main--account p1-home" aria-labelledby="p1-account-home-todo-list-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 id="p1-account-home-todo-list-title">{{ content.title }}</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>{{ content.summary }}</p>
+  </div>
+
+  <section class="p1-home__todos" aria-label="Account todo list">
+    <div class="p1-home__todo-heading">
+      <div>
+        <span>First-time setup</span>
+        <h2>Todo List</h2>
+      </div>
+    </div>
+
+    @if (taskGroups().length === 0) {
+      <div class="p1-home__empty" role="status">
+        <span class="fa fa-circle-check"></span>
+        <strong>No setup items available</strong>
+        <p>Open or create an account to see setup guidance.</p>
+      </div>
+    }
+
+    <div class="p1-home__groups">
+      @for (group of taskGroups(); track group.title) {
+        <section class="p1-home__group" [attr.aria-label]="group.title">
+          <h3>{{ group.title }}</h3>
+          @for (task of group.tasks; track task.id) {
+            <a [class]="'p1-home__task p1-home__task--' + task.tone" [routerLink]="facade.setupTaskRoute(task)"
+              [attr.aria-label]="'Open ' + task.title">
+              <span>{{ task.statusLabel }}</span>
+              <h4>{{ task.title }}</h4>
+              <p>{{ task.summary }}</p>
+            </a>
+          }
+        </section>
+      }
+    </div>
+  </section>
+</section>

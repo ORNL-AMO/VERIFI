@@ -6,10 +6,35 @@
 .p1-home__todos,
 .p1-home__group,
 .p1-home__task,
-.p1-home__empty {
+.p1-home__empty,
+.p1-main__placeholder {
   border: 1px solid var(--prototype-border);
   border-radius: 8px;
   background: var(--prototype-surface);
+}
+
+.p1-main__placeholder {
+  display: flex;
+  gap: .85rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-left: 4px solid var(--prototype-blue);
+}
+
+.p1-main__placeholder > span {
+  color: var(--prototype-orange);
+  font-size: 1.35rem;
+}
+
+.p1-main__placeholder strong {
+  display: block;
+  margin-bottom: .25rem;
+  color: var(--prototype-accent-strong);
+}
+
+.p1-main__placeholder p {
+  margin: 0;
+  color: var(--prototype-muted);
 }
 
 .p1-home__todos {

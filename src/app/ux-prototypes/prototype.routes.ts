@@ -6,14 +6,18 @@ import { P1AccountEventsDataPageComponent } from './p1/pages/account-data-pages/
 import { P1AccountFacilitiesDataPageComponent } from './p1/pages/account-data-pages/account-facilities-data-page/account-facilities-data-page.component';
 import { P1AccountMetersDataPageComponent } from './p1/pages/account-data-pages/account-meters-data-page/account-meters-data-page.component';
 import { P1AccountPredictorsDataPageComponent } from './p1/pages/account-data-pages/account-predictors-data-page/account-predictors-data-page.component';
-import { P1AccountHomePageComponent } from './p1/pages/account-home-page/account-home-page.component';
+import { P1AccountHomeGoalProgressPageComponent } from './p1/pages/account-home-page/goal-progress/account-home-goal-progress-page.component';
+import { P1AccountHomeOverviewPageComponent } from './p1/pages/account-home-page/overview/account-home-overview-page.component';
+import { P1AccountHomeTodoListPageComponent } from './p1/pages/account-home-page/todo-list/account-home-todo-list-page.component';
 import { P1AccountPlaceholderPageComponent } from './p1/pages/account-placeholder-page/account-placeholder-page.component';
 import { P1AccountSettingsPageComponent } from './p1/pages/account-settings-page/account-settings-page.component';
 import { P1FacilityEnergyUsesDataPageComponent } from './p1/pages/facility-data-pages/facility-energy-uses-data-page/facility-energy-uses-data-page.component';
 import { P1FacilityEventsDataPageComponent } from './p1/pages/facility-data-pages/facility-events-data-page/facility-events-data-page.component';
 import { P1FacilityMetersDataPageComponent } from './p1/pages/facility-data-pages/facility-meters-data-page/facility-meters-data-page.component';
 import { P1FacilityPredictorsDataPageComponent } from './p1/pages/facility-data-pages/facility-predictors-data-page/facility-predictors-data-page.component';
-import { P1FacilityHomePageComponent } from './p1/pages/facility-home-page/facility-home-page.component';
+import { P1FacilityHomeGoalProgressPageComponent } from './p1/pages/facility-home-page/goal-progress/facility-home-goal-progress-page.component';
+import { P1FacilityHomeOverviewPageComponent } from './p1/pages/facility-home-page/overview/facility-home-overview-page.component';
+import { P1FacilityHomeTodoListPageComponent } from './p1/pages/facility-home-page/todo-list/facility-home-todo-list-page.component';
 import { P1FacilityAnalysisDashboardPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-dashboard-page.component';
 import { P1FacilityAnalysisWorkbenchPageComponent } from './p1/pages/facility-analysis-page/facility-analysis-workbench-page.component';
 import { P1FacilityPlaceholderPageComponent } from './p1/pages/facility-placeholder-page/facility-placeholder-page.component';
@@ -36,9 +40,19 @@ export const PrototypeRoutes: Routes = [
           { path: 'workspace', pathMatch: 'full', redirectTo: 'workspace/account/home/overview/help' },
           { path: 'workspace/account', pathMatch: 'full', redirectTo: 'workspace/account/home/overview/help' },
           {
-            path: 'workspace/account/home/:detail/:panelTab',
+            path: 'workspace/account/home/overview/:panelTab',
             component: P1WorkspaceShellComponent,
-            children: [{ path: '', component: P1AccountHomePageComponent }]
+            children: [{ path: '', component: P1AccountHomeOverviewPageComponent }]
+          },
+          {
+            path: 'workspace/account/home/goal-progress/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1AccountHomeGoalProgressPageComponent }]
+          },
+          {
+            path: 'workspace/account/home/todo-list/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1AccountHomeTodoListPageComponent }]
           },
           {
             path: 'workspace/account/data/facilities/:panelTab',
@@ -87,9 +101,19 @@ export const PrototypeRoutes: Routes = [
           },
           { path: 'workspace/facility/:facilityGuid', pathMatch: 'full', redirectTo: 'workspace/facility/:facilityGuid/home/overview/help' },
           {
-            path: 'workspace/facility/:facilityGuid/home/:detail/:panelTab',
+            path: 'workspace/facility/:facilityGuid/home/overview/:panelTab',
             component: P1WorkspaceShellComponent,
-            children: [{ path: '', component: P1FacilityHomePageComponent }]
+            children: [{ path: '', component: P1FacilityHomeOverviewPageComponent }]
+          },
+          {
+            path: 'workspace/facility/:facilityGuid/home/goal-progress/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1FacilityHomeGoalProgressPageComponent }]
+          },
+          {
+            path: 'workspace/facility/:facilityGuid/home/todo-list/:panelTab',
+            component: P1WorkspaceShellComponent,
+            children: [{ path: '', component: P1FacilityHomeTodoListPageComponent }]
           },
           {
             path: 'workspace/facility/:facilityGuid/data/meters/:panelTab',

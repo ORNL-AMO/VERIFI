@@ -330,7 +330,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
   const facility = facilityCounts || emptyCounts();
   return {
     account: {
-      home: [{ title: 'Workspace', items: [{ id: 'overview', label: 'Overview', meta: 'Portfolio' }, { id: 'todo-list', label: 'Todo List', status: toneForCount(account.facilities) }, { id: 'activity', label: 'Workspace notes' }] }],
+      home: [{ title: 'Workspace', items: [{ id: 'overview', label: 'Overview' }, { id: 'goal-progress', label: 'Goal Progress' }, { id: 'todo-list', label: 'Todo List' }] }],
       data: [{ title: 'Account Data', items: [{ id: 'meters', label: 'Meters', meta: `${account.meters} total`, status: toneForCount(account.meters) }, { id: 'predictors', label: 'Predictors', meta: String(account.predictors), status: toneForCount(account.predictors) }, { id: 'energy-uses', label: 'Energy Uses', meta: String(account.energyUseEquipment), status: toneForCount(account.energyUseEquipment) }, { id: 'events', label: 'Events' }] }],
       visualization: [{ title: 'Explore', items: [{ id: 'time-series', label: 'Time series' }, { id: 'trends', label: 'Utility trends' }, { id: 'compare', label: 'Facility comparison' }] }],
       analysis: [{ title: 'Account Analysis', items: [{ id: 'rollup', label: 'Account rollup', status: toneForCount(account.accountAnalyses) }, { id: 'savings', label: 'Savings summary' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
@@ -342,7 +342,7 @@ function buildNav(accountCounts?: P1Counts, facilityCounts?: P1Counts): Record<P
       ]
     },
     facility: {
-      home: [{ title: 'Facility Workspace', items: [{ id: 'overview', label: 'Overview' }, { id: 'todo-list', label: 'Todo List', status: toneForCount(facility.meters) }, { id: 'activity', label: 'Workspace notes' }] }],
+      home: [{ title: 'Facility Workspace', items: [{ id: 'overview', label: 'Overview' }, { id: 'goal-progress', label: 'Goal Progress' }, { id: 'todo-list', label: 'Todo List' }] }],
       data: [{ title: 'Facility Data', items: [{ id: 'meters', label: 'Meters', meta: String(facility.meters), status: toneForCount(facility.meters) }, { id: 'predictors', label: 'Predictors', meta: String(facility.predictors), status: toneForCount(facility.predictors) }, { id: 'energy-uses', label: 'Energy Uses', meta: String(facility.energyUseEquipment), status: toneForCount(facility.energyUseEquipment) }, { id: 'events', label: 'Events' }] }],
       visualization: [{ title: 'Facility Charts', items: [{ id: 'time-series', label: 'Time series' }, { id: 'correlation', label: 'Correlation plots' }, { id: 'heatmap', label: 'Heatmaps' }] }],
       analysis: [{ title: 'Facility Analysis', items: [{ id: 'setup', label: 'Analysis setup', status: toneForCount(facility.facilityAnalyses) }, { id: 'results', label: 'Results' }, { id: 'footprint-analysis', label: 'Footprint analysis' }] }],
