@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
@@ -342,6 +342,13 @@ export class P1RouteFacade {
     void this.navigateToWorkspace(context, this.activeSection(), facilityGuid, tabId, this.activeDetailId());
   }
 
+  openTodoList(extras?: NavigationExtras): void {
+    this.isRightPanelOpen.set(true);
+    const context = this.contextMode();
+    const facilityGuid = context === 'facility' ? this.selectedFacility()?.id : undefined;
+    void this.navigateToWorkspace(context, 'home', facilityGuid, 'todos', 'todo-list', extras);
+  }
+
   setupTaskRoute(task: P1SetupTask): Array<string> {
     if (task.contextMode === 'facility' && task.facilityId) {
       return ['/p1', 'workspace', 'facility', task.facilityId, task.section, task.detail, task.panelTab];
@@ -411,15 +418,16 @@ export class P1RouteFacade {
     sectionId: P1SectionId,
     facilityGuid: string | undefined,
     panelTab: P1PanelTabId,
-    detailId?: string
+    detailId?: string,
+    extras?: NavigationExtras
   ): Promise<boolean> {
     const section = isP1Section(sectionId) ? sectionId : DEFAULT_SECTION;
     const detail = this.getValidDetail(contextMode, section, detailId);
     const tab = isP1PanelTab(panelTab) ? panelTab : DEFAULT_PANEL_TAB;
     if (contextMode === 'facility' && facilityGuid) {
-      return this.router.navigate(['/p1', 'workspace', 'facility', facilityGuid, section, detail, tab]);
+      return this.router.navigate(['/p1', 'workspace', 'facility', facilityGuid, section, detail, tab], extras);
     }
-    return this.router.navigate(['/p1', 'workspace', 'account', section, detail, tab]);
+    return this.router.navigate(['/p1', 'workspace', 'account', section, detail, tab], extras);
   }
 
   private async syncWorkspaceSelection(state: P1WorkspaceRouteState): Promise<void> {

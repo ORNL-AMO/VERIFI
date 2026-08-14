@@ -35,5 +35,11 @@
   @if (facade.isRightPanelOpen()) {
     <app-p1-right-panel></app-p1-right-panel>
   }
+
+  @if (isGettingStartedDrawerOpen()) {
+    <app-p1-getting-started-drawer
+      (startTodos)="startWithTodos()"
+      (closed)="closeGettingStartedDrawer()"></app-p1-getting-started-drawer>
+  }
   }
 </main>

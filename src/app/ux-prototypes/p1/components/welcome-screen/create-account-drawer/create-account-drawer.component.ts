@@ -112,7 +112,10 @@ export class P1CreateAccountDrawerComponent {
       this.createdAccountGuid = createdAccount.guid;
 
       if (!account.isSingleFacilityCompany) {
-        await this.router.navigateByUrl('/p1/workspace/account/settings/profile/help');
+        await this.router.navigate(
+          ['/p1', 'workspace', 'account', 'home', 'todo-list', 'todos'],
+          { queryParams: { gettingStarted: 'new-account' } }
+        );
         return;
       }
 
@@ -133,10 +136,10 @@ export class P1CreateAccountDrawerComponent {
         'workspace',
         'facility',
         result.value.facility.guid,
-        'settings',
-        'profile',
-        'help'
-      ]);
+        'home',
+        'todo-list',
+        'todos'
+      ], { queryParams: { gettingStarted: 'new-account' } });
     } catch (error) {
       console.warn('P1 prototype could not create an account.', error);
       this.createError = this.createdAccountGuid

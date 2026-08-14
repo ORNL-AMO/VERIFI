@@ -427,56 +427,6 @@ function buildSetupSummary(snapshot?: AccountWorkspaceSnapshot, selectedFacility
 function buildAccountSetupTasks(account: IdbAccount, counts: P1Counts): Array<P1SetupTask> {
   return [
     setupTask({
-      id: 'account-profile',
-      contextMode: 'account',
-      group: 'Account settings',
-      title: 'Complete corporate information',
-      summary: 'Confirm the account name, location, NAICS code, notes, and contact information that identify this workspace.',
-      status: account.name && account.name !== 'New Account' ? 'complete' : 'ready',
-      section: 'settings',
-      detail: 'profile'
-    }),
-    setupTask({
-      id: 'account-units',
-      contextMode: 'account',
-      group: 'Account settings',
-      title: 'Review units and emissions',
-      summary: 'Set the default energy, mass, liquid, gas, electricity, source-energy, emissions, and assessment report preferences.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'units'
-    }),
-    setupTask({
-      id: 'account-goals',
-      contextMode: 'account',
-      group: 'Account settings',
-      title: 'Review reduction goals',
-      summary: 'Confirm energy, greenhouse gas, water, and Better Plants goal settings before building analyses and reports.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'goals'
-    }),
-    setupTask({
-      id: 'account-financial',
-      contextMode: 'account',
-      group: 'Account settings',
-      title: 'Review financial reporting',
-      summary: 'Choose the fiscal-year basis used by account and facility reporting workflows.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'financial'
-    }),
-    setupTask({
-      id: 'account-staleness',
-      contextMode: 'account',
-      group: 'Account settings',
-      title: 'Review data staleness rules',
-      summary: 'Set how VERIFI flags meter and predictor data that has not been updated recently.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'staleness'
-    }),
-    setupTask({
       id: 'account-facilities',
       contextMode: 'account',
       group: 'Account setup',
@@ -503,50 +453,6 @@ function buildFacilitySetupTasks(facility: IdbFacility, counts: P1Counts): Array
       status: facility.name && facility.name !== 'New Facility' ? 'complete' : 'ready',
       section: 'settings',
       detail: 'profile'
-    }),
-    setupTask({
-      id: `facility-${facility.guid}-units`,
-      contextMode: 'facility',
-      facilityId: facility.guid,
-      group: facility.name || 'Facility setup',
-      title: 'Review facility units',
-      summary: 'Confirm whether this facility inherits account settings or needs local unit and emissions preferences.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'units'
-    }),
-    setupTask({
-      id: `facility-${facility.guid}-goals`,
-      contextMode: 'facility',
-      facilityId: facility.guid,
-      group: facility.name || 'Facility setup',
-      title: 'Review facility goals',
-      summary: 'Confirm local reduction goals and whether this facility is newly included in the reporting scope.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'goals'
-    }),
-    setupTask({
-      id: `facility-${facility.guid}-financial`,
-      contextMode: 'facility',
-      facilityId: facility.guid,
-      group: facility.name || 'Facility setup',
-      title: 'Review facility financial reporting',
-      summary: 'Confirm the fiscal-year basis used by this facility for analysis and reporting.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'financial'
-    }),
-    setupTask({
-      id: `facility-${facility.guid}-staleness`,
-      contextMode: 'facility',
-      facilityId: facility.guid,
-      group: facility.name || 'Facility setup',
-      title: 'Review facility staleness rules',
-      summary: 'Choose whether this facility uses account data-staleness settings or a local threshold.',
-      status: 'ready',
-      section: 'settings',
-      detail: 'staleness'
     }),
     setupTask({
       id: `facility-${facility.guid}-meters`,

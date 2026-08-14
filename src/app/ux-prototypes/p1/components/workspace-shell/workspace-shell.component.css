@@ -3,6 +3,7 @@
 }
 
 .p1-shell {
+  position: relative;
   display: grid;
   grid-template-columns: 4.25rem minmax(14rem, 18rem) minmax(0, 1fr) minmax(18rem, 22rem);
   height: calc(100vh - 4.75rem);
