@@ -1,0 +1,79 @@
+<button type="button" class="p1-import-backup__backdrop" aria-label="Close import account backup panel"
+  [disabled]="isImporting" (click)="close()"></button>
+
+<aside class="p1-import-backup__drawer" role="dialog" aria-modal="true" aria-labelledby="p1-import-backup-title">
+  <header class="p1-import-backup__header">
+    <div>
+      <p class="p1-eyebrow">Existing workspace</p>
+      <h2 id="p1-import-backup-title">Upload Account Backup</h2>
+    </div>
+    <button type="button" class="p1-icon-btn" title="Close import account backup panel"
+      aria-label="Close import account backup panel" [disabled]="isImporting" (click)="close()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </header>
+
+  <div class="p1-import-backup__body">
+    <p class="p1-import-backup__intro">
+      Import a VERIFI account backup exported as a JSON file. The backup will be added as a new account and opened in the prototype workspace.
+    </p>
+
+    <label class="p1-import-backup__dropzone" for="p1-import-backup-file">
+      <span class="fa fa-file-arrow-up"></span>
+      <strong>{{ selectedFileName || 'Choose account backup file' }}</strong>
+      <small>Accepted file type: .json</small>
+      <input id="p1-import-backup-file" type="file" accept=".json,application/json"
+        [disabled]="isImporting" (change)="setImportFile($event)">
+    </label>
+
+    @if (backupFileError) {
+      <div class="p1-alert p1-alert--danger" role="alert">
+        <span class="fa fa-circle-exclamation"></span>
+        {{ backupFileError }}
+      </div>
+    }
+
+    @if (backupFile && !backupFileError) {
+      <section class="p1-import-backup__summary" aria-labelledby="p1-import-backup-summary-title">
+        <div>
+          <span class="p1-label p1-label--upper">Ready to import</span>
+          <h3 id="p1-import-backup-summary-title">{{ backupName }}</h3>
+          <p>This account backup passed VERIFI validation and will be imported as a separate account.</p>
+        </div>
+        <dl>
+          <div>
+            <dt>Facilities</dt>
+            <dd>{{ facilityCount }}</dd>
+          </div>
+          <div>
+            <dt>Meters</dt>
+            <dd>{{ meterCount }}</dd>
+          </div>
+          <div>
+            <dt>Backup type</dt>
+            <dd>{{ backupFile.backupFileType }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+
+    <div class="p1-alert p1-alert--info">
+      <span class="fa fa-circle-info"></span>
+      Facility backups and account overwrite workflows are still handled inside an open account workspace.
+    </div>
+  </div>
+
+  <footer class="p1-import-backup__actions">
+    <button type="button" class="p1-btn p1-btn--ghost" [disabled]="isImporting" (click)="close()">Cancel</button>
+    <button type="button" class="p1-btn p1-btn--primary"
+      [disabled]="!backupFile || !!backupFileError || isImporting" (click)="importBackupFile()">
+      @if (isImporting) {
+        <span class="fa fa-spinner fa-spin"></span>
+        Importing
+      } @else {
+        Import account
+        <span class="fa fa-arrow-right"></span>
+      }
+    </button>
+  </footer>
+</aside>

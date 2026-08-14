@@ -54,6 +54,7 @@ export class P1WelcomeScreenComponent {
 
   isExampleDrawerOpen = false;
   isCreateAccountDrawerOpen = false;
+  isImportAccountBackupDrawerOpen = false;
   loadingExamplePath: string | undefined;
 
   get recentAccount(): P1AccountSummary | undefined {
@@ -76,12 +77,24 @@ export class P1WelcomeScreenComponent {
     return action.title === 'Create New Account';
   }
 
+  isImportAccountBackupAction(action: P1WelcomeAction): boolean {
+    return action.title === 'Upload Account Backup';
+  }
+
   openCreateAccountDrawer(): void {
     this.isCreateAccountDrawerOpen = true;
   }
 
   closeCreateAccountDrawer(): void {
     this.isCreateAccountDrawerOpen = false;
+  }
+
+  openImportAccountBackupDrawer(): void {
+    this.isImportAccountBackupDrawerOpen = true;
+  }
+
+  closeImportAccountBackupDrawer(): void {
+    this.isImportAccountBackupDrawerOpen = false;
   }
 
   openExampleDrawer(): void {

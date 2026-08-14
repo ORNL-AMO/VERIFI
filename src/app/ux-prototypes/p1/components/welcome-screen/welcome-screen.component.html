@@ -69,6 +69,10 @@
             (click)="openCreateAccountDrawer()">
             {{ action.cta }}
           </button>
+          } @else if (isImportAccountBackupAction(action)) {
+          <button type="button" [disabled]="state.status === 'loading'" (click)="openImportAccountBackupDrawer()">
+            {{ action.cta }}
+          </button>
           } @else if (isLoadExampleAction(action)) {
           <button type="button" [disabled]="!!loadingExamplePath" (click)="openExampleDrawer()">
             {{ action.cta }}
@@ -146,6 +150,11 @@
 
   @if (isCreateAccountDrawerOpen) {
     <app-p1-create-account-drawer (closed)="closeCreateAccountDrawer()"></app-p1-create-account-drawer>
+  }
+
+  @if (isImportAccountBackupDrawerOpen) {
+    <app-p1-import-account-backup-drawer
+      (closed)="closeImportAccountBackupDrawer()"></app-p1-import-account-backup-drawer>
   }
 
   @if (isExampleDrawerOpen) {

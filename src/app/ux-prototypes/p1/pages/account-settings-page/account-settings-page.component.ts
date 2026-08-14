@@ -240,6 +240,7 @@ export class P1AccountSettingsPageComponent {
         },
         () => this.accountHandler.update({ ...account, deleteAccount: true }, account.guid)
       );
+      await this.lifecycle.handleMarkedAccountDeletion(account.guid);
       await this.router.navigateByUrl('/p1');
     } catch (error) {
       this.saveMessage = '';

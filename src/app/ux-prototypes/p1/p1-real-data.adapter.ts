@@ -49,7 +49,9 @@ export function buildP1PrototypeData(input: P1RealDataInput): P1PrototypeData {
   const snapshot = input.snapshot;
   const activeAccountGuid = snapshot?.account.guid;
   const activeCounts = snapshot ? getAccountCounts(snapshot) : undefined;
-  const accounts = input.accounts.map(account => mapAccount(account, activeAccountGuid, activeCounts));
+  const accounts = input.accounts
+    .filter(account => !account.deleteAccount)
+    .map(account => mapAccount(account, activeAccountGuid, activeCounts));
   const selectedFacilityGuid = input.selectedFacilityGuid || snapshot?.facilities[0]?.guid;
   const facilities = snapshot
     ? snapshot.facilities.map(facility => mapFacility(facility.guid, snapshot))

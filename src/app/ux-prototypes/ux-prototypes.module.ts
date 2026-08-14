@@ -16,6 +16,7 @@ import { P1PrimaryRailComponent } from './p1/components/primary-rail/primary-rai
 import { P1RightPanelComponent } from './p1/components/right-panel/right-panel.component';
 import { P1SectionNavComponent } from './p1/components/section-nav/section-nav.component';
 import { P1CreateAccountDrawerComponent } from './p1/components/welcome-screen/create-account-drawer/create-account-drawer.component';
+import { P1ImportAccountBackupDrawerComponent } from './p1/components/welcome-screen/import-account-backup-drawer/import-account-backup-drawer.component';
 import { P1CreateFacilityDrawerComponent } from './p1/pages/account-data-pages/account-facilities-data-page/create-facility-drawer/create-facility-drawer.component';
 import { P1WelcomeScreenComponent } from './p1/components/welcome-screen/welcome-screen.component';
 import { P1WorkspaceShellComponent } from './p1/components/workspace-shell/workspace-shell.component';
@@ -71,6 +72,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     P1HeaderBannerComponent,
     P1WelcomeScreenComponent,
     P1CreateAccountDrawerComponent,
+    P1ImportAccountBackupDrawerComponent,
     P1WorkspaceShellComponent,
     P1PrimaryRailComponent,
     P1SectionNavComponent,
