@@ -296,7 +296,9 @@ export function getCostSavingsReportSettings(): CostSavingsReportSettings {
         includeFacility: true,
         includeAnnual: true,
         includeMonthly: true,
-        includeGroup: true
+        includeGroup: true,
+        isRawDataChecked: false,
+        calendarizedMetersActualCost: {}
     };
 }
 
@@ -322,7 +324,9 @@ export interface CostSavingsReportSettings {
     includeFacility: boolean,
     includeAnnual: boolean,
     includeMonthly: boolean,
-    includeGroup: boolean
+    includeGroup: boolean,
+    isRawDataChecked: boolean,
+    calendarizedMetersActualCost?: YearGroupData
 }
 
 export type YearGroupData = { [year: number]: { [groupId: string]: number } };

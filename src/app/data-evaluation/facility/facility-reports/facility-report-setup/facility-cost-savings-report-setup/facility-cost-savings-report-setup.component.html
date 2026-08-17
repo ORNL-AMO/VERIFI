@@ -51,13 +51,14 @@
   <hr class="mt-4">
   <div class="alert alert-info text-center">
     <div class="fw-bold mt-2">
-      Click 'Calculate' below to auto-populate fields with utility data, or enter your energy costs manually. For groups
-      with multiple meters, click the 'Calculator Icon' for assistance.
+      Click 'Calculate' below to auto-populate fields with your blended utility rate based on your monthly data, or
+      enter your energy costs manually. For groups with multiple meters, click the 'Calculator Icon' for assistance in
+      estimating a combined rate.
     </div>
     <div class="mt-4 text-center">
-      <button class="btn btn-primary" (click)="calculateCostFromCalendarizedMeters()">Calculate</button>
+      <button type="button" class="btn btn-primary" (click)="calculateCostFromCalendarizedMeters()">Calculate</button>
     </div>
-    @if ((missingCostData | keyvalue).length > 0) {
+    @if (showMissingCostWarning && (missingCostData | keyvalue).length > 0) {
     <div class="mt-4 text-center text-danger fw-bold">
       You have cost data entered as 0 for the following meters and dates. If this is not as expected, please check your
       meter
@@ -75,6 +76,11 @@
       </ul>
     </div>
     }
+  </div>
+  <div class="mt-4 checkbox-large">
+    <input type="checkbox" class="form-check-input" id="useRawCostData"
+      [(ngModel)]="reportSettings.isRawDataChecked" (change)="save()">
+    <label class="form-check-label ms-2" for="useRawCostData">Use calendarized cost</label>
   </div>
   <div class="table-responsive mt-4">
     <table class="table table-bordered table-hover">

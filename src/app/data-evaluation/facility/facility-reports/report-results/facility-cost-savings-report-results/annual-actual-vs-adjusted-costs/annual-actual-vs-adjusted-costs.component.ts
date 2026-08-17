@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { YearGroupData } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-annual-actual-vs-adjusted-costs',
@@ -7,5 +8,18 @@ import { Component } from '@angular/core';
   styleUrl: './annual-actual-vs-adjusted-costs.component.css',
 })
 export class AnnualActualVsAdjustedCostsComponent {
-
+  @Input()
+  groupId: string;
+  @Input()
+  estimatedEnergyCostTable: YearGroupData;
+  @Input()
+  expectedEnergyCostTable: YearGroupData;
+  @Input()
+  rowKeys: Array<number | string>;
+  
+  getValue(table: YearGroupData, rowKey: number | string) {
+    const key = String(rowKey);
+    const value = table?.[key]?.[this.groupId];
+    return value === undefined || isNaN(value) || value === 0 || value === null ? 0 : value;
+  }
 }

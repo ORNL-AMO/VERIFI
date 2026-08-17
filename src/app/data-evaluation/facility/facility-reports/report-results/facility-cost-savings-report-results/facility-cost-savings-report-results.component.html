@@ -12,6 +12,12 @@
         </h6>
     </div>
 
+    <p class="mt-4 fs-5 fst-italic fw-bold">
+        The below cost savings are the estimated savings from avoided utility costs. They use the adjusted energy
+        consumption (based on the selected model) and the blended utility rates provided in report setup (based on
+        monthly data when provided). These avoided costs reflect the true energy cost savings as projects are completed.
+    </p>
+
     @if(costSavingsTable) {
     @if (reportSettings.annualSavingsTable && reportSettings.includeFacility && reportSettings.includeAnnual) {
     <div>
@@ -132,9 +138,15 @@
     </h3>
     @if (reportSettings.includeGroup && reportSettings.groupActualVsAdjustedTable) {
     <h4 class="mt-5">
-        Actual vs Adjusted Costs
+        Energy Cost Comparison
     </h4>
-    <app-annual-actual-vs-adjusted-costs></app-annual-actual-vs-adjusted-costs>
+    <app-annual-actual-vs-adjusted-costs [groupId]="group.idbGroupId"
+        [estimatedEnergyCostTable]="estimatedEnergyCostTable" [expectedEnergyCostTable]="expectedEnergyCostTable"
+        [rowKeys]="years"></app-annual-actual-vs-adjusted-costs>
+
+    <app-annual-actual-vs-adjusted-costs-graph [groupId]="group.idbGroupId"
+        [estimatedEnergyCostTable]="estimatedEnergyCostTable"
+        [expectedEnergyCostTable]="expectedEnergyCostTable" [rowKeys]="years"></app-annual-actual-vs-adjusted-costs-graph>
     }
     @if (reportSettings.includeGroup && reportSettings.groupAnnualTable) {
     <h4 class="mt-5">
