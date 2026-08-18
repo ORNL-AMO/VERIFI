@@ -9,6 +9,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { Month, Months } from '../../form-data/months';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -18,6 +20,7 @@ import { Month, Months } from '../../form-data/months';
 })
 export class EditPredictorFormComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input({ required: true })
   predictorForm: FormGroup;
   @Input({ required: true })
@@ -34,6 +37,16 @@ export class EditPredictorFormComponent {
 
   displaySationModal: boolean = false;
   months: Array<Month> = Months;
+  yearOptions: Array<number> = Array.from(
+    { length: new Date().getFullYear() - 1999 },
+    (_, i) => new Date().getFullYear() - i
+  );
+  startMonth: number;
+  startYear: number;
+  endMonth: number;
+  endYear: number;
+  facilityPredictorData: Array<IdbPredictorData>;
+
   constructor(
     private router: Router,
     private weatherDataService: WeatherDataService,
@@ -45,6 +58,41 @@ export class EditPredictorFormComponent {
     if (!this.facility) {
       this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.predictor.facilityId));
     }
+    this.setWeatherPredictorDates();
+  }
+
+  setWeatherPredictorDates() {
+    if (!this.predictorForm)
+      return;
+
+    const predictorData = this.predictor?.guid ? this.accountWorkspaceQuery.getPredictorData(this.predictor.guid) : [];
+
+    const fallBackPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(this.facility?.guid);
+    const sourceData = predictorData.length ? predictorData : fallBackPredictorData;
+    this.facilityPredictorData = sourceData;
+    if (!this.facilityPredictorData.length) {
+      this.predictorForm.patchValue(
+        { startMonth: null, startYear: null, endMonth: null, endYear: null },
+        { emitEvent: false }
+      );
+      return;
+    }
+    const sortedPredictorData = this.facilityPredictorData.sort((a, b) => {
+      const dateA = new Date(a.year, a.month - 1);
+      const dateB = new Date(b.year, b.month - 1);
+      return dateA.getTime() - dateB.getTime();
+    });
+    const first = sortedPredictorData[0];
+    const last = sortedPredictorData[sortedPredictorData.length - 1];
+    this.predictorForm.patchValue(
+      {
+        startMonth: first.month - 1,
+        startYear: first.year,
+        endMonth: last.month - 1,
+        endYear: last.year
+      },
+      { emitEvent: false }
+    );
   }
 
   changePredictorType() {

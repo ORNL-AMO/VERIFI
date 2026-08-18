@@ -45,3 +45,7 @@ button span {
 .predictor-row label {
     color: #2b3442;
 }
+
+.weather-data-select {
+    width: 140px;
+}

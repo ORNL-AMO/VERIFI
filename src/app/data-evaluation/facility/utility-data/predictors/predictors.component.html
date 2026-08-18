@@ -14,7 +14,7 @@
         <a class="nav-link" routerLink="predictor/{{predictorItem.predictor.guid}}" [routerLinkActive]="['active']">
           <i class="fa fa-file-invoice"></i>
           {{predictorItem.predictor.name}}
-          @if (predictorItem.predictorStatusCheck.status != 'good') {
+          @if (predictorItem.predictorStatusCheck?.status != 'good') {
           <i class="fa fa-exclamation-triangle text-warning"></i>
           }
         </a>

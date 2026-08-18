@@ -142,9 +142,7 @@ export class EditPredictorComponent {
             const addedPredictor = await this.predictorHandler.addPredictor(newPredictor, activeAccountGuid);
             predictors.push(addedPredictor);
 
-            if (this.predictorForm.controls.createPredictorData.value) {
-              await this.addWeatherDataForPredictor(addedPredictor, activeAccountGuid);
-            }
+            await this.addWeatherDataForPredictor(addedPredictor, activeAccountGuid);
           }
           await this.analysisHandler.addAnalysisPredictors(predictors);
         }
@@ -191,7 +189,7 @@ export class EditPredictorComponent {
             } else {
               this.toastNotificationService.weatherDataErrorToast();
             }
-          } 
+          }
           await this.analysisHandler.updateAnalysisPredictor(this.predictor);
         }
       }
@@ -224,10 +222,10 @@ export class EditPredictorComponent {
   }
 
   async addWeatherDataForPredictor(targetPredictor: IdbPredictor, activeAccountGuid: string) {
-    if (this.latestMeterReading && this.firstMeterReading) {
-      let startDate: Date = new Date(this.firstMeterReading);
-      let endDate: Date = new Date(this.latestMeterReading);
+    let startDate: Date = new Date(this.predictorForm.controls.startYear.value, this.predictorForm.controls.startMonth.value, 1);
+    let endDate: Date = new Date(this.predictorForm.controls.endYear.value, this.predictorForm.controls.endMonth.value, 1);
 
+    if (startDate && endDate && startDate <= endDate) {
       let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(
         targetPredictor.weatherStationId,
         startDate,

@@ -82,6 +82,39 @@
           Select at least one weather data type below to create predictors using the selected weather station and
           temperature thresholds.
         </div>
+        <div class="d-flex flex-wrap justify-content-center align-items-end gap-5 mt-4">
+          <div class="d-flex flex-column align-items-center">
+            <label class="semibold d-block mb-1" for="startDateMonth">Start Date</label>
+            <div class="d-flex gap-2">
+              <select id="startMonth" class="form-select form-select-sm weather-data-select"
+                formControlName="startMonth">
+                @for (month of months; track month.monthNumValue) {
+                <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
+                }
+              </select>
+              <select id="startYear" class="form-select form-select-sm weather-data-select" formControlName="startYear">
+                @for (year of yearOptions; track year) {
+                <option [ngValue]="year">{{year}}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="d-flex flex-column align-items-center">
+            <label class="semibold d-block mb-1" for="endDateMonth">End Date</label>
+            <div class="d-flex gap-2">
+              <select id="endMonth" class="form-select form-select-sm weather-data-select" formControlName="endMonth">
+                @for (month of months; track month.monthNumValue) {
+                <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
+                }
+              </select>
+              <select id="endYear" class="form-select form-select-sm weather-data-select" formControlName="endYear">
+                @for (year of yearOptions; track year) {
+                <option [ngValue]="year">{{year}}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
         <div class="d-flex flex-column mb-3 mt-3" formGroupName="weatherSelections">
           @if(predictorForm.get('weatherSelections.cdd')?.value || predictorForm.get('weatherSelections.hdd')?.value) {
           <div class="row justify-content-end">
@@ -93,7 +126,8 @@
 
           <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
             <div class="col-6">
-              <input type="checkbox" id="cdd" class="form-check-input" formControlName="cdd" (change)="onWeatherSelectionChange('cdd', $event)">
+              <input type="checkbox" id="cdd" class="form-check-input" formControlName="cdd"
+                (change)="onWeatherSelectionChange('cdd', $event)">
               <label for="cdd" class="fw-bold ps-2">Cooling Degree Days</label>
             </div>
             @if(predictorForm.get('weatherSelections.cdd')?.value) {
@@ -109,7 +143,8 @@
 
           <div class="row g-2 align-items-center mb-2 flex-nowrap predictor-row">
             <div class="col-6">
-              <input type="checkbox" id="hdd" class="form-check-input" formControlName="hdd" (change)="onWeatherSelectionChange('hdd', $event)">
+              <input type="checkbox" id="hdd" class="form-check-input" formControlName="hdd"
+                (change)="onWeatherSelectionChange('hdd', $event)">
               <label for="hdd" class="fw-bold ps-2">Heating Degree Days</label>
             </div>
             @if(predictorForm.get('weatherSelections.hdd')?.value) {

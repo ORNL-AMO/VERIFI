@@ -37,6 +37,10 @@ export class EditPredictorFormService {
       'coolingBaseTemperature': [predictor.coolingBaseTemperature],
       'weatherStationId': [predictor.weatherStationId],
       'weatherSelections': weatherSelections,
+      'startMonth': [null],
+      'startYear': [null],
+      'endMonth': [null],
+      'endYear': [null],
       'createPredictorData': [true],
       //status settings
       'noLongerInUse': [predictor.noLongerInUse || false],
