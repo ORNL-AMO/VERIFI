@@ -1,0 +1,109 @@
+@if (page.profileForm) {
+  <form class="p1-settings p1-settings__panel" [formGroup]="page.profileForm" aria-label="Corporate information">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Profile</span>
+        <h2>Corporate information</h2>
+      </div>
+      <small>Saved as account profile fields</small>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label>
+        <span>Account name <b>*</b></span>
+        <input type="text" formControlName="name" minlength="1" maxlength="42"
+          (input)="page.saveProfile()">
+        @if (page.profileForm.controls['name'].hasError('required')) {
+          <em>Name is required.</em>
+        }
+      </label>
+      <label>
+        <span>Country</span>
+        <select formControlName="country" (change)="page.saveProfile()">
+          @for (country of page.countries; track country.code) {
+            <option [ngValue]="country.code">{{ country.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="p1-settings__grid">
+      <label>
+        <span>Address</span>
+        <input type="text" formControlName="address" (input)="page.saveProfile()">
+      </label>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>City</span>
+        <input type="text" formControlName="city" (input)="page.saveProfile()">
+      </label>
+      @if (page.profileForm.controls['country'].value === 'US') {
+        <label>
+          <span>State</span>
+          <input type="text" formControlName="state" (input)="page.saveProfile()">
+        </label>
+        <label>
+          <span>Zip</span>
+          <input type="text" formControlName="zip" (input)="page.saveProfile()">
+        </label>
+      }
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>NAICS level 1</span>
+        <select formControlName="naics1" (change)="page.checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of page.firstNaicsList; track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 2</span>
+        <select formControlName="naics2"
+          (change)="page.checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of page.secondNaicsOptions(page.profileForm.controls['naics1'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 3</span>
+        <select formControlName="naics3"
+          (change)="page.checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of page.thirdNaicsOptions(page.profileForm.controls['naics2'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      <span>Notes</span>
+      <textarea formControlName="notes" (input)="page.saveProfile()"></textarea>
+    </label>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>Contact name</span>
+        <input type="text" formControlName="contactName" maxlength="60"
+          (input)="page.saveProfile()">
+      </label>
+      <label>
+        <span>Contact phone</span>
+        <input type="text" formControlName="contactPhone" maxlength="12"
+          (input)="page.formatPhone($event)">
+      </label>
+      <label>
+        <span>Contact email</span>
+        <input type="email" formControlName="contactEmail" maxlength="85"
+          (input)="page.saveProfile()">
+      </label>
+    </div>
+  </form>
+}

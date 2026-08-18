@@ -1,0 +1,86 @@
+@let content = facade.content();
+@let facility = facade.selectedFacility();
+@let activeNavItem = facade.activeNavItem();
+
+<section class="p1-main p1-main--facility" [attr.aria-labelledby]="'p1-facility-title-' + facade.activeSection()">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 [id]="'p1-facility-title-' + facade.activeSection()">{{ content.title }}</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ facility?.location }}</span>
+      <button type="button" disabled>
+        {{ content.primaryAction }}
+      </button>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>{{ content.summary }}</p>
+  </div>
+
+  <div class="p1-main__placeholder" role="status">
+    <span class="fa fa-industry"></span>
+    <div>
+      <strong>{{ facade.activeSection() }} / {{ facade.activeDetailId() }}</strong>
+      <p>Facility content placeholder. This page is routed and ready for the future facility workspace experience.</p>
+    </div>
+  </div>
+
+  <div class="p1-main__metrics" aria-label="Facility workspace metrics">
+    @for (metric of content.metrics; track metric.label) {
+      <article [class]="'p1-main__metric p1-main__metric--' + metric.tone">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.trend }}</small>
+      </article>
+    }
+  </div>
+
+  <div class="p1-main__body">
+    <section class="p1-main__cards" aria-label="Facility workspace cards">
+      @for (card of content.cards; track card.title) {
+        <article [class]="'p1-main__card p1-main__card--' + card.tone">
+          <span>{{ card.meta }}</span>
+          <h2>{{ card.title }}</h2>
+          <p>{{ card.summary }}</p>
+        </article>
+      }
+    </section>
+
+    <aside class="p1-main__activity" aria-label="Workspace notes">
+      <div class="p1-main__activity-header">
+        <h2>Workspace notes</h2>
+        <span>{{ facility?.status }}</span>
+      </div>
+      <ol>
+        @for (activity of content.activity; track activity) {
+          <li>{{ activity }}</li>
+        }
+      </ol>
+    </aside>
+  </div>
+
+  @if (facade.activeSection() === 'data' && facility) {
+    <section class="p1-main__table" aria-label="Facility data details">
+      <div class="p1-main__table-heading">
+        <h2>Facility data details</h2>
+        <span>{{ facility.name }}</span>
+      </div>
+      <div class="p1-main__rows">
+        <div class="p1-main__row">
+          <strong>{{ facility.name }}</strong>
+          <span>{{ facility.meters }} meters</span>
+          <span>{{ facility.predictors }} predictors</span>
+          <span>{{ facility.footprint }}</span>
+          <em>{{ facility.status }}</em>
+        </div>
+      </div>
+    </section>
+  }
+</section>

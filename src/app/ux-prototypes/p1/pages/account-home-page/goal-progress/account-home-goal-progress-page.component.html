@@ -1,0 +1,32 @@
+@let content = facade.content();
+@let account = facade.selectedAccount();
+@let activeNavItem = facade.activeNavItem();
+@let setup = facade.setup();
+
+<section class="p1-main p1-main--account p1-home" aria-labelledby="p1-account-home-goal-progress-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 id="p1-account-home-goal-progress-title">{{ account?.name || content.title }} Goal Progress</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>Account goal progress is routed and ready for future portfolio-level content.</p>
+  </div>
+
+  <div class="p1-main__placeholder" role="status">
+    <span class="fa fa-bullseye"></span>
+    <div>
+      <strong>Account home / goal-progress</strong>
+      <p>Goal progress content will be filled out in a later prototype pass.</p>
+    </div>
+  </div>
+</section>

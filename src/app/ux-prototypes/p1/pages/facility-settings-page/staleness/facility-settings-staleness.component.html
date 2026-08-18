@@ -1,0 +1,39 @@
+@let _account = page.account();
+
+@if (page.stalenessForm && _account) {
+  <form class="p1-settings p1-settings--facility p1-settings__panel" [formGroup]="page.stalenessForm" aria-label="Facility data staleness">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Data quality</span>
+        <h2>Data staleness alerts</h2>
+      </div>
+      <small>Can inherit account-level settings</small>
+    </div>
+    <label class="p1-settings__choice p1-settings__choice--block">
+      <input type="checkbox" formControlName="useAccountSettings" (change)="page.onUseAccountStalenessChange()">
+      <span>Use account-level settings</span>
+    </label>
+    @if (page.isUsingAccountStaleness) {
+      <div class="p1-settings__notice">
+        <span class="fa fa-circle-info"></span>
+        This facility inherits staleness settings from {{ _account.name }}.
+      </div>
+    }
+    <div [class.p1-settings__disabled-region]="page.isUsingAccountStaleness">
+      <label class="p1-settings__choice p1-settings__choice--block">
+        <input type="checkbox" formControlName="enabled" (change)="page.saveStaleness()">
+        <span>Enable time-based staleness alerts</span>
+      </label>
+      @if (page.stalenessForm.controls['enabled'].value) {
+        <label>
+          <span>Alert when data is older than</span>
+          <select formControlName="thresholdMonths" (change)="page.saveStaleness()">
+            @for (option of page.stalenessOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      }
+    </div>
+  </form>
+}

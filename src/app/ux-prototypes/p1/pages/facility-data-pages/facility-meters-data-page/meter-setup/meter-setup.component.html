@@ -1,0 +1,312 @@
+@if (form) {
+  <form class="p1-setup" [formGroup]="form" (ngSubmit)="submit()">
+    <section class="p1-setup__band">
+      <div>
+        <h3>Meter Information</h3>
+        <p>Core identity, source, units, and conversion settings.</p>
+      </div>
+      <button type="submit" class="p1-local-btn p1-local-btn--primary" [disabled]="form.invalid || form.pristine || !canWrite">
+        <span class="fa fa-save"></span>
+        Save Setup
+      </button>
+    </section>
+
+    @if (meterDataExists && !unitsUnlocked) {
+      <div class="p1-setup__notice p1-setup__notice--warn">
+        <span class="fa fa-triangle-exclamation"></span>
+        Readings exist for this meter. Source and unit fields are locked to protect calculations.
+        <button type="button" (click)="unlockUnitChanges()">Unlock setup fields</button>
+      </div>
+    }
+
+    @if (unitsUnlocked) {
+      <div class="p1-setup__notice p1-setup__notice--danger">
+        <span class="fa fa-triangle-exclamation"></span>
+        Changing collection values will not alter amounts already entered in readings.
+      </div>
+    }
+
+    <div class="p1-setup__grid">
+      <label>
+        <span>Name <b>*</b></span>
+        <input formControlName="name" maxlength="100">
+        @if (form.controls.name.invalid && form.controls.name.touched) {
+          <em>Name is required.</em>
+        }
+      </label>
+
+      <label>
+        <span>Source <b>*</b></span>
+        <select formControlName="source" (change)="changeSource()">
+          @for (sourceOption of sources; track sourceOption) {
+            <option [ngValue]="sourceOption">{{ sourceOption }}</option>
+          }
+        </select>
+      </label>
+
+      @if (displayScope) {
+        <label>
+          <span>Scope</span>
+          <select formControlName="scope" (change)="changeScope()">
+            @for (scopeOption of scopes; track scopeOption.value) {
+              <option [ngValue]="scopeOption.value">{{ scopeOption.optionLabel }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (displayPhase) {
+        <label>
+          <span>Phase <b>*</b></span>
+          <select formControlName="phase" (change)="changePhaseOrFuel()">
+            @for (phase of phases; track phase) {
+              <option [ngValue]="phase">{{ phase }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (displayFuel) {
+        <label>
+          <span>{{ source === 'Other Energy' ? 'Energy Type' : 'Fuel Type' }} <b>*</b></span>
+          <select formControlName="fuel" (change)="changePhaseOrFuel()">
+            @for (fuel of fuelOptions; track fuel.value) {
+              <option [ngValue]="fuel.value">{{ fuel.value }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (displayWaterIntake) {
+        <label>
+          <span>Water Intake Type <b>*</b></span>
+          <select formControlName="waterIntakeType">
+            @for (waterType of waterIntakeTypes; track waterType) {
+              <option [ngValue]="waterType">{{ waterType }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (displayWaterDischarge) {
+        <label>
+          <span>Water Discharge Type <b>*</b></span>
+          <select formControlName="waterDischargeType">
+            @for (waterType of waterDischargeTypes; track waterType) {
+              <option [ngValue]="waterType">{{ waterType }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <label>
+        <span>Collection Unit <b>*</b></span>
+        <select formControlName="startingUnit" (change)="changeUnits()">
+          @for (unit of startingUnitOptions; track unit.value) {
+            <option [ngValue]="unit.value">{{ unit.display }}</option>
+          }
+        </select>
+      </label>
+
+      @if (isEnergyMeter && !collectionUnitIsEnergy) {
+        <label>
+          <span>Energy Unit <b>*</b></span>
+          <select formControlName="energyUnit" (change)="changeUnits()">
+            @for (unit of energyUnits; track unit.value) {
+              <option [ngValue]="unit.value">{{ unit.display }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (source === 'Electricity') {
+        <label>
+          <span>Demand Unit</span>
+          <select formControlName="demandUnit">
+            @for (unit of demandUnits; track unit.value) {
+              <option [ngValue]="unit.value">{{ unit.display }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (displayHeatCapacity) {
+        <label>
+          <span>Heat Capacity <b>*</b></span>
+          <input type="number" formControlName="heatCapacity">
+        </label>
+      }
+
+      @if (displaySiteToSource) {
+        <label>
+          <span>Site to Source <b>*</b></span>
+          <input type="number" formControlName="siteToSource">
+        </label>
+      }
+
+      <label>
+        <span>Meter Number</span>
+        <input formControlName="meterNumber">
+      </label>
+
+      <label>
+        <span>Account Number</span>
+        <input type="number" formControlName="accountNumber">
+      </label>
+
+      <label>
+        <span>Supplier</span>
+        <input formControlName="supplier">
+      </label>
+
+      <label>
+        <span>Location</span>
+        <input formControlName="location">
+      </label>
+    </div>
+
+    <section class="p1-setup__group-assignment">
+      <div class="p1-setup__group-head">
+        <div>
+          <h3>Analysis Group Assignment</h3>
+          <p>
+            Current group:
+            <strong>{{ currentGroup()?.name || 'Ungrouped' }}</strong>
+          </p>
+        </div>
+        <button type="button" class="p1-local-btn" (click)="openAnalysisGroups.emit()">
+          <span class="fa fa-layer-group"></span>
+          Manage Analysis Groups
+        </button>
+      </div>
+
+      <div class="p1-setup__group-options">
+        <button type="button" [class.active]="!meter.groupId" (click)="selectGroup(undefined)" [disabled]="!canWrite || !meter.groupId">
+          <span class="fa fa-inbox"></span>
+          <strong>Ungrouped</strong>
+          <small>Remove this meter from analysis groups.</small>
+        </button>
+
+        @for (group of eligibleGroups(); track group.guid) {
+          <button type="button" [class.active]="meter.groupId === group.guid" (click)="selectGroup(group.guid)"
+            [disabled]="!canWrite || meter.groupId === group.guid">
+            <span class="fa fa-layer-group"></span>
+            <strong>{{ group.name }}</strong>
+            <small>
+              {{ group.groupType }} group
+              @if (assignmentWarning(group)) {
+                · {{ assignmentWarning(group) }}
+              }
+            </small>
+          </button>
+        } @empty {
+          <p class="p1-setup__group-empty">No eligible analysis groups exist for this meter source.</p>
+        }
+      </div>
+    </section>
+
+    <section class="p1-setup__split">
+      <div>
+        <h3>Energy And Emissions</h3>
+        <div class="p1-setup__checks">
+          <label><input type="checkbox" formControlName="includeInEnergy" (change)="changeUnits()"> Include in energy</label>
+          <label><input type="checkbox" formControlName="retainRECs" (change)="changeUnits()"> Retain RECs</label>
+          <label><input type="checkbox" formControlName="directConnection" (change)="changeUnits()"> Direct connection</label>
+        </div>
+        @if (source === 'Electricity') {
+          <label class="p1-setup__field">
+            <span>Agreement Type</span>
+            <select formControlName="agreementType" (change)="changeUnits()">
+              <option [ngValue]="1">Grid electricity</option>
+              <option [ngValue]="2">Self-generated</option>
+              <option [ngValue]="3">Physical PPA</option>
+              <option [ngValue]="4">Virtual PPA</option>
+              <option [ngValue]="5">Utility green product</option>
+              <option [ngValue]="6">RECs</option>
+            </select>
+          </label>
+          <label class="p1-setup__field">
+            <span>Green Purchase Fraction (%)</span>
+            <input type="number" min="0" max="100" formControlName="greenPurchaseFraction">
+          </label>
+        }
+      </div>
+
+      <div>
+        <h3>Status Settings</h3>
+        <div class="p1-setup__checks">
+          <label><input type="checkbox" formControlName="noLongerInUse"> No longer in use</label>
+          <label><input type="checkbox" formControlName="canBeNegative"> Can be negative</label>
+          <label><input type="checkbox" formControlName="ignoreDateStatusChecks"> Ignore date status checks</label>
+        </div>
+        @if (form.controls.noLongerInUse.value) {
+          <div class="p1-setup__inline-fields">
+            <label>
+              <span>Stop Month</span>
+              <select formControlName="noLongerInUseMonth">
+                @for (month of months; track month.monthNumValue) {
+                  <option [ngValue]="month.monthNumValue">{{ month.abbreviation }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              <span>Stop Year</span>
+              <select formControlName="noLongerInUseYear">
+                @for (year of years; track year) {
+                  <option [ngValue]="year">{{ year }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="p1-setup__band p1-setup__band--charges">
+      <div>
+        <h3>Meter Charges</h3>
+        <p>Optional charge columns are kept with the meter and mirrored into readings.</p>
+      </div>
+      <button type="button" class="p1-local-btn" (click)="addCharge()" [disabled]="!canWrite">
+        <span class="fa fa-plus"></span>
+        Add Charge
+      </button>
+    </section>
+
+    <div class="p1-setup__charges">
+      @for (charge of chargesArray.controls; track charge.get('guid')?.value; let index = $index) {
+        <div class="p1-setup__charge" [formGroup]="$any(charge)">
+          <label>
+            <span>Charge Name</span>
+            <input formControlName="name">
+          </label>
+          <label>
+            <span>Type</span>
+            <select formControlName="chargeType">
+              <option value="consumption">Consumption</option>
+              <option value="demand">Demand</option>
+              <option value="tax">Tax</option>
+              <option value="lateFee">Late fee</option>
+              <option value="flatFee">Flat fee</option>
+              <option value="other">Other</option>
+              <option value="usage">Usage</option>
+              <option value="sewer">Sewer</option>
+            </select>
+          </label>
+          <label class="p1-setup__check"><input type="checkbox" formControlName="displayUsageInTable"> Usage column</label>
+          <label class="p1-setup__check"><input type="checkbox" formControlName="displayChargeInTable"> Cost column</label>
+          <button type="button" class="p1-local-icon p1-local-icon--danger" (click)="removeCharge(index)" aria-label="Remove charge">
+            <span class="fa fa-trash"></span>
+          </button>
+        </div>
+      } @empty {
+        <p class="p1-setup__empty">No custom charge columns.</p>
+      }
+    </div>
+
+    <label class="p1-setup__notes">
+      <span>Notes</span>
+      <textarea rows="3" formControlName="notes"></textarea>
+    </label>
+  </form>
+}

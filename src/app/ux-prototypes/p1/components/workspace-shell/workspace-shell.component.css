@@ -1,0 +1,91 @@
+:host {
+  display: block;
+}
+
+.p1-shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.25rem minmax(14rem, 18rem) minmax(0, 1fr) minmax(18rem, 22rem);
+  height: calc(100vh - 4.75rem);
+  min-height: 42rem;
+  background: var(--prototype-bg);
+  overflow: hidden;
+  border-top: 3px solid var(--prototype-border);
+  transition: border-color 400ms ease;
+}
+
+.p1-shell--account {
+  border-top-color: var(--prototype-green);
+}
+
+.p1-shell--facility {
+  border-top-color: var(--prototype-blue);
+}
+
+.p1-shell--panel-closed {
+  grid-template-columns: 4.25rem minmax(14rem, 18rem) minmax(0, 1fr);
+}
+
+.p1-shell__main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.p1-shell__state {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: .75rem;
+  min-height: inherit;
+  padding: 2rem;
+  text-align: center;
+}
+
+.p1-shell__state span {
+  color: var(--prototype-orange);
+  font-size: 2rem;
+}
+
+.p1-shell__state h1,
+.p1-shell__state p {
+  margin: 0;
+}
+
+.p1-shell__state p {
+  max-width: 32rem;
+  color: var(--prototype-muted);
+}
+
+.p1-shell__state button {
+  min-height: 2.35rem;
+  padding: .5rem .8rem;
+  border: 0;
+  border-radius: 7px;
+  background: var(--prototype-orange);
+  color: #fff;
+  font-weight: 800;
+}
+
+@media (max-width: 1160px) {
+  .p1-shell {
+    grid-template-columns: 4.25rem minmax(13rem, 16rem) minmax(0, 1fr);
+  }
+
+  .p1-shell app-p1-right-panel {
+    grid-column: 2 / 4;
+    border-top: 1px solid var(--prototype-border);
+  }
+}
+
+@media (max-width: 820px) {
+  .p1-shell {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}

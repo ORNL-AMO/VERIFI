@@ -116,7 +116,7 @@ function buildBackupFile(dataBackupId: string): BackupFile {
   return {
     origin: 'VERIFI',
     backupFileType: 'Account',
-    dataVersion: 1,
+    dataVersion: 2,
     dataBackupId,
     timeStamp: new Date('2026-08-10T12:00:00.000Z'),
     account: { guid: 'account-a', name: 'Account A' } as BackupFile['account'],

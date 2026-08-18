@@ -32,6 +32,7 @@ Designs may reorganize how the workflow is presented, but they must preserve the
 - Use existing production components, forms, tables, help text, validation states, and neighboring workflow screens as content references. For example, a redesigned meter form should preserve the established meter fields, options, required states, units, and actions even when the layout changes.
 - Make setup progress, validation status, next actions, and blocked work visible without requiring users to hunt through separate screens.
 - Design for dense industrial data: long facility names, wide tables, unit-bearing values, charts, reports, and multi-facility portfolios.
+- Account scale varies widely. Prototype layouts should work for accounts with one facility or portfolios of roughly 50 facilities, and for meters, predictors, analyses, reports, and other data objects that may range from a few records to much larger sets.
 - Provide an intentional help pattern for dense guidance, especially calculation explanations, validation details, weather-data context, and reporting assumptions.
 - Include loading, empty, validation, warning, error, disabled, and success states when a prototype introduces an interaction pattern.
 - Preserve import, backup, weather data, calculation, Worker, and report contracts unless the task explicitly moves from visual prototype into production workflow implementation.
@@ -60,6 +61,12 @@ Apply that direction through:
 Prototype styling must remain scoped under `.verifi-prototype`. Use semantic tokens for surfaces, text, borders, focus, actions, status, and chart accents so light and dark mode can share the same component structure. Do not hard-code one-off colors inside individual prototype components when a shared token would express the same purpose.
 
 Dark mode support is a foundation requirement for prototype direction. A prototype does not need a working theme switch unless requested, but color choices, contrast, shadows, borders, charts, and state indicators should be planned so both light and dark palettes are viable.
+
+## Component and style structure
+
+Prototype pages should be composed from focused, prototype-owned components where that improves clarity. Use child components for major workspace regions, repeated cards or rows, dense forms, chart/table panels, help content, status summaries, and interaction-heavy sections. Keep the route component responsible for page layout and mock-data wiring instead of concentrating a full workflow in one `pN.component` file set.
+
+Prototype styles should be easy to adjust as the redesign direction evolves. Prefer scoped CSS custom properties and semantic class names for shared concepts such as shell, panel, toolbar, field group, status, help, table, chart, and action areas. Keep styles local to the prototype area and avoid global CSS unless a prototype is intentionally being promoted into a production pattern.
 
 ## Responsive design
 
@@ -107,9 +114,11 @@ Keep these content elements:
 
 The first viewport should make the user's next best action obvious. Existing users should quickly return to a recent account. New users should understand that setup begins by creating or importing an account; after entering that account, they add facilities, meters, predictors, analyses, reports, and other account-scoped data.
 
-## Prototype mock data
+## Prototype Data
 
-Use static mock data by default and colocate it with the prototype that consumes it. Mock only the minimum shape needed to render the screen. Use the existing models under `src/app/models/idbModels/` as references so prototype data includes the relevant account, facility, meter, predictor, analysis, report, weather, and GUID relationship fields without inventing incompatible shapes.
+Use static mock data by default for visual-only prototypes and colocate it with the prototype that consumes it. Mock only the minimum shape needed to render the screen. Use the existing models under `src/app/models/idbModels/` as references so prototype data includes the relevant account, facility, meter, predictor, analysis, report, weather, and GUID relationship fields without inventing incompatible shapes.
+
+P1 facility Data workbench sections are the current real-data prototype exception. They should read from `AccountWorkspaceStore` facility-scoped signals and write through existing workspace command boundaries and handlers so meters, predictors, energy uses, and events can be evaluated with real account data while preserving production persistence rules.
 
 When prototyping established workflows, inspect the existing production component for that workflow before drafting new content. Reuse its fields, labels, options, helper text, validation messages, empty states, and actions as the default content source, then improve the hierarchy, grouping, and interaction design in the prototype.
 
@@ -117,8 +126,9 @@ Use realistic manufacturing examples that include:
 
 - account and facility names;
 - facility, meter, predictor, weather data, analysis, and report counts;
+- small and larger portfolio examples so layouts are not tuned only to one facility, a few meters, or a single analysis;
 - current setup/status indicators;
 - recent activity or modified dates when useful;
 - representative utility, production, and weather-related values with units.
 
-Do not read from or write to IndexedDB, weather services, backup services, import/export services, Web Workers, calculation services, or report writers unless the task explicitly changes from prototype exploration to production implementation.
+Do not read from or write to IndexedDB, weather services, backup services, import/export services, Web Workers, calculation services, or report writers unless the task explicitly changes from prototype exploration to production implementation or a documented real-data prototype path, such as the [P1 data workbench pattern](p1-data-workbench-pattern.md), applies.

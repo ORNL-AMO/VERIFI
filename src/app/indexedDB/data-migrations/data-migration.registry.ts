@@ -1,8 +1,10 @@
 import { CURRENT_DATA_VERSION, DataMigration } from './data-migration.models';
+import { VERSION_ONE_TO_TWO_MIGRATION } from './version-one-to-two.migration';
 import { VERSION_ZERO_TO_ONE_MIGRATION } from './version-zero-to-one.migration';
 
 export const DATA_MIGRATIONS: ReadonlyArray<DataMigration> = validateMigrationRegistry([
-  VERSION_ZERO_TO_ONE_MIGRATION
+  VERSION_ZERO_TO_ONE_MIGRATION,
+  VERSION_ONE_TO_TWO_MIGRATION
 ]);
 
 export function validateMigrationRegistry(

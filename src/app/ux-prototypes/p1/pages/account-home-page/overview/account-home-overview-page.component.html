@@ -1,0 +1,162 @@
+@let content = facade.content();
+@let account = facade.selectedAccount();
+@let activeNavItem = facade.activeNavItem();
+@let setup = facade.setup();
+
+<section class="p1-main p1-main--account p1-home" aria-labelledby="p1-account-home-overview-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 id="p1-account-home-overview-title">{{ account?.name || content.title }} Overview</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>
+    </div>
+  </div>
+
+  @if (account) {
+    @let primary = primaryAction();
+    <div class="p1-account-overview">
+      <div class="p1-account-overview__hero">
+        <section class="p1-account-overview__brief" aria-label="Account overview summary">
+          <div class="p1-account-overview__brief-header">
+            <div>
+              <span class="p1-eyebrow">Account home</span>
+              <h2>Portfolio overview, readiness, and next places to go</h2>
+              <p>{{ content.summary }}</p>
+            </div>
+            <span class="p1-chip p1-chip--success">{{ account.status }}</span>
+          </div>
+          <div class="p1-account-overview__meta" aria-label="Account context">
+            <span class="p1-chip p1-chip--success">{{ activeNavItem.label }}</span>
+            <span class="p1-chip">{{ account.descriptor }}</span>
+            <span class="p1-chip">{{ setup.completeCount }} of {{ setup.totalCount }} setup items complete</span>
+          </div>
+        </section>
+
+        <aside class="p1-account-overview__primary" aria-label="Recommended next action">
+          <span class="p1-account-overview__primary-icon" [ngClass]="['fa', primary.icon]" aria-hidden="true"></span>
+          <div>
+            <span class="p1-eyebrow">Recommended</span>
+            <h2>{{ primary.title }}</h2>
+            <p>{{ primary.summary }}</p>
+          </div>
+          <a class="p1-account-overview__primary-action" [routerLink]="routeFor(primary)">
+            <span [ngClass]="['fa', primary.icon]" aria-hidden="true"></span>
+            {{ primary.title }}
+          </a>
+        </aside>
+      </div>
+
+      <div class="p1-account-overview__body">
+        <div class="p1-account-overview__main-stack">
+          <section class="p1-account-overview__panel" aria-label="Account utility performance summary">
+            <div>
+              <span class="p1-eyebrow">Data Evaluation overview</span>
+              <h2>Portfolio utility performance</h2>
+              <p>Energy, cost, emissions, and water are grouped together so account-level signals are visible from home.</p>
+            </div>
+            <div class="p1-account-overview__utility-grid">
+              @for (utility of utilitySummaries(); track utility.label) {
+                <article [class]="'p1-account-overview__utility-card p1-account-overview__utility-card--' + utility.tone">
+                  <span>{{ utility.label }}</span>
+                  <strong>{{ utility.value }}</strong>
+                  <small>{{ utility.unit }} &middot; {{ utility.trend }}</small>
+                </article>
+              }
+            </div>
+          </section>
+
+          <section class="p1-account-overview__chart-panel" aria-label="Account overview charts">
+            <div>
+              <span class="p1-eyebrow">Portfolio trends</span>
+              <h2>Overview charts</h2>
+            </div>
+            <div class="p1-account-overview__chart-grid">
+              <app-p1-overview-chart
+                [config]="trendChart()"
+                [themeSignature]="themeSignature()">
+              </app-p1-overview-chart>
+              <app-p1-overview-chart
+                [config]="contributionChart()"
+                [themeSignature]="themeSignature()">
+              </app-p1-overview-chart>
+            </div>
+          </section>
+
+          <section class="p1-account-overview__launchpad" aria-labelledby="p1-account-launchpad-title">
+            <div>
+              <span class="p1-eyebrow">Account launchpad</span>
+              <h2 id="p1-account-launchpad-title">Useful places from home</h2>
+              <p>Jump directly to account areas used for data setup, visualization, analysis, reporting, settings, and imports.</p>
+            </div>
+            <div class="p1-account-overview__launch-grid">
+              @for (action of launchpadActions(); track action.title) {
+                <a [class]="'p1-account-overview__launch-card p1-account-overview__launch-card--' + action.tone"
+                  [routerLink]="routeFor(action)">
+                  <span class="p1-account-overview__launch-icon" [ngClass]="['fa', action.icon]" aria-hidden="true"></span>
+                  <div>
+                    <span>{{ action.meta }}</span>
+                    <h3>{{ action.title }}</h3>
+                    <p>{{ action.summary }}</p>
+                  </div>
+                  <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                </a>
+              }
+            </div>
+          </section>
+        </div>
+
+        <aside class="p1-account-overview__side-stack" aria-label="Account readiness and activity">
+          <section class="p1-account-overview__panel">
+            <div>
+              <span class="p1-eyebrow">Account status</span>
+              <h2>Portfolio readiness</h2>
+              <p>Facilities, utility data, predictors, analysis, and reports are grouped by what needs attention next.</p>
+            </div>
+            <div class="p1-account-overview__readiness">
+              @for (item of readinessItems(); track item.title) {
+                <article [class]="'p1-account-overview__readiness-card p1-account-overview__readiness-card--' + item.tone">
+                  <span [ngClass]="['fa', item.icon]" aria-hidden="true"></span>
+                  <div>
+                    <span>{{ item.statusLabel }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.summary }}</p>
+                  </div>
+                  <a class="p1-account-overview__action" [routerLink]="routeFor(item.action)">
+                    Open
+                  </a>
+                </article>
+              }
+            </div>
+          </section>
+
+          <section class="p1-account-overview__chart-panel" aria-label="Account setup readiness chart">
+            <app-p1-overview-chart
+              [config]="readinessChart()"
+              [themeSignature]="themeSignature()">
+            </app-p1-overview-chart>
+          </section>
+
+          <section class="p1-account-overview__panel">
+            <div>
+              <span class="p1-eyebrow">Home tab content</span>
+              <h2>Setup snapshot</h2>
+            </div>
+            <ol>
+              @for (activity of content.activity; track activity) {
+                <li>{{ activity }}</li>
+              }
+            </ol>
+          </section>
+        </aside>
+      </div>
+    </div>
+  } @else {
+    <div class="p1-account-overview__empty">
+      <span class="p1-eyebrow">Account home</span>
+      <h2>No account is selected</h2>
+      <p>Select or create an account before reviewing account overview content.</p>
+    </div>
+  }
+</section>

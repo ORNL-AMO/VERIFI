@@ -1,0 +1,54 @@
+<button type="button" class="p1-getting-started__backdrop" aria-label="Close getting started guide"
+  (click)="closed.emit()"></button>
+
+<aside class="p1-getting-started" role="dialog" aria-modal="true" aria-labelledby="p1-getting-started-title">
+  <header class="p1-getting-started__header">
+    <div>
+      <p class="p1-eyebrow">Getting started</p>
+      <h2 id="p1-getting-started-title">Welcome to the workspace</h2>
+    </div>
+    <button type="button" class="p1-icon-btn" title="Close getting started guide"
+      aria-label="Close getting started guide" (click)="closed.emit()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </header>
+
+  <div class="p1-getting-started__body">
+    <p>
+      This workspace keeps setup, utility data, analysis, reports, and account settings in one place.
+      Start with the todo list on the right; it points to the next step and updates as records are added.
+    </p>
+
+    <div class="p1-getting-started__steps" aria-label="Workspace orientation">
+      <article>
+        <span class="fa fa-building"></span>
+        <div>
+          <h3>Account and facility context</h3>
+          <p>Use the workspace context to move between portfolio setup and site-specific work.</p>
+        </div>
+      </article>
+      <article>
+        <span class="fa fa-compass"></span>
+        <div>
+          <h3>Left navigation</h3>
+          <p>Move through Home, Data, Analysis, Reports, Settings, and Imports as setup grows.</p>
+        </div>
+      </article>
+      <article>
+        <span class="fa fa-list-check"></span>
+        <div>
+          <h3>Todo panel</h3>
+          <p>Open todo items to jump directly to the setup screen that needs attention.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <footer class="p1-getting-started__footer">
+    <button type="button" class="p1-btn p1-btn--ghost" (click)="closed.emit()">Close</button>
+    <button type="button" class="p1-btn p1-btn--primary" (click)="startTodos.emit()">
+      Start with Todos
+      <span class="fa fa-arrow-right"></span>
+    </button>
+  </footer>
+</aside>

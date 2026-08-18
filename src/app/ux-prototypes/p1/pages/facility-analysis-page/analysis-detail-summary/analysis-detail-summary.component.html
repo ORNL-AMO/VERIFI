@@ -1,0 +1,51 @@
+@if (row) {
+<div class="p1-analysis-drawer__backdrop" (click)="closeSummary.emit()"></div>
+<section class="p1-analysis__drawer" role="dialog" aria-modal="true" aria-label="Analysis details">
+  <div class="p1-analysis__drawer-header">
+    <div>
+      <span class="p1-chip">{{ categoryLabel(row.analysis.analysisCategory) }}</span>
+      <h2>{{ row.analysis.name }}</h2>
+    </div>
+    <button type="button" class="p1-icon-btn" title="Close" aria-label="Close details" (click)="closeSummary.emit()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </div>
+  <div class="p1-analysis__detail-grid">
+    <article>
+      <span>Status</span>
+      <strong>{{ row.status?.status || 'Unknown' }}</strong>
+      <small>{{ row.status?.groupsHaveErrors ? 'Group errors present' : 'Setup and group status' }}</small>
+    </article>
+    <article>
+      <span>Baseline Year</span>
+      <strong>{{ row.analysis.baselineYear || 'Unset' }}</strong>
+      <small>{{ row.analysis.energyIsSource ? 'Source energy' : 'Site energy' }}</small>
+    </article>
+    <article>
+      <span>Linked Items</span>
+      <strong>{{ row.linkedAccountAnalyses.length + row.linkedReports.length + row.linkedBankingAnalyses.length }}</strong>
+      <small>Account analysis, reports, and banking links</small>
+    </article>
+  </div>
+  <div class="p1-analysis__group-list">
+    @for (group of row.analysis.groups; track group.idbGroupId) {
+    <article>
+      <div>
+        <strong>{{ group.idbGroupId | groupName }}</strong>
+        <span>{{ typeLabel(group.analysisType) }}</span>
+      </div>
+      <small>
+        {{ group.predictorVariables.length }} predictors
+        @if (group.analysisType === 'regression') {
+        <span> · {{ group.models?.length || 0 }} generated models</span>
+        }
+      </small>
+    </article>
+    }
+  </div>
+  <button type="button" class="p1-btn p1-btn--primary" (click)="openAnalysis.emit(row.analysis)">
+    <span class="fa fa-arrow-right"></span>
+    Open Workbench
+  </button>
+</section>
+}

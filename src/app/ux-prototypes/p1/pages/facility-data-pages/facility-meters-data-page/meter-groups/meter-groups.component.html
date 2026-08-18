@@ -1,0 +1,197 @@
+<section class="p1-groups">
+  <header class="p1-groups__toolbar">
+    <div>
+      <h3>Analysis Groups</h3>
+      <p>{{ groups.length }} analysis groups · {{ buckets().ungroupedMeters.length }} ungrouped meters</p>
+    </div>
+    <button type="button" class="p1-local-btn p1-local-btn--primary" (click)="addGroup.emit()" [disabled]="!canWrite || meters.length === 0">
+      <span class="fa fa-plus"></span>
+      Add Analysis Group
+    </button>
+  </header>
+
+  @if (activeEditor?.view === 'table' || activeEditor?.view === 'chart') {
+    <section class="p1-groups__detail-view">
+      <div class="p1-groups__editor-head">
+        <div>
+          <h3>{{ activeEditor.group?.name || 'Ungrouped Meters' }}</h3>
+          <p>{{ activeEditor?.view === 'table' ? 'Analysis group data table' : 'Analysis group usage chart' }}</p>
+        </div>
+        <button type="button" class="p1-local-btn" (click)="openManage()">Back to Analysis Groups</button>
+      </div>
+      @if (activeEditor?.view === 'chart') {
+        <div class="p1-groups__bars" aria-label="Group usage chart">
+          @for (item of groupSummary(activeEditor.group); track item.meter.guid) {
+            <div>
+              <span>{{ item.meter.name }}</span>
+              <strong [style.width.%]="item.totalEnergyUse ? 100 : 4"></strong>
+              <em>{{ item.totalEnergyUse | number:'1.0-0' }}</em>
+            </div>
+          } @empty {
+            <p class="p1-groups__empty">No meters in this group.</p>
+          }
+        </div>
+      } @else {
+        <ng-container *ngTemplateOutlet="groupTable; context: { group: activeEditor.group }"></ng-container>
+      }
+    </section>
+  } @else {
+    <div class="p1-groups__columns">
+      <ng-container *ngTemplateOutlet="groupBucket; context: { title: 'Energy Groups', items: buckets().energy }"></ng-container>
+      <ng-container *ngTemplateOutlet="groupBucket; context: { title: 'Water Groups', items: buckets().water }"></ng-container>
+      <ng-container *ngTemplateOutlet="groupBucket; context: { title: 'Other Groups', items: buckets().other }"></ng-container>
+      <section class="p1-groups__bucket">
+        <h4>Ungrouped Meters</h4>
+        <ng-container *ngTemplateOutlet="groupTable; context: { group: undefined }"></ng-container>
+      </section>
+    </div>
+  }
+
+  @if (activeEditor?.view === 'edit' && form && editingGroup) {
+    <div class="p1-groups__drawer-backdrop" (click)="openManage()"></div>
+    <aside class="p1-groups__drawer" role="dialog" aria-modal="true" aria-labelledby="analysis-group-editor-title">
+      <form class="p1-groups__editor" [formGroup]="form" (ngSubmit)="submitGroup()">
+        <div class="p1-groups__editor-head">
+          <div>
+            <h3 id="analysis-group-editor-title">
+              {{ editingGroup.id === undefined ? 'Add Analysis Group' : 'Edit Analysis Group' }}
+            </h3>
+            <p>Analysis and report setup will be updated when group membership changes.</p>
+          </div>
+          <button type="button" class="p1-groups__close" (click)="openManage()" aria-label="Close analysis group editor">
+            <span class="fa fa-xmark"></span>
+          </button>
+        </div>
+
+        <div class="p1-groups__editor-grid">
+          <label>
+            <span>Name <b>*</b></span>
+            <input formControlName="name">
+          </label>
+          <label>
+            <span>Type</span>
+            <select formControlName="groupType">
+              @if (canUseType('Energy')) {
+                <option value="Energy">Energy</option>
+              }
+              @if (canUseType('Water')) {
+                <option value="Water">Water</option>
+              }
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>
+            <span>Description</span>
+            <input formControlName="description">
+          </label>
+        </div>
+
+        @if (editingGroup.id !== undefined && groupMeterCount(editingGroup) > 0) {
+          <p class="p1-groups__notice"><span class="fa fa-lock"></span> Analysis group type is locked while meters belong to this group.</p>
+        }
+
+        <div class="p1-groups__meter-options">
+          @for (meter of groupOptions(); track meter.guid) {
+            <label [class.p1-groups__meter-option--warn]="isInAnotherGroup(meter)">
+              <input type="checkbox" [checked]="isSelected(meter)" (change)="setSelected(meter, $any($event.target).checked)">
+              <span>
+                <strong>{{ meter.name }}</strong>
+                <small>{{ meter.source }} · {{ isInAnotherGroup(meter) ? 'Currently in ' + otherGroupName(meter) : 'Available' }}</small>
+              </span>
+            </label>
+          } @empty {
+            <p class="p1-groups__empty">No meters are eligible for this group type.</p>
+          }
+        </div>
+
+        <div class="p1-groups__drawer-actions">
+          @if (editingGroup.id !== undefined) {
+            <button type="button" class="p1-local-btn p1-local-btn--danger" (click)="deleteGroup.emit(editingGroup)" [disabled]="!canWrite">
+              <span class="fa fa-trash"></span>
+              Delete Analysis Group
+            </button>
+          }
+          <span></span>
+          <button type="button" class="p1-local-btn" (click)="openManage()">Cancel</button>
+          <button type="submit" class="p1-local-btn p1-local-btn--primary" [disabled]="form.invalid || !canWrite">
+            {{ editingGroup.id === undefined ? 'Create Analysis Group' : 'Save Analysis Group' }}
+          </button>
+        </div>
+      </form>
+    </aside>
+  }
+</section>
+
+<ng-template #groupBucket let-title="title" let-items="items">
+  <section class="p1-groups__bucket">
+    <h4>{{ title }}</h4>
+    @for (group of items; track group.guid) {
+      <article class="p1-groups__card">
+        <div>
+          <strong>{{ group.name }}</strong>
+          <small>{{ groupMeterCount(group) }} meters · {{ group.groupType }}</small>
+          <ul class="p1-groups__meter-list" aria-label="Meters in analysis group">
+            @for (item of groupSummary(group); track item.meter.guid) {
+              <li>{{ item.meter.name }} <span>{{ item.meter.source }}</span></li>
+            } @empty {
+              <li>No meters assigned</li>
+            }
+          </ul>
+        </div>
+        <div class="p1-groups__card-actions">
+          <button type="button" title="Edit group" aria-label="Edit group" (click)="openGroupView.emit({ view: 'edit', group })">
+            <span class="fa fa-pencil"></span>
+          </button>
+          <button type="button" title="Group data table" aria-label="Group data table" (click)="openGroupView.emit({ view: 'table', group })">
+            <span class="fa fa-table"></span>
+          </button>
+          <button type="button" title="Group chart" aria-label="Group chart" (click)="openGroupView.emit({ view: 'chart', group })">
+            <span class="fa fa-chart-line"></span>
+          </button>
+          <button type="button" title="Delete group" aria-label="Delete group" (click)="deleteGroup.emit(group)" [disabled]="!canWrite">
+            <span class="fa fa-trash"></span>
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <p class="p1-groups__empty">No {{ title | lowercase }}.</p>
+    }
+  </section>
+</ng-template>
+
+<ng-template #groupTable let-group="group">
+  <div class="p1-groups__table-wrap">
+    <table class="p1-groups__table">
+      <thead>
+        <tr>
+          <th>Meter</th>
+          <th>Source</th>
+          <th class="num">Readings</th>
+          <th>Latest</th>
+          <th class="num">Energy</th>
+          <th class="num">Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of groupSummary(group); track item.meter.guid) {
+          <tr>
+            <td>{{ item.meter.name }}</td>
+            <td>{{ item.meter.source }}</td>
+            <td class="num">{{ item.readingCount }}</td>
+            <td>
+              @if (item.latestReading) {
+                {{ item.latestReading.month }}/{{ item.latestReading.year }}
+              } @else {
+                --
+              }
+            </td>
+            <td class="num">{{ item.totalEnergyUse | number:'1.0-1' }}</td>
+            <td class="num">{{ item.totalCost | currency:'USD':'symbol':'1.0-0' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="p1-groups__empty">No meters in this group.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-template>

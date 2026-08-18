@@ -1,0 +1,216 @@
+<header class="p1-header" aria-label="VERIFI header banner">
+  <!-- Backdrop closes any open menu -->
+  @if (hasBackdrop) {
+  <div class="p1-header__backdrop" (click)="closeAll()" aria-hidden="true"></div>
+  }
+
+  <div class="p1-header__brand">
+    <button type="button" class="p1-header__logo" (click)="facade.showWelcome()" aria-label="Show welcome screen">
+      <strong class="p1-header__verifi">VERIFI</strong>
+    </button>
+  </div>
+
+  @if (facade.isWorkspaceRoute() && facade.selectedAccount(); as account) {
+  @let facilities = facade.accountFacilities();
+  @let facility = facade.selectedFacility();
+  @let contextMode = facade.contextMode();
+  <div class="p1-header__workspace" aria-label="Active workspace context">
+
+    <!-- Account switcher -->
+    <div class="p1-header__zone">
+      <button type="button" class="p1-header__account-btn" (click)="toggleAccountMenu()" [class.open]="accountMenuOpen"
+        aria-haspopup="true" [attr.aria-expanded]="accountMenuOpen">
+        <span class="fa fa-building"></span>
+        <span class="p1-header__account-name">{{ account.name }}</span>
+        <span class="fa fa-chevron-down p1-header__chevron"></span>
+      </button>
+
+      @if (accountMenuOpen) {
+      <div class="p1-header__dropdown" role="menu">
+        <div class="p1-header__dropdown-section">
+          <span class="p1-header__dropdown-label">Switch account</span>
+          @for (a of facade.accounts(); track a.id) {
+          <button type="button" class="p1-header__dropdown-item" role="menuitem" [class.active]="a.id === account.id"
+            (click)="selectAccount(a.id)">
+            <span class="fa fa-check p1-header__check"></span>
+            <span>
+              {{ a.name }}
+              <small>{{ a.descriptor }}</small>
+            </span>
+          </button>
+          }
+        </div>
+        <div class="p1-header__dropdown-divider"></div>
+        <div class="p1-header__dropdown-section">
+          <button type="button" class="p1-header__dropdown-item" role="menuitem" disabled>
+            <span class="fa fa-plus"></span> Add new account
+          </button>
+          <button type="button" class="p1-header__dropdown-item" role="menuitem" disabled>
+            <span class="fa fa-upload"></span> Import backup
+          </button>
+          <button type="button" class="p1-header__dropdown-item" role="menuitem" disabled>
+            <span class="fa fa-gears"></span> Manage accounts
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+
+    @if(!account.isSingleFacilityCompany){
+    <!-- Context + facility switcher -->
+    <div class="p1-header__context" role="group" aria-label="Switch workspace context"
+      [class.p1-header__context--account]="contextMode === 'account'"
+      [class.p1-header__context--facility]="contextMode === 'facility'">
+      <button type="button" [class.active]="contextMode === 'account'" (click)="switchToAccountContext()">
+        <span class="fa fa-building"></span>
+        Account
+      </button>
+
+      @if (facilities.length === 0) {
+      <button type="button" disabled>
+        <span class="fa fa-industry"></span>
+        No facilities
+      </button>
+      } @else if (facilities.length === 1) {
+      <!-- Single facility: direct toggle, no dropdown -->
+      <button type="button" [class.active]="contextMode === 'facility'" (click)="switchToSingleFacility()">
+        <span class="fa fa-industry"></span>
+        {{ facilities[0].name }}
+      </button>
+      } @else {
+      <!-- Multiple facilities: dropdown picker -->
+      <div class="p1-header__zone">
+        <button type="button" [class.active]="contextMode === 'facility'" [class.open]="facilityMenuOpen"
+          (click)="toggleFacilityMenu()" aria-haspopup="true" [attr.aria-expanded]="facilityMenuOpen">
+          <span class="fa fa-industry"></span>
+          {{ contextMode === 'facility' && facility ? facility.name : 'Facility' }}
+          <span class="fa fa-chevron-down p1-header__chevron"></span>
+        </button>
+
+        @if (facilityMenuOpen) {
+        <div class="p1-header__dropdown p1-header__dropdown--facility" role="menu">
+          @if (showFacilitySearch) {
+          <div class="p1-header__facility-search">
+            <span class="fa fa-search p1-header__facility-search-icon" aria-hidden="true"></span>
+            <input class="p1-header__facility-search-input" type="search" placeholder="Search facilities…"
+              aria-label="Search facilities" autocomplete="off" [(ngModel)]="facilitySearch" />
+          </div>
+          }
+          <div class="p1-header__dropdown-section p1-header__dropdown-section--scroll">
+            <span class="p1-header__dropdown-label">Switch facility</span>
+            @for (f of filteredFacilities; track f.id) {
+            <button type="button" class="p1-header__dropdown-item" role="menuitem"
+              [class.active]="f.id === facility?.id" (click)="selectFacility(f.id)">
+              <span class="fa fa-check p1-header__check"></span>
+              <span>
+                {{ f.name }}
+                <small>{{ f.location }}</small>
+              </span>
+            </button>
+            }
+            @if (filteredFacilities.length === 0) {
+            <span class="p1-header__facility-empty">No facilities match</span>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+
+  </div>
+  }
+
+  <!-- App settings -->
+  <div class="p1-header__zone p1-header__zone--app">
+    <button type="button" class="p1-header__app-btn" (click)="toggleAppMenu()" [class.open]="appMenuOpen"
+      aria-label="Application settings" aria-haspopup="true" [attr.aria-expanded]="appMenuOpen">
+      <span class="fa fa-gear"></span>
+    </button>
+
+    @if (appMenuOpen) {
+    <div class="p1-header__app-menu" role="menu">
+      <div class="p1-header__dropdown-section">
+        <span class="p1-header__dropdown-label">Appearance</span>
+        <div class="p1-header__palette-row" role="group" aria-label="Color palette">
+          @for (option of paletteOptions; track option.id) {
+          <button type="button" class="p1-header__swatch" [ngClass]="option.swatchClass"
+            [class.active]="facade.palette() === option.id" (click)="facade.setPalette(option.id)"
+            [title]="option.label" [attr.aria-label]="option.label + ' palette'"
+            [attr.aria-pressed]="facade.palette() === option.id">
+            <span class="p1-header__swatch-sample" aria-hidden="true"></span>
+            <span>{{ option.label }}</span>
+          </button>
+          }
+        </div>
+
+        <span class="p1-header__dropdown-label">Layout</span>
+        <div class="p1-header__segment" role="group" aria-label="Workspace density">
+          @for (option of densityOptions; track option.id) {
+          <button type="button" [class.active]="facade.density() === option.id" (click)="facade.setDensity(option.id)"
+            [attr.aria-pressed]="facade.density() === option.id">
+            <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
+            <span>{{ option.label }}</span>
+          </button>
+          }
+        </div>
+        <div class="p1-header__segment" role="group" aria-label="Corner style">
+          @for (option of cornerOptions; track option.id) {
+          <button type="button" [class.active]="facade.cornerStyle() === option.id"
+            (click)="facade.setCornerStyle(option.id)" [attr.aria-pressed]="facade.cornerStyle() === option.id">
+            <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
+            <span>{{ option.label }}</span>
+          </button>
+          }
+        </div>
+
+        <span class="p1-header__dropdown-label">Effects</span>
+        <label class="p1-header__setting-row">
+          <span>Dark mode</span>
+          <button type="button" class="p1-header__toggle" [class.on]="facade.darkMode()"
+            (click)="facade.toggleDarkMode()" [attr.aria-pressed]="facade.darkMode()"
+            [attr.aria-label]="facade.darkMode() ? 'Disable dark mode' : 'Enable dark mode'">
+            <span class="p1-header__toggle-thumb"></span>
+          </button>
+        </label>
+        <label class="p1-header__setting-row">
+          <span>Glow accents</span>
+          <button type="button" class="p1-header__toggle" [class.on]="facade.glowAccents()"
+            (click)="facade.toggleGlowAccents()" [attr.aria-pressed]="facade.glowAccents()"
+            [attr.aria-label]="facade.glowAccents() ? 'Disable glow accents' : 'Enable glow accents'">
+            <span class="p1-header__toggle-thumb"></span>
+          </button>
+        </label>
+        <label class="p1-header__setting-row">
+          <span>Background pattern</span>
+          <select class="p1-header__setting-select" [value]="facade.backgroundPattern()"
+            (change)="facade.setBackgroundPattern($any($event.target).value)" aria-label="Background pattern">
+            @for (option of patternOptions; track option.id) {
+            <option [value]="option.id">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="p1-header__setting-row">
+          <span>High contrast</span>
+          <button type="button" class="p1-header__toggle" [class.on]="facade.highContrast()"
+            (click)="facade.toggleHighContrast()" [attr.aria-pressed]="facade.highContrast()"
+            [attr.aria-label]="facade.highContrast() ? 'Disable high contrast' : 'Enable high contrast'">
+            <span class="p1-header__toggle-thumb"></span>
+          </button>
+        </label>
+      </div>
+    </div>
+    }
+  </div>
+
+  @if (facade.isWorkspaceRoute() && facade.selectedAccount(); as account) {
+  <div>
+    <!-- Panel toggle -->
+    <button type="button" class="p1-header__panel-btn" (click)="facade.toggleRightPanel()"
+      [attr.aria-pressed]="facade.isRightPanelOpen()" aria-label="Toggle support panel">
+      <span [class]="'fa ' + (facade.isRightPanelOpen() ? 'fa-chevron-right' : 'fa-chevron-left')"></span>
+    </button>
+  </div>
+  }
+</header>

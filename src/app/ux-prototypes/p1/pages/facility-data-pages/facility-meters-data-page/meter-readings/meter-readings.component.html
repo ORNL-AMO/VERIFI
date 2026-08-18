@@ -1,0 +1,120 @@
+<section class="p1-readings">
+  <header class="p1-readings__toolbar">
+    <div>
+      <h3>Meter Readings</h3>
+      <p>{{ meterData.length }} bills · {{ totalEnergy() | number:'1.0-1' }} {{ meter.energyUnit }} · {{ totalCost() | currency:'USD':'symbol':'1.0-0' }}</p>
+    </div>
+    <div class="p1-readings__actions">
+      @if (checked().size > 0) {
+        <button type="button" class="p1-local-btn p1-local-btn--danger" (click)="emitBulkDelete()" [disabled]="!canWrite">
+          <span class="fa fa-trash"></span>
+          Delete {{ checked().size }}
+        </button>
+      }
+      <button type="button" class="p1-local-btn p1-local-btn--primary" (click)="addBill.emit()" [disabled]="!canWrite">
+        <span class="fa fa-plus"></span>
+        Add Bill
+      </button>
+    </div>
+  </header>
+
+  @if (meterStatus) {
+    <div class="p1-readings__alerts">
+      @if (!meterStatus.isMeterValid) {
+        <p class="p1-alert p1-alert--danger"><span class="fa fa-circle-xmark"></span> Meter setup has errors. Resolve setup before relying on reading calculations.</p>
+      }
+      @if (meterStatus.hasNoData) {
+        <p class="p1-alert p1-alert--danger"><span class="fa fa-circle-xmark"></span> No readings have been entered for this meter.</p>
+      }
+      @if (meterStatus.hasDuplicateEntries) {
+        <p class="p1-alert p1-alert--danger"><span class="fa fa-triangle-exclamation"></span> Duplicate readings exist for the same date.</p>
+      }
+      @if (meterStatus.hasNegativeReadings) {
+        <p class="p1-alert p1-alert--danger"><span class="fa fa-triangle-exclamation"></span> Negative readings are present. Enable negative readings in setup if this is expected.</p>
+      }
+      @if (meterStatus.missingDataMonths.length > 0) {
+        <div class="p1-alert p1-alert--danger">
+          <span class="fa fa-triangle-exclamation"></span>
+          <span>{{ meterStatus.missingDataMonths.length }} missing month{{ meterStatus.missingDataMonths.length === 1 ? '' : 's' }} between first and last reading.</span>
+          <button type="button" (click)="fillMissing.emit()" [disabled]="!canWrite">Fill with zeros</button>
+        </div>
+      }
+      @if (!meterStatus.hasNoData && !meterStatus.isDataCurrent && meterStatus.lastDateEntry) {
+        <p class="p1-alert p1-alert--warn"><span class="fa fa-clock"></span> Latest reading is {{ meterStatus.lastDateEntry | date:'MMM yyyy' }}.</p>
+      }
+    </div>
+  }
+
+  <div class="p1-readings__filters">
+    <label>
+      <span class="fa fa-search"></span>
+      <input type="search" placeholder="Filter by date" [value]="search()" (input)="setSearch($any($event.target).value)">
+    </label>
+    <label class="p1-readings__check">
+      <input type="checkbox" [checked]="showEstimatedOnly()" (change)="setEstimatedOnly($any($event.target).checked)">
+      Estimated only
+    </label>
+  </div>
+
+  <div class="p1-readings__table-wrap">
+    <table class="p1-readings__table">
+      <thead>
+        <tr>
+          <th aria-label="Select reading"></th>
+          <th>Date</th>
+          <th class="num">Energy</th>
+          @if (meter.source !== 'Electricity') {
+            <th class="num">Volume</th>
+          }
+          @if (meter.source === 'Electricity') {
+            <th class="num">Demand</th>
+          }
+          <th class="num">Cost</th>
+          <th>Flags</th>
+          <th aria-label="Actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (data of filteredData(); track data.guid) {
+          <tr>
+            <td>
+              <input type="checkbox" [checked]="checked().has(data.guid)"
+                (change)="toggleChecked(data.guid, $any($event.target).checked)">
+            </td>
+            <td>{{ data.month }}/{{ data.day }}/{{ data.year }}</td>
+            <td class="num">{{ data.totalEnergyUse | number:'1.0-2' }}</td>
+            @if (meter.source !== 'Electricity') {
+              <td class="num">{{ data.totalVolume | number:'1.0-2' }}</td>
+            }
+            @if (meter.source === 'Electricity') {
+              <td class="num">{{ data.totalBilledDemand || data.totalRealDemand | number:'1.0-2' }}</td>
+            }
+            <td class="num">{{ data.totalCost | currency:'USD':'symbol':'1.0-0' }}</td>
+            <td>
+              @if (data.isEstimated) {
+                <span class="p1-readings__flag">Estimated</span>
+              }
+              @if (data.isBillConnected) {
+                <span class="p1-readings__flag">Connected</span>
+              }
+            </td>
+            <td>
+              <div class="p1-readings__row-actions">
+                <button type="button" title="Edit bill" aria-label="Edit bill" (click)="editBill.emit(data)">
+                  <span class="fa fa-pencil"></span>
+                </button>
+                <button type="button" title="Delete bill" aria-label="Delete bill" (click)="deleteBill.emit(data)" [disabled]="!canWrite">
+                  <span class="fa fa-trash"></span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="p1-readings__empty">No readings found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

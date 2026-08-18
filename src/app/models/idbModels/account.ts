@@ -20,7 +20,8 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     sidebarCustomDataOpen?: boolean,
     toDoListOutdatedDays?: number
     migratedDates?: boolean,
-    displayEmissions: boolean
+    displayEmissions: boolean,
+    isSingleFacilityCompany?: boolean
 }
 
 export function getNewIdbAccount(): IdbAccount {
@@ -76,6 +77,7 @@ export function getNewIdbAccount(): IdbAccount {
         color: undefined,
         assessmentReportVersion: 'AR6',
         displayEmissions: false,
+        isSingleFacilityCompany: false,
         dataStalenessSettings: {
             enabled: true,
             thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS

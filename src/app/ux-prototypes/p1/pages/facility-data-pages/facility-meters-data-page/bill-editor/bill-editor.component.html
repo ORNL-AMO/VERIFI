@@ -1,0 +1,113 @@
+<div class="p1-bill__backdrop" (click)="closeEditor.emit()"></div>
+<aside class="p1-bill" role="dialog" aria-modal="true" aria-labelledby="p1-bill-title">
+  <header>
+    <div>
+      <span>{{ mode === 'add' ? 'New bill' : 'Edit bill' }}</span>
+      <h2 id="p1-bill-title">{{ meter.name }}</h2>
+    </div>
+    <button type="button" aria-label="Close bill editor" (click)="closeEditor.emit()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </header>
+
+  @if (form) {
+    <form [formGroup]="form" (ngSubmit)="submit(false)">
+      <section class="p1-bill__section">
+        <h3>Bill Period</h3>
+        <label>
+          <span>Read Date <b>*</b></span>
+          <input type="date" formControlName="readDate">
+        </label>
+        <label class="p1-bill__check">
+          <input type="checkbox" formControlName="isEstimated">
+          Estimated reading
+        </label>
+      </section>
+
+      <section class="p1-bill__section">
+        <h3>Usage And Cost</h3>
+        @if (meter.source === 'Electricity') {
+          <label>
+            <span>Energy Use ({{ meter.energyUnit }}) <b>*</b></span>
+            <input type="number" formControlName="totalEnergyUse">
+          </label>
+          <label>
+            <span>Real Demand ({{ meter.demandUnit || 'kW' }})</span>
+            <input type="number" formControlName="totalRealDemand">
+          </label>
+          <label>
+            <span>Billed Demand ({{ meter.demandUnit || 'kW' }})</span>
+            <input type="number" formControlName="totalBilledDemand">
+          </label>
+          <label>
+            <span>Power Factor</span>
+            <input type="number" min="0" max="1" step="0.01" formControlName="powerFactor">
+          </label>
+        } @else {
+          @if (displayVolume) {
+            <label>
+              <span>Consumption ({{ meter.startingUnit }})</span>
+              <input type="number" formControlName="totalVolume">
+            </label>
+          }
+          @if (displayEnergy) {
+            <label>
+              <span>Energy Use ({{ meter.energyUnit }})</span>
+              <input type="number" formControlName="totalEnergyUse">
+            </label>
+          }
+          @if (displayHeatCapacity) {
+            <label>
+              <span>Heat Capacity</span>
+              <input type="number" formControlName="heatCapacity">
+            </label>
+          }
+          @if (displayVehicleFuelEfficiency) {
+            <label>
+              <span>Fuel Efficiency</span>
+              <input type="number" formControlName="vehicleFuelEfficiency">
+            </label>
+          }
+        }
+        <label>
+          <span>Total Cost</span>
+          <input type="number" formControlName="totalCost">
+        </label>
+      </section>
+
+      @if (chargesArray.length > 0) {
+        <section class="p1-bill__section">
+          <h3>Meter Charges</h3>
+          @for (charge of chargesArray.controls; track charge.get('chargeGuid')?.value) {
+            <div class="p1-bill__charge" [formGroup]="$any(charge)">
+              <label>
+                <span>Usage</span>
+                <input type="number" formControlName="chargeUsage">
+              </label>
+              <label>
+                <span>Cost</span>
+                <input type="number" formControlName="chargeAmount">
+              </label>
+            </div>
+          }
+        </section>
+      }
+
+      @if (form.invalid && form.touched) {
+        <p class="p1-bill__error">Review required fields and date limits before saving.</p>
+      }
+
+      <footer>
+        <button type="button" class="p1-local-btn" (click)="closeEditor.emit()">Cancel</button>
+        @if (mode === 'add') {
+          <button type="button" class="p1-local-btn" (click)="submit(true)" [disabled]="form.invalid || !canWrite">
+            Save + Add Another
+          </button>
+        }
+        <button type="submit" class="p1-local-btn p1-local-btn--primary" [disabled]="form.invalid || !canWrite">
+          {{ mode === 'add' ? 'Save Bill' : 'Save Changes' }}
+        </button>
+      </footer>
+    </form>
+  }
+</aside>

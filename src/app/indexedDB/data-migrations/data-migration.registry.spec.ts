@@ -5,11 +5,11 @@ import { getNewApplicationInstanceData } from '../../models/idbModels/applicatio
 describe('data migration registry', () => {
   it('contains one contiguous migration ending at the current version', () => {
     expect(DATA_MIGRATIONS.map(migration => [migration.fromVersion, migration.toVersion]))
-      .toEqual([[0, 1]]);
+      .toEqual([[0, 1], [1, 2]]);
   });
 
   it('starts new application metadata at the current data version', () => {
-    expect(getNewApplicationInstanceData().dataVersion).toBe(1);
+    expect(getNewApplicationInstanceData().dataVersion).toBe(2);
   });
 
   it('rejects gaps, duplicates, and multi-version steps', () => {

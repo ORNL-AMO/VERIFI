@@ -25,7 +25,7 @@ describe('JsonBackupSerializer', () => {
 
 function createBackup(): BackupFile {
   return {
-    dataVersion: 1,
+    dataVersion: 2,
     account: { guid: 'account-a', name: 'Account A' } as any,
     facilities: [],
     facility: undefined,

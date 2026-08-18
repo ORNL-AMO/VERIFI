@@ -1,0 +1,88 @@
+@let content = facade.content();
+@let account = facade.selectedAccount();
+@let activeNavItem = facade.activeNavItem();
+
+<section class="p1-main p1-main--account" [attr.aria-labelledby]="'p1-account-title-' + facade.activeSection()">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 [id]="'p1-account-title-' + facade.activeSection()">{{ content.title }}</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ account?.facilityCountLabel }}</span>
+      <button type="button" disabled>
+        {{ content.primaryAction }}
+      </button>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>{{ content.summary }}</p>
+  </div>
+
+  <div class="p1-main__placeholder" role="status">
+    <span class="fa fa-layer-group"></span>
+    <div>
+      <strong>{{ facade.activeSection() }} / {{ facade.activeDetailId() }}</strong>
+      <p>Account content placeholder. This page is routed and ready for the future account workspace experience.</p>
+    </div>
+  </div>
+
+  <div class="p1-main__metrics" aria-label="Account workspace metrics">
+    @for (metric of content.metrics; track metric.label) {
+      <article [class]="'p1-main__metric p1-main__metric--' + metric.tone">
+        <span>{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.trend }}</small>
+      </article>
+    }
+  </div>
+
+  <div class="p1-main__body">
+    <section class="p1-main__cards" aria-label="Account workspace cards">
+      @for (card of content.cards; track card.title) {
+        <article [class]="'p1-main__card p1-main__card--' + card.tone">
+          <span>{{ card.meta }}</span>
+          <h2>{{ card.title }}</h2>
+          <p>{{ card.summary }}</p>
+        </article>
+      }
+    </section>
+
+    <aside class="p1-main__activity" aria-label="Workspace notes">
+      <div class="p1-main__activity-header">
+        <h2>Workspace notes</h2>
+        <span>{{ account?.lastModified }}</span>
+      </div>
+      <ol>
+        @for (activity of content.activity; track activity) {
+          <li>{{ activity }}</li>
+        }
+      </ol>
+    </aside>
+  </div>
+
+  @if (facade.activeSection() === 'data') {
+    <section class="p1-main__table" aria-label="Facility data snapshot">
+      <div class="p1-main__table-heading">
+        <h2>Facility data snapshot</h2>
+        <span>Current workspace</span>
+      </div>
+      <div class="p1-main__rows">
+        @for (item of facade.accountFacilities(); track item.id) {
+          <div class="p1-main__row">
+            <strong>{{ item.name }}</strong>
+            <span>{{ item.meters }} meters</span>
+            <span>{{ item.predictors }} predictors</span>
+            <span>{{ item.footprint }}</span>
+            <em>{{ item.status }}</em>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</section>

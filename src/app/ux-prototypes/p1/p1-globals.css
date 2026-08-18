@@ -1,0 +1,1012 @@
+/*
+ * p1-globals.css
+ *
+ * Shared design elements for the p1 prototype. These classes encode
+ * repeating UI patterns — buttons, inputs, drawers, etc. — so component
+ * stylesheets only need to carry structural / layout rules unique to
+ * that component.
+ *
+ * All colours route through CSS custom properties defined in
+ * prototype-reset.css. Dark mode works automatically via the .p1-dark
+ * class on the root element — no dark-specific rules needed here.
+ *
+ * Colour semantics:
+ *   --prototype-orange  primary brand / CTA (VERIFI identity)
+ *   --prototype-green   account context
+ *   --prototype-blue    facility context
+ */
+
+/* ────────────────────────────────────────────────────────────────
+   Chip / badge  (pill-shaped inline label)
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: .18rem .45rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 999px;
+  background: var(--prototype-surface);
+  color: var(--prototype-muted);
+  font-size: .68rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.p1-chip--success {
+  border-color: color-mix(in srgb, var(--prototype-green) 55%, var(--prototype-border));
+  color: var(--prototype-green);
+}
+
+.p1-chip--warning {
+  border-color: color-mix(in srgb, var(--prototype-orange) 65%, var(--prototype-border));
+  color: var(--prototype-warning);
+}
+
+.p1-chip--danger {
+  border-color: color-mix(in srgb, var(--prototype-danger) 60%, var(--prototype-border));
+  color: var(--prototype-danger);
+}
+
+.p1-chip--info {
+  border-color: color-mix(in srgb, var(--prototype-blue) 45%, var(--prototype-border));
+  background: color-mix(in srgb, var(--prototype-blue) 8%, var(--prototype-surface));
+  color: var(--prototype-blue);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Eyebrow label
+   Uppercase micro-label used above page/drawer titles.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-eyebrow {
+  display: block;
+  margin: 0;
+  color: var(--prototype-orange);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Section label (muted uppercase meta text)
+   Used for column headers, group labels, filter labels.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-label {
+  display: block;
+  color: var(--prototype-muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.p1-label--upper {
+  text-transform: uppercase;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Icon / close button  (2.35 × 2.35 rem square)
+   Used for drawer close buttons, toolbar icon buttons.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-icon-btn {
+  display: inline-grid;
+  flex-shrink: 0;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
+  cursor: pointer;
+}
+
+.p1-icon-btn:hover {
+  border-color: var(--prototype-blue);
+  color: var(--prototype-blue);
+  background: var(--prototype-surface);
+}
+
+.p1-icon-btn--danger {
+  color: var(--prototype-danger);
+}
+
+.p1-icon-btn--danger:hover {
+  border-color: var(--prototype-danger);
+  color: var(--prototype-danger);
+}
+
+.p1-icon-btn:focus-visible {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
+.p1-icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Button family
+   Base class + semantic/size modifiers.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-btn {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: .48rem .8rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* Primary brand CTA — orange */
+.p1-btn--primary {
+  border-color: var(--prototype-orange);
+  background: var(--prototype-orange);
+  color: #fff;
+}
+
+/* Account-context action — green */
+.p1-btn--success {
+  border-color: var(--prototype-green);
+  background: var(--prototype-green);
+  color: #fff;
+}
+
+/* Facility-context action / link action — blue */
+.p1-btn--blue {
+  border-color: var(--prototype-blue);
+  background: var(--prototype-blue);
+  color: #fff;
+}
+
+/* Destructive — danger red */
+.p1-btn--danger {
+  border-color: var(--prototype-danger);
+  background: var(--prototype-danger);
+  color: #fff;
+}
+
+/* Ghost — bordered, no fill, muted colour */
+.p1-btn--ghost,
+.p1-btn--quiet {
+  border-color: var(--prototype-border);
+  background: var(--prototype-surface);
+  color: var(--prototype-muted);
+}
+
+/* Ghost blue — bordered, blue text */
+.p1-btn--ghost-blue {
+  border-color: var(--prototype-border);
+  background: var(--prototype-surface);
+  color: var(--prototype-blue);
+}
+
+/* Ghost green — bordered, green text */
+.p1-btn--ghost-green {
+  border-color: var(--prototype-border);
+  background: var(--prototype-surface);
+  color: var(--prototype-green);
+}
+
+/* Larger CTA variant (hero buttons) */
+.p1-btn--lg {
+  min-height: 2.75rem;
+  padding: .65rem .95rem;
+}
+
+/* Smaller compact variant */
+.p1-btn--sm {
+  min-height: 2rem;
+  padding: .3rem .55rem;
+  font-size: .82rem;
+}
+
+.p1-btn:focus-visible {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
+.p1-btn:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Form field
+   Label + input/select stacked vertically.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-field {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+}
+
+/* Input, select, textarea */
+.p1-input,
+.p1-select,
+.p1-textarea {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: .45rem .6rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
+  font: inherit;
+}
+
+.p1-textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.p1-input:focus,
+.p1-select:focus,
+.p1-textarea:focus {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+  border-color: var(--prototype-blue);
+  background: var(--prototype-surface);
+}
+
+.p1-input:disabled,
+.p1-select:disabled,
+.p1-textarea:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+/* Validation error hint */
+.p1-field__error {
+  color: var(--prototype-danger);
+  font-size: .78rem;
+  font-style: normal;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Search input  (icon + input combo)
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-search {
+  position: relative;
+}
+
+.p1-search__icon {
+  position: absolute;
+  left: .7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--prototype-muted);
+  font-size: .8rem;
+  pointer-events: none;
+}
+
+.p1-search .p1-input {
+  padding-left: 2rem;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Inline error / alert banner
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-alert {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  padding: .75rem .9rem;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.p1-alert--danger {
+  border: 1px solid color-mix(in srgb, var(--prototype-danger) 35%, transparent);
+  background: color-mix(in srgb, var(--prototype-danger) 8%, transparent);
+  color: var(--prototype-danger);
+}
+
+.p1-alert--warning {
+  border: 1px solid color-mix(in srgb, var(--prototype-warning) 35%, transparent);
+  background: color-mix(in srgb, var(--prototype-warning) 8%, transparent);
+  color: var(--prototype-warning);
+}
+
+.p1-alert--info {
+  border: 1px solid color-mix(in srgb, var(--prototype-blue) 25%, transparent);
+  background: color-mix(in srgb, var(--prototype-blue) 6%, transparent);
+  color: var(--prototype-muted);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Status dot  (small coloured badge in nav items)
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-status-dot {
+  width: .55rem;
+  height: .55rem;
+  border-radius: 999px;
+  background: var(--prototype-muted);
+  flex-shrink: 0;
+}
+
+.p1-status-dot--success { background: var(--prototype-green); }
+.p1-status-dot--warning { background: var(--prototype-orange); }
+.p1-status-dot--danger  { background: var(--prototype-danger); }
+.p1-status-dot--info    { background: var(--prototype-blue); }
+
+/* ────────────────────────────────────────────────────────────────
+   Card  (bordered, rounded container)
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-card {
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  box-shadow: 0 1px 4px rgba(23, 35, 31, .05);
+}
+
+.p1-card--panel {
+  background: var(--prototype-panel);
+}
+
+.p1-db-item-card {
+  border: 1px solid var(--prototype-border);
+  border-left: 4px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-db-item-card);
+  box-shadow: 0 1px 4px var(--prototype-shadow);
+}
+
+.p1-db-item-card:hover,
+.p1-db-item-card:focus-within {
+  background: var(--prototype-db-item-card-hover);
+}
+
+.p1-db-item-card--success {
+  border-left-color: var(--prototype-green);
+}
+
+.p1-db-item-card--warning {
+  border-left-color: var(--prototype-orange);
+}
+
+.p1-db-item-card--danger,
+.p1-db-item-card--error {
+  border-left-color: var(--prototype-danger);
+}
+
+.p1-db-item-card--neutral {
+  border-left-color: var(--prototype-muted);
+}
+
+/* Left-accent coloured stripe */
+.p1-card--accent-left        { border-left: 4px solid var(--prototype-border); }
+.p1-card--accent-left-brand  { border-left-color: var(--prototype-orange); }
+.p1-card--accent-left-green  { border-left-color: var(--prototype-green); }
+.p1-card--accent-left-blue   { border-left-color: var(--prototype-blue); }
+.p1-card--accent-left-danger { border-left-color: var(--prototype-danger); }
+
+/* Top-accent stripe (metric cards) — body tint uses accent/orange only, not context colors */
+.p1-card--accent-top-green  {
+  border-top: 3px solid var(--prototype-green);
+  background: color-mix(in srgb, var(--prototype-accent) 5%, var(--prototype-surface));
+}
+.p1-card--accent-top-brand  {
+  border-top: 3px solid var(--prototype-orange);
+  background: color-mix(in srgb, var(--prototype-orange) 4%, var(--prototype-surface));
+}
+.p1-card--accent-top-blue   {
+  border-top: 3px solid var(--prototype-blue);
+  background: color-mix(in srgb, var(--prototype-accent) 5%, var(--prototype-surface));
+}
+.p1-card--accent-top-danger {
+  border-top: 3px solid var(--prototype-danger);
+  background: color-mix(in srgb, var(--prototype-danger) 4%, var(--prototype-surface));
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Segmented control  (inline toggle button group)
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-segmented {
+  display: inline-flex;
+  gap: .2rem;
+  padding: .2rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+}
+
+.p1-segmented__btn {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: .3rem .55rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--prototype-muted);
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.p1-segmented__btn.active,
+.p1-segmented__btn[aria-pressed="true"] {
+  background: var(--prototype-surface);
+  color: var(--prototype-blue);
+}
+
+.p1-segmented__btn:focus-visible {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Drawer shell  (slide-in panel from the right)
+   Usage:
+     <div class="p1-drawer-layer">
+       <button class="p1-drawer-backdrop"></button>
+       <div class="p1-drawer p1-drawer--wide">
+         <div class="p1-drawer__header"> ... </div>
+         <div class="p1-drawer__body">   ... </div>
+         <div class="p1-drawer__footer"> ... </div>
+       </div>
+     </div>
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: block;
+  overflow: hidden;
+}
+
+.p1-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--prototype-backdrop);
+  cursor: default;
+}
+
+.p1-drawer {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0;
+  width: min(42rem, 100vw);
+  border-left: 1px solid var(--prototype-border);
+  background: var(--prototype-surface);
+  box-shadow: -1rem 0 3rem rgba(0, 0, 0, .16);
+  overflow: auto;
+}
+
+.p1-drawer--wide    { width: min(44rem, 100vw); }
+.p1-drawer--narrow  { width: min(36rem, 100vw); }
+.p1-drawer--full    { width: 100vw; }
+
+/* When the drawer uses grid-template-rows: auto for each section */
+.p1-drawer--auto-rows {
+  grid-template-rows: auto;
+}
+
+.p1-drawer__header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  padding-bottom: 0;
+}
+
+.p1-drawer__header h2 {
+  margin: .25rem 0 0;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+}
+
+.p1-drawer__body {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  overflow-y: auto;
+}
+
+.p1-drawer__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  justify-content: flex-end;
+  padding: clamp(.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
+  border-top: 1px solid var(--prototype-border);
+}
+
+@media (max-width: 560px) {
+  .p1-drawer,
+  .p1-drawer--wide,
+  .p1-drawer--narrow {
+    width: 100vw;
+  }
+
+  .p1-drawer__footer {
+    display: grid;
+  }
+
+  .p1-drawer__footer > * {
+    width: 100%;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Dropdown shell  (small floating menu)
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-dropdown {
+  position: absolute;
+  top: calc(100% + .4rem);
+  right: 0;
+  z-index: 200;
+  min-width: 14rem;
+  padding: .4rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 10px;
+  background: var(--prototype-surface);
+  box-shadow: 0 .75rem 2rem rgba(23, 35, 31, .12);
+}
+
+.p1-dropdown__section {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+}
+
+.p1-dropdown__label {
+  display: block;
+  padding: .3rem .55rem .2rem;
+  color: var(--prototype-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.p1-dropdown__divider {
+  height: 1px;
+  margin: .35rem .1rem;
+  background: var(--prototype-border);
+}
+
+.p1-dropdown__item {
+  display: flex;
+  gap: .55rem;
+  align-items: flex-start;
+  width: 100%;
+  padding: .45rem .55rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--prototype-text);
+  font-size: .85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.p1-dropdown__item small {
+  display: block;
+  color: var(--prototype-muted);
+  font-size: .75rem;
+}
+
+.p1-dropdown__item:hover {
+  background: var(--prototype-surface-muted);
+}
+
+.p1-dropdown__item.active {
+  color: var(--prototype-blue);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 currentColor;
+}
+
+.p1-dropdown__item:focus-visible {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Appearance modifiers
+   Applied from the p1 root so prototype-only settings can reshape the
+   shell without changing production styles or persisted preferences.
+   ──────────────────────────────────────────────────────────────── */
+
+.verifi-prototype .p1-prototype.p1-background-pattern-neon-grid {
+  background:
+    linear-gradient(color-mix(in srgb, var(--prototype-accent) 14%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-accent) 10%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--prototype-blue) 20%, transparent), transparent 24rem),
+    var(--prototype-bg);
+  background-size: 2.25rem 2.25rem, 2.25rem 2.25rem, auto, auto;
+}
+
+.verifi-prototype .p1-background-pattern-neon-grid .p1-shell {
+  background:
+    linear-gradient(color-mix(in srgb, var(--prototype-accent) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-accent) 13%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 18% 10%, color-mix(in srgb, var(--prototype-blue) 20%, transparent), transparent 26rem),
+    var(--prototype-bg);
+  background-size: 2.25rem 2.25rem, 2.25rem 2.25rem, auto, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-blueprint-grid {
+  background:
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-blue) 10%, transparent) 1px, transparent 1px),
+    var(--prototype-bg);
+  background-size: 1.5rem 1.5rem, 1.5rem 1.5rem, auto;
+}
+
+.verifi-prototype .p1-background-pattern-blueprint-grid .p1-shell {
+  background:
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-blue) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-blue) 5%, transparent) 1px, transparent 1px),
+    var(--prototype-bg);
+  background-size: 6rem 6rem, 6rem 6rem, 1.5rem 1.5rem, 1.5rem 1.5rem, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-steel-hatch {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 13%, transparent) 1px, transparent 1.7px),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--prototype-blue) 5%, transparent) 0 1px, transparent 1px 1.35rem),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--prototype-border) 22%, transparent) 0 1px, transparent 1px 2.8rem),
+    var(--prototype-bg);
+  background-size: 5.6rem 5.6rem, auto, auto, auto;
+}
+
+.verifi-prototype .p1-background-pattern-steel-hatch .p1-shell {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 18%, transparent) 1px, transparent 1.7px),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--prototype-blue) 7%, transparent) 0 1px, transparent 1px 1.15rem),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--prototype-border) 28%, transparent) 0 1px, transparent 1px 2.4rem),
+    linear-gradient(120deg, color-mix(in srgb, var(--prototype-surface) 34%, transparent), transparent 42%),
+    var(--prototype-bg);
+  background-size: 4.8rem 4.8rem, auto, auto, auto, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-aurora-flow {
+  background:
+    repeating-radial-gradient(ellipse at 50% -12%, transparent 0 3.3rem, color-mix(in srgb, var(--prototype-blue) 5%, transparent) 3.3rem 3.42rem, transparent 3.42rem 6.5rem),
+    linear-gradient(108deg, transparent 0 10%, color-mix(in srgb, var(--prototype-green) 11%, transparent) 19%, transparent 34%),
+    linear-gradient(75deg, transparent 0 52%, color-mix(in srgb, var(--prototype-blue) 10%, transparent) 61%, transparent 76%),
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--prototype-green) 18%, transparent), transparent 25rem),
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--prototype-blue) 16%, transparent), transparent 28rem),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-aurora-flow .p1-shell {
+  background:
+    repeating-radial-gradient(ellipse at 50% -18%, transparent 0 2.7rem, color-mix(in srgb, var(--prototype-blue) 7%, transparent) 2.7rem 2.82rem, transparent 2.82rem 5.7rem),
+    linear-gradient(105deg, transparent 0 12%, color-mix(in srgb, var(--prototype-green) 14%, transparent) 20%, transparent 34%),
+    linear-gradient(72deg, transparent 0 48%, color-mix(in srgb, var(--prototype-blue) 12%, transparent) 58%, transparent 73%),
+    linear-gradient(145deg, color-mix(in srgb, var(--prototype-green) 8%, transparent), transparent 46%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-isometric-mesh {
+  background:
+    linear-gradient(30deg, color-mix(in srgb, var(--prototype-blue) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(150deg, color-mix(in srgb, var(--prototype-green) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-border) 18%, transparent) 1px, transparent 1px),
+    var(--prototype-bg);
+  background-size: 3.8rem 6.6rem, 3.8rem 6.6rem, 3.8rem 6.6rem, auto;
+}
+
+.verifi-prototype .p1-background-pattern-isometric-mesh .p1-shell {
+  background:
+    linear-gradient(30deg, color-mix(in srgb, var(--prototype-blue) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(150deg, color-mix(in srgb, var(--prototype-green) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-border) 24%, transparent) 1px, transparent 1px),
+    linear-gradient(115deg, color-mix(in srgb, var(--prototype-surface) 28%, transparent), transparent 44%),
+    var(--prototype-bg);
+  background-size: 3.8rem 6.6rem, 3.8rem 6.6rem, 3.8rem 6.6rem, auto, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-circuit-traces {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 16%, transparent) 1px, transparent 1.8px),
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-green) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 46%, color-mix(in srgb, var(--prototype-orange) 5%, transparent) 46% 47%, transparent 47%),
+    var(--prototype-bg);
+  background-size: 4.25rem 4.25rem, 4.25rem 4.25rem, 4.25rem 4.25rem, 8.5rem 8.5rem, auto;
+}
+
+.verifi-prototype .p1-background-pattern-circuit-traces .p1-shell {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--prototype-accent) 20%, transparent) 1px, transparent 1.8px),
+    linear-gradient(color-mix(in srgb, var(--prototype-blue) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--prototype-green) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 46%, color-mix(in srgb, var(--prototype-orange) 7%, transparent) 46% 47%, transparent 47%),
+    var(--prototype-bg);
+  background-size: 4.25rem 4.25rem, 4.25rem 4.25rem, 4.25rem 4.25rem, 8.5rem 8.5rem, auto;
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-topographic-contours {
+  background:
+    repeating-radial-gradient(ellipse at 18% 12%, transparent 0 2.35rem, color-mix(in srgb, var(--prototype-green) 7%, transparent) 2.35rem 2.48rem, transparent 2.48rem 4.9rem),
+    repeating-radial-gradient(ellipse at 84% 72%, transparent 0 2.8rem, color-mix(in srgb, var(--prototype-blue) 6%, transparent) 2.8rem 2.94rem, transparent 2.94rem 5.7rem),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-topographic-contours .p1-shell {
+  background:
+    repeating-radial-gradient(ellipse at 18% 12%, transparent 0 2.15rem, color-mix(in srgb, var(--prototype-green) 9%, transparent) 2.15rem 2.3rem, transparent 2.3rem 4.55rem),
+    repeating-radial-gradient(ellipse at 84% 72%, transparent 0 2.55rem, color-mix(in srgb, var(--prototype-blue) 8%, transparent) 2.55rem 2.7rem, transparent 2.7rem 5.2rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--prototype-surface) 22%, transparent), transparent 48%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-prism-facets {
+  background:
+    linear-gradient(132deg, color-mix(in srgb, var(--prototype-blue) 9%, transparent) 0 16%, transparent 16% 100%),
+    linear-gradient(38deg, transparent 0 54%, color-mix(in srgb, var(--prototype-green) 8%, transparent) 54% 68%, transparent 68% 100%),
+    linear-gradient(156deg, transparent 0 22%, color-mix(in srgb, var(--prototype-orange) 6%, transparent) 22% 32%, transparent 32% 100%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-prism-facets .p1-shell {
+  background:
+    linear-gradient(132deg, color-mix(in srgb, var(--prototype-blue) 11%, transparent) 0 16%, transparent 16% 100%),
+    linear-gradient(38deg, transparent 0 54%, color-mix(in srgb, var(--prototype-green) 10%, transparent) 54% 68%, transparent 68% 100%),
+    linear-gradient(156deg, transparent 0 22%, color-mix(in srgb, var(--prototype-orange) 8%, transparent) 22% 32%, transparent 32% 100%),
+    linear-gradient(110deg, color-mix(in srgb, var(--prototype-surface) 28%, transparent), transparent 46%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-prototype.p1-background-pattern-signal-rings {
+  background:
+    repeating-radial-gradient(circle at 18% 30%, transparent 0 2.9rem, color-mix(in srgb, var(--prototype-accent) 7%, transparent) 2.9rem 3.05rem, transparent 3.05rem 6.1rem),
+    repeating-radial-gradient(circle at 92% 10%, transparent 0 3.5rem, color-mix(in srgb, var(--prototype-orange) 5%, transparent) 3.5rem 3.64rem, transparent 3.64rem 7.25rem),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-background-pattern-signal-rings .p1-shell {
+  background:
+    repeating-radial-gradient(circle at 18% 30%, transparent 0 2.55rem, color-mix(in srgb, var(--prototype-accent) 9%, transparent) 2.55rem 2.7rem, transparent 2.7rem 5.4rem),
+    repeating-radial-gradient(circle at 92% 10%, transparent 0 3.1rem, color-mix(in srgb, var(--prototype-orange) 7%, transparent) 3.1rem 3.25rem, transparent 3.25rem 6.45rem),
+    linear-gradient(125deg, color-mix(in srgb, var(--prototype-blue) 6%, transparent), transparent 50%),
+    var(--prototype-bg);
+}
+
+.verifi-prototype .p1-density-compact .p1-header {
+  min-height: 4.1rem;
+  padding: .45rem clamp(.75rem, 1.5vw, 1.25rem);
+}
+
+.verifi-prototype .p1-density-compact .p1-shell {
+  grid-template-columns: 3.65rem minmax(12rem, 15.5rem) minmax(0, 1fr) minmax(15rem, 19rem);
+  height: calc(100vh - 4.1rem);
+  min-height: 35rem;
+}
+
+.verifi-prototype .p1-density-compact .p1-shell--panel-closed {
+  grid-template-columns: 3.65rem minmax(12rem, 15.5rem) minmax(0, 1fr);
+}
+
+.verifi-prototype .p1-density-compact :is(.p1-rail, .p1-nav, .p1-panel__content) {
+  gap: .65rem;
+  padding: .6rem;
+}
+
+.verifi-prototype .p1-density-compact :is(.p1-panel__header, .p1-panel__tabs) {
+  padding: .55rem;
+}
+
+.verifi-prototype .p1-density-compact :is(.p1-rail button, .p1-panel__tabs button) {
+  min-height: 2.75rem;
+}
+
+.verifi-prototype .p1-density-compact :is(
+  .p1-btn,
+  .p1-icon-btn,
+  .p1-input,
+  .p1-select,
+  .p1-dropdown__item,
+  .p1-header__dropdown-item,
+  .p1-nav__group button,
+  .p1-nav__picker-btn,
+  .p1-nav__picker-item,
+  .p1-header__account-btn,
+  .p1-header__context button,
+  .p1-header__panel-btn,
+  .p1-header__app-btn,
+  .p1-header__segment button
+) {
+  min-height: 2rem;
+  padding-block: .28rem;
+}
+
+.verifi-prototype .p1-density-compact :is(.p1-chip, .p1-label, .p1-dropdown__label, .p1-header__dropdown-label) {
+  font-size: .66rem;
+}
+
+.verifi-prototype .p1-corners-square :is(
+  button,
+  select,
+  textarea,
+  input:not([type="radio"]),
+  .btn,
+  .btn-group,
+  .dropdown-menu,
+  .dropdown-item,
+  .form-control,
+  .form-select,
+  .input-group,
+  .input-group-text,
+  .card,
+  .modal-content,
+  .popover,
+  .tooltip-inner,
+  .toast,
+  .alert,
+  .badge,
+  .nav-link,
+  .list-group,
+  .list-group-item,
+  .accordion,
+  .accordion-item,
+  .accordion-button,
+  .accordion-body,
+  .rounded,
+  .rounded-0,
+  .rounded-1,
+  .rounded-2,
+  .rounded-3,
+  .rounded-4,
+  .rounded-5,
+  .rounded-pill,
+  [class*="p1-"],
+  .p1-header,
+  .p1-header__account-btn,
+  .p1-header__context,
+  .p1-header__context button,
+  .p1-header__panel-btn,
+  .p1-header__app-btn,
+  .p1-header__dropdown,
+  .p1-header__app-menu,
+  .p1-header__dropdown-item,
+  .p1-header__swatch,
+  .p1-header__swatch-sample,
+  .p1-header__segment button,
+  .p1-btn,
+  .p1-icon-btn,
+  .p1-chip,
+  .p1-input,
+  .p1-select,
+  .p1-textarea,
+  .p1-segmented,
+  .p1-segmented__btn,
+  .p1-dropdown,
+  .p1-dropdown__item,
+  .p1-drawer,
+  .p1-rail button,
+  .p1-nav__context,
+  .p1-nav__context button,
+  .p1-nav__picker-btn,
+  .p1-nav__picker-dropdown,
+  .p1-nav__picker-item,
+  .p1-nav__group button,
+  .p1-panel__header button,
+  .p1-panel__tabs button,
+  .p1-panel__item,
+  .p1-panel__result
+) {
+  border-radius: 2px !important;
+}
+
+.verifi-prototype .p1-corners-square {
+  --prototype-active-row-radius: 2px;
+  --prototype-active-marker-radius: 0;
+  --bs-border-radius: 2px;
+  --bs-border-radius-sm: 2px;
+  --bs-border-radius-lg: 2px;
+  --bs-border-radius-xl: 2px;
+  --bs-border-radius-xxl: 2px;
+  --bs-border-radius-2xl: 2px;
+  --bs-border-radius-pill: 2px;
+}
+
+.verifi-prototype .p1-effects-glow :is(
+  .p1-header,
+  .p1-header__dropdown,
+  .p1-header__app-menu,
+  .p1-dropdown,
+  .p1-panel,
+  .p1-drawer,
+  .p1-nav__picker-dropdown
+) {
+  box-shadow: 0 .9rem 2.4rem var(--prototype-shadow), 0 0 1.25rem var(--prototype-glow);
+}
+
+.verifi-prototype .p1-effects-glow :is(
+  .p1-btn--primary,
+  .p1-btn--success,
+  .p1-btn--blue,
+  .p1-icon-btn:hover,
+  .p1-header__app-btn.open,
+  .p1-header__swatch.active,
+  .p1-rail button.active,
+  .p1-nav__group button.active,
+  .p1-panel__tabs button.active
+) {
+  box-shadow: 0 0 0 1px currentColor, 0 0 1rem var(--prototype-glow);
+}
+
+.verifi-prototype .p1-effects-glow .p1-header__verifi::first-letter,
+.verifi-prototype .p1-effects-glow .p1-eyebrow {
+  text-shadow: 0 0 .65rem var(--prototype-glow);
+}
+
+.verifi-prototype .p1-contrast-strong :is(
+  .p1-btn,
+  .p1-icon-btn,
+  .p1-chip,
+  .p1-input,
+  .p1-select,
+  .p1-textarea,
+  .p1-header__account-btn,
+  .p1-header__context,
+  .p1-header__panel-btn,
+  .p1-header__app-btn,
+  .p1-header__dropdown,
+  .p1-header__app-menu,
+  .p1-nav,
+  .p1-rail,
+  .p1-panel,
+  .p1-panel__item,
+  .p1-panel__result,
+  .p1-dropdown
+) {
+  border-width: 2px;
+}
+
+@media (max-width: 1160px) {
+  .verifi-prototype .p1-density-compact .p1-shell,
+  .verifi-prototype .p1-density-compact .p1-shell--panel-closed {
+    grid-template-columns: 3.65rem minmax(11rem, 14rem) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .verifi-prototype .p1-density-compact .p1-shell {
+    height: auto;
+    min-height: 0;
+  }
+}

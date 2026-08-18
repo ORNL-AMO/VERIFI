@@ -1,0 +1,54 @@
+<section class="p1-analysis-tab-content" aria-label="Regression model">
+  @if (group.isGeneratedModel) {
+  <div class="p1-analysis__model-list">
+    <h3>Generated Models</h3>
+    @if (!group.models?.length) {
+    <div class="p1-analysis__notice">
+      <span class="fa fa-arrow-up-right-dots"></span>
+      No generated regression models are stored for this group yet.
+    </div>
+    }
+    @for (model of group.models || []; track model.modelId) {
+    <label class="p1-analysis__model-row">
+      <input type="radio" name="selectedModel" [ngModel]="group.selectedModelId" [value]="model.modelId"
+        (ngModelChange)="selectModel($event)" [disabled]="!canWrite">
+      <span>
+        <strong>Model {{ model.modelYear }}</strong>
+        <small>Adjusted R2 {{ model.adjust_R2 | number:'0.1-3' }} · {{ model.predictorVariables.length }} variables</small>
+      </span>
+      @if (model.isValid) {
+      <span class="p1-chip p1-chip--success">Valid</span>
+      } @else {
+      <span class="p1-chip p1-chip--warning">Review</span>
+      }
+    </label>
+    }
+  </div>
+  } @else {
+  <div class="p1-analysis__form-grid">
+    <label>
+      <span>Model Year</span>
+      <input class="form-control" type="number" [ngModel]="group.regressionModelYear"
+        (ngModelChange)="updateUserDefined('regressionModelYear', $event)" [disabled]="!canWrite">
+    </label>
+    <label>
+      <span>Regression Constant</span>
+      <input class="form-control" type="number" [ngModel]="group.regressionConstant"
+        (ngModelChange)="updateUserDefined('regressionConstant', $event)" [disabled]="!canWrite">
+    </label>
+  </div>
+  }
+
+  @let model = selectedModel(group);
+  @if (model) {
+  <div class="p1-analysis__model-summary">
+    <h3>Selected Model Summary</h3>
+    <dl>
+      <div><dt>Model year</dt><dd>{{ model.modelYear }}</dd></div>
+      <div><dt>Adjusted R2</dt><dd>{{ model.adjust_R2 | number:'0.1-3' }}</dd></div>
+      <div><dt>P-value</dt><dd>{{ model.modelPValue | number:'0.1-4' }}</dd></div>
+      <div><dt>Variables</dt><dd>{{ model.predictorVariables.length }}</dd></div>
+    </dl>
+  </div>
+  }
+</section>

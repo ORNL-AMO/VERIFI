@@ -1,6 +1,10 @@
 .verifi-prototype,
 .verifi-prototype * {
   box-sizing: border-box;
+  /* Override the global * { color: #333; font-size: 12px } in typography.css
+     so every element inherits these from its nearest token-setting ancestor. */
+  color: inherit;
+  font-size: inherit;
 }
 
 .verifi-prototype {
@@ -16,7 +20,19 @@
   --prototype-warning: #9a6212;
   --prototype-danger: #a53f36;
   --prototype-focus: #246bfe;
+  --prototype-orange: #ff6000;   /* primary brand */
+  --prototype-green: #145a32;    /* account context */
+  --prototype-blue: #2c386b;     /* facility context */
+  --prototype-backdrop: rgba(13, 20, 18, .36);
+  --prototype-glow: transparent;
+  --prototype-shadow: rgba(23, 35, 31, .12);
+  --prototype-active-row-radius: 6px;
+  --prototype-active-marker-radius: 999px;
+  --prototype-db-item-card: #f2f6f2;
+  --prototype-db-item-card-hover: #e8f0ea;
 
+  /* Establish the base text colour for the whole prototype tree */
+  color: var(--prototype-text);
   min-height: 100%;
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -38,4 +54,265 @@
 .verifi-prototype :focus-visible {
   outline: 3px solid var(--prototype-focus);
   outline-offset: 2px;
+}
+
+/* ── Palette: Ocean (blue-tinted surfaces) ───────────────────── */
+
+.p1-palette-ocean {
+  --prototype-bg:           #f2f5fc;
+  --prototype-surface:      #f7f9ff;
+  --prototype-surface-muted:#dde7f7;
+  --prototype-panel:        #e8eefa;
+  --prototype-border:       #bfcde8;
+  --prototype-db-item-card: #edf4ff;
+  --prototype-db-item-card-hover: #e2ecfb;
+}
+
+/* ── Palette: Forest (green-tinted surfaces) ─────────────────── */
+
+.p1-palette-forest {
+  --prototype-bg:           #f0f6f2;
+  --prototype-surface:      #f6fbf7;
+  --prototype-surface-muted:#d9ecdf;
+  --prototype-panel:        #e6f2e9;
+  --prototype-border:       #b7d4be;
+  --prototype-db-item-card: #eef7ed;
+  --prototype-db-item-card-hover: #e2f0e0;
+}
+
+/* ── Palette: Sunset (warm amber/orange-tinted surfaces) ─────── */
+
+.p1-palette-sunset {
+  --prototype-bg:           #fdf4eb;
+  --prototype-surface:      #fffaf4;
+  --prototype-surface-muted:#f5e4ce;
+  --prototype-panel:        #faeddd;
+  --prototype-border:       #e8c99a;
+  --prototype-db-item-card: #fff2e1;
+  --prototype-db-item-card-hover: #f8e4cb;
+}
+
+/* ── Palette: Neon Grid (electric shop-floor console) ────────── */
+
+.p1-palette-neon {
+  --prototype-bg:           #081121;
+  --prototype-surface:      #101a2d;
+  --prototype-surface-muted:#172642;
+  --prototype-panel:        #0c1728;
+  --prototype-text:         #e8faff;
+  --prototype-muted:        #91b8c8;
+  --prototype-border:       #2a4964;
+  --prototype-accent:       #00cfe8;
+  --prototype-accent-strong:#3cffdd;
+  --prototype-warning:      #ffd166;
+  --prototype-danger:       #ff6b89;
+  --prototype-focus:        #ff40d4;
+  --prototype-orange:       #ff6a3d;
+  --prototype-green:        #42f58d;
+  --prototype-blue:         #8c8cff;
+  --prototype-backdrop:     rgba(3, 7, 18, .62);
+  --prototype-glow:         rgba(0, 207, 232, .34);
+  --prototype-shadow:       rgba(0, 0, 0, .35);
+  --prototype-db-item-card: #121c34;
+  --prototype-db-item-card-hover: #192642;
+}
+
+/* ── Palette: Blueprint (drafting-room blues) ────────────────── */
+
+.p1-palette-blueprint {
+  --prototype-bg:           #eaf3fb;
+  --prototype-surface:      #f7fbff;
+  --prototype-surface-muted:#d7eaff;
+  --prototype-panel:        #e1effc;
+  --prototype-text:         #102b45;
+  --prototype-muted:        #4d6a83;
+  --prototype-border:       #9ec2e4;
+  --prototype-accent:       #1d73b7;
+  --prototype-accent-strong:#0d4f82;
+  --prototype-focus:        #0b83ff;
+  --prototype-blue:         #174a7c;
+  --prototype-db-item-card: #edf7ff;
+  --prototype-db-item-card-hover: #ddecfb;
+}
+
+/* ── Palette: Steel Lab (cool industrial neutrals) ───────────── */
+
+.p1-palette-steel {
+  --prototype-bg:           #eef1f2;
+  --prototype-surface:      #fbfcfc;
+  --prototype-surface-muted:#dfe5e8;
+  --prototype-panel:        #e8edf0;
+  --prototype-text:         #182329;
+  --prototype-muted:        #59676f;
+  --prototype-border:       #b9c5cb;
+  --prototype-accent:       #3c7280;
+  --prototype-accent-strong:#235360;
+  --prototype-focus:        #1677a8;
+  --prototype-blue:         #344f68;
+  --prototype-db-item-card: #f1f4f5;
+  --prototype-db-item-card-hover: #e5ecef;
+}
+
+/* ── Palette: Aurora (cool green with violet highlights) ─────── */
+
+.p1-palette-aurora {
+  --prototype-bg:           #f1f7f5;
+  --prototype-surface:      #fbfffd;
+  --prototype-surface-muted:#dff1ed;
+  --prototype-panel:        #e9f5f1;
+  --prototype-text:         #14251f;
+  --prototype-muted:        #5c7069;
+  --prototype-border:       #b8d8cf;
+  --prototype-accent:       #16896f;
+  --prototype-accent-strong:#0d6754;
+  --prototype-focus:        #8757d7;
+  --prototype-orange:       #f25c35;
+  --prototype-green:        #138852;
+  --prototype-blue:         #6957bd;
+  --prototype-db-item-card: #f2f7fb;
+  --prototype-db-item-card-hover: #e7eef8;
+}
+
+/* ── Dark mode overrides ──────────────────────────────────────── */
+
+.p1-dark {
+  --prototype-bg: #0f1512;
+  --prototype-surface: #1a2420;
+  --prototype-surface-muted: #1f2c27;
+  --prototype-panel: #162019;
+  --prototype-text: #dde8e2;
+  --prototype-muted: #7d9488;
+  --prototype-border: #2d3f38;
+  --prototype-accent: #3db896;
+  --prototype-accent-strong: #5ecfad;
+  --prototype-warning: #d4a24a;
+  --prototype-danger: #e06b62;
+  --prototype-focus: #5a9aff;
+  /* brand / context colours — must stay semantically dominant on dark surfaces */
+  --prototype-orange: #ff7a28;   /* primary brand: vivid, punchy, unmistakably VERIFI */
+  --prototype-green: #4db87e;    /* account context: warm green, readable on dark bg */
+  --prototype-blue: #8fa3e8;     /* facility context: already correct */
+  --prototype-backdrop: rgba(0, 0, 0, .52);
+  --prototype-glow: rgba(94, 207, 173, .22);
+  --prototype-shadow: rgba(0, 0, 0, .32);
+  --prototype-db-item-card: #1d2a22;
+  --prototype-db-item-card-hover: #25352b;
+}
+
+.verifi-prototype button .fa {
+  color: inherit;
+}
+
+/* ── Dark + palette combos ─────────────────────────────────────
+   Shift the dark neutrals toward each palette's hue. Only the
+   surface tokens need overriding; text/brand colours from .p1-dark
+   remain untouched.
+   ──────────────────────────────────────────────────────────────── */
+
+.p1-dark.p1-palette-ocean {
+  --prototype-bg:           #0d1320;
+  --prototype-surface:      #141c2e;
+  --prototype-surface-muted:#1c2840;
+  --prototype-panel:        #111828;
+  --prototype-border:       #263550;
+  --prototype-db-item-card: #17223a;
+  --prototype-db-item-card-hover: #1f2d49;
+}
+
+.p1-dark.p1-palette-forest {
+  --prototype-bg:           #0c1610;
+  --prototype-surface:      #131e16;
+  --prototype-surface-muted:#1a2a1d;
+  --prototype-panel:        #101a13;
+  --prototype-border:       #243428;
+  --prototype-db-item-card: #172517;
+  --prototype-db-item-card-hover: #20311f;
+}
+
+.p1-dark.p1-palette-sunset {
+  --prototype-bg:           #1a1008;
+  --prototype-surface:      #261a10;
+  --prototype-surface-muted:#332214;
+  --prototype-panel:        #20140a;
+  --prototype-border:       #4a2e14;
+  --prototype-db-item-card: #2d1d10;
+  --prototype-db-item-card-hover: #3a2616;
+}
+
+.p1-dark.p1-palette-neon {
+  --prototype-bg:           #040814;
+  --prototype-surface:      #0b1324;
+  --prototype-surface-muted:#111f38;
+  --prototype-panel:        #070f1d;
+  --prototype-border:       #275f77;
+  --prototype-accent:       #00e7ff;
+  --prototype-accent-strong:#48ffd6;
+  --prototype-orange:       #ff7a45;
+  --prototype-green:        #5dff9f;
+  --prototype-blue:         #9ca1ff;
+  --prototype-glow:         rgba(0, 231, 255, .42);
+  --prototype-db-item-card: #121d32;
+  --prototype-db-item-card-hover: #192949;
+}
+
+.p1-dark.p1-palette-blueprint {
+  --prototype-bg:           #071626;
+  --prototype-surface:      #0e243b;
+  --prototype-surface-muted:#143356;
+  --prototype-panel:        #0a1d31;
+  --prototype-border:       #29577d;
+  --prototype-accent:       #56b9ff;
+  --prototype-accent-strong:#8fd1ff;
+  --prototype-blue:         #8fc8ff;
+  --prototype-db-item-card: #102b45;
+  --prototype-db-item-card-hover: #173957;
+}
+
+.p1-dark.p1-palette-steel {
+  --prototype-bg:           #10171b;
+  --prototype-surface:      #182227;
+  --prototype-surface-muted:#223035;
+  --prototype-panel:        #141d22;
+  --prototype-border:       #35454d;
+  --prototype-accent:       #75bac9;
+  --prototype-accent-strong:#9ed7e2;
+  --prototype-blue:         #a3bed3;
+  --prototype-db-item-card: #1b282d;
+  --prototype-db-item-card-hover: #25343a;
+}
+
+.p1-dark.p1-palette-aurora {
+  --prototype-bg:           #08130f;
+  --prototype-surface:      #10201a;
+  --prototype-surface-muted:#17332a;
+  --prototype-panel:        #0c1a15;
+  --prototype-border:       #28544a;
+  --prototype-accent:       #40d5a1;
+  --prototype-accent-strong:#88f2cb;
+  --prototype-green:        #69dfa1;
+  --prototype-blue:         #bd9cff;
+  --prototype-glow:         rgba(136, 242, 203, .26);
+  --prototype-db-item-card: #172d26;
+  --prototype-db-item-card-hover: #203a32;
+}
+
+/* ── High contrast can layer over any palette/mode ────────────── */
+
+.p1-contrast-strong {
+  --prototype-surface-muted: color-mix(in srgb, var(--prototype-surface) 76%, var(--prototype-text));
+  --prototype-panel: color-mix(in srgb, var(--prototype-surface) 88%, var(--prototype-text));
+  --prototype-muted: color-mix(in srgb, var(--prototype-text) 82%, var(--prototype-surface));
+  --prototype-border: color-mix(in srgb, var(--prototype-text) 52%, var(--prototype-surface));
+  --prototype-focus: #005fcc;
+  --prototype-db-item-card: color-mix(in srgb, #d8f0a6 70%, var(--prototype-surface));
+  --prototype-db-item-card-hover: color-mix(in srgb, #c6e384 78%, var(--prototype-surface));
+}
+
+.p1-dark.p1-contrast-strong,
+.p1-palette-neon.p1-contrast-strong {
+  --prototype-muted: color-mix(in srgb, var(--prototype-text) 78%, var(--prototype-bg));
+  --prototype-border: color-mix(in srgb, var(--prototype-text) 45%, var(--prototype-bg));
+  --prototype-focus: #f7ff6b;
+  --prototype-db-item-card: color-mix(in srgb, #314015 76%, var(--prototype-surface));
+  --prototype-db-item-card-hover: color-mix(in srgb, #40561a 78%, var(--prototype-surface));
 }

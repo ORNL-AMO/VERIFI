@@ -1,0 +1,59 @@
+<section class="p1-analysis-tab-content" aria-label="Group setup">
+  <div class="p1-analysis__form-grid">
+    <fieldset>
+      <legend>Analysis Type</legend>
+      @for (type of analysisTypes; track type) {
+      <label class="p1-analysis__choice">
+        <input type="radio" name="analysisType" [ngModel]="group.analysisType" [value]="type"
+          (ngModelChange)="updateType($event)" [disabled]="!canWrite">
+        {{ typeLabel(type) }}
+      </label>
+      }
+      @if (analysis.analysisCategory === 'water') {
+      <label class="p1-analysis__choice">
+        <input type="radio" name="analysisType" [ngModel]="group.analysisType" [value]="'skipAnalysis'"
+          (ngModelChange)="updateType($event)" [disabled]="!canWrite">
+        {{ typeLabel('skipAnalysis') }}
+      </label>
+      }
+    </fieldset>
+    <article class="p1-analysis__setup-card">
+      <span>Data Adjustments</span>
+      <strong>{{ group.dataAdjustments.length }}</strong>
+      <small>Annual adjustments currently configured</small>
+    </article>
+    <article class="p1-analysis__setup-card">
+      <span>Baseline Adjustments</span>
+      <strong>{{ group.baselineAdjustmentsV2.length }}</strong>
+      <small>Other baseline adjustments currently configured</small>
+    </article>
+  </div>
+
+  @if (group.analysisType !== 'absoluteEnergyConsumption' && group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis') {
+  <div class="p1-analysis__predictors">
+    <h3>Production Variables</h3>
+    @for (predictor of group.predictorVariables; track predictor.id) {
+    @if (predictor.production) {
+    <label class="p1-analysis__predictor-row">
+      <span>
+        <strong>{{ predictor.name }}</strong>
+        @if (predictor.unit) {
+        <small>{{ predictor.unit }}</small>
+        }
+      </span>
+      <input type="checkbox" [ngModel]="predictor.productionInAnalysis"
+        (ngModelChange)="updatePredictor(predictor, $event)" [disabled]="!canWrite">
+    </label>
+    }
+    }
+  </div>
+  }
+
+  @if (analysis.hasBanking && group.analysisType !== 'skip' && group.analysisType !== 'skipAnalysis') {
+  <label class="p1-analysis__switch">
+    <input type="checkbox" [ngModel]="group.applyBanking" (ngModelChange)="updateBanking($event)"
+      [disabled]="!canWrite">
+    <span>Apply banking to this group</span>
+  </label>
+  }
+</section>

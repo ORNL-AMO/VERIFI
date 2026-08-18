@@ -1,0 +1,32 @@
+@let _account = page.account();
+
+@if (page.financialForm && _account) {
+  <form class="p1-settings p1-settings--facility p1-settings__panel" [formGroup]="page.financialForm" aria-label="Facility financial reporting">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Reporting</span>
+        <h2>Financial reporting</h2>
+      </div>
+      @if (page.financialDontMatchAccount) {
+        <button type="button" [disabled]="!page.canWrite()" (click)="page.useAccountFinancial()">Use account reporting</button>
+      }
+    </div>
+    @if (page.financialDontMatchAccount) {
+      <div class="p1-settings__notice">
+        <span class="fa fa-circle-info"></span>
+        Facility fiscal-year settings differ from {{ _account.name }}.
+      </div>
+    }
+    <fieldset>
+      <legend>Fiscal year</legend>
+      <label class="p1-settings__choice"><input type="radio" formControlName="fiscalYear" value="calendarYear" (change)="page.saveFinancial()"><span>Calendar Year</span></label>
+      <label class="p1-settings__choice"><input type="radio" formControlName="fiscalYear" value="nonCalendarYear" (change)="page.saveFinancial()"><span>Non Calendar Year</span></label>
+    </fieldset>
+    @if (page.financialForm.controls['fiscalYear'].value === 'nonCalendarYear') {
+      <div class="p1-settings__grid p1-settings__grid--2">
+        <label><span>Start month</span><select formControlName="fiscalYearMonth" (change)="page.saveFinancial()">@for (month of page.months; track month.monthNumValue) { <option [ngValue]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+        <label class="p1-settings__choice p1-settings__choice--block"><input type="checkbox" formControlName="fiscalYearCalendarEnd" (change)="page.saveFinancial()"><span>Fiscal year is denoted by the calendar year in which it ends</span></label>
+      </div>
+    }
+  </form>
+}

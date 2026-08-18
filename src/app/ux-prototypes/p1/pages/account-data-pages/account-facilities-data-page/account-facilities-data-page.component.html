@@ -1,0 +1,184 @@
+@let _account = account();
+@let _totals = totals();
+@let _summaries = filteredSummaries();
+@let _facilityToDelete = facilityToDelete();
+
+<section class="p1-account-facilities" aria-label="Account facilities">
+  <header class="p1-account-facilities__header">
+    <div class="p1-account-facilities__title">
+      <span>Account data</span>
+      <h1>{{ _account?.name || 'Account' }} Facilities</h1>
+      <p>Review facility setup and open the workspace for any site in this account.</p>
+    </div>
+
+    <div class="p1-account-facilities__totals" aria-label="Account facility totals">
+      <article>
+        <span>Facilities</span>
+        <strong>{{ _totals.facilities }}</strong>
+      </article>
+      <article>
+        <span>Meters</span>
+        <strong>{{ _totals.meters }}</strong>
+      </article>
+      <article>
+        <span>Predictors</span>
+        <strong>{{ _totals.predictors }}</strong>
+      </article>
+      <article>
+        <span>Analyses</span>
+        <strong>{{ _totals.analyses }}</strong>
+      </article>
+      <article>
+        <span>Reports</span>
+        <strong>{{ _totals.reports }}</strong>
+      </article>
+      <article [class.p1-account-facilities__total--warn]="_totals.attention > 0">
+        <span>Setup</span>
+        <strong>{{ _totals.attention }}</strong>
+      </article>
+    </div>
+
+    <button type="button" class="p1-btn p1-btn--primary" (click)="addFacility()"
+      [disabled]="!canWrite() || hasPending()">
+      <span class="fa fa-plus" aria-hidden="true"></span>
+      Add Facility
+    </button>
+  </header>
+
+  @if (actionMessage || actionError) {
+  <div class="p1-account-facilities__notice" [class.p1-account-facilities__notice--error]="actionError" aria-live="polite">
+    {{ actionError || actionMessage }}
+  </div>
+  }
+
+  @if (_totals.facilities === 0) {
+  <div class="p1-account-facilities__state" aria-live="polite">
+    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <h2>No facilities available</h2>
+    <p>Add a facility to start entering meters, predictors, analyses, reports, and equipment data.</p>
+    <button type="button" class="p1-btn p1-btn--primary" (click)="addFacility()"
+      [disabled]="!canWrite() || hasPending()">
+      <span class="fa fa-plus" aria-hidden="true"></span>
+      Add Facility
+    </button>
+  </div>
+  } @else {
+  <div class="p1-account-facilities__toolbar" aria-label="Facility filters">
+    <label class="p1-account-facilities__search">
+      <span class="fa fa-search" aria-hidden="true"></span>
+      <input type="search" placeholder="Find facility, location, or type" [value]="search()"
+        (input)="setSearch($any($event.target).value)">
+    </label>
+
+    <label>
+      <span>Status</span>
+      <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+        <option value="all">All</option>
+        <option value="attention">Needs setup</option>
+        <option value="noMeters">No meters</option>
+        <option value="noReadings">No readings</option>
+        <option value="noAnalyses">No analyses</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Sort</span>
+      <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+        <option value="attention">Setup first</option>
+        <option value="facilityName">Facility name</option>
+        <option value="modified">Latest activity</option>
+      </select>
+    </label>
+  </div>
+
+  @if (_summaries.length === 0) {
+  <div class="p1-account-facilities__state p1-account-facilities__state--filter" aria-live="polite">
+    <span class="fa fa-filter-circle-xmark" aria-hidden="true"></span>
+    <h2>No facilities match these filters</h2>
+    <p>Adjust the search or filter controls to return to the full facility list.</p>
+  </div>
+  } @else {
+  <div class="p1-account-facilities__cards" role="list" aria-label="Facilities">
+    @for (summary of _summaries; track summary.facility.guid) {
+    <article class="p1-facility-card p1-db-item-card" [ngClass]="'p1-db-item-card--' + summary.statusTone"
+      role="listitem">
+      <div class="p1-facility-card__summary">
+        <div class="p1-facility-card__top">
+          <span class="p1-chip">{{ summary.classification }}</span>
+          <span class="p1-chip" [ngClass]="'p1-chip--' + summary.statusTone">{{ summary.statusLabel }}</span>
+        </div>
+        <button type="button" class="p1-facility-card__title" (click)="openFacility(summary.facility)">
+          {{ summary.facility.name }}
+        </button>
+        <span class="p1-facility-card__location">
+          <span class="fa fa-location-dot" aria-hidden="true"></span>
+          {{ summary.location }}
+        </span>
+      </div>
+
+      <dl class="p1-facility-card__meta">
+        @for (metric of summary.metrics; track metric.label) {
+        <div>
+          <dt>{{ metric.label }}</dt>
+          <dd>{{ metric.value }}</dd>
+        </div>
+        }
+      </dl>
+
+      <div class="p1-facility-card__links">
+        <span>
+          <span class="fa fa-file-lines" aria-hidden="true"></span>
+          {{ summary.reportCount }} reports
+        </span>
+        <span>
+          <span class="fa fa-industry" aria-hidden="true"></span>
+          {{ summary.equipmentCount }} equipment
+        </span>
+        <span>
+          <span class="fa fa-calendar-days" aria-hidden="true"></span>
+          {{ summary.latestActivityLabel }}
+        </span>
+      </div>
+
+      <div class="p1-facility-card__actions">
+        <button type="button" class="p1-icon-btn" title="Open facility" aria-label="Open facility"
+          (click)="openFacility(summary.facility)">
+          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="p1-icon-btn" title="Copy facility is not wired in this prototype"
+          aria-label="Copy facility is not wired in this prototype" disabled>
+          <span class="fa fa-copy" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="p1-icon-btn p1-icon-btn--danger" title="Delete facility"
+          aria-label="Delete facility" (click)="openDeleteFacility(summary.facility)"
+          [disabled]="!canWrite() || hasPending()">
+          <span class="fa fa-trash" aria-hidden="true"></span>
+        </button>
+      </div>
+    </article>
+    }
+  </div>
+  }
+  }
+
+  @if (_facilityToDelete) {
+  <div class="p1-confirm" role="dialog" aria-modal="true" aria-labelledby="p1-delete-facility-title">
+    <div>
+      <h2 id="p1-delete-facility-title">Delete {{ _facilityToDelete.name }}?</h2>
+      <p>Deleting this facility also deletes its meters, predictors, analyses, reports, equipment, and related data.</p>
+    </div>
+    <div class="p1-confirm__actions">
+      <button type="button" class="p1-btn p1-btn--ghost" (click)="cancelDeleteFacility()" [disabled]="hasPending()">
+        Cancel
+      </button>
+      <button type="button" class="p1-btn p1-btn--danger" (click)="confirmDeleteFacility()" [disabled]="hasPending()">
+        Delete Facility
+      </button>
+    </div>
+  </div>
+  }
+
+  @if (isCreateFacilityDrawerOpen) {
+    <app-p1-create-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-p1-create-facility-drawer>
+  }
+</section>

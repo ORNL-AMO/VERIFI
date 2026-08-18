@@ -1,0 +1,76 @@
+<div class="p1-analysis-tab-content" aria-label="Items using this analysis">
+  <div class="p1-analysis__notice">
+    <span class="fa fa-circle-info"></span>
+    These items reference the current facility analysis and may use its results in rollups or reports.
+  </div>
+
+  <div class="p1-analysis__reference-grid">
+    <section class="p1-analysis__reference-section" aria-label="Linked account analysis items">
+      <div class="p1-analysis__reference-heading">
+        <span class="fa fa-building"></span>
+        <h3>Account Analysis</h3>
+        <span class="p1-chip">{{ accountAnalyses.length }}</span>
+      </div>
+
+      @if (accountAnalyses.length === 0) {
+      <div class="p1-analysis__empty-small">
+        <span class="fa fa-building"></span>
+        <strong>No linked account analyses</strong>
+        <p>This facility analysis is not currently used by an account analysis item.</p>
+      </div>
+      } @else {
+      <div class="p1-analysis__linked-list">
+        @for (item of accountAnalyses; track item.guid) {
+        <article>
+          <span class="fa fa-building"></span>
+          <div>
+            <strong>{{ item.name }}</strong>
+            <small>{{ item.analysisCategory }} · baseline {{ item.baselineYear || 'unset' }}</small>
+          </div>
+          <a [routerLink]="['/p1', 'workspace', 'account', 'analysis', 'rollup', 'help']">Open account area</a>
+        </article>
+        }
+      </div>
+      }
+    </section>
+
+    <section class="p1-analysis__reference-section" aria-label="Linked facility reports">
+      <div class="p1-analysis__reference-heading">
+        <span class="fa fa-file-lines"></span>
+        <h3>Reports</h3>
+        <span class="p1-chip">{{ reports.length }}</span>
+      </div>
+
+      <button type="button" class="p1-btn p1-btn--quiet" disabled>
+        <span class="fa fa-file-circle-plus"></span>
+        Generate Report
+      </button>
+
+      <div class="p1-analysis__notice">
+        <span class="fa fa-circle-info"></span>
+        Report generation is placeholder-only in this prototype pass. No report records or output files are created here.
+      </div>
+
+      @if (reports.length === 0) {
+      <div class="p1-analysis__empty-small">
+        <span class="fa fa-file-lines"></span>
+        <strong>No linked facility reports</strong>
+        <p>Future report setup content will be added in the P1 reports prototype.</p>
+      </div>
+      } @else {
+      <div class="p1-analysis__linked-list">
+        @for (report of reports; track report.guid) {
+        <article>
+          <span class="fa fa-file-lines"></span>
+          <div>
+            <strong>{{ report.name }}</strong>
+            <small>{{ report.facilityReportType }} report</small>
+          </div>
+          <button type="button" disabled>Preview later</button>
+        </article>
+        }
+      </div>
+      }
+    </section>
+  </div>
+</div>

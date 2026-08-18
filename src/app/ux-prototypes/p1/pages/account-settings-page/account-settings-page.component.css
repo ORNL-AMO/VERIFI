@@ -1,0 +1,324 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.p1-settings {
+  --settings-gap: .85rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.p1-settings__save {
+  border-color: color-mix(in srgb, var(--prototype-green) 25%, transparent);
+  color: var(--prototype-green);
+}
+
+.p1-settings__save--error {
+  border-color: color-mix(in srgb, var(--prototype-danger) 35%, transparent);
+  color: var(--prototype-danger);
+}
+
+.p1-settings__state,
+.p1-settings__notice,
+.p1-settings__panel {
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+}
+
+.p1-settings__state {
+  display: grid;
+  gap: .4rem;
+  justify-items: start;
+  padding: 1.25rem;
+}
+
+.p1-settings__state > span {
+  color: var(--prototype-green);
+  font-size: 1.4rem;
+}
+
+.p1-settings__notice {
+  display: flex;
+  gap: .55rem;
+  align-items: center;
+  padding: .75rem .9rem;
+  color: var(--prototype-muted);
+  font-weight: 800;
+}
+
+.p1-settings__notice .fa {
+  color: var(--prototype-orange);
+}
+
+.p1-settings__panel {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  padding: 1rem;
+  border-left: 3px solid var(--prototype-accent);
+  overflow: hidden;
+}
+
+.p1-settings__panel--danger {
+  border-left-color: var(--prototype-danger);
+}
+
+.p1-settings__panel-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  /* Bleed to panel edges, then restore padding */
+  margin: -1rem -1rem 0;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--prototype-border);
+  border-radius: 5px 5px 0 0;
+  background: var(--prototype-surface-muted);
+}
+
+.p1-settings__panel--danger .p1-settings__panel-heading {
+  border-bottom-color: color-mix(in srgb, var(--prototype-danger) 25%, var(--prototype-border));
+  background: color-mix(in srgb, var(--prototype-danger) 6%, var(--prototype-panel));
+}
+
+.p1-settings__panel-heading span,
+.p1-settings__panel-heading small,
+.p1-settings label > span,
+.p1-settings legend {
+  color: var(--prototype-muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.p1-settings__panel-heading span {
+  color: var(--prototype-orange);
+  text-transform: uppercase;
+}
+
+.p1-settings__panel-heading h2 {
+  margin: .1rem 0 0;
+  font-size: 1.25rem;
+}
+
+.p1-settings__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--settings-gap);
+}
+
+.p1-settings__grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.p1-settings__grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.p1-settings__grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.p1-settings label {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.p1-settings input,
+.p1-settings select,
+.p1-settings textarea {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: .45rem .6rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
+}
+
+.p1-settings textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.p1-settings input:focus,
+.p1-settings select:focus,
+.p1-settings textarea:focus,
+.p1-settings button:focus,
+.p1-settings a:focus {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
+.p1-settings input:disabled,
+.p1-settings select:disabled,
+.p1-settings textarea:disabled,
+.p1-settings button:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+.p1-settings em {
+  color: var(--prototype-danger);
+  font-size: .78rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.p1-settings fieldset {
+  display: grid;
+  gap: .45rem;
+  min-width: 0;
+  margin: 0;
+  padding: .8rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+}
+
+.p1-settings legend {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 .25rem;
+}
+
+.p1-settings__choice {
+  display: flex !important;
+  grid-template-columns: none;
+  gap: .45rem !important;
+  align-items: center;
+  margin: 0;
+}
+
+.p1-settings__choice input {
+  width: 1rem;
+  min-height: 1rem;
+}
+
+.p1-settings__choice--block {
+  padding: .75rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+}
+
+.p1-settings__goal {
+  display: grid;
+  gap: .75rem;
+  padding: .85rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+}
+
+.p1-settings__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.p1-settings__cards article {
+  display: grid;
+  gap: .55rem;
+  padding: .9rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+}
+
+.p1-settings__cards h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.p1-settings__cards p,
+.p1-settings__panel > p {
+  margin: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-settings button,
+.p1-settings a {
+  justify-self: start;
+  min-height: 2.35rem;
+  padding: .48rem .75rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-surface);
+  color: var(--prototype-blue);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.p1-settings .p1-btn--danger {
+  border-color: var(--prototype-danger);
+  background: var(--prototype-danger);
+  color: #fff;
+}
+
+.p1-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: var(--prototype-backdrop);
+}
+
+.p1-confirm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 410;
+  display: grid;
+  gap: .85rem;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, .18);
+  transform: translate(-50%, -50%);
+}
+
+.p1-confirm h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0;
+}
+
+.p1-confirm p {
+  margin: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-confirm__actions {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.p1-confirm button:focus,
+.p1-confirm .p1-btn:focus {
+  outline: 3px solid var(--prototype-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+  .p1-settings__grid--4,
+  .p1-settings__grid--3,
+  .p1-settings__grid--2,
+  .p1-settings__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .p1-settings__panel-heading {
+    display: grid;
+  }
+}

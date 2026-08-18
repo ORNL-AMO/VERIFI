@@ -1,0 +1,419 @@
+:host {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.p1-account-meters {
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.p1-account-meters__header {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(26rem, auto);
+  gap: .85rem;
+  align-items: center;
+  padding: .85rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+}
+
+.p1-account-meters__title {
+  min-width: 0;
+}
+
+.p1-account-meters__title span {
+  display: block;
+  color: var(--prototype-muted);
+  font-size: .75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.p1-account-meters__title h1,
+.p1-account-meters__state h2,
+.p1-facility-meter-card h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.p1-account-meters__title h1 {
+  overflow: hidden;
+  font-size: 1.4rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p1-account-meters__title p {
+  margin: .25rem 0 0;
+  color: var(--prototype-muted);
+  font-weight: 700;
+}
+
+.p1-account-meters__totals {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(4.75rem, 1fr));
+  gap: .45rem;
+}
+
+.p1-account-meters__totals article {
+  display: grid;
+  gap: .1rem;
+  min-width: 0;
+  padding: .45rem .6rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+}
+
+.p1-account-meters__totals span {
+  color: var(--prototype-muted);
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.p1-account-meters__totals strong {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.p1-account-meters__total--warn {
+  border-color: color-mix(in srgb, var(--prototype-orange) 70%, var(--prototype-border));
+}
+
+.p1-account-meters__toolbar {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(10rem, auto) minmax(10rem, auto);
+  gap: .65rem;
+  align-items: end;
+  padding: .75rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+}
+
+.p1-account-meters__toolbar label {
+  display: grid;
+  gap: .25rem;
+  min-width: 0;
+  margin: 0;
+  color: var(--prototype-muted);
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.p1-account-meters__toolbar input,
+.p1-account-meters__toolbar select {
+  width: 100%;
+  min-height: 2.35rem;
+  min-width: 0;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.p1-account-meters__toolbar input {
+  padding: .45rem .65rem .45rem 2rem;
+}
+
+.p1-account-meters__toolbar select {
+  padding: .45rem .65rem;
+}
+
+.p1-account-meters__toolbar input:focus,
+.p1-account-meters__toolbar select:focus {
+  outline: 3px solid color-mix(in srgb, var(--prototype-blue) 22%, transparent);
+  border-color: var(--prototype-blue);
+}
+
+.p1-account-meters__search {
+  position: relative;
+}
+
+.p1-account-meters__search .fa {
+  position: absolute;
+  left: .7rem;
+  bottom: .65rem;
+  color: var(--prototype-muted);
+  font-size: .9rem;
+}
+
+.p1-account-meters__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: .85rem;
+  min-height: 0;
+  padding: .15rem .1rem .25rem;
+  overflow: auto;
+}
+
+.p1-facility-meter-card {
+  display: grid;
+  gap: .8rem;
+  align-content: start;
+  /* min-height: 15.25rem; */
+  padding: .9rem;
+  border: 1px solid var(--prototype-border);
+  border-left: 4px solid var(--prototype-blue);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+  color: var(--prototype-text);
+  text-align: left;
+  text-decoration: none;
+}
+
+.p1-facility-meter-card:hover,
+.p1-facility-meter-card:focus-visible {
+  border-color: var(--prototype-blue);
+  border-left-color: var(--prototype-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--prototype-blue) 16%, transparent);
+  color: var(--prototype-text);
+  text-decoration: none;
+}
+
+.p1-facility-meter-card--success {
+  border-left-color: var(--prototype-green);
+}
+
+.p1-facility-meter-card--warning {
+  border-left-color: var(--prototype-orange);
+}
+
+.p1-facility-meter-card--danger {
+  border-left-color: var(--prototype-danger);
+}
+
+.p1-facility-meter-card--neutral {
+  border-left-color: var(--prototype-muted);
+}
+
+.p1-facility-meter-card__top {
+  display: flex;
+  gap: .75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.p1-facility-meter-card__identity {
+  min-width: 0;
+}
+
+.p1-facility-meter-card__kicker {
+  display: block;
+  overflow: hidden;
+  color: var(--prototype-muted);
+  font-size: .72rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.p1-facility-meter-card h2 {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: .15rem;
+  font-size: 1.05rem;
+  line-height: 1.22;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.p1-facility-meter-card__status {
+  flex: 0 0 auto;
+  max-width: 9rem;
+  padding: .3rem .5rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 999px;
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
+  font-size: .7rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.p1-facility-meter-card__status--success {
+  border-color: color-mix(in srgb, var(--prototype-green) 60%, var(--prototype-border));
+  color: var(--prototype-green);
+}
+
+.p1-facility-meter-card__status--warning {
+  border-color: color-mix(in srgb, var(--prototype-orange) 60%, var(--prototype-border));
+  color: var(--prototype-warning);
+}
+
+.p1-facility-meter-card__status--danger {
+  border-color: color-mix(in srgb, var(--prototype-danger) 60%, var(--prototype-border));
+  color: var(--prototype-danger);
+}
+
+.p1-facility-meter-card__sources {
+  display: flex;
+  gap: .35rem;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 1.65rem;
+}
+
+.p1-facility-meter-card__sources span {
+  padding: .22rem .42rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 999px;
+  background: var(--prototype-panel);
+  color: var(--prototype-muted);
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.p1-facility-meter-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .35rem;
+  margin: 0;
+  padding: .65rem 0;
+  border-top: 1px solid var(--prototype-border);
+  border-bottom: 1px solid var(--prototype-border);
+}
+
+.p1-facility-meter-card__metrics div {
+  min-width: 0;
+}
+
+.p1-facility-meter-card__metrics dt {
+  overflow: hidden;
+  color: var(--prototype-muted);
+  font-size: .66rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.p1-facility-meter-card__metrics dd {
+  margin: .1rem 0 0;
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.p1-facility-meter-card__footer {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  color: var(--prototype-muted);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.p1-facility-meter-card__footer span,
+.p1-facility-meter-card__footer strong {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.p1-facility-meter-card__footer strong {
+  flex: 0 0 auto;
+  color: var(--prototype-blue);
+}
+
+.p1-account-meters__state {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: .6rem;
+  flex: 1 1 auto;
+  min-height: 18rem;
+  padding: 2rem;
+  border: 1px dashed var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+  text-align: center;
+}
+
+.p1-account-meters__state .fa {
+  color: var(--prototype-orange);
+  font-size: 2rem;
+}
+
+.p1-account-meters__state h2 {
+  font-size: 1.25rem;
+}
+
+.p1-account-meters__state p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--prototype-muted);
+  font-weight: 700;
+}
+
+.p1-account-meters__state--filter {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 1180px) {
+  .p1-account-meters__header {
+    grid-template-columns: 1fr;
+  }
+
+  .p1-account-meters__toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .p1-account-meters__search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  :host {
+    overflow: visible;
+  }
+
+  .p1-account-meters {
+    overflow: visible;
+  }
+
+  .p1-account-meters__totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .p1-account-meters__toolbar,
+  .p1-account-meters__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .p1-account-meters__search {
+    grid-column: auto;
+  }
+
+  .p1-facility-meter-card__top,
+  .p1-facility-meter-card__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .p1-facility-meter-card__status,
+  .p1-facility-meter-card__footer strong {
+    max-width: 100%;
+  }
+}

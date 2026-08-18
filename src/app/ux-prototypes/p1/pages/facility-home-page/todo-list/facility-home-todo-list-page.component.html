@@ -1,0 +1,71 @@
+@let content = facade.content();
+@let facility = facade.selectedFacility();
+@let activeNavItem = facade.activeNavItem();
+@let tasks = facade.setup().selectedFacilityTasks;
+
+<section class="p1-main p1-main--facility p1-home" aria-labelledby="p1-facility-home-todo-list-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 id="p1-facility-home-todo-list-title">{{ facility?.name || content.title }} Todo List</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ facility?.location }}</span>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>{{ content.summary }}</p>
+  </div>
+
+  <section class="p1-home__todos" aria-label="Facility todo list">
+    <div class="p1-home__todo-heading">
+      <div>
+        <span>Facility setup</span>
+        <h2>Todo List</h2>
+        <p>{{ content.summary }}</p>
+      </div>
+      <div class="p1-home__todo-progress p1-home__todo-progress--facility" aria-label="Facility setup items">
+        <strong>{{ tasks.length }}</strong>
+        <span>{{ tasks.length === 1 ? 'Item' : 'Items' }}</span>
+      </div>
+    </div>
+
+    @if (tasks.length === 0) {
+      <div class="p1-home__empty" role="status">
+        <span class="fa fa-circle-check"></span>
+        <strong>No facility setup items available</strong>
+        <p>Select a facility to see setup guidance.</p>
+      </div>
+    }
+
+    <div class="p1-home__groups">
+      <section class="p1-home__group" [attr.aria-label]="facility?.name || 'Facility tasks'">
+        <div class="p1-home__group-header">
+          <div>
+            <span>Facility</span>
+            <h3>{{ facility?.name || 'Facility setup' }}</h3>
+          </div>
+          <span class="p1-chip p1-chip--info">{{ facility?.status || 'Selected facility' }}</span>
+        </div>
+        <div class="p1-home__task-list">
+          @for (task of tasks; track task.id) {
+            <a [class]="'p1-home__task p1-home__task--' + task.tone" [routerLink]="facade.setupTaskRoute(task)"
+              [attr.aria-label]="'Open ' + task.title">
+              <span [class]="'p1-home__status p1-home__status--' + task.tone">{{ task.statusLabel }}</span>
+              <div>
+                <h4>{{ task.title }}</h4>
+                <p>{{ task.summary }}</p>
+              </div>
+              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            </a>
+          }
+        </div>
+      </section>
+    </div>
+  </section>
+</section>

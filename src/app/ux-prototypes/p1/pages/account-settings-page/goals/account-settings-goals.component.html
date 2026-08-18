@@ -1,0 +1,63 @@
+@if (page.goalsForm) {
+  <form class="p1-settings p1-settings__panel" [formGroup]="page.goalsForm" aria-label="Reduction goals">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Goals</span>
+        <h2>Organizational goals</h2>
+      </div>
+      <small>Used by analysis setup and reporting</small>
+    </div>
+
+    <label class="p1-settings__choice p1-settings__choice--block">
+      <input type="checkbox" formControlName="isBetterPlantsPartner" (change)="page.saveGoals()">
+      <span>Better Plants Program Partner</span>
+    </label>
+
+    <div class="p1-settings__goal">
+      <label class="p1-settings__choice p1-settings__choice--block">
+        <input type="checkbox" formControlName="energyReductionGoal" (change)="page.saveGoals()">
+        <span>Energy Reduction goal</span>
+      </label>
+      @if (page.goalsForm.controls['energyReductionGoal'].value) {
+        <div class="p1-settings__grid p1-settings__grid--4">
+          <label><span>Reduction goal (%)</span><input type="number" formControlName="energyReductionPercent" min="0" max="100" (input)="page.saveGoals()"></label>
+          <label><span>Baseline year</span><select formControlName="energyReductionBaselineYear" (change)="page.changeBaselineYear('energyReductionBaselineYear', 'energyReductionTargetYear')">@for (year of page.years; track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+          <label><span>Target year</span><select formControlName="energyReductionTargetYear" (change)="page.saveGoals()">@for (year of page.years; track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+          <fieldset><legend>Goal type</legend><label class="p1-settings__choice"><input type="radio" formControlName="energyIsAbsolute" [value]="true" (change)="page.saveGoals()"><span>Absolute</span></label><label class="p1-settings__choice"><input type="radio" formControlName="energyIsAbsolute" [value]="false" (change)="page.saveGoals()"><span>Intensity</span></label></fieldset>
+        </div>
+      }
+    </div>
+
+    <div class="p1-settings__goal">
+      <label class="p1-settings__choice p1-settings__choice--block">
+        <input type="checkbox" formControlName="waterReductionGoal" (change)="page.saveGoals()">
+        <span>Water Reduction goal</span>
+      </label>
+      @if (page.goalsForm.controls['waterReductionGoal'].value) {
+        <div class="p1-settings__grid p1-settings__grid--4">
+          <label><span>Reduction goal (%)</span><input type="number" formControlName="waterReductionPercent" min="0" max="100" (input)="page.saveGoals()"></label>
+          <label><span>Baseline year</span><select formControlName="waterReductionBaselineYear" (change)="page.changeBaselineYear('waterReductionBaselineYear', 'waterReductionTargetYear')">@for (year of page.years; track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+          <label><span>Target year</span><select formControlName="waterReductionTargetYear" (change)="page.saveGoals()">@for (year of page.years; track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+          <fieldset><legend>Goal type</legend><label class="p1-settings__choice"><input type="radio" formControlName="waterIsAbsolute" [value]="true" (change)="page.saveGoals()"><span>Absolute</span></label><label class="p1-settings__choice"><input type="radio" formControlName="waterIsAbsolute" [value]="false" (change)="page.saveGoals()"><span>Intensity</span></label></fieldset>
+        </div>
+      }
+    </div>
+
+    @if (page.unitsForm?.controls['displayEmissions'].value) {
+      <div class="p1-settings__goal">
+        <label class="p1-settings__choice p1-settings__choice--block">
+          <input type="checkbox" formControlName="greenhouseReductionGoal" (change)="page.saveGoals()">
+          <span>Greenhouse Emission/Carbon Reduction goal</span>
+        </label>
+        @if (page.goalsForm.controls['greenhouseReductionGoal'].value) {
+          <div class="p1-settings__grid p1-settings__grid--4">
+            <label><span>Reduction goal (%)</span><input type="number" formControlName="greenhouseReductionPercent" min="0" max="100" (input)="page.saveGoals()"></label>
+            <label><span>Baseline year</span><select formControlName="greenhouseReductionBaselineYear" (change)="page.changeBaselineYear('greenhouseReductionBaselineYear', 'greenhouseReductionTargetYear')">@for (year of page.years; track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+            <label><span>Target year</span><select formControlName="greenhouseReductionTargetYear" (change)="page.saveGoals()">@for (year of page.years; track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+            <fieldset><legend>Goal type</legend><label class="p1-settings__choice"><input type="radio" formControlName="greenhouseIsAbsolute" [value]="true" (change)="page.saveGoals()"><span>Absolute</span></label><label class="p1-settings__choice"><input type="radio" formControlName="greenhouseIsAbsolute" [value]="false" (change)="page.saveGoals()"><span>Intensity</span></label></fieldset>
+          </div>
+        }
+      </div>
+    }
+  </form>
+}

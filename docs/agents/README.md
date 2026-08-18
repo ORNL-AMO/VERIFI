@@ -11,6 +11,7 @@ This directory indexes the repository context used by coding agents and human co
 | Data workflow | Practical examples for workspace reads, selections, persistence, transactions, and committed refreshes | [`data-access-and-workspace.md`](../data-access-and-workspace.md) |
 | Task context | Minimal entrypoints, document sections, modes, skills, risks, and initial validation | [`context-index.md`](context-index.md) |
 | Prototype foundation | Shared product, workflow, visual, welcome-screen, and theming guidance for redesign prototypes | [`prototype-foundation.md`](prototype-foundation.md) |
+| P1 data workbench pattern | Facility Data navigation, home/workbench layout, scoped editors, and real-data prototype guidance | [`p1-data-workbench-pattern.md`](p1-data-workbench-pattern.md) |
 | Task modes | Implementer, Investigator, Reviewer, Test Engineer, and Designer checklists | [`personas.md`](personas.md) |
 | Skills | Repeatable task workflows loaded only when relevant | [`.agents/skills`](../../.agents/skills) |
 

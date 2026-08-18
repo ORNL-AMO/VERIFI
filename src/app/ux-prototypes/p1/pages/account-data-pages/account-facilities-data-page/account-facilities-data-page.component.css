@@ -1,0 +1,390 @@
+:host {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.p1-account-facilities {
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.p1-account-facilities__header,
+.p1-account-facilities__toolbar,
+.p1-confirm {
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+}
+
+.p1-account-facilities__header {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(30rem, auto) auto;
+  gap: .85rem;
+  align-items: center;
+  padding: .85rem;
+}
+
+.p1-account-facilities__title {
+  min-width: 0;
+}
+
+.p1-account-facilities__title span,
+.p1-account-facilities__totals span,
+.p1-account-facilities__toolbar label > span:not(.fa),
+.p1-facility-card__meta dt {
+  color: var(--prototype-muted);
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.p1-account-facilities__title h1,
+.p1-account-facilities__state h2,
+.p1-confirm h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.p1-account-facilities__title h1 {
+  overflow: hidden;
+  font-size: 1.4rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p1-account-facilities__title p {
+  margin: .25rem 0 0;
+  color: var(--prototype-muted);
+  font-weight: 700;
+}
+
+.p1-account-facilities__totals {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(4.7rem, 1fr));
+  gap: .45rem;
+}
+
+.p1-account-facilities__totals article {
+  display: grid;
+  gap: .1rem;
+  min-width: 0;
+  padding: .45rem .6rem;
+  border: 0;
+  border-top: 2px solid var(--prototype-border);
+  border-radius: 4px;
+  background: var(--prototype-panel);
+}
+
+.p1-account-facilities__totals strong {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.p1-account-facilities__total--warn {
+  border-top-color: var(--prototype-orange);
+}
+
+.p1-account-facilities__add {
+  border-color: color-mix(in srgb, var(--prototype-orange) 80%, var(--prototype-border));
+  background: var(--prototype-orange);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.p1-account-facilities__notice {
+  padding: .65rem .8rem;
+  border: 1px solid color-mix(in srgb, var(--prototype-green) 50%, var(--prototype-border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--prototype-green) 9%, var(--prototype-panel));
+  color: var(--prototype-green);
+  font-weight: 900;
+}
+
+.p1-account-facilities__notice--error {
+  border-color: color-mix(in srgb, var(--prototype-danger) 55%, var(--prototype-border));
+  background: color-mix(in srgb, var(--prototype-danger) 8%, var(--prototype-panel));
+  color: var(--prototype-danger);
+}
+
+.p1-account-facilities__toolbar {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(10rem, auto) minmax(10rem, auto);
+  gap: .65rem;
+  align-items: end;
+  padding: .75rem;
+}
+
+.p1-account-facilities__toolbar label {
+  display: grid;
+  gap: .25rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.p1-account-facilities__toolbar input,
+.p1-account-facilities__toolbar select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.35rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.p1-account-facilities__toolbar input {
+  padding: .45rem .65rem .45rem 2rem;
+}
+
+.p1-account-facilities__toolbar select {
+  padding: .45rem .65rem;
+}
+
+.p1-account-facilities__toolbar input:focus,
+.p1-account-facilities__toolbar select:focus,
+.p1-facility-card__title:focus {
+  outline: 3px solid color-mix(in srgb, var(--prototype-blue) 22%, transparent);
+  border-color: var(--prototype-blue);
+}
+
+.p1-account-facilities__search {
+  position: relative;
+}
+
+.p1-account-facilities__search .fa {
+  position: absolute;
+  left: .7rem;
+  bottom: .65rem;
+  color: var(--prototype-muted);
+  font-size: .9rem;
+  pointer-events: none;
+}
+
+.p1-account-facilities__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .65rem;
+  min-height: 0;
+  padding: .15rem .1rem .25rem;
+  overflow: auto;
+}
+
+.p1-facility-card {
+  display: grid;
+  grid-template-columns: minmax(13rem, 1.05fr) minmax(20rem, 1.35fr) minmax(14rem, .95fr) auto;
+  gap: .85rem;
+  align-items: center;
+  min-width: 0;
+  padding: .85rem;
+}
+
+.p1-facility-card__summary {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.p1-facility-card__top,
+.p1-facility-card__links,
+.p1-facility-card__actions,
+.p1-confirm,
+.p1-confirm__actions {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.p1-facility-card__top {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.p1-facility-card__title {
+  display: block;
+  overflow: hidden;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--prototype-text);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p1-facility-card__title:hover {
+  color: var(--prototype-blue);
+  text-decoration: underline;
+}
+
+.p1-facility-card__location {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+  overflow: hidden;
+  color: var(--prototype-muted);
+  font-size: .82rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p1-facility-card__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .4rem;
+  margin: 0;
+}
+
+.p1-facility-card__meta div {
+  min-width: 0;
+  padding: .45rem .55rem;
+  border: 0;
+  border-top: 2px solid var(--prototype-border);
+  border-radius: 4px;
+  background: var(--prototype-panel);
+}
+
+.p1-facility-card__meta dd {
+  margin: .1rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.p1-facility-card__links {
+  flex-wrap: wrap;
+  color: var(--prototype-muted);
+  font-size: .78rem;
+  font-weight: 850;
+}
+
+.p1-facility-card__links span {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+}
+
+.p1-facility-card__actions {
+  justify-content: flex-end;
+}
+
+.p1-account-facilities__state {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: .65rem;
+  flex: 1 1 auto;
+  min-height: 18rem;
+  padding: 2rem;
+  border: 1px dashed var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+  text-align: center;
+}
+
+.p1-account-facilities__state .fa {
+  color: var(--prototype-orange);
+  font-size: 2rem;
+}
+
+.p1-account-facilities__state h2 {
+  font-size: 1.25rem;
+}
+
+.p1-account-facilities__state p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--prototype-muted);
+  font-weight: 700;
+}
+
+.p1-confirm {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 3;
+  justify-content: space-between;
+  padding: .85rem;
+  box-shadow: 0 1rem 2rem color-mix(in srgb, #000 18%, transparent);
+}
+
+.p1-confirm p {
+  margin: .2rem 0 0;
+  color: var(--prototype-muted);
+  font-weight: 750;
+}
+
+.p1-confirm__actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1260px) {
+  .p1-account-facilities__header {
+    grid-template-columns: 1fr;
+  }
+
+  .p1-account-facilities__add {
+    justify-self: start;
+  }
+
+  .p1-facility-card {
+    grid-template-columns: minmax(14rem, 1fr) minmax(20rem, 1.2fr) auto;
+  }
+
+  .p1-facility-card__links {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 860px) {
+  :host,
+  .p1-account-facilities {
+    overflow: visible;
+  }
+
+  .p1-account-facilities__totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .p1-account-facilities__toolbar,
+  .p1-facility-card {
+    grid-template-columns: 1fr;
+  }
+
+  .p1-facility-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .p1-facility-card__actions,
+  .p1-confirm,
+  .p1-confirm__actions {
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .p1-confirm {
+    position: static;
+  }
+}

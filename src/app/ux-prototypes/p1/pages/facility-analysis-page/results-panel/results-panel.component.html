@@ -1,0 +1,32 @@
+<section class="p1-analysis-tab-content" aria-label="Analysis results">
+  <div class="p1-analysis__tab-toolbar">
+    <div class="p1-segmented" aria-label="Result display">
+      <button type="button" class="p1-segmented__btn" [class.active]="display === 'table'" (click)="display = 'table'">
+        <span class="fa fa-table"></span>
+        Table
+      </button>
+      <button type="button" class="p1-segmented__btn" [class.active]="display === 'graph'" (click)="display = 'graph'">
+        <span class="fa fa-chart-line"></span>
+        Graph
+      </button>
+    </div>
+  </div>
+  <div class="p1-analysis__result-placeholder">
+    <span class="fa fa-magnifying-glass-chart"></span>
+    <div>
+      <h3>{{ display === 'table' ? 'Results table' : 'Results graph' }}</h3>
+      <p>
+        Prototype placeholder for {{ period }} {{ level }} results using the selected analysis setup.
+        Production calculations, workers, and report outputs are unchanged.
+      </p>
+      <dl>
+        <div><dt>Analysis</dt><dd>{{ analysis.name }}</dd></div>
+        <div><dt>Baseline</dt><dd>{{ analysis.baselineYear || 'Unset' }}</dd></div>
+        <div><dt>Status</dt><dd>{{ status?.status || 'Unknown' }}</dd></div>
+        @if (group) {
+        <div><dt>Group type</dt><dd>{{ group.analysisType }}</dd></div>
+        }
+      </dl>
+    </div>
+  </div>
+</section>

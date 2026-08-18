@@ -1,0 +1,31 @@
+@let content = facade.content();
+@let facility = facade.selectedFacility();
+@let activeNavItem = facade.activeNavItem();
+
+<section class="p1-main p1-main--facility p1-home" aria-labelledby="p1-facility-home-goal-progress-title">
+  <div class="p1-main__toolbar">
+    <div>
+      <p>{{ content.eyebrow }}</p>
+      <h1 id="p1-facility-home-goal-progress-title">{{ facility?.name || content.title }} Goal Progress</h1>
+    </div>
+    <div class="p1-main__toolbar-actions">
+      <span>{{ facility?.location }}</span>
+    </div>
+  </div>
+
+  <div class="p1-main__intro">
+    <div>
+      <span>Selected view</span>
+      <strong>{{ activeNavItem.label }}</strong>
+    </div>
+    <p>Facility goal progress is routed and ready for future facility-level content.</p>
+  </div>
+
+  <div class="p1-main__placeholder" role="status">
+    <span class="fa fa-bullseye"></span>
+    <div>
+      <strong>Facility home / goal-progress</strong>
+      <p>Goal progress content will be filled out in a later prototype pass.</p>
+    </div>
+  </div>
+</section>

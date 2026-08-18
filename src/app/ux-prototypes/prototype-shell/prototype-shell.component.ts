@@ -4,7 +4,6 @@ import { Component, ViewEncapsulation } from '@angular/core';
   selector: 'app-prototype-shell',
   templateUrl: './prototype-shell.component.html',
   styleUrls: [
-    '../styles/prototype-reset.css',
     './prototype-shell.component.css'
   ],
   encapsulation: ViewEncapsulation.None,

@@ -1,0 +1,157 @@
+<button type="button" class="p1-create-facility__backdrop" aria-label="Close create facility panel"
+  [disabled]="isCreating" (click)="close()"></button>
+
+<aside class="p1-create-facility__drawer" role="dialog" aria-modal="true" aria-labelledby="p1-create-facility-title">
+  <header class="p1-create-facility__header">
+    <div>
+      <p class="p1-eyebrow">New facility</p>
+      <h2 id="p1-create-facility-title">Create Facility</h2>
+    </div>
+    <button type="button" class="p1-icon-btn" title="Close create facility panel"
+      aria-label="Close create facility panel" [disabled]="isCreating" (click)="close()">
+      <span class="fa fa-xmark"></span>
+    </button>
+  </header>
+
+  <p class="p1-create-facility__intro">
+    Start with facility information. After the facility is created, VERIFI opens the facility settings workspace so setup can continue from there.
+  </p>
+
+  @if (createError) {
+    <div class="p1-alert p1-alert--danger" role="alert">
+      <span class="fa fa-circle-exclamation"></span>
+      {{ createError }}
+    </div>
+  }
+
+  <form class="p1-create-facility__form p1-settings p1-settings__panel" [formGroup]="profileForm"
+    aria-label="Facility information" (ngSubmit)="createFacility()">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Profile</span>
+        <h2>Facility information</h2>
+      </div>
+      <small>Saved when facility is created</small>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label>
+        <span>Facility name <b>*</b></span>
+        <input type="text" formControlName="name" minlength="1" maxlength="42" required>
+        @if (facilityNameInvalid) {
+          <em>Name is required.</em>
+        }
+      </label>
+      <label>
+        <span>Facility classification</span>
+        <select formControlName="classification">
+          @for (classification of facilityClassifications; track classification) {
+            <option [ngValue]="classification">{{ classification }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--2">
+      <label>
+        <span>Country</span>
+        <select formControlName="country">
+          @for (country of countries; track country.code) {
+            <option [ngValue]="country.code">{{ country.name }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Facility area</span>
+        <input type="number" formControlName="size">
+      </label>
+    </div>
+
+    <div class="p1-settings__grid">
+      <label>
+        <span>Address</span>
+        <input type="text" formControlName="address">
+      </label>
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>City</span>
+        <input type="text" formControlName="city">
+      </label>
+      @if (profileForm.controls['country'].value === 'US') {
+        <label>
+          <span>State</span>
+          <input type="text" formControlName="state">
+        </label>
+        <label>
+          <span>Zip</span>
+          <input type="text" formControlName="zip">
+        </label>
+      }
+    </div>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>NAICS level 1</span>
+        <select formControlName="naics1" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of firstNaicsList; track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 2</span>
+        <select formControlName="naics2" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of secondNaicsOptions(profileForm.controls['naics1'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 3</span>
+        <select formControlName="naics3" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of thirdNaicsOptions(profileForm.controls['naics2'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      <span>Notes</span>
+      <textarea formControlName="notes"></textarea>
+    </label>
+
+    <div class="p1-settings__grid p1-settings__grid--3">
+      <label>
+        <span>Contact name</span>
+        <input type="text" formControlName="contactName" maxlength="60">
+      </label>
+      <label>
+        <span>Contact phone</span>
+        <input type="text" formControlName="contactPhone" maxlength="12" (input)="formatPhone($event)">
+      </label>
+      <label>
+        <span>Contact email</span>
+        <input type="email" formControlName="contactEmail" maxlength="85">
+      </label>
+    </div>
+
+    <div class="p1-create-facility__actions">
+      <button type="button" class="p1-btn p1-btn--ghost" [disabled]="isCreating" (click)="close()">Cancel</button>
+      <button type="submit" class="p1-btn p1-btn--success" [disabled]="isCreating || profileForm.invalid">
+        @if (isCreating) {
+          <span class="fa fa-spinner fa-spin"></span>
+          Creating
+        } @else {
+          Create Facility
+          <span class="fa fa-arrow-right"></span>
+        }
+      </button>
+    </div>
+  </form>
+</aside>

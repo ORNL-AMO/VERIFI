@@ -1,0 +1,73 @@
+<div class="p1-analysis-tab-content" aria-label="Analysis setup">
+  @if (linkedAccountCount > 0) {
+  <div class="p1-analysis__notice">
+    <span class="fa fa-circle-info"></span>
+    This analysis is used by {{ linkedAccountCount }} account analysis item{{ linkedAccountCount === 1 ? '' : 's' }}.
+  </div>
+  }
+
+  <div class="p1-analysis__form-grid">
+    <label>
+      <span>Name</span>
+      <input class="form-control" type="text" [ngModel]="analysis.name" (ngModelChange)="update('name', $event)"
+        [disabled]="!canWrite">
+    </label>
+    @if (category === 'energy') {
+    <fieldset>
+      <legend>Analysis Boundary</legend>
+      <label class="p1-analysis__choice">
+        <input type="radio" name="energyIsSource" [ngModel]="analysis.energyIsSource"
+          (ngModelChange)="update('energyIsSource', true)" [value]="true" [disabled]="!canWrite">
+        Source Energy
+      </label>
+      <label class="p1-analysis__choice">
+        <input type="radio" name="energyIsSource" [ngModel]="analysis.energyIsSource"
+          (ngModelChange)="update('energyIsSource', false)" [value]="false" [disabled]="!canWrite">
+        Site Energy
+      </label>
+    </fieldset>
+    }
+    <label>
+      <span>{{ unitLabel }}</span>
+      <select class="form-select" [ngModel]="category === 'water' ? analysis.waterUnit : analysis.energyUnit"
+        (ngModelChange)="category === 'water' ? update('waterUnit', $event) : update('energyUnit', $event)"
+        [disabled]="!canWrite">
+        @for (option of unitOptions; track option.value) {
+        <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Baseline Year</span>
+      <select class="form-select" [ngModel]="analysis.baselineYear" (ngModelChange)="update('baselineYear', $event)"
+        [disabled]="!canWrite">
+        @for (year of baselineYears; track year) {
+        <option [ngValue]="year">{{ year }}</option>
+        }
+        @if (baselineYears.length === 0 && analysis.baselineYear) {
+        <option [ngValue]="analysis.baselineYear">{{ analysis.baselineYear }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <div class="p1-analysis__banking">
+    <label class="p1-analysis__switch">
+      <input type="checkbox" [ngModel]="analysis.hasBanking" (ngModelChange)="toggleBanking($event)"
+        [disabled]="!canWrite || bankingOptions.length === 0">
+      <span>Enable banking</span>
+    </label>
+    @if (analysis.hasBanking) {
+    <label>
+      <span>Banked Analysis</span>
+      <select class="form-select" [ngModel]="analysis.bankedAnalysisItemId"
+        (ngModelChange)="update('bankedAnalysisItemId', $event)" [disabled]="!canWrite">
+        <option [ngValue]="undefined">Select analysis</option>
+        @for (option of bankingOptions; track option.guid) {
+        <option [ngValue]="option.guid">{{ option.name }}</option>
+        }
+      </select>
+    </label>
+    }
+  </div>
+</div>

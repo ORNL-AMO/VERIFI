@@ -1,0 +1,25 @@
+@if (page.stalenessForm) {
+  <form class="p1-settings p1-settings__panel" [formGroup]="page.stalenessForm" aria-label="Data staleness">
+    <div class="p1-settings__panel-heading">
+      <div>
+        <span>Data quality</span>
+        <h2>Data staleness alerts</h2>
+      </div>
+      <small>Flags meters and predictors without recent entries</small>
+    </div>
+    <label class="p1-settings__choice p1-settings__choice--block">
+      <input type="checkbox" formControlName="enabled" (change)="page.saveStaleness()">
+      <span>Enable time-based staleness alerts</span>
+    </label>
+    @if (page.stalenessForm.controls['enabled'].value) {
+      <label>
+        <span>Alert when data is older than</span>
+        <select formControlName="thresholdMonths" (change)="page.saveStaleness()">
+          @for (option of page.stalenessOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+    }
+  </form>
+}
