@@ -4,6 +4,13 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "baseUrl": "./",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@v0/*": ["src/app/v0/*"],
+      "@data/*": ["src/app/data/*"],
+      "@domain/*": ["src/app/domain/*"],
+      "@platform/*": ["src/app/platform/*"]
+    },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
