@@ -74,7 +74,7 @@ export class FacilityAnalysisReportComponent {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     this.reportYear = this.analysisReportSettings.reportYear;
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {

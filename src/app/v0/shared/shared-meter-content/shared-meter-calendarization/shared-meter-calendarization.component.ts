@@ -116,7 +116,7 @@ export class SharedMeterCalendarizationComponent {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();
         }
-        this.calanderizationWorker = new Worker(new URL('../../../platform/web-workers/calanderization.worker', import.meta.url));
+        this.calanderizationWorker = new Worker(new URL('../../../../platform/web-workers/calanderization.worker', import.meta.url));
         this.calanderizationWorker.onmessage = ({ data }) => {
           this.calanderizationWorker.terminate();
           if (!data.error) {
