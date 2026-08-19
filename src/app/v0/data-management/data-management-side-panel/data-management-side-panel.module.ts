@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { UploadDataHelpModule } from '@v0/data-management/data-management-side-panel/data-management-help-panel/upload-data-help/upload-data-help.module';
 import { DataManagementFacilityHelpComponent } from '@v0/data-management/data-management-side-panel/data-management-help-panel/data-management-facility-help/data-management-facility-help.component';
 import { FacilityListHelpComponent } from '@v0/data-management/data-management-side-panel/data-management-help-panel/data-management-facility-help/facility-list-help/facility-list-help.component';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { PredictorDataQualityReportHelpComponent } from '@v0/data-management/data-management-side-panel/data-management-help-panel/data-management-facility-help/predictor-data-quality-report-help/predictor-data-quality-report-help.component';
 import { MeterDataQualityReportHelpComponent } from '@v0/data-management/data-management-side-panel/data-management-help-panel/data-management-facility-help/meter-data-quality-report-help/meter-data-quality-report-help.component';
 import { EnergyFootprintSidePanelComponent } from '@v0/data-management/data-management-side-panel/energy-footprint-side-panel/energy-footprint-side-panel.component';

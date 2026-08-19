@@ -17,7 +17,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '@shared/form-data/naics-data';
-import { ChargesTypes } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { ChargesTypes } from '@data/models/meter-charges-options';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Injectable({

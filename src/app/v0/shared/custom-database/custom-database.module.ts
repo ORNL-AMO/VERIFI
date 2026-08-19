@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CustomDatabaseComponent } from '@v0/shared/custom-database/custom-database.component';
 import { RegionalEmissionsDataComponent } from '@v0/shared/custom-database/regional-emissions-data/regional-emissions-data.component';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { EmissionsDataFormComponent } from '@v0/shared/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component';
 import { EmissionsDataDashboardComponent } from '@v0/shared/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';

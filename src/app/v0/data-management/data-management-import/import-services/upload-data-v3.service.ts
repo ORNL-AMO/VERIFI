@@ -14,12 +14,12 @@ import { checkImportCellNumber, checkImportStartingUnit, checkSameMonthPredictor
 import * as _ from 'lodash';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SubRegionData } from '@data/models/eGridEmissions';
-import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@shared/sharedHelperFunctions';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
-import { MeterChargeType } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { MeterChargeType } from '@data/models/meter-charges-options';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
 import { WaterDischargeTypes, WaterIntakeTypes } from '@data/models/constantsAndTypes';

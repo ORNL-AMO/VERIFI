@@ -3,12 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { AnalysisReportSettings, IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, StyledTextSection, TableHeaderCell, TableSection } from "@v0/shared/pdf-report/models/report-section.model";
-import { CustomNumberPipe } from "@shared/helper-pipes/custom-number.pipe";
+import { CustomNumberPipe } from "@v0/shared/helper-pipes/custom-number.pipe";
 import { IdbFacility } from "@data/models/idbModels/facility";
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "@data/models/analysis";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
 import { AnalysisGroupItem, AnalysisService } from "@v0/data-evaluation/facility/analysis/analysis.service";
-import { RegressionNumberPipe } from "@shared/helper-pipes/regression-number.pipe";
+import { RegressionNumberPipe } from "@v0/shared/helper-pipes/regression-number.pipe";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityAnalysisReportAdapter {

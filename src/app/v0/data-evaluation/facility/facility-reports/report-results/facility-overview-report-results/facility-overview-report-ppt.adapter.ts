@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { PptDocument } from '@v0/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec, PptChartSeries } from '@v0/shared/ppt-report/models/ppt-slide';
-import { CustomNumberPipe } from '@shared/helper-pipes/custom-number.pipe';
+import { CustomNumberPipe } from '@v0/shared/helper-pipes/custom-number.pipe';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IUseAndCost, UseAndCost, UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';

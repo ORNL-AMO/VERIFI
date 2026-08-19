@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DataEvaluationComponent } from '@v0/data-evaluation/data-evaluation.component';
 import { SidebarComponent } from '@v0/data-evaluation/sidebar/sidebar.component';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { FacilityListPipe } from '@v0/data-evaluation/sidebar/facility-list.pipe';
 import { HelpPanelModule } from '@v0/data-evaluation/help-panel/help-panel.module';
 import { AccountModule } from '@v0/data-evaluation/account/account.module';

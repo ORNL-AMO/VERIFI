@@ -4,9 +4,9 @@ import { PptDocument } from '@v0/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, TitleSlide } from '@v0/shared/ppt-report/models/ppt-slide';
 import { IdbFacilityReport, ModelingReportSettings } from '@data/models/idbModels/facilityReport';
 import { FacilityGroupAnalysisItem } from '@shared/shared-analysis/calculations/regression-models.service';
-import { UserDefineModelDateRangePipe } from '@shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
-import { RegressionNumberPipe } from '@shared/helper-pipes/regression-number.pipe';
-import { CustomNumberPipe } from '@shared/helper-pipes/custom-number.pipe';
+import { UserDefineModelDateRangePipe } from '@v0/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
+import { RegressionNumberPipe } from '@v0/shared/helper-pipes/regression-number.pipe';
+import { CustomNumberPipe } from '@v0/shared/helper-pipes/custom-number.pipe';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 
 export interface FacilityModelingReportPptInput {

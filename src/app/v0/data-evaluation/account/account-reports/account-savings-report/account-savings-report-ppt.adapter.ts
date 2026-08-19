@@ -9,7 +9,7 @@ import { PerformanceReport } from '@domain/calculations/performance-report-calcu
 import { AccountSavingsReportSetup } from '@data/models/overview-report';
 import { PptDocument } from '@v0/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from '@v0/shared/ppt-report/models/ppt-slide';
-import { CustomNumberPipe } from '@shared/helper-pipes/custom-number.pipe';
+import { CustomNumberPipe } from '@v0/shared/helper-pipes/custom-number.pipe';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { FacilityModelingReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-ppt.adapter';

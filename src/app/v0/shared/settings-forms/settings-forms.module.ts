@@ -5,8 +5,8 @@ import { GeneralInformationFormComponent } from '@v0/shared/settings-forms/gener
 import { FinancialReportingFormComponent } from '@v0/shared/settings-forms/financial-reporting-form/financial-reporting-form.component';
 import { DefaultUnitsFormComponent } from '@v0/shared/settings-forms/default-units-form/default-units-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
-import { LabelWithTooltipModule } from '@shared/label-with-tooltip/label-with-tooltip.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
+import { LabelWithTooltipModule } from '@v0/shared/label-with-tooltip/label-with-tooltip.module';
 import { EGridEmissionsTableComponent } from '@v0/shared/settings-forms/default-units-form/e-grid-emissions-table/e-grid-emissions-table.component';
 import { DataStalenessSettingsFormComponent } from '@v0/shared/settings-forms/data-staleness-settings-form/data-staleness-settings-form.component';
 

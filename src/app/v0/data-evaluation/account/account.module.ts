@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { AccountBannerComponent } from '@v0/data-evaluation/account/account-banner/account-banner.component';
 import { AccountSettingsComponent } from '@v0/data-evaluation/account/account-settings/account-settings.component';
 import { FormsModule } from '@angular/forms';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { SettingsFormsModule } from '@v0/shared/settings-forms/settings-forms.module';
 import { AccountAnalysisModule } from '@v0/data-evaluation/account/account-analysis/account-analysis.module';
 import { AccountHomeModule } from '@v0/data-evaluation/account/account-home/account-home.module';

@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, TableHeaderCell, TableSection } from "@v0/shared/pdf-report/models/report-section.model";
-import { CustomNumberPipe } from "@shared/helper-pipes/custom-number.pipe";
+import { CustomNumberPipe } from "@v0/shared/helper-pipes/custom-number.pipe";
 import { IdbFacility } from "@data/models/idbModels/facility";
 import { FacilityOverviewData, FacilityOverviewMeter } from "@domain/calculations/dashboard-calculations/facilityOverviewClass";
 import { UtilityUseAndCost } from "@domain/calculations/dashboard-calculations/useAndCostClass";

@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
-import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@shared/sharedHelperFunctions';

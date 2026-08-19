@@ -11,8 +11,8 @@ import { FacilityPredictorDataQualityReportComponent } from '@v0/data-management
 import { FacilityPredictorComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
 import { FacilityPredictorsTableComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
 import { FacilitySetupComponent } from '@v0/data-management/account-facilities/facility-data/facility-setup/facility-setup.component';
-import { MeterDataComponent } from '@shared/shared-meter-content/meter-data/meter-data.component';
-import { SetMeterGroupingComponent } from '@shared/shared-meter-content/set-meter-grouping/set-meter-grouping.component';
+import { MeterDataComponent } from '@v0/shared/shared-meter-content/meter-data/meter-data.component';
+import { SetMeterGroupingComponent } from '@v0/shared/shared-meter-content/set-meter-grouping/set-meter-grouping.component';
 
 @Component({
   selector: 'app-data-management-facility-help',

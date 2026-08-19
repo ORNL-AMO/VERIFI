@@ -4,17 +4,17 @@ import { AccountReportsComponent } from '@v0/data-evaluation/account/account-rep
 import { AccountReportsBannerComponent } from '@v0/data-evaluation/account/account-reports/account-reports-banner/account-reports-banner.component';
 import { RouterModule } from '@angular/router';
 import { AccountReportsDashboardComponent } from '@v0/data-evaluation/account/account-reports/account-reports-dashboard/account-reports-dashboard.component';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { AccountReportSetupComponent } from '@v0/data-evaluation/account/account-reports/account-report-setup/account-report-setup.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BetterPlantsSetupComponent } from '@v0/data-evaluation/account/account-reports/account-report-setup/better-plants-setup/better-plants-setup.component';
 import { DataOverviewSetupComponent } from '@v0/data-evaluation/account/account-reports/account-report-setup/data-overview-setup/data-overview-setup.component';
-import { LabelWithTooltipModule } from '@shared/label-with-tooltip/label-with-tooltip.module';
+import { LabelWithTooltipModule } from '@v0/shared/label-with-tooltip/label-with-tooltip.module';
 import { BetterPlantsReportComponent } from '@v0/data-evaluation/account/account-reports/better-plants-report/better-plants-report.component';
 import { PrimaryEnergyConsumptionTableComponent } from '@v0/data-evaluation/account/account-reports/better-plants-report/primary-energy-consumption-table/primary-energy-consumption-table.component';
 import { FacilityPerformanceTableComponent } from '@v0/data-evaluation/account/account-reports/better-plants-report/facility-performance-table/facility-performance-table.component';
 import { CompanyInformationTableComponent } from '@v0/data-evaluation/account/account-reports/better-plants-report/company-information-table/company-information-table.component';
-import { CalculatingSpinnerModule } from '@shared/calculating-spinner/calculating-spinner.module';
+import { CalculatingSpinnerModule } from '@v0/shared/calculating-spinner/calculating-spinner.module';
 import { DataOverviewReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.component';
 import { AccountTitlePageComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-account-report/account-title-page/account-title-page.component';
 import { DataOverviewModule } from '@v0/shared/data-overview/data-overview.module';
@@ -49,7 +49,7 @@ import { TopPerformersChartComponent } from '@v0/data-evaluation/account/account
 import { AccountReportTypePipe } from '@v0/data-evaluation/account/account-reports/report-pipes/account-report-type.pipe';
 import { AnalysisReportComponent } from '@v0/data-evaluation/account/account-reports/analysis-report/analysis-report.component';
 import { AnalysisReportSetupComponent } from '@v0/data-evaluation/account/account-reports/account-report-setup/analysis-report-setup/analysis-report-setup.component';
-import { SharedAnalysisModule } from "@shared/shared-analysis/shared-analysis.module";
+import { SharedAnalysisModule } from "@v0/shared/shared-analysis/shared-analysis.module";
 import { AccountEmissionFactorsReportComponent } from '@v0/data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report/account-emission-factors-report.component';
 import { AccountEmissionFactorsReportTableComponent } from '@v0/data-evaluation/account/account-reports/account-emission-factors-report/account-emission-factors-report-table/account-emission-factors-report-table.component';
 import { AccountSavingsReportSetupComponent } from '@v0/data-evaluation/account/account-reports/account-report-setup/account-savings-report-setup/account-savings-report-setup.component';
@@ -57,13 +57,13 @@ import { AccountSavingsReportComponent } from '@v0/data-evaluation/account/accou
 import { AccountReportsDashboardTableComponent } from '@v0/data-evaluation/account/account-reports/account-reports-dashboard/account-reports-dashboard-table/account-reports-dashboard-table.component';
 import { ReportOrderByPipe } from '@v0/data-evaluation/account/account-reports/report-pipes/report-order-by.pipe';
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
-import { TableItemsDropdownModule } from "@shared/table-items-dropdown/table-items-dropdown.module";
+import { TableItemsDropdownModule } from "@v0/shared/table-items-dropdown/table-items-dropdown.module";
 import { ReportBadgeClassPipe } from '@v0/data-evaluation/account/account-reports/report-pipes/report-badge-class.pipe';
 import { SharedReportsModule } from "@v0/shared/shared-reports/shared-reports.module";
 import { AccountReportsDataCheckComponent } from '@v0/data-evaluation/account/account-reports/account-reports-data-check/account-reports-data-check.component';
 import { AccountReportAnalysisSelectionComponent } from '@v0/data-evaluation/account/account-reports/account-report-setup/account-report-analysis-selection/account-report-analysis-selection.component';
-import { CustomNumberPipe } from '@shared/helper-pipes/custom-number.pipe';
-import { NaicsDisplayPipe } from '@shared/helper-pipes/naics-display.pipe';
+import { CustomNumberPipe } from '@v0/shared/helper-pipes/custom-number.pipe';
+import { NaicsDisplayPipe } from '@v0/shared/helper-pipes/naics-display.pipe';
 
 @NgModule({
   declarations: [

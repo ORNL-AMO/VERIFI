@@ -10,9 +10,9 @@ import { ProcessTemplateFileComponent } from "@v0/data-management/data-managemen
 import { ProcessTemplateFacilitiesComponent } from "@v0/data-management/data-management-import/process-template-file/process-template-facilities/process-template-facilities.component";
 import { FacilityMetersTableComponent } from "@v0/data-management/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "@v0/data-management/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
-import { MeterDataTableComponent } from "@shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
+import { MeterDataTableComponent } from "@v0/shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { FacilitiesListComponent } from "@v0/data-management/account-facilities/facilities-list/facilities-list.component";
-import { EditBillComponent } from "@shared/shared-meter-content/edit-bill/edit-bill.component";
+import { EditBillComponent } from "@v0/shared/shared-meter-content/edit-bill/edit-bill.component";
 import { canDeactivateGuard } from "@v0/routing/can-deactivate.guard";
 import { FacilityMeterMonthlyDataComponent } from "@v0/data-management/account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component";
 import { FacilityPredictorComponent } from "@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component";
@@ -60,10 +60,10 @@ import { FacilityEnergyUsesGroupSummaryComponent } from "@v0/data-management/acc
 import { FootprintUploadSelectFacilityComponent } from "@v0/data-management/data-management-import/process-footprint-tool-file/footprint-upload-select-facility/footprint-upload-select-facility.component";
 import { FacilityEnergyUsesGroupFootprintComponent } from "@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-footprint.component";
 import { FacilityEnergyUsesFootprintComponent } from "@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-footprint.component";
-import { ManageMeterGroupingComponent } from "@shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
-import { MeterGroupFormComponent } from "@shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
-import { MeterGroupingResultsTableComponent } from "@shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
-import { MeterGroupingResultsGraphComponent } from "@shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
+import { ManageMeterGroupingComponent } from "@v0/shared/shared-meter-content/set-meter-grouping/manage-meter-grouping/manage-meter-grouping.component";
+import { MeterGroupFormComponent } from "@v0/shared/shared-meter-content/set-meter-grouping/meter-group-form/meter-group-form.component";
+import { MeterGroupingResultsTableComponent } from "@v0/shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component";
+import { MeterGroupingResultsGraphComponent } from "@v0/shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component";
 import { FacilityEnergyUsesSetupOptionsComponent } from "@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/facility-energy-uses-setup-options.component";
 import { NewEquipmentGroupSetupOptionsComponent } from "@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/new-equipment-group-setup-options/new-equipment-group-setup-options.component";
 import { EditExistingGroupsSetupOptionsComponent } from "@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup-options/edit-existing-groups-setup-options/edit-existing-groups-setup-options.component";

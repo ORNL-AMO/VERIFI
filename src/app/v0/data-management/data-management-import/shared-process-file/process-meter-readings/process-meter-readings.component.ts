@@ -5,7 +5,7 @@ import { DataManagementService } from '@v0/data-management/data-management.servi
 import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
+import { UtilityMeterDataService } from '@v0/shared/shared-meter-content/utility-meter-data.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';

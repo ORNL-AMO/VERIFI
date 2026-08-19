@@ -6,19 +6,19 @@ import { AccountAnalysisBannerComponent } from '@v0/data-evaluation/account/acco
 import { RouterModule } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { AccountAnalysisSetupComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-setup/account-analysis-setup.component';
 import { SelectFacilityAnalysisItemsComponent } from '@v0/data-evaluation/account/account-analysis/select-facility-analysis-items/select-facility-analysis-items.component';
 import { SelectItemTableComponent } from '@v0/data-evaluation/account/account-analysis/select-facility-analysis-items/select-item-table/select-item-table.component';
 import { AccountAnalysisResultsComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-results/account-analysis-results.component';
 import { MonthlyAccountAnalysisComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
-import { SharedAnalysisModule } from '@shared/shared-analysis/shared-analysis.module';
-import { CalculatingSpinnerModule } from '@shared/calculating-spinner/calculating-spinner.module';
+import { SharedAnalysisModule } from '@v0/shared/shared-analysis/shared-analysis.module';
+import { CalculatingSpinnerModule } from '@v0/shared/calculating-spinner/calculating-spinner.module';
 import { AccountAnalysisFooterComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-footer/account-analysis-footer.component';
-import { TableItemsDropdownModule } from '@shared/table-items-dropdown/table-items-dropdown.module';
+import { TableItemsDropdownModule } from '@v0/shared/table-items-dropdown/table-items-dropdown.module';
 import { AccountAnalysisFacilitiesSummaryComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component';
-import { LabelWithTooltipModule } from '@shared/label-with-tooltip/label-with-tooltip.module';
+import { LabelWithTooltipModule } from '@v0/shared/label-with-tooltip/label-with-tooltip.module';
 import { AccountAnalysisDetailsTableComponent } from '@v0/data-evaluation/account/account-analysis/account-analysis-dashboard/account-analysis-details-table/account-analysis-details-table.component';
 
 

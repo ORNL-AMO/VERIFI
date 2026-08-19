@@ -15,7 +15,7 @@ import { ToastNotificationsComponent } from '@v0/core-components/toast-notificat
 import { DataEvaluationModule } from '@v0/data-evaluation/data-evaluation.module';
 import { DataManagementModule } from '@v0/data-management/data-management.module';
 import { EmailListSubscribeModule } from '@v0/shared/email-list-subscribe/email-list-subscribe.module';
-import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
 import { StaticContentModule } from '@v0/static-content/static-content.module';
 import { WeatherDataModule } from '@v0/weather-data/weather-data.module';
 import { ExistingUxShellComponent } from './shell/existing-ux-shell/existing-ux-shell.component';

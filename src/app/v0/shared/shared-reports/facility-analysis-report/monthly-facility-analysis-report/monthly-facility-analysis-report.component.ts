@@ -7,8 +7,8 @@ import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { AnalysisReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { MonthlyAnalysisSummaryGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
-import { MonthlyAnalysisSummarySavingsGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { MonthlyAnalysisSummaryGraphComponent } from '@v0/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from '@v0/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 
 @Component({
   selector: 'app-monthly-facility-analysis-report',

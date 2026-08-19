@@ -3,8 +3,8 @@ import { IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { MeterDataStats, PredictorDataStats } from "@v0/data-evaluation/facility/facility-reports/report-results/facility-data-quality-report-results/facility-data-quality-report-results.component";
 import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, StyledText, StyledTextSection, TableSection } from "@v0/shared/pdf-report/models/report-section.model";
-import { getUnitFromMeter } from "@shared/shared-data-quality-report-meters/meterDataQualityStatistics";
-import { CustomNumberPipe } from "@shared/helper-pipes/custom-number.pipe";
+import { getUnitFromMeter } from "@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics";
+import { CustomNumberPipe } from "@v0/shared/helper-pipes/custom-number.pipe";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityDataQualityReportAdapter {
