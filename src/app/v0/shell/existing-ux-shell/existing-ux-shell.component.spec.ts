@@ -3,7 +3,7 @@ import { NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ApplicationLifecycleService } from '../application-lifecycle/application-lifecycle.service';
+import { ApplicationLifecycleService } from '../../../application-lifecycle/application-lifecycle.service';
 import { ExistingUxShellComponent } from './existing-ux-shell.component';
 
 @NgModule({

@@ -9,8 +9,9 @@ import { FeedbackComponent } from '../static-content/feedback/feedback.component
 import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
 import { environment } from 'src/environments/environment';
 import { persistenceReadyGuard } from './workspace-readiness.guards';
-import { ExistingUxShellComponent } from '../existing-ux-shell/existing-ux-shell.component';
+import { ExistingUxShellComponent } from '../v0/shell/existing-ux-shell/existing-ux-shell.component';
 import { PrototypeRoutes } from '../ux-prototypes/prototype.routes';
+import { V1Routes } from '../v1/v1.routes';
 
 export const LegacyRoutes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'welcome' },
@@ -26,6 +27,7 @@ export const LegacyRoutes: Routes = [
 
 export const AppRoutes: Routes = [
   ...PrototypeRoutes,
+  ...V1Routes,
   {
     path: '',
     component: ExistingUxShellComponent,

@@ -30,7 +30,8 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
 import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-modal/shared-router-guard-modal.component';
 import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-list-subscribe.module";
 import { UxPrototypesModule } from './ux-prototypes/ux-prototypes.module';
-import { ExistingUxShellComponent } from './existing-ux-shell/existing-ux-shell.component';
+import { ExistingUxShellComponent } from './v0/shell/existing-ux-shell/existing-ux-shell.component';
+import { V1ShellComponent } from './v1/shell/v1-shell.component';
 
 @NgModule({
     declarations: [
@@ -48,7 +49,8 @@ import { ExistingUxShellComponent } from './existing-ux-shell/existing-ux-shell.
         DeletingAccountDataComponent,
         HomePageComponent,
         SharedRouterGuardModalComponent,
-        ExistingUxShellComponent
+        ExistingUxShellComponent,
+        V1ShellComponent
     ],
     bootstrap: [AppComponent],
     imports: [

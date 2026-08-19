@@ -1,6 +1,6 @@
 import { Component, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { ApplicationLifecycleService } from '../application-lifecycle/application-lifecycle.service';
+import { ApplicationLifecycleService } from '../../../application-lifecycle/application-lifecycle.service';
 
 @Component({
   selector: 'app-existing-ux-shell',
