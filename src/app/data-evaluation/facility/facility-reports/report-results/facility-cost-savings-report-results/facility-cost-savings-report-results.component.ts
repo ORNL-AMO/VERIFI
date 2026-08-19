@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { Component, inject, Injector } from '@angular/core';
+import { Component, inject, Injector, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -18,6 +18,11 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { convertConsumptionRate, getYearsArray } from 'src/app/shared/sharedHelperFunctions';
 import { FacilityCostSavingsReportResults } from 'src/app/calculations/cost-savings-report-calculations/facilityCostSavingsReportResults';
+import { FacilityCostSavingsReportAdapter } from './facility-cost-savings-report.adapter';
+import { ExportReportPdfService } from 'src/app/shared/pdf-report/services/export-report-pdf.service';
+import { AnnualSavingsGraphComponent } from './annual-savings-graph/annual-savings-graph.component';
+import { MonthlySavingsGraphComponent } from './monthly-savings-graph/monthly-savings-graph.component';
+import { AnnualActualVsAdjustedCostsGraphComponent } from './annual-actual-vs-adjusted-costs-graph/annual-actual-vs-adjusted-costs-graph.component';
 
 @Component({
   selector: 'app-facility-cost-savings-report-results',
@@ -66,9 +71,18 @@ export class FacilityCostSavingsReportResultsComponent {
   monthlyEnergyUseTable: MonthlyGroupData = {};
   monthlyAdjustedEnergyUseTable: MonthlyGroupData = {};
   monthlyEnergySavingsTable: MonthlyGroupData = {};
+  isExportingPdf: boolean = false;
+
+  @ViewChild('annualSavingsGraph') annualSavingsGraph: AnnualSavingsGraphComponent;
+  @ViewChild('monthlySavingsGraph') monthlySavingsGraph: MonthlySavingsGraphComponent;
+  @ViewChild('cumulativeAnnualSavingsGraph') cumulativeAnnualSavingsGraph: AnnualSavingsGraphComponent;
+  @ViewChild('cumulativeMonthlySavingsGraph') cumulativeMonthlySavingsGraph: MonthlySavingsGraphComponent;
+  @ViewChildren('groupComparisonGraph') groupComparisonGraphs!: QueryList<AnnualActualVsAdjustedCostsGraphComponent>;
 
   constructor(
-    private injector: Injector
+    private injector: Injector,
+    private exportReportPdfService: ExportReportPdfService,
+    private facilityCostSavingsReportAdapter: FacilityCostSavingsReportAdapter
 
   ) { }
 
@@ -201,5 +215,67 @@ export class FacilityCostSavingsReportResultsComponent {
 
   get filteredGroups() {
     return this.selectedAnalysisItem?.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') ?? [];
+  }
+
+  async onExportPdf() {
+    if (!this.facilityReport || this.isExportingPdf) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const document = this.facilityCostSavingsReportAdapter.buildDocument({
+        facilityReport: this.facilityReport,
+        facility: this.facility,
+        years: this.years,
+        filteredGroups: this.filteredGroups,
+        costSavingsTable: this.costSavingsTable,
+        monthlyCostSavingsTable: this.monthlyCostSavingsTable,
+        monthKeys: this.monthKeys,
+        cumulativeCostSavingsTable: this.cumulativeCostSavingsTable,
+        cumulativeMonthlyCostSavingsTable: this.cumulativeMonthlyCostSavingsTable,
+        costDataTable: this.costDataTable,
+        groupUnits: this.groupUnits,
+        convertedCostDataTable: this.convertedCostDataTable,
+        finalUnit: this.finalUnit,
+        estimatedEnergyCostTable: this.estimatedEnergyCostTable,
+        expectedEnergyCostTable: this.expectedEnergyCostTable,
+        energyUseTable: this.energyUseTable,
+        adjustedEnergyUseTable: this.adjustedEnergyUseTable,
+        energySavingsTable: this.energySavingsTable,
+        monthlyEnergyUseTable: this.monthlyEnergyUseTable,
+        adjustedMonthlyEnergyUseTable: this.monthlyAdjustedEnergyUseTable,
+        monthlyEnergySavingsTable: this.monthlyEnergySavingsTable,
+        estimatedMonthlyEnergyCostTable: this.estimatedMonthlyEnergyCostTable,
+        expectedMonthlyEnergyCostTable: this.expectedMonthlyEnergyCostTable,
+        chartImageProviders: this.getChartImageProviders()
+      });
+
+      await this.exportReportPdfService.export(document, `${this.facilityReport.name} - Cost Savings Report`);
+    } finally {
+      this.isExportingPdf = false;
+    }
+  }
+
+  getChartImageProviders() {
+    return {
+      annualCostSavingsGraph: async () => await this.annualSavingsGraph.getAnnualSavingsChartAsBase64Image() ?? '',
+      monthlyCostSavingsGraph: async () => await this.monthlySavingsGraph.getMonthlySavingsChartAsBase64Image() ?? '',
+      cumulativeAnnualCostSavingsGraph: async () => await this.cumulativeAnnualSavingsGraph.getAnnualSavingsChartAsBase64Image() ?? '',
+      cumulativeMonthlyCostSavingsGraph: async () => await this.cumulativeMonthlySavingsGraph.getMonthlySavingsChartAsBase64Image() ?? '',
+      groupComparisonGraph: this.getGroupComparisonGraphProvider()
+    };
+  }
+
+   getGroupComparisonGraphProvider(): Record<string, () => Promise<string>> {
+    const providers: Record<string, () => Promise<string>> = {};
+    if (this.groupComparisonGraphs) {
+      this.groupComparisonGraphs.forEach((graphComponent, index) => {
+        const groupId = this.filteredGroups[index].idbGroupId;
+        providers[groupId] = async () => graphComponent.getComparisonChartAsBase64Image() ?? '';
+      });
+    }
+    return providers;
   }
 }

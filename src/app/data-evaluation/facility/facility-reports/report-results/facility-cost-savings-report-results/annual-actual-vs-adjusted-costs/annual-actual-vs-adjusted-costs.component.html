@@ -14,7 +14,7 @@
 
                 @if (getValue(estimatedEnergyCostTable, rowKey) !== 0) {
                 <td class="text-center">
-                    {{ getValue(estimatedEnergyCostTable, rowKey) | number:'1.0-0' }}
+                    $ {{ getValue(estimatedEnergyCostTable, rowKey) | number:'1.0-0' }}
                 </td>
                 }
                 @else {
@@ -25,7 +25,7 @@
 
                 @if (getValue(expectedEnergyCostTable, rowKey) !== 0) {
                 <td class="text-center">
-                    {{ getValue(expectedEnergyCostTable, rowKey) | number:'1.0-0' }}
+                    $ {{ getValue(expectedEnergyCostTable, rowKey) | number:'1.0-0' }}
                 </td>
                 }
                 @else {

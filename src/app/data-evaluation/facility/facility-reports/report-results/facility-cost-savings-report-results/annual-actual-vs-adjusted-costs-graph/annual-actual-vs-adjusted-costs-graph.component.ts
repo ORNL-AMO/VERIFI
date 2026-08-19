@@ -70,12 +70,12 @@ export class AnnualActualVsAdjustedCostsGraphComponent {
 
     var layout = {
       xaxis: {
-        title: { font: { size: 16 }},
+        title: { font: { size: 16 } },
         type: 'category',
       },
-      yaxis: { 
-        title: { text: 'Cost ($)', font: { size: 16 }, standoff: 18 }, 
-        automargin: true 
+      yaxis: {
+        title: { text: 'Cost ($)', font: { size: 16 }, standoff: 18 },
+        automargin: true
       },
       showlegend: true,
       margin: { r: 10, t: 10 }
@@ -93,5 +93,21 @@ export class AnnualActualVsAdjustedCostsGraphComponent {
     const key = String(year);
     const value = table?.[key]?.[this.groupId];
     return value === undefined || isNaN(value) || value === 0 || value === null ? 0 : value;
+  }
+
+  async getComparisonChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.comparisonGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.comparisonGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
   }
 }

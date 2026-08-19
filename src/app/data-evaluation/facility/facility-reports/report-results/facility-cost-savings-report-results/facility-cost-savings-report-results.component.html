@@ -31,7 +31,7 @@
 
     @if(years && selectedAnalysisItem && costSavingsTable && dataComplete && reportSettings.annualSavingsGraph &&
     reportSettings.includeFacility && reportSettings.includeAnnual) {
-    <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
+    <app-annual-savings-graph #annualSavingsGraph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="costSavingsTable"></app-annual-savings-graph>
     }
     }
@@ -50,7 +50,7 @@
 
     @if (monthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlySavingsGraph &&
     reportSettings.includeFacility && reportSettings.includeMonthly) {
-    <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
+    <app-monthly-savings-graph #monthlySavingsGraph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="monthlyCostSavingsTable"></app-monthly-savings-graph>
     }
 
@@ -67,7 +67,7 @@
 
     @if(years && selectedAnalysisItem && cumulativeCostSavingsTable && dataComplete &&
     reportSettings.annualCumulativeSavingsGraph && reportSettings.includeFacility && reportSettings.includeAnnual) {
-    <app-annual-savings-graph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
+    <app-annual-savings-graph #cumulativeAnnualSavingsGraph [years]="years" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="cumulativeCostSavingsTable"></app-annual-savings-graph>
     }
     }
@@ -86,7 +86,7 @@
 
     @if (cumulativeMonthlyCostSavingsTable && monthKeys?.length > 0 && reportSettings.monthlyCumulativeSavingsGraph &&
     reportSettings.includeFacility && reportSettings.includeMonthly) {
-    <app-monthly-savings-graph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
+    <app-monthly-savings-graph #cumulativeMonthlySavingsGraph [monthKeys]="monthKeys" [selectedAnalysisItem]="selectedAnalysisItem"
         [savingsData]="cumulativeMonthlyCostSavingsTable"></app-monthly-savings-graph>
     }
 
@@ -144,7 +144,7 @@
         [estimatedEnergyCostTable]="estimatedEnergyCostTable" [expectedEnergyCostTable]="expectedEnergyCostTable"
         [rowKeys]="years"></app-annual-actual-vs-adjusted-costs>
 
-    <app-annual-actual-vs-adjusted-costs-graph [groupId]="group.idbGroupId"
+    <app-annual-actual-vs-adjusted-costs-graph #groupComparisonGraph [groupId]="group.idbGroupId"
         [estimatedEnergyCostTable]="estimatedEnergyCostTable"
         [expectedEnergyCostTable]="expectedEnergyCostTable" [rowKeys]="years"></app-annual-actual-vs-adjusted-costs-graph>
     }
@@ -175,3 +175,5 @@
 }
 }
 }
+
+<app-facility-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()"></app-facility-print-report-button>

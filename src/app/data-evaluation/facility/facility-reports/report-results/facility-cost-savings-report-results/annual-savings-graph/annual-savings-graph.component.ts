@@ -130,4 +130,19 @@ export class AnnualSavingsGraphComponent {
     }
   }
 
+  async getAnnualSavingsChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.savingsGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.savingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }
