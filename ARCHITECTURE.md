@@ -139,7 +139,7 @@ Preserve these invariants:
 
 ## UI architecture
 
-VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Legacy v0 feature components live under `src/app/v0/` and own their local templates and styles. Reusable UI that is not version-specific lives under `src/app/shared/`; global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
+VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Legacy v0 feature components live under `src/app/v0/` and own their local templates and styles. Reusable UI that is not version-specific lives under `src/app/shared/` and should be imported with `@shared/*`; v0-only reusable UI lives under `src/app/v0/shared/` and should be imported with `@v0/shared/*`. Global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
 
 The current production UI is treated as v0 and is lazy-loaded through `src/app/v0/`. The root `AppComponent` owns startup, lifecycle, root routing, and app-wide runtime overlays only; v0 owns the legacy header, legacy route outlet, and legacy UI modals. Future v1 production UI should use a separate lazy-loaded route module rather than adding v0/v1 conditionals to legacy components.
 

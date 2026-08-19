@@ -6,7 +6,8 @@ Use this guide with issue #2559 when planning or implementing new UI/UX work. It
 
 - `src/app/v0/` contains the current production UI. Keep legacy routes and v0-only presentation behavior here.
 - `src/app/v1/` is reserved for the future opt-in production experience. Add it on the `unified-ux` branch after the develop foundation lands.
-- `src/app/shared/` contains UI and helper code that is not version-specific.
+- `src/app/shared/` contains UI and helper code that is not version-specific; import it with `@shared/*`.
+- `src/app/v0/shared/` contains legacy reusable UI that is shared only inside v0; import it with `@v0/shared/*`.
 - `src/app/data/` contains shared data contracts: account workspace, IndexedDB, backups, persisted models, and migrations.
 - `src/app/domain/` contains deterministic calculations and domain helpers.
 - `src/app/platform/` contains Electron services, Web Worker wrappers/contracts, analytics, and other runtime integration boundaries.
@@ -41,7 +42,8 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.
 - Keep current public v0 URLs stable while v0 remains the default experience.
 - Keep `/p1` prototype routes and `/v1` production routes out of `develop`; add them on `unified-ux`.
-- Prefer aliases for cross-boundary imports: `@app/*`, `@v0/*`, `@data/*`, `@domain/*`, and `@platform/*`.
+- Prefer aliases for cross-boundary imports: `@app/*`, `@shared/*`, `@v0/*`, `@data/*`, `@domain/*`, and `@platform/*`.
+- Do not import from `@v0/*` in root shared, data, domain, platform, or future v1 code.
 
 ## Validation
 
