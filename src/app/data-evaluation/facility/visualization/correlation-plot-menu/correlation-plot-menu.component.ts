@@ -11,10 +11,10 @@ import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-correlation-plot-menu',
-    templateUrl: './correlation-plot-menu.component.html',
-    styleUrls: ['./correlation-plot-menu.component.css'],
-    standalone: false
+  selector: 'app-correlation-plot-menu',
+  templateUrl: './correlation-plot-menu.component.html',
+  styleUrls: ['./correlation-plot-menu.component.css'],
+  standalone: false
 })
 export class CorrelationPlotMenuComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
@@ -82,8 +82,10 @@ export class CorrelationPlotMenuComponent {
 
   async saveSiteOrSource() {
     await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'update', entityGuid: this.facility.guid, label: 'Updating facility' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
+      {
+        entityKind: 'facility', changeKind: 'update', entityGuid: this.facility.guid, label: 'Updating facility',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }
+      },
       () => this.facilityHandler.update({ ...this.facility }, this.accountWorkspaceStore.account()?.guid)
     );
   }
@@ -206,6 +208,24 @@ export class CorrelationPlotMenuComponent {
     let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
     this.years = allYears;
+  }
+
+  areAllSelected(options: Array<AxisOption>): boolean {
+    return options.length > 0 && options.every(o => o.selected);
+  }
+
+  toggleAll(options: Array<AxisOption>, selected: boolean, axis?: 'left' | 'right') {
+    options.forEach(option => option.selected = selected);
+
+    if (axis == 'left') {
+      this.setTimeSeriesLeftAxis();
+      return;
+    }
+    if (axis == 'right') {
+      this.setTimeSeriesRightAxis();
+      return;
+    }
+    this.savePlotOptions();
   }
 }
 
