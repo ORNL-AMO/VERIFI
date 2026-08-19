@@ -6,6 +6,8 @@ Read the [prototype design foundation](prototype-foundation.md) before creating 
 
 For P1 facility Data sections, also read the [P1 data workbench pattern](p1-data-workbench-pattern.md). It captures the navigation, home/workbench split, scoped editor behavior, and real-data prototype expectations established by the meters workbench.
 
+For historical context on the first P1 walkthrough, see the [P1 prototype walkthrough feedback](p1-prototype-walkthrough-feedback.md). Treat it as feedback history and design context, not as a normative implementation contract.
+
 ## Routing
 
 - Each prototype uses a temporary top-level route named `/pN`, such as `/p1`, `/p2`, and `/p3`.
