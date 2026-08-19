@@ -19,7 +19,7 @@ Do not copy volatile package versions, scripts, database versions, or implementa
 
 VERIFI's Angular renderer ships for web and Electron. Use the [task context index](docs/agents/context-index.md) to choose entrypoints, minimum documentation, skill, mode, and first validation tier. Prefer established neighboring code over a new pattern.
 
-The current production UI lives under `src/app/v0/`. Use `@v0/shared/*` for legacy-only shared UI and `@shared/*` for version-neutral shared helpers and contracts. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. Do not import `@v0/*` from root shared, data, domain, platform, or future v1 code. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md) and add workflow notes just-in-time rather than building an exhaustive feature register.
+The current production UI lives under `src/app/v0/`. On unified-ux work, `/p1` is prototype reference material and `/v1` is the opt-in production UI. Use `@v0/shared/*` for legacy-only shared UI and `@shared/*` for version-neutral shared helpers and contracts. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. Do not import `@v0/*` from root shared, data, domain, platform, or production v1 code. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md) and add workflow notes just-in-time rather than building an exhaustive feature register.
 
 ## Context discipline
 

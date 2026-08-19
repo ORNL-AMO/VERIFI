@@ -10,7 +10,6 @@ This directory indexes the repository context used by coding agents and human co
 | Architecture | Current runtime boundaries, modules, persistence, calculations, file flows, and invariants | [`ARCHITECTURE.md`](../../ARCHITECTURE.md) |
 | Unified UI/UX migration | v0/v1 boundaries, shared-contract protection, and just-in-time workflow notes | [`unified-ux-migration.md`](../unified-ux-migration.md) |
 | Data workflow | Practical examples for workspace reads, selections, persistence, transactions, and committed refreshes | [`data-access-and-workspace.md`](../data-access-and-workspace.md) |
-| Unified UI/UX migration | v0/v1 boundaries, protected shared contracts, and just-in-time workflow decision notes | [`migration-guide.md`](../unified-ux/migration-guide.md) |
 | Task context | Minimal entrypoints, document sections, modes, skills, risks, and initial validation | [`context-index.md`](context-index.md) |
 | Prototype foundation | Shared product, workflow, visual, welcome-screen, and theming guidance for redesign prototypes | [`prototype-foundation.md`](prototype-foundation.md) |
 | P1 data workbench pattern | Facility Data navigation, home/workbench layout, scoped editors, and real-data prototype guidance | [`p1-data-workbench-pattern.md`](p1-data-workbench-pattern.md) |

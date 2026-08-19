@@ -5,7 +5,8 @@ Use this guide with issue #2559 when planning or implementing new UI/UX work. It
 ## Source Layout
 
 - `src/app/v0/` contains the current production UI. Keep legacy routes and v0-only presentation behavior here.
-- `src/app/v1/` is reserved for the future opt-in production experience. Add it on the `unified-ux` branch after the develop foundation lands.
+- `src/app/v1/` contains the opt-in production unified workspace reached through `/v1` on `unified-ux`.
+- `src/app/ux-prototypes/` contains P1 prototype reference material reached through `/p1` on `unified-ux`. Prototype code can inform v1, but production v1 should not depend on prototype-only components unless they are deliberately promoted.
 - `src/app/shared/` contains version-neutral helpers and contracts; import it with `@shared/*`.
 - `src/app/v0/shared/` contains legacy reusable UI that is shared only inside v0; import it with `@v0/shared/*`.
 - `src/app/data/` contains shared data contracts: account workspace, IndexedDB, backups, persisted models, and migrations.
@@ -47,9 +48,10 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 - Rebuild v1 UI components from scratch using the new architecture and P1 learnings.
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.
 - Keep current public v0 URLs stable while v0 remains the default experience.
-- Keep `/p1` prototype routes and `/v1` production routes out of `develop`; add them on `unified-ux`.
+- Keep `/p1` prototype routes and `/v1` production routes out of `develop`; on `unified-ux`, root routing lazy-loads `/p1`, `/v1`, and the default v0 route tree.
+- Treat `/p1` as non-production reference material. It may temporarily import `@v0/shared/*` while production v1 must not import from `@v0/*`.
 - Prefer aliases for cross-boundary imports: `@app/*`, `@shared/*`, `@v0/*`, `@data/*`, `@domain/*`, and `@platform/*`.
-- Do not import from `@v0/*` in root shared, data, domain, platform, or future v1 code.
+- Do not import from `@v0/*` in root shared, data, domain, platform, or production v1 code.
 - Use `@v0/shared/*` for legacy reusable UI even when only v0 imports it today; use `@shared/*` only when v1 can safely depend on the code without inheriting v0 presentation behavior.
 
 ## Validation
