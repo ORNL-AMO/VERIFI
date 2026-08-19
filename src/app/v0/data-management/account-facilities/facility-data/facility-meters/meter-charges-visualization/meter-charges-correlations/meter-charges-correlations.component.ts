@@ -1,0 +1,35 @@
+import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { Component, Input, inject } from '@angular/core';
+import { IdbUtilityMeter, MeterCharge } from '@app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+
+@Component({
+  selector: 'app-meter-charges-correlations',
+  standalone: false,
+  templateUrl: './meter-charges-correlations.component.html',
+  styleUrl: './meter-charges-correlations.component.css'
+})
+export class MeterChargesCorrelationsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  @Input({ required: true }) meter: IdbUtilityMeter;
+  @Input({ required: true }) charge: MeterCharge;
+
+  hasTotalCost: boolean;
+  hasDemand: boolean;
+  hasData: boolean;
+
+
+  ngOnInit() {
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);
+    this.hasData = utilityMeterData.length > 2;
+    if (this.hasData) {
+      this.hasTotalCost = utilityMeterData.find(data => {
+        return isNaN(data.totalCost) == false
+      }) != undefined;
+      this.hasDemand = utilityMeterData.find(data => {
+        return isNaN(data.totalRealDemand) == false || isNaN(data.totalBilledDemand) == false
+      }) != undefined;
+    }
+  }
+
+}

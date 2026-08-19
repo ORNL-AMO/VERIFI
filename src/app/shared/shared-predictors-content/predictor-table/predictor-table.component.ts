@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
@@ -13,7 +13,7 @@ import { getSelectedRegressionModel } from '../../shared-analysis/calculations/r
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';

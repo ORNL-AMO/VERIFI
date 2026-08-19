@@ -1,6 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { AnalysisGroup, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

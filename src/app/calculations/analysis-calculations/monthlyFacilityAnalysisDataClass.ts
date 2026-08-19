@@ -6,7 +6,7 @@ import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalcu
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
-import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonth } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 
 export class MonthlyFacilityAnalysisDataClass {
 

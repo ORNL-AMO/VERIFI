@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
 import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';

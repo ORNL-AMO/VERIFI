@@ -5,7 +5,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
 import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';

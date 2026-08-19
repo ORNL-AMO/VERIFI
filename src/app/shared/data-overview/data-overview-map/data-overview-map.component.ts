@@ -2,7 +2,7 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, ElementRef, Input, ViewChild, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
+import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import { EGridService } from '../../helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';

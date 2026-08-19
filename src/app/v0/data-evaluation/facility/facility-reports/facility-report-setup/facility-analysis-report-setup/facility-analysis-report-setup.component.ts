@@ -1,0 +1,292 @@
+import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { Component, inject, Injector } from '@angular/core';
+import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
+import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@app/models/analysis';
+import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { AnalysisReportSettings, IdbFacilityReport } from '@app/models/idbModels/facilityReport';
+import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+
+@Component({
+  selector: 'app-facility-analysis-report-setup',
+  templateUrl: './facility-analysis-report-setup.component.html',
+  styleUrl: './facility-analysis-report-setup.component.css',
+  standalone: false
+})
+export class FacilityAnalysisReportSetupComponent {
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly reportHandler = inject(ReportCommandHandler);
+
+  facilityReport: IdbFacilityReport;
+  facilityReportSub: Subscription;
+
+  analysisItems: Array<IdbAnalysisItem>;
+  analysisItemsSub: Subscription;
+
+  analysisTableColumns: AnalysisTableColumns;
+  selectedAnalysisItem: IdbAnalysisItem;
+  energyColumnLabel: string;
+  actualUseLabel: string;
+  modeledUseLabel: string;
+  reportYears: Array<number>;
+  reportSettings: AnalysisReportSettings;
+  baselineYears: Array<number>;
+  filteredAnalysisItems: Array<IdbAnalysisItem>;
+  calanderizedMetersSub: Subscription;
+
+  constructor(
+    private calanderizationService: CalanderizationService,
+    private injector: Injector
+  ) {
+
+  }
+
+  ngOnInit() {
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityReport()),
+        distinctUntilChanged()
+      )
+      .subscribe(report => {
+        this.facilityReport = report;
+        this.setReportSettings();
+      });
+
+    this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector })
+      .pipe(
+        startWith(this.accountWorkspaceStore.selectedFacilityAnalyses()),
+        distinctUntilChanged()
+      )
+      .subscribe(items => {
+        this.analysisItems = [...items];
+      });
+
+    this.setSelectedAnalysisItem();
+
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
+      this.setYearOptions();
+    });
+
+  }
+
+  ngOnDestroy() {
+    this.facilityReportSub.unsubscribe();
+    this.analysisItemsSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
+  }
+
+  setSelectedAnalysisItem() {
+    if (!this.analysisItems || !this.facilityReport) {
+      return;
+    }
+    this.selectedAnalysisItem = this.analysisItems.find(item => {
+      return item.guid == this.facilityReport.analysisItemId;
+    });
+    this.setPredictorVariables();
+    this.setLabels();
+  }
+
+  private setReportSettings(): void {
+    if (!this.facilityReport) {
+      return;
+    }
+    this.reportSettings = this.facilityReport.analysisReportSettings;
+    this.analysisTableColumns = this.reportSettings.analysisTableColumns;
+  }
+
+  async save() {
+    this.setMonthIncrementalImprovement();
+    this.setEnergyColumns();
+    this.setPredictorColumn();
+    this.facilityReport.analysisReportSettings.analysisTableColumns = this.analysisTableColumns;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    const { value: updatedReport } = await this.commandBoundary.execute(
+      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
+      () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
+    );
+    this.facilityReport = updatedReport;
+    this.accountWorkspaceService.selectFacilityReport(this.facilityReport?.guid);
+  }
+
+  toggleEnergyColumns() {
+    if (this.analysisTableColumns.energy == false) {
+      this.analysisTableColumns.actualEnergy = false;
+      this.analysisTableColumns.modeledEnergy = false;
+      this.analysisTableColumns.adjusted = false;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = false;
+      this.analysisTableColumns.baselineAdjustmentForOther = false;
+      this.analysisTableColumns.baselineAdjustment = false;
+    } else {
+      this.analysisTableColumns.actualEnergy = true;
+      this.analysisTableColumns.modeledEnergy = true;
+      this.analysisTableColumns.adjusted = true;
+      this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+      this.analysisTableColumns.baselineAdjustmentForOther = true;
+      this.analysisTableColumns.baselineAdjustment = true;
+    }
+    this.save();
+  }
+
+  toggleIncrementalImprovement() {
+    if (this.analysisTableColumns.incrementalImprovement == false) {
+      this.analysisTableColumns.SEnPI = false;
+      this.analysisTableColumns.savings = false;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+      // this.analysisTableColumns.yearToDateSavings = false;
+      // this.analysisTableColumns.yearToDatePercentSavings = false;
+      this.analysisTableColumns.bankedSavings = false;
+      this.analysisTableColumns.savingsUnbanked = false;
+      this.analysisTableColumns.rollingSavings = false;
+      this.analysisTableColumns.rolling12MonthImprovement = false;
+      this.analysisTableColumns.totalSavingsPercentImprovement = false;
+      this.analysisTableColumns.annualSavingsPercentImprovement = false;
+      this.analysisTableColumns.cummulativeSavings = false;
+      this.analysisTableColumns.newSavings = false;
+    } else {
+      this.analysisTableColumns.SEnPI = true;
+      this.analysisTableColumns.savings = true;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
+      // this.analysisTableColumns.yearToDateSavings = true;
+      // this.analysisTableColumns.yearToDatePercentSavings = true;
+      this.analysisTableColumns.bankedSavings = true;
+      this.analysisTableColumns.savingsUnbanked = true;
+      this.analysisTableColumns.rollingSavings = true;
+      this.analysisTableColumns.rolling12MonthImprovement = true;
+      this.analysisTableColumns.totalSavingsPercentImprovement = true;
+      this.analysisTableColumns.annualSavingsPercentImprovement = true;
+      this.analysisTableColumns.cummulativeSavings = true;
+      this.analysisTableColumns.newSavings = true;
+    }
+    this.save();
+  }
+
+
+  setEnergyColumns() {
+    this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy
+      || this.analysisTableColumns.modeledEnergy
+      || this.analysisTableColumns.adjusted
+      || this.analysisTableColumns.baselineAdjustmentForNormalization
+      || this.analysisTableColumns.baselineAdjustmentForOther
+      || this.analysisTableColumns.baselineAdjustment);
+  }
+
+  setMonthIncrementalImprovement() {
+    this.analysisTableColumns.incrementalImprovement = (
+      this.analysisTableColumns.SEnPI ||
+      this.analysisTableColumns.savings ||
+      // this.analysisTableColumns.percentSavingsComparedToBaseline ||
+      // this.analysisTableColumns.yearToDateSavings ||
+      // this.analysisTableColumns.yearToDatePercentSavings ||
+      this.analysisTableColumns.rollingSavings ||
+      this.analysisTableColumns.rolling12MonthImprovement ||
+      this.analysisTableColumns.SEnPI ||
+      this.analysisTableColumns.savings ||
+      this.analysisTableColumns.totalSavingsPercentImprovement ||
+      this.analysisTableColumns.annualSavingsPercentImprovement ||
+      this.analysisTableColumns.cummulativeSavings ||
+      this.analysisTableColumns.newSavings ||
+      this.analysisTableColumns.bankedSavings ||
+      this.analysisTableColumns.savingsUnbanked
+    )
+  }
+
+  setPredictorColumn() {
+    let predictorOn = this.analysisTableColumns.predictors.find(predictor => {
+      return predictor.display;
+    });
+    this.analysisTableColumns.productionVariables = (predictorOn != undefined);
+  }
+
+  setLabels() {
+    if (this.selectedAnalysisItem) {
+      if (this.selectedAnalysisItem.analysisCategory == 'water') {
+        this.actualUseLabel = 'Actual Consumption';
+        this.modeledUseLabel = 'Modeled Consumption';
+        this.energyColumnLabel = 'Consumption Columns';
+      } else if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+        this.actualUseLabel = 'Actual Energy Use';
+        this.modeledUseLabel = 'Modeled Energy Use';
+        this.energyColumnLabel = 'Energy Columns';
+      }
+    }
+  }
+
+  async setDefault() {
+    this.analysisTableColumns.incrementalImprovement = true;
+    this.analysisTableColumns.SEnPI = false;
+    this.analysisTableColumns.savings = false;
+    this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+    this.analysisTableColumns.yearToDateSavings = false;
+    this.analysisTableColumns.yearToDatePercentSavings = false;
+    this.analysisTableColumns.rollingSavings = false;
+    this.analysisTableColumns.rolling12MonthImprovement = false;
+    this.analysisTableColumns.productionVariables = true;
+    this.analysisTableColumns.energy = true;
+    this.analysisTableColumns.actualEnergy = true;
+    this.analysisTableColumns.modeledEnergy = true;
+    this.analysisTableColumns.adjusted = true;
+    this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+    this.analysisTableColumns.baselineAdjustmentForOther = true;
+    this.analysisTableColumns.baselineAdjustment = true;
+    this.analysisTableColumns.totalSavingsPercentImprovement = true;
+    this.analysisTableColumns.annualSavingsPercentImprovement = true;
+    this.analysisTableColumns.cummulativeSavings = true;
+    this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.bankedSavings = false;
+    this.analysisTableColumns.savingsUnbanked = false;
+    await this.save();
+  }
+
+  setPredictorVariables() {
+    if (this.selectedAnalysisItem) {
+      let predictorSelections: Array<{
+        predictor: AnalysisGroupPredictorVariable,
+        display: boolean,
+        usedInAnalysis: boolean
+      }> = new Array();
+
+      let variableCopy: Array<AnalysisGroupPredictorVariable> = this.selectedAnalysisItem.groups[0].predictorVariables.map(pVar => {
+        return JSON.parse(JSON.stringify(pVar));
+      })
+      variableCopy.forEach(variable => {
+        predictorSelections.push({
+          predictor: variable,
+          display: variable.productionInAnalysis && this.analysisTableColumns.productionVariables,
+          usedInAnalysis: variable.productionInAnalysis
+        });
+      });
+      this.analysisTableColumns.predictors = predictorSelections;
+      this.save();
+    }
+  }
+
+  async toggleAllPredictors() {
+    this.analysisTableColumns.predictors.forEach(predictor => {
+      predictor.display = this.analysisTableColumns.productionVariables;
+    });
+    await this.save();
+  }
+
+  setYearOptions() {
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
+    this.reportYears = yearOptions;
+    this.baselineYears = yearOptions;
+  }
+
+  onSelectedAnalysisItemChange(item: IdbAnalysisItem) {
+    this.selectedAnalysisItem = item;
+    this.setPredictorVariables();
+    this.setLabels();
+    this.save();
+  }
+
+  onFilteredItemsChange(items: Array<IdbAnalysisItem>) {
+    this.filteredAnalysisItems = items;
+  }
+}

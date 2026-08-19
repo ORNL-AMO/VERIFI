@@ -5,7 +5,7 @@ import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler, PredictorDataBatchChanges } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
@@ -17,7 +17,7 @@ import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFunctions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
 import { Month, Months } from '../../form-data/months';
 

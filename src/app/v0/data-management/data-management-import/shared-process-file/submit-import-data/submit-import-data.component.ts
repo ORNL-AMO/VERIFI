@@ -1,0 +1,269 @@
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { DataManagementService } from '@v0/data-management/data-management.service';
+import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
+import { IdbAccount } from '@app/models/idbModels/account';
+import { LoadingService } from '@app/core-components/loading/loading.service';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from '@app/shared/dateHelperFunctions';
+
+@Component({
+  selector: 'app-submit-import-data',
+  standalone: false,
+
+  templateUrl: './submit-import-data.component.html',
+  styleUrl: './submit-import-data.component.css'
+})
+export class SubmitImportDataComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  fileReference: FileReference;
+  paramsSub: Subscription;
+  navSub: Subscription;
+
+  importSummary: {
+    numFacilities: number,
+    numUtilityData: number,
+    numPredictorData: number
+  } = {
+      numFacilities: 0,
+      numPredictorData: 0,
+      numUtilityData: 0
+    };
+  facilitySummaries: Array<ImportSummaryItem> = [];
+  displayUpdatePredictorModal: boolean = false;
+  dataSubmitted: boolean = false;
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService,
+    private uploadDataService: UploadDataService,
+    private router: Router,
+    private loadingService: LoadingService
+
+  ) { }
+
+
+  ngOnInit(): void {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
+      let id: string = param['id'];
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
+      this.setFacilitySummaries();
+    });
+
+    this.navSub = this.loadingService.navigationAfterLoading.subscribe((context) => {
+      if (context == 'submit-file-data') {
+        this.uploadDataService.navigate();
+        let account: IdbAccount = this.accountWorkspaceStore.account();
+        this.router.navigateByUrl('/data-management/' + account.guid + '/import-data');
+        this.loadingService.navigationAfterLoading.next(undefined);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.paramsSub.unsubscribe();
+    this.navSub?.unsubscribe();
+  }
+
+  async submitImport() {
+    if (!this.dataSubmitted) {
+      this.fileReference = await this.uploadDataService.submit(this.fileReference);
+      let accountHasWeatherPredictors: boolean = this.checkAccountWeatherPredictors();
+      if (accountHasWeatherPredictors) {
+        this.dataSubmitted = true;
+      } else {
+        this.finishSubmit();
+      }
+    } else {
+      this.finishSubmit();
+    }
+  }
+
+  checkAccountWeatherPredictors(): boolean {
+    let predictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+    let weatherPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
+      return predictor.predictorType == 'Weather';
+    });
+    return weatherPredictors.length > 0;
+  }
+
+  finishSubmit() {
+    let fileReferences: Array<FileReference> = this.dataManagementService.fileReferences.getValue();
+    fileReferences = fileReferences.filter(fileRef => { return fileRef.id != this.fileReference.id });
+    this.dataManagementService.fileReferences.next(fileReferences);
+  }
+
+  setFacilitySummaries() {
+    this.facilitySummaries = new Array();
+    this.fileReference.importFacilities.forEach(facility => {
+      let meters: Array<IdbUtilityMeter> = this.fileReference.meters.filter(meter => {
+        return meter.facilityId == facility.guid
+      });
+      let predictors: Array<IdbPredictor> = this.fileReference.predictors.filter(predictor => {
+        return predictor.facilityId == facility.guid;
+      });
+      if (meters.length != 0 && predictors.length != 0) {
+        let newMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
+          return meter.id == undefined;
+        });
+        let existingMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
+          return meter.id != undefined;
+        });
+        let newPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
+          return predictor.id == undefined;
+        });
+        let existingPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
+          return predictor.id != undefined;
+        });
+        this.facilitySummaries.push({
+          facility: facility,
+          newMeters: newMeters.map(meter => {
+            return this.getMeterItem(meter)
+          }),
+          existingMeters: existingMeters.map(meter => {
+            return this.getMeterItem(meter)
+          }),
+          newPredictors: newPredictors.map(meter => {
+            return this.getPredictorItem(meter)
+          }),
+          existingPredictors: existingPredictors.map(meter => {
+            return this.getPredictorItem(meter)
+          })
+        })
+      }
+    });
+    this.importSummary = {
+      numFacilities: this.facilitySummaries.length,
+      numPredictorData: this.fileReference.predictorData.length,
+      numUtilityData: this.fileReference.meterData.length
+    }
+  }
+
+  getMeterItem(meter: IdbUtilityMeter): {
+    meter: IdbUtilityMeter,
+    existingReadings: Array<IdbUtilityMeterData>,
+    existingDateRange: { startDate: Date, endDate: Date },
+    newReadings: Array<IdbUtilityMeterData>,
+    newDateRange: { startDate: Date, endDate: Date }
+  } {
+    let existingReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(mData => {
+      return mData.meterId == meter.guid && mData.id != undefined
+    });
+    let minExistingStartDate: Date;
+    let maxExistingStartDate: Date;
+    if (existingReadings.length > 0) {
+      minExistingStartDate = getEarliestMeterDataDate(existingReadings);
+      maxExistingStartDate = getLatestMeterDataDate(existingReadings);
+    }
+    let newReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(mData => {
+      return mData.meterId == meter.guid && mData.id == undefined
+    });
+    let minNewStartDate: Date;
+    let maxNewStartDate: Date;
+    if (newReadings.length > 0) {
+      minNewStartDate = getEarliestMeterDataDate(newReadings);
+      maxNewStartDate = getLatestMeterDataDate(newReadings);
+    }
+    return {
+      meter: meter,
+      existingReadings: existingReadings,
+      existingDateRange: {
+        startDate: minExistingStartDate,
+        endDate: maxExistingStartDate
+      },
+      newReadings: newReadings,
+      newDateRange: {
+        startDate: minNewStartDate,
+        endDate: maxNewStartDate
+      }
+    }
+  }
+  getPredictorItem(predictor: IdbPredictor): {
+    predictor: IdbPredictor,
+    existingReadings: Array<IdbPredictorData>,
+    existingDateRange: { startDate: Date, endDate: Date },
+    newReadings: Array<IdbPredictorData>,
+    newDateRange: { startDate: Date, endDate: Date }
+  } {
+
+    let existingReadings: Array<IdbPredictorData> = this.fileReference.predictorData.filter(pData => {
+      return pData.predictorId == predictor.guid && pData.id != undefined
+    });
+
+    let minExistingStartDate: Date;
+    let maxExistingStartDate: Date;
+    if (existingReadings.length > 0) {
+      minExistingStartDate = getEarliestPredictorDataDate(existingReadings);
+      maxExistingStartDate = getLatestPredictorDataDate(existingReadings);
+    }
+    let newReadings: Array<IdbPredictorData> = this.fileReference.predictorData.filter(pData => {
+      return pData.predictorId == predictor.guid && pData.id == undefined
+    });
+    let minNewStartDate: Date;
+    let maxNewStartDate: Date;
+    if (newReadings.length > 0) {
+      minNewStartDate = getEarliestPredictorDataDate(newReadings);
+      maxNewStartDate = getLatestPredictorDataDate(newReadings);
+    }
+
+    return {
+      predictor: predictor,
+      existingReadings: existingReadings,
+      existingDateRange: {
+        startDate: minExistingStartDate,
+        endDate: maxExistingStartDate
+      },
+      newReadings: newReadings,
+      newDateRange: {
+        startDate: minNewStartDate,
+        endDate: maxNewStartDate
+      }
+    }
+  }
+
+  openWeatherPredictorModal() {
+    this.displayUpdatePredictorModal = true;
+  }
+
+  hideWeatherPredictorModal() {
+    this.displayUpdatePredictorModal = false;
+  }
+}
+
+export interface ImportSummaryItem {
+  facility: IdbFacility,
+  newMeters: Array<{
+    meter: IdbUtilityMeter,
+    existingReadings: Array<IdbUtilityMeterData>,
+    existingDateRange: { startDate: Date, endDate: Date },
+    newReadings: Array<IdbUtilityMeterData>,
+    newDateRange: { startDate: Date, endDate: Date }
+  }>,
+  existingMeters: Array<{
+    meter: IdbUtilityMeter,
+    existingReadings: Array<IdbUtilityMeterData>,
+    existingDateRange: { startDate: Date, endDate: Date },
+    newReadings: Array<IdbUtilityMeterData>,
+    newDateRange: { startDate: Date, endDate: Date }
+  }>,
+  newPredictors: Array<{
+    predictor: IdbPredictor,
+    existingReadings: Array<IdbPredictorData>,
+    existingDateRange: { startDate: Date, endDate: Date },
+    newReadings: Array<IdbPredictorData>,
+    newDateRange: { startDate: Date, endDate: Date }
+  }>,
+  existingPredictors: Array<{
+    predictor: IdbPredictor,
+    existingReadings: Array<IdbPredictorData>,
+    existingDateRange: { startDate: Date, endDate: Date },
+    newReadings: Array<IdbPredictorData>,
+    newDateRange: { startDate: Date, endDate: Date }
+  }>
+}

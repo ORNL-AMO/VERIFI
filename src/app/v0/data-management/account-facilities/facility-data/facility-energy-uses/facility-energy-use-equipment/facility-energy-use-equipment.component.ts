@@ -1,0 +1,211 @@
+import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
+import { EnergyUseCommandHandler } from '@app/account-workspace/handlers/energy-use-command-handler.service';
+import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { from, map, Observable, of, switchAll, take } from 'rxjs';
+import { LoadingService } from '@app/core-components/loading/loading.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@app/account-workspace/account-workspace-patches';
+import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
+import { getYearsWithFullData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { CalanderizedMeter } from '@app/models/calanderization';
+import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+
+@Component({
+  selector: 'app-facility-energy-use-equipment',
+  standalone: false,
+  templateUrl: './facility-energy-use-equipment.component.html',
+  styleUrl: './facility-energy-use-equipment.component.css'
+})
+export class FacilityEnergyUseEquipmentComponent {
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly energyUseHandler = inject(EnergyUseCommandHandler);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  private activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private router: Router = inject(Router);
+  private sharedDataService: SharedDataService = inject(SharedDataService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private toastNotificationsService: ToastNotificationsService = inject(ToastNotificationsService);
+  private calanderizationService: CalanderizationService = inject(CalanderizationService);
+  private routerGuardService: RouterGuardService = inject(RouterGuardService);
+
+  energyUseEquipmentSignal: WritableSignal<IdbFacilityEnergyUseEquipment> = signal<IdbFacilityEnergyUseEquipment>(null);
+  get energyUseEquipment(): IdbFacilityEnergyUseEquipment {
+    return this.energyUseEquipmentSignal();
+  }
+  set energyUseEquipment(value: IdbFacilityEnergyUseEquipment) {
+    this.energyUseEquipmentSignal.set(value);
+  }
+
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  calanderizedMeters: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+
+  showDeleteEquipment: boolean = false;
+  dataChanged: boolean = false;
+  showNoLongerInUseModal: boolean = false;
+  showReinstateEquipmentModal: boolean = false;
+
+  selectedYear: number;
+  yearOptions: Signal<Array<number>> = computed(() => {
+    const calanderizedMeters = this.calanderizedMeters();
+    const selectedFacility = this.selectedFacility();
+    if (calanderizedMeters.length === 0 || !selectedFacility) {
+      return [];
+    }
+    return getYearsWithFullData(calanderizedMeters, selectedFacility);
+  });
+
+  ngOnInit() {
+    this.activatedRoute.params.subscribe(params => {
+      let equipmentId: string = params['equipmentId'];
+      let energyUseEquipment: IdbFacilityEnergyUseEquipment = this.accountWorkspaceQuery.getEnergyUseEquipmentByGuid(equipmentId);
+      if (energyUseEquipment) {
+        //create copy
+        this.energyUseEquipment = _.cloneDeep(energyUseEquipment);
+        this.dataChanged = false;
+      } else {
+        this.goToGroupList();
+      }
+    });
+  }
+
+  async saveChanges() {
+    this.loadingService.setLoadingMessage('Saving Meter...');
+    this.loadingService.setLoadingStatus(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      {
+        entityKind: 'energyUseEquipment',
+        changeKind: 'update',
+        entityGuid: this.energyUseEquipment.guid,
+        label: 'Saving energy use equipment',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('energyUseEquipment', [value])
+        }
+      },
+      () => this.energyUseHandler.updateEquipment(this.energyUseEquipment, activeAccountGuid)
+    );
+    this.loadingService.setLoadingStatus(false);
+    this.dataChanged = false;
+  }
+
+  showDelete() {
+    this.sharedDataService.modalOpen.next(true);
+    this.showDeleteEquipment = true;
+  }
+
+  cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showDeleteEquipment = false;
+  }
+
+  async deleteEquipment() {
+    this.dataChanged = false;
+    this.showDeleteEquipment = false;
+    this.loadingService.setLoadingMessage('Deleting Energy Use Equipment...')
+    this.loadingService.setLoadingStatus(true);
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
+    await this.commandBoundary.execute(
+      {
+        entityKind: 'energyUseEquipment',
+        changeKind: 'delete',
+        label: 'Deleting energy use equipment',
+        publication: {
+          mode: 'patch',
+          buildPatch: value => deleteWorkspaceRecords('energyUseEquipment', { ids: [value] })
+        }
+      },
+      () => this.energyUseHandler.deleteEquipment(this.energyUseEquipment, activeAccountGuid)
+    );
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationsService.showToast("Energy Use Equipment Deleted", undefined, undefined, false, "alert-success");
+    this.goToGroupList();
+  }
+
+  goToGroupList() {
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/energy-uses/' + this.energyUseEquipment.energyUseGroupId);
+  }
+
+
+  canDeactivate(): Observable<boolean> {
+    if (this.dataChanged) {
+      this.routerGuardService.setShowSave(true);
+      this.routerGuardService.setShowModal(true);
+      return this.routerGuardService.getModalAction().pipe(map(action => {
+        if (action == 'save') {
+          return from(this.saveChanges()).pipe(map(() => true));
+        } else if (action == 'discard') {
+          return of(true);
+        }
+        return of(false);
+      }),
+        take(1), switchAll());
+    }
+    return of(true);
+  }
+
+  setDataChanged(updatedEquipment: IdbFacilityEnergyUseEquipment) {
+    this.energyUseEquipment = updatedEquipment;
+    this.dataChanged = true;
+  }
+
+  openNoLongerInUse() {
+    let yearOptions = this.yearOptions();
+    this.selectedYear = yearOptions[yearOptions.length - 1];
+    this.sharedDataService.modalOpen.next(true);
+    this.showNoLongerInUseModal = true;
+  }
+
+  closeNoLongerInUse() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showNoLongerInUseModal = false;
+  }
+
+  async markNoLongerInUse() {
+    if (!this.energyUseEquipment.noLongerInUse) {
+      this.energyUseEquipment['noLongerInUse'] = {
+        isNoLongerInUse: true,
+        year: this.selectedYear
+      }
+    } else {
+
+      this.energyUseEquipment.noLongerInUse = {
+        isNoLongerInUse: true,
+        year: this.selectedYear
+      }
+    }
+    await this.saveChanges();
+    this.closeNoLongerInUse();
+  }
+
+  openReinstateEquipment() {
+    this.sharedDataService.modalOpen.next(true);
+    this.showReinstateEquipmentModal = true;
+  }
+
+  closeReinstateEquipment() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showReinstateEquipmentModal = false;
+  }
+
+  async reinstateEquipment() {
+    if (this.energyUseEquipment.noLongerInUse) {
+      this.energyUseEquipment.noLongerInUse.isNoLongerInUse = false;
+      this.energyUseEquipment.noLongerInUse.year = null;
+      await this.saveChanges();
+    }
+    this.closeReinstateEquipment();
+  }
+}

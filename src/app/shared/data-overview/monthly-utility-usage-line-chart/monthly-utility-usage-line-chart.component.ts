@@ -2,11 +2,11 @@ import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspa
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
+import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { Month, Months } from '../../form-data/months';
 import * as _ from 'lodash';
-import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 

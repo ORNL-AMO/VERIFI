@@ -11,7 +11,7 @@ import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-co
 import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
 import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
 import { LoadingService } from '../loading/loading.service';
-import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { ElectronBackupFileComponent } from './electron-backup-file.component';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';

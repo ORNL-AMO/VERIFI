@@ -1,0 +1,30 @@
+import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+
+@Component({
+  selector: 'app-facility-meter-monthly-data',
+  templateUrl: './facility-meter-monthly-data.component.html',
+  styleUrl: './facility-meter-monthly-data.component.css',
+  standalone: false
+})
+export class FacilityMeterMonthlyDataComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+
+  utilityMeter: IdbUtilityMeter;
+  constructor(
+    private activatedRoute: ActivatedRoute
+
+  ) { }
+
+  ngOnInit() {
+    this.activatedRoute.params.subscribe(params => {
+      let meterId: string = params['id'];
+      this.utilityMeter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
+      this.accountWorkspaceService.selectMeter((this.utilityMeter)?.guid);
+    });
+  }
+}

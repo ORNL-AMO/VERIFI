@@ -9,7 +9,7 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
+import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { MetersOverviewStackedLineChartComponent } from '../meters-overview-stacked-line-chart/meters-overview-stacked-line-chart.component';
 import { MeterUsageDonutComponent } from '../meter-usage-donut/meter-usage-donut.component';
 import { MonthlyUtilityUsageLineChartComponent } from '../monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';

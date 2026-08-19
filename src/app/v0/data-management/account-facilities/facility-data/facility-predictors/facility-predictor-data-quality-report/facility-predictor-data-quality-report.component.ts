@@ -1,0 +1,46 @@
+import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { IdbPredictorData } from '@app/models/idbModels/predictorData';
+
+@Component({
+  selector: 'app-facility-predictor-data-quality-report',
+  standalone: false,
+  templateUrl: './facility-predictor-data-quality-report.component.html',
+  styleUrl: './facility-predictor-data-quality-report.component.css'
+})
+export class FacilityPredictorDataQualityReportComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  predictor: IdbPredictor;
+  predictorData: Array<IdbPredictorData>;
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router
+
+  ) {
+
+  }
+
+  ngOnInit() {
+    this.activatedRoute.params.subscribe(params => {
+      let meterId: string = params['id'];
+      this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(meterId);
+      if (this.predictor) {
+        this.predictorData = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
+      } else {
+        this.goToPredictorList();
+      }
+    });
+  }
+
+  goToPredictorList() {
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/predictors')
+  }
+}

@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
-import { NominatimLocation, WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { NominatimLocation, WeatherDataService } from '@v0/weather-data/weather-data.service';
 
 @Component({
   selector: 'app-weather-station-modal',

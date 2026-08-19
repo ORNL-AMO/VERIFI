@@ -33,7 +33,7 @@ Account creation and import flows activate their persisted account through the l
 
 [`AppComponent`](src/app/app.component.ts) triggers and renders that lifecycle but does not query repositories. Its shell exposes accessible initializing, error/retry, and switching states. Application-instance metadata is lifecycle-owned readonly state; its IndexedDB service is persistence-only.
 
-Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts):
+Top-level routing is composed by [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts), with the current production route tree owned by v0 under [`src/app/v0/routing/`](src/app/v0/routing/):
 
 - **v0 legacy experience** is lazy-loaded from [`src/app/v0/v0.module.ts`](src/app/v0/v0.module.ts). Its shell owns the current production header, legacy global modals, toast placement, and legacy route outlet while keeping existing public URLs stable.
 - **Data management** handles account setup, facilities, meters, predictor data, imports, energy-use setup, and custom factors.
@@ -41,7 +41,7 @@ Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/ap
 - **Weather data** provides station selection and annual or monthly observations.
 - Shared routes provide the home page, account management, help, privacy, feedback, and other static content.
 
-Account and facility route trees are intentionally large. Add routes alongside the relevant workflow and inspect adjacent components before changing navigation behavior.
+Account and facility route trees are intentionally large. Add legacy routes under `src/app/v0/routing/` alongside the relevant workflow and inspect adjacent components before changing navigation behavior.
 
 Readiness guards in [`workspace-readiness.guards.ts`](src/app/routing/workspace-readiness.guards.ts) wait for persistence, account workspace, or facility selection as required. Account and facility deep links resolve GUIDs and may switch the active workspace before activation. Static help, privacy, feedback, acknowledgment, and about routes remain available without an active account, including their existing nested URLs. Existing `canDeactivate` guards remain attached to edit routes.
 
@@ -139,7 +139,7 @@ Preserve these invariants:
 
 ## UI architecture
 
-VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Feature components own their local templates and styles; reusable UI lives under `src/app/shared/`; global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
+VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Legacy v0 feature components live under `src/app/v0/` and own their local templates and styles. Reusable UI that is not version-specific lives under `src/app/shared/`; global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
 
 The current production UI is treated as v0 and is lazy-loaded through `src/app/v0/`. The root `AppComponent` owns startup, lifecycle, root routing, and app-wide runtime overlays only; v0 owns the legacy header, legacy route outlet, and legacy UI modals. Future v1 production UI should use a separate lazy-loaded route module rather than adding v0/v1 conditionals to legacy components.
 

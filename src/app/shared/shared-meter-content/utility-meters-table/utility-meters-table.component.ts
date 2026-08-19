@@ -6,7 +6,7 @@ import { Component, computed, ElementRef, inject, input, signal, Signal, ViewChi
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';

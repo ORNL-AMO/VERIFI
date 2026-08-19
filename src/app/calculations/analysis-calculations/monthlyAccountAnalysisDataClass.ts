@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalculatedValuesClassSummation";
 import { IdbAccount } from "src/app/models/idbModels/account";
-import { checkSameMonth } from "src/app/data-management/data-management-import/import-services/upload-helper-functions";
+import { checkSameMonth } from "@v0/data-management/data-management-import/import-services/upload-helper-functions";
 
 export class MonthlyAccountAnalysisDataClass {
     date: Date;

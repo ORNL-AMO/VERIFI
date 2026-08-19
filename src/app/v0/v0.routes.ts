@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { ManageAccountsComponent } from '../core-components/manage-accounts/manage-accounts.component';
-import { HomePageComponent } from '../core-components/home-page/home-page.component';
-import { DataManagementRoutes } from '../routing/data-management.routes';
-import { DataEvaluationRoutes } from '../routing/data-evaluation.routes';
-import { FeedbackComponent } from '../static-content/feedback/feedback.component';
-import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
+import { ManageAccountsComponent } from '@v0/core-components/manage-accounts/manage-accounts.component';
+import { HomePageComponent } from '@v0/core-components/home-page/home-page.component';
+import { DataManagementRoutes } from '@v0/routing/data-management.routes';
+import { DataEvaluationRoutes } from '@v0/routing/data-evaluation.routes';
+import { FeedbackComponent } from '@v0/static-content/feedback/feedback.component';
+import { PrivacyNoticeComponent } from '@v0/static-content/privacy-notice/privacy-notice.component';
 import { persistenceReadyGuard } from '../routing/workspace-readiness.guards';
-import { PageNotFoundComponent } from '../core-components/page-not-found/page-not-found.component';
+import { PageNotFoundComponent } from '@v0/core-components/page-not-found/page-not-found.component';
 import { ExistingUxShellComponent } from './shell/existing-ux-shell/existing-ux-shell.component';
 
 const LegacyRoutes: Routes = [

@@ -1,0 +1,69 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { Component, inject, computed, Injector } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { IdbFacility } from '@app/models/idbModels/facility';
+import { FacilityEnergyUsesSetupService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup.service';
+
+@Component({
+  selector: 'app-edit-existing-groups-setup-options',
+  standalone: false,
+  templateUrl: './edit-existing-groups-setup-options.component.html',
+  styleUrl: './edit-existing-groups-setup-options.component.css',
+})
+export class EditExistingGroupsSetupOptionsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  facility: IdbFacility;
+  facilitySub: Subscription;
+
+  facilityEnergyUseGroups: Array<{
+    guid: string,
+    name: string,
+    selected: boolean
+  }>;
+  facilityEnergyUseGroupsSub: Subscription;
+
+  constructor(
+    private router: Router,
+    private facilityEnergyUsesSetupService: FacilityEnergyUsesSetupService,
+    private route: ActivatedRoute,
+    private injector: Injector
+
+  ) { }
+
+  ngOnInit() {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
+      this.facility = facility;
+    });
+
+    this.facilityEnergyUseGroupsSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityEnergyUseGroups()]), { injector: this.injector }).subscribe(groups => {
+      this.facilityEnergyUseGroups = groups.map(group => {
+        return {
+          guid: group.guid,
+          name: group.name,
+          selected: true
+        }
+      });
+    });
+  }
+
+  ngOnDestroy() {
+    this.facilityEnergyUseGroupsSub.unsubscribe();
+    this.facilitySub.unsubscribe();
+  }
+
+  toggleGroupSelection(group: { guid: string, name: string, selected: boolean }) {
+    group.selected = !group.selected;
+  }
+
+  goToEquipmentDetails() {
+    this.facilityEnergyUsesSetupService.existingGroupsToEdit = this.facilityEnergyUseGroups.filter(group => group.selected).map(group => group.guid);
+    this.router.navigate(['../../edit-existing'], { relativeTo: this.route });
+  }
+
+  leaveGroupSetup() {
+    this.router.navigate(['../../'], { relativeTo: this.route });
+  }
+}

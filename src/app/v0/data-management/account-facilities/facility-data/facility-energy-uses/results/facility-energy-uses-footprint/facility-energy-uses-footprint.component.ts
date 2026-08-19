@@ -1,0 +1,85 @@
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { EnergyFootprintAnnualFacilityBalance } from '@app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
+import { getYearsWithFullData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizedMeter } from '@app/models/calanderization';
+import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
+import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
+import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+
+@Component({
+  selector: 'app-facility-energy-uses-footprint',
+  standalone: false,
+  templateUrl: './facility-energy-uses-footprint.component.html',
+  styleUrl: './facility-energy-uses-footprint.component.css',
+})
+export class FacilityEnergyUsesFootprintComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  private calanderizationService = inject(CalanderizationService);
+
+  selectedFacility$: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  energyUseGroups$: Signal<Array<IdbFacilityEnergyUseGroup>> = computed(() => [...this.accountWorkspaceStore.energyUseGroups()]);
+  equipment$: Signal<Array<IdbFacilityEnergyUseEquipment>> = computed(() => [...this.accountWorkspaceStore.energyUseEquipment()]);
+  calanderizedMeters$: Signal<Array<CalanderizedMeter>> = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  utilityMeterGroups$: Signal<Array<IdbUtilityMeterGroup>> = computed(() => [...this.accountWorkspaceStore.meterGroups()]);
+
+
+  yearOptions: Signal<Array<number>> = computed(() => {
+    const calanderizedMeters = this.calanderizedMeters$();
+    const selectedFacility = this.selectedFacility$();
+    if (calanderizedMeters.length === 0 || !selectedFacility) {
+      return [];
+    }
+    return getYearsWithFullData(calanderizedMeters, selectedFacility);
+  });
+
+  //TODO: potentially make a web worker for this or optimize number of calls
+  //so as data changes it doesn't have to recalculate everything if not necessary.
+  //TODO: add loading logic during calculation
+  energyFootprintAnnualFacilityBalance$: Signal<EnergyFootprintAnnualFacilityBalance> = computed(() => {
+    const selectedFacility = this.selectedFacility$();
+    const energyUseGroups = this.energyUseGroups$();
+    const equipment = this.equipment$();
+    //TODO: calanderized meters may not be correct units.
+    const calanderizedMeters = this.calanderizedMeters$();
+    const utilityMeterGroups = this.utilityMeterGroups$();
+    const selectedYear = this.selectedYear();
+    if (
+      !energyUseGroups ||
+      !equipment ||
+      !calanderizedMeters ||
+      !utilityMeterGroups ||
+      !selectedYear ||
+      !selectedFacility
+    ) {
+      return null;
+    }
+    return new EnergyFootprintAnnualFacilityBalance(
+      selectedFacility,
+      energyUseGroups,
+      equipment,
+      calanderizedMeters,
+      utilityMeterGroups,
+      selectedYear,
+      "both"
+    )
+  });
+
+  //set to latest year with full data by default, but allow user to select other years to view
+  selectedYear = signal<number | null>(null);
+  displayDataByGroup = signal<boolean>(false);
+
+  constructor() {
+    // Automatically set selectedYear to the last year in yearOptions when yearOptions changes
+    effect(() => {
+      const options = this.yearOptions();
+      if (options.length > 0 && !options.includes(this.selectedYear()!)) {
+        this.selectedYear.set(options[options.length - 1]);
+      }
+    });
+  }
+}

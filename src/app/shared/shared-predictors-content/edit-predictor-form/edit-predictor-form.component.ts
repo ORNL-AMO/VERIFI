@@ -4,7 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { Router } from '@angular/router';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';

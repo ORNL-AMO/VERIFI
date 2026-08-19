@@ -3,7 +3,7 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
-import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData, AnnualSourceDataItem } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

@@ -1,0 +1,140 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { Component, EventEmitter, OnInit, Output, inject, Injector } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import * as _ from 'lodash';
+import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbAccount } from '@app/models/idbModels/account';
+import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
+
+@Component({
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css'],
+  standalone: false
+})
+export class SidebarComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Output('emitToggleCollapse')
+  emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
+
+  isDev: boolean;
+
+  accountSub: Subscription;
+
+  facilityList: Array<FacilityListItem>;
+  facilityListSub: Subscription;
+
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
+  showSidebar: boolean;
+  showAllFacilities: boolean = false;
+  hoverIndex: number;
+  hoverAccount: boolean;
+  account: IdbAccount;
+
+  sidebarOpen: boolean;
+  sidebarOpenSub: Subscription;
+  url: string;
+  routerSub: Subscription;
+  constructor(
+    private router: Router,
+    private dataEvaluationService: DataEvaluationService,
+    private injector: Injector
+  ) {
+  }
+
+  ngOnInit() {
+    this.isDev = !environment.production;
+    this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
+      this.account = account;
+    });
+
+    this.facilityListSub = toObservable(this.accountWorkspaceStore.facilities, { injector: this.injector }).subscribe(val => {
+      this.setFacilityList(val.map(facility => ({ ...facility })));
+    });
+
+    this.selectedFacilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(val => {
+      this.selectedFacility = val;
+    })
+    this.sidebarOpenSub = this.dataEvaluationService.sidebarOpen.subscribe(val => {
+      this.sidebarOpen = val;
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+      }, 100)
+    });
+
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.url = this.router.url;
+      }
+    });
+    this.url = this.router.url;
+  }
+
+  ngOnDestroy() {
+    this.accountSub.unsubscribe();
+    this.facilityListSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+    this.routerSub.unsubscribe();
+  }
+
+
+  toggleSidebar() {
+    this.emitToggleCollapse.emit(!this.sidebarOpen);
+  }
+
+  setFacilityList(accountFacilities: Array<IdbFacility>) {
+    if (!this.facilityList) {
+      this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate, facilityOrder: facility.facilityOrder } });
+    } else {
+      let tmpList: Array<string> = accountFacilities.map(facility => { return facility.guid });
+      let currentIdList: Array<string> = this.facilityList.map(listItem => { return listItem.guid });
+      let missingVals: Array<string> = _.xor(tmpList, currentIdList);
+      if (missingVals.length != 0) {
+        this.facilityList = accountFacilities.map(facility => { return { guid: facility.guid, color: facility.color, id: facility.id, modifiedDate: facility.modifiedDate, facilityOrder: facility.facilityOrder } });
+      } else {
+        let tmpList: Array<string> = accountFacilities.map(facility => { return facility.color });
+        let currentColorList: Array<string> = this.facilityList.map(listItem => { return listItem.color });
+        let missingVals: Array<string> = _.xor(tmpList, currentColorList);
+        if (missingVals.length != 0) {
+          this.facilityList.forEach(item => {
+            item.color = accountFacilities.find(facility => { return facility.guid == item.guid }).color;
+          })
+        } else {
+          let tmpList: Array<Date> = accountFacilities.map(facility => { return facility.modifiedDate });
+          let currentColorList: Array<Date> = this.facilityList.map(listItem => { return listItem.modifiedDate });
+          let missingVals: Array<Date> = _.xor(tmpList, currentColorList);
+          if (missingVals.length != 0) {
+            this.facilityList.forEach(item => {
+              item.facilityOrder = accountFacilities.find(facility => { return facility.guid == item.guid }).facilityOrder;
+            })
+          }
+        }
+      }
+    }
+  }
+
+  toggleShowAllFacilities() {
+    this.showAllFacilities = !this.showAllFacilities;
+  }
+
+  setHoverIndex(index: number) {
+    this.hoverIndex = index;
+  }
+
+  setHoverAccount(bool: boolean) {
+    this.hoverAccount = bool;
+  }
+
+  goToDataWizard() {
+    this.router.navigateByUrl('/data-management/' + this.account.guid);
+  }
+}
+
+export interface FacilityListItem {
+  guid: string, color: string, id: number, modifiedDate: Date,
+  facilityOrder: number
+}

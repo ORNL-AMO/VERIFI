@@ -7,9 +7,9 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';

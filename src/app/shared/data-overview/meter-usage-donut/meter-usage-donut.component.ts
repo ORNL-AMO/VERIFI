@@ -4,7 +4,7 @@ import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 

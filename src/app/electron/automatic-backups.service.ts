@@ -4,7 +4,7 @@ import { BackupExportCoordinator } from '../backup/backup-export-coordinator.ser
 import { BackupPreparationService, FutureBackupVersionError, PreparedBackupFile } from '../backup/backup-preparation.service';
 import { AccountWorkspaceState } from '../account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
-import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
 import { ElectronBackupFileGateway } from './electron-backup-file.gateway';
 import { IdbAccount } from '../models/idbModels/account';
