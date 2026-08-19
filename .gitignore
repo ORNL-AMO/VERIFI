@@ -1,6 +1,8 @@
 node_modules
 
 /dist
+/output
+/tmp
 
 embedded.provisionprofile
 .env

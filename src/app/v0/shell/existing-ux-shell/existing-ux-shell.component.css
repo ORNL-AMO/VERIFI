@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.existing-ux-shell {
+  min-height: 0;
+}

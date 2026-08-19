@@ -35,6 +35,7 @@ Account creation and import flows activate their persisted account through the l
 
 Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts):
 
+- **v0 legacy experience** is lazy-loaded from [`src/app/v0/v0.module.ts`](src/app/v0/v0.module.ts). Its shell owns the current production header, legacy global modals, toast placement, and legacy route outlet while keeping existing public URLs stable.
 - **Data management** handles account setup, facilities, meters, predictor data, imports, energy-use setup, and custom factors.
 - **Data evaluation** handles account and facility dashboards, visualizations, analyses, and reports.
 - **Weather data** provides station selection and annual or monthly observations.
@@ -139,6 +140,8 @@ Preserve these invariants:
 ## UI architecture
 
 VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Feature components own their local templates and styles; reusable UI lives under `src/app/shared/`; global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
+
+The current production UI is treated as v0 and is lazy-loaded through `src/app/v0/`. The root `AppComponent` owns startup, lifecycle, root routing, and app-wide runtime overlays only; v0 owns the legacy header, legacy route outlet, and legacy UI modals. Future v1 production UI should use a separate lazy-loaded route module rather than adding v0/v1 conditionals to legacy components.
 
 Use neighboring screens as the primary visual reference. Reuse shared components and existing classes before adding global rules. UI work should account for:
 
