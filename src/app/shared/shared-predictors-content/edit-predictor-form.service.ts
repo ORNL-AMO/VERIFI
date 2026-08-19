@@ -116,13 +116,7 @@ export class EditPredictorFormService {
       weatherDataChange = true;
       predictor.weatherDataType = nextWeatherType;
     }
-
-    let name = predictorForm.controls.name.value;
-    if (predictorForm.controls.predictorType.value == 'Weather' && selectedWeatherTypes.length === 1) {
-      name = this.getWeatherNameForType(nextWeatherType, predictorForm);
-      predictorForm.controls.name.patchValue(name, { emitEvent: false });
-    }
-    predictor.name = name;
+    predictor.name = predictorForm.controls.name.value;
     if (predictor.heatingBaseTemperature != predictorForm.controls.heatingBaseTemperature.value) {
       weatherDataChange = true;
       predictor.heatingBaseTemperature = predictorForm.controls.heatingBaseTemperature.value;

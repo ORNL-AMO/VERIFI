@@ -72,7 +72,7 @@
       }
     </div>
 
-    @if (predictorForm.get('weatherStationId')?.value) {
+    @if (predictorForm.get('weatherStationId')?.value && addOrEdit === 'add') {
     <div class="col-12">
       <div class="alert alert-secondary weather-alert mt-5 mb-5">
         <div class="weather-alert-title">
@@ -208,6 +208,46 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    }
+    }
+    @if (predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit') {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
+      <div class="mb-3">
+        <select id="weatherDataType" class="form-select" formControlName="weatherDataType">
+          <option [value]="'HDD'">Heating Degree Days</option>
+          <option [value]="'CDD'">Cooling Degree Days</option>
+          <option [value]="'relativeHumidity'">Relative Humidity</option>
+          <option [value]="'dryBulbTemp'">Dry Bulb Temp</option>
+          <option [value]="'wetBulbTemp'">Wet Bulb Temp</option>
+          <option [value]="'dewPointTemp'">Dew Point Temp</option>
+          <option [value]="'precipitation'">Precipitation</option>
+        </select>
+      </div>
+    </div>
+    @if (predictorForm.controls.weatherDataType.value === 'HDD') {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
+      <div class="mb-3 input-group">
+        <input id="heatingBaseTemperature" class="form-control" type="number" formControlName="heatingBaseTemperature"
+          onfocus="this.select();" name="heatingBaseTemperature">
+        <span class="input-group-text">
+          &#8457;
+        </span>
+      </div>
+    </div>
+    }
+    @if (predictorForm.controls.weatherDataType.value === 'CDD') {
+    <div class="col-lg-6 col-md-12 col-sm-12">
+      <label class="semibold" for="coolingBaseTemperature">Cooling Base Temperature</label>
+      <div class="mb-3 input-group">
+        <input id="coolingBaseTemperature" class="form-control" type="number" formControlName="coolingBaseTemperature"
+          onfocus="this.select();" name="coolingBaseTemperature">
+        <span class="input-group-text">
+          &#8457;
+        </span>
       </div>
     </div>
     }
@@ -366,14 +406,14 @@
 }
 
 
-<div [ngClass]="{'windowOverlay': displaySationModal}"></div>
-<div class="popup" [class.open]="displaySationModal">
+<div [ngClass]="{'windowOverlay': displayStationModal}"></div>
+<div class="popup" [class.open]="displayStationModal">
   <div class="popup-header">
     Select Station
     <button class="item-right" (click)="cancelStationSelect()">x</button>
   </div>
   <div class="popup-body">
-    @if (displaySationModal) {
+    @if (displayStationModal) {
     <app-weather-station-modal [facility]="facility"
       (emitSelectStation)="selectStation($event)"></app-weather-station-modal>
     }

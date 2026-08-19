@@ -1,7 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictor, WeatherDataType } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { Router } from '@angular/router';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -35,7 +35,7 @@ export class EditPredictorFormComponent {
   facility: IdbFacility;
 
 
-  displaySationModal: boolean = false;
+  displayStationModal: boolean = false;
   months: Array<Month> = Months;
   yearOptions: Array<number> = Array.from(
     { length: new Date().getFullYear() - 1999 },
@@ -46,6 +46,7 @@ export class EditPredictorFormComponent {
   endMonth: number;
   endYear: number;
   facilityPredictorData: Array<IdbPredictorData>;
+  selectedWeatherTypes: Array<WeatherDataType>;
 
   constructor(
     private router: Router,
@@ -59,6 +60,15 @@ export class EditPredictorFormComponent {
       this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.predictor.facilityId));
     }
     this.setWeatherPredictorDates();
+    this.setValidators();
+    this.selectedWeatherTypes = this.editPredictorFormService.getSelectedWeatherTypes(this.predictorForm);
+    const disableWeatherType = this.addOrEdit === 'edit' && this.predictorForm.controls.predictorType.value === 'Weather';
+    if (disableWeatherType) {
+      this.predictorForm.controls.weatherDataType.patchValue(this.selectedWeatherTypes[0], { emitEvent: false });
+      this.predictorForm.controls.weatherDataType.disable({ emitEvent: false });
+    } else {
+      this.predictorForm.controls.weatherDataType.enable({ emitEvent: false });
+    }
   }
 
   setWeatherPredictorDates() {
@@ -108,7 +118,7 @@ export class EditPredictorFormComponent {
   }
 
   async goToWeatherData() {
-    this.displaySationModal = false;
+    this.displayStationModal = false;
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
     } else if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
@@ -140,11 +150,11 @@ export class EditPredictorFormComponent {
   }
 
   openStationModal() {
-    this.displaySationModal = true;
+    this.displayStationModal = true;
   }
 
   cancelStationSelect() {
-    this.displaySationModal = false;
+    this.displayStationModal = false;
   }
 
   selectStation(station: WeatherStation) {
