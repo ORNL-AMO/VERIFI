@@ -1,9 +1,9 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
-import { IdbFacilityReport, ModelingReportSettings } from "@app/models/idbModels/facilityReport";
+import { IdbFacilityReport, ModelingReportSettings } from "@data/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
 import { BaseSection, TableSection, TextSection } from "@app/shared/pdf-report/models/report-section.model";
-import { IdbAnalysisItem } from "@app/models/idbModels/analysisItem";
+import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
 import { RegressionNumberPipe } from "@app/shared/helper-pipes/regression-number.pipe";
 import { FacilityGroupAnalysisItem } from "@app/shared/shared-analysis/calculations/regression-models.service";
 import { UserDefineModelDateRangePipe } from "@app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe";

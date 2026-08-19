@@ -1,13 +1,13 @@
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { skip, take } from 'rxjs';
-import { ElectronService } from 'src/app/electron/electron.service';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { ElectronService } from '@platform/electron/electron.service';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 
 @Component({
   selector: 'app-edit-connect-bill',

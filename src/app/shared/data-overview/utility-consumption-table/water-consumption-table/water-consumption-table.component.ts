@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { IUseAndCost, UseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
     selector: 'app-water-consumption-table',

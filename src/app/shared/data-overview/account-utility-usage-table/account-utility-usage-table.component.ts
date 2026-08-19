@@ -1,6 +1,6 @@
 import { Component, Input, SimpleChange, SimpleChanges } from '@angular/core';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { SourceTotal } from 'src/app/calculations/dashboard-calculations/sourceTotalsClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { SourceTotal } from '@domain/calculations/dashboard-calculations/sourceTotalsClass';
 import { UtilityColors } from '../../utilityColors';
 
 @Component({

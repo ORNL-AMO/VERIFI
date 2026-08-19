@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { GroupAnalysisErrors } from 'src/app/models/validation';
+import { GroupAnalysisErrors } from '@data/models/validation';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 
 @Pipe({

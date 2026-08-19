@@ -1,10 +1,10 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as _ from 'lodash';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { BehaviorSubject } from 'rxjs';
-import { AccountOverviewData } from '@app/calculations/dashboard-calculations/accountOverviewClass';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Injectable({
   providedIn: 'root'

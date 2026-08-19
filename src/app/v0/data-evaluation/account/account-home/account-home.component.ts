@@ -1,24 +1,24 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
 import { AccountHomeService } from '@v0/data-evaluation/account/account-home/account-home.service';
 import * as _ from 'lodash';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { AnnualAccountAnalysisSummaryClass } from '@app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { AccountOverviewData } from '@app/calculations/dashboard-calculations/accountOverviewClass';
-import { SubregionEmissions } from '@app/models/eGridEmissions';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { AnnualAccountAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { SubregionEmissions } from '@data/models/eGridEmissions';
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbCustomFuel } from '@app/models/idbModels/customFuel';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbCustomGWP } from '@app/models/idbModels/customGWP';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -107,7 +107,7 @@ export class AccountHomeComponent implements OnDestroy {
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
 
     if (typeof Worker !== 'undefined') {
-      this.annualEnergyAnalysisWorker = new Worker(new URL('../../../web-workers/annual-account-analysis.worker', import.meta.url));
+      this.annualEnergyAnalysisWorker = new Worker(new URL('../../../../platform/web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
         this.annualEnergyAnalysisWorker.terminate();
         if (!data.error) {
@@ -160,7 +160,7 @@ export class AccountHomeComponent implements OnDestroy {
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
 
     if (typeof Worker !== 'undefined') {
-      this.annualWaterAnalysisWorker = new Worker(new URL('../../../web-workers/annual-account-analysis.worker', import.meta.url));
+      this.annualWaterAnalysisWorker = new Worker(new URL('../../../../platform/web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
         this.annualWaterAnalysisWorker.terminate();
         if (!data.error) {
@@ -214,7 +214,7 @@ export class AccountHomeComponent implements OnDestroy {
     let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
 
     if (typeof Worker !== 'undefined') {
-      this.accountOverviewWorker = new Worker(new URL('../../../web-workers/account-overview.worker', import.meta.url));
+      this.accountOverviewWorker = new Worker(new URL('../../../../platform/web-workers/account-overview.worker', import.meta.url));
       this.accountOverviewWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.accountHomeService.accountOverviewData.next(data.accountOverviewData);

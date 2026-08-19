@@ -1,25 +1,25 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '@v0/data-management/data-management.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from '@app/account-workspace/handlers/account-command-handler.service';
-import { FacilityCommandHandler } from '@app/account-workspace/handlers/facility-command-handler.service';
-import { MeterCommandHandler } from '@app/account-workspace/handlers/meter-command-handler.service';
-import { PredictorCommandHandler } from '@app/account-workspace/handlers/predictor-command-handler.service';
-import { EnergyUseCommandHandler } from '@app/account-workspace/handlers/energy-use-command-handler.service';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy-use-command-handler.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
-import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 
 @Component({
   selector: 'app-data-management-sidebar',

@@ -1,24 +1,24 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { EnergyUseCommandHandler } from '@app/account-workspace/handlers/energy-use-command-handler.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy-use-command-handler.service';
 import { Component, inject, Signal, computed } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupFormService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group-form.service';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { AllSources, MeterSource } from '@app/models/constantsAndTypes';
-import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { AllSources, MeterSource } from '@data/models/constantsAndTypes';
+import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { getLatestYearWithData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { getLatestYearWithData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-use-group',

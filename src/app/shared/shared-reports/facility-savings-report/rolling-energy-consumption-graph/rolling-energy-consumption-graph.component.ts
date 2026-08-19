@@ -1,11 +1,11 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { trace } from 'console';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-rolling-energy-consumption-graph',

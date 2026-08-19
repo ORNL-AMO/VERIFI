@@ -1,11 +1,11 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbFacilityReport, EmissionFactorsReportSettings } from '@app/models/idbModels/facilityReport';
+import { IdbFacilityReport, EmissionFactorsReportSettings } from '@data/models/idbModels/facilityReport';
 import { Month, Months } from '@app/shared/form-data/months';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 

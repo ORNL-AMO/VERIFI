@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { SourceTotal, SourceTotals } from 'src/app/calculations/dashboard-calculations/sourceTotalsClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { SourceTotal, SourceTotals } from '@domain/calculations/dashboard-calculations/sourceTotalsClass';
 import { UtilityColors } from '../../utilityColors';
 
 @Component({

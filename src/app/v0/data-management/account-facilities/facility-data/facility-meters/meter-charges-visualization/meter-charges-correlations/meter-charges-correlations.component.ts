@@ -1,7 +1,7 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, Input, inject } from '@angular/core';
-import { IdbUtilityMeter, MeterCharge } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 
 @Component({
   selector: 'app-meter-charges-correlations',

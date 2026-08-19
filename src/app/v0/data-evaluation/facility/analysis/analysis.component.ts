@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, effect, inject, OnDestroy, Signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { RegressionModelStateService } from '@app/account-workspace/regression-model-state.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { RegressionModelStateService } from '@data/account-workspace/regression-model-state.service';
 
 @Component({
   selector: 'app-analysis',

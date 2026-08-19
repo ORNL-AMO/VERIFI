@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { BetterPlantsSummary } from '@app/models/overview-report';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { BetterPlantsSummary } from '@data/models/overview-report';
 
 @Component({
     selector: 'app-primary-water-consumption-table',

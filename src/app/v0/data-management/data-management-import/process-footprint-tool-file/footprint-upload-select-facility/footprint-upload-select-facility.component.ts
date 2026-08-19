@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { DataManagementService } from '@v0/data-management/data-management.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';

@@ -2,15 +2,15 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
-import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { AccountStatusCheck } from 'src/app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { CalanderizationService } from './calanderization.service';
-import { AnalysisSetupErrors, GroupAnalysisErrors } from 'src/app/models/validation';
-import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
-import { emptyAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/analysisValidation';
-import { emptyGroupAnalysisErrors } from '../../calculations/status-check-calculations/validation/groupAnalysisValidation';
-import { emptyAccountAnalysisSetupErrors } from '../../calculations/status-check-calculations/validation/accountAnalysisValidation';
+import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
+import { AccountAnalysisSetupErrors } from '@data/models/accountAnalysis';
+import { emptyAnalysisSetupErrors } from '@domain/calculations/status-check-calculations/validation/analysisValidation';
+import { emptyGroupAnalysisErrors } from '@domain/calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { emptyAccountAnalysisSetupErrors } from '@domain/calculations/status-check-calculations/validation/accountAnalysisValidation';
 
 @Injectable({
     providedIn: 'root'

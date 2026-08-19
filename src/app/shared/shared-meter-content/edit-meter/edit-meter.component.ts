@@ -1,5 +1,5 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -7,12 +7,12 @@ import { ToastNotificationsService } from '@v0/core-components/toast-notificatio
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData, updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
 import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 
 @Component({
   selector: 'app-edit-meter',

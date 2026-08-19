@@ -1,9 +1,9 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

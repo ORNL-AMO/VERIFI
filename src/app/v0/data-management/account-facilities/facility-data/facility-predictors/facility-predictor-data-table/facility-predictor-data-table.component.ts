@@ -1,10 +1,10 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 
 @Component({
   selector: 'app-facility-predictor-data-table',

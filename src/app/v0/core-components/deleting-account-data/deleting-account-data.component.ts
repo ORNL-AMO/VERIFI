@@ -1,9 +1,9 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { Component, inject, Injector } from '@angular/core';
-import { AccountDeletionError, DeleteDataService } from '@app/indexedDB/delete-data.service';
+import { AccountDeletionError, DeleteDataService } from '@data/indexedDB/delete-data.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
     selector: 'app-deleting-account-data',

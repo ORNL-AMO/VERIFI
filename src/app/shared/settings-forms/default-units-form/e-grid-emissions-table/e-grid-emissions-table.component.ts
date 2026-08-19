@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { SubregionEmissions } from 'src/app/models/eGridEmissions';
+import { SubregionEmissions } from '@data/models/eGridEmissions';
 
 @Component({
     selector: 'app-e-grid-emissions-table',

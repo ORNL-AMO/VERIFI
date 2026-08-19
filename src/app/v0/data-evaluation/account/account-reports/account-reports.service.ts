@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { AccountSavingsReportSetup, AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from '@app/models/overview-report';
+import { AccountSavingsReportSetup, AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from '@data/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { AccountReportDbService } from '@app/indexedDB/account-report-db.service';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { AccountReportDbService } from '@data/indexedDB/account-report-db.service';
 
 @Injectable({
   providedIn: 'root'

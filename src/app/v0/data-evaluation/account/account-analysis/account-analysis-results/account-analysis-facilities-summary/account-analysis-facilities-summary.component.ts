@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { Subscription } from 'rxjs';
-import { MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-account-analysis-facilities-summary',

@@ -1,11 +1,11 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 @Component({
   selector: 'app-calanderization',

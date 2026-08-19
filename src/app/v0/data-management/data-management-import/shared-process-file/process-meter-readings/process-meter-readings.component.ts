@@ -3,12 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '@app/shared/shared-meter-content/utility-meter-data.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from '@app/shared/sharedHelperFunctions';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getEarliestMeterDataDate, getLatestMeterDataDate } from '@app/shared/dateHelperFunctions';
 
 

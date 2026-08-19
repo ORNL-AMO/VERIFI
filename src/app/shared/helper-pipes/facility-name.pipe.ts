@@ -1,6 +1,6 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Pipe({
     pure: false,

@@ -1,24 +1,24 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { EnergyUnitOptions, UnitOption } from '@app/shared/unitOptions';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime } from 'rxjs';
 import { VolumeLiquidOptions } from '@app/shared/unitOptions';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { getYearsWithFullDataAnalysis } from '@app/calculations/shared-calculations/calculationsHelpers';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 
 @Component({

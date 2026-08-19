@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { FacilityOverviewData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
     selector: 'app-meter-usage-table',

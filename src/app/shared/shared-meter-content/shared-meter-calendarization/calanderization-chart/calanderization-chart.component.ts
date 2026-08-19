@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter } from '@data/models/calanderization';
 import * as _ from 'lodash';
 @Component({
     selector: 'app-calanderization-chart',

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ReportType } from '@app/models/constantsAndTypes';
+import { ReportType } from '@data/models/constantsAndTypes';
 
 @Pipe({
   name: 'accountReportType',

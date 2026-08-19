@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-company-information-table',

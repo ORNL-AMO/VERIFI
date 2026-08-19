@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { calculateTotalEquipmentEnergyUse } from '@app/calculations/energy-footprint/energyFootprintCalculations';
-import { MeterSource } from '@app/models/constantsAndTypes';
-import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { calculateTotalEquipmentEnergyUse } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, EquipmentUtilityDataEnergyUse, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 
 export interface UtilityDataForm {
   energySource: MeterSource,

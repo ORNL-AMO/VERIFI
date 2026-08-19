@@ -1,12 +1,12 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { STATUS_CHECK_OPTIONS, StatusCheckAction } from '@app/calculations/status-check-calculations/statusCheckModels';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { STATUS_CHECK_OPTIONS, StatusCheckAction } from '@domain/calculations/status-check-calculations/statusCheckModels';
 
 interface FacilityActionGroup {
   facility: IdbFacility;

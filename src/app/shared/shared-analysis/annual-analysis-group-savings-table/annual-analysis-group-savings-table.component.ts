@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, QueryList, ViewChildren } from '@angular/core';
-import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from '@data/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 
 @Component({

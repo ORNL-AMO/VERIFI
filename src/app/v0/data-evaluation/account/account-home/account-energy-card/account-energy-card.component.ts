@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '@v0/data-evaluation/account/account-home/account-home.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { AccountOverviewData } from '@app/calculations/dashboard-calculations/accountOverviewClass';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

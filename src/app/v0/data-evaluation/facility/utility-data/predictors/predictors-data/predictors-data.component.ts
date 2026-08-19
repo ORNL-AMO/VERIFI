@@ -1,7 +1,7 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 
 @Component({
     selector: 'app-predictors-data',

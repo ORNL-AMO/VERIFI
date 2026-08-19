@@ -1,6 +1,6 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
     selector: 'app-account-custom-data-help',

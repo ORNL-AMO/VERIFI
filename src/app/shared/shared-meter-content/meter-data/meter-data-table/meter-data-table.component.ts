@@ -1,19 +1,19 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
-import { deleteWorkspaceRecords, upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
-import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 
 @Component({

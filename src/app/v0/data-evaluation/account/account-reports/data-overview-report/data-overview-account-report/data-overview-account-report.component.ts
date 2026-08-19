@@ -1,6 +1,6 @@
 import { Component, Input, QueryList, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataOverviewReportSetup } from '@app/models/overview-report';
+import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { DataOverviewAccount } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.component';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { AccountSectionReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-account-report/account-section-report/account-section-report.component';

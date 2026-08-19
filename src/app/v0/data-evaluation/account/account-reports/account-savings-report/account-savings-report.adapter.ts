@@ -2,14 +2,14 @@ import { inject, Injectable } from "@angular/core";
 import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "@app/shared/pdf-report/models/report-section.model";
 import { CustomNumberPipe } from "@app/shared/helper-pipes/custom-number.pipe";
-import { AccountSavingsReportSetup, PerformanceReportSetup } from "@app/models/overview-report";
-import { IdbAccount } from "@app/models/idbModels/account";
-import { IdbAccountReport } from "@app/models/idbModels/accountReport";
-import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "@app/models/analysis";
-import { IdbAccountAnalysisItem } from "@app/models/idbModels/accountAnalysisItem";
-import { IdbAnalysisItem } from "@app/models/idbModels/analysisItem";
-import { IdbFacility } from "@app/models/idbModels/facility";
-import { PerformanceReport } from "@app/calculations/performance-report-calculations/performanceReport";
+import { AccountSavingsReportSetup, PerformanceReportSetup } from "@data/models/overview-report";
+import { IdbAccount } from "@data/models/idbModels/account";
+import { IdbAccountReport } from "@data/models/idbModels/accountReport";
+import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "@data/models/analysis";
+import { IdbAccountAnalysisItem } from "@data/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { PerformanceReport } from "@domain/calculations/performance-report-calculations/performanceReport";
 
 @Injectable({ providedIn: 'root' })
 export class AccountSavingsReportAdapter {

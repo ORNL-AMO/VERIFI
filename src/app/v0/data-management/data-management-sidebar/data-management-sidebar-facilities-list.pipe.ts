@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import * as _ from 'lodash';
 
 @Pipe({

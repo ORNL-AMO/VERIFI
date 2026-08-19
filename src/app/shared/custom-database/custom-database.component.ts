@@ -1,8 +1,8 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({

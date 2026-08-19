@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { CalanderizationFilters } from 'src/app/models/calanderization';
+import { CalanderizationFilters } from '@data/models/calanderization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({

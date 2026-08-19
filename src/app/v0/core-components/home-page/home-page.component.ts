@@ -1,15 +1,15 @@
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { Router } from '@angular/router';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { Subscription } from 'rxjs';
-import { getNewIdbAccount, IdbAccount } from '@app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { BackupImportCoordinator } from '@app/backup/backup-import-coordinator.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 
 @Component({
   selector: 'app-home-page',

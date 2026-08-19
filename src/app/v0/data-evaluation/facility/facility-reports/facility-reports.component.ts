@@ -1,10 +1,10 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 
 @Component({
     selector: 'app-facility-reports',

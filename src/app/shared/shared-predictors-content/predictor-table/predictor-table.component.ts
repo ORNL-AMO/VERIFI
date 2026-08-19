@@ -1,26 +1,26 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
-import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '@data/models/analysis';
 import { getSelectedRegressionModel } from '../../shared-analysis/calculations/regression-model-recovery';
-import { WeatherStation } from 'src/app/models/degreeDays';
-import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { WeatherStation } from '@data/models/degreeDays';
+import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
-import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 
 interface PredictorListItem {
   predictor: IdbPredictor,

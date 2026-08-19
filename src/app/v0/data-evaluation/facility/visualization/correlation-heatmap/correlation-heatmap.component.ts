@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import * as _ from 'lodash';
 import * as jStat from 'jstat';
-import { JStatRegressionModel } from '@app/models/analysis';
+import { JStatRegressionModel } from '@data/models/analysis';
 import { AxisOption, CorrelationPlotOptions, VisualizationStateService } from '@v0/data-evaluation/facility/visualization/visualization-state.service';
 
 @Component({

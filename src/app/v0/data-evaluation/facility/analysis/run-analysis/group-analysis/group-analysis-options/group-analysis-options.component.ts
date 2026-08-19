@@ -1,22 +1,22 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { Router } from '@angular/router';
-import { AnalysisGroup } from '@app/models/analysis';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { getLatestCompleteAnalysisYear } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { getLatestCompleteAnalysisYear } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { GroupAnalysisErrors } from '@app/models/validation';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { GroupAnalysisErrors } from '@data/models/validation';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 
 @Component({
   selector: 'app-group-analysis-options',

@@ -1,9 +1,9 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-predictors-data-help',

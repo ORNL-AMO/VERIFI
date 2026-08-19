@@ -1,11 +1,11 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 
 @Component({
   selector: 'app-facility-meter-data-quality-report',

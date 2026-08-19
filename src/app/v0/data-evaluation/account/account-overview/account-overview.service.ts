@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AccountOverviewData } from '@app/calculations/dashboard-calculations/accountOverviewClass';
-import { UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 
 @Injectable({
   providedIn: 'root'

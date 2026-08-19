@@ -1,4 +1,4 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { Subscription } from 'rxjs';
@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
   selector: 'app-confirm-energy-uses-upload',

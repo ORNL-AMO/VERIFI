@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 
 @Injectable({
   providedIn: 'root'

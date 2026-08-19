@@ -1,7 +1,7 @@
 import { Component, computed, ElementRef, inject, Input, OnChanges, signal, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { EnergyUsesFacilitySummary } from '@app/calculations/energy-footprint/energyUsesFacilitySummary';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { EnergyUsesFacilitySummary } from '@domain/calculations/energy-footprint/energyUsesFacilitySummary';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-energy-uses-summary-chart',

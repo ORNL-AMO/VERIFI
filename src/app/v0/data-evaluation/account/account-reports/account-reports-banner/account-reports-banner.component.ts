@@ -1,14 +1,14 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { filter, map, startWith } from 'rxjs';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountReportStatusCheck } from '@app/calculations/status-check-calculations/accountReportStatusCheck';
+import { AccountReportStatusCheck } from '@domain/calculations/status-check-calculations/accountReportStatusCheck';
 
 @Component({
   selector: 'app-account-reports-banner',

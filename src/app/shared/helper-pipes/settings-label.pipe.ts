@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 
 @Pipe({
     name: 'settingsLabel',

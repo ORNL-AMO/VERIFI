@@ -1,8 +1,8 @@
 import { Component, ElementRef, inject, Input, ViewChild, OnDestroy, OnChanges, SimpleChanges, computed, signal } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { EnergyFootprintAnnualFacilityBalance } from '@app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
-import { SankeyData, SankeyNode, SankeyLink } from '@app/models/visualization';
-import { EnergyFootprintAnnualBalanceMeterGroup } from '@app/calculations/energy-footprint/energyBalance/energyFootprintAnnualBalanceMeterGroup';
+import { EnergyFootprintAnnualFacilityBalance } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
+import { SankeyData, SankeyNode, SankeyLink } from '@data/models/visualization';
+import { EnergyFootprintAnnualBalanceMeterGroup } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualBalanceMeterGroup';
 import { buildSankeyData, formatEnergyValue, getEquipmentGroupColor, getLinkColor, getSourceColor } from '@app/shared/sankey-utils';
 
 @Component({

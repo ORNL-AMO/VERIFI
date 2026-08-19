@@ -1,8 +1,8 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 
 @Component({

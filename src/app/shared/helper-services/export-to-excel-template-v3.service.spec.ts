@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import * as ExcelJS from 'exceljs';
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ExportToExcelTemplateV3Service } from './export-to-excel-template-v3.service';
 

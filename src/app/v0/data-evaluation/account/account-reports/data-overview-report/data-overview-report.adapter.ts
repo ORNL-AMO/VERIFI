@@ -1,15 +1,15 @@
 import { inject, Injectable } from "@angular/core";
-import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "@app/models/idbModels/facilityReport";
+import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableHeaderCell, TableSection } from "@app/shared/pdf-report/models/report-section.model";
 import { CustomNumberPipe } from "@app/shared/helper-pipes/custom-number.pipe";
-import { IUseAndCost, UseAndCost } from "@app/calculations/dashboard-calculations/useAndCostClass";
-import { DataOverviewReportSetup } from "@app/models/overview-report";
+import { IUseAndCost, UseAndCost } from "@domain/calculations/dashboard-calculations/useAndCostClass";
+import { DataOverviewReportSetup } from "@data/models/overview-report";
 import { DataOverviewAccount, DataOverviewFacility } from "@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.component";
-import { IdbAccount } from "@app/models/idbModels/account";
-import { IdbAccountReport } from "@app/models/idbModels/accountReport";
+import { IdbAccount } from "@data/models/idbModels/account";
+import { IdbAccountReport } from "@data/models/idbModels/accountReport";
 import { NaicsDisplayPipe } from "@app/shared/helper-pipes/naics-display.pipe";
-import { AccountOverviewFacility } from "@app/calculations/dashboard-calculations/accountOverviewClass";
+import { AccountOverviewFacility } from "@domain/calculations/dashboard-calculations/accountOverviewClass";
 import { FacilityOverviewReportAdapter } from "@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report.adapter";
 
 @Injectable({ providedIn: 'root' })

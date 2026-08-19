@@ -1,14 +1,14 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
-import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "@app/models/idbModels/facilityReport";
+import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, TableHeaderCell, TableSection } from "@app/shared/pdf-report/models/report-section.model";
 import { CustomNumberPipe } from "@app/shared/helper-pipes/custom-number.pipe";
-import { IdbFacility } from "@app/models/idbModels/facility";
-import { FacilityOverviewData, FacilityOverviewMeter } from "@app/calculations/dashboard-calculations/facilityOverviewClass";
-import { UtilityUseAndCost } from "@app/calculations/dashboard-calculations/useAndCostClass";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { FacilityOverviewData, FacilityOverviewMeter } from "@domain/calculations/dashboard-calculations/facilityOverviewClass";
+import { UtilityUseAndCost } from "@domain/calculations/dashboard-calculations/useAndCostClass";
 import { formatDate } from "@angular/common";
-import { EnergySources, WaterSources } from "@app/models/constantsAndTypes";
+import { EnergySources, WaterSources } from "@data/models/constantsAndTypes";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityOverviewReportAdapter {

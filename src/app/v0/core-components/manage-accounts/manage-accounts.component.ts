@@ -1,18 +1,18 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Component, Injector } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountdbService } from '@app/indexedDB/account-db.service';
+import { AccountdbService } from '@data/indexedDB/account-db.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from '@app/account-workspace/handlers/account-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { getNewIdbAccount, IdbAccount } from '@app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { ExportToExcelTemplateV3Service } from '@app/shared/helper-services/export-to-excel-template-v3.service';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { DatabaseResetService } from '@app/application-lifecycle/database-reset.service';
-import { BackupExportCoordinator } from '@app/backup/backup-export-coordinator.service';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-manage-accounts',

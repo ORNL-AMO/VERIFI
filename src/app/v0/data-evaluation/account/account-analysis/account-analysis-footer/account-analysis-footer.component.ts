@@ -1,16 +1,16 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountAnalysisStatusCheck } from '@app/calculations/status-check-calculations/accountAnalysisStatusCheck';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 
 @Component({
   selector: 'app-account-analysis-footer',

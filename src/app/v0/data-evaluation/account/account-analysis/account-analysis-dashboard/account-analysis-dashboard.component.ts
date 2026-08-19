@@ -1,17 +1,17 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { AnalysisCategory } from '@app/models/analysis';
-import { AnalyticsService } from '@app/analytics/analytics.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { getNewIdbAccountAnalysisItem, IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { AnalysisCategory } from '@data/models/analysis';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { getNewIdbAccountAnalysisItem, IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
     selector: 'app-account-analysis-dashboard',

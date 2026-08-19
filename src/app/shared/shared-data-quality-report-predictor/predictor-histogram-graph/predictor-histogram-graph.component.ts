@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 
 @Component({
   selector: 'app-predictor-histogram-graph',

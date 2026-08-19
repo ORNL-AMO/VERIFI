@@ -1,12 +1,12 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { AllSources, EnergySources, MeterSource, WaterSources } from 'src/app/models/constantsAndTypes';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 @Component({
     selector: 'app-meters-overview-stacked-line-chart',

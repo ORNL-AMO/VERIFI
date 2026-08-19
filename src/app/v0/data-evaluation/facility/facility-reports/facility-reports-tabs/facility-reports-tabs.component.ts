@@ -1,16 +1,16 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityReport } from '@app/models/idbModels/facilityReport';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { FacilityReportStatusCheck } from '@app/calculations/status-check-calculations/facilityReportStatusCheck';
+import { FacilityReportStatusCheck } from '@domain/calculations/status-check-calculations/facilityReportStatusCheck';
 
 @Component({
   selector: 'app-facility-reports-tabs',

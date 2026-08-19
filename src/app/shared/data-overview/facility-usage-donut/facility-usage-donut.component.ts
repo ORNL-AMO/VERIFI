@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
-import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-facility-usage-donut',

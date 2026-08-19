@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 
 @Component({
   selector: 'app-weather-data-sub-label',

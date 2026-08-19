@@ -1,12 +1,12 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AnnualAnalysisSummary } from '@app/models/analysis';
+import { AnnualAnalysisSummary } from '@data/models/analysis';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-annual-account-analysis',

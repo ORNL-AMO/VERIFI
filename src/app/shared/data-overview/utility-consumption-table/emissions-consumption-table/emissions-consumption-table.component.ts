@@ -1,5 +1,5 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
-import { IUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { IUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';

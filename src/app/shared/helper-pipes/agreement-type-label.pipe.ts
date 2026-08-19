@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
+import { AgreementType, AgreementTypes } from '@data/models/agreementType';
 
 @Pipe({
     name: 'agreementTypeLabel',

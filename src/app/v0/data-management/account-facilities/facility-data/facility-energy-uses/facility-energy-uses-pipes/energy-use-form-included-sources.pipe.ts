@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { MeterSource } from '@app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 import { UtilityDataForm } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 
 @Pipe({

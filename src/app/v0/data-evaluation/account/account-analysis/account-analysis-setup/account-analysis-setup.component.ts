@@ -1,31 +1,31 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { Month, Months } from '@app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from '@app/shared/unitOptions';
 import { debounceTime } from 'rxjs';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { AnalysisType } from '@app/models/analysis';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { AnalysisType } from '@data/models/analysis';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { getYearsWithFullDataAccountAnalysis } from '@app/calculations/shared-calculations/calculationsHelpers';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { getYearsWithFullDataAccountAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountAnalysisStatusCheck } from '@app/calculations/status-check-calculations/accountAnalysisStatusCheck';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
 
 @Component({
   selector: 'app-account-analysis-setup',

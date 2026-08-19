@@ -1,9 +1,9 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityOverviewData } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
-import { UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
+import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 
 @Component({

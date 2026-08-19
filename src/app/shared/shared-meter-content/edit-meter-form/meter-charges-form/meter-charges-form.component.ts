@@ -2,7 +2,7 @@ import { Component, Input, SimpleChanges } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { EditMeterFormService } from '../edit-meter-form.service';
 import { getChargeTypes } from './meterChargesOptions';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Component({
   selector: 'app-meter-charges-form',

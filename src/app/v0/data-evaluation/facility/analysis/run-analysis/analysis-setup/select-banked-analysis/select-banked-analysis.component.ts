@@ -1,7 +1,7 @@
 import { Component, Input, output } from '@angular/core';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { AnalysisReportSettings, getAnalysisReportSettings } from '@app/models/idbModels/facilityReport';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { AnalysisReportSettings, getAnalysisReportSettings } from '@data/models/idbModels/facilityReport';
 
 @Component({
     selector: 'app-select-banked-analysis',

@@ -1,8 +1,8 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 import { AnalysisGroupItem, AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 
 @Component({

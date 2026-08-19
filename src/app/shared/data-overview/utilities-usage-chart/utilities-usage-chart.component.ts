@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import * as _ from 'lodash';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { AnnualSourceData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnnualSourceData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { EnergySources, WaterSources } from '@data/models/constantsAndTypes';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
     selector: 'app-utilities-usage-chart',

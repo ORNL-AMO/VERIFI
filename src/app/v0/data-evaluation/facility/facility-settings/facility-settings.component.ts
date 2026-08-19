@@ -1,17 +1,17 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { FacilityCommandHandler } from '@app/account-workspace/handlers/facility-command-handler.service';
-import { FACILITY_DELETION_MESSAGES } from '@app/indexedDB/facility-deletion.config';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { BackupExportCoordinator } from '@app/backup/backup-export-coordinator.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from '@data/indexedDB/facility-deletion.config';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 
 @Component({
     selector: 'app-facility-settings',

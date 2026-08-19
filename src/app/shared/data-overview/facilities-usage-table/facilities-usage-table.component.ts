@@ -2,9 +2,9 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
-import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import * as _ from 'lodash';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
     selector: 'app-facilities-usage-table',

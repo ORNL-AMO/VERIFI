@@ -1,14 +1,14 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { EmissionsResults } from '@data/models/eGridEmissions';
+import { getEmissions } from '@domain/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
   selector: 'app-edit-electricity-bill',

@@ -1,14 +1,14 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
-import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
-import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { getNewAccountCustomGWP, IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from '@data/account-workspace/handlers/custom-data-command-handler.service';
+import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { getNewAccountCustomGWP, IdbCustomGWP } from '@data/models/idbModels/customGWP';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 @Component({
     selector: 'app-custom-gwp-form',

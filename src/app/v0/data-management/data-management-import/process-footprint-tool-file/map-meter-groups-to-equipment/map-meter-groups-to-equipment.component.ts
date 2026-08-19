@@ -1,16 +1,16 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { ActivatedRoute } from '@angular/router';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { Subscription } from 'rxjs';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
-import { MeterSource } from '@app/models/constantsAndTypes';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 
 @Component({
   selector: 'app-map-meter-groups-to-equipment',

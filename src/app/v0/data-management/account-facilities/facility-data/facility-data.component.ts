@@ -1,8 +1,8 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-data',

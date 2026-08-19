@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter } from '@data/models/calanderization';
 
 @Injectable({
   providedIn: 'root',

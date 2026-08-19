@@ -1,14 +1,14 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { CalanderizedMeter, MeterGroupType, MonthlyData } from '@app/models/calanderization';
+import { CalanderizedMeter, MeterGroupType, MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from '@app/shared/form-data/months';
-import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from '@app/calculations/shared-calculations/calanderizationFunctions';
+import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from '@domain/calculations/shared-calculations/calanderizationFunctions';
 import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 @Injectable({
   providedIn: 'root'
 })

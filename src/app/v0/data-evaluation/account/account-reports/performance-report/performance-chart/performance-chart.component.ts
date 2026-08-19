@@ -1,12 +1,12 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { PerformanceReport, PerformanceReportAnnualData } from '@app/calculations/performance-report-calculations/performanceReport';
-import { PerformanceReportSetup } from '@app/models/overview-report';
+import { PerformanceReport, PerformanceReportAnnualData } from '@domain/calculations/performance-report-calculations/performanceReport';
+import { PerformanceReportSetup } from '@data/models/overview-report';
 import { UtilityColors } from '@app/shared/utilityColors';
 import * as _ from 'lodash';
-import { AnalysisGroup } from '@app/models/analysis';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
     selector: 'app-performance-chart',

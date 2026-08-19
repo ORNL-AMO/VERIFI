@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({

@@ -1,17 +1,17 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, EventEmitter, inject, Injector, input, Output, Signal, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityData, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { auditTime, distinctUntilChanged, merge } from 'rxjs';
-import { MeterSource } from '@app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 import * as _ from 'lodash';
 import { FacilityEnergyUseEquipmentFormService, UtilityDataForm } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { CalanderizedMeter } from '@app/models/calanderization';
+import { CalanderizedMeter } from '@data/models/calanderization';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { getAllYearsWithData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getAllYearsWithData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-use-equipment-form',

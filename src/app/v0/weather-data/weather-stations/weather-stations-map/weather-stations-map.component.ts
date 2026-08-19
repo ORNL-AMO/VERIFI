@@ -1,6 +1,6 @@
 import { Component, SimpleChanges, ElementRef, ViewChild, Input } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { WeatherStation } from '@app/models/degreeDays';
+import { WeatherStation } from '@data/models/degreeDays';
 import * as _ from 'lodash';
 
 @Component({

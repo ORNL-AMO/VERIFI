@@ -1,22 +1,22 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
 import { ChartSlide, getPptAxisSpec, ImageSlide, PptChartSeries, PptSlide, TableHeaderCell, TableSlide, TitleSlide } from '@app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from '@app/shared/helper-pipes/custom-number.pipe';
-import { DataOverviewReportSetup } from '@app/models/overview-report';
+import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { DataOverviewAccount, DataOverviewFacility } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.component';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { NaicsDisplayPipe } from '@app/shared/helper-pipes/naics-display.pipe';
-import { MeterSource, EnergySources, WaterSources, AllSources } from '@app/models/constantsAndTypes';
+import { MeterSource, EnergySources, WaterSources, AllSources } from '@data/models/constantsAndTypes';
 import { UtilityColors } from '@app/shared/utilityColors';
-import { UseAndCost, IUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
-import { AnnualSourceData, FacilityOverviewMeter } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
-import { YearMonthData } from '@app/models/dashboard';
+import { UseAndCost, IUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
+import { AnnualSourceData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { YearMonthData } from '@data/models/dashboard';
 import { Month, Months } from '@app/shared/form-data/months';
-import { AccountOverviewData, AccountOverviewFacility } from '@app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 
 export interface DataOverviewReportPptInput {
     account: IdbAccount;

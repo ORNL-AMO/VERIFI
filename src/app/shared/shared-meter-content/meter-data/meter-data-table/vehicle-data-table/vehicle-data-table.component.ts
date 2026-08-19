@@ -1,18 +1,18 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { VehicleDataFilters } from '@data/models/meterDataFilter';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { EmissionsResults } from '@data/models/eGridEmissions';
+import { getEmissions } from '@domain/calculations/emissions-calculations/emissions';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData, MeterDataCharge } from '@data/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { ElectronService } from 'src/app/electron/electron.service';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { ElectronService } from '@platform/electron/electron.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
 

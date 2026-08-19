@@ -1,9 +1,9 @@
 import { Component, computed, effect, inject, Input, Signal, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyUsesFacilitySummary, FacilityEnergyUseGroupSummary } from '@app/calculations/energy-footprint/energyUsesFacilitySummary';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { EnergyUsesFacilitySummary, FacilityEnergyUseGroupSummary } from '@domain/calculations/energy-footprint/energyUsesFacilitySummary';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import * as _ from 'lodash';
-import { EnergyUsesGroupSummary } from '@app/calculations/energy-footprint/energyUsesGroupSummary';
+import { EnergyUsesGroupSummary } from '@domain/calculations/energy-footprint/energyUsesGroupSummary';
 
 @Component({
   selector: 'app-facility-energy-uses-summary-table',

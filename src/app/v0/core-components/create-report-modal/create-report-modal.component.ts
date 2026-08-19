@@ -1,21 +1,21 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { getNewIdbAccountReport, IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { getNewIdbAccountReport, IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-create-report-modal',

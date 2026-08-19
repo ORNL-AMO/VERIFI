@@ -1,6 +1,6 @@
 import { Component, computed, Input } from '@angular/core';
-import { FacilityGroupAnalysisItem } from '../../calculations/regression-models.service';
-import { AnalysisGroup } from 'src/app/models/analysis';
+import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { AnalysisGroup } from '@data/models/analysis';
 
 @Component({
   selector: 'app-regression-model-details-table',

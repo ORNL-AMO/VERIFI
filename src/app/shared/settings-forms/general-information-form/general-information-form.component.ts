@@ -1,5 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject, Injector } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -7,13 +7,13 @@ import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { State, States } from 'src/app/shared/form-data/states';
 import { SettingsFormsService } from '../settings-forms.service';
-import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { FacilityClassification, FacilityClassifications } from '@data/models/constantsAndTypes';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { GeneralInformationService } from './general-information.service';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({

@@ -1,15 +1,15 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, input, inject, computed, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EquipmentTypes } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/equipmentTypes';
-import { EquipmentType } from '@app/models/idbModels/facilityEnergyUseEquipment';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { UtilityDataForm } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/facility-energy-use-equipment-form.service';
-import { MeterSource } from '@app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Component({
   selector: 'app-equipment-details-form',

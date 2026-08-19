@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { PptDocument } from './models/ppt-document';
-import { PptSlide, TitleSlide, TableSlide, ChartSlide, TableHeaderCell, ImageSlide } from './models/ppt-slide';
+import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
+import { PptSlide, TitleSlide, TableSlide, ChartSlide, TableHeaderCell, ImageSlide } from '@app/shared/ppt-report/models/ppt-slide';
 import { PPT_THEME } from './ppt-theme';
 import { defineSlideMasters, SLIDE_MASTERS } from './ppt-slide-master';
 import pptxgen from 'pptxgenjs';

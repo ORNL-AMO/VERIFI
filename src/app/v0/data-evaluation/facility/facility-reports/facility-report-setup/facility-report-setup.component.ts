@@ -1,11 +1,11 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
-import { FacilityReportType, IdbFacilityReport } from '@app/models/idbModels/facilityReport';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
+import { FacilityReportType, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-facility-report-setup',

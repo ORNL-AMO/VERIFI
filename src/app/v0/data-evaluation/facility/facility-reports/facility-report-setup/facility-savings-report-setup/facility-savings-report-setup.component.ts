@@ -1,15 +1,15 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
 import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
-import { IdbFacilityReport, SavingsFacilityReportSettings } from '@app/models/idbModels/facilityReport';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbFacilityReport, SavingsFacilityReportSettings } from '@data/models/idbModels/facilityReport';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 import { Month, Months } from '@app/shared/form-data/months';
-import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@app/models/analysis';
+import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/models/analysis';
 
 @Component({
   selector: 'app-facility-savings-report-setup',

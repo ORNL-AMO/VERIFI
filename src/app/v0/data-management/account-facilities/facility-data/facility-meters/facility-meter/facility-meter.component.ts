@@ -1,9 +1,9 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from '@app/account-workspace/handlers/meter-command-handler.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,9 +11,9 @@ import { from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from '@app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData, updateMeterDataCharges } from '@app/models/idbModels/utilityMeterData';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData, updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
 

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AnalysisGroupItem, AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-banked-groups-details',

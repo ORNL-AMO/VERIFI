@@ -1,12 +1,12 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, OnInit, Output, inject, Injector } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 
 @Component({

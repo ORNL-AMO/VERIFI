@@ -1,13 +1,13 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, ViewChild, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { AnalysisGroupItem, AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { AnalysisReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { AnalysisReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { RegressionModelDetailsComponent } from './regression-model-details/regression-model-details.component';
 import { GroupAnnualAnalysisReportComponent } from './group-annual-analysis-report/group-annual-analysis-report.component';
 import { GroupMonthlyAnalysisReportComponent } from './group-monthly-analysis-report/group-monthly-analysis-report.component';

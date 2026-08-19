@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 
 @Pipe({
   name: 'meterGroupOptions',

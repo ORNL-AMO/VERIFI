@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
-import { EnergyUsesFacilitySummary } from '@app/calculations/energy-footprint/energyUsesFacilitySummary';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
+import { EnergyUsesFacilitySummary } from '@domain/calculations/energy-footprint/energyUsesFacilitySummary';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 
 @Component({
   selector: 'app-facility-energy-uses-summary',

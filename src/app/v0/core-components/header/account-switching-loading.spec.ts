@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { OrderByPipe } from '@app/shared/helper-pipes/order-by.pipe';
 import { HeaderComponent } from '@v0/core-components/header/header.component';
 import { ManageAccountsComponent } from '@v0/core-components/manage-accounts/manage-accounts.component';

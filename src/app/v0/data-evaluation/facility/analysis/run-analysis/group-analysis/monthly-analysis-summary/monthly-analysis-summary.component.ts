@@ -1,15 +1,15 @@
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, DestroyRef, Signal, computed, effect, inject, signal } from '@angular/core';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup, MonthlyAnalysisSummary } from '@app/models/analysis';
-import { CalanderizedMeter } from '@app/models/calanderization';
+import { AnalysisGroup, MonthlyAnalysisSummary } from '@data/models/analysis';
+import { CalanderizedMeter } from '@data/models/calanderization';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { MonthlyAnalysisSummaryClass } from '@app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@app/calculations/shared-calculations/calanderizationFunctions';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { MonthlyAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-monthly-analysis-summary',
@@ -52,7 +52,7 @@ export class MonthlyAnalysisSummaryComponent {
     const account = this.accountWorkspaceStore.account();
 
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../../platform/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.monthlyAnalysisSummary.set(data.monthlyAnalysisSummary);

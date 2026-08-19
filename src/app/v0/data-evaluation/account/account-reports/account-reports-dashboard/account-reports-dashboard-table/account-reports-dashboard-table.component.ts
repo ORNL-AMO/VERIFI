@@ -1,19 +1,19 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { ReportType } from '@app/models/constantsAndTypes';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { ReportType } from '@data/models/constantsAndTypes';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { AccountReportStatusCheck } from '@app/calculations/status-check-calculations/accountReportStatusCheck';
+import { AccountReportStatusCheck } from '@domain/calculations/status-check-calculations/accountReportStatusCheck';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { getGUID } from '@app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 

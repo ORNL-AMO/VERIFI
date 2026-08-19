@@ -1,16 +1,16 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 
 @Component({
   selector: 'app-facility-report-analysis-selection',

@@ -1,9 +1,9 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from '@app/calculations/carbon-calculations/betterClimateReport';
+import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from '@domain/calculations/carbon-calculations/betterClimateReport';
 import * as _ from 'lodash';
-import { BetterClimateYearDetails } from '@app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { BetterClimateReportSetup } from '@app/models/overview-report';
+import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
+import { BetterClimateReportSetup } from '@data/models/overview-report';
 
 @Component({
     selector: 'app-top-performers-chart',

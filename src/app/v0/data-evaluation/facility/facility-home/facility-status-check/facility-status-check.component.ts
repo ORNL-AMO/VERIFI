@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-status-check',

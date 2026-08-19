@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { BetterClimateYearDetails } from '@app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { getEmissionsTypeColor } from '@app/models/eGridEmissions';
+import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
+import { getEmissionsTypeColor } from '@data/models/eGridEmissions';
 
 @Component({
     selector: 'app-absolute-emissions-chart',

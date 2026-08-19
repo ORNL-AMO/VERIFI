@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { JStatRegressionModel } from '@app/models/analysis';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { JStatRegressionModel } from '@data/models/analysis';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-regression-model-comparison',

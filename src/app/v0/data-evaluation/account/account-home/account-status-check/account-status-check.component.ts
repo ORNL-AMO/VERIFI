@@ -1,8 +1,8 @@
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 
 @Component({

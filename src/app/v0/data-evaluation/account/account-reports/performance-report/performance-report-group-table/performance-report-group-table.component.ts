@@ -1,12 +1,12 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, Input, inject } from '@angular/core';
-import { PerformanceReport, PerformanceReportAnnualData } from '@app/calculations/performance-report-calculations/performanceReport';
+import { PerformanceReport, PerformanceReportAnnualData } from '@domain/calculations/performance-report-calculations/performanceReport';
 import * as _ from 'lodash';
-import { AnalysisGroup } from '@app/models/analysis';
-import { PerformanceReportSetup } from '@app/models/overview-report';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { AnalysisGroup } from '@data/models/analysis';
+import { PerformanceReportSetup } from '@data/models/overview-report';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
     selector: 'app-performance-report-group-table',

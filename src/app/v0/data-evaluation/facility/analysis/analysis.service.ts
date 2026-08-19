@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { getSelectedRegressionModel } from '@app/shared/shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({

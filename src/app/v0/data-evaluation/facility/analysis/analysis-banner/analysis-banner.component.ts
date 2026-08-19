@@ -1,15 +1,15 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { AnalysisGroupStatusCheck } from '@app/calculations/status-check-calculations/analysisGroupStatusCheck';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { AnalysisGroup } from '@app/models/analysis';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { AnalysisGroupStatusCheck } from '@domain/calculations/status-check-calculations/analysisGroupStatusCheck';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 

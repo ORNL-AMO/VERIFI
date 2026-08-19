@@ -1,6 +1,6 @@
 import { Component, EventEmitter, input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { MeterSource } from '@app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Component({
   selector: 'app-equipment-utility-data-form',

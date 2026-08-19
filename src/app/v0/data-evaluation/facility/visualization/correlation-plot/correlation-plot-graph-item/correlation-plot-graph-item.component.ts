@@ -2,9 +2,9 @@ import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AxisOption, VisualizationStateService } from '@v0/data-evaluation/facility/visualization/visualization-state.service';
 import * as jStat from 'jstat';
-import { JStatRegressionModel } from '@app/models/analysis';
+import { JStatRegressionModel } from '@data/models/analysis';
 import * as _ from 'lodash';
-import { RegressionTableDataItem } from '@app/models/visualization';
+import { RegressionTableDataItem } from '@data/models/visualization';
 
 @Component({
     selector: 'app-correlation-plot-graph-item',

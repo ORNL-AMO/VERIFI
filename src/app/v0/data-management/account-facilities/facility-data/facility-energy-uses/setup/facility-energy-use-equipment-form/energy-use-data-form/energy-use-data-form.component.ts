@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, input, Signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { footprintEnergyUseUnits } from '@app/calculations/energy-footprint/energyFootprintCalculations';
-import { MeterSource } from '@app/models/constantsAndTypes';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { footprintEnergyUseUnits } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-energy-use-data-form',

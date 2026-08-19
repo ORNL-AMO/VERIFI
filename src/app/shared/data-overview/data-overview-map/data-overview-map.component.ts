@@ -1,13 +1,13 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, Input, ViewChild, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import { EGridService } from '../../helper-services/e-grid.service';
 import * as _ from 'lodash';
-import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-data-overview-map',

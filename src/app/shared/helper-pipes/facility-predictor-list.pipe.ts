@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 
 @Pipe({
   name: 'facilityPredictorList',

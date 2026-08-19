@@ -1,22 +1,22 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChild, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { FacilitySavingsReport } from '@app/calculations/savings-report-calculations/facilitySavingsReport';
-import { getNeededUnits } from '@app/calculations/shared-calculations/calanderizationFunctions';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { FacilitySavingsReport } from '@domain/calculations/savings-report-calculations/facilitySavingsReport';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
@@ -113,7 +113,7 @@ export class FacilitySavingsReportResultsComponent {
     let accountPredictors: Array<IdbPredictor> = this.accountWorkspaceQuery.getFacilityPredictors(this.analysisItem.facilityId);
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../web-workers/facility-savings-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../platform/web-workers/facility-savings-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {

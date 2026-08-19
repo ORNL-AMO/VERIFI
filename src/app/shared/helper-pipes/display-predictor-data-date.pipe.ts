@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { Month, Months } from '../form-data/months';
 
 @Pipe({

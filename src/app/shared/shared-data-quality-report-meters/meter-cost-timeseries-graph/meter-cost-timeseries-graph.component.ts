@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { Statistics } from '../meterDataQualityStatistics';
 import { getDateFromMeterData } from '../../dateHelperFunctions';
 

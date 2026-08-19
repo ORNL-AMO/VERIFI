@@ -1,26 +1,26 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WeatherStation } from 'src/app/models/degreeDays';
+import { WeatherStation } from '@data/models/degreeDays';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFunctions';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
-import { FacilityStatusCheck } from 'src/app/calculations/status-check-calculations/facilityStatusCheck';
-import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { deleteWorkspaceRecords, upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { PredictorCommandHandler } from 'src/app/account-workspace/handlers/predictor-command-handler.service';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 
 type OrderDataField = 'date' | 'amount';
 

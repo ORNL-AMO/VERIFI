@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
+import { ScopeOption, ScopeOptions } from '@data/models/scopeOption';
 
 @Pipe({
     name: 'scopeLabel',

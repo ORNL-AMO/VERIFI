@@ -1,26 +1,26 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import * as _ from 'lodash';
 import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
-import { SubRegionData } from '@app/models/eGridEmissions';
+import { SubRegionData } from '@data/models/eGridEmissions';
 import { FuelTypeOption } from '@app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@app/shared/fuel-options/getFuelTypeOptions';
 import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@app/shared/sharedHelperFunctions';
 import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
 import { EditMeterFormService } from '@app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { getMeterDataCopy } from '@app/calculations/conversions/convertMeterData';
-import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@app/models/globalWarmingPotentials';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { getNewIdbFacility, IdbFacility } from '@app/models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 
 @Injectable({
   providedIn: 'root'

@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { FacilitydbService } from '@app/indexedDB/facility-db.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { FacilitydbService } from '@data/indexedDB/facility-db.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 
 @Component({

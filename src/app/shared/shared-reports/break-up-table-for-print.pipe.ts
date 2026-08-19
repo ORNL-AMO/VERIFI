@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AnalysisTableColumns } from 'src/app/models/analysis';
+import { AnalysisTableColumns } from '@data/models/analysis';
 
 @Pipe({
     name: 'breakUpTableForPrint',

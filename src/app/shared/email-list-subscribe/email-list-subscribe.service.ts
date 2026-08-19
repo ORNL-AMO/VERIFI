@@ -3,9 +3,9 @@ import { BehaviorSubject, catchError, firstValueFrom, from, map, Observable, of,
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { FormControl, Validators } from '@angular/forms';
-import { AnalyticsService } from 'src/app/analytics/analytics.service';
-import { ApplicationInstanceDbService } from 'src/app/indexedDB/application-instance-db.service';
-import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationInstanceData';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
+import { ApplicationInstanceDbService } from '@data/indexedDB/application-instance-db.service';
+import { ApplicationInstanceData } from '@data/models/idbModels/applicationInstanceData';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Injectable({

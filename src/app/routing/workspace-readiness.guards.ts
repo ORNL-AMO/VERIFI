@@ -7,10 +7,10 @@ import {
   RouterStateSnapshot,
   UrlTree
 } from '@angular/router';
-import { AccountWorkspaceService } from '../account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
-import { ApplicationLifecycleService } from '../application-lifecycle/application-lifecycle.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
+import { FacilitydbService } from '@data/indexedDB/facility-db.service';
 
 const PUBLIC_NESTED_PATHS = new Set(['privacy', 'about', 'acknowledgments', 'feedback', 'help']);
 

@@ -1,15 +1,15 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { AnalysisGroup } from '@app/models/analysis';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { AnalysisGroupStatusCheck } from '@app/calculations/status-check-calculations/analysisGroupStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisGroupStatusCheck } from '@domain/calculations/status-check-calculations/analysisGroupStatusCheck';
 
 @Component({
   selector: 'app-group-analysis',

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { EmissionElectricity, EmissionOthers } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 
 @Component({

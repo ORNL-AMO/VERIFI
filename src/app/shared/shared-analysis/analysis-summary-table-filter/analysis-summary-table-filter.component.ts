@@ -1,10 +1,10 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject } from '@angular/core';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/models/analysis';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-analysis-summary-table-filter',

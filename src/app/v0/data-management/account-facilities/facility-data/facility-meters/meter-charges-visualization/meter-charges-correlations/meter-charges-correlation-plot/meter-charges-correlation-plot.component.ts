@@ -1,11 +1,11 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbUtilityMeter, MeterCharge } from '@app/models/idbModels/utilityMeter';
+import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
 import * as jStat from 'jstat';
-import { JStatRegressionModel } from '@app/models/analysis';
-import { IdbUtilityMeterData, MeterDataCharge } from '@app/models/idbModels/utilityMeterData';
+import { JStatRegressionModel } from '@data/models/analysis';
+import { IdbUtilityMeterData, MeterDataCharge } from '@data/models/idbModels/utilityMeterData';
 import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
 import { getDateFromMeterData } from '@app/shared/dateHelperFunctions';
 

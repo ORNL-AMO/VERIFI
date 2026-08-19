@@ -1,5 +1,5 @@
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { SankeyData, SankeyLink, SankeyNode } from 'src/app/models/visualization';
+import { SankeyData, SankeyLink, SankeyNode } from '@data/models/visualization';
 
 /**
  * Formats an energy value with its unit for display in Sankey chart labels.

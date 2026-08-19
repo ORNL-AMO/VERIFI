@@ -1,15 +1,15 @@
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { Component, Input, OnInit, inject } from '@angular/core';
-import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from '@data/models/meterDataFilter';
 import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
   selector: 'app-utility-meter-data-filter',

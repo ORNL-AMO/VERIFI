@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { PlotlyModule } from 'angular-plotly.js';
 import * as PlotlyJS from 'plotly.js-dist-min';
 import { LoadingComponent } from './core-components/loading/loading.component';
-import { IndexedDBModule } from './indexedDB/indexed-db.module';
+import { IndexedDBModule } from '@data/indexedDB/indexed-db.module';
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

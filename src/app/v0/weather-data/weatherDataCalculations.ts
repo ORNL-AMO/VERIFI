@@ -1,5 +1,5 @@
-import { ConvertValue } from "@app/calculations/conversions/convertValue";
-import { DetailDegreeDay, WeatherStation } from "@app/models/degreeDays";
+import { ConvertValue } from "@domain/calculations/conversions/convertValue";
+import { DetailDegreeDay, WeatherStation } from "@data/models/degreeDays";
 import { WeatherDataReading } from "@v0/weather-data/weather-data.service";
 
 

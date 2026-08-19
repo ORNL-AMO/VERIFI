@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
-import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { FacilityOverviewData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
-import { EmissionsTypes, getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
+import { EmissionsTypes, getEmissionsTypeColor } from '@data/models/eGridEmissions';
 
 @Component({
     selector: 'app-emissions-usage-table',

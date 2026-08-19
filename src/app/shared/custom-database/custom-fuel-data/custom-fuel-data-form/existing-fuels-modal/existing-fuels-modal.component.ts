@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { MeterPhase } from 'src/app/models/constantsAndTypes';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { MeterPhase } from '@data/models/constantsAndTypes';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { MobileBusOptions } from 'src/app/shared/fuel-options/mobileBusOptions';
 import { MobileHeavyDutyTruckOptions } from 'src/app/shared/fuel-options/mobileHeavyDutyVehicleOptions';

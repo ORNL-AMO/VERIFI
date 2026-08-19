@@ -1,15 +1,15 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { getNewIdbFacility, IdbFacility } from '@app/models/idbModels/facility';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
   selector: 'app-map-predictors-to-facilities',

@@ -1,14 +1,14 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
-import { deleteWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from '@data/account-workspace/handlers/custom-data-command-handler.service';
+import { deleteWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
     selector: 'app-emissions-data-dashboard',

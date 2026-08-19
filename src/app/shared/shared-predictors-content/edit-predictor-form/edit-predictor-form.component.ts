@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { WeatherStation } from 'src/app/models/degreeDays';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { WeatherStation } from '@data/models/degreeDays';
 import { Router } from '@angular/router';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { Month, Months } from '../../form-data/months';

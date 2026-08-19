@@ -1,15 +1,15 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { PredictorCommandHandler } from '@app/account-workspace/handlers/predictor-command-handler.service';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { getNewIdbPredictorData, IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
 
 @Component({

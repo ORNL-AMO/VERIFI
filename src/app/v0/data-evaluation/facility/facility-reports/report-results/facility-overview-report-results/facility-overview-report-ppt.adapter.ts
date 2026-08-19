@@ -1,16 +1,16 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec, PptChartSeries } from '@app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from '@app/shared/helper-pipes/custom-number.pipe';
-import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IUseAndCost, UseAndCost, UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
-import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
+import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IUseAndCost, UseAndCost, UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
+import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityColors } from '@app/shared/utilityColors';
-import { AllSources, EnergySources, MeterSource, WaterSources } from '@app/models/constantsAndTypes';
-import { YearMonthData } from '@app/models/dashboard';
+import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
+import { YearMonthData } from '@data/models/dashboard';
 import { Month, Months } from '@app/shared/form-data/months';
 
 export interface FacilityOverviewReportPptInput {

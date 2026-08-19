@@ -1,6 +1,6 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
 
 @Pipe({

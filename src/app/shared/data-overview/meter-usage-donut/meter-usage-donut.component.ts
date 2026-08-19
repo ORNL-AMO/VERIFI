@@ -1,12 +1,12 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
-import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-meter-usage-donut',

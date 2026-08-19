@@ -1,12 +1,12 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-monthly-facility-analysis',

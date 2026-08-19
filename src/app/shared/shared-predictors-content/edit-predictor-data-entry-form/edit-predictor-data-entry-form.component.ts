@@ -1,13 +1,13 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, SimpleChanges, inject } from '@angular/core';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
-import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherStation } from '@data/models/degreeDays';
 import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { Router } from '@angular/router';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { getDateFromPredictorData } from '../../dateHelperFunctions';
 
 @Component({

@@ -1,20 +1,20 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
 import { Month, Months } from '@app/shared/form-data/months';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { getAllYearsWithDataAccount, getLatestDataDate, getYearsWithFullDataAccount } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { getAllYearsWithDataAccount, getLatestDataDate, getYearsWithFullDataAccount } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { AccountReportStatusCheck } from '@app/calculations/status-check-calculations/accountReportStatusCheck';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { AccountReportStatusCheck } from '@domain/calculations/status-check-calculations/accountReportStatusCheck';
 
 @Component({
   selector: 'app-account-report-setup',

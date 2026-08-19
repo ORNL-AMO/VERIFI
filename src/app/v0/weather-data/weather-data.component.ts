@@ -1,16 +1,16 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WeatherDataSelection } from '@app/models/degreeDays';
-import { AnalyticsService } from '@app/analytics/analytics.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { WeatherDataSelection } from '@data/models/degreeDays';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WeatherPredictorManagementService } from '@v0/weather-data/weather-predictor-management.service';
 // import { DegreeDaysService } from '@app/shared/helper-services/degree-days.service';
 

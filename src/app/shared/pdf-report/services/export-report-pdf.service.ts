@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { ReportDocument } from '../models/report-document.model';
+import { ReportDocument } from '@app/shared/pdf-report/models/report-document.model';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableSection, TextSection } from '../models/report-section.model';
+import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableSection, TextSection } from '@app/shared/pdf-report/models/report-section.model';
 
 const DEFAULT_ACCENT_COLOR: [number, number, number] = [30, 90, 140];
 

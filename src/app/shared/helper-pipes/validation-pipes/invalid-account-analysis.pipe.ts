@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
+import { AccountAnalysisSetupErrors } from '@data/models/accountAnalysis';
 import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
 
 @Pipe({

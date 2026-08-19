@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import _ from 'lodash';
 import { getAccountReportType } from '@v0/data-evaluation/account/account-reports/report-pipes/account-report-type.pipe';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 
 @Pipe({
   name: 'reportOrderBy',

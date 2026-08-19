@@ -1,24 +1,24 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Signal, computed, WritableSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
-import { AnalyticsService } from '@app/analytics/analytics.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
-import { FacilityReportStatusCheck } from '@app/calculations/status-check-calculations/facilityReportStatusCheck';
+import { FacilityReportStatusCheck } from '@domain/calculations/status-check-calculations/facilityReportStatusCheck';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 
 interface FacilityReportTableItem {
   id: number;

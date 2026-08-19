@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from '@app/models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from '@data/models/degreeDays';
 import * as _ from 'lodash';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDegreeDayAmount } from '@app/shared/sharedHelperFunctions';

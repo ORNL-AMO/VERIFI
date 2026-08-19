@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

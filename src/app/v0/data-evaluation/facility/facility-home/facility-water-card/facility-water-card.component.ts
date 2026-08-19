@@ -1,11 +1,11 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Signal } from '@angular/core';
 import { FacilityHomeService } from '@v0/data-evaluation/facility/facility-home/facility-home.service';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { FacilityOverviewData } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

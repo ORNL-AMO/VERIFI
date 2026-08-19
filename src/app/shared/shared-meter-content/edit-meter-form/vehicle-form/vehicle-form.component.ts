@@ -1,4 +1,4 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
@@ -8,8 +8,8 @@ import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleTy
 import { EditMeterFormService } from '../edit-meter-form.service';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { getHeatingCapacity } from 'src/app/shared/sharedHelperFunctions';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 
 @Component({
     selector: 'app-vehicle-form',

@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 
 @Component({

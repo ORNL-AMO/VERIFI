@@ -1,23 +1,23 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, ElementRef, HostListener, inject, signal, Signal, untracked, ViewChild, WritableSignal } from '@angular/core';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
-import { AnalysisGroup, JStatRegressionModel } from '@app/models/analysis';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { getYearsWithFullData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
-import { GroupAnalysisErrors } from '@app/models/validation';
+import { GroupAnalysisErrors } from '@data/models/validation';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { emptyGroupAnalysisErrors } from '@app/calculations/status-check-calculations/validation/groupAnalysisValidation';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { RegressionModelStateService } from '@app/account-workspace/regression-model-state.service';
+import { emptyGroupAnalysisErrors } from '@domain/calculations/status-check-calculations/validation/groupAnalysisValidation';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { RegressionModelStateService } from '@data/account-workspace/regression-model-state.service';
 
 type OrderDataBy = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 

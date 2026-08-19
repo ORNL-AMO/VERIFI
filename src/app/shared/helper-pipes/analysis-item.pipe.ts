@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Pipe({
   name: 'analysisItem',

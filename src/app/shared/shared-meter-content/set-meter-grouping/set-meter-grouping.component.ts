@@ -1,17 +1,17 @@
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { MeterGroupingDataService } from './meter-grouping-data.service';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { CalanderizedMeter } from '@data/models/calanderization';
 
 
 @Component({
@@ -92,7 +92,7 @@ export class SetMeterGroupingComponent {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();
         }
-        this.calanderizationWorker = new Worker(new URL('../../../web-workers/calanderization.worker', import.meta.url));
+        this.calanderizationWorker = new Worker(new URL('../../../platform/web-workers/calanderization.worker', import.meta.url));
         this.calanderizationWorker.onmessage = ({ data }) => {
           this.calanderizationWorker.terminate();
           if (!data.error) {

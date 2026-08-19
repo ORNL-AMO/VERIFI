@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 
 @Injectable({
   providedIn: 'root'

@@ -1,5 +1,5 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { EnergyUnitsHelperService } from '@app/shared/helper-services/energy-units-helper.service';
@@ -7,21 +7,21 @@ import { EditMeterFormService } from '@app/shared/shared-meter-content/edit-mete
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@app/shared/sharedHelperFunctions';
-import { MeterPhase } from '@app/models/constantsAndTypes';
-import { SubRegionData } from '@app/models/eGridEmissions';
-import { getMeterDataCopy } from '@app/calculations/conversions/convertMeterData';
+import { MeterPhase } from '@data/models/constantsAndTypes';
+import { SubRegionData } from '@data/models/eGridEmissions';
+import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '@app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@app/shared/fuel-options/getFuelTypeOptions';
 import { ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { getNewIdbFacility, IdbFacility } from '@app/models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 
 @Injectable({
   providedIn: 'root'

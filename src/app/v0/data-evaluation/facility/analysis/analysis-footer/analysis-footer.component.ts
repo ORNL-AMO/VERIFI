@@ -1,19 +1,19 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { filter, map, startWith } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup } from '@app/models/analysis';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { AnalysisSetupErrors, GroupAnalysisErrors } from '@app/models/validation';
+import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 @Component({
   selector: 'app-analysis-footer',
   templateUrl: './analysis-footer.component.html',

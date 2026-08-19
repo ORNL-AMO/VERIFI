@@ -1,15 +1,15 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { DataQualityReportSettings, IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { DataQualityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 
 @Component({

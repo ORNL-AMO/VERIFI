@@ -1,23 +1,23 @@
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, SimpleChanges, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
+import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { Router } from '@angular/router';
-import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-shared-meter-calendarization',
@@ -116,7 +116,7 @@ export class SharedMeterCalendarizationComponent {
         if (this.calanderizationWorker) {
           this.calanderizationWorker.terminate();
         }
-        this.calanderizationWorker = new Worker(new URL('../../../web-workers/calanderization.worker', import.meta.url));
+        this.calanderizationWorker = new Worker(new URL('../../../platform/web-workers/calanderization.worker', import.meta.url));
         this.calanderizationWorker.onmessage = ({ data }) => {
           this.calanderizationWorker.terminate();
           if (!data.error) {

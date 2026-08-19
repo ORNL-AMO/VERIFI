@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { MeterCharge } from 'src/app/models/idbModels/utilityMeter';
+import { MeterCharge } from '@data/models/idbModels/utilityMeter';
 
 @Pipe({
   name: 'meterCharge',

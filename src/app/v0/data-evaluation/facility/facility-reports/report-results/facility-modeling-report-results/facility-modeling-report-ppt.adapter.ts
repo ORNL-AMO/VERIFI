@@ -1,13 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, TitleSlide } from '@app/shared/ppt-report/models/ppt-slide';
-import { IdbFacilityReport, ModelingReportSettings } from '@app/models/idbModels/facilityReport';
+import { IdbFacilityReport, ModelingReportSettings } from '@data/models/idbModels/facilityReport';
 import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
 import { UserDefineModelDateRangePipe } from '@app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
 import { RegressionNumberPipe } from '@app/shared/helper-pipes/regression-number.pipe';
 import { CustomNumberPipe } from '@app/shared/helper-pipes/custom-number.pipe';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 
 export interface FacilityModelingReportPptInput {
     report: IdbFacilityReport;

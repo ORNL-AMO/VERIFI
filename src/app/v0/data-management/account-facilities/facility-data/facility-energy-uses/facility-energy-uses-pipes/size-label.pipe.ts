@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EquipmentType } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { EquipmentType } from '@data/models/idbModels/facilityEnergyUseEquipment';
 
 @Pipe({
   name: 'sizeLabel',

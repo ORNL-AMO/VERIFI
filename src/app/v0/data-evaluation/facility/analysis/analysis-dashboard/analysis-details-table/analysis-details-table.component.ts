@@ -1,30 +1,30 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
-import { FacilityCommandHandler } from '@app/account-workspace/handlers/facility-command-handler.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityReport, getNewIdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport, getNewIdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { CalanderizedMeter } from '@app/models/calanderization';
+import { CalanderizedMeter } from '@data/models/calanderization';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
-import { getYearsWithFullData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import * as _ from 'lodash';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 
 interface AnalysisDetailsTableRow {
   analysisItem: IdbAnalysisItem,

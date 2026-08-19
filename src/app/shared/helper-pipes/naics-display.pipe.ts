@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { getNAICS } from '../form-data/naics-data';
-import { AccountAndFacility } from 'src/app/models/idbModels/accountAndFacility';
+import { AccountAndFacility } from '@data/models/idbModels/accountAndFacility';
 
 @Pipe({
     name: 'naicsDisplay',

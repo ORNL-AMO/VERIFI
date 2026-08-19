@@ -1,4 +1,4 @@
-import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
+import { MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
 import { FuelTypeOption } from "./fuelTypeOption";
 import { StationarySolidOptions } from "./stationarySolidOptions";
 import { StationaryLiquidOptions } from "./stationaryLiquidOptions";
@@ -15,7 +15,7 @@ import { MobileRailOptions } from "./mobileRailOptions";
 import { MobileTransportOnsiteOptions } from "./mobileTransportOnsiteOptions";
 import { MobileWaterTransportOptions } from "./mobileWaterTransportOptions";
 import { VehicleType, VehicleTypes } from "../vehicle-data/vehicleType";
-import { IdbCustomFuel } from "src/app/models/idbModels/customFuel";
+import { IdbCustomFuel } from "@data/models/idbModels/customFuel";
 
 
 

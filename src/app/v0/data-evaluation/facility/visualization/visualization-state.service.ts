@@ -1,17 +1,17 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
 import * as _ from 'lodash';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 
 @Injectable({

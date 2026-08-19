@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject } from '@angular/core';
-import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
-import { AssessmentReportVersion } from 'src/app/models/idbModels/account';
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
+import { AssessmentReportVersion } from '@data/models/idbModels/account';
 
 @Component({
     selector: 'app-existing-gwps-modal',

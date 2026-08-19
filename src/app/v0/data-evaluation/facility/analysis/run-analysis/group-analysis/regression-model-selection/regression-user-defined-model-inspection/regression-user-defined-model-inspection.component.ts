@@ -1,20 +1,20 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, ElementRef, inject, Signal, ViewChild, effect, signal, WritableSignal, untracked, afterRenderEffect } from '@angular/core';
-import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@app/models/analysis';
+import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { MonthlyAnalysisSummaryClass } from '@app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@app/calculations/shared-calculations/calanderizationFunctions';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { MonthlyAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
-import { getLatestCompleteAnalysisYear } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { getLatestCompleteAnalysisYear } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -113,7 +113,7 @@ export class RegressionUserDefinedModelInspectionComponent {
     this.calculating.set(true);
 
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../../../web-workers/monthly-group-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../../../platform/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.inspectedMonthlyAnalysisSummaryData.set(data.monthlyAnalysisSummary.monthlyAnalysisSummaryData);

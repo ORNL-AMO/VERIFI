@@ -1,13 +1,13 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { VisualizationStateService } from '@v0/data-evaluation/facility/visualization/visualization-state.service';
 import * as _ from 'lodash';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
-import { AnalyticsService } from '@app/analytics/analytics.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 
 @Component({
     selector: 'app-visualization',

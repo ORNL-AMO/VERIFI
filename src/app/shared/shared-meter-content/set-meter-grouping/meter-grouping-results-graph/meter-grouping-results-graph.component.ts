@@ -1,14 +1,14 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlotlyService } from 'angular-plotly.js';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import * as _ from 'lodash';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { Subscription } from 'rxjs';
 import { MeterGroupingDataService } from '../meter-grouping-data.service';
 

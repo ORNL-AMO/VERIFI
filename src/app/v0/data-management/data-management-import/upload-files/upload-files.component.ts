@@ -1,4 +1,4 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
 import { Router } from '@angular/router';
@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 

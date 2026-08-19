@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 // import { EGridService } from './e-grid.service';
 // import * as _ from 'lodash';
-// import { DetailDegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
+// import { DetailDegreeDay, LocalClimatologicalData, WeatherStation } from '@data/models/degreeDays';
 // import * as Papa from 'papaparse';
-// import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+// import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 
 @Injectable({
   providedIn: 'root'

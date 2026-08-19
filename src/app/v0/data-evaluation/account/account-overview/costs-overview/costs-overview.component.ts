@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import { Subscription } from 'rxjs';
-import { AccountOverviewData } from '@app/calculations/dashboard-calculations/accountOverviewClass';
-import { UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
-import { YearMonthData } from '@app/models/dashboard';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
+import { YearMonthData } from '@data/models/dashboard';
 
 @Component({
     selector: 'app-costs-overview',

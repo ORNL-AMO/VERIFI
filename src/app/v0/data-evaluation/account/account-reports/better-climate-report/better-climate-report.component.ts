@@ -1,22 +1,22 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
 import { Router } from '@angular/router';
-import { BetterClimateReport } from '@app/calculations/carbon-calculations/betterClimateReport';
+import { BetterClimateReport } from '@domain/calculations/carbon-calculations/betterClimateReport';
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
-import { BetterClimateReportSetup } from '@app/models/overview-report';
+import { BetterClimateReportSetup } from '@data/models/overview-report';
 import { BetterClimateExcelWriterService } from '@v0/data-evaluation/account/account-reports/excel-writer-services/better-climate-excel-writer.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbCustomFuel } from '@app/models/idbModels/customFuel';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { IdbCustomGWP } from '@app/models/idbModels/customGWP';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 @Component({
   selector: 'app-better-climate-report',
   templateUrl: './better-climate-report.component.html',
@@ -87,7 +87,7 @@ export class BetterClimateReportComponent {
     let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()]
     let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../web-workers/better-climate-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../platform/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.betterClimateReportUnfiltered = _.cloneDeep(data.betterClimateReport);

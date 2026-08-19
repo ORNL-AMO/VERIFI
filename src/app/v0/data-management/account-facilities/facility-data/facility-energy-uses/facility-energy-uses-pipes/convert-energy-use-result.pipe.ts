@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ConvertValue } from '@app/calculations/conversions/convertValue';
-import { MeterSource } from '@app/models/constantsAndTypes';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
+import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Pipe({
   name: 'convertEnergyUseResult',

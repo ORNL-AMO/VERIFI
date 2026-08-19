@@ -1,7 +1,7 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { isMeterInvalid } from '../../../calculations/status-check-calculations/validation/meterValidation';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { isMeterInvalid } from '@domain/calculations/status-check-calculations/validation/meterValidation';
 
 @Pipe({
   name: 'invalidMeters',

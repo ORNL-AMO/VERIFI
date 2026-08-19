@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { FacilityReportType } from '@app/models/idbModels/facilityReport';
+import { FacilityReportType } from '@data/models/idbModels/facilityReport';
 
 @Pipe({
     name: 'facilityReportType',

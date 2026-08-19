@@ -4,15 +4,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
-import { BackupImportCoordinator } from '@app/backup/backup-import-coordinator.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { HomePageComponent } from '@v0/core-components/home-page/home-page.component';
 import { Meta, Title } from '@angular/platform-browser';
-import { getNewIdbAccount, IdbAccount } from '@app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 
 @NgModule({
   declarations: [HomePageComponent],

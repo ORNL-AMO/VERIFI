@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { MeterStatusCheck } from '@app/calculations/status-check-calculations/meterStatusCheck';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 
 interface MetersListItem {

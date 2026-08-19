@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AnalysisGroup } from 'src/app/models/analysis';
+import { AnalysisGroup } from '@data/models/analysis';
 import { Month, Months } from 'src/app/shared/form-data/months';
 
 @Pipe({

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { WeatherStation } from '@app/models/degreeDays';
+import { WeatherStation } from '@data/models/degreeDays';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';

@@ -1,13 +1,13 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EnergyFootprintAnnualFacilityBalance } from '@app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
-import { getYearsWithFullData } from '@app/calculations/shared-calculations/calculationsHelpers';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
+import { EnergyFootprintAnnualFacilityBalance } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
+import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
 
 @Component({

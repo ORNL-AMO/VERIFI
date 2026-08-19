@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DetailDegreeDay } from '@app/models/degreeDays';
+import { DetailDegreeDay } from '@data/models/degreeDays';
 import * as _ from 'lodash';
 
 @Pipe({

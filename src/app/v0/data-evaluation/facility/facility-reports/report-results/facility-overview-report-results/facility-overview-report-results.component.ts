@@ -1,21 +1,21 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChildren, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { FacilityOverviewData } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
-import { UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
-import { IdbCustomFuel } from '@app/models/idbModels/customFuel';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
+import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { IdbCustomGWP } from '@app/models/idbModels/customGWP';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { FacilityOverviewReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report.adapter';
 import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
 import { FacilitySectionReportComponent } from '@app/shared/data-overview/facility-section-report/facility-section-report.component';
@@ -108,7 +108,7 @@ export class FacilityOverviewReportResultsComponent {
     }
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../web-workers/facility-overview.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../platform/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.facilityOverviewData = data.facilityOverviewData;

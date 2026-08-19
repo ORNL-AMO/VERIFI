@@ -1,14 +1,14 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getEmissions, getZeroEmissionsResults } from '@domain/calculations/emissions-calculations/emissions';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { EmissionsResults } from '@data/models/eGridEmissions';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 

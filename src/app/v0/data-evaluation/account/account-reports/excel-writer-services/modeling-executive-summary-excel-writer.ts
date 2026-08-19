@@ -1,6 +1,6 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Injectable, inject } from '@angular/core';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
 import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
 

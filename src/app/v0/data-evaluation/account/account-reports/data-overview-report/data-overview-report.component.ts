@@ -1,22 +1,22 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { DataOverviewReportSetup } from '@app/models/overview-report';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { Subscription } from 'rxjs';
-import { AccountOverviewData } from '@app/calculations/dashboard-calculations/accountOverviewClass';
-import { UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
-import { FacilityOverviewData } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
+import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterGroup } from '@app/models/idbModels/utilityMeterGroup';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbCustomFuel } from '@app/models/idbModels/customFuel';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { IdbCustomGWP } from '@app/models/idbModels/customGWP';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
 import { DataOverviewReportAdapter } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.adapter';
 import { DataOverviewAccountReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-account-report/data-overview-account-report.component';
@@ -127,7 +127,7 @@ export class DataOverviewReportComponent {
     let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
     let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
-      this.facilitiesWorker = new Worker(new URL('../../../../web-workers/facility-overview.worker', import.meta.url));
+      this.facilitiesWorker = new Worker(new URL('../../../../../platform/web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
         if (!data.error) {
           dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
@@ -200,7 +200,7 @@ export class DataOverviewReportComponent {
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
 
     if (typeof Worker !== 'undefined') {
-      this.accountWorker = new Worker(new URL('../../../../web-workers/account-overview.worker', import.meta.url));
+      this.accountWorker = new Worker(new URL('../../../../../platform/web-workers/account-overview.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.accountData.accountOverviewData = data.accountOverviewData;

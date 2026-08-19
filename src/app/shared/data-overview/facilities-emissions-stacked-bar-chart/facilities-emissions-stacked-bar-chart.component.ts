@@ -3,8 +3,8 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import * as _ from 'lodash';
-import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
+import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { getEmissionsTypeColor } from '@data/models/eGridEmissions';
 
 @Component({
     selector: 'app-facilities-emissions-stacked-bar-chart',

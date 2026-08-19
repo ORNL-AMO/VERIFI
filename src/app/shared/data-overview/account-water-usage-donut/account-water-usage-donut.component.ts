@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-account-water-usage-donut',

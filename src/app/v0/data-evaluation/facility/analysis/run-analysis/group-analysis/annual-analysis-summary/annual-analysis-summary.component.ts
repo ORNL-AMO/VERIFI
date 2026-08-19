@@ -1,14 +1,14 @@
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, DestroyRef, Signal, computed, effect, inject, signal } from '@angular/core';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AnalysisGroup, AnnualAnalysisSummary } from '@app/models/analysis';
-import { CalanderizedMeter } from '@app/models/calanderization';
-import { AnnualGroupAnalysisSummaryClass } from '@app/calculations/analysis-calculations/annualGroupAnalysisSummaryClass';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@app/calculations/shared-calculations/calanderizationFunctions';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { AnalysisGroup, AnnualAnalysisSummary } from '@data/models/analysis';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { AnnualGroupAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualGroupAnalysisSummaryClass';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Component({
     selector: 'app-annual-analysis-summary',
@@ -50,7 +50,7 @@ export class AnnualAnalysisSummaryComponent {
     const account = this.accountWorkspaceStore.account();
 
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../../../web-workers/annual-group-analysis.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../../../platform/web-workers/annual-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.annualAnalysisSummary.set(data.annualAnalysisSummaries);

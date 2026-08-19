@@ -1,10 +1,10 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '@v0/data-evaluation/account/account-home/account-home.service';
 import { Router } from '@angular/router';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { ExportToExcelTemplateV3Service } from '@app/shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { toSignal } from '@angular/core/rxjs-interop';

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 @Pipe({
   name: 'meterGroupSourcesList',

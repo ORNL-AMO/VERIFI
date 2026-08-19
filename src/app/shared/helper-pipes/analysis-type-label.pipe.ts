@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AnalysisType } from 'src/app/models/analysis';
+import { AnalysisType } from '@data/models/analysis';
 
 @Pipe({
     name: 'analysisTypeLabel',

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
     selector: 'app-account-water-usage-table',

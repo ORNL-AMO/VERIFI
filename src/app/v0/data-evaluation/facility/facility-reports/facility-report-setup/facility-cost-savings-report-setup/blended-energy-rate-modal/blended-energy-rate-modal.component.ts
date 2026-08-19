@@ -1,15 +1,15 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@app/calculations/shared-calculations/calanderizationFunctions';
-import { AnalysisGroup } from '@app/models/analysis';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityReport } from '@app/models/idbModels/facilityReport';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { AnalysisGroup } from '@data/models/analysis';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { convertConsumptionRate, getMeterCollectionUnit } from '@app/shared/sharedHelperFunctions';
 
 @Component({

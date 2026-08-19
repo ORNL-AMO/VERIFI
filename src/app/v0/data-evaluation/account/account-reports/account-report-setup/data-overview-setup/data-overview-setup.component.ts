@@ -1,10 +1,10 @@
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { ReportCommandHandler } from '@app/account-workspace/handlers/report-command-handler.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Component, computed, effect, inject } from '@angular/core';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { DataOverviewReportSetup } from '@app/models/overview-report';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { DataOverviewReportSetup } from '@data/models/overview-report';
 
 @Component({
     selector: 'app-data-overview-setup',

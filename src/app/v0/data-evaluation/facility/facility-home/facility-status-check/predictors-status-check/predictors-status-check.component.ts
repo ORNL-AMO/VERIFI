@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { PredictorStatusCheck } from '@app/calculations/status-check-calculations/predictorStatusCheck';
-import { STATUS_CHECK_OPTIONS } from '@app/calculations/status-check-calculations/statusCheckModels';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
+import { STATUS_CHECK_OPTIONS } from '@domain/calculations/status-check-calculations/statusCheckModels';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-predictors-status-check',

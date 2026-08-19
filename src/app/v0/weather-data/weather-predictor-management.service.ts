@@ -1,21 +1,21 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { getNewIdbPredictor, IdbPredictor } from '@app/models/idbModels/predictor';
-import { DetailDegreeDay, WeatherDataSelection } from '@app/models/degreeDays';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
+import { DetailDegreeDay, WeatherDataSelection } from '@data/models/degreeDays';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
 import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
-import { getNewIdbPredictorData, IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getDegreeDayAmount } from '@app/shared/sharedHelperFunctions';
-import { PredictorCommandHandler } from '@app/account-workspace/handlers/predictor-command-handler.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { Month, Months } from '@app/shared/form-data/months';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 
 @Injectable({

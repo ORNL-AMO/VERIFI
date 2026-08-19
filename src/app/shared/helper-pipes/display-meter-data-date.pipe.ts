@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { Month, Months } from '../form-data/months';
 
 @Pipe({

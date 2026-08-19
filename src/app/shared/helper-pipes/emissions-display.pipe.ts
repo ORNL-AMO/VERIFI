@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
-import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 
 @Pipe({
     name: 'emissionsDisplay',

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { UtilityColors } from '../utilityColors';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Pipe({
   name: 'meterSourceColor',

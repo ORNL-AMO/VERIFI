@@ -1,12 +1,12 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { StackedBarChartData, UtilityItem } from '@data/models/dashboard';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
-import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { DataOverviewReportSetup } from '@data/models/overview-report';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-facilities-usage-stacked-bar-chart',

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { BetterPlantsReportSetup, BetterPlantsSummary } from '@app/models/overview-report';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { BetterPlantsReportSetup, BetterPlantsSummary } from '@data/models/overview-report';
 
 @Component({
     selector: 'app-facility-performance-table',

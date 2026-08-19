@@ -1,10 +1,10 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { AnalysisGroup, AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { AnalysisGroup, AnnualAnalysisSummary } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { AnalysisReportSettings } from '@data/models/idbModels/facilityReport';
 import { AnnualAnalysisSummaryGraphComponent } from 'src/app/shared/shared-analysis/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 
 @Component({

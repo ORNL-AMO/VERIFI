@@ -1,12 +1,12 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredictorDataDate } from '@app/shared/dateHelperFunctions';
 
 @Component({

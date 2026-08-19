@@ -1,26 +1,26 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { DatabaseResetService } from '@app/application-lifecycle/database-reset.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, Input, OnInit, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { AccountdbService } from "@app/indexedDB/account-db.service";
-import { UtilityMeterdbService } from "@app/indexedDB/utilityMeter-db.service";
-import { UtilityMeterGroupdbService } from "@app/indexedDB/utilityMeterGroup-db.service";
-import { UtilityMeterDatadbService } from "@app/indexedDB/utilityMeterData-db.service";
+import { AccountdbService } from "@data/indexedDB/account-db.service";
+import { UtilityMeterdbService } from "@data/indexedDB/utilityMeter-db.service";
+import { UtilityMeterGroupdbService } from "@data/indexedDB/utilityMeterGroup-db.service";
+import { UtilityMeterDatadbService } from "@data/indexedDB/utilityMeterData-db.service";
 import { Subscription } from 'rxjs';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { environment } from 'src/environments/environment';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ElectronService } from '@app/electron/electron.service';
+import { ElectronService } from '@platform/electron/electron.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { AutomaticBackupsService } from '@app/electron/automatic-backups.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from '@app/account-workspace/handlers/account-command-handler.service';
-import { BackupExportCoordinator } from '@app/backup/backup-export-coordinator.service';
+import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-header',

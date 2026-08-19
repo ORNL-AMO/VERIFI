@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EnergyEquipmentOperatingConditionsData } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { EnergyEquipmentOperatingConditionsData } from '@data/models/idbModels/facilityEnergyUseEquipment';
 
 @Pipe({
   name: 'yearOptionsFilter',

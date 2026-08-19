@@ -1,7 +1,7 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-monthly-savings-graph',

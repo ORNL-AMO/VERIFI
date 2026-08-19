@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
-import { PredictorStatusCheck } from '@app/calculations/status-check-calculations/predictorStatusCheck';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 
 interface PredictorListItem {

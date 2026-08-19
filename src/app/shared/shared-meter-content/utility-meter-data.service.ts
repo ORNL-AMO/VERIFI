@@ -1,14 +1,14 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
-import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from '@data/models/meterDataFilter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { MeterSource } from '@data/models/constantsAndTypes';
 import { maxDateValidator, minDateValidator } from '../customFormValidators';
 import { getMeterDataDateString } from '../dateHelperFunctions';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

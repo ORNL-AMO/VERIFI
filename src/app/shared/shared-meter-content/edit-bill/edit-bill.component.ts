@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { MeterCommandHandler } from 'src/app/account-workspace/handlers/meter-command-handler.service';
-import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,11 +9,11 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
-import { ElectronService } from 'src/app/electron/electron.service';
+import { ElectronService } from '@platform/electron/electron.service';
 import { getDateFromMeterData, setMeterDataDateFromDate } from '../../dateHelperFunctions';
 import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
 

@@ -1,12 +1,12 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, ElementRef, ViewChild, Input, SimpleChanges, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
-import { AnnualSourceData, AnnualSourceDataItem } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnnualSourceData, AnnualSourceDataItem } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/models/eGridEmissions';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
     selector: 'app-emissions-usage-chart',

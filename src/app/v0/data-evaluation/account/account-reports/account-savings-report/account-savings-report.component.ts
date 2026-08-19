@@ -1,21 +1,21 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { AccountSavingsReportSetup, PerformanceReportSetup } from '@app/models/overview-report';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { PerformanceReport } from '@app/calculations/performance-report-calculations/performanceReport';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { AccountSavingsReportSetup, PerformanceReportSetup } from '@data/models/overview-report';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { PerformanceReport } from '@domain/calculations/performance-report-calculations/performanceReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { AccountSavingsReport } from '@app/calculations/savings-report-calculations/accountSavingsReport';
+import { AccountSavingsReport } from '@domain/calculations/savings-report-calculations/accountSavingsReport';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
@@ -157,7 +157,7 @@ export class AccountSavingsReportComponent {
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../../web-workers/account-savings-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../../platform/web-workers/account-savings-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           let accountSavingsReport: AccountSavingsReport = data.accountSavingsReport;

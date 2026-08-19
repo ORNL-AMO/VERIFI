@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { FacilitySavingsReportResultsComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component';
 
 @Pipe({ name: 'breakUpTableForPrint', standalone: false })

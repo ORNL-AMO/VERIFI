@@ -5,7 +5,7 @@ import { DataManagementRoutes } from '@v0/routing/data-management.routes';
 import { DataEvaluationRoutes } from '@v0/routing/data-evaluation.routes';
 import { FeedbackComponent } from '@v0/static-content/feedback/feedback.component';
 import { PrivacyNoticeComponent } from '@v0/static-content/privacy-notice/privacy-notice.component';
-import { persistenceReadyGuard } from '../routing/workspace-readiness.guards';
+import { persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { PageNotFoundComponent } from '@v0/core-components/page-not-found/page-not-found.component';
 import { ExistingUxShellComponent } from './shell/existing-ux-shell/existing-ux-shell.component';
 

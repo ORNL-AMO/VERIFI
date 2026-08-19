@@ -1,14 +1,14 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { FacilityCommandHandler } from '@app/account-workspace/handlers/facility-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { Month, Months } from '@app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '@v0/data-evaluation/facility/visualization/visualization-state.service';
-import { MonthlyData } from '@app/models/calanderization';
+import { MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
   selector: 'app-correlation-plot-menu',

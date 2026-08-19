@@ -1,20 +1,20 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, OnDestroy, Signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
-import { AnnualFacilityAnalysisSummaryClass } from '@app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
+import { AnnualFacilityAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { FacilityHomeService } from '@v0/data-evaluation/facility/facility-home/facility-home.service';
 import * as _ from 'lodash';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { FacilityOverviewData } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -101,7 +101,7 @@ export class FacilityHomeComponent implements OnDestroy {
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
-      this.annualEnergyAnalysisWorker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.annualEnergyAnalysisWorker = new Worker(new URL('../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.setEnergyBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData);
@@ -156,7 +156,7 @@ export class FacilityHomeComponent implements OnDestroy {
     let accountAnalysisItems: Array<IdbAnalysisItem> = [...this.accountWorkspaceStore.facilityAnalyses()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
-      this.annualWaterAnalysisWorker = new Worker(new URL('../../../web-workers/annual-facility-analysis.worker', import.meta.url));
+      this.annualWaterAnalysisWorker = new Worker(new URL('../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.setWaterBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData);
@@ -209,7 +209,7 @@ export class FacilityHomeComponent implements OnDestroy {
     let meterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
     let account: IdbAccount = this.accountWorkspaceStore.account();
     if (typeof Worker !== 'undefined') {
-      this.overviewWorker = new Worker(new URL('../../../web-workers/facility-overview.worker', import.meta.url));
+      this.overviewWorker = new Worker(new URL('../../../../platform/web-workers/facility-overview.worker', import.meta.url));
       this.overviewWorker.onmessage = ({ data }) => {
         if (!data.error) {
           this.facilityHomeService.facilityOverviewData.next(data.facilityOverviewData);

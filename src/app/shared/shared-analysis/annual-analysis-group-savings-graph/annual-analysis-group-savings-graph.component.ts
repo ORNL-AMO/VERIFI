@@ -1,7 +1,7 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from '@data/models/analysis';
 
 @Component({
   selector: 'app-annual-analysis-group-savings-graph',

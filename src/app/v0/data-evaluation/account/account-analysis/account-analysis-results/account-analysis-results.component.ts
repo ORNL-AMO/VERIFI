@@ -1,19 +1,19 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { AnnualAccountAnalysisSummaryClass } from '@app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
+import { AnnualAccountAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { runWorker } from '@app/web-workers/run-worker';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { runWorker } from '@platform/web-workers/run-worker';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 
 @Component({
   selector: 'app-account-analysis-results',
@@ -77,7 +77,7 @@ export class AccountAnalysisResultsComponent implements OnInit {
     };
 
     if (typeof Worker !== 'undefined') {
-      const worker = new Worker(new URL('../../../../web-workers/annual-account-analysis.worker', import.meta.url));
+      const worker = new Worker(new URL('../../../../../platform/web-workers/annual-account-analysis.worker', import.meta.url));
       this.accountAnalysisService.calculating.next(true);
       runWorker<any>(worker, payload).pipe(
         takeUntilDestroyed(this.destroyRef)

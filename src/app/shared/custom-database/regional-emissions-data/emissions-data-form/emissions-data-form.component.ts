@@ -1,20 +1,20 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { CustomDataCommandHandler } from 'src/app/account-workspace/handlers/custom-data-command-handler.service';
-import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
-import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
-import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { CustomDataCommandHandler } from '@data/account-workspace/handlers/custom-data-command-handler.service';
+import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { EmissionsRate, SubregionEmissions } from '@data/models/eGridEmissions';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 
 @Component({
   selector: 'app-emissions-data-form',

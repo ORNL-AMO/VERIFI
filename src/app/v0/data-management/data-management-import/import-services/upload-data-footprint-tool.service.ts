@@ -1,14 +1,14 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { FileReference, ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
-import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
-import { MeterSource } from '@app/models/constantsAndTypes';
-import { getEnergyUseUnit, setEnergyFootprintEnergyUse } from '@app/calculations/energy-footprint/energyFootprintCalculations';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { getEnergyUseUnit, setEnergyFootprintEnergyUse } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root',

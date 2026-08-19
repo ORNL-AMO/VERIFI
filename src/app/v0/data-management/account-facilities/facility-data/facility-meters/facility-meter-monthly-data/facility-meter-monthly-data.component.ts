@@ -1,8 +1,8 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 @Component({
   selector: 'app-facility-meter-monthly-data',

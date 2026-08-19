@@ -1,4 +1,4 @@
-import { MeterSource } from "src/app/models/constantsAndTypes";
+import { MeterSource } from "@data/models/constantsAndTypes";
 
 export const ConsumptionCostUnits: Array<{ value: ChargeCostUnit, label: string }> = [
     { value: 'dollarsPerKilowattHour', label: '$/kWh' },

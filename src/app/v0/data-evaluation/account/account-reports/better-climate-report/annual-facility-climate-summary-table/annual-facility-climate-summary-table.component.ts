@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
-import { BetterClimateAnnualFacilitySummary, BetterClimateFacilityMaxMin, BetterClimateReport } from '@app/calculations/carbon-calculations/betterClimateReport';
+import { BetterClimateAnnualFacilitySummary, BetterClimateFacilityMaxMin, BetterClimateReport } from '@domain/calculations/carbon-calculations/betterClimateReport';
 import * as _ from 'lodash';
-import { BetterClimateYearDetails } from '@app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { BetterClimateReportSetup } from '@app/models/overview-report';
+import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
+import { BetterClimateReportSetup } from '@data/models/overview-report';
 @Component({
     selector: 'app-annual-facility-climate-summary-table',
     templateUrl: './annual-facility-climate-summary-table.component.html',

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { AnalysisGroup } from '@app/models/analysis';
+import { AnalysisGroup } from '@data/models/analysis';
 
 @Component({
   selector: 'app-monthly-savings-table',

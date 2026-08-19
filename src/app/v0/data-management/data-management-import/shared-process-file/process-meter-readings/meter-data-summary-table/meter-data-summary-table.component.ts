@@ -1,9 +1,9 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { MeterDataSummary } from '@v0/data-management/data-management-import/shared-process-file/process-meter-readings/process-meter-readings.component';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { getDateFromMeterData } from '@app/shared/dateHelperFunctions';
 
 @Component({

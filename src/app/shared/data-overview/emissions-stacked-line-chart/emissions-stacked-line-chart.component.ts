@@ -3,8 +3,8 @@ import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/models/eGridEmissions';
 
 
 @Component({

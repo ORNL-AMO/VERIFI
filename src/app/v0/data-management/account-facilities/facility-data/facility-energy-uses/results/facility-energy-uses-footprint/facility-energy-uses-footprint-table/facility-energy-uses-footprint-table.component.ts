@@ -1,7 +1,7 @@
 import { Component, inject, Input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { EnergyFootprintAnnualFacilityBalance } from '@app/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
+import { EnergyFootprintAnnualFacilityBalance } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 
 @Component({
   selector: 'app-facility-energy-uses-footprint-table',

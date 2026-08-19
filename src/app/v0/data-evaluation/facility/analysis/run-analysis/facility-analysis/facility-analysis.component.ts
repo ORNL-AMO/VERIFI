@@ -1,25 +1,25 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AnnualFacilityAnalysisSummaryClass } from '@app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { CalanderizedMeter } from '@app/models/calanderization';
+import { AnnualFacilityAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { CalanderizedMeter } from '@data/models/calanderization';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@app/calculations/shared-calculations/calanderizationFunctions';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbPredictorData } from '@app/models/idbModels/predictorData';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbCustomGWP } from '@app/models/idbModels/customGWP';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { FacilityStatusCheck } from '@app/calculations/status-check-calculations/facilityStatusCheck';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { runWorker } from '@app/web-workers/run-worker';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
+import { runWorker } from '@platform/web-workers/run-worker';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 
 @Component({
   selector: 'app-facility-analysis',
@@ -92,7 +92,7 @@ export class FacilityAnalysisComponent implements OnInit {
     };
 
     if (typeof Worker !== 'undefined') {
-      const worker = new Worker(new URL('../../../../../web-workers/annual-facility-analysis.worker', import.meta.url));
+      const worker = new Worker(new URL('../../../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.analysisService.calculating.next(true);
       runWorker<any>(worker, payload).pipe(
         takeUntilDestroyed(this.destroyRef)

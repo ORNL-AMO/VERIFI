@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { EnergySources, MeterSource } from '@app/models/constantsAndTypes';
+import { EnergySources, MeterSource } from '@data/models/constantsAndTypes';
 
 @Pipe({
   name: 'energyUseFormAvailableSources',

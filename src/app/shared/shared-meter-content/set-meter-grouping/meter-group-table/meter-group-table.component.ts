@@ -1,13 +1,13 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { getLatestYearWithData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { getLatestYearWithData } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import * as _ from 'lodash';
 import { MeterGroupingDataService } from '../meter-grouping-data.service';
 

@@ -1,17 +1,17 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { AnalysisStatusCheck } from '@app/calculations/status-check-calculations/analysisStatusCheck';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { AccountStatusCheck } from '@app/calculations/status-check-calculations/accountStatusCheck';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 
 interface FacilityListItem {
   facility: IdbFacility;

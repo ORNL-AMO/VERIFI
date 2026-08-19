@@ -1,17 +1,17 @@
 import { inject, Injectable } from '@angular/core';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from '@app/models/idbModels/accountAnalysisItem';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@app/models/analysis';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { PerformanceReport } from '@app/calculations/performance-report-calculations/performanceReport';
-import { AccountSavingsReportSetup } from '@app/models/overview-report';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { PerformanceReport } from '@domain/calculations/performance-report-calculations/performanceReport';
+import { AccountSavingsReportSetup } from '@data/models/overview-report';
 import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
 import { PptSlide, TableSlide, ChartSlide, TableHeaderCell, getPptAxisSpec } from '@app/shared/ppt-report/models/ppt-slide';
 import { CustomNumberPipe } from '@app/shared/helper-pipes/custom-number.pipe';
 import { FacilityGroupAnalysisItem, RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { FacilityModelingReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-ppt.adapter';
 
 export interface AccountSavingsReportPptInput {

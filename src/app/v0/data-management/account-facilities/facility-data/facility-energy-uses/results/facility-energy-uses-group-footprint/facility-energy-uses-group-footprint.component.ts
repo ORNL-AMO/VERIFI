@@ -1,15 +1,15 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbFacilityEnergyUseEquipment } from '@app/models/idbModels/facilityEnergyUseEquipment';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IdbFacilityEnergyUseGroup } from '@app/models/idbModels/facilityEnergyUseGroups';
-import { CalanderizedMeter } from '@app/models/calanderization';
+import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import { CalanderizedMeter } from '@data/models/calanderization';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { EnergyFootprintAnnualEquipmentGroupSummary } from '@app/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
+import { EnergyFootprintAnnualEquipmentGroupSummary } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
 import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { getYearsWithFullData } from '@app/calculations/shared-calculations/calculationsHelpers';
+import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 
 @Component({
   selector: 'app-facility-energy-uses-group-footprint',

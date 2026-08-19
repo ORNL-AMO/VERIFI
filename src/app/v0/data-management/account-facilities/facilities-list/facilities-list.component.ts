@@ -1,17 +1,17 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { FacilityCommandHandler } from '@app/account-workspace/handlers/facility-command-handler.service';
-import { FACILITY_DELETION_MESSAGES } from '@app/indexedDB/facility-deletion.config';
-import { getNewIdbFacility, IdbFacility } from '@app/models/idbModels/facility';
-import { IdbAccount } from '@app/models/idbModels/account';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from '@data/indexedDB/facility-deletion.config';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({
   selector: 'app-facilities-list',

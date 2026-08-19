@@ -1,24 +1,24 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
-import { AccountWorkspaceService } from '@app/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { ChangeDetectorRef, Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, skip, take } from 'rxjs';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from '@app/account-workspace/handlers/account-command-handler.service';
-import { FacilityCommandHandler } from '@app/account-workspace/handlers/facility-command-handler.service';
-import { FACILITY_DELETION_MESSAGES } from '@app/indexedDB/facility-deletion.config';
-import { ElectronService } from '@app/electron/electron.service';
-import { AutomaticBackupsService } from '@app/electron/automatic-backups.service';
-import { ElectronBackupFileGateway } from '@app/electron/electron-backup-file.gateway';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { getNewIdbFacility, IdbFacility } from '@app/models/idbModels/facility';
-import { BackupFile } from '@app/models/backup-file';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { FACILITY_DELETION_MESSAGES } from '@data/indexedDB/facility-deletion.config';
+import { ElectronService } from '@platform/electron/electron.service';
+import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
+import { BackupFile } from '@data/models/backup-file';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
-import { BackupExportCoordinator } from '@app/backup/backup-export-coordinator.service';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 
 @Component({
   selector: 'app-account-settings',

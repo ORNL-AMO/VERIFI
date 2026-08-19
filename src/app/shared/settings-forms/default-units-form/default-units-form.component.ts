@@ -1,5 +1,5 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, OnInit, inject, Injector } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -9,13 +9,13 @@ import * as _ from 'lodash';
 import { SettingsFormsService } from '../settings-forms.service';
 import { Router } from '@angular/router';
 import { SharedDataService } from '../../helper-services/shared-data.service';
-import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
+import { SubRegionData, SubregionEmissions } from '@data/models/eGridEmissions';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 
 @Component({

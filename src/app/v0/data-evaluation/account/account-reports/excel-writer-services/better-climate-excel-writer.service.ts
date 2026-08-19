@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import * as _ from 'lodash';
-import { BetterClimateReport } from '@app/calculations/carbon-calculations/betterClimateReport';
-import { BetterClimateYearDetails } from '@app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { BetterClimateReport } from '@domain/calculations/carbon-calculations/betterClimateReport';
+import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 
 @Injectable({
   providedIn: 'root'

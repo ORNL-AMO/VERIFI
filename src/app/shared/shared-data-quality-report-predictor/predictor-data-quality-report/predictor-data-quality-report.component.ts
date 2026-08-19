@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getPredictorStatistics, PredictorStatistics } from '../predictorDataQualityStatistics';
 import { Router } from '@angular/router';
-import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
 
 @Component({
   selector: 'app-predictor-data-quality-report',

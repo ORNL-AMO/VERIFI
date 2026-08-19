@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { FacilityGroupAnalysisItem } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 
 @Component({

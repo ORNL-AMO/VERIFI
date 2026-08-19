@@ -1,15 +1,15 @@
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { DetailDegreeDay } from '@app/models/degreeDays';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbPredictor } from '@app/models/idbModels/predictor';
-import { getNewIdbPredictorData, IdbPredictorData } from '@app/models/idbModels/predictorData';
+import { DetailDegreeDay } from '@data/models/degreeDays';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 // import { DegreeDaysService } from '@app/shared/helper-services/degree-days.service';
 import { PredictorDataHelperService } from '@app/shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from '@app/shared/shared-predictors-content/edit-predictor-form.service';
@@ -20,9 +20,9 @@ import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculation
 import { getDateFromPredictorData } from '@app/shared/dateHelperFunctions';
 import { Month, Months } from '@app/shared/form-data/months';
 import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
-import { WorkspaceCommandBoundary } from '@app/account-workspace/workspace-command-boundary.service';
-import { PredictorCommandHandler } from '@app/account-workspace/handlers/predictor-command-handler.service';
-import { AnalysisCommandHandler } from '@app/account-workspace/handlers/analysis-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 
 @Component({
   selector: 'app-facility-predictor',

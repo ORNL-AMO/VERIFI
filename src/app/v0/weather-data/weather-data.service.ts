@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { DetailDegreeDay, WeatherDataSelection, WeatherStation } from '@app/models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection, WeatherStation } from '@data/models/degreeDays';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
-import { IdbFacility } from '@app/models/idbModels/facility';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
 import { environment } from 'src/environments/environment';

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { MeterSource } from '@app/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Pipe({
   name: 'meterGroupSourceConflict',

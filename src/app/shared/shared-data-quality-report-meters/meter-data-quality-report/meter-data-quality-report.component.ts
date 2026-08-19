@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getStatistics, Statistics } from '../meterDataQualityStatistics';
 import { Router } from '@angular/router';
 import { getDateFromMeterData } from '../../dateHelperFunctions';

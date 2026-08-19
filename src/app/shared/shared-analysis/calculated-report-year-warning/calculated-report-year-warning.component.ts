@@ -1,9 +1,9 @@
 import { Component, computed, input, Signal } from '@angular/core';
-import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
-import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
-import { PredictorStatusCheck } from 'src/app/calculations/status-check-calculations/predictorStatusCheck';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getFiscalYear } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 interface AnalysisInputAvailability {
   key: string;

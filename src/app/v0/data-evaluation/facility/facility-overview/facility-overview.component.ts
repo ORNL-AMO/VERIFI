@@ -1,21 +1,21 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilityOverviewData } from '@app/calculations/dashboard-calculations/facilityOverviewClass';
-import { UtilityUseAndCost } from '@app/calculations/dashboard-calculations/useAndCostClass';
+import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
-import { CalanderizedMeter, MonthlyData } from '@app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
 import { EGridService } from '@app/shared/helper-services/e-grid.service';
-import { getCalanderizedMeterData } from '@app/calculations/calanderization/calanderizeMeters';
-import { IdbFacility } from '@app/models/idbModels/facility';
-import { IdbUtilityMeterData } from '@app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeter } from '@app/models/idbModels/utilityMeter';
-import { IdbCustomFuel } from '@app/models/idbModels/customFuel';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbCustomGWP } from '@app/models/idbModels/customGWP';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 
 @Component({
   selector: 'app-facility-overview',
@@ -85,7 +85,7 @@ export class FacilityOverviewComponent implements OnInit {
     let account: IdbAccount = this.accountWorkspaceStore.account();
     let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('../../../web-workers/facility-overview.worker', import.meta.url));
+      this.worker = new Worker(new URL('../../../../platform/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.facilityOverviewService.facilityOverviewData.next(data.facilityOverviewData);

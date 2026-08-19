@@ -1,8 +1,8 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
-import { BetterClimateYearDetails } from '@app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { BetterClimateReportSetup } from '@app/models/overview-report';
+import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { BetterClimateReportSetup } from '@data/models/overview-report';
 
 @Component({
   selector: 'app-total-portfolio-energy-use-table',

@@ -2,12 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
 import { PptSlide } from '@app/shared/ppt-report/models/ppt-slide';
 import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
-import { IdbAccount } from '@app/models/idbModels/account';
-import { IdbAccountReport } from '@app/models/idbModels/accountReport';
-import { AnalysisReportSetup } from '@app/models/overview-report';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { AnalysisReportSetup } from '@data/models/overview-report';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityModelingReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-ppt.adapter';
-import { AccountWorkspaceQueryService } from '@app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 
 export interface AnalysisReportPptInput {
     account: IdbAccount;

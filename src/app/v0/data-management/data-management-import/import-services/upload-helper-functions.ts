@@ -1,7 +1,7 @@
-import { IdbPredictorData } from "@app/models/idbModels/predictorData";
-import { AgreementType, AgreementTypes } from "@app/models/agreementType";
-import { AllSources, MeterPhase, MeterSource } from "@app/models/constantsAndTypes";
-import { ScopeOption, ScopeOptions } from "@app/models/scopeOption";
+import { IdbPredictorData } from "@data/models/idbModels/predictorData";
+import { AgreementType, AgreementTypes } from "@data/models/agreementType";
+import { AllSources, MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
+import { ScopeOption, ScopeOptions } from "@data/models/scopeOption";
 import { Countries, Country } from "@app/shared/form-data/countries";
 import { State, States } from "@app/shared/form-data/states";
 import { FuelTypeOption } from "@app/shared/fuel-options/fuelTypeOption";

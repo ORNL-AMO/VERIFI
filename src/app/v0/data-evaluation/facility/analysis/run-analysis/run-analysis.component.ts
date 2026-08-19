@@ -1,7 +1,7 @@
-import { AccountWorkspaceStore } from '@app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, effect, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { IdbAnalysisItem } from '@app/models/idbModels/analysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-run-analysis',

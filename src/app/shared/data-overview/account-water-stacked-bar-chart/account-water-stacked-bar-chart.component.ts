@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AccountOverviewData, AccountOverviewFacility, WaterTypeData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, AccountOverviewFacility, WaterTypeData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import * as _ from 'lodash';
 
 @Component({

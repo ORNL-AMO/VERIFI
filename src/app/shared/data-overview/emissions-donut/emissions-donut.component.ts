@@ -3,9 +3,9 @@ import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
-import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { EmissionsResults, EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
-import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { EmissionsResults, EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/models/eGridEmissions';
+import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 
 @Component({
