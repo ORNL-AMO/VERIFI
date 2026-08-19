@@ -7,7 +7,7 @@ import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WeatherPredictorManagementService } from '@v0/weather-data/weather-predictor-management.service';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from '@app/shared/dateHelperFunctions';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-update-weather-predictors-modal',

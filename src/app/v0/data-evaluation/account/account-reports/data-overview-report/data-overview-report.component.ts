@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { FacilityOverviewData } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -17,12 +17,12 @@ import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
 import { DataOverviewReportAdapter } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.adapter';
 import { DataOverviewAccountReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-account-report/data-overview-account-report.component';
 import { DataOverviewFacilityReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
 import { DataOverviewReportPptAdapter } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report-ppt.adapter';
-import { PptReportService } from '@app/shared/ppt-report/ppt-report.service';
+import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-data-overview-report',

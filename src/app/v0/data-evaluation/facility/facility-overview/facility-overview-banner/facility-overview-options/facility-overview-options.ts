@@ -6,7 +6,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { Month, Months } from '@app/shared/form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
 import { IdbAccount } from '@data/models/idbModels/account';

@@ -2,7 +2,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
-import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
+import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { IdbFacility } from '@data/models/idbModels/facility';

@@ -3,11 +3,11 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { filter, map, startWith } from 'rxjs';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountReportStatusCheck } from '@domain/calculations/status-check-calculations/accountReportStatusCheck';
 
 @Component({

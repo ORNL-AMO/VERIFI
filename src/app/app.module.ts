@@ -12,7 +12,7 @@ import { IndexedDBModule } from '@data/indexedDB/indexed-db.module';
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-modal/shared-router-guard-modal.component';
+import { SharedRouterGuardModalComponent } from '@shared/shared-router-guard-modal/shared-router-guard-modal.component';
 
 @NgModule({
     declarations: [

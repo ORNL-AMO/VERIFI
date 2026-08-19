@@ -3,7 +3,7 @@ import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PerformanceReport, PerformanceReportAnnualData } from '@domain/calculations/performance-report-calculations/performanceReport';
 import { PerformanceReportSetup } from '@data/models/overview-report';
-import { UtilityColors } from '@app/shared/utilityColors';
+import { UtilityColors } from '@shared/utilityColors';
 import * as _ from 'lodash';
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbFacility } from '@data/models/idbModels/facility';

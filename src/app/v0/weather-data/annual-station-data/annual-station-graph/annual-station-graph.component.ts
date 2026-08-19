@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { WeatherDataSelection } from '@data/models/degreeDays';
-import { Months } from '@app/shared/form-data/months';
+import { Months } from '@shared/form-data/months';
 import { AnnualStationDataSummary } from '@v0/weather-data/annual-station-data/annual-station-data.component';
 
 @Component({

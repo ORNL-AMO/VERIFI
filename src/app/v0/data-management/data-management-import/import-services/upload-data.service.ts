@@ -7,14 +7,14 @@ import * as XLSX from 'xlsx';
 import { FacilitydbService } from '@data/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '@data/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '@data/indexedDB/utilityMeterData-db.service';
-import { EnergyUnitsHelperService } from '@app/shared/helper-services/energy-units-helper.service';
-import { EditMeterFormService } from '@app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
+import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterGroupdbService } from '@data/indexedDB/utilityMeterGroup-db.service';
-import { UnitOption } from '@app/shared/unitOptions';
-import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '@app/shared/sharedHelperFunctions';
+import { UnitOption } from '@shared/unitOptions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '@shared/sharedHelperFunctions';
 import { MeterPhase, MeterSource } from '@data/models/constantsAndTypes';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
-import { FuelTypeOption } from '@app/shared/fuel-options/fuelTypeOption';;
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';;
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate, TemplateVersion } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { UploadDataV1Service } from '@v0/data-management/data-management-import/import-services/upload-data-v1.service';
 import { UploadDataV2Service } from '@v0/data-management/data-management-import/import-services/upload-data-v2.service';
@@ -30,9 +30,9 @@ import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDataService } from '@app/shared/shared-meter-content/utility-meter-data.service';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
 import { UploadDataEnergyTreasureHuntService } from '@v0/data-management/data-management-import/import-services/upload-data-energy-treasure-hunt.service';
 import { UploadDataV3Service } from '@v0/data-management/data-management-import/import-services/upload-data-v3.service';
 import { UploadDataFootprintToolService } from '@v0/data-management/data-management-import/import-services/upload-data-footprint-tool.service';
@@ -40,7 +40,7 @@ import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergy
 import { FacilityEnergyUseGroupsDbService } from '@data/indexedDB/facility-energy-use-groups-db.service';
 import { FacilityEnergyUseEquipmentDbService } from '@data/indexedDB/facility-energy-use-equipment-db.service';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
-import { setPredictorDateDataFromDate } from '@app/shared/dateHelperFunctions';
+import { setPredictorDateDataFromDate } from '@shared/dateHelperFunctions';
 
 @Injectable({
   providedIn: 'root'

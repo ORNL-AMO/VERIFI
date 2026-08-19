@@ -14,10 +14,10 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { FacilityReportStatusCheck } from '@domain/calculations/status-check-calculations/facilityReportStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 
 interface FacilityReportTableItem {

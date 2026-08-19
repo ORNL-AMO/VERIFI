@@ -5,12 +5,12 @@ import { Component, computed, effect, inject, Signal, untracked } from '@angular
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
-import { EnergyUnitOptions, UnitOption } from '@app/shared/unitOptions';
+import { EnergyUnitOptions, UnitOption } from '@shared/unitOptions';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime } from 'rxjs';
-import { VolumeLiquidOptions } from '@app/shared/unitOptions';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { VolumeLiquidOptions } from '@shared/unitOptions';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -19,7 +19,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-analysis-setup',

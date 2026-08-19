@@ -4,7 +4,7 @@ import { MeterDataSummary } from '@v0/data-management/data-management-import/sha
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { getDateFromMeterData } from '@app/shared/dateHelperFunctions';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-data-summary-table',

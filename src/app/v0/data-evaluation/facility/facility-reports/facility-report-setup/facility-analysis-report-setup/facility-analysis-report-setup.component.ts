@@ -8,7 +8,7 @@ import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { AnalysisReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-analysis-report-setup',

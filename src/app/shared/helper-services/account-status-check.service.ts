@@ -5,7 +5,7 @@ import { debounceTime, map } from 'rxjs/operators';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { CalanderizationService } from './calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
 import { AccountAnalysisSetupErrors } from '@data/models/accountAnalysis';
 import { emptyAnalysisSetupErrors } from '@domain/calculations/status-check-calculations/validation/analysisValidation';

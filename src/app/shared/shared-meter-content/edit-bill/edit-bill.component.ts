@@ -7,15 +7,15 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
+import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { from, map, Observable, of, Subscription, switchAll, take } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
 import { ElectronService } from '@platform/electron/electron.service';
-import { getDateFromMeterData, setMeterDataDateFromDate } from '../../dateHelperFunctions';
-import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
+import { getDateFromMeterData, setMeterDataDateFromDate } from '@shared/dateHelperFunctions';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-bill',

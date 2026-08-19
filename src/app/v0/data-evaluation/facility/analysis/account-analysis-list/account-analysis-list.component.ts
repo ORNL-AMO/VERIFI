@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';

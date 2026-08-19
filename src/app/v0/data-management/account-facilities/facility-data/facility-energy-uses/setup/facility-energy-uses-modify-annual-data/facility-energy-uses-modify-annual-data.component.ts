@@ -13,7 +13,7 @@ import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergy
 import * as _ from 'lodash';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-energy-uses-modify-annual-data',

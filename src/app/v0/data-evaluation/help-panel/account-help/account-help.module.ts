@@ -14,7 +14,7 @@ import { AccountAnalysisDashboardHelpComponent } from '@v0/data-evaluation/help-
 import { AccountAnalysisSetupHelpComponent } from '@v0/data-evaluation/help-panel/account-help/account-analysis-help/account-analysis-setup-help/account-analysis-setup-help.component';
 import { AccountAnalysisSelectItemsHelpComponent } from '@v0/data-evaluation/help-panel/account-help/account-analysis-help/account-analysis-select-items-help/account-analysis-select-items-help.component';
 import { AccountAnalysisResultsHelpComponent } from '@v0/data-evaluation/help-panel/account-help/account-analysis-help/account-analysis-results-help/account-analysis-results-help.component';
-import { SharedHelpContentModule } from '@app/shared/shared-help-content/shared-help-content.module';
+import { SharedHelpContentModule } from '@v0/shared/shared-help-content/shared-help-content.module';
 import { AnalysisReportHelpComponent } from '@v0/data-evaluation/help-panel/account-help/account-reports-help/analysis-report-help/analysis-report-help.component';
 import { BetterClimateReportHelpComponent } from '@v0/data-evaluation/help-panel/account-help/account-reports-help/better-climate-report-help/better-climate-report-help.component';
 import { EmissionsFactorsReportHelpComponent } from '@v0/data-evaluation/help-panel/account-help/account-reports-help/emissions-factors-report-help/emissions-factors-report-help.component';

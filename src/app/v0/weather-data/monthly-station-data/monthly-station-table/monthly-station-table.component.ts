@@ -1,8 +1,8 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { DetailDegreeDay, WeatherDataSelection } from '@data/models/degreeDays';
 import { Subscription } from 'rxjs';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { CopyTableService } from '@app/shared/helper-services/copy-table.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-monthly-station-table',

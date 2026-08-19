@@ -2,7 +2,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
     selector: 'app-calanderized-meter-data-table',

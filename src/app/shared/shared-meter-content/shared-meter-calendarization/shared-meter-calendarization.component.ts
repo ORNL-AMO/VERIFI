@@ -6,10 +6,10 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, Input, SimpleChanges, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

@@ -7,9 +7,9 @@ import { CostsOverviewComponent } from '@v0/data-evaluation/account/account-over
 import { EmissionsOverviewComponent } from '@v0/data-evaluation/account/account-overview/emissions-overview/emissions-overview.component';
 import { RouterModule } from '@angular/router';
 import { WaterOverviewComponent } from '@v0/data-evaluation/account/account-overview/water-overview/water-overview.component';
-import { HelperPipesModule } from '@app/shared/helper-pipes/_helper-pipes.module';
-import { CalculatingSpinnerModule } from '@app/shared/calculating-spinner/calculating-spinner.module';
-import { DataOverviewModule } from '@app/shared/data-overview/data-overview.module';
+import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { CalculatingSpinnerModule } from '@shared/calculating-spinner/calculating-spinner.module';
+import { DataOverviewModule } from '@v0/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
 import { AccountOverviewOptions } from '@v0/data-evaluation/account/account-overview/account-overview-banner/account-overview-options/account-overview-options';
 

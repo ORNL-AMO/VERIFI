@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SharedDataService } from '../helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 
 @Component({

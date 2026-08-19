@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import * as _ from 'lodash';
 import { DetailDegreeDay, WeatherDataSelection } from '@data/models/degreeDays';
-import { getDegreeDayAmount } from '../sharedHelperFunctions';
+import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
 
 @Pipe({
     name: 'degreeDayTotal',

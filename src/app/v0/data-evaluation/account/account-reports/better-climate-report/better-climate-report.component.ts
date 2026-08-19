@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
 import { Router } from '@angular/router';
 import { BetterClimateReport } from '@domain/calculations/carbon-calculations/betterClimateReport';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { BetterClimateReportSetup } from '@data/models/overview-report';
 import { BetterClimateExcelWriterService } from '@v0/data-evaluation/account/account-reports/excel-writer-services/better-climate-excel-writer.service';

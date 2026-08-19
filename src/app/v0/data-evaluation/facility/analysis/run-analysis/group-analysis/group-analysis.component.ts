@@ -6,7 +6,7 @@ import { filter, map } from 'rxjs';
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AnalysisGroupStatusCheck } from '@domain/calculations/status-check-calculations/analysisGroupStatusCheck';

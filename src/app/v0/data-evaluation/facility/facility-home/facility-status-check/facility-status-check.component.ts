@@ -2,7 +2,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, inject, Signal } from '@angular/core';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({

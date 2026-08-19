@@ -10,7 +10,7 @@ import { PredictorCommandHandler } from '@data/account-workspace/handlers/predic
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-predictors-data-form',

@@ -4,10 +4,10 @@ import { Component, computed, effect, inject, Signal, untracked } from '@angular
 import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
-import { Month, Months } from '@app/shared/form-data/months';
-import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from '@app/shared/unitOptions';
+import { Month, Months } from '@shared/form-data/months';
+import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from '@shared/unitOptions';
 import { debounceTime } from 'rxjs';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
@@ -23,7 +23,7 @@ import { CalanderizedMeter } from '@data/models/calanderization';
 import { getYearsWithFullDataAccountAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
 

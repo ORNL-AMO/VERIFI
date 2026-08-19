@@ -1,4 +1,4 @@
-import { FlatEnergyUseColors } from "src/app/shared/utilityColors";
+import { FlatEnergyUseColors } from "@shared/utilityColors";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbFacilityEnergyUseGroup extends IdbEntry {

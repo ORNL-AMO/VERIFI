@@ -9,7 +9,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-facility-water-reduction-goal',

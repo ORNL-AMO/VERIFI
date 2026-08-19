@@ -14,8 +14,8 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { SelectItemTableComponent } from '@v0/data-evaluation/account/account-analysis/select-facility-analysis-items/select-item-table/select-item-table.component';
 
 @Pipe({ name: 'invalidAnalysis', standalone: false })

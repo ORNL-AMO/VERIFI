@@ -4,7 +4,7 @@ import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
 import { checkNumberValueValid } from "./validationHelpers";
-import { getSelectedRegressionModel } from "src/app/shared/shared-analysis/calculations/regression-model-recovery";
+import { getSelectedRegressionModel } from "@shared/shared-analysis/calculations/regression-model-recovery";
 
 export function getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem, calendarizedMeters: Array<CalanderizedMeter>, facilityPredictorData: Array<IdbPredictorData>): GroupAnalysisErrors {
 

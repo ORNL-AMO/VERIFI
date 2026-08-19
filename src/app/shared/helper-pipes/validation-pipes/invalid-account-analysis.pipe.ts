@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { AccountAnalysisSetupErrors } from '@data/models/accountAnalysis';
-import { AccountStatusCheckService } from '../../helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 @Pipe({
   name: 'invalidAccountAnalysis',

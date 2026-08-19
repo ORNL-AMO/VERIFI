@@ -9,7 +9,7 @@ import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysi
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { FacilityGroupAnalysisItem, RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
   selector: 'app-facility-reports-data-check',

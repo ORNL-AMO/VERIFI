@@ -1,21 +1,21 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from 'src/app/shared/sharedHelperFunctions';
-import { DemandUnitOptions, EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
-import { EditMeterFormService } from './edit-meter-form.service';
+import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from '@shared/sharedHelperFunctions';
+import { DemandUnitOptions, EnergyUnitOptions, UnitOption } from '@shared/unitOptions';
+import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { AllSources, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from '@data/models/constantsAndTypes';
-import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
-import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
-import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { StationaryOtherEnergyOptions } from '@shared/fuel-options/stationaryOtherEnergyOptions';
+import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
 import { ScopeOption, ScopeOptions } from '@data/models/scopeOption';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { AssessmentReportVersion, IdbAccount } from '@data/models/idbModels/account';
-import { Month, Months } from '../../form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 
 @Component({
   selector: 'app-edit-meter-form',

@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { getPredictorStatistics } from './predictorDataQualityStatistics';
+import { getPredictorStatistics } from '@shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
 import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
 
 @Pipe({

@@ -5,11 +5,11 @@ import { DataManagementService } from '@v0/data-management/data-management.servi
 import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';
-import { UtilityMeterDataService } from '@app/shared/shared-meter-content/utility-meter-data.service';
-import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from '@app/shared/sharedHelperFunctions';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
+import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { getEarliestMeterDataDate, getLatestMeterDataDate } from '@app/shared/dateHelperFunctions';
+import { getEarliestMeterDataDate, getLatestMeterDataDate } from '@shared/dateHelperFunctions';
 
 
 @Component({

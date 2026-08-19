@@ -1,5 +1,5 @@
 import { Component, computed, Input } from '@angular/core';
-import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityGroupAnalysisItem } from '@shared/shared-analysis/calculations/regression-models.service';
 import { AnalysisGroup } from '@data/models/analysis';
 
 @Component({

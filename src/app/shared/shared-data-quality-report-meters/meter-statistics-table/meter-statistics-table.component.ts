@@ -1,8 +1,8 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getUnitFromMeter, Statistics } from '../meterDataQualityStatistics';
-import { CopyTableService } from '../../helper-services/copy-table.service';
+import { getUnitFromMeter, Statistics } from '@shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-meter-statistics-table',

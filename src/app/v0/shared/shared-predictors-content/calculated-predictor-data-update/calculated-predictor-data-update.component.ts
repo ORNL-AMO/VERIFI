@@ -1,0 +1,425 @@
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, inject, computed, Injector } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { PredictorCommandHandler, PredictorDataBatchChanges } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { DetailDegreeDay } from '@data/models/degreeDays';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
+// import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
+import { PredictorDataHelperService } from '@shared/helper-services/predictor-data-helper.service';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
+import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
+import { Month, Months } from '@shared/form-data/months';
+
+@Component({
+  selector: 'app-calculated-predictor-data-update',
+  templateUrl: './calculated-predictor-data-update.component.html',
+  styleUrl: './calculated-predictor-data-update.component.css',
+  standalone: false
+})
+export class CalculatedPredictorDataUpdateComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  predictor: IdbPredictor;
+
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
+  predictorDataSub: Subscription;
+
+  predictorData: Array<CalculatedPredictorTableItem>;
+  orderDataField: string = 'date';
+  orderByDirection: string = 'desc';
+  currentPageNumber: number = 1;
+  calculatingData: boolean = false;
+  destroyed: boolean = false;
+  paramsSub: Subscription;
+
+  startDate: Date;
+  endDate: Date;
+
+  dataSummary: {
+    newEntries: number,
+    deletedEntries: number,
+    changedEntries: number
+  } = {
+      newEntries: 0,
+      deletedEntries: 0,
+      changedEntries: 0
+    };
+  calculationDate: Date;
+  latestMeterReading: Date;
+  firstMeterReading: Date;
+
+  displayUpdatesModal: boolean = false;
+  checkForUpdates: boolean = false;
+
+  months: Array<Month> = Months;
+  today: Date = new Date();
+  yearOptions: Array<number> = Array.from(
+    { length: new Date().getFullYear() - 1999 },
+    (_, i) => new Date().getFullYear() - i
+  );
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private predictorHandler: PredictorCommandHandler,
+    private sharedDataService: SharedDataService,
+    private router: Router,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private predictorDataHelperService: PredictorDataHelperService,
+    private weatherDataService: WeatherDataService,
+    private injector: Injector
+  ) {
+  }
+
+  ngOnInit() {
+    this.setLastMeterReading();
+    this.predictorDataSub = toObservable(computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]), { injector: this.injector }).subscribe(() => {
+      this.setPredictorData();
+    });
+
+    if (!this.predictor) {
+      this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
+        let predictorId: string = params['id'];
+        this.predictor = this.accountWorkspaceQuery.getPredictorByGuid(predictorId);
+        this.setPredictorData();
+      });
+    }
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
+  }
+
+  ngOnDestroy() {
+    this.itemsPerPageSub.unsubscribe();
+    this.predictorDataSub.unsubscribe();
+    this.paramsSub.unsubscribe();
+    this.destroyed = true;
+  }
+
+  setLastMeterReading() {
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    this.latestMeterReading = this.predictorDataHelperService.getLastMeterDate(facility);
+    this.firstMeterReading = this.predictorDataHelperService.getFirstMeterDate(facility);
+  }
+
+
+  setPredictorData() {
+    if (this.predictor) {
+      let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
+      this.predictorData = predictorData.map(pData => {
+        return {
+          ...pData,
+          updatedAmount: undefined,
+          changeAmount: undefined,
+          deleted: false,
+          added: false
+        }
+      });
+      this.predictorData = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
+        return getDateFromPredictorData(pData).getTime();
+      });
+      if (this.predictorData.length > 0) {
+        this.startDate = getDateFromPredictorData(this.predictorData[0]);
+        this.endDate = getDateFromPredictorData(this.predictorData[this.predictorData.length - 1]);
+        if (this.endDate < this.latestMeterReading) {
+          this.endDate = new Date(this.latestMeterReading);
+          this.updateDataDateChange();
+        }
+      }
+    }
+  }
+
+  async setUpdatedAmount(updateAll: boolean) {
+    this.checkForUpdates = true;
+    this.closeCheckForUpdatesModal();
+    this.calculatingData = true;
+    let predictorStart: number = 0;
+
+    let existingPredictorIndex: Array<number> = this.predictorData.map((p, idx) => {
+      if (p.id && p.updatedAmount == undefined) {
+        return idx
+      };
+      return undefined;
+    });
+    existingPredictorIndex = existingPredictorIndex.filter(idx => {
+      return idx != undefined;
+    });
+    if (existingPredictorIndex.length > 6 && !updateAll) {
+      predictorStart = (existingPredictorIndex.length - 6);
+    }
+    for (let i = predictorStart; i < existingPredictorIndex.length; i++) {
+      if (this.destroyed) {
+        break;
+      }
+      let predictorIndex: number = existingPredictorIndex[i];
+      if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
+        let entryDate: Date = getDateFromPredictorData(this.predictorData[predictorIndex]);
+        let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
+        if (degreeDays != 'error') {
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
+          this.predictorData[predictorIndex].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        } else {
+          this.toastNotificationService.weatherDataErrorToast();
+        }
+      }
+    }
+    this.setDataSummary();
+    this.calculatingData = false;
+  }
+
+
+  async updateDataDateChange() {
+    if (this.endDate && this.startDate) {
+      let endDate: Date = new Date(this.endDate);
+      let startDate: Date = new Date(this.startDate);
+      let orderedData: Array<CalculatedPredictorTableItem> = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
+        return getDateFromPredictorData(pData).getTime();
+      });
+
+      if (orderedData.length > 0) {
+        let dataEndDate: Date = getDateFromPredictorData(orderedData[orderedData.length - 1]);
+        dataEndDate.setMonth(dataEndDate.getMonth() + 1);
+        if (dataEndDate <= endDate) {
+          await this.addDegreeDays(dataEndDate, endDate);
+        }
+        let dataStartDate: Date = getDateFromPredictorData(orderedData[0]);
+        dataStartDate.setMonth(dataStartDate.getMonth() - 1);
+        if (startDate <= dataStartDate) {
+          await this.addDegreeDays(startDate, dataStartDate);
+        }
+
+        let testStartDate: Date = new Date(this.startDate);
+        let testEndDate: Date = new Date(this.endDate);
+        if (dataEndDate > testEndDate || dataStartDate > testStartDate) {
+          this.predictorData = this.predictorData.filter(pData => {
+            return pData.id || ((getDateFromPredictorData(pData).getTime() <= testEndDate.getTime()) && (getDateFromPredictorData(pData).getTime() >= testStartDate.getTime()));
+          });
+          this.predictorData = this.predictorData.map(pData => {
+            if (getDateFromPredictorData(pData).getTime() > testEndDate.getTime() || getDateFromPredictorData(pData).getTime() < testStartDate.getTime()) {
+              pData.deleted = true
+            } else {
+              pData.deleted = false;
+            }
+            return pData;
+          });
+        }
+      } else {
+        let dataEndDate: Date = new Date(endDate);
+        // dataEndDate.setMonth(dataEndDate.getMonth() + 1);
+        await this.addDegreeDays(startDate, dataEndDate);
+      }
+
+
+
+      this.setDataSummary();
+    }
+    this.calculatingData = false;
+  }
+
+  async addDegreeDays(startDate: Date, endDate: Date) {
+    while (startDate <= endDate) {
+      if (this.destroyed) {
+        break;
+      }
+      this.calculatingData = true;
+      let newDate: Date = new Date(startDate)
+      this.calculationDate = new Date(newDate);
+      let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(newDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+      // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
+      if (degreeDays != 'error') {
+        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+          return degreeDay.gapInData == true
+        });
+        let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
+        newPredictorData.year = newDate.getFullYear();
+        newPredictorData.month = newDate.getMonth() + 1;
+        newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        let tableItem: CalculatedPredictorTableItem = {
+          ...newPredictorData,
+          updatedAmount: newPredictorData.amount,
+          changeAmount: 0,
+          deleted: false,
+          added: true
+        };
+        this.predictorData.push(tableItem);
+      } else {
+        this.toastNotificationService.weatherDataErrorToast();
+      }
+      startDate.setMonth(startDate.getMonth() + 1);
+    }
+  }
+
+  setDataSummary() {
+    this.dataSummary = {
+      changedEntries: 0,
+      deletedEntries: 0,
+      newEntries: 0
+    }
+    this.predictorData.forEach(pData => {
+      if (pData.added) {
+        this.dataSummary.newEntries++;
+      } else if (pData.deleted) {
+        this.dataSummary.deletedEntries++;
+      } else if (pData.changeAmount != 0 && pData.changeAmount != undefined) {
+        this.dataSummary.changedEntries++
+      }
+    })
+  };
+
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
+
+  cancel() {
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
+    } else {
+      let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.guid + '/utility/predictors/predictor/' + this.predictor.guid)
+    }
+  }
+
+  async updateEntries() {
+    this.loadingService.setLoadingMessage('Updating Entries...');
+    this.loadingService.setLoadingStatus(true);
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const changes = this.getPredictorDataChanges();
+    await this.commandBoundary.execute(
+      { entityKind: 'predictorData', changeKind: 'bulk', label: 'Update Predictor Entries' },
+      () => this.predictorHandler.reconcilePredictorData(this.predictor.guid, changes, accountGuid)
+    );
+    this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
+    this.cancel();
+  }
+
+  private getPredictorDataChanges(): PredictorDataBatchChanges {
+    const changes: {
+      add: IdbPredictorData[];
+      update: IdbPredictorData[];
+      delete: IdbPredictorData[];
+    } = {
+      add: [],
+      update: [],
+      delete: []
+    };
+
+    for (const predictorData of this.predictorData) {
+      if (predictorData.added) {
+        changes.add.push(this.toPredictorDataRecord(predictorData));
+        continue;
+      }
+      if (predictorData.deleted) {
+        changes.delete.push(this.toPredictorDataRecord(predictorData));
+        continue;
+      }
+      if (predictorData.changeAmount) {
+        changes.update.push(this.toPredictorDataRecord(predictorData, predictorData.updatedAmount));
+      }
+    }
+
+    return changes;
+  }
+
+  private toPredictorDataRecord(
+    predictorData: CalculatedPredictorTableItem,
+    amount = predictorData.amount
+  ): IdbPredictorData {
+    const { updatedAmount, changeAmount, deleted, added, ...record } = predictorData;
+    return {
+      ...record,
+      amount
+    };
+  }
+
+  async setEndDate(eventData: string) {
+    //eventData format = yyyy-mm = 2022-06
+    let yearMonth: Array<string> = eventData.split('-');
+    //-1 on month
+    this.endDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
+    await this.updateDataDateChange();
+  }
+
+  async setStartDate(eventData: string) {
+    //eventData format = yyyy-mm = 2022-06
+    let yearMonth: Array<string> = eventData.split('-');
+    //-1 on month
+    this.startDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
+    await this.updateDataDateChange();
+  }
+
+  async onStartMonthChange(month: number) {
+    if (month != null) {
+      const year = this.startDate?.getFullYear() ?? this.today.getFullYear();
+      this.startDate = new Date(year, month, 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  async onStartYearChange(year: number) {
+    if (year != null) {
+      const month = this.startDate?.getMonth() ?? this.today.getMonth();
+      this.startDate = new Date(year, month, 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  async onEndMonthChange(month: number) {
+    if (month != null) {
+      const year = this.endDate?.getFullYear() ?? this.today.getFullYear();
+      this.endDate = new Date(year, month, 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  async onEndYearChange(year: number) {
+    if (year != null) {
+      const month = this.endDate?.getMonth() ?? this.today.getMonth();
+      this.endDate = new Date(year, month, 1);
+      await this.updateDataDateChange();
+    }
+  }
+
+  openCheckForUpdatesModal() {
+    this.displayUpdatesModal = true;
+  }
+
+  closeCheckForUpdatesModal() {
+    this.displayUpdatesModal = false;
+  }
+}
+
+export interface CalculatedPredictorTableItem extends IdbPredictorData {
+  updatedAmount: number,
+  changeAmount: number,
+  deleted: boolean,
+  added: boolean
+}

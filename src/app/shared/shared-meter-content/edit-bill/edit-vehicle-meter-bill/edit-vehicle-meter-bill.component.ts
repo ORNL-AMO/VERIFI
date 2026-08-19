@@ -9,8 +9,8 @@ import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
-import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
 
 @Component({
     selector: 'app-edit-vehicle-meter-bill',

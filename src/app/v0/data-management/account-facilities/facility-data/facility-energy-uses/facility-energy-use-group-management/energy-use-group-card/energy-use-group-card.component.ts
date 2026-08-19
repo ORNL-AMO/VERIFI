@@ -10,8 +10,8 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { getGUID } from '@app/shared/sharedHelperFunctions';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { getGUID } from '@shared/sharedHelperFunctions';
 
 @Component({
     selector: 'app-energy-use-group-card',

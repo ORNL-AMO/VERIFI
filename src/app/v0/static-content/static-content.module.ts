@@ -5,7 +5,7 @@ import { AcknowledgmentsComponent } from '@v0/static-content/acknowledgments/ack
 import { FeedbackComponent } from '@v0/static-content/feedback/feedback.component';
 import { HelpComponent } from '@v0/static-content/help/help.component';
 import { PrivacyNoticeComponent } from '@v0/static-content/privacy-notice/privacy-notice.component';
-import { EmailListSubscribeModule } from '@app/shared/email-list-subscribe/email-list-subscribe.module';
+import { EmailListSubscribeModule } from '@v0/shared/email-list-subscribe/email-list-subscribe.module';
 
 @NgModule({
   declarations: [

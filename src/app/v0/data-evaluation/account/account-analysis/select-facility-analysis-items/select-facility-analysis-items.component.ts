@@ -8,7 +8,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';

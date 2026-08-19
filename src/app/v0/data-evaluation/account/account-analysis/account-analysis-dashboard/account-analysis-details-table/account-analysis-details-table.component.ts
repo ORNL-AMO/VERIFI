@@ -18,10 +18,10 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
 
 interface AnalysisDetailsTableRow {
   analysisItem: IdbAccountAnalysisItem,

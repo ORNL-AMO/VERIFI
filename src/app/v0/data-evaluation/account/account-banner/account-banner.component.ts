@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-account-banner',

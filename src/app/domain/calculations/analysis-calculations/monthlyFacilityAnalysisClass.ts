@@ -10,7 +10,7 @@ import { IdbFacility } from "@data/models/idbModels/facility";
 import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { IdbPredictor } from "@data/models/idbModels/predictor";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
-import { getDateFromPredictorData, getLatestPredictorData } from "src/app/shared/dateHelperFunctions";
+import { getDateFromPredictorData, getLatestPredictorData } from "@shared/dateHelperFunctions";
 import { AnalysisCalculationOptions } from "./analysisCalculationOptions";
 
 export class MonthlyFacilityAnalysisClass {

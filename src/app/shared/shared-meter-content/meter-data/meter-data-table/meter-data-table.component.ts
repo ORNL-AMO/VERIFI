@@ -9,12 +9,12 @@ import { ToastNotificationsService } from '@v0/core-components/toast-notificatio
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
-import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
 
 @Component({
   selector: 'app-meter-data-table',

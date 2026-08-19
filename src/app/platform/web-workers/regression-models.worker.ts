@@ -4,7 +4,7 @@ import { getCalanderizedMeterData } from '@domain/calculations/calanderization/c
 import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { JStatRegressionModel } from '@data/models/analysis';
-import { RegressionModelsCalculator } from '@app/shared/shared-analysis/calculations/regression-models-calculator';
+import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
 
 addEventListener('message', ({ data }) => {
   try {

@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { DataOverviewFacility } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.component';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { FacilitySectionReportComponent } from '@app/shared/data-overview/facility-section-report/facility-section-report.component';
+import { FacilitySectionReportComponent } from '@v0/shared/data-overview/facility-section-report/facility-section-report.component';
 
 @Component({
   selector: 'app-data-overview-facility-report',

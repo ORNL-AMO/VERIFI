@@ -10,7 +10,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { FacilityAnalysisReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
 
 @Component({

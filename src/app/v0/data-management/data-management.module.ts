@@ -7,12 +7,12 @@ import { AccountSetupComponent } from '@v0/data-management/account-setup/account
 import { AccountFacilitiesComponent } from '@v0/data-management/account-facilities/account-facilities.component';
 import { FacilityDataComponent } from '@v0/data-management/account-facilities/facility-data/facility-data.component';
 import { FacilitySetupComponent } from '@v0/data-management/account-facilities/facility-data/facility-setup/facility-setup.component';
-import { SettingsFormsModule } from '@app/shared/settings-forms/settings-forms.module';
+import { SettingsFormsModule } from '@v0/shared/settings-forms/settings-forms.module';
 import { DataManagementImportComponent } from '@v0/data-management/data-management-import/data-management-import.component';
 import { UploadFilesComponent } from '@v0/data-management/data-management-import/upload-files/upload-files.component';
 import { ProcessTemplateFileComponent } from '@v0/data-management/data-management-import/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from '@v0/data-management/data-management-import/process-template-file/process-template-facilities/process-template-facilities.component';
-import { HelperPipesModule } from '@app/shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from '@v0/data-management/data-management-import/shared-process-file/process-meters/meter-group-options.pipe';
 import { FacilityMetersTableComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
@@ -20,10 +20,10 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
 import { FacilitiesListComponent } from '@v0/data-management/account-facilities/facilities-list/facilities-list.component';
 import { DataManagementSidebarFacilitiesListPipe } from '@v0/data-management/data-management-sidebar/data-management-sidebar-facilities-list.pipe';
-import { TableItemsDropdownModule } from '@app/shared/table-items-dropdown/table-items-dropdown.module';
-import { SharedMeterContentModule } from '@app/shared/shared-meter-content/shared-meter-content.module';
+import { TableItemsDropdownModule } from '@shared/table-items-dropdown/table-items-dropdown.module';
+import { SharedMeterContentModule } from '@shared/shared-meter-content/shared-meter-content.module';
 import { FacilityMeterMonthlyDataComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
-import { SharedPredictorsContentModule } from "@app/shared/shared-predictors-content/shared-predictors-content.module";
+import { SharedPredictorsContentModule } from "@v0/shared/shared-predictors-content/shared-predictors-content.module";
 import { FacilityPredictorsTableComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
 import { FacilityPredictorComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
 import { FacilityPredictorDataTableComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component';
@@ -31,7 +31,7 @@ import { FacilityPredictorDataEntryComponent } from '@v0/data-management/account
 import { FacilityPredictorDataBulkUpdateComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-bulk-update/facility-predictor-data-bulk-update.component';
 import { ProcessGeneralFileComponent } from '@v0/data-management/data-management-import/process-general-file/process-general-file.component';
 import { SelectWorksheetComponent } from '@v0/data-management/data-management-import/process-general-file/select-worksheet/select-worksheet.component';
-import { LabelWithTooltipModule } from '@app/shared/label-with-tooltip/label-with-tooltip.module';
+import { LabelWithTooltipModule } from '@shared/label-with-tooltip/label-with-tooltip.module';
 import { IdentifyColumnsComponent } from '@v0/data-management/data-management-import/process-general-file/identify-columns/identify-columns.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MapMetersToFacilitiesComponent } from '@v0/data-management/data-management-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component';
@@ -44,14 +44,14 @@ import { ProcessPredictorReadingsComponent } from '@v0/data-management/data-mana
 import { SubmitImportDataComponent } from '@v0/data-management/data-management-import/shared-process-file/submit-import-data/submit-import-data.component';
 import { DataManagementImportFooterComponent } from '@v0/data-management/data-management-import/data-management-import-footer/data-management-import-footer.component';
 import { DataManagementHomeComponent } from '@v0/data-management/data-management-home/data-management-home.component';
-import { CustomDatabaseModule } from '@app/shared/custom-database/custom-database.module';
+import { CustomDatabaseModule } from '@v0/shared/custom-database/custom-database.module';
 import { AccountCustomDataComponent } from '@v0/data-management/account-custom-data/account-custom-data.component';
 import { DataManagementSidePanelModule } from '@v0/data-management/data-management-side-panel/data-management-side-panel.module';
 import { SidebarItemActivePipe } from '@v0/data-management/data-management-sidebar/sidebar-item-active.pipe';
 import { FacilityMeterDataQualityReportComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component';
-import { SharedDataQualityReportMetersModule } from "@app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module";
+import { SharedDataQualityReportMetersModule } from "@shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module";
 import { FacilityPredictorDataQualityReportComponent } from '@v0/data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component';
-import { SharedDataQualityReportPredictorsModule } from '@app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
+import { SharedDataQualityReportPredictorsModule } from '@shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 import { MeterChargesVisualizationComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-visualization.component';
 import { MeterChargesTimeseriesComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-timeseries/meter-charges-timeseries.component';
 import { MeterChargesCorrelationPlotComponent } from '@v0/data-management/account-facilities/facility-data/facility-meters/meter-charges-visualization/meter-charges-correlations/meter-charges-correlation-plot/meter-charges-correlation-plot.component';
@@ -103,7 +103,7 @@ import { MapMeterGroupsToEquipmentComponent } from '@v0/data-management/data-man
 import { ConfirmEnergyUsesUploadComponent } from '@v0/data-management/data-management-import/process-footprint-tool-file/confirm-energy-uses-upload/confirm-energy-uses-upload.component';
 import { FacilityEnergyUsesSankeyComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-sankey/facility-energy-uses-sankey.component';
 import { FacilityEnergyUsesGroupSankeyComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-sankey/facility-energy-uses-group-sankey.component';
-import { OperatingHoursModalModule } from '@app/shared/operating-hours-modal/operating-hours.module';
+import { OperatingHoursModalModule } from '@v0/shared/operating-hours-modal/operating-hours.module';
 
 
 @NgModule({

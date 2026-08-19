@@ -7,7 +7,7 @@ import { Component, inject, Injector } from '@angular/core';
 import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacilityReport, ModelingReportSettings } from '@data/models/idbModels/facilityReport';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-modeling-report-setup',

@@ -6,7 +6,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { UserSurvey } from '@data/models/userSurvey';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
-import { getMinutesBetweenDates } from '../sharedHelperFunctions';
+import { getMinutesBetweenDates } from '@shared/sharedHelperFunctions';
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 
 @Injectable({

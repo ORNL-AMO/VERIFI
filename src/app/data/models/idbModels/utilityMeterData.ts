@@ -1,9 +1,9 @@
-import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFunctions";
+import { getIsEnergyMeter, getIsEnergyUnit } from "@shared/sharedHelperFunctions";
 import { EmissionsResults } from "../eGridEmissions"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbUtilityMeter } from "./utilityMeter";
 import * as _ from 'lodash';
-import { getLatestMeterDataDate } from "src/app/shared/dateHelperFunctions";
+import { getLatestMeterDataDate } from "@shared/dateHelperFunctions";
 
 export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry {
     //keys (id primary)

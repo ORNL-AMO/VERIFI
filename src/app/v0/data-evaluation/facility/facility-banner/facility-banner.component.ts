@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, injec
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-facility-banner',

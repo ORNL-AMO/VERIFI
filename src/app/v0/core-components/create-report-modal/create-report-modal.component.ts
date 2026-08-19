@@ -2,7 +2,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, Injector } from '@angular/core';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Subscription } from 'rxjs';

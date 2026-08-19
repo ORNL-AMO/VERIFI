@@ -7,10 +7,10 @@ import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { FacilityAnalysisReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report.adapter';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { FacilityAnalysisReportComponent } from '@app/shared/shared-reports/facility-analysis-report/facility-analysis-report.component';
+import { FacilityAnalysisReportComponent } from '@v0/shared/shared-reports/facility-analysis-report/facility-analysis-report.component';
 
 @Component({
   selector: 'app-facility-analysis-report-results',

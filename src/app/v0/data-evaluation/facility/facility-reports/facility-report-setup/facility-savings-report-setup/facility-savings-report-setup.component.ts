@@ -7,8 +7,8 @@ import { Component, inject, Injector } from '@angular/core';
 import { distinctUntilChanged, startWith, Subscription } from 'rxjs';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from '@data/models/idbModels/facilityReport';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { Month, Months } from '@app/shared/form-data/months';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { Month, Months } from '@shared/form-data/months';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/models/analysis';
 
 @Component({

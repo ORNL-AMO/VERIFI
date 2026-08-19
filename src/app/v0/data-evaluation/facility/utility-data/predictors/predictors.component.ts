@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 interface PredictorListItem {
   predictor: IdbPredictor;

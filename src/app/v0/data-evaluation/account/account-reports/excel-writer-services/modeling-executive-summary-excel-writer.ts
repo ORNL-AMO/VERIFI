@@ -2,7 +2,7 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { Injectable, inject } from '@angular/core';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import * as ExcelJS from 'exceljs';
-import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityGroupAnalysisItem } from '@shared/shared-analysis/calculations/regression-models.service';
 
 @Injectable({
   providedIn: 'root',

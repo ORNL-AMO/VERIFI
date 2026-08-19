@@ -12,7 +12,7 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { FacilityGroupAnalysisItem, RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 
 @Component({
   selector: 'app-account-reports-data-check',

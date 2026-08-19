@@ -7,7 +7,7 @@ import { ToastNotificationsService } from '@v0/core-components/toast-notificatio
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 

@@ -8,7 +8,7 @@ import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/u
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';

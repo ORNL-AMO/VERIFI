@@ -10,7 +10,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';

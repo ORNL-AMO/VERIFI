@@ -12,15 +12,15 @@ import { FacilityOverviewData } from '@domain/calculations/dashboard-calculation
 import { UtilityUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { FacilityOverviewReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report.adapter';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
-import { FacilitySectionReportComponent } from '@app/shared/data-overview/facility-section-report/facility-section-report.component';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
+import { FacilitySectionReportComponent } from '@v0/shared/data-overview/facility-section-report/facility-section-report.component';
 import { FacilityOverviewReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-ppt.adapter';
-import { PptReportService } from '@app/shared/ppt-report/ppt-report.service';
+import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-overview-report-results',

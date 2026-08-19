@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { AccountHomeComponent } from '@v0/data-evaluation/account/account-home/account-home.component';
 import { AccountHomeSummaryComponent } from '@v0/data-evaluation/account/account-home/account-home-summary/account-home-summary.component';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from '@app/shared/helper-pipes/_helper-pipes.module';
-import { SharedAnalysisModule } from '@app/shared/shared-analysis/shared-analysis.module';
-import { CalculatingSpinnerModule } from '@app/shared/calculating-spinner/calculating-spinner.module';
+import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { SharedAnalysisModule } from '@shared/shared-analysis/shared-analysis.module';
+import { CalculatingSpinnerModule } from '@shared/calculating-spinner/calculating-spinner.module';
 import { AccountWaterReductionGoalComponent } from '@v0/data-evaluation/account/account-home/account-water-card/account-water-reduction-goal/account-water-reduction-goal.component';
 import { AccountEnergyReductionGoalComponent } from '@v0/data-evaluation/account/account-home/account-energy-card/account-energy-reduction-goal/account-energy-reduction-goal.component';
 import { AccountEnergyCardComponent } from '@v0/data-evaluation/account/account-home/account-energy-card/account-energy-card.component';
 import { AccountWaterCardComponent } from '@v0/data-evaluation/account/account-home/account-water-card/account-water-card.component';
-import { DataOverviewModule } from '@app/shared/data-overview/data-overview.module';
+import { DataOverviewModule } from '@v0/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
 import { AccountStatusCheckComponent } from '@v0/data-evaluation/account/account-home/account-status-check/account-status-check.component';
 

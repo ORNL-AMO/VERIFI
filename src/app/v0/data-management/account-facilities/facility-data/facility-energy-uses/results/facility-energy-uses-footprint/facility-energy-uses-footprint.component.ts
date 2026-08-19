@@ -8,7 +8,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-energy-uses-footprint',

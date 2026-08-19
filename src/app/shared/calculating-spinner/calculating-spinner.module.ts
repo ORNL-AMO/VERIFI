@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CalculatingSpinnerComponent } from './calculating-spinner.component';
+import { CalculatingSpinnerComponent } from '@shared/calculating-spinner/calculating-spinner.component';
 
 
 

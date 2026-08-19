@@ -1,4 +1,4 @@
-import { checkShowSiteToSource, getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFunctions";
+import { checkShowSiteToSource, getIsEnergyMeter, getIsEnergyUnit } from "@shared/sharedHelperFunctions";
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
 import { ConvertValue } from "./convertValue";
 import { IdbAccount } from "@data/models/idbModels/account";

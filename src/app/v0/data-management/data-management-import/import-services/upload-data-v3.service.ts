@@ -12,18 +12,18 @@ import * as XLSX from 'xlsx';
 import { ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { checkImportCellNumber, checkImportStartingUnit, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import * as _ from 'lodash';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SubRegionData } from '@data/models/eGridEmissions';
-import { EditMeterFormService } from '@app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@app/shared/sharedHelperFunctions';
-import { FuelTypeOption } from '@app/shared/fuel-options/fuelTypeOption';
-import { getFuelTypeOptions } from '@app/shared/fuel-options/getFuelTypeOptions';
+import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@shared/sharedHelperFunctions';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
 import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
-import { MeterChargeType } from '@app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { MeterChargeType } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
 import { WaterDischargeTypes, WaterIntakeTypes } from '@data/models/constantsAndTypes';
-import { setPredictorDateDataFromDate } from '@app/shared/dateHelperFunctions';
+import { setPredictorDateDataFromDate } from '@shared/dateHelperFunctions';
 @Injectable({
   providedIn: 'root'
 })

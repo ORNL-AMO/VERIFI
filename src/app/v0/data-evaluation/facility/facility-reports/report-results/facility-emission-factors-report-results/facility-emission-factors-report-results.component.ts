@@ -5,13 +5,13 @@ import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport, EmissionFactorsReportSettings } from '@data/models/idbModels/facilityReport';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { EmissionsRate, SubregionEmissions } from '@data/models/eGridEmissions';
 import { getEmissionsRate, getFuelEmissionsOutputRate } from '@domain/calculations/emissions-calculations/emissions';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
-import { FuelTypeOption } from '@app/shared/fuel-options/fuelTypeOption';
-import { getMobileFuelTypes } from '@app/shared/fuel-options/getFuelTypeOptions';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 
 @Component({

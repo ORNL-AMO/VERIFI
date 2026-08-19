@@ -12,7 +12,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WeatherPredictorManagementService } from '@v0/weather-data/weather-predictor-management.service';
-// import { DegreeDaysService } from '@app/shared/helper-services/degree-days.service';
+// import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-weather-data',

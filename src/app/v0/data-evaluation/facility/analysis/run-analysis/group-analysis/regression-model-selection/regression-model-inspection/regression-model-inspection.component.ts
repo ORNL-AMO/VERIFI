@@ -13,7 +13,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { getSelectedRegressionModel } from '@app/shared/shared-analysis/calculations/regression-model-recovery';
+import { getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 @Component({
     selector: 'app-regression-model-inspection',

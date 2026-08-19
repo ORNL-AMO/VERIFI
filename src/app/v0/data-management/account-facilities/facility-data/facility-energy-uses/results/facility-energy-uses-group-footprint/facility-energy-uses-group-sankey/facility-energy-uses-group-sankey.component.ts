@@ -3,7 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { EnergyFootprintAnnualEquipmentGroupSummary } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { SankeyData, SankeyLink, SankeyNode } from '@data/models/visualization';
-import { buildSankeyData, formatEnergyValue, getLinkColor, getSourceColor } from '@app/shared/sankey-utils';
+import { buildSankeyData, formatEnergyValue, getLinkColor, getSourceColor } from '@v0/shared/sankey-utils';
 
 @Component({
   selector: 'app-facility-energy-uses-group-sankey',

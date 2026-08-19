@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { checkShowHeatCapacity, checkShowSiteToSource, getGUID } from 'src/app/shared/sharedHelperFunctions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getGUID } from '@shared/sharedHelperFunctions';
 
 @Injectable({
   providedIn: 'root'

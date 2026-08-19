@@ -4,9 +4,9 @@ import { Injectable, inject } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { getIsEnergyUnit } from '../sharedHelperFunctions';
+import { getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { AgreementType, AgreementTypes } from '@data/models/agreementType';
-import { VehicleTypes } from '../vehicle-data/vehicleType';
+import { VehicleTypes } from '@shared/vehicle-data/vehicleType';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -16,9 +16,9 @@ import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
-import { FirstNaicsList, NAICS, SecondNaicsList } from '../form-data/naics-data';
-import { ChargesTypes } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
-import { getDateFromMeterData } from '../dateHelperFunctions';
+import { FirstNaicsList, NAICS, SecondNaicsList } from '@shared/form-data/naics-data';
+import { ChargesTypes } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Injectable({
   providedIn: 'root'

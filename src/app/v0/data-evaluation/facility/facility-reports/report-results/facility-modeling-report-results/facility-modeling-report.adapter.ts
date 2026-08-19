@@ -1,13 +1,13 @@
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import { IdbFacilityReport, ModelingReportSettings } from "@data/models/idbModels/facilityReport";
-import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
-import { BaseSection, TableSection, TextSection } from "@app/shared/pdf-report/models/report-section.model";
+import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
+import { BaseSection, TableSection, TextSection } from "@v0/shared/pdf-report/models/report-section.model";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
-import { RegressionNumberPipe } from "@app/shared/helper-pipes/regression-number.pipe";
-import { FacilityGroupAnalysisItem } from "@app/shared/shared-analysis/calculations/regression-models.service";
-import { UserDefineModelDateRangePipe } from "@app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe";
-import { CustomNumberPipe } from "@app/shared/helper-pipes/custom-number.pipe";
+import { RegressionNumberPipe } from "@shared/helper-pipes/regression-number.pipe";
+import { FacilityGroupAnalysisItem } from "@shared/shared-analysis/calculations/regression-models.service";
+import { UserDefineModelDateRangePipe } from "@shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe";
+import { CustomNumberPipe } from "@shared/helper-pipes/custom-number.pipe";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityModelingReportAdapter {

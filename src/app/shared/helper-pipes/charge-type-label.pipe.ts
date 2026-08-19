@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ChargesTypes, MeterChargeType } from '../shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { ChargesTypes, MeterChargeType } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 
 @Pipe({
   name: 'chargeTypeLabel',

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
-import { EnergyUseIcons, getEnergyUseSourceIcons } from '../sharedHelperFunctions';
+import { EnergyUseIcons, getEnergyUseSourceIcons } from '@shared/sharedHelperFunctions';
 
 @Pipe({
   name: 'equipmentSourceIcons',

@@ -17,16 +17,16 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
 import { FacilitySavingsReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report.adapter';
-import { MonthlyAnalysisSummarySavingsGraphComponent } from '@app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
-import { MonthlyAnalysisSummaryGraphComponent } from '@app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
-import { RollingEnergyConsumptionGraphComponent } from '@app/shared/shared-reports/facility-savings-report/rolling-energy-consumption-graph/rolling-energy-consumption-graph.component';
-import { RollingEnergySavingsGraphComponent } from '@app/shared/shared-reports/facility-savings-report/rolling-energy-savings-graph/rolling-energy-savings-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { MonthlyAnalysisSummaryGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { RollingEnergyConsumptionGraphComponent } from '@v0/shared/shared-reports/facility-savings-report/rolling-energy-consumption-graph/rolling-energy-consumption-graph.component';
+import { RollingEnergySavingsGraphComponent } from '@v0/shared/shared-reports/facility-savings-report/rolling-energy-savings-graph/rolling-energy-savings-graph.component';
 import { FacilitySavingsReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-ppt.adapter';
-import { PptReportService } from '@app/shared/ppt-report/ppt-report.service';
+import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-savings-report-results',

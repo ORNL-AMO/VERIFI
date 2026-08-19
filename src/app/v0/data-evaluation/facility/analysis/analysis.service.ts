@@ -6,7 +6,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { getSelectedRegressionModel } from '@app/shared/shared-analysis/calculations/regression-model-recovery';
+import { getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'

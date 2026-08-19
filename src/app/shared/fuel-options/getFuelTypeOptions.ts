@@ -1,20 +1,20 @@
 import { MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
-import { FuelTypeOption } from "./fuelTypeOption";
-import { StationarySolidOptions } from "./stationarySolidOptions";
-import { StationaryLiquidOptions } from "./stationaryLiquidOptions";
-import { StationaryGasOptions } from "./stationaryGasOptions";
-import { StationaryOtherEnergyOptions } from "./stationaryOtherEnergyOptions";
-import { MobileBusOptions } from "./mobileBusOptions";
-import { MobileHeavyDutyTruckOptions } from "./mobileHeavyDutyVehicleOptions";
-import { MobileLightDutyTruckOptions } from "./mobileLightDutyTruckOptions";
-import { MobileMotorcycleOptions } from "./mobileMotorcycleOptions";
-import { MobileOffRoadAgricultureOptions } from "./mobileOffRoadAgricultureOptions";
-import { MobileOffRoadConstructionOptions } from "./mobileOffRoadConstructionOptions";
-import { MobilePassangerCarOptions } from "./mobilePassangerCarOptions";
-import { MobileRailOptions } from "./mobileRailOptions";
-import { MobileTransportOnsiteOptions } from "./mobileTransportOnsiteOptions";
-import { MobileWaterTransportOptions } from "./mobileWaterTransportOptions";
-import { VehicleType, VehicleTypes } from "../vehicle-data/vehicleType";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
+import { StationarySolidOptions } from "@shared/fuel-options/stationarySolidOptions";
+import { StationaryLiquidOptions } from "@shared/fuel-options/stationaryLiquidOptions";
+import { StationaryGasOptions } from "@shared/fuel-options/stationaryGasOptions";
+import { StationaryOtherEnergyOptions } from "@shared/fuel-options/stationaryOtherEnergyOptions";
+import { MobileBusOptions } from "@shared/fuel-options/mobileBusOptions";
+import { MobileHeavyDutyTruckOptions } from "@shared/fuel-options/mobileHeavyDutyVehicleOptions";
+import { MobileLightDutyTruckOptions } from "@shared/fuel-options/mobileLightDutyTruckOptions";
+import { MobileMotorcycleOptions } from "@shared/fuel-options/mobileMotorcycleOptions";
+import { MobileOffRoadAgricultureOptions } from "@shared/fuel-options/mobileOffRoadAgricultureOptions";
+import { MobileOffRoadConstructionOptions } from "@shared/fuel-options/mobileOffRoadConstructionOptions";
+import { MobilePassangerCarOptions } from "@shared/fuel-options/mobilePassangerCarOptions";
+import { MobileRailOptions } from "@shared/fuel-options/mobileRailOptions";
+import { MobileTransportOnsiteOptions } from "@shared/fuel-options/mobileTransportOnsiteOptions";
+import { MobileWaterTransportOptions } from "@shared/fuel-options/mobileWaterTransportOptions";
+import { VehicleType, VehicleTypes } from "@shared/vehicle-data/vehicleType";
 import { IdbCustomFuel } from "@data/models/idbModels/customFuel";
 
 

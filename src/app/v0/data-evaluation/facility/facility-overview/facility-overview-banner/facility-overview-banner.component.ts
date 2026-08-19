@@ -3,7 +3,7 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';

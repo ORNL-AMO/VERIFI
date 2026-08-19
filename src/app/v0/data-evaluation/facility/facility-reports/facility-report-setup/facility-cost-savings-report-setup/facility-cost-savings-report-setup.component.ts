@@ -13,9 +13,9 @@ import { MonthlyData } from '@data/models/calanderization';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacilityReport, CostSavingsReportSettings, YearGroupData } from '@data/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { Month, Months } from '@app/shared/form-data/months';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from '@app/shared/sharedHelperFunctions';
+import { Month, Months } from '@shared/form-data/months';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { getGroupUnit, getMeterCollectionUnit, getYearsArray } from '@shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-facility-cost-savings-report-setup',

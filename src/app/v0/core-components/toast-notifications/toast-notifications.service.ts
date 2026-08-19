@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { getGUID } from '@app/shared/sharedHelperFunctions';
+import { getGUID } from '@shared/sharedHelperFunctions';
 
 @Injectable({
   providedIn: 'root'

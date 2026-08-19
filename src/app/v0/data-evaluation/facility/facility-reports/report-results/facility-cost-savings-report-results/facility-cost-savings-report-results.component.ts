@@ -16,7 +16,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AnnualFacilityAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { convertConsumptionRate, getYearsArray } from '@app/shared/sharedHelperFunctions';
+import { convertConsumptionRate, getYearsArray } from '@shared/sharedHelperFunctions';
 import { FacilityCostSavingsReportResults } from '@domain/calculations/cost-savings-report-calculations/facilityCostSavingsReportResults';
 
 @Component({

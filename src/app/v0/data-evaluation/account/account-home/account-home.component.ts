@@ -8,7 +8,7 @@ import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { SubregionEmissions } from '@data/models/eGridEmissions';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';

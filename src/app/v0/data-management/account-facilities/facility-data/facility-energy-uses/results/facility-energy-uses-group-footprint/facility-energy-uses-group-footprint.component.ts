@@ -8,7 +8,7 @@ import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergy
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EnergyFootprintAnnualEquipmentGroupSummary } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualEquipmentGroupSummary';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 
 @Component({

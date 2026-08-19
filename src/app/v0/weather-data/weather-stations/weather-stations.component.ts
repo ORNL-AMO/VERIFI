@@ -5,7 +5,7 @@ import { WeatherStation } from '@data/models/degreeDays';
 import { NominatimLocation, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { getWeatherSearchFromFacility } from '@app/shared/sharedHelperFunctions';
+import { getWeatherSearchFromFacility } from '@shared/sharedHelperFunctions';
 
 @Component({
     selector: 'app-weather-stations',

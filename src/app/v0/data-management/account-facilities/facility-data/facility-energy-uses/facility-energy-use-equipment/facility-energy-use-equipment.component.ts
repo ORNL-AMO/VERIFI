@@ -10,13 +10,13 @@ import { ToastNotificationsService } from '@v0/core-components/toast-notificatio
 import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from '@data/models/calanderization';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-energy-use-equipment',

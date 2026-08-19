@@ -8,9 +8,9 @@ import { FacilityCommandHandler } from '@data/account-workspace/handlers/facilit
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { MeterGroupingDataService } from '../meter-grouping-data.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { MeterGroupingDataService } from '@shared/shared-meter-content/set-meter-grouping/meter-grouping-data.service';
 
 @Component({
   selector: 'app-meter-grouping-results-table',

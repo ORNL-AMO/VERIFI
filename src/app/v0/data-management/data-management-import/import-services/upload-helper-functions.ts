@@ -2,12 +2,12 @@ import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { AgreementType, AgreementTypes } from "@data/models/agreementType";
 import { AllSources, MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
 import { ScopeOption, ScopeOptions } from "@data/models/scopeOption";
-import { Countries, Country } from "@app/shared/form-data/countries";
-import { State, States } from "@app/shared/form-data/states";
-import { FuelTypeOption } from "@app/shared/fuel-options/fuelTypeOption";
-import { getFuelTypeOptions } from "@app/shared/fuel-options/getFuelTypeOptions";
-import { getStartingUnitOptions } from "@app/shared/sharedHelperFunctions";
-import { UnitOption } from "@app/shared/unitOptions";
+import { Countries, Country } from "@shared/form-data/countries";
+import { State, States } from "@shared/form-data/states";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
+import { getFuelTypeOptions } from "@shared/fuel-options/getFuelTypeOptions";
+import { getStartingUnitOptions } from "@shared/sharedHelperFunctions";
+import { UnitOption } from "@shared/unitOptions";
 
 export function getCountryCode(country: string): string {
     if (country) {

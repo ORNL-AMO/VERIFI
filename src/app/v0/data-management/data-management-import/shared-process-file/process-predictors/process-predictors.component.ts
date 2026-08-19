@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { EditPredictorFormService } from '@app/shared/shared-predictors-content/edit-predictor-form.service';
+import { EditPredictorFormService } from '@v0/shared/shared-predictors-content/edit-predictor-form.service';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 

@@ -1,6 +1,6 @@
 import { MeterSource } from "@data/models/constantsAndTypes";
 import { EquipmentType } from "@data/models/idbModels/facilityEnergyUseEquipment";
-import { PowerUnitOptions, UnitOption, VolumeLiquidOptions } from "@app/shared/unitOptions";
+import { PowerUnitOptions, UnitOption, VolumeLiquidOptions } from "@shared/unitOptions";
 
 // export type UtilityType = 'Electricity' | 'Natural Gas' | 'Other Fuels' | 'Water' | 'Waste Water' | 'Steam' | 'Compressed Air';
 

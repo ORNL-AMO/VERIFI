@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-// import { EGridService } from './e-grid.service';
+// import { EGridService } from '@shared/helper-services/e-grid.service';
 // import * as _ from 'lodash';
 // import { DetailDegreeDay, LocalClimatologicalData, WeatherStation } from '@data/models/degreeDays';
 // import * as Papa from 'papaparse';

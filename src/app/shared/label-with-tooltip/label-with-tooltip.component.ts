@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { LabelTooltips } from './labelTooltips';
+import { LabelTooltips } from '@shared/label-with-tooltip/labelTooltips';
 // import * as bootstrap from 'bootstrap'
 declare var bootstrap: any;
 @Component({

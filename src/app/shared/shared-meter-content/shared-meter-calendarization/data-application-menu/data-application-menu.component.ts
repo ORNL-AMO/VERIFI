@@ -3,14 +3,14 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, Input, OnInit, inject } from '@angular/core';
 import * as _ from 'lodash';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
-import { CalanderizationService, CalendarizationSummaryItem } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService, CalendarizationSummaryItem } from '@shared/helper-services/calanderization.service';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from '@domain/calculations/calanderization/calanderizationHelpers';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
+import { getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-data-application-menu',

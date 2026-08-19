@@ -4,7 +4,7 @@ import { HelpPanelComponent } from '@v0/data-evaluation/help-panel/help-panel.co
 import { HelpPageComponent } from '@v0/data-evaluation/help-panel/help-page/help-page.component';
 import { AccountHelpModule } from '@v0/data-evaluation/help-panel/account-help/account-help.module';
 import { FacilityHelpModule } from '@v0/data-evaluation/help-panel/facility-help/facility-help.module';
-import { SharedHelpContentModule } from '@app/shared/shared-help-content/shared-help-content.module';
+import { SharedHelpContentModule } from '@v0/shared/shared-help-content/shared-help-content.module';
 
 @NgModule({
   declarations: [

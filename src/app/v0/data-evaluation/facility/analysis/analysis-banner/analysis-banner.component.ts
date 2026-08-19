@@ -10,8 +10,8 @@ import { FacilityStatusCheck } from '@domain/calculations/status-check-calculati
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
 interface GroupsList {
   group: AnalysisGroup,

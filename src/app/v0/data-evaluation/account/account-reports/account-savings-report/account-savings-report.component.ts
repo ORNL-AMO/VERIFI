@@ -16,15 +16,15 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { PerformanceReport } from '@domain/calculations/performance-report-calculations/performanceReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { AccountSavingsReport } from '@domain/calculations/savings-report-calculations/accountSavingsReport';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
 import { AccountSavingsReportAdapter } from '@v0/data-evaluation/account/account-reports/account-savings-report/account-savings-report.adapter';
-import { AnnualAnalysisSummaryGraphComponent } from '@app/shared/shared-analysis/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
-import { MonthlyAnalysisSummaryGraphComponent } from '@app/shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
-import { MonthlyAnalysisSummarySavingsGraphComponent } from '@app/shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { AnnualAnalysisSummaryGraphComponent } from '@shared/shared-analysis/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
+import { MonthlyAnalysisSummaryGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 import { PerformanceChartComponent } from '@v0/data-evaluation/account/account-reports/performance-report/performance-chart/performance-chart.component';
-import { PptReportService } from '@app/shared/ppt-report/ppt-report.service';
+import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
 import { AccountSavingsReportPptAdapter } from '@v0/data-evaluation/account/account-reports/account-savings-report/account-savings-report-ppt.adapter';
 
 @Component({

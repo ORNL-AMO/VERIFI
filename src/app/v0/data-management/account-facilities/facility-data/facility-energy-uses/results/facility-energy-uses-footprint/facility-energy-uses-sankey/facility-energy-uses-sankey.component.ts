@@ -3,7 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { EnergyFootprintAnnualFacilityBalance } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualFacilityBalance';
 import { SankeyData, SankeyNode, SankeyLink } from '@data/models/visualization';
 import { EnergyFootprintAnnualBalanceMeterGroup } from '@domain/calculations/energy-footprint/energyBalance/energyFootprintAnnualBalanceMeterGroup';
-import { buildSankeyData, formatEnergyValue, getEquipmentGroupColor, getLinkColor, getSourceColor } from '@app/shared/sankey-utils';
+import { buildSankeyData, formatEnergyValue, getEquipmentGroupColor, getLinkColor, getSourceColor } from '@v0/shared/sankey-utils';
 
 @Component({
   selector: 'app-facility-energy-uses-sankey',

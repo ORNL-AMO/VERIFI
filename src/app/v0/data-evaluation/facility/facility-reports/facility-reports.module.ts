@@ -8,22 +8,22 @@ import { FacilityReportsTabsComponent } from '@v0/data-evaluation/facility/facil
 import { FacilityReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-report-setup.component';
 import { FacilityReportTypePipe } from '@v0/data-evaluation/facility/facility-reports/facility-report-pipes/facility-report-type.pipe';
 import { FacilityAnalysisReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
-import { SharedReportsModule } from '@app/shared/shared-reports/shared-reports.module';
+import { SharedReportsModule } from '@v0/shared/shared-reports/shared-reports.module';
 import { FacilityPrintReportButtonComponent } from '@v0/data-evaluation/facility/facility-reports/facility-print-report-button/facility-print-report-button.component';
-import { HelperPipesModule } from '@app/shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
 import { FacilityOverviewReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-overview-report-setup/facility-overview-report-setup.component';
 import { FacilityOverviewReportResultsComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-results.component';
 import { FacilityAnalysisReportResultsComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component';
-import { DataOverviewModule } from '@app/shared/data-overview/data-overview.module';
-import { CalculatingSpinnerModule } from '@app/shared/calculating-spinner/calculating-spinner.module';
+import { DataOverviewModule } from '@v0/shared/data-overview/data-overview.module';
+import { CalculatingSpinnerModule } from '@shared/calculating-spinner/calculating-spinner.module';
 import { FacilityEmissionFactorsReportResultsComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-results.component';
 import { FacilityEmissionFactorsReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-emission-factors-report-setup/facility-emission-factors-report-setup.component';
 import { FacilityEmissionFactorsReportTableComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report-table/facility-emission-factors-report-table.component';
 import { FacilitySavingsReportResultsComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component';
 import { FacilitySavingsReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-savings-report-setup/facility-savings-report-setup.component';
-import { SharedAnalysisModule } from '@app/shared/shared-analysis/shared-analysis.module';
+import { SharedAnalysisModule } from '@shared/shared-analysis/shared-analysis.module';
 import { FacilityReportsDashboardTableComponent } from '@v0/data-evaluation/facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard-table/facility-reports-dashboard-table.component';
-import { TableItemsDropdownModule } from "@app/shared/table-items-dropdown/table-items-dropdown.module";
+import { TableItemsDropdownModule } from "@shared/table-items-dropdown/table-items-dropdown.module";
 import { NgbPagination } from "@ng-bootstrap/ng-bootstrap";
 import { FacilityReportBadgeClassPipe } from '@v0/data-evaluation/facility/facility-reports/facility-report-pipes/facility-report-badge-class.pipe';
 import { FacilityModelingReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-modeling-report-setup/facility-modeling-report-setup.component';
@@ -37,15 +37,15 @@ import { FacilityCostSavingsReportResultsComponent } from '@v0/data-evaluation/f
 import { AnnualSavingsGraphComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/annual-savings-graph/annual-savings-graph.component';
 import { FacilityDataQualityReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-data-quality-report-setup/facility-data-quality-report-setup.component';
 import { FacilityDataQualityReportResultsComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-data-quality-report-results/facility-data-quality-report-results.component';
-import { SharedDataQualityReportMetersModule } from '@app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
-import { SharedDataQualityReportPredictorsModule } from '@app/shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
-import { CustomNumberPipe } from '@app/shared/helper-pipes/custom-number.pipe';
+import { SharedDataQualityReportMetersModule } from '@shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module';
+import { SharedDataQualityReportPredictorsModule } from '@shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
+import { CustomNumberPipe } from '@shared/helper-pipes/custom-number.pipe';
 import { MonthlySavingsTableComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/monthly-savings-table/monthly-savings-table.component';
 import { GroupSavingsTableComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/group-savings-table/group-savings-table.component';
 import { AnnualSavingsTableComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/annual-savings-table/annual-savings-table.component';
 import { MonthlySavingsGraphComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
-import { RegressionNumberPipe } from '@app/shared/helper-pipes/regression-number.pipe';
-import { UserDefineModelDateRangePipe } from '@app/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
+import { RegressionNumberPipe } from '@shared/helper-pipes/regression-number.pipe';
+import { UserDefineModelDateRangePipe } from '@shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
 
 
 

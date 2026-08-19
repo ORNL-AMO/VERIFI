@@ -6,9 +6,9 @@ import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { ExportToExcelTemplateV3Service } from '@app/shared/helper-services/export-to-excel-template-v3.service';
+import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { getLatestMeterData } from '@app/shared/dateHelperFunctions';
+import { getLatestMeterData } from '@shared/dateHelperFunctions';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

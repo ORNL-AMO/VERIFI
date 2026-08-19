@@ -1,8 +1,8 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { Statistics } from '../meterDataQualityStatistics';
-import { getDateFromMeterData } from '../../dateHelperFunctions';
+import { Statistics } from '@shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-cost-timeseries-graph',

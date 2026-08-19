@@ -8,7 +8,7 @@ import { AccountCommandHandler } from '@data/account-workspace/handlers/account-
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
-import { ExportToExcelTemplateV3Service } from '@app/shared/helper-services/export-to-excel-template-v3.service';
+import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { DatabaseResetService } from '@app/application-lifecycle/database-reset.service';

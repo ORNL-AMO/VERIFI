@@ -4,7 +4,7 @@ import { Injectable, inject, computed } from '@angular/core';
 import * as _ from 'lodash';
 import { CalanderizationFilters, CalanderizedMeter } from '@data/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
-import { getIsEnergyMeter } from '../sharedHelperFunctions';
+import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';

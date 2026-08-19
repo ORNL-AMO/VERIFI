@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
-import { CopyTableService } from '../../helper-services/copy-table.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';

@@ -5,7 +5,7 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-account-report-analysis-selection',

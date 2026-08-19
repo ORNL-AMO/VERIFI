@@ -1,7 +1,7 @@
 import { inject, Injectable } from "@angular/core";
-import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
-import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "@app/shared/pdf-report/models/report-section.model";
-import { CustomNumberPipe } from "@app/shared/helper-pipes/custom-number.pipe";
+import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
+import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "@v0/shared/pdf-report/models/report-section.model";
+import { CustomNumberPipe } from "@shared/helper-pipes/custom-number.pipe";
 import { AccountSavingsReportSetup, PerformanceReportSetup } from "@data/models/overview-report";
 import { IdbAccount } from "@data/models/idbModels/account";
 import { IdbAccountReport } from "@data/models/idbModels/accountReport";

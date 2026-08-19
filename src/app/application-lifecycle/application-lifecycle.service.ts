@@ -13,7 +13,7 @@ import { DataMigrationRunnerService } from '@data/indexedDB/data-migrations/data
 import { FacilitydbService } from '@data/indexedDB/facility-db.service';
 import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { AppStartupState, AppStartupStep } from './application-lifecycle.models';
 import { ApplicationInstanceData } from '@data/models/idbModels/applicationInstanceData';
 

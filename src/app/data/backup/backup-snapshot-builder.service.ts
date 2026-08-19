@@ -7,7 +7,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { JStatRegressionModel } from '@data/models/analysis';
-import { normalizeAnalysisGroupModelStorage } from '@app/shared/shared-analysis/calculations/regression-model-recovery';
+import { normalizeAnalysisGroupModelStorage } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 export interface BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile;

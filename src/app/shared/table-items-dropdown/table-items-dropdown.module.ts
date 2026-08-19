@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableItemsDropdownComponent } from './table-items-dropdown.component';
+import { TableItemsDropdownComponent } from '@shared/table-items-dropdown/table-items-dropdown.component';
 import { FormsModule } from '@angular/forms';
 
 

@@ -2,21 +2,21 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, computed, effect, ElementRef, inject, output, signal, Signal, ViewChild, WritableSignal } from '@angular/core';
 import * as _ from 'lodash';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { GeneralUtilityDataFilters } from '@data/models/meterDataFilter';
-import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
+import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { EmissionsResults } from '@data/models/eGridEmissions';
-import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { getEmissions, setUtilityDataEmissionsValues } from '@domain/calculations/emissions-calculations/emissions';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, MeterDataCharge } from '@data/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
-import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { ElectronService } from '@platform/electron/electron.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { getDateFromMeterData } from 'src/app/shared/dateHelperFunctions';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-general-utility-data-table',

@@ -4,9 +4,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { ExportToExcelTemplateV3Service } from '@app/shared/helper-services/export-to-excel-template-v3.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-utility-banner',

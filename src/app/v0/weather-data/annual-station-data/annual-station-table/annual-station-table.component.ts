@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { WeatherDataSelection } from '@data/models/degreeDays';
 import { AnnualStationDataSummary } from '@v0/weather-data/annual-station-data/annual-station-data.component';
-import { CopyTableService } from '@app/shared/helper-services/copy-table.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-annual-station-table',

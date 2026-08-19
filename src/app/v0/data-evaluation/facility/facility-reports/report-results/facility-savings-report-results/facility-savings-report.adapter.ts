@@ -1,9 +1,9 @@
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { inject, Injectable } from '@angular/core';
 import { IdbFacilityReport, SavingsFacilityReportSettings } from "@data/models/idbModels/facilityReport";
-import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
-import { BaseSection, ChartSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "@app/shared/pdf-report/models/report-section.model";
-import { CustomNumberPipe } from "@app/shared/helper-pipes/custom-number.pipe";
+import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
+import { BaseSection, ChartSection, StyledTextSection, TableHeaderCell, TableSection, TextSection } from "@v0/shared/pdf-report/models/report-section.model";
+import { CustomNumberPipe } from "@shared/helper-pipes/custom-number.pipe";
 import { IdbFacility } from "@data/models/idbModels/facility";
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "@data/models/analysis";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";

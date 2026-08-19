@@ -8,9 +8,9 @@ import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { FuelTypeOption } from '@app/shared/fuel-options/fuelTypeOption';
-import { getMobileFuelTypes } from '@app/shared/fuel-options/getFuelTypeOptions';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 
 @Component({
   selector: 'app-account-emission-factors-report-table',

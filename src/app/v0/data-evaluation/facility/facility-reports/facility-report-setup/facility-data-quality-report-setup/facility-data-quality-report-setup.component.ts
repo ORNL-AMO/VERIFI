@@ -10,7 +10,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { DataQualityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-data-quality-report-setup',

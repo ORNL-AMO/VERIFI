@@ -13,16 +13,16 @@ import { DetailDegreeDay } from '@data/models/degreeDays';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
-// import { DegreeDaysService } from '@app/shared/helper-services/degree-days.service';
-import { PredictorDataHelperService } from '@app/shared/helper-services/predictor-data-helper.service';
-import { EditPredictorFormService } from '@app/shared/shared-predictors-content/edit-predictor-form.service';
-import { getDegreeDayAmount } from '@app/shared/sharedHelperFunctions';
+// import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
+import { PredictorDataHelperService } from '@shared/helper-services/predictor-data-helper.service';
+import { EditPredictorFormService } from '@v0/shared/shared-predictors-content/edit-predictor-form.service';
+import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
-import { getDateFromPredictorData } from '@app/shared/dateHelperFunctions';
-import { Month, Months } from '@app/shared/form-data/months';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
+import { Month, Months } from '@shared/form-data/months';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-edit-predictor',

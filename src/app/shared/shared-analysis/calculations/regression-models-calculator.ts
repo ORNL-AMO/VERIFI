@@ -8,7 +8,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { checkSameMonth, checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
-import { getDateFromPredictorData } from '../../dateHelperFunctions';
+import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 
 /**
  * Pure computation class — no Angular DI.

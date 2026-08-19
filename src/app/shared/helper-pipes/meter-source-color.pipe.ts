@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { UtilityColors } from '../utilityColors';
+import { UtilityColors } from '@shared/utilityColors';
 import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Pipe({

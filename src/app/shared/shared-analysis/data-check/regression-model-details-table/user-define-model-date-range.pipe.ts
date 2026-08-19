@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { AnalysisGroup } from '@data/models/analysis';
-import { Month, Months } from 'src/app/shared/form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 
 @Pipe({
   name: 'userDefineModelDateRange',

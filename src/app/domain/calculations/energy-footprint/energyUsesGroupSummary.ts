@@ -3,7 +3,7 @@ import { IdbFacilityEnergyUseEquipment } from "@data/models/idbModels/facilityEn
 import { IdbFacilityEnergyUseGroup } from "@data/models/idbModels/facilityEnergyUseGroups";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
-import { getEnergyUseSourceIcons, EnergyUseIcons } from "src/app/shared/sharedHelperFunctions";
+import { getEnergyUseSourceIcons, EnergyUseIcons } from "@shared/sharedHelperFunctions";
 
 export class EnergyUsesGroupSummary {
     groupName: string;

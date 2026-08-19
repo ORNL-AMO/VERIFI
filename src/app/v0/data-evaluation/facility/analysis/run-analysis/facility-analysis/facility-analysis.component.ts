@@ -15,7 +15,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { runWorker } from '@platform/web-workers/run-worker';

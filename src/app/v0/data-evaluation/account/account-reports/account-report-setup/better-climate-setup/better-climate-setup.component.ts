@@ -6,7 +6,7 @@ import { ReportCommandHandler } from '@data/account-workspace/handlers/report-co
 import { Component, inject, Injector } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';

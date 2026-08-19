@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { skip, take } from 'rxjs';
 import { ElectronService } from '@platform/electron/electron.service';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { UtilityMeterDataService } from '../../utility-meter-data.service';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';

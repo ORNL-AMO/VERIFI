@@ -9,13 +9,13 @@ import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
-import { DataOverviewMapComponent } from '@app/shared/data-overview/data-overview-map/data-overview-map.component';
-import { FacilityUsageDonutComponent } from '@app/shared/data-overview/facility-usage-donut/facility-usage-donut.component';
-import { AccountUtilityUsageDonutComponent } from '@app/shared/data-overview/account-utility-usage-donut/account-utility-usage-donut.component';
-import { AccountWaterUsageDonutComponent } from '@app/shared/data-overview/account-water-usage-donut/account-water-usage-donut.component';
-import { FacilitiesUsageStackedBarChartComponent } from '@app/shared/data-overview/facilities-usage-stacked-bar-chart/facilities-usage-stacked-bar-chart.component';
-import { AccountWaterStackedBarChartComponent } from '@app/shared/data-overview/account-water-stacked-bar-chart/account-water-stacked-bar-chart.component';
-import { MonthlyUtilityUsageLineChartComponent } from '@app/shared/data-overview/monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';
+import { DataOverviewMapComponent } from '@v0/shared/data-overview/data-overview-map/data-overview-map.component';
+import { FacilityUsageDonutComponent } from '@v0/shared/data-overview/facility-usage-donut/facility-usage-donut.component';
+import { AccountUtilityUsageDonutComponent } from '@v0/shared/data-overview/account-utility-usage-donut/account-utility-usage-donut.component';
+import { AccountWaterUsageDonutComponent } from '@v0/shared/data-overview/account-water-usage-donut/account-water-usage-donut.component';
+import { FacilitiesUsageStackedBarChartComponent } from '@v0/shared/data-overview/facilities-usage-stacked-bar-chart/facilities-usage-stacked-bar-chart.component';
+import { AccountWaterStackedBarChartComponent } from '@v0/shared/data-overview/account-water-stacked-bar-chart/account-water-stacked-bar-chart.component';
+import { MonthlyUtilityUsageLineChartComponent } from '@v0/shared/data-overview/monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';
 
 @Component({
     selector: 'app-account-section-report',

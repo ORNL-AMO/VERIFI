@@ -4,7 +4,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { Component, inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';

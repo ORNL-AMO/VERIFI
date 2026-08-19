@@ -9,12 +9,12 @@ import { ToastNotificationsService } from '@v0/core-components/toast-notificatio
 import { ReportType } from '@data/models/constantsAndTypes';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { AccountReportStatusCheck } from '@domain/calculations/status-check-calculations/accountReportStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
-import { getGUID } from '@app/shared/sharedHelperFunctions';
+import { getGUID } from '@shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 
 interface ReportListItem {

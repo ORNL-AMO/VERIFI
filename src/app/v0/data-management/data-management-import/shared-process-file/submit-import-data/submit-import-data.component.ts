@@ -12,7 +12,7 @@ import { FileReference } from '@v0/data-management/data-management-import/import
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from '@app/shared/dateHelperFunctions';
+import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-submit-import-data',

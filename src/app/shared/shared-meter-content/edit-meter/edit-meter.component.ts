@@ -4,13 +4,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
+import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData, updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
-import { RouterGuardService } from '../../shared-router-guard-modal/router-guard-service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 

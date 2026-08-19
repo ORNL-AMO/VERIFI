@@ -4,7 +4,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import * as _ from 'lodash';
-import { getDateFromMeterData } from '@app/shared/dateHelperFunctions';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 @Component({
   selector: 'app-meter-charges-timeseries',
   standalone: false,

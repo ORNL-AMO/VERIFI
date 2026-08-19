@@ -1,0 +1,139 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Input, Output, SimpleChanges, inject } from '@angular/core';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+// import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
+import { DetailDegreeDay, WeatherStation } from '@data/models/degreeDays';
+import { getDegreeDayAmount, getWeatherSearchFromFacility } from '@shared/sharedHelperFunctions';
+import { WeatherDataService } from '@v0/weather-data/weather-data.service';
+import { Router } from '@angular/router';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
+
+@Component({
+  selector: 'app-edit-predictor-data-entry-form',
+  templateUrl: './edit-predictor-data-entry-form.component.html',
+  styleUrl: './edit-predictor-data-entry-form.component.css',
+  standalone: false
+})
+export class EditPredictorDataEntryFormComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input({ required: true })
+  predictor: IdbPredictor;
+  @Input({ required: true })
+  predictorData: IdbPredictorData;
+  @Input()
+  calculatingDegreeDays: boolean = false;
+
+  @Output()
+  isSaved = new EventEmitter<boolean>();
+
+  constructor(
+    private weatherDataService: WeatherDataService,
+    private router: Router
+
+  ) {
+  }
+
+  ngOnInit() {
+    this.setDegreeDayValues();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.predictorData && !changes.predictorData.firstChange) {
+      this.setDegreeDayValues();
+    }
+  }
+
+  setDate(eventData: string) {
+    //eventData format = yyyy-mm = 2022-06
+    let yearMonth: Array<string> = eventData.split('-');
+    this.predictorData.year = Number(yearMonth[0]);
+    this.predictorData.month = Number(yearMonth[1]);
+    this.setDegreeDayValues();
+    this.setChanged();
+  }
+
+  async setDegreeDayValues() {
+    if (this.predictor.predictorType == 'Weather') {
+      this.calculatingDegreeDays = true;
+      let hasWeatherDataWarning: boolean = false;
+      if (!this.predictorData.weatherOverride) {
+        // let stationId: string = this.predictor.weatherStationId;
+        let entryDate: Date = getDateFromPredictorData(this.predictorData);
+        let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
+        if (degreeDays != 'error') {
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
+            hasWeatherDataWarning = true;
+          }
+          this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        } else {
+          this.predictorData.weatherDataWarning = true;
+        }
+      }
+    }
+    this.calculatingDegreeDays = false;
+  }
+
+  async goToWeatherData() {
+    let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    this.weatherDataService.selectedFacility = facility;
+    this.weatherDataService.selectedMonth = getDateFromPredictorData(this.predictorData);
+    this.weatherDataService.selectedYear = this.predictorData.year
+
+    if (this.predictor.weatherDataType == 'CDD') {
+      this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
+    } else if (this.predictor.weatherDataType == 'HDD') {
+      this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+    }
+    this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
+    this.weatherDataService.selectedFacility = facility;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(facility);
+    let weatherStation: WeatherStation | "error" = await this.weatherDataService.getStation(this.predictor.weatherStationId);
+    if (weatherStation && weatherStation != 'error') {
+      this.weatherDataService.selectedStation = weatherStation;
+      let endDate: Date = new Date(weatherStation.end);
+      endDate.setFullYear(endDate.getFullYear() - 1);
+      this.weatherDataService.selectedYear = endDate.getFullYear();
+      this.weatherDataService.selectedDate = endDate;
+      this.weatherDataService.selectedMonth = endDate;
+      if (this.router.url.includes('data-management')) {
+        this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/weather-data/annual-station');
+      } else {
+        this.router.navigateByUrl('/data-evaluation/weather-data/annual-station');
+      }
+    } else {
+      if (this.router.url.includes('data-management')) {
+        this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/weather-data');
+      } else {
+        this.router.navigateByUrl('/data-evaluation/weather-data');
+      }
+    }
+
+  }
+
+  setChanged() {
+    this.isSaved.emit(false);
+  }
+
+  setWeatherManually() {
+    if (this.predictor.predictorType == 'Weather') {
+      this.predictorData.weatherOverride = true;
+      this.predictorData.weatherDataWarning = false;
+    }
+    this.setChanged();
+  }
+
+  async revertManualWeatherData() {
+    if (this.predictor.predictorType == 'Weather') {
+      this.predictorData.weatherOverride = false;
+    }
+    await this.setDegreeDayValues();
+    this.setChanged();
+  }
+}

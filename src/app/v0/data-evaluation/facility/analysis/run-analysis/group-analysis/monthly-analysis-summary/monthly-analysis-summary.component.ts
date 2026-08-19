@@ -4,7 +4,7 @@ import { Component, DestroyRef, Signal, computed, effect, inject, signal } from 
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, MonthlyAnalysisSummary } from '@data/models/analysis';
 import { CalanderizedMeter } from '@data/models/calanderization';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { MonthlyAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';

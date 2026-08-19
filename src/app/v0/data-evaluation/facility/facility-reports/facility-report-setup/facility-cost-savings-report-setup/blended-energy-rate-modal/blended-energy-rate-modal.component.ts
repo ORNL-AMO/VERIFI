@@ -10,7 +10,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { convertConsumptionRate, getMeterCollectionUnit } from '@app/shared/sharedHelperFunctions';
+import { convertConsumptionRate, getMeterCollectionUnit } from '@shared/sharedHelperFunctions';
 
 @Component({
   selector: 'app-blended-energy-rate-modal',

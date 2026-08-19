@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { getGUID } from '@app/shared/sharedHelperFunctions';
+import { getGUID } from '@shared/sharedHelperFunctions';
 import { FacilityEnergyUsesSetupService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup.service';
 import { ActivatedRoute, Router } from '@angular/router';
 

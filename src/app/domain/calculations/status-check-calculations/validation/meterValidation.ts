@@ -1,5 +1,5 @@
 import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
-import { checkShowHeatCapacity, checkShowSiteToSource } from "@app/shared/sharedHelperFunctions";
+import { checkShowHeatCapacity, checkShowSiteToSource } from "@shared/sharedHelperFunctions";
 
 
 export function isMeterInvalid(meter: IdbUtilityMeter): boolean {

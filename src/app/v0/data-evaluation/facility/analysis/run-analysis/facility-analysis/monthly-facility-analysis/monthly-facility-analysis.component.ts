@@ -4,7 +4,7 @@ import { Component, OnInit, inject, Injector } from '@angular/core';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { Subscription } from 'rxjs';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 

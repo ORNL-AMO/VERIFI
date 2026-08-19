@@ -1,22 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AnalysisSummaryTableFilterComponent } from './analysis-summary-table-filter/analysis-summary-table-filter.component';
-import { AnnualAnalysisSummaryTableComponent } from './annual-analysis-summary-table/annual-analysis-summary-table.component';
-import { MonthlyAnalysisSummaryTableComponent } from './monthly-analysis-summary-table/monthly-analysis-summary-table.component';
+import { AnalysisSummaryTableFilterComponent } from '@shared/shared-analysis/analysis-summary-table-filter/analysis-summary-table-filter.component';
+import { AnnualAnalysisSummaryTableComponent } from '@shared/shared-analysis/annual-analysis-summary-table/annual-analysis-summary-table.component';
+import { MonthlyAnalysisSummaryTableComponent } from '@shared/shared-analysis/monthly-analysis-summary-table/monthly-analysis-summary-table.component';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
-import { AnnualAnalysisSummaryGraphComponent } from './annual-analysis-summary-graph/annual-analysis-summary-graph.component';
-import { MonthlyAnalysisSummaryGraphComponent } from './monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
-import { MonthlyAnalysisSummarySavingsGraphComponent } from './monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
-import { AnnualAnalysisGroupSavingsTableComponent } from './annual-analysis-group-savings-table/annual-analysis-group-savings-table.component';
-import { AnnualAnalysisGroupSavingsGraphComponent } from './annual-analysis-group-savings-graph/annual-analysis-group-savings-graph.component';
-import { AnalysisDataValidationTablesComponent } from './data-check/analysis-data-validation-tables/analysis-data-validation-tables.component';
-import { AnalysisFacilityReportComponent } from './data-check/analysis-facility-report/analysis-facility-report.component';
-import { AnalysisProblemsInformationComponent } from './data-check/analysis-problems-information/analysis-problems-information.component';
-import { RegressionModelDetailsTable } from './data-check/regression-model-details-table/regression-model-details-table.component';
-import { UserDefineModelDateRangePipe } from './data-check/regression-model-details-table/user-define-model-date-range.pipe';
-import { CalculatedReportYearWarningComponent } from './calculated-report-year-warning/calculated-report-year-warning.component';
+import { HelperPipesModule } from '@shared/helper-pipes/_helper-pipes.module';
+import { AnnualAnalysisSummaryGraphComponent } from '@shared/shared-analysis/annual-analysis-summary-graph/annual-analysis-summary-graph.component';
+import { MonthlyAnalysisSummaryGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from '@shared/shared-analysis/monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
+import { AnnualAnalysisGroupSavingsTableComponent } from '@shared/shared-analysis/annual-analysis-group-savings-table/annual-analysis-group-savings-table.component';
+import { AnnualAnalysisGroupSavingsGraphComponent } from '@shared/shared-analysis/annual-analysis-group-savings-graph/annual-analysis-group-savings-graph.component';
+import { AnalysisDataValidationTablesComponent } from '@shared/shared-analysis/data-check/analysis-data-validation-tables/analysis-data-validation-tables.component';
+import { AnalysisFacilityReportComponent } from '@shared/shared-analysis/data-check/analysis-facility-report/analysis-facility-report.component';
+import { AnalysisProblemsInformationComponent } from '@shared/shared-analysis/data-check/analysis-problems-information/analysis-problems-information.component';
+import { RegressionModelDetailsTable } from '@shared/shared-analysis/data-check/regression-model-details-table/regression-model-details-table.component';
+import { UserDefineModelDateRangePipe } from '@shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
+import { CalculatedReportYearWarningComponent } from '@shared/shared-analysis/calculated-report-year-warning/calculated-report-year-warning.component';
 import { RouterModule } from '@angular/router';
 
 

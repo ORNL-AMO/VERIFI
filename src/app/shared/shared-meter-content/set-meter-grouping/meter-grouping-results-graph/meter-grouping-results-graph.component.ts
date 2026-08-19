@@ -10,7 +10,7 @@ import * as _ from 'lodash';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { Subscription } from 'rxjs';
-import { MeterGroupingDataService } from '../meter-grouping-data.service';
+import { MeterGroupingDataService } from '@shared/shared-meter-content/set-meter-grouping/meter-grouping-data.service';
 
 @Component({
   selector: 'app-meter-grouping-results-graph',

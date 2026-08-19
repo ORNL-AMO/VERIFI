@@ -8,10 +8,10 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AssessmentReportVersion } from '@data/models/idbModels/account';
-import { RegressionModelsCalculator } from './regression-models-calculator';
+import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
-import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from './regression-model-recovery';
+import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'

@@ -4,7 +4,7 @@ import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, Weat
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-// import { DegreeDaysService } from '@app/shared/helper-services/degree-days.service';
+// import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
 
 @Component({
     selector: 'app-monthly-station-data',

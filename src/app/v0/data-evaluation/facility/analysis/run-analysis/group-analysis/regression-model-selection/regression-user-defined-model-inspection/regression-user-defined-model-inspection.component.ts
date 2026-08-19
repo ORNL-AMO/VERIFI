@@ -13,9 +13,9 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 import { getLatestCompleteAnalysisYear } from '@domain/calculations/shared-calculations/calculationsHelpers';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

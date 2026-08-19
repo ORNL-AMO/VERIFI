@@ -2,8 +2,8 @@ import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { PredictorStatistics } from '../predictorDataQualityStatistics';
-import { getDateFromPredictorData } from '../../dateHelperFunctions';
+import { PredictorStatistics } from '@shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
+import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-predictor-timeseries-graph',

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ChargeCostUnit, ConsumptionCostUnits, DemandCostUnits, MeterChargeType, OtherCostUnits } from './meterChargesOptions';
+import { ChargeCostUnit, ConsumptionCostUnits, DemandCostUnits, MeterChargeType, OtherCostUnits } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 
 @Pipe({
   name: 'chargesUnitOptions',

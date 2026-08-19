@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
-import { PptSlide } from '@app/shared/ppt-report/models/ppt-slide';
-import { FacilityGroupAnalysisItem } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { PptDocument } from '@v0/shared/ppt-report/models/ppt-document';
+import { PptSlide } from '@v0/shared/ppt-report/models/ppt-slide';
+import { FacilityGroupAnalysisItem } from '@shared/shared-analysis/calculations/regression-models.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { AnalysisReportSetup } from '@data/models/overview-report';

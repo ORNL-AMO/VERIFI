@@ -1,9 +1,9 @@
 import { inject, Injectable } from "@angular/core";
 import { IdbAccountReport } from "@data/models/idbModels/accountReport";
-import { ReportDocument, ReportMetaData } from "@app/shared/pdf-report/models/report-document.model";
-import { BaseSection } from "@app/shared/pdf-report/models/report-section.model";
+import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
+import { BaseSection } from "@v0/shared/pdf-report/models/report-section.model";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
-import { FacilityGroupAnalysisItem } from "@app/shared/shared-analysis/calculations/regression-models.service";
+import { FacilityGroupAnalysisItem } from "@shared/shared-analysis/calculations/regression-models.service";
 import { AnalysisReportSetup } from "@data/models/overview-report";
 import { FacilityModelingReportAdapter } from "@v0/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report.adapter";
 

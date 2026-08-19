@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Month, Months } from '../form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 
 @Pipe({
     name: 'monthLabel',

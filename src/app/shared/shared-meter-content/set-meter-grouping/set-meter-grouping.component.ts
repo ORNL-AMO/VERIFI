@@ -9,7 +9,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { MeterGroupingDataService } from './meter-grouping-data.service';
+import { MeterGroupingDataService } from '@shared/shared-meter-content/set-meter-grouping/meter-grouping-data.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { CalanderizedMeter } from '@data/models/calanderization';
 

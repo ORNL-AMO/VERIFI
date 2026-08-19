@@ -10,17 +10,17 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getDateFromMeterData } from '@app/shared/dateHelperFunctions';
-import { getStatistics, Statistics } from '@app/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
-import { getPredictorStatistics, PredictorStatistics } from '@app/shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
+import { getStatistics, Statistics } from '@shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getPredictorStatistics, PredictorStatistics } from '@shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
 import { FacilityDataQualityReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-data-quality-report-results/facility-data-quality-report.adapter';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
-import { MeterEnergyTimeseriesGraphComponent } from '@app/shared/shared-data-quality-report-meters/meter-energy-timeseries-graph/meter-energy-timeseries-graph.component';
-import { MeterCostTimeseriesGraphComponent } from '@app/shared/shared-data-quality-report-meters/meter-cost-timeseries-graph/meter-cost-timeseries-graph.component';
-import { MeterEnergyHistogramComponent } from '@app/shared/shared-data-quality-report-meters/meter-energy-histogram/meter-energy-histogram.component';
-import { MeterCostHistogramComponent } from '@app/shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
-import { PredictorTimeseriesGraphComponent } from '@app/shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
-import { PredictorHistogramGraphComponent } from '@app/shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
+import { MeterEnergyTimeseriesGraphComponent } from '@shared/shared-data-quality-report-meters/meter-energy-timeseries-graph/meter-energy-timeseries-graph.component';
+import { MeterCostTimeseriesGraphComponent } from '@shared/shared-data-quality-report-meters/meter-cost-timeseries-graph/meter-cost-timeseries-graph.component';
+import { MeterEnergyHistogramComponent } from '@shared/shared-data-quality-report-meters/meter-energy-histogram/meter-energy-histogram.component';
+import { MeterCostHistogramComponent } from '@shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
+import { PredictorTimeseriesGraphComponent } from '@shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
+import { PredictorHistogramGraphComponent } from '@shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
 
 @Component({
   selector: 'app-facility-data-quality-report-results',

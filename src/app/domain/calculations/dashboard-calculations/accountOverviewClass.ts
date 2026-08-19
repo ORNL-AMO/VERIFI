@@ -6,7 +6,7 @@ import { EnergySources, WaterSources } from "@data/models/constantsAndTypes";
 import { EmissionsResults } from "@data/models/eGridEmissions";
 import { getEmissionsTotalsFromArray } from "../shared-calculations/calculationsHelpers";
 import { SourceTotals } from "./sourceTotalsClass";
-import { WaterDischargeColors, WaterIntakeColors } from "src/app/shared/utilityColors";
+import { WaterDischargeColors, WaterIntakeColors } from "@shared/utilityColors";
 import { IdbAccount } from "@data/models/idbModels/account";
 import { IdbFacility } from "@data/models/idbModels/facility";
 

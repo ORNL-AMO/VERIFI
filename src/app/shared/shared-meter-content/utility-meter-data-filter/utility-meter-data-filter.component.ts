@@ -5,10 +5,10 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from '@data/models/meterDataFilter';
-import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
+import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { UtilityMeterDataService } from '@shared/shared-meter-content/utility-meter-data.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 
 @Component({

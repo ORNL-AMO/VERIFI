@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, QueryList, ViewChildren } from '@angular/core';
 import { AnalysisGroup, MonthlyAnalysisSummaryData, AnnualAnalysisSummary } from '@data/models/analysis';
-import { CopyTableService } from '../../helper-services/copy-table.service';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-annual-analysis-group-savings-table',

@@ -9,14 +9,14 @@ import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupFormService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group-form.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AllSources, MeterSource } from '@data/models/constantsAndTypes';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { getLatestYearWithData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 

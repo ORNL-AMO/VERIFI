@@ -1,4 +1,4 @@
-import { ChargeCostUnit, MeterChargeType } from "src/app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions";
+import { ChargeCostUnit, MeterChargeType } from "@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions";
 import { MeterPhase, MeterSource, WaterDischargeType, WaterIntakeType } from "../constantsAndTypes"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 

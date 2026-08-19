@@ -1,13 +1,13 @@
 
-import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFunctions";
+import { getIsEnergyMeter, getIsEnergyUnit } from "@shared/sharedHelperFunctions";
 import * as _ from 'lodash';
-import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
-import { StationaryOtherEnergyOptions } from "src/app/shared/fuel-options/stationaryOtherEnergyOptions";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
+import { StationaryOtherEnergyOptions } from "@shared/fuel-options/stationaryOtherEnergyOptions";
 import { IdbAccount } from "@data/models/idbModels/account";
 import { IdbFacility } from "@data/models/idbModels/facility";
 import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
 import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
-import { getDateFromMeterData, getEarliestMeterData, getLatestMeterData, getLatestMeterDataDate } from "src/app/shared/dateHelperFunctions";
+import { getDateFromMeterData, getEarliestMeterData, getLatestMeterData, getLatestMeterDataDate } from "@shared/dateHelperFunctions";
 import { CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
 import { ConvertValue } from "../conversions/convertValue";
 

@@ -5,11 +5,11 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { FacilityReportStatusCheck } from '@domain/calculations/status-check-calculations/facilityReportStatusCheck';
 
 @Component({

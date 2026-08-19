@@ -1,9 +1,9 @@
-import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
-import { AccountReportNamePipe } from './account-report-name-pipe';
-import { AnalysisCategoryPipe } from './analysis-category.pipe';
-import { AnalysisItemPipe } from './analysis-item.pipe';
-import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
-import { FacilityReportNamePipe } from './facility-report-name.pipe';
+import { AccountAnalysisNamePipe } from '@shared/helper-pipes/account-analysis-name.pipe';
+import { AccountReportNamePipe } from '@shared/helper-pipes/account-report-name-pipe';
+import { AnalysisCategoryPipe } from '@shared/helper-pipes/analysis-category.pipe';
+import { AnalysisItemPipe } from '@shared/helper-pipes/analysis-item.pipe';
+import { FacilityAnalysisNamePipe } from '@shared/helper-pipes/facility-analysis-name.pipe';
+import { FacilityReportNamePipe } from '@shared/helper-pipes/facility-report-name.pipe';
 
 describe('workspace entity lookup pipes', () => {
   const query = {

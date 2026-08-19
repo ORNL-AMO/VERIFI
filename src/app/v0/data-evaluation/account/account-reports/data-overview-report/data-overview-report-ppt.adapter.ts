@@ -2,20 +2,20 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { inject, Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { PptDocument } from '@app/shared/ppt-report/models/ppt-document';
-import { ChartSlide, getPptAxisSpec, ImageSlide, PptChartSeries, PptSlide, TableHeaderCell, TableSlide, TitleSlide } from '@app/shared/ppt-report/models/ppt-slide';
-import { CustomNumberPipe } from '@app/shared/helper-pipes/custom-number.pipe';
+import { PptDocument } from '@v0/shared/ppt-report/models/ppt-document';
+import { ChartSlide, getPptAxisSpec, ImageSlide, PptChartSeries, PptSlide, TableHeaderCell, TableSlide, TitleSlide } from '@v0/shared/ppt-report/models/ppt-slide';
+import { CustomNumberPipe } from '@shared/helper-pipes/custom-number.pipe';
 import { DataOverviewReportSetup } from '@data/models/overview-report';
 import { DataOverviewAccount, DataOverviewFacility } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report.component';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { NaicsDisplayPipe } from '@app/shared/helper-pipes/naics-display.pipe';
+import { NaicsDisplayPipe } from '@shared/helper-pipes/naics-display.pipe';
 import { MeterSource, EnergySources, WaterSources, AllSources } from '@data/models/constantsAndTypes';
-import { UtilityColors } from '@app/shared/utilityColors';
+import { UtilityColors } from '@shared/utilityColors';
 import { UseAndCost, IUseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
 import { AnnualSourceData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 import { YearMonthData } from '@data/models/dashboard';
-import { Month, Months } from '@app/shared/form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 import { AccountOverviewData, AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 
 export interface DataOverviewReportPptInput {

@@ -4,8 +4,8 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { Month, Months } from '@app/shared/form-data/months';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { Month, Months } from '@shared/form-data/months';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
     selector: 'app-facility-overview-report-setup',

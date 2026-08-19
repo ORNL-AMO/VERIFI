@@ -7,7 +7,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredictorDataDate } from '@app/shared/dateHelperFunctions';
+import { getDateFromPredictorData, getEarliestPredictorDataDate, getLatestPredictorDataDate } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-process-predictor-readings',

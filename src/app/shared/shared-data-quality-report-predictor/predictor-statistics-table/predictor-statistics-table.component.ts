@@ -1,8 +1,8 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { PredictorStatistics } from '../predictorDataQualityStatistics';
-import { CopyTableService } from '../../helper-services/copy-table.service';
+import { PredictorStatistics } from '@shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
   selector: 'app-predictor-statistics-table',

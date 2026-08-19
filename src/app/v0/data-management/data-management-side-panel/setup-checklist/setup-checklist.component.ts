@@ -4,7 +4,7 @@ import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from '@domain/calculations/status-check-calculations/statusCheckModels';
 

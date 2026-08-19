@@ -4,7 +4,7 @@ import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
-import { Month, Months } from '@app/shared/form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '@v0/data-evaluation/facility/visualization/visualization-state.service';
 import { MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';

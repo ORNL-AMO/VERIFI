@@ -36,7 +36,7 @@ import { FacilityReportsDbService } from '@data/indexedDB/facility-reports-db.se
 import { FacilityEnergyUseGroupsDbService } from '@data/indexedDB/facility-energy-use-groups-db.service';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { FacilityEnergyUseEquipmentDbService } from '@data/indexedDB/facility-energy-use-equipment-db.service';
-import { normalizeAnalysisGroupModelStorage } from '@app/shared/shared-analysis/calculations/regression-model-recovery';
+import { normalizeAnalysisGroupModelStorage } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { BackupFile } from '@data/models/backup-file';
 import { CURRENT_DATA_VERSION } from '@data/indexedDB/data-migrations/data-migration.models';
 import { PreparedBackupFile } from './backup-preparation.service';

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { PowerUnitOptions, UnitOption, VolumeLiquidOptions } from '@app/shared/unitOptions';
+import { PowerUnitOptions, UnitOption, VolumeLiquidOptions } from '@shared/unitOptions';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { getUnitOptionsForUtilityType } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/equipment-details-form/equipmentTypes';
 

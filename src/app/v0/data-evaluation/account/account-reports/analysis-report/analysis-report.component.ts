@@ -12,11 +12,11 @@ import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.servi
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ModelingExecutiveSummaryExcelWriter } from '@v0/data-evaluation/account/account-reports/excel-writer-services/modeling-executive-summary-excel-writer';
-import { FacilityGroupAnalysisItem, RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { AnalysisReportAdapter } from '@v0/data-evaluation/account/account-reports/analysis-report/analysis-report.adapter';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
-import { PptReportService } from '@app/shared/ppt-report/ppt-report.service';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
+import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
 import { AnalysisReportPptAdapter } from '@v0/data-evaluation/account/account-reports/analysis-report/analysis-report-ppt.adapter';
 
 @Component({

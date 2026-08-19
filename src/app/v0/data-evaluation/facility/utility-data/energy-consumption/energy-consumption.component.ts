@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 
 interface MetersListItem {
   meter: IdbUtilityMeter;

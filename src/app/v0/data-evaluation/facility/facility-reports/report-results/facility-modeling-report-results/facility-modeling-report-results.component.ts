@@ -6,11 +6,11 @@ import { Subscription } from 'rxjs';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { ExportReportPdfService } from '@app/shared/pdf-report/services/export-report-pdf.service';
-import { FacilityGroupAnalysisItem, RegressionModelsService } from '@app/shared/shared-analysis/calculations/regression-models.service';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
+import { FacilityGroupAnalysisItem, RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 import { FacilityModelingReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report.adapter';
 import { FacilityModelingReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-modeling-report-results/facility-modeling-report-ppt.adapter';
-import { PptReportService } from '@app/shared/ppt-report/ppt-report.service';
+import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
 
 @Component({
   selector: 'app-facility-modeling-report-results',

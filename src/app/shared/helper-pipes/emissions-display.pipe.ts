@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
-import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 
 @Pipe({

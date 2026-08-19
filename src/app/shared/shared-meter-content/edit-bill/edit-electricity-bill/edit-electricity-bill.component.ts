@@ -3,7 +3,7 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EmissionsResults } from '@data/models/eGridEmissions';
 import { getEmissions } from '@domain/calculations/emissions-calculations/emissions';
-import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';

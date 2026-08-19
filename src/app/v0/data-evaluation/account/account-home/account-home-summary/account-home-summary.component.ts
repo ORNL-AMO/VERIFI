@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { ExportToExcelTemplateV3Service } from '@app/shared/helper-services/export-to-excel-template-v3.service';
+import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 

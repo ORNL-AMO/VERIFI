@@ -11,7 +11,7 @@ import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predict
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getCountryCode, getState, getZip } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { SubRegionData } from '@data/models/eGridEmissions';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 
 
 @Injectable({

@@ -6,7 +6,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
 import { IdbAccount } from '@data/models/idbModels/account';

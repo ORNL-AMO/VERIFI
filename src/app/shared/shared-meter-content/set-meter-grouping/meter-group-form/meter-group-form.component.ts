@@ -9,12 +9,12 @@ import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
+import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
-import { RouterGuardService } from 'src/app/shared/shared-router-guard-modal/router-guard-service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-meter-group-form',

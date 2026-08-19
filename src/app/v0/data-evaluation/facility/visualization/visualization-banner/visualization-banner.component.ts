@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service'
+import { SharedDataService } from '@shared/helper-services/shared-data.service'
 
 @Component({
     selector: 'app-visualization-banner',

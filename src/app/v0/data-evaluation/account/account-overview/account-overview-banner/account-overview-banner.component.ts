@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';

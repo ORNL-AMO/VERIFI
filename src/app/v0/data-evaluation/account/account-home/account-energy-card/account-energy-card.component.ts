@@ -2,7 +2,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, inject, Signal } from '@angular/core';
 import { AccountHomeService } from '@v0/data-evaluation/account/account-home/account-home.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';

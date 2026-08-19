@@ -1,4 +1,4 @@
-import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 import { MeterPhase } from "../constantsAndTypes";
 import { IdbAccount } from "./account";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";

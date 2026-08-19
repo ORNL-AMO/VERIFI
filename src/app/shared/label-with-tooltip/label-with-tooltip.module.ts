@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LabelWithTooltipComponent } from './label-with-tooltip.component';
+import { LabelWithTooltipComponent } from '@shared/label-with-tooltip/label-with-tooltip.component';
 
 
 

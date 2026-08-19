@@ -5,7 +5,7 @@ import { AccountOverviewService } from '@v0/data-evaluation/account/account-over
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
-import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';

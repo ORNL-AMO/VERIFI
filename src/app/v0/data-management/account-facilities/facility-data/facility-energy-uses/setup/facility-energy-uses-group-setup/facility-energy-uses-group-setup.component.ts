@@ -13,7 +13,7 @@ import { ToastNotificationsService } from '@v0/core-components/toast-notificatio
 import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { FacilityEnergyUsesSetupService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup.service';
-import { RouterGuardService } from '@app/shared/shared-router-guard-modal/router-guard-service';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({
   selector: 'app-facility-energy-uses-group-setup',

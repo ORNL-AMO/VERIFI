@@ -3,7 +3,7 @@ import { Component, computed, DestroyRef, inject, OnInit, Signal } from '@angula
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AnnualAccountAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '@v0/data-evaluation/account/account-analysis/account-analysis.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -12,7 +12,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { runWorker } from '@platform/web-workers/run-worker';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 
 @Component({

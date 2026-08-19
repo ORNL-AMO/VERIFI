@@ -1,0 +1,107 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, ViewChild, inject } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
+import { IUseAndCost, UseAndCost } from '@domain/calculations/dashboard-calculations/useAndCostClass';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { YearMonthData } from '@data/models/dashboard';
+import { DataOverviewReportSetup } from '@data/models/overview-report';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { DataOverviewFacilityReportSettings, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
+import { MetersOverviewStackedLineChartComponent } from '@v0/shared/data-overview/meters-overview-stacked-line-chart/meters-overview-stacked-line-chart.component';
+import { MeterUsageDonutComponent } from '@v0/shared/data-overview/meter-usage-donut/meter-usage-donut.component';
+import { MonthlyUtilityUsageLineChartComponent } from '@v0/shared/data-overview/monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';
+import { UtilitiesUsageChartComponent } from '@v0/shared/data-overview/utilities-usage-chart/utilities-usage-chart.component';
+
+@Component({
+  selector: 'app-facility-section-report',
+  templateUrl: './facility-section-report.component.html',
+  styleUrls: ['./facility-section-report.component.css'],
+  standalone: false
+})
+export class FacilitySectionReportComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  dataType: 'energyUse' | 'cost' | 'water' | 'emissions';
+  @Input()
+  facility: IdbFacility;
+  @Input()
+  calanderizedMeters: Array<CalanderizedMeter>;
+  @Input()
+  yearMonthData: Array<YearMonthData>;
+  @Input()
+  annualSourceData: Array<AnnualSourceData>;
+  @Input()
+  facilityOverviewMeters: Array<FacilityOverviewMeter>;
+  @Input()
+  facilityOverviewData: FacilityOverviewData;
+  @Input()
+  sourcesUseAndCost: Array<UseAndCost>;
+  @Input()
+  useAndCostTotal: {
+    end: IUseAndCost;
+    average: IUseAndCost;
+    previousYear: IUseAndCost;
+  };
+  @Input()
+  dateRange: { startDate: Date, endDate: Date };
+  @Input()
+  previousYear: Date;
+  @Input()
+  inFacilityReport: boolean;
+
+  sectionOptions: DataOverviewReportSetup | DataOverviewFacilityReportSettings;
+  waterUnit: string;
+  energyUnit: string;
+  printSub: Subscription;
+  print: boolean;
+
+  @ViewChild('meterStackedLineChart') meterStackedLineChart !: MetersOverviewStackedLineChartComponent;
+  @ViewChild('meterBarChart') meterBarChart !: MeterUsageDonutComponent;
+  @ViewChild('annualBarChart') annualBarChart !: UtilitiesUsageChartComponent;
+  @ViewChild('monthlyUsageLineChart') monthlyUsageLineChart !: MonthlyUtilityUsageLineChartComponent;
+
+  constructor(
+    private dataEvaluationService: DataEvaluationService
+  ) {
+  }
+
+  ngOnInit() {
+    if (!this.inFacilityReport) {
+      let selectedReport: IdbAccountReport = this.accountWorkspaceStore.selectedAccountReport();
+      this.sectionOptions = selectedReport.dataOverviewReportSetup;
+    } else {
+      let selectedReport: IdbFacilityReport = this.accountWorkspaceStore.selectedFacilityReport();
+      this.sectionOptions = selectedReport.dataOverviewReportSettings;
+    }
+    this.waterUnit = this.facility.volumeLiquidUnit;
+    this.energyUnit = this.facility.energyUnit;
+
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
+      this.print = print;
+    });
+  }
+
+  async getMeterStackedLineChartImage(): Promise<string> {
+    return this.meterStackedLineChart ? await this.meterStackedLineChart.getChartAsBase64Image() : '';
+  }
+
+  async getMeterBarChartImage(): Promise<string> {
+    return this.meterBarChart ? await this.meterBarChart.getChartAsBase64Image() : '';
+  }
+
+  async getAnnualBarChartImage(): Promise<string> {
+    return this.annualBarChart ? await this.annualBarChart.getChartAsBase64Image() : '';
+  }
+
+  async getMonthlyUsageLineChartImage(): Promise<string> {
+    return this.monthlyUsageLineChart ? await this.monthlyUsageLineChart.getChartAsBase64Image() : '';
+  }
+
+  ngOnDestroy() {
+    this.printSub.unsubscribe();
+  }
+
+}

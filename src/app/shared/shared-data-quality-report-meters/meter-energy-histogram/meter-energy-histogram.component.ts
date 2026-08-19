@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getConsumptionData, getUnitFromMeter } from '../meterDataQualityStatistics';
+import { getConsumptionData, getUnitFromMeter } from '@shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 
 @Component({
   selector: 'app-meter-energy-histogram',

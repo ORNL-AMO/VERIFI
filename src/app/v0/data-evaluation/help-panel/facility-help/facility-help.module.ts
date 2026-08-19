@@ -10,7 +10,7 @@ import { FacilityAnalysisSetupHelpComponent } from '@v0/data-evaluation/help-pan
 import { GroupAnalysisHelpComponent } from '@v0/data-evaluation/help-panel/facility-help/facility-analysis-help/group-analysis-help/group-analysis-help.component';
 import { FacilityAnalysisResultsHelpComponent } from '@v0/data-evaluation/help-panel/facility-help/facility-analysis-help/facility-analysis-results-help/facility-analysis-results-help.component';
 import { AccountAnalysisInFacilityHelpComponent } from '@v0/data-evaluation/help-panel/facility-help/facility-analysis-help/account-analysis-in-facility-help/account-analysis-in-facility-help.component';
-import { SharedHelpContentModule } from '@app/shared/shared-help-content/shared-help-content.module';
+import { SharedHelpContentModule } from '@v0/shared/shared-help-content/shared-help-content.module';
 import { FacilityReportsHelpComponent } from '@v0/data-evaluation/help-panel/facility-help/facility-reports-help/facility-reports-help.component';
 import { FacilityReportSetupHelpComponent } from '@v0/data-evaluation/help-panel/facility-help/facility-reports-help/facility-report-setup-help/facility-report-setup-help.component';
 import { FacilityDataOverviewReportHelpComponent } from '@v0/data-evaluation/help-panel/facility-help/facility-reports-help/facility-data-overview-report-help/facility-data-overview-report-help.component';

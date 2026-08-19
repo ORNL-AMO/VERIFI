@@ -5,8 +5,8 @@ import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predict
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { MeterChargeType } from '@app/shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
-import { normalizeAnalysisGroupModelStorage } from '@app/shared/shared-analysis/calculations/regression-model-recovery';
+import { MeterChargeType } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
+import { normalizeAnalysisGroupModelStorage } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import {
   DataMigration,
   MigrationCollectionName,

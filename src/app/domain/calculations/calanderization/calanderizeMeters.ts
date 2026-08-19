@@ -1,8 +1,8 @@
 import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
-import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFunctions";
+import { getIsEnergyMeter, getIsEnergyUnit } from "@shared/sharedHelperFunctions";
 import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
-import { Months } from "src/app/shared/form-data/months";
+import { Months } from "@shared/form-data/months";
 import { daysBetweenDates, getConsumptionUnit, getCurrentMonthsReadings, getMonthsArray, getNextMonthsBill, getPreviousMonthsBill, getUnitFromMeter } from "./calanderizationHelpers";
 import { convertMeterData } from "../conversions/convertMeterData";
 import { EmissionsResults, SubregionEmissions } from "@data/models/eGridEmissions";
@@ -13,7 +13,7 @@ import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
 import { IdbCustomFuel } from "@data/models/idbModels/customFuel";
 import { IdbCustomGWP } from "@data/models/idbModels/customGWP";
-import { getDateFromMeterData } from "src/app/shared/dateHelperFunctions";
+import { getDateFromMeterData } from "@shared/dateHelperFunctions";
 
 
 export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMeterData: Array<IdbUtilityMeterData>, accountOrFacility: IdbAccount | IdbFacility, monthDisplayShort: boolean, calanderizationOptions: CalanderizationOptions,

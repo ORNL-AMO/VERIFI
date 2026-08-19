@@ -7,8 +7,8 @@ import { filter, map, startWith } from 'rxjs';
 import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-account-analysis-banner',

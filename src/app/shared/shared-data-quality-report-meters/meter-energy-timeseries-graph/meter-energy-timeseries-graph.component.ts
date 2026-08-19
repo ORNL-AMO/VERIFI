@@ -2,8 +2,8 @@ import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getConsumptionData, getUnitFromMeter, Statistics } from '../meterDataQualityStatistics';
-import { getDateFromMeterData } from '../../dateHelperFunctions';
+import { getConsumptionData, getUnitFromMeter, Statistics } from '@shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-energy-timeseries-graph',

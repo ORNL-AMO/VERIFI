@@ -6,7 +6,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { AnalysisService } from '@v0/data-evaluation/facility/analysis/analysis.service';
-import { SharedDataService } from '@app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -15,7 +15,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
 

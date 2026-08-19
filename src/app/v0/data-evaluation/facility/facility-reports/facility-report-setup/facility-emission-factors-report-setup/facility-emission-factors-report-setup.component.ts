@@ -6,8 +6,8 @@ import { ReportCommandHandler } from '@data/account-workspace/handlers/report-co
 import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbFacilityReport, EmissionFactorsReportSettings } from '@data/models/idbModels/facilityReport';
-import { Month, Months } from '@app/shared/form-data/months';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { Month, Months } from '@shared/form-data/months';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-emission-factors-report-setup',

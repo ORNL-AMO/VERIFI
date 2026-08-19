@@ -10,8 +10,8 @@ import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { AnalysisGroup, AnalysisGroupPredictorVariable } from "@data/models/analysis";
 import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
 import { IdbAccountAnalysisItem } from "@data/models/idbModels/accountAnalysisItem";
-import { getDateFromPredictorData } from "src/app/shared/dateHelperFunctions";
-import { getIsEnergyMeter } from "src/app/shared/sharedHelperFunctions";
+import { getDateFromPredictorData } from "@shared/dateHelperFunctions";
+import { getIsEnergyMeter } from "@shared/sharedHelperFunctions";
 
 export function getMonthlyStartAndEndDate(
     facilityOrAccount: IdbFacility | IdbAccount,

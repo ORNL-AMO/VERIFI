@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { NAICS } from 'src/app/shared/form-data/naics-data';
+import { NAICS } from '@shared/form-data/naics-data';
 
 @Pipe({
     name: 'naicsList',

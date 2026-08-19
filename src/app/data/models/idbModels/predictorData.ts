@@ -1,4 +1,4 @@
-import { getDateFromPredictorData } from "src/app/shared/dateHelperFunctions";
+import { getDateFromPredictorData } from "@shared/dateHelperFunctions";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbPredictor } from "./predictor";
 

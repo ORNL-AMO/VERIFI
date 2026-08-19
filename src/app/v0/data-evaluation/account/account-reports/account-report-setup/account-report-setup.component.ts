@@ -5,14 +5,14 @@ import { FormGroup } from '@angular/forms';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
-import { Month, Months } from '@app/shared/form-data/months';
-import { CalanderizationService } from '@app/shared/helper-services/calanderization.service';
+import { Month, Months } from '@shared/form-data/months';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CalanderizedMeter } from '@data/models/calanderization';
 import { getAllYearsWithDataAccount, getLatestDataDate, getYearsWithFullDataAccount } from '@domain/calculations/shared-calculations/calculationsHelpers';
-import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountReportStatusCheck } from '@domain/calculations/status-check-calculations/accountReportStatusCheck';
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { BetterPlantsSummary } from '@data/models/overview-report';
-import { getNAICS } from '@app/shared/form-data/naics-data';
+import { getNAICS } from '@shared/form-data/naics-data';
 import * as _ from 'lodash';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

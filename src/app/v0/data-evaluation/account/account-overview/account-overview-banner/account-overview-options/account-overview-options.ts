@@ -4,7 +4,7 @@ import { Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { Month, Months } from '@app/shared/form-data/months';
+import { Month, Months } from '@shared/form-data/months';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 import * as _ from 'lodash';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';

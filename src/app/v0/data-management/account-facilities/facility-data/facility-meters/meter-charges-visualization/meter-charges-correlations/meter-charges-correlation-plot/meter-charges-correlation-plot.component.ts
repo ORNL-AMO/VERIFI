@@ -6,8 +6,8 @@ import * as _ from 'lodash';
 import * as jStat from 'jstat';
 import { JStatRegressionModel } from '@data/models/analysis';
 import { IdbUtilityMeterData, MeterDataCharge } from '@data/models/idbModels/utilityMeterData';
-import { getIsEnergyMeter } from '@app/shared/sharedHelperFunctions';
-import { getDateFromMeterData } from '@app/shared/dateHelperFunctions';
+import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
   selector: 'app-meter-charges-correlation-plot',

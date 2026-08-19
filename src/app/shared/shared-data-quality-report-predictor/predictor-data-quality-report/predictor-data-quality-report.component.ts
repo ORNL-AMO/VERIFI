@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { getPredictorStatistics, PredictorStatistics } from '../predictorDataQualityStatistics';
+import { getPredictorStatistics, PredictorStatistics } from '@shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
 import { Router } from '@angular/router';
 import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
 

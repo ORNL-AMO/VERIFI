@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getStatistics, Statistics } from './meterDataQualityStatistics';
+import { getStatistics, Statistics } from '@shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 
 @Pipe({
   name: 'meterDataQualityStatus',

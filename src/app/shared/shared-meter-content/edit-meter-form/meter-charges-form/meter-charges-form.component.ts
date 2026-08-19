@@ -1,7 +1,7 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
-import { EditMeterFormService } from '../edit-meter-form.service';
-import { getChargeTypes } from './meterChargesOptions';
+import { EditMeterFormService } from '@shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { getChargeTypes } from '@shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 import { MeterSource } from '@data/models/constantsAndTypes';
 
 @Component({
