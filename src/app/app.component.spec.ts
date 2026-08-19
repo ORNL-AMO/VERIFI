@@ -3,8 +3,8 @@ import { NgModule, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterOutlet } from '@angular/router';
 import { of } from 'rxjs';
-import { AnalyticsService } from './analytics/analytics.service';
-import { AccountWorkspaceStore } from './account-workspace/account-workspace.store';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
 import { AppComponent } from './app.component';
 

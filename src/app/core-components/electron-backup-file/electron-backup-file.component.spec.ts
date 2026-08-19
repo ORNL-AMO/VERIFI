@@ -4,19 +4,19 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
-import { PreparedBackupFile } from 'src/app/backup/backup-preparation.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
-import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
+import { PreparedBackupFile } from '@data/backup/backup-preparation.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { LoadingService } from '../loading/loading.service';
-import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ElectronBackupFileComponent } from './electron-backup-file.component';
-import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
-import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';
-import { ElectronService } from 'src/app/electron/electron.service';
-import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
+import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
+import { ElectronService } from '@platform/electron/electron.service';
+import { DeleteDataService } from '@data/indexedDB/delete-data.service';
 
 @NgModule({
   declarations: [ElectronBackupFileComponent],

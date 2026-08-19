@@ -1,14 +1,15 @@
 :host {
   display: block;
   height: 100%;
+  min-height: 0;
 }
 
 .existing-ux-shell {
-  min-height: 100%;
+  min-height: 0;
 }
 
 .content {
-  background-image: url('src/assets/images/industrial-skyline.svg');
+  background-image: url('../../../../assets/images/industrial-skyline.svg');
   background-position: bottom;
   background-repeat: no-repeat;
   background-size: 100%;
@@ -18,7 +19,6 @@
 }
 
 .content.data-management {
-  /* background-color: #373A36; */
   background-color: #005776;
 }
 

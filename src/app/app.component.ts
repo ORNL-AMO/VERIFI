@@ -1,10 +1,10 @@
 import { Component, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { AnalyticsService } from './analytics/analytics.service';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
 import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
-import { WorkspaceStatus } from './account-workspace/account-workspace.models';
-import { AccountWorkspaceStore } from './account-workspace/account-workspace.store';
+import { WorkspaceStatus } from '@data/account-workspace/account-workspace.models';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { environment } from 'src/environments/environment';
 
 @Component({

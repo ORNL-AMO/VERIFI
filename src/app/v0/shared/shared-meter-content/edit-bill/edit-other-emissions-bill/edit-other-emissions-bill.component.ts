@@ -1,0 +1,131 @@
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { EmissionsResults } from '@data/models/eGridEmissions';
+import { getEmissions } from '@domain/calculations/emissions-calculations/emissions';
+import { EGridService } from '@shared/helper-services/e-grid.service';
+import * as _ from 'lodash';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
+
+@Component({
+  selector: 'app-edit-other-emissions-bill',
+  templateUrl: './edit-other-emissions-bill.component.html',
+  styleUrls: ['./edit-other-emissions-bill.component.css'],
+  standalone: false
+})
+export class EditOtherEmissionsBillComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  editMeterData: IdbUtilityMeterData;
+  @Input()
+  addOrEdit: string;
+  @Input()
+  meterDataForm: FormGroup;
+  @Input()
+  editMeter: IdbUtilityMeter;
+  @Input()
+  invalidDate: boolean;
+
+
+  volumeUnit: string;
+  fugitiveEmissions: number = 0;
+  processEmissions: number = 0;
+  totalLabel: 'Total Refrigerant Lost' | 'Total Process Emissions';
+  displayFugitiveTableModal: boolean = false;
+  showCopyLast: boolean;
+  constructor(
+    private eGridService: EGridService
+  ) { }
+
+  ngOnInit(): void {
+    this.setTotalEmissions();
+    this.setShowCopyLast();
+
+  }
+
+  ngOnChanges() {
+    this.volumeUnit = this.editMeter.startingUnit;
+    this.checkDate();
+    this.setTotalEmissions();
+    this.setTotalLabel();
+  }
+
+  calculateTotalEnergyUse() {
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity;
+    this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
+    this.setTotalEmissions();
+  }
+
+  checkDate() {
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
+    if (this.addOrEdit == 'add') {
+      //new meter entry should have any year/month combo of existing meter reading
+      this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
+    } else {
+      //edit meter needs to allow year/month combo of the meter being edited
+      let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
+      if (checkSameDate(changeDate, this.editMeterData)) {
+        this.invalidDate = false;
+      } else {
+        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
+      }
+    }
+  }
+
+  setTotalEmissions() {
+    if (this.meterDataForm.controls.totalVolume.value) {
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let account: IdbAccount = this.accountWorkspaceStore.account();
+      //meed to use total volume for fugitive/process emissions
+      let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
+        this.meterDataForm.controls.totalEnergyUse.value,
+        this.editMeter.energyUnit,
+        new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
+        false, [facility], this.eGridService.co2Emissions, customFuels,
+        this.meterDataForm.controls.totalVolume.value, undefined, undefined, undefined, account.assessmentReportVersion, customGWPs);
+      this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
+      this.processEmissions = emissionsValues.processEmissions;
+    } else {
+      this.fugitiveEmissions = 0;
+      this.processEmissions = 0;
+    }
+  }
+
+  setTotalLabel() {
+    if (this.editMeter.scope == 5) {
+      this.totalLabel = 'Total Refrigerant Lost';
+    } else if (this.editMeter.scope == 6) {
+      this.totalLabel = 'Total Process Emissions';
+    }
+  }
+
+  showFugitiveEmissionsTable() {
+    this.displayFugitiveTableModal = true;
+  }
+
+  hideFugitiveTableModal() {
+    this.displayFugitiveTableModal = false;
+  }
+
+  setShowCopyLast() {
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
+    this.showCopyLast = (allSelectedMeterData.length != 0);
+  }
+
+  copyLastReading() {
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.editMeter.guid);
+    allSelectedMeterData = _.orderBy(allSelectedMeterData, 'readDate');
+    let lastReading: IdbUtilityMeterData = allSelectedMeterData[allSelectedMeterData.length - 1];
+    this.meterDataForm.controls.totalVolume.patchValue(lastReading.totalVolume);
+    this.setTotalEmissions();
+  }
+}

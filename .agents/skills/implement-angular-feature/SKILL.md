@@ -6,10 +6,10 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 # Implement an Angular feature
 
 1. Read [UI architecture](../../../ARCHITECTURE.md#ui-architecture) and the [Implementer](../../../docs/agents/personas.md#implementer) mode. Add the [Designer](../../../docs/agents/personas.md#designer) mode for user-facing work and [startup and application shell](../../../ARCHITECTURE.md#startup-and-application-shell) for routing or initialization.
-2. Trace the current workflow through `src/app/routing/`, its feature module, component, services, and shared dependencies. Inspect at least one neighboring screen that solves a similar problem.
+2. Trace the current workflow through `src/app/routing/`, its feature module, component, services, and shared dependencies. Inspect at least one neighboring screen that solves a similar problem. For legacy UI, treat `src/app/v0/shared/` and `@v0/shared/*` as the reusable UI layer; use `src/app/shared/` and `@shared/*` only for version-neutral helpers and contracts.
 3. Define the behavior and state transitions before editing. For UI work, cover loading, empty, validation, error, disabled, and success states plus responsive and accessible behavior.
 4. Keep orchestration in components and reusable behavior in services, helpers, pipes, or shared components according to local precedent. Avoid moving domain calculations into templates or presentation components.
-5. Reuse Bootstrap, ng-bootstrap, Font Awesome, shared components, and existing style layers. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
+5. Reuse Bootstrap, ng-bootstrap, Font Awesome, the appropriate shared layer, and existing style layers. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
 6. Add meaningful behavior tests. Replace or remove creation-only tests that do not verify the changed behavior.
 
 ## Validate

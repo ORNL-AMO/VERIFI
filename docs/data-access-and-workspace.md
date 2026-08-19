@@ -40,7 +40,7 @@ Inject the workspace store and expose its signals directly or derive new signals
 
 ```ts
 import { Component, computed, inject } from '@angular/core';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from 'src/app/data/account-workspace/account-workspace.store';
 
 @Component({
   selector: 'app-meter-summary',
@@ -272,7 +272,7 @@ Automatic backups observe committed revisions. Therefore:
 
 ## Backup workflows and services
 
-Backup code is centered under [`src/app/backup/`](../src/app/backup). Use the coordinators there as workflow boundaries instead of assembling or restoring backup files from components.
+Backup code is centered under [`src/app/data/backup/`](../src/app/data/backup). Use the coordinators there as workflow boundaries instead of assembling or restoring backup files from components.
 
 The two main flows are:
 

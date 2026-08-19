@@ -1,0 +1,157 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { EmissionsResults } from '@data/models/eGridEmissions';
+import { getEmissions, getZeroEmissionsResults } from '@domain/calculations/emissions-calculations/emissions';
+import { EGridService } from '@shared/helper-services/e-grid.service';
+import { checkShowEmissionsOutputRate } from '@shared/sharedHelperFunctions';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccount } from '@data/models/idbModels/account';
+
+@Component({
+  selector: 'app-edit-utility-bill',
+  templateUrl: './edit-utility-bill.component.html',
+  styleUrls: ['./edit-utility-bill.component.css'],
+  standalone: false
+})
+export class EditUtilityBillComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  editMeterData: IdbUtilityMeterData;
+  @Input()
+  addOrEdit: string;
+  @Input()
+  meterDataForm: FormGroup;
+  @Input()
+  editMeter: IdbUtilityMeter;
+  @Input()
+  displayVolumeInput: boolean;
+  @Input()
+  displayEnergyUse: boolean;
+  @Input()
+  invalidDate: boolean;
+  @Input()
+  displayHeatCapacity: boolean;
+
+  energyUnit: string;
+  source: MeterSource;
+  volumeUnit: string;
+  emissionsResults: EmissionsResults;
+  showEmissions: boolean;
+  showStationaryEmissions: boolean;
+  showScope2OtherEmissions: boolean;
+  usingMeterHeatCapacity: boolean;
+  isBiofuel: boolean;
+  constructor(
+    private eGridService: EGridService
+  ) { }
+
+  ngOnInit(): void {
+    this.setIsBiofuel();
+    this.setShowEmissions();
+    this.setTotalEmissions();
+    this.setUsingMeterHeatCapacity();
+  }
+
+  ngOnChanges() {
+    this.source = this.editMeter.source;
+    this.energyUnit = this.editMeter.energyUnit;
+    this.volumeUnit = this.editMeter.startingUnit;
+    this.checkDate();
+    this.setShowEmissions();
+    this.setTotalEmissions();
+  }
+
+  setShowEmissions() {
+    let account: IdbAccount = this.accountWorkspaceStore.account();
+    if (account.displayEmissions) {
+      this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
+      this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
+      this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
+    } else {
+      this.showEmissions = false;
+      this.showStationaryEmissions = false;
+      this.showScope2OtherEmissions = false;
+    }
+  }
+
+  calculateTotalEnergyUse() {
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.meterDataForm.controls.heatCapacity.value;
+    this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
+    this.setTotalEmissions();
+  }
+
+  checkDate() {
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
+    if (this.addOrEdit == 'add') {
+      //new meter entry should have any year/month combo of existing meter reading
+      this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
+    } else {
+      //edit meter needs to allow year/month combo of the meter being edited
+      let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
+      if (checkSameDate(changeDate, this.editMeterData)) {
+        this.invalidDate = false;
+      } else {
+        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
+      }
+    }
+  }
+
+  setTotalEmissions() {
+    if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let account: IdbAccount = this.accountWorkspaceStore.account();
+      //meed to use total volume for fugitive/process emissions
+      this.emissionsResults = getEmissions(this.editMeter,
+        this.meterDataForm.controls.totalEnergyUse.value,
+        this.editMeter.energyUnit,
+        new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
+        false, [facility], this.eGridService.co2Emissions, customFuels,
+        this.meterDataForm.controls.totalVolume.value, undefined, undefined,
+        this.meterDataForm.controls.heatCapacity.value,
+        account.assessmentReportVersion, []);
+    } else {
+      this.emissionsResults = getZeroEmissionsResults();
+    }
+  }
+
+  editHeatCapacity() {
+    this.meterDataForm.controls.heatCapacity.enable();
+    this.usingMeterHeatCapacity = false;
+    this.calculateTotalEnergyUse();
+  }
+
+  useMeterHeatCapacity() {
+    this.meterDataForm.controls.heatCapacity.patchValue(this.editMeter.heatCapacity);
+    this.meterDataForm.controls.heatCapacity.disable();
+    this.usingMeterHeatCapacity = true;
+    this.calculateTotalEnergyUse();
+  }
+
+  setUsingMeterHeatCapacity() {
+    this.usingMeterHeatCapacity = (this.meterDataForm.controls.heatCapacity.value == this.editMeter.heatCapacity);
+    if (!this.usingMeterHeatCapacity) {
+      this.meterDataForm.controls.heatCapacity.enable();
+    }
+  }
+
+  setIsBiofuel() {
+    if (this.editMeter.source != 'Natural Gas') {
+      let allFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let fuels: Array<FuelTypeOption> = getFuelTypeOptions(this.editMeter.source, this.editMeter.phase, allFuels, this.editMeter.scope, undefined, undefined)
+      let meterFuel: FuelTypeOption = fuels.find(fuel => {
+        return fuel.value == this.editMeter.fuel;
+      });
+      this.isBiofuel = meterFuel?.isBiofuel;
+    } else {
+      this.isBiofuel = false;
+    }
+  }
+}

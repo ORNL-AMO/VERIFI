@@ -1,0 +1,39 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+
+interface PredictorListItem {
+  predictor: IdbPredictor;
+  predictorStatusCheck: PredictorStatusCheck;
+}
+
+@Component({
+  selector: 'app-predictors',
+  templateUrl: './predictors.component.html',
+  styleUrl: './predictors.component.css',
+  standalone: false
+})
+export class PredictorsComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+
+  private predictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+
+  predictorList: Signal<Array<PredictorListItem>> = computed(() => {
+    const predictors = this.predictors();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!predictors || !facilityStatusCheck) return [];
+    return predictors.map(predictor => {
+      return {
+        predictor,
+        predictorStatusCheck: facilityStatusCheck.predictorsStatusChecks.find(psc => psc.predictorId === predictor.guid)
+      };
+    });
+  });
+
+}

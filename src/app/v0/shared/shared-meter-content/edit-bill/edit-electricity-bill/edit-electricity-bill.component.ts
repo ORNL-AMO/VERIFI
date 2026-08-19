@@ -1,0 +1,83 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, OnInit, inject } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { EmissionsResults } from '@data/models/eGridEmissions';
+import { getEmissions } from '@domain/calculations/emissions-calculations/emissions';
+import { EGridService } from '@shared/helper-services/e-grid.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { checkMeterReadingExistForDate, checkSameDate, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { IdbAccount } from '@data/models/idbModels/account';
+
+@Component({
+  selector: 'app-edit-electricity-bill',
+  templateUrl: './edit-electricity-bill.component.html',
+  styleUrls: ['./edit-electricity-bill.component.css'],
+  standalone: false
+})
+export class EditElectricityBillComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  editMeterData: IdbUtilityMeterData;
+  @Input()
+  addOrEdit: 'add' | 'edit';
+  @Input()
+  meterDataForm: FormGroup;
+  @Input()
+  editMeter: IdbUtilityMeter;
+  @Input()
+  invalidDate: boolean;
+
+  energyUnit: string;
+  totalLocationEmissions: number = 0;
+  totalMarketEmissions: number = 0;
+  RECs: number = 0;
+  account: IdbAccount;
+  constructor(
+    private eGridService: EGridService
+  ) { }
+
+  ngOnInit(): void {
+    this.setTotalEmissions();
+    this.account = this.accountWorkspaceStore.account();
+  }
+
+  ngOnChanges() {
+    this.energyUnit = this.editMeter.startingUnit;
+    this.checkDate();
+    this.setTotalEmissions();
+  }
+
+  checkDate() {
+    let accountMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.meterData()];
+    if (this.addOrEdit == 'add') {
+      //new meter entry should have any year/month combo of existing meter reading
+      this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
+    } else {
+      //edit meter needs to allow year/month combo of the meter being edited
+      let changeDate: Date = new Date(this.meterDataForm.controls.readDate.value);
+      if (checkSameDate(changeDate, this.editMeterData)) {
+        this.invalidDate = false;
+      } else {
+        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
+      }
+    }
+  }
+
+  setTotalEmissions() {
+    if (this.meterDataForm.controls.totalEnergyUse.value && this.account && this.account.displayEmissions) {
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, this.account.assessmentReportVersion, []);
+      this.totalLocationEmissions = emissionsValues.locationElectricityEmissions;
+      this.totalMarketEmissions = emissionsValues.marketElectricityEmissions;
+      this.RECs = emissionsValues.RECs;
+    } else {
+      this.totalLocationEmissions = 0;
+      this.totalMarketEmissions = 0;
+      this.RECs = 0;
+    }
+  }
+
+}

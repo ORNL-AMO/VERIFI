@@ -1,0 +1,20 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, inject, Signal } from '@angular/core';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+
+@Component({
+  selector: 'app-facility-status-check',
+  standalone: false,
+  templateUrl: './facility-status-check.component.html',
+  styleUrl: './facility-status-check.component.css',
+})
+export class FacilityStatusCheckComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+}

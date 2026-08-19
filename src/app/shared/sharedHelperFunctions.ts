@@ -1,13 +1,13 @@
-import { ConvertValue } from "../calculations/conversions/convertValue";
-import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
-import { DetailDegreeDay, WeatherDataSelection } from "../models/degreeDays";
-import { IdbAnalysisItem } from "../models/idbModels/analysisItem";
-import { IdbFacility } from "../models/idbModels/facility";
-import { IdbFacilityEnergyUseEquipment } from "../models/idbModels/facilityEnergyUseEquipment";
-import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
-import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
-import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
-import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "./unitOptions";
+import { ConvertValue } from "@domain/calculations/conversions/convertValue";
+import { MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
+import { DetailDegreeDay, WeatherDataSelection } from "@data/models/degreeDays";
+import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { IdbFacilityEnergyUseEquipment } from "@data/models/idbModels/facilityEnergyUseEquipment";
+import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
+import { StationaryOtherEnergyOptions } from "@shared/fuel-options/stationaryOtherEnergyOptions";
+import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "@shared/unitOptions";
 import * as _ from 'lodash';
 
 export function getGUID(): string {
