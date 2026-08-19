@@ -13,7 +13,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { ElectronService } from '@platform/electron/electron.service';

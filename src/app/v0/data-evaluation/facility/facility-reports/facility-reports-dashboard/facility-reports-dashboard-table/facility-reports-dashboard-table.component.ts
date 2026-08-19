@@ -8,7 +8,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';

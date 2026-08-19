@@ -11,7 +11,7 @@ import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergy
 import { FacilityEnergyUseGroupFormService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/facility-energy-use-group/facility-energy-use-group-form.service';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AllSources, MeterSource } from '@data/models/constantsAndTypes';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';

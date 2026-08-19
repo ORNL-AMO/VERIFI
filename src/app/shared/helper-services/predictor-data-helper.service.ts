@@ -4,7 +4,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { checkSameMonth } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonth } from '@shared/meter-date-helpers';
 import { getDateFromMeterData, getDateFromPredictorData, getEarliestMeterData, getLatestMeterData, getLatestPredictorData } from '@shared/dateHelperFunctions';
 
 @Injectable({

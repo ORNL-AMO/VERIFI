@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { BackupFile } from '@data/models/backup-file';
 
 @Injectable({

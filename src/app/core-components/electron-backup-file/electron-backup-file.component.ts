@@ -6,7 +6,7 @@ import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electr
 import { ElectronService } from '@platform/electron/electron.service';
 import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { LoadingService } from '../loading/loading.service';
 import { DeleteDataService } from '@data/indexedDB/delete-data.service';
 import { BackupFile } from '@data/models/backup-file';

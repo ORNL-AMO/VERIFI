@@ -6,7 +6,7 @@ import { LoadingService } from '@app/core-components/loading/loading.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { Router } from '@angular/router';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';

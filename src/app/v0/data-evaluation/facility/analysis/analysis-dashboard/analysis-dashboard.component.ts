@@ -6,7 +6,7 @@ import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysi
 import { Component, OnInit, inject, Injector } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AnalysisCategory } from '@data/models/analysis';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { IdbAccount } from '@data/models/idbModels/account';

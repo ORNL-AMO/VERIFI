@@ -3,7 +3,7 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';

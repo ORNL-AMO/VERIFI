@@ -7,7 +7,7 @@ import { addAccountBackupMessages, addFacilityBackupMessages } from '@data/backu
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { Router } from '@angular/router';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { DeleteDataService } from '@data/indexedDB/delete-data.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

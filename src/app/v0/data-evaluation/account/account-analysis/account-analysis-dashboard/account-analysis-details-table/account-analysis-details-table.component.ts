@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 
 import { getYearsWithFullDataAccount } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';

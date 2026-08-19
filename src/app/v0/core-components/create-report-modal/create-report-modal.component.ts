@@ -8,7 +8,7 @@ import { ReportCommandHandler } from '@data/account-workspace/handlers/report-co
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

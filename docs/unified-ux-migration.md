@@ -6,11 +6,17 @@ Use this guide with issue #2559 when planning or implementing new UI/UX work. It
 
 - `src/app/v0/` contains the current production UI. Keep legacy routes and v0-only presentation behavior here.
 - `src/app/v1/` is reserved for the future opt-in production experience. Add it on the `unified-ux` branch after the develop foundation lands.
-- `src/app/shared/` contains UI and helper code that is not version-specific; import it with `@shared/*`.
+- `src/app/shared/` contains version-neutral helpers and contracts; import it with `@shared/*`.
 - `src/app/v0/shared/` contains legacy reusable UI that is shared only inside v0; import it with `@v0/shared/*`.
 - `src/app/data/` contains shared data contracts: account workspace, IndexedDB, backups, persisted models, and migrations.
 - `src/app/domain/` contains deterministic calculations and domain helpers.
 - `src/app/platform/` contains Electron services, Web Worker wrappers/contracts, analytics, and other runtime integration boundaries.
+
+Current boundary examples:
+
+- Root shared keeps form, fuel, vehicle, date/helper service, router-guard, notification-state, and analysis-calculation contracts.
+- v0 shared owns legacy helper pipes, spinners, labels, table/dropdown helpers, meter content, data-quality displays, analysis presentation widgets, report widgets, settings/help UI, and similar presentation bundles.
+- Meter charge option types/constants live in `src/app/data/models/meter-charges-options.ts` because they are used by persisted models, migrations, exports, and v0 forms.
 
 ## Protected Contracts
 
@@ -44,6 +50,7 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 - Keep `/p1` prototype routes and `/v1` production routes out of `develop`; add them on `unified-ux`.
 - Prefer aliases for cross-boundary imports: `@app/*`, `@shared/*`, `@v0/*`, `@data/*`, `@domain/*`, and `@platform/*`.
 - Do not import from `@v0/*` in root shared, data, domain, platform, or future v1 code.
+- Use `@v0/shared/*` for legacy reusable UI even when only v0 imports it today; use `@shared/*` only when v1 can safely depend on the code without inheriting v0 presentation behavior.
 
 ## Validation
 

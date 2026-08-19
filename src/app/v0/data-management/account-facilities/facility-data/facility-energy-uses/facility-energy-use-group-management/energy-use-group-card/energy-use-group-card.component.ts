@@ -4,7 +4,7 @@ import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy
 import { Component, computed, inject, Input, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

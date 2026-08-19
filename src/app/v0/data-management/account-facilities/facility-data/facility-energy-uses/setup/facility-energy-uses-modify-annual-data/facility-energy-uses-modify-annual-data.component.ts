@@ -12,7 +12,7 @@ import { EnergyEquipmentOperatingConditionsData, EquipmentUtilityDataEnergyUse, 
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import * as _ from 'lodash';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({

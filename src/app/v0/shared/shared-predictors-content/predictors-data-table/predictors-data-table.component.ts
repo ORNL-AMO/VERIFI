@@ -7,7 +7,7 @@ import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WeatherStation } from '@data/models/degreeDays';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { IdbFacility } from '@data/models/idbModels/facility';

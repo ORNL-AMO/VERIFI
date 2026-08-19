@@ -2,7 +2,7 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 

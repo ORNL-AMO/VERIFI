@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, OnInit, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, firstValueFrom, from, map, of, switchAll, take } from 'rxjs';

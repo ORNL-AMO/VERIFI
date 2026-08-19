@@ -6,7 +6,7 @@ import { Component, computed, inject, Signal, signal, WritableSignal } from '@an
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';

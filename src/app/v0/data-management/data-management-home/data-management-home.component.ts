@@ -7,7 +7,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { WeatherPredictorManagementService } from '@v0/weather-data/weather-predictor-management.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { STATUS_CHECK_OPTIONS, StatusCheckAction } from '@domain/calculations/status-check-calculations/statusCheckModels';

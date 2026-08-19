@@ -9,7 +9,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { FacilityEnergyUsesSetupService } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/setup/facility-energy-uses-setup.service';

@@ -8,7 +8,7 @@ import { ImportBackupModalService } from '@v0/core-components/import-backup-moda
 import { Subscription } from 'rxjs';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import * as _ from 'lodash';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 
 @Component({

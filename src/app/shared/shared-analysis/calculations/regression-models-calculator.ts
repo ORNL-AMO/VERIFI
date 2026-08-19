@@ -7,7 +7,7 @@ import { getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate } from '@domai
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { checkSameMonth, checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonth, checkSameMonthPredictorData } from '@shared/meter-date-helpers';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 
 /**

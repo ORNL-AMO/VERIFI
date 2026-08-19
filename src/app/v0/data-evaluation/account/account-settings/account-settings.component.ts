@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { Subscription, skip, take } from 'rxjs';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';

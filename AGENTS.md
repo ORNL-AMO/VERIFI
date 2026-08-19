@@ -19,7 +19,7 @@ Do not copy volatile package versions, scripts, database versions, or implementa
 
 VERIFI's Angular renderer ships for web and Electron. Use the [task context index](docs/agents/context-index.md) to choose entrypoints, minimum documentation, skill, mode, and first validation tier. Prefer established neighboring code over a new pattern.
 
-The current production UI lives under `src/app/v0/`. Use `@v0/shared/*` for legacy-only shared UI and `@shared/*` for version-neutral shared code. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md) and add workflow notes just-in-time rather than building an exhaustive feature register.
+The current production UI lives under `src/app/v0/`. Use `@v0/shared/*` for legacy-only shared UI and `@shared/*` for version-neutral shared helpers and contracts. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. Do not import `@v0/*` from root shared, data, domain, platform, or future v1 code. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md) and add workflow notes just-in-time rather than building an exhaustive feature register.
 
 ## Context discipline
 
@@ -71,7 +71,7 @@ Use the mode and discoverable skill selected by the [task context index](docs/ag
 - Keep calculations deterministic and verify every consumer when changing a shared result, unit, payload, or report field.
 - Treat Web Worker messages as contracts: update payloads, results, errors, call sites, and browser tests together.
 - Keep Electron `contextIsolation` intact. Expose only explicit IPC channels through `preload.js`; never expose unrestricted Node or `ipcRenderer` access.
-- Reuse shared UI, Bootstrap/ng-bootstrap conventions, and existing style layers. Cover loading, empty, validation, error, disabled, and success states.
+- Reuse the correct shared layer, Bootstrap/ng-bootstrap conventions, and existing style layers. Legacy reusable UI belongs behind `@v0/shared/*`; only version-neutral helpers and contracts belong behind `@shared/*`. Cover loading, empty, validation, error, disabled, and success states.
 - Check responsive behavior, keyboard access, focus, labels, contrast, screen-reader semantics, printing, charts, and Electron window constraints when relevant.
 - Do not edit `node_modules/`, `dist/`, or `output/`. Treat spreadsheets, images, and other binary assets under `src/assets/` as deliberate source artifacts.
 - Do not add secrets, credentials, private deployment details, or machine-specific paths to documentation or source.

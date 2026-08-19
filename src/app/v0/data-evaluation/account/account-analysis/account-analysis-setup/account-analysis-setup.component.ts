@@ -14,7 +14,7 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { AnalysisType } from '@data/models/analysis';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from '@data/models/idbModels/predictor';

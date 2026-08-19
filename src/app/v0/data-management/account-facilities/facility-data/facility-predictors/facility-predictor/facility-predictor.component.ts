@@ -5,7 +5,7 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { DetailDegreeDay } from '@data/models/degreeDays';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictor } from '@data/models/idbModels/predictor';

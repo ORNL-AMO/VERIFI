@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WeatherDataSelection } from '@data/models/degreeDays';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { IdbFacility } from '@data/models/idbModels/facility';

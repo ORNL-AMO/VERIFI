@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, map, Observable, of, switchAll, take } from 'rxjs';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';

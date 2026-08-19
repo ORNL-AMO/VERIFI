@@ -7,7 +7,7 @@ import { ConvertValue } from "../conversions/convertValue";
 import { IdbFacility } from "@data/models/idbModels/facility";
 import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { GroupMonthlyAnalysisRollupValues } from './groupMonthlyAnalysisRollupValuesClass';
-import { checkSameMonth } from "@v0/data-management/data-management-import/import-services/upload-helper-functions";
+import { checkSameMonth } from "@shared/meter-date-helpers";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results

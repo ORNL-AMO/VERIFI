@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
 import { getMonthlyDataFromYear } from '@v0/weather-data/weatherDataCalculations';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 // import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
 
 @Component({

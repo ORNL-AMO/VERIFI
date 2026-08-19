@@ -1,4 +1,3 @@
-import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import { AgreementType, AgreementTypes } from "@data/models/agreementType";
 import { AllSources, MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
 import { ScopeOption, ScopeOptions } from "@data/models/scopeOption";
@@ -8,6 +7,8 @@ import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 import { getFuelTypeOptions } from "@shared/fuel-options/getFuelTypeOptions";
 import { getStartingUnitOptions } from "@shared/sharedHelperFunctions";
 import { UnitOption } from "@shared/unitOptions";
+
+export { checkSameMonth, checkSameMonthPredictorData } from '@shared/meter-date-helpers';
 
 export function getCountryCode(country: string): string {
     if (country) {
@@ -100,14 +101,6 @@ export function checkImportCellNumber(value: any): number {
 
 export function checkSameDay(date1: Date, date2: Date): boolean {
     return date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth() && date1.getDate() == date2.getDate();
-}
-
-export function checkSameMonth(date1: Date, date2: Date): boolean {
-    return date1.getFullYear() == date2.getFullYear() && date1.getMonth() == date2.getMonth();
-}
-
-export function checkSameMonthPredictorData(predictorData: IdbPredictorData, date: Date): boolean {
-    return predictorData.year == date.getFullYear() && predictorData.month == (date.getMonth() + 1);
 }
 
 export function getScope(formScope: string): number {

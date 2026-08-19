@@ -5,7 +5,7 @@ import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-worksp
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { BackupPreparationService } from '@data/backup/backup-preparation.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ElectronBackupsDbService } from '@data/indexedDB/electron-backups-db.service';
 import { AutomaticBackupsService } from './automatic-backups.service';
 import { ElectronBackupFileGateway } from './electron-backup-file.gateway';

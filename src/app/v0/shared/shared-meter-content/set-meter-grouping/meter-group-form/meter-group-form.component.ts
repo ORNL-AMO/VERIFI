@@ -13,7 +13,7 @@ import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
 import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 
 @Component({

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
 import { AnalyticsService } from '@platform/analytics/analytics.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';

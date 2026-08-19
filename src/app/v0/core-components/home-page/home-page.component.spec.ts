@@ -9,7 +9,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { ImportBackupModalService } from '@v0/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { HomePageComponent } from '@v0/core-components/home-page/home-page.component';
 import { Meta, Title } from '@angular/platform-browser';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';

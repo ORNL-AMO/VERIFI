@@ -5,7 +5,7 @@ import { Component, Input, inject, computed, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler, PredictorDataBatchChanges } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { DetailDegreeDay } from '@data/models/degreeDays';

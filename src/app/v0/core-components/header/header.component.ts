@@ -13,7 +13,7 @@ import { ImportBackupModalService } from '@v0/core-components/import-backup-moda
 import { environment } from 'src/environments/environment';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ElectronService } from '@platform/electron/electron.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

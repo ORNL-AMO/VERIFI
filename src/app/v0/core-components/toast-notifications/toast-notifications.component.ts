@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { ToastNotification, ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotification, ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { Subscription } from 'rxjs';
 import * as confetti from 'canvas-confetti';
 

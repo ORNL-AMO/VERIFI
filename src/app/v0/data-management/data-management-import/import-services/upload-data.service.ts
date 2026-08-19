@@ -29,7 +29,7 @@ import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predict
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '@v0/shared/shared-meter-content/utility-meter-data.service';

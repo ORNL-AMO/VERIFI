@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, computed, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from '@v0/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';

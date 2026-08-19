@@ -90,7 +90,7 @@ Test both an empty database and representative older data. Consider JSON backup 
 
 ## Calculations, Workers, and reports
 
-Pure TypeScript calculations live under [`src/app/domain/calculations`](src/app/domain/calculations). Major groups cover calendarization, analyses, conversions, emissions, energy footprints, dashboards, savings, performance reports, and validation/status checks. Shared analysis services in `src/app/shared/shared-analysis/` orchestrate some calculations for components.
+Pure TypeScript calculations live under [`src/app/domain/calculations`](src/app/domain/calculations). Major groups cover calendarization, analyses, conversions, emissions, energy footprints, dashboards, savings, performance reports, and validation/status checks. Analysis calculation helpers that still sit outside `domain` live under [`src/app/shared/shared-analysis/calculations`](src/app/shared/shared-analysis/calculations); v0-only analysis tables, graphs, and validation display components live under `src/app/v0/shared/shared-analysis/`.
 
 Compute-heavy operations use workers under [`src/app/platform/web-workers`](src/app/platform/web-workers). [`run-worker.ts`](src/app/platform/web-workers/run-worker.ts) wraps a Worker in an RxJS observable, posts one structured-cloneable payload, emits one result or error, and terminates the worker during teardown. Each worker imports calculation code and owns its request/result contract.
 
@@ -139,7 +139,9 @@ Preserve these invariants:
 
 ## UI architecture
 
-VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Legacy v0 feature components live under `src/app/v0/` and own their local templates and styles. Reusable UI that is not version-specific lives under `src/app/shared/` and should be imported with `@shared/*`; v0-only reusable UI lives under `src/app/v0/shared/` and should be imported with `@v0/shared/*`. Global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
+VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Legacy v0 feature components live under `src/app/v0/` and own their local templates and styles. Version-neutral helpers and contracts live under `src/app/shared/` and should be imported with `@shared/*`; v0-only reusable UI lives under `src/app/v0/shared/` and should be imported with `@v0/shared/*`. Current v0 shared UI includes legacy helper pipes, spinners, table/dropdown helpers, labels, meter content, data-quality displays, analysis presentation widgets, report widgets, settings/help UI, and similar presentation bundles. Do not import from `@v0/*` in root shared, data, domain, platform, or future v1 code. Global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
+
+Shared notification state lives under [`src/app/shared/notifications`](src/app/shared/notifications), while v0 owns the visual toast host under `src/app/v0/core-components/toast-notifications/`. Meter charge option types and constants live under [`src/app/data/models/meter-charges-options.ts`](src/app/data/models/meter-charges-options.ts) so persisted models, migrations, exports, and v0 forms use the same contract without importing legacy UI.
 
 The current production UI is treated as v0 and is lazy-loaded through `src/app/v0/`. The root `AppComponent` owns startup, lifecycle, root routing, and app-wide runtime overlays only; v0 owns the legacy header, legacy route outlet, and legacy UI modals. Future v1 production UI should use a separate lazy-loaded route module rather than adding v0/v1 conditionals to legacy components.
 
