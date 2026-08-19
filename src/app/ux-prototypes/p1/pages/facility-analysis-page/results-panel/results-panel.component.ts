@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { AnalysisGroup } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 
 @Component({
   selector: 'app-p1-facility-analysis-results-panel',

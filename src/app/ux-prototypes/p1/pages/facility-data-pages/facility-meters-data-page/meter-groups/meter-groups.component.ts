@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, Output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFunctions';
 import {
   buildP1MeterGroupBuckets,

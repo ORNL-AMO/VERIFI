@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { P1FacilityAnalysisRow, getP1AnalysisCategoryLabel, getP1AnalysisTypeLabel } from '../facility-analysis-workbench.helpers';
 
 @Component({

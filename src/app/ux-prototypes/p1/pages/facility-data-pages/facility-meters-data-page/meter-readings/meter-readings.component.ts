@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, computed, signal } from '@angular/core';
-import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { readingDateValue } from '../facility-meters-workbench.helpers';
 
 @Component({

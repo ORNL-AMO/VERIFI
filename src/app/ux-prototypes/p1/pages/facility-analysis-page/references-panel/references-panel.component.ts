@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-p1-facility-analysis-references-panel',

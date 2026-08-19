@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { P1NavGroup, P1NavItem } from '../../../p1.models';
 import { P1RouteFacade } from '../../../p1-route.facade';
 // import { accountNavCounts, toneForNavCount } from '../section-nav-content';

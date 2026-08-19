@@ -1,8 +1,8 @@
-import { MeterStatusCheck } from 'src/app/calculations/status-check-calculations/meterStatusCheck';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { MeterSource } from '@data/models/constantsAndTypes';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 
 export type P1MeterWorkbenchTab = 'setup' | 'readings' | 'monthlyData';
 export type P1MetersHomeView = 'meters' | 'analysis-groups';

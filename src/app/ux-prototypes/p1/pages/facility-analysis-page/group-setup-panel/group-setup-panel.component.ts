@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisType } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisType } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { cloneP1AnalysisWithGroup, getP1AnalysisTypeLabel } from '../facility-analysis-workbench.helpers';
 
 @Component({

@@ -1,18 +1,18 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
-import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { getYearsWithFullDataAnalysis } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { EnergyUnitOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { AnalysisGroup } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AnalysisGroup } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import {
   P1FacilityAnalysisStep,
   P1FacilityAnalysisStepId,
