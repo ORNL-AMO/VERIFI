@@ -12,6 +12,7 @@ For historical context on the first P1 walkthrough, see the [P1 prototype walkth
 
 - Each prototype uses a temporary top-level route named `/pN`, such as `/p1`, `/p2`, and `/p3`.
 - Add prototype routes under `src/app/ux-prototypes/` and register them through the prototype route export used by `src/app/routing/app-routing.module.ts`.
+- Keep prototypes separate from production v1 routes. Production unified workspace work belongs under `src/app/v1/` and uses `/v1`.
 - Keep existing production routes unchanged. Do not move, rename, or redirect `/welcome`, `/data-evaluation`, `/data-management/:id`, `/manage-accounts`, `/feedback`, or `/privacy` as part of prototype-only work.
 
 ## Data

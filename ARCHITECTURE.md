@@ -35,6 +35,8 @@ Account creation and import flows activate their persisted account through the l
 
 Top-level routing is defined in [`src/app/routing/app-routing.module.ts`](src/app/routing/app-routing.module.ts):
 
+- **v1 unified workspace** is the opt-in production redesign mounted at `/v1`.
+- **v0 legacy shell** owns the current production header, legacy global modals, toast placement, and default route outlet while keeping existing public URLs stable.
 - **Data management** handles account setup, facilities, meters, predictor data, imports, energy-use setup, and custom factors.
 - **Data evaluation** handles account and facility dashboards, visualizations, analyses, and reports.
 - **Weather data** provides station selection and annual or monthly observations.
@@ -139,6 +141,8 @@ Preserve these invariants:
 ## UI architecture
 
 VERIFI uses Bootstrap, ng-bootstrap, Font Awesome, Angular templates, and Plotly. Feature components own their local templates and styles; reusable UI lives under `src/app/shared/`; global style layers live under [`src/styles`](src/styles) and cover tables, forms, navigation, reports, printing, Plotly, and other cross-feature patterns.
+
+The unified UI/UX migration keeps the current experience as v0 and adds the new opt-in experience under `/v1`. v0 and v1 should have separate UI components and route shells. Shared data services, models, calculations, backups, imports, exports, Web Workers, and Electron boundaries remain outside versioned UI folders unless a dedicated compatibility issue changes those contracts. See the [Unified UI/UX migration guide](docs/unified-ux/migration-guide.md) for the lightweight migration decision process.
 
 Use neighboring screens as the primary visual reference. Reuse shared components and existing classes before adding global rules. UI work should account for:
 
