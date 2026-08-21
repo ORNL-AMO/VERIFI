@@ -80,7 +80,7 @@ export class FacilityReportAnalysisSelectionComponent {
 
     let tableItems: Array<AnalysisItemListRow> = [];
     filtered.forEach(item => {
-      const statusCheck = facilityStatus.analysisStatusChecks.find(check => check.analysisItem.guid === item.guid);
+      const statusCheck = facilityStatus?.analysisStatusChecks.find(check => check.analysisItem.guid === item.guid);
       tableItems.push({
         analysisItem: item,
         statusCheck: statusCheck
@@ -156,11 +156,11 @@ export class FacilityReportAnalysisSelectionComponent {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     await this.commandBoundary.execute(
       {
-        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: this.selectedAnalysisItem.guid, label: 'Save Facility Analysis',
+        entityKind: 'facilityAnalysis', changeKind: 'update', entityGuid: selectedItem.guid, label: 'Save Facility Analysis',
         publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityAnalyses', upsert: [value] }] }) }
       },
-      () => this.analysisHandler.updateFacilityAnalysis(this.selectedAnalysisItem, activeAccountGuid)
+      () => this.analysisHandler.updateFacilityAnalysis(selectedItem, activeAccountGuid)
     );
-    this.accountWorkspaceService.selectFacilityAnalysis(this.selectedAnalysisItem?.guid);
+    this.accountWorkspaceService.selectFacilityAnalysis(selectedItem?.guid);
   }
 }

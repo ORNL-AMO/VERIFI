@@ -26,9 +26,16 @@ export class AccountReportAnalysisSelectionComponent {
   private readonly router = inject(Router);
   private readonly calanderizationService = inject(CalanderizationService);
   private readonly accountStatusCheckService = inject(AccountStatusCheckService);
+  
+  private reportFormSignal = signal<FormGroup | null>(null);
 
   @Input({ required: true })
-  reportForm: FormGroup;
+  set reportForm(value: FormGroup) {
+    this.reportFormSignal.set(value);
+  }
+  get reportForm(): FormGroup {
+    return this.reportFormSignal() as FormGroup;
+  }
 
   calendarizedMeters = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
   selectedBaselineYear: WritableSignal<number | 'All'> = signal('All');
@@ -69,7 +76,7 @@ export class AccountReportAnalysisSelectionComponent {
 
   constructor() {
     effect(() => {
-      const form = this.reportForm;
+      const form = this.reportFormSignal();
       const filtered = this.filteredAnalysisItems();
       const selectedItemId = form?.controls?.['analysisItemId']?.value;
 
