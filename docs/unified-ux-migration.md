@@ -1,6 +1,6 @@
 # Unified UI/UX Migration Guide
 
-Use this guide with issue #2559 when planning or implementing new UI/UX work. It is intentionally lightweight: do not create an exhaustive feature register before building. Add workflow notes only when a workflow is actively planned, rebuilt, bridged, deferred, combined, or retired.
+Use this guide with issue #2559 when planning or implementing new UI/UX work. It is intentionally lightweight: do not create an exhaustive feature register before building. Add workflow notes only when a workflow is actively planned, rebuilt, bridged, deferred, combined, or retired. Use the [current-state notes guide](unified-ux-current-state.md) with issue #2558 when a v1 workflow needs existing v0 behavior documented.
 
 ## Source Layout
 
@@ -41,6 +41,8 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 - **Parity:** Name the user-visible behaviors that must match v0.
 - **Shared contracts:** List any data, domain, file, Worker, Electron, or report contracts touched.
 - **Tests:** Name the focused unit, browser, Electron, or manual checks required.
+
+If the workflow needs current-state detail, add a short current-state note using the template in the [current-state notes guide](unified-ux-current-state.md). Do not create a full application inventory as a prerequisite for v1 work.
 
 ## Implementation Rules
 
