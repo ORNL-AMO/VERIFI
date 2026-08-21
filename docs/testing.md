@@ -68,7 +68,7 @@ Instantiate a class directly when the subject is ordinary TypeScript and Angular
 
 Use Angular `TestBed` when the test needs dependency injection, a template, DOM bindings, lifecycle behavior, forms, providers, signals created with `inject()`, routing, or another Angular facility. Test components through the rendered DOM and user actions when those are the public surface.
 
-The executable service example in [`data-management.service.spec.ts`](../src/app/data-management/data-management.service.spec.ts) uses direct construction with a mocked storage boundary. The component example in [`shared-router-guard-modal.component.spec.ts`](../src/app/shared/shared-router-guard-modal/shared-router-guard-modal.component.spec.ts) uses TestBed because template bindings, signals, and clicks are part of the behavior.
+The executable service example in [`data-management.service.spec.ts`](../src/app/v0/data-management/data-management.service.spec.ts) uses direct construction with a mocked storage boundary. The component example in [`shared-router-guard-modal.component.spec.ts`](../src/app/shared/shared-router-guard-modal/shared-router-guard-modal.component.spec.ts) uses TestBed because template bindings, signals, and clicks are part of the behavior.
 
 ### Mocks and real collaborators
 
@@ -85,7 +85,7 @@ The executable service example in [`data-management.service.spec.ts`](../src/app
 - Use table-driven tests when the same behavior must hold across units, dates, validation states, or boundary values.
 - Do not generate large randomized datasets unless the seed is fixed and the failure reports the input.
 
-Representative executable patterns already exist for a [pure calculation](../src/app/calculations/shared-calculations/calculationsHelpers.spec.ts), a [mocked persistence service](../src/app/indexedDB/analysis-db.service.spec.ts), [real IndexedDB](../src/app/indexedDB/indexed-db.browser.spec.ts), a [mocked Worker lifecycle](../src/app/web-workers/run-worker.spec.ts), and a [native Worker exchange](../src/app/web-workers/run-worker.browser.spec.ts).
+Representative executable patterns already exist for a [pure calculation](../src/app/domain/calculations/shared-calculations/calculationsHelpers.spec.ts), a [mocked persistence service](../src/app/data/indexedDB/analysis-db.service.spec.ts), [real IndexedDB](../src/app/data/indexedDB/indexed-db.browser.spec.ts), a [mocked Worker lifecycle](../src/app/platform/web-workers/run-worker.spec.ts), and a [native Worker exchange](../src/app/platform/web-workers/run-worker.browser.spec.ts).
 
 ## Asynchronous behavior and isolation
 
@@ -117,9 +117,9 @@ Keep the fast suite below 60 seconds and the browser suite below 120 seconds in 
 
 `npm run test:coverage` runs both ordinary and browser specs in headless Chromium and produces text and HTML coverage for production TypeScript under:
 
-- `src/app/calculations/`
-- `src/app/indexedDB/`
-- `src/app/web-workers/`
+- `src/app/domain/calculations/`
+- `src/app/data/indexedDB/`
+- `src/app/platform/web-workers/`
 
 The native Worker smoke spec remains in the required browser suite but is excluded from the coverage target because coverage instrumentation cannot currently serve its Worker fixture reliably. Worker lifecycle logic is still included in the coverage report, and `npm run test:browser:ci` remains the source of truth for the native Worker boundary.
 

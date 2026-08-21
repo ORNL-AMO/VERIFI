@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AccountdbService } from '../indexedDB/account-db.service';
-import { ElectronService } from '../electron/electron.service';
+import { AccountdbService } from '@data/indexedDB/account-db.service';
+import { ElectronService } from '@platform/electron/electron.service';
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseResetService {

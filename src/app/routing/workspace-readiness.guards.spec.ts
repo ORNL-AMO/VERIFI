@@ -2,11 +2,11 @@ import { EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, convertToParamMap, Router, RouterStateSnapshot } from '@angular/router';
 import { vi } from 'vitest';
-import { AccountWorkspaceService } from '../account-workspace/account-workspace.service';
-import { AccountWorkspaceSnapshot } from '../account-workspace/account-workspace.models';
-import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
-import { ApplicationLifecycleService } from '../application-lifecycle/application-lifecycle.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
+import { FacilitydbService } from '@data/indexedDB/facility-db.service';
 import {
   accountGuidReadyGuard,
   accountReadyGuard,

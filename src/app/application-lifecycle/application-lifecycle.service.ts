@@ -1,21 +1,21 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AccountWorkspaceService } from '../account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
-import { WorkspaceSelectionStorageService } from '../account-workspace/workspace-selection-storage.service';
-import { AutomaticBackupsService } from '../electron/automatic-backups.service';
-import { ElectronService } from '../electron/electron.service';
-import { AccountdbService } from '../indexedDB/account-db.service';
-import { AnalysisSelectionRepairService } from '../indexedDB/analysis-selection-repair.service';
-import { ApplicationInstanceDbService } from '../indexedDB/application-instance-db.service';
-import { CustomEmissionsDbService } from '../indexedDB/custom-emissions-db.service';
-import { DataMigrationRunnerService } from '../indexedDB/data-migrations/data-migration-runner.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IndexedDbTransactionService } from '../indexedDB/indexed-db-transaction.service';
-import { IdbAccount } from '../models/idbModels/account';
-import { EGridService } from '../shared/helper-services/e-grid.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceSelectionStorageService } from '@data/account-workspace/workspace-selection-storage.service';
+import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { ElectronService } from '@platform/electron/electron.service';
+import { AccountdbService } from '@data/indexedDB/account-db.service';
+import { AnalysisSelectionRepairService } from '@data/indexedDB/analysis-selection-repair.service';
+import { ApplicationInstanceDbService } from '@data/indexedDB/application-instance-db.service';
+import { CustomEmissionsDbService } from '@data/indexedDB/custom-emissions-db.service';
+import { DataMigrationRunnerService } from '@data/indexedDB/data-migrations/data-migration-runner.service';
+import { FacilitydbService } from '@data/indexedDB/facility-db.service';
+import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { EGridService } from '@shared/helper-services/e-grid.service';
 import { AppStartupState, AppStartupStep } from './application-lifecycle.models';
-import { ApplicationInstanceData } from '../models/idbModels/applicationInstanceData';
+import { ApplicationInstanceData } from '@data/models/idbModels/applicationInstanceData';
 
 const INITIAL_STATE: AppStartupState = { status: 'idle' };
 

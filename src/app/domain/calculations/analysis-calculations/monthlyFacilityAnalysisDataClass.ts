@@ -1,0 +1,115 @@
+import * as _ from 'lodash';
+import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
+import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { ConvertValue } from "../conversions/convertValue";
+import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalculatedValuesClassSummation";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { IdbPredictorData } from "@data/models/idbModels/predictorData";
+import { IdbPredictor } from "@data/models/idbModels/predictor";
+import { checkSameMonth } from '@shared/meter-date-helpers';
+
+export class MonthlyFacilityAnalysisDataClass {
+
+    date: Date;
+    baselineAdjustmentInput: number;
+    predictorUsage: Array<{
+        usage: number,
+        predictorId: string
+    }>;
+    fiscalYear: number;
+    monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValuesSummation;
+
+    currentMonthData: Array<MonthlyAnalysisSummaryDataClass>;
+    monthPredictorData: Array<IdbPredictorData>;
+    baselineActualEnergyUse: number;
+    facilityGUID: string;
+    dataAdjustment: number;
+    modelYearDataAdjustment: number;
+    isBanked: boolean;
+    missingValueWarning: boolean;
+    constructor(
+        allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
+        monthDate: Date,
+        facilityPredictorEntries: Array<IdbPredictorData>,
+        facility: IdbFacility,
+        priviousMonthsValues: Array<MonthlyFacilityAnalysisDataClass>,
+        baselineYear: number,
+        predictors: Array<IdbPredictor>) {
+        this.facilityGUID = facility.guid;
+        this.date = monthDate;
+        this.setFiscalYear(facility);
+        this.setCurrentMonthData(allFacilityAnalysisData);
+        this.setMonthPredictorData(facilityPredictorEntries);
+        this.setPredictorUsage(facilityPredictorEntries, predictors);
+        this.setMissingPredictorWarning(predictors);
+        this.setBaselineAdjustmentInput();
+        this.setDataAdjustment();
+        this.setModelYearDataAdjustment();
+        this.setMonthlyAnalysisCalculatedValues(priviousMonthsValues, baselineYear);
+    }
+
+    setCurrentMonthData(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>) {
+        this.currentMonthData = allFacilityAnalysisData.filter(summaryData => {
+            let summaryDataDate: Date = new Date(summaryData.date);
+            return checkSameMonth(summaryDataDate, this.date);
+        });
+    }
+
+    setMonthPredictorData(facilityPredictorEntries: Array<IdbPredictorData>) {
+        this.monthPredictorData = facilityPredictorEntries.filter(predictorData => {
+            return predictorData.year == this.date.getFullYear() && (predictorData.month - 1) == this.date.getMonth();
+        });
+    }
+
+    setPredictorUsage(facilityPredictorEntries: Array<IdbPredictorData>, predictors: Array<IdbPredictor>) {
+        this.predictorUsage = new Array();
+        if (facilityPredictorEntries.length != 0) {
+            predictors.forEach(variable => {
+                let usageVal: number = _.sumBy(this.monthPredictorData, (pData: IdbPredictorData) => {
+                    if (pData.predictorId == variable.guid) {
+                        return pData.amount;
+                    }
+                    return 0;
+                });
+                this.predictorUsage.push({
+                    usage: usageVal,
+                    predictorId: variable.guid
+                });
+            });
+        }
+    }
+
+    setMissingPredictorWarning(predictors: Array<IdbPredictor>) {
+        this.missingValueWarning = predictors.some(variable => {
+            if (variable.productionInAnalysis) {
+                return !this.monthPredictorData.some(data => data.predictorId == variable.guid)
+            }
+        });
+    }
+
+    setFiscalYear(facility: IdbFacility) {
+        this.fiscalYear = getFiscalYear(new Date(this.date), facility);
+    }
+
+    setBaselineAdjustmentInput() {
+        this.baselineAdjustmentInput = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.baselineAdjustmentInput });
+    }
+
+    setModelYearDataAdjustment() {
+        this.modelYearDataAdjustment = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.modelYearDataAdjustment });
+    }
+
+    setDataAdjustment() {
+        this.dataAdjustment = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.dataAdjustment });
+    }
+
+    setMonthlyAnalysisCalculatedValues(previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>, baselineYear: number) {
+        let previousMonthsAnalysisCalculatedValues: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
+        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData, 0, previousMonthsAnalysisCalculatedValues, baselineYear, this.fiscalYear);
+    }
+
+    convertResults(startingUnit: string, endingUnit: string) {
+        this.baselineAdjustmentInput = new ConvertValue(this.baselineAdjustmentInput, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.convertResults(startingUnit, endingUnit);
+    }
+}
