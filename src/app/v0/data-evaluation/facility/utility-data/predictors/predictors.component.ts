@@ -8,7 +8,7 @@ import { AccountStatusCheckService } from '@shared/helper-services/account-statu
 
 interface PredictorListItem {
   predictor: IdbPredictor;
-  predictorStatusCheck: PredictorStatusCheck;
+  predictorStatusCheck?: PredictorStatusCheck;
 }
 
 @Component({
