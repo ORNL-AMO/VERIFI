@@ -41,3 +41,71 @@ h4{
   border-bottom: none;
   padding: inherit;
 }
+
+.experience-switcher {
+  display: grid;
+  gap: .85rem;
+}
+
+.experience-switcher__options-wrapper {
+  padding-left: 1rem;
+  border-left: solid #ff6000 5px;
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+
+.experience-switcher__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.experience-switcher__option {
+  display: grid;
+  gap: .35rem;
+  min-height: 8.75rem;
+  padding: .85rem;
+  border: 1px solid #d7dee2;
+  border-radius: 8px;
+  background: #fff;
+  color: #212529;
+  text-decoration: none;
+}
+
+.experience-switcher__option:not(.experience-switcher__option--active):hover,
+.experience-switcher__option:not(.experience-switcher__option--active):focus-visible {
+  border-color: #2c386b;
+  box-shadow: 0 0 0 .2rem rgba(44, 56, 107, .12);
+  outline: 0;
+}
+
+.experience-switcher__option--active {
+  border-color: #145a32;
+  background: #eef7f0;
+}
+
+.experience-switcher__tag {
+  width: fit-content;
+  padding: .18rem .45rem;
+  border-radius: 999px;
+  background: #edf0f7;
+  color: #2c386b;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+.experience-switcher__option--active .experience-switcher__tag {
+  background: #145a32;
+  color: #fff;
+}
+
+.experience-switcher__option strong {
+  color: #2c386b;
+  font-size: .98rem;
+}
+
+@media (max-width: 900px) {
+  .experience-switcher__options {
+    grid-template-columns: 1fr;
+  }
+}

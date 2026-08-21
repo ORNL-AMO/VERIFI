@@ -148,6 +148,33 @@
     </article>
   </section>
 
+  <section class="p1-experience-switcher" aria-labelledby="p1-experience-switcher-title">
+    <div class="p1-experience-switcher__intro">
+      <p class="p1-eyebrow">Experience switcher</p>
+      <h2 id="p1-experience-switcher-title">Move between VERIFI versions</h2>
+      <p>
+        Compare the current production workspace, this P1 prototype, and the new v1 production shell as the unified UX takes shape.
+      </p>
+    </div>
+    <div class="p1-experience-switcher__options" aria-label="VERIFI experience options">
+      <a class="p1-experience-switcher__option" [routerLink]="'/welcome'">
+        <span>Current VERIFI</span>
+        <strong>Use the established app</strong>
+        <small>Full production workflows and existing navigation.</small>
+      </a>
+      <div class="p1-experience-switcher__option p1-experience-switcher__option--active" aria-current="page">
+        <span>P1 prototype</span>
+        <strong>You are exploring P1</strong>
+        <small>Prototype workspace for testing the unified direction.</small>
+      </div>
+      <a class="p1-experience-switcher__option" [routerLink]="'/v1'">
+        <span>v1 shell</span>
+        <strong>Preview the production foundation</strong>
+        <small>The opt-in space where real v1 pages will land.</small>
+      </a>
+    </div>
+  </section>
+  
   @if (isCreateAccountDrawerOpen) {
     <app-p1-create-account-drawer (closed)="closeCreateAccountDrawer()"></app-p1-create-account-drawer>
   }

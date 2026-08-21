@@ -4,7 +4,6 @@
       <div class="d-flex justify-content-center">
         <h1>Welcome to </h1>
         <h1 class="verifi ps-2 pe-2">VERIFI</h1>
-        <a [routerLink]="'/p1'">Prototype</a>
       </div>
     </div>
     <div class="col-lg-8 col-md-12 text-center">
@@ -163,6 +162,36 @@
         If you have any feedback or would like to contact the team behind VERIFI, please reach out to us at
         <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.
       </p>
+  </div>
+
+  <div class="row justify-content-center p-0">
+    <div class="col-md-12 col-lg-9">
+      <hr>
+      <section class="experience-switcher" aria-labelledby="experience-switcher-title">
+        <div class="experience-switcher__intro">
+          <h4 id="experience-switcher-title">Choose your VERIFI experience</h4>
+        </div>
+        <div class="experience-switcher__options-wrapper">
+          <div class="experience-switcher__options" aria-label="VERIFI experience options">
+            <div class="experience-switcher__option experience-switcher__option--active" aria-current="page">
+              <span class="experience-switcher__tag">You are here</span>
+              <strong>Current VERIFI</strong>
+              <p>The established production experience with the full set of existing workflows.</p>
+            </div>
+            <a class="experience-switcher__option" [routerLink]="'/p1'">
+              <span class="experience-switcher__tag">Prototype</span>
+              <strong>P1 unified workspace</strong>
+              <p>Try the prototype direction and compare how the future workspace could feel.</p>
+            </a>
+            <a class="experience-switcher__option" [routerLink]="'/v1'">
+              <span class="experience-switcher__tag">New foundation</span>
+              <strong>v1 production shell</strong>
+              <p>Open the opt-in v1 starting point where production pages will be built.</p>
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 </div>
 
