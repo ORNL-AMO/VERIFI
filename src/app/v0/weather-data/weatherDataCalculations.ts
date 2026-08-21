@@ -1,5 +1,5 @@
 import { ConvertValue } from "@domain/calculations/conversions/convertValue";
-import { DetailDegreeDay, WeatherStation } from "@data/models/degreeDays";
+import { DetailDegreeDay, WeatherDataSelection, WeatherStation } from "@data/models/degreeDays";
 import { WeatherDataReading } from "@v0/weather-data/weather-data.service";
 
 
@@ -149,6 +149,26 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
         }
     }
     return results;
+}
+
+export function hasWeatherDataWarning(degreeDays: Array<DetailDegreeDay>, weatherDataSelection: WeatherDataSelection): boolean {
+    if (degreeDays.length === 0) {
+        return true;
+    }
+    if (degreeDays.some(degreeDay => degreeDay.gapInData)) {
+        return true;
+    }
+    if (weatherDataSelection === 'relativeHumidity') {
+        return degreeDays.some(degreeDay => isMissingWeatherValue(degreeDay.relativeHumidity));
+    }
+    if (weatherDataSelection === 'wetBulbTemp') {
+        return degreeDays.some(degreeDay => isMissingWeatherValue(degreeDay.wetBulbTemp));
+    }
+    return false;
+}
+
+function isMissingWeatherValue(value: number): boolean {
+    return value === null || value === undefined || Number.isFinite(value) === false;
 }
 
 export function getMinutesBetweenDates(firstDate: Date, secondDate: Date): number {
