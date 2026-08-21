@@ -8,6 +8,8 @@ For P1 facility Data sections, also read the [P1 data workbench pattern](p1-data
 
 For historical context on the first P1 walkthrough, see the [P1 prototype walkthrough feedback](p1-prototype-walkthrough-feedback.md). Treat it as feedback history and design context, not as a normative implementation contract.
 
+For the selected production v1 direction from P1, see the [P1 selected prototype baseline](p1-selected-prototype-baseline.md). It defines the lightweight issue #2557 acceptance framing and the first production implementation backlog.
+
 ## Routing
 
 - Each prototype uses a temporary top-level route named `/pN`, such as `/p1`, `/p2`, and `/p3`.
