@@ -1,23 +1,23 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { upsertWorkspaceRecords } from 'src/app/account-workspace/account-workspace-patches';
-import { AnalysisCommandHandler } from 'src/app/account-workspace/handlers/analysis-command-handler.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { getGUID } from 'src/app/shared/sharedHelperFunctions';
-import { AnalysisCategory } from 'src/app/models/analysis';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { AnalysisCategory } from '@data/models/analysis';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import {
   P1FacilityAnalysisRow,
   buildP1FacilityAnalysisRows

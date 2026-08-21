@@ -1,7 +1,7 @@
 //HELPER FUNCTIONS FOR DATES
-import { IdbPredictorData } from "../models/idbModels/predictorData";
+import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import * as _ from 'lodash';
-import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
+import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
 
 //PREDICTOR DATA FUNCTIONS
 export function getDateFromPredictorData(predictorData: IdbPredictorData): Date {

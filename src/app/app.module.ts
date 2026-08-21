@@ -4,51 +4,23 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent } from './app.component';
-import { HeaderComponent } from './core-components/header/header.component';
 import { CommonModule } from '@angular/common';
 import { PlotlyModule } from 'angular-plotly.js';
 import * as PlotlyJS from 'plotly.js-dist-min';
 import { LoadingComponent } from './core-components/loading/loading.component';
-import { IndexedDBModule } from './indexedDB/indexed-db.module';
-import { PageNotFoundComponent } from './core-components/page-not-found/page-not-found.component';
-import { ToastNotificationsComponent } from './core-components/toast-notifications/toast-notifications.component';
+import { IndexedDBModule } from '@data/indexedDB/indexed-db.module';
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
-import { StaticContentModule } from './static-content/static-content.module';
-import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
-import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
-import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
-import { NgbPaginationModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
-import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
-import { WeatherDataModule } from './weather-data/weather-data.module';
-import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
-import { DataManagementModule } from './data-management/data-management.module';
-import { HomePageComponent } from './core-components/home-page/home-page.component';
-import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
-import { SharedRouterGuardModalComponent } from './shared/shared-router-guard-modal/shared-router-guard-modal.component';
-import { EmailListSubscribeModule } from "./shared/email-list-subscribe/email-list-subscribe.module";
-import { UxPrototypesModule } from './ux-prototypes/ux-prototypes.module';
-import { ExistingUxShellComponent } from './existing-ux-shell/existing-ux-shell.component';
+import { SharedRouterGuardModalComponent } from '@shared/shared-router-guard-modal/shared-router-guard-modal.component';
 
 @NgModule({
     declarations: [
         AppComponent,
-        HeaderComponent,
         LoadingComponent,
-        PageNotFoundComponent,
-        ToastNotificationsComponent,
         ElectronUpdateComponent,
-        ImportBackupModalComponent,
-        SearchBarComponent,
-        CreateReportModalComponent,
-        ManageAccountsComponent,
         ElectronBackupFileComponent,
-        DeletingAccountDataComponent,
-        HomePageComponent,
-        SharedRouterGuardModalComponent,
-        ExistingUxShellComponent
+        SharedRouterGuardModalComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -58,16 +30,7 @@ import { ExistingUxShellComponent } from './existing-ux-shell/existing-ux-shell.
     CommonModule,
     PlotlyModule.forRoot(PlotlyJS),
     IndexedDBModule,
-    StaticContentModule,
     BrowserAnimationsModule,
-    HelperPipesModule,
-    NgbTypeaheadModule,
-    WeatherDataModule,
-    DataManagementModule,
-    DataEvaluationModule,
-    NgbPaginationModule,
-    EmailListSubscribeModule,
-    UxPrototypesModule
 ],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })

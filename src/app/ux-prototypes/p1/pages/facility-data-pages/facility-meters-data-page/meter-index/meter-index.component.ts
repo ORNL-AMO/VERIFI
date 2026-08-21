@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { AllSources, MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { AllSources, MeterSource } from '@data/models/constantsAndTypes';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import {
   filterP1MeterRows,
   P1MeterFilterState,

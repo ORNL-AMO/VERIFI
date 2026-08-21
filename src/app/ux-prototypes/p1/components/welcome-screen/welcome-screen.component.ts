@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { P1AccountSummary, P1WelcomeAction } from '../../p1.models';
 import { P1RouteFacade } from '../../p1-route.facade';
 

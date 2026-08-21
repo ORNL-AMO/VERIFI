@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, Output, inject } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { UtilityMeterDataService } from '@v0/shared/shared-meter-content/utility-meter-data.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFunctions';
 import { P1BillEditorMode } from '../facility-meters-workbench.helpers';
 

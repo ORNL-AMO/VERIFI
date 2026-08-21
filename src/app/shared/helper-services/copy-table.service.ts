@@ -1,5 +1,5 @@
 import { ElementRef, Injectable } from '@angular/core';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 
 @Injectable({
   providedIn: 'root'

@@ -1,15 +1,15 @@
 import { Component, EventEmitter, Input, OnChanges, Output, inject } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
-import { AllSources, MeterPhase, MeterSource, WaterDischargeTypes, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { ScopeOptions } from 'src/app/models/scopeOption';
+import { AllSources, MeterPhase, MeterSource, WaterDischargeTypes, WaterIntakeTypes } from '@data/models/constantsAndTypes';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { ScopeOptions } from '@data/models/scopeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { EnergyUnitOptions, DemandUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
-import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import {
   checkShowHeatCapacity,
   checkShowSiteToSource,

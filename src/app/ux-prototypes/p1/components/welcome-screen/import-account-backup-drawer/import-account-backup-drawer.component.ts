@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Output, inject } from '@angular/core';
-import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
-import { addAccountBackupMessages } from 'src/app/backup/backup-loading-messages';
-import { FutureBackupVersionError, PreparedBackupFile } from 'src/app/backup/backup-preparation.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
+import { addAccountBackupMessages } from '@data/backup/backup-loading-messages';
+import { FutureBackupVersionError, PreparedBackupFile } from '@data/backup/backup-preparation.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { P1RouteFacade } from '../../../p1-route.facade';
 
 @Component({

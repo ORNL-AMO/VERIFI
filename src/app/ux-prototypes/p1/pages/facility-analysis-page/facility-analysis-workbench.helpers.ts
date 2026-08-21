@@ -1,10 +1,10 @@
-import { AnalysisCategory, AnalysisGroup, AnalysisType, JStatRegressionModel } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
-import { AnalysisGroupStatusCheck } from 'src/app/calculations/status-check-calculations/analysisGroupStatusCheck';
-import { AnalysisStatusCheck } from 'src/app/calculations/status-check-calculations/analysisStatusCheck';
+import { AnalysisCategory, AnalysisGroup, AnalysisType, JStatRegressionModel } from '@data/models/analysis';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { AnalysisGroupStatusCheck } from '@domain/calculations/status-check-calculations/analysisGroupStatusCheck';
+import { AnalysisStatusCheck } from '@domain/calculations/status-check-calculations/analysisStatusCheck';
 import { P1StatusTone } from '../../p1.models';
 
 export type P1FacilityAnalysisStepId =

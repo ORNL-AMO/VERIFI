@@ -116,7 +116,7 @@ The first viewport should make the user's next best action obvious. Existing use
 
 ## Prototype Data
 
-Use static mock data by default for visual-only prototypes and colocate it with the prototype that consumes it. Mock only the minimum shape needed to render the screen. Use the existing models under `src/app/models/idbModels/` as references so prototype data includes the relevant account, facility, meter, predictor, analysis, report, weather, and GUID relationship fields without inventing incompatible shapes.
+Use static mock data by default for visual-only prototypes and colocate it with the prototype that consumes it. Mock only the minimum shape needed to render the screen. Use the existing models under `src/app/data/models/idbModels/` as references so prototype data includes the relevant account, facility, meter, predictor, analysis, report, weather, and GUID relationship fields without inventing incompatible shapes.
 
 P1 facility Data workbench sections are the current real-data prototype exception. They should read from `AccountWorkspaceStore` facility-scoped signals and write through existing workspace command boundaries and handlers so meters, predictors, energy uses, and events can be evaluated with real account data while preserving production persistence rules.
 

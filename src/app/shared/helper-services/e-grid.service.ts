@@ -1,9 +1,9 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject, computed } from '@angular/core';
 import * as XLSX from 'xlsx';
-import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
-import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
+import { SubRegionData, SubregionEmissions } from '@data/models/eGridEmissions';
+import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
 
 @Injectable({
   providedIn: 'root'

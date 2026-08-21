@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbUtilityMeter, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { IdbUtilityMeter, MeterReadingDataApplication } from '@data/models/idbModels/utilityMeter';
 
 type P1MonthlyDataView = 'table' | 'graph';
 type P1MonthlySortField = keyof MonthlyData | 'date';

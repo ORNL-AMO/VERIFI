@@ -8,6 +8,7 @@ This directory indexes the repository context used by coding agents and human co
 | --- | --- | --- |
 | Persistent guidance | Rules, commands, source routing, and review expectations that apply to every task | [`AGENTS.md`](../../AGENTS.md) |
 | Architecture | Current runtime boundaries, modules, persistence, calculations, file flows, and invariants | [`ARCHITECTURE.md`](../../ARCHITECTURE.md) |
+| Unified UI/UX migration | v0/v1 boundaries, shared-contract protection, and just-in-time workflow notes | [`unified-ux-migration.md`](../unified-ux-migration.md) |
 | Data workflow | Practical examples for workspace reads, selections, persistence, transactions, and committed refreshes | [`data-access-and-workspace.md`](../data-access-and-workspace.md) |
 | Task context | Minimal entrypoints, document sections, modes, skills, risks, and initial validation | [`context-index.md`](context-index.md) |
 | Prototype foundation | Shared product, workflow, visual, welcome-screen, and theming guidance for redesign prototypes | [`prototype-foundation.md`](prototype-foundation.md) |

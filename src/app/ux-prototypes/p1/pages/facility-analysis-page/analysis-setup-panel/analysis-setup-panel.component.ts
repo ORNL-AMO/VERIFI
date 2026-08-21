@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { AnalysisCategory } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnalysisCategory } from '@data/models/analysis';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { UnitOption } from 'src/app/shared/unitOptions';
 
 @Component({

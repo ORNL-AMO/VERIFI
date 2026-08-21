@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AccountStatusCheckService } from 'src/app/shared/helper-services/account-status-check.service';
 import { P1NavGroup, P1NavItem } from '../../../p1.models';
 import { P1RouteFacade } from '../../../p1-route.facade';

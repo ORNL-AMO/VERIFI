@@ -1,7 +1,7 @@
 import { AppStartupState } from 'src/app/application-lifecycle/application-lifecycle.models';
-import { AccountWorkspaceSnapshot, WorkspaceError, WorkspaceStatus } from 'src/app/account-workspace/account-workspace.models';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AccountWorkspaceSnapshot, WorkspaceError, WorkspaceStatus } from '@data/account-workspace/account-workspace.models';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import {
   P1AccountSummary,
   P1ContentCard,

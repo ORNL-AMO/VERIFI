@@ -1,0 +1,37 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+
+interface MetersListItem {
+  meter: IdbUtilityMeter;
+  meterStatusCheck: MeterStatusCheck;
+}
+
+@Component({
+  selector: 'app-energy-consumption',
+  templateUrl: './energy-consumption.component.html',
+  styleUrls: ['./energy-consumption.component.css'],
+  standalone: false
+})
+export class EnergyConsumptionComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+
+  utilityMeters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$)
+
+  metersList: Signal<Array<MetersListItem>> = computed(() => {
+    const utilityMeters = this.utilityMeters();
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!utilityMeters || !facilityStatusCheck) return [];
+    return utilityMeters.map(meter => ({
+      meter,
+      meterStatusCheck: facilityStatusCheck.metersStatusChecks.find(mc => mc.meterId === meter.guid)
+    }));
+  });
+
+}

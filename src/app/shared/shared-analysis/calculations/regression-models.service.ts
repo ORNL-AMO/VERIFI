@@ -1,17 +1,17 @@
-import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { Injectable, inject } from '@angular/core';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { AssessmentReportVersion } from 'src/app/models/idbModels/account';
-import { RegressionModelsCalculator } from './regression-models-calculator';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from './regression-model-recovery';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '@data/models/analysis';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { AssessmentReportVersion } from '@data/models/idbModels/account';
+import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +41,7 @@ export class RegressionModelsService {
     if (typeof Worker !== 'undefined') {
       return new Promise((resolve, reject) => {
         this.currentWorker = new Worker(
-          new URL('../../../web-workers/regression-models.worker', import.meta.url)
+          new URL('../../../platform/web-workers/regression-models.worker', import.meta.url)
         );
         this.currentWorker.onmessage = ({ data }) => {
           this.terminateCurrentWorker();

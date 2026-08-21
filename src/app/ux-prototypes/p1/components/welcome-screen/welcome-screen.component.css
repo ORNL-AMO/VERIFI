@@ -151,6 +151,93 @@
   padding: 1rem;
 }
 
+.p1-experience-switcher {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  align-items: stretch;
+  padding: 1rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-surface);
+}
+
+.p1-experience-switcher__intro {
+  display: grid;
+  align-content: center;
+}
+
+.p1-experience-switcher__intro h2 {
+  margin-bottom: .35rem;
+  font-size: 1.25rem;
+}
+
+.p1-experience-switcher__intro p:not(.p1-eyebrow) {
+  margin-bottom: 0;
+  color: var(--prototype-muted);
+}
+
+.p1-experience-switcher__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.p1-experience-switcher__option {
+  display: grid;
+  gap: .45rem;
+  min-height: 8.5rem;
+  padding: .85rem;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+  background: var(--prototype-panel);
+  color: var(--prototype-text);
+  text-decoration: none;
+}
+
+.p1-experience-switcher__option:hover,
+.p1-experience-switcher__option:focus-visible {
+  border-color: var(--prototype-blue);
+  outline: 3px solid color-mix(in srgb, var(--prototype-orange) 24%, transparent);
+  outline-offset: 2px;
+}
+
+.p1-experience-switcher__option--active {
+  border-color: var(--prototype-orange);
+  background: color-mix(in srgb, var(--prototype-orange) 8%, var(--prototype-panel));
+}
+
+.p1-experience-switcher__option--active:hover,
+.p1-experience-switcher__option--active:focus-visible {
+  border-color: var(--prototype-orange);
+  outline: 0;
+}
+
+.p1-experience-switcher__option span {
+  width: fit-content;
+  padding: .2rem .45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--prototype-blue) 10%, transparent);
+  color: var(--prototype-blue);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.p1-experience-switcher__option--active span {
+  background: var(--prototype-orange);
+  color: #fff;
+}
+
+.p1-experience-switcher__option strong {
+  color: var(--prototype-text);
+  font-size: .98rem;
+}
+
+.p1-experience-switcher__option small {
+  color: var(--prototype-muted);
+  line-height: 1.35;
+}
+
 .p1-welcome__actions h2,
 .p1-welcome__portfolio h2,
 .p1-welcome__support h2 {
@@ -444,7 +531,9 @@
 @media (max-width: 900px) {
   .p1-welcome__hero,
   .p1-welcome__action-grid,
-  .p1-welcome__support {
+  .p1-welcome__support,
+  .p1-experience-switcher,
+  .p1-experience-switcher__options {
     grid-template-columns: 1fr;
   }
 

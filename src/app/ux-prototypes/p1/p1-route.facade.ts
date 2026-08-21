@@ -2,8 +2,8 @@ import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } f
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { AccountWorkspaceService } from 'src/app/account-workspace/account-workspace.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
 import { buildP1PrototypeData } from './p1-real-data.adapter';
 import {

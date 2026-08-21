@@ -1,0 +1,29 @@
+import { Pipe, PipeTransform } from '@angular/core';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { getPredictorStatistics } from '@v0/shared/shared-data-quality-report-predictor/predictorDataQualityStatistics';
+import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
+
+@Pipe({
+  name: 'predictorDataQualityStatus',
+  standalone: false
+})
+export class PredictorDataQualityStatusPipe implements PipeTransform {
+
+  transform(predictor: IdbPredictor, allPredictorData: Array<IdbPredictorData>, isBtn: boolean): "btn-warning" | "btn-danger" | "btn-success" | "warning" | "danger" | "success" {
+    let predictorData: Array<IdbPredictorData> = allPredictorData.filter(data => data.predictorId === predictor.guid);
+    if (predictorData.length === 0) {
+      return isBtn ? "btn-danger" : "danger";
+    }
+    let statusCheck = new PredictorStatusCheck(predictor, allPredictorData, undefined);
+    if (statusCheck.hasDuplicateEntries || statusCheck.hasMissingEntries) {
+      return isBtn ? "btn-danger" : "danger";
+    }
+    let statistics = getPredictorStatistics(predictorData.map(d => d.amount));
+    if (statistics.outliers > 0) {
+      return isBtn ? "btn-warning" : "warning";
+    }
+    return isBtn ? "btn-success" : "success";
+  }
+
+}

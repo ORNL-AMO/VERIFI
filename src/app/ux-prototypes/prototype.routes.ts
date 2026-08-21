@@ -28,7 +28,7 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
 
 export const PrototypeRoutes: Routes = [
   {
-    path: 'p1',
+    path: '',
     component: PrototypeShellComponent,
     children: [
       {

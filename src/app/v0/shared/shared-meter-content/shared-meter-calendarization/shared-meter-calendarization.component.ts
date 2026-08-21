@@ -1,0 +1,335 @@
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, SimpleChanges, inject } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import * as _ from 'lodash';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { EGridService } from '@shared/helper-services/e-grid.service';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { Router } from '@angular/router';
+import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
+
+@Component({
+  selector: 'app-shared-meter-calendarization',
+  templateUrl: './shared-meter-calendarization.component.html',
+  styleUrl: './shared-meter-calendarization.component.css',
+  standalone: false
+})
+export class SharedMeterCalendarizationComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input({ required: true })
+  selectedMeter: IdbUtilityMeter;
+
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
+  calanderizedMeter: CalanderizedMeter;
+  orderDataField: string = 'date';
+  orderByDirection: string = 'desc';
+
+  calanderizedDataFilters: CalanderizationFilters;
+  calanderizedDataFiltersSub: Subscription;
+  dataDisplay: "table" | "graph";
+  displayGraphEnergy: "bar" | "scatter" | null;
+  displayGraphCost: "bar" | "scatter" | null;
+
+  dataApplicationMeter: IdbUtilityMeter;
+
+  selectedFacility: IdbFacility;
+  displayDataApplicationModal: boolean = false;
+  hasMeterData: boolean;
+  consumptionLabel: 'Consumption' | 'Distance';
+  isRECs: boolean;
+
+  calanderizationWorker: Worker;
+  calanderizingMeterData: boolean | 'error' = false;
+  constructor(
+    private calanderizationService: CalanderizationService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private meterHandler: MeterCommandHandler,
+    private facilityHandler: FacilityCommandHandler,
+    private sharedDataService: SharedDataService,
+    private eGridService: EGridService,
+    private router: Router
+  ) { }
+
+  ngOnInit(): void {
+    this.displayGraphCost = this.calanderizationService.displayGraphCost;
+    this.displayGraphEnergy = this.calanderizationService.displayGraphEnergy;
+    this.dataDisplay = this.calanderizationService.dataDisplay;
+    this.selectedFacility = this.accountWorkspaceStore.selectedFacility();
+    this.setHasMeterData();
+    this.calanderizedDataFiltersSub = this.calanderizationService.calanderizedDataFilters.subscribe(val => {
+      this.calanderizedDataFilters = val;
+      this.setCalanderizedMeterData();
+    });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedMeter'] && !changes['selectedMeter'].firstChange) {
+      this.setHasMeterData();
+      this.setCalanderizedMeterData();
+    }
+  }
+
+  ngOnDestroy() {
+    this.calanderizedDataFiltersSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
+    this.calanderizationService.calanderizedDataFilters.next({
+      selectedSources: [],
+      showAllSources: true,
+      selectedDateMax: undefined,
+      selectedDateMin: undefined,
+      dataDateRange: undefined
+    });
+    this.calanderizationService.displayGraphCost = this.displayGraphCost;
+    this.calanderizationService.displayGraphEnergy = this.displayGraphEnergy;
+    this.calanderizationService.dataDisplay = this.dataDisplay;
+    if (this.calanderizationWorker) {
+      this.calanderizationWorker.terminate();
+    }
+  }
+
+
+  setCalanderizedMeterData() {
+    if (this.selectedMeter && this.calanderizedDataFilters) {
+      this.calanderizingMeterData = true;
+      let facilityMeterData: Array<IdbUtilityMeterData> = [...this.accountWorkspaceStore.facilityMeterData()];
+      let customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+      let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+      let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
+      if (typeof Worker !== 'undefined') {
+        if (this.calanderizationWorker) {
+          this.calanderizationWorker.terminate();
+        }
+        this.calanderizationWorker = new Worker(new URL('../../../../platform/web-workers/calanderization.worker', import.meta.url));
+        this.calanderizationWorker.onmessage = ({ data }) => {
+          this.calanderizationWorker.terminate();
+          if (!data.error) {
+            this.finishSettingsCalanderizedMeterData(data.calanderizedMeters);
+          } else {
+            console.log('Error in calanderization worker');
+            this.finishSettingsCalanderizedMeterData([]);
+            this.calanderizingMeterData = 'error';
+          }
+        };
+        this.calanderizationWorker.postMessage({
+          meters: [this.selectedMeter],
+          allMeterData: facilityMeterData,
+          accountOrFacility: this.selectedFacility,
+          monthDisplayShort: false,
+          calanderizationOptions: undefined,
+          co2Emissions: this.eGridService.co2Emissions,
+          customFuels: customFuels,
+          facilities: [this.selectedFacility],
+          assessmentReportVersion: selectedAccount.assessmentReportVersion,
+          customGWPs: customGWPs
+        });
+
+      } else {
+        let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], selectedAccount.assessmentReportVersion, customGWPs);
+        this.finishSettingsCalanderizedMeterData(allCalanderizedMeterData);
+      }
+    }
+  }
+
+  finishSettingsCalanderizedMeterData(allCalanderizedMeterData: Array<CalanderizedMeter>) {
+    let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
+      return cMeter.meter.guid == this.selectedMeter.guid
+    });
+    calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
+    this.calanderizedMeter = calanderizedMeterData[0];
+    if (this.selectedMeter.scope != 2) {
+      this.consumptionLabel = 'Consumption';
+    } else {
+      this.consumptionLabel = 'Distance';
+    }
+    if (this.selectedMeter.source != 'Electricity') {
+      this.isRECs = false;
+    } else {
+      this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
+    }
+    this.setDateRange(allCalanderizedMeterData);
+    this.calanderizingMeterData = false;
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
+
+  setDateRange(calanderizedMeterData: Array<CalanderizedMeter>) {
+    if (calanderizedMeterData.length != 0) {
+      if (!this.calanderizedDataFilters.selectedDateMax || !this.calanderizedDataFilters.selectedDateMin) {
+        let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+        if (allMeterData.length != 0) {
+          let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+          let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+          if (minDateEntry && maxDateEntry) {
+            this.calanderizedDataFilters.selectedDateMax = {
+              year: maxDateEntry.year,
+              month: maxDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.selectedDateMin = {
+              year: minDateEntry.year,
+              month: minDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.dataDateRange = {
+              minDate: minDateEntry.date,
+              maxDate: maxDateEntry.date
+            }
+            this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+          }
+        }
+      } else {
+        let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
+        if (allMeterData.length != 0) {
+          let maxDateEntry: MonthlyData = _.maxBy(allMeterData, 'date');
+          let minDateEntry: MonthlyData = _.minBy(allMeterData, 'date');
+          if (minDateEntry && this.calanderizedDataFilters.dataDateRange.maxDate < minDateEntry.date || this.calanderizedDataFilters.dataDateRange.minDate > maxDateEntry.date) {
+            this.calanderizedDataFilters.selectedDateMax = {
+              year: maxDateEntry.year,
+              month: maxDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.selectedDateMin = {
+              year: minDateEntry.year,
+              month: minDateEntry.monthNumValue
+            };
+            this.calanderizedDataFilters.dataDateRange = {
+              minDate: minDateEntry.date,
+              maxDate: maxDateEntry.date
+            }
+            this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
+          }
+        }
+      }
+    }
+  }
+
+  filterMeterDataDateRanges(calanderizedMeterData: Array<CalanderizedMeter>): Array<CalanderizedMeter> {
+    if (this.calanderizedDataFilters.selectedDateMax && this.calanderizedDataFilters.selectedDateMin) {
+      calanderizedMeterData.forEach(calanderizedMeter => {
+        calanderizedMeter.monthlyData = calanderizedMeter.monthlyData.filter(monthlyDataItem => {
+          return this.checkMonthlyDataItemInRange(monthlyDataItem);
+        })
+      });
+    }
+    return calanderizedMeterData;
+  }
+
+  checkMonthlyDataItemInRange(monthlyDataItem: MonthlyData): boolean {
+    let maxDate: Date = new Date(this.calanderizedDataFilters.selectedDateMax.year, this.calanderizedDataFilters.selectedDateMax.month + 1);
+    let minDate: Date = new Date(this.calanderizedDataFilters.selectedDateMin.year, this.calanderizedDataFilters.selectedDateMin.month - 1);
+    let itemDate: Date = new Date(monthlyDataItem.date);
+    return (maxDate > itemDate) && (minDate < itemDate);
+  }
+
+  setDataDisplay(str: "table" | "graph") {
+    this.dataDisplay = str;
+  }
+
+  setDisplayGraphEnergy(str: "bar" | "scatter") {
+    if (str == this.displayGraphEnergy) {
+      this.displayGraphEnergy = undefined;
+    } else {
+      this.displayGraphEnergy = str;
+    }
+  }
+
+  setDisplayGraphCost(str: "bar" | "scatter") {
+    if (str == this.displayGraphCost) {
+      this.displayGraphCost = undefined;
+    } else {
+      this.displayGraphCost = str;
+    }
+  }
+
+  showDataApplicationModal() {
+    this.sharedDataService.modalOpen.next(true);
+    this.dataApplicationMeter = JSON.parse(JSON.stringify(this.selectedMeter));
+    this.displayDataApplicationModal = true;
+  }
+
+  cancelSetDataApplication() {
+    this.sharedDataService.modalOpen.next(false);
+    this.displayDataApplicationModal = false;
+    this.dataApplicationMeter = undefined;
+  }
+
+  async setDataApplication() {
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    const meter = this.dataApplicationMeter;
+    await this.commandBoundary.execute(
+      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Update Data Application' ,
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
+      () => this.meterHandler.updateMeter(meter, accountGuid)
+    );
+    this.selectedMeter = this.dataApplicationMeter;
+    this.setCalanderizedMeterData();
+  }
+
+  async setCalanderizeData(calanderize: 'fullMonth' | 'backward' | 'fullYear') {
+    this.dataApplicationMeter = this.selectedMeter;
+    this.dataApplicationMeter.meterReadingDataApplication = calanderize;
+    await this.setDataApplication();
+  }
+
+  async setFacilityEnergyIsSource(energyIsSource: boolean) {
+    if (this.selectedFacility.energyIsSource != energyIsSource) {
+      const updatedFacility: IdbFacility = { ...this.selectedFacility, energyIsSource };
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      await this.commandBoundary.execute(
+        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' ,
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
+        () => this.facilityHandler.update(updatedFacility, accountGuid)
+      );
+      this.setCalanderizedMeterData();
+    }
+  }
+
+  setHasMeterData() {
+    let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.selectedMeter.guid);
+    if (meterData.length != 0) {
+      this.hasMeterData = true;
+      this.setCalanderizedMeterData();
+    } else {
+      this.hasMeterData = false;
+    }
+  }
+
+  uploadData() {
+    let selectedAccount: IdbAccount = this.accountWorkspaceStore.account();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
+  }
+
+
+  meterDataAdd() {
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
+    } else {
+      let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+      this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/new-bill');
+    }
+  }
+}

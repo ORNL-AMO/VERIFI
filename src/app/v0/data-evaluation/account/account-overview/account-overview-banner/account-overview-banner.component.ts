@@ -1,0 +1,74 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild, inject, Injector } from '@angular/core';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { Subscription } from 'rxjs';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+
+@Component({
+  selector: 'app-account-overview-banner',
+  templateUrl: './account-overview-banner.component.html',
+  styleUrls: ['./account-overview-banner.component.css'],
+  standalone: false
+})
+export class AccountOverviewBannerComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  @ViewChild('navTabs') navTabs: ElementRef;
+  modalOpenSub: Subscription;
+  modalOpen: boolean;
+  selectedAccount: IdbAccount;
+  selectedAccountSub: Subscription;
+  showWater: boolean;
+
+
+  hideTabText: boolean = false;
+  hideAllText: boolean = false;
+  constructor(
+    private sharedDataService: SharedDataService,
+    private cd: ChangeDetectorRef,
+    private injector: Injector
+  ) { }
+
+  ngOnInit(): void {
+    this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
+      this.modalOpen = val;
+    });
+    this.selectedAccountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
+      this.selectedAccount = val;
+      this.setShowWater();
+    });
+  }
+
+  ngAfterViewInit() {
+    this.setHideTabText();
+    this.cd.detectChanges();
+  }
+
+  ngOnDestroy() {
+    this.modalOpenSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
+  }
+
+  setShowWater() {
+    let accountMeters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
+    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
+    this.showWater = waterMeter != undefined;
+  }
+
+  createReport() {
+    this.sharedDataService.openCreateReportModal.next(true);
+  }
+
+
+  setHideTabText() {
+    this.hideTabText = this.navTabs.nativeElement.offsetWidth < 400;
+    this.hideAllText = this.navTabs.nativeElement.offsetWidth < 300;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.setHideTabText();
+  }
+}

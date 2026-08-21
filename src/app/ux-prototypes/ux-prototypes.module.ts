@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
+import { HelperPipesModule } from '@v0/shared/helper-pipes/_helper-pipes.module';
+import { PrototypeRoutes } from './prototype.routes';
 import { P1AnalysisSectionNavComponent } from './p1/components/section-nav/analysis-section-nav/analysis-section-nav.component';
 import { P1DataSectionNavComponent } from './p1/components/section-nav/data-section-nav/data-section-nav.component';
 import { P1HomeSectionNavComponent } from './p1/components/section-nav/home-section-nav/home-section-nav.component';
@@ -145,6 +146,6 @@ import { PrototypeShellComponent } from './prototype-shell/prototype-shell.compo
     PrototypeShellComponent,
     P1Component
   ],
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, HelperPipesModule]
+  imports: [CommonModule, RouterModule.forChild(PrototypeRoutes), FormsModule, ReactiveFormsModule, HelperPipesModule]
 })
 export class UxPrototypesModule { }

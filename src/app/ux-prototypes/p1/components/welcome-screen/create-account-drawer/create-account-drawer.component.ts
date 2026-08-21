@@ -1,15 +1,15 @@
 import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { FacilityCommandHandler } from 'src/app/account-workspace/handlers/facility-command-handler.service';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from 'src/app/application-lifecycle/application-lifecycle.service';
-import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
-import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
 import { Countries } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
-import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
+import { SettingsFormsService } from '@v0/shared/settings-forms/settings-forms.service';
 
 @Component({
   selector: 'app-p1-create-account-drawer',

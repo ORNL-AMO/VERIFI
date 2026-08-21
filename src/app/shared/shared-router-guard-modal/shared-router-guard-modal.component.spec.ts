@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
-import { RouterGuardService } from './router-guard-service';
-import { SharedRouterGuardModalComponent } from './shared-router-guard-modal.component';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
+import { SharedRouterGuardModalComponent } from '@shared/shared-router-guard-modal/shared-router-guard-modal.component';
 
 @NgModule({
   declarations: [SharedRouterGuardModalComponent],
