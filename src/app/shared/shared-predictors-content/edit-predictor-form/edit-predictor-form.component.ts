@@ -1,7 +1,7 @@
 import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
 import { Component, Input, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictor, WeatherDataType } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { Router } from '@angular/router';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -9,6 +9,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import { getWeatherSearchFromFacility } from '../../sharedHelperFunctions';
 import { Month, Months } from '../../form-data/months';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { AccountWorkspaceQueryService } from 'src/app/account-workspace/account-workspace-query.service';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -18,6 +20,7 @@ import { Month, Months } from '../../form-data/months';
 })
 export class EditPredictorFormComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   @Input({ required: true })
   predictorForm: FormGroup;
   @Input({ required: true })
@@ -32,8 +35,19 @@ export class EditPredictorFormComponent {
   facility: IdbFacility;
 
 
-  displaySationModal: boolean = false;
+  displayStationModal: boolean = false;
   months: Array<Month> = Months;
+  yearOptions: Array<number> = Array.from(
+    { length: new Date().getFullYear() - 1999 },
+    (_, i) => new Date().getFullYear() - i
+  );
+  startMonth: number;
+  startYear: number;
+  endMonth: number;
+  endYear: number;
+  facilityPredictorData: Array<IdbPredictorData>;
+  selectedWeatherTypes: Array<WeatherDataType>;
+
   constructor(
     private router: Router,
     private weatherDataService: WeatherDataService,
@@ -45,6 +59,50 @@ export class EditPredictorFormComponent {
     if (!this.facility) {
       this.facility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (this.predictor.facilityId));
     }
+    this.setWeatherPredictorDates();
+    this.setValidators();
+    this.selectedWeatherTypes = this.editPredictorFormService.getSelectedWeatherTypes(this.predictorForm);
+    const disableWeatherType = this.addOrEdit === 'edit' && this.predictorForm.controls.predictorType.value === 'Weather';
+    if (disableWeatherType) {
+      this.predictorForm.controls.weatherDataType.patchValue(this.selectedWeatherTypes[0], { emitEvent: false });
+      this.predictorForm.controls.weatherDataType.disable({ emitEvent: false });
+    } else {
+      this.predictorForm.controls.weatherDataType.enable({ emitEvent: false });
+    }
+  }
+
+  setWeatherPredictorDates() {
+    if (!this.predictorForm)
+      return;
+
+    const predictorData = this.predictor?.guid ? this.accountWorkspaceQuery.getPredictorData(this.predictor.guid) : [];
+
+    const fallBackPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(this.facility?.guid);
+    const sourceData = predictorData.length ? predictorData : fallBackPredictorData;
+    this.facilityPredictorData = sourceData;
+    if (!this.facilityPredictorData.length) {
+      this.predictorForm.patchValue(
+        { startMonth: null, startYear: null, endMonth: null, endYear: null },
+        { emitEvent: false }
+      );
+      return;
+    }
+    const sortedPredictorData = this.facilityPredictorData.sort((a, b) => {
+      const dateA = new Date(a.year, a.month - 1);
+      const dateB = new Date(b.year, b.month - 1);
+      return dateA.getTime() - dateB.getTime();
+    });
+    const first = sortedPredictorData[0];
+    const last = sortedPredictorData[sortedPredictorData.length - 1];
+    this.predictorForm.patchValue(
+      {
+        startMonth: first.month - 1,
+        startYear: first.year,
+        endMonth: last.month - 1,
+        endYear: last.year
+      },
+      { emitEvent: false }
+    );
   }
 
   changePredictorType() {
@@ -60,7 +118,7 @@ export class EditPredictorFormComponent {
   }
 
   async goToWeatherData() {
-    this.displaySationModal = false;
+    this.displayStationModal = false;
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
     } else if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
@@ -92,11 +150,11 @@ export class EditPredictorFormComponent {
   }
 
   openStationModal() {
-    this.displaySationModal = true;
+    this.displayStationModal = true;
   }
 
   cancelStationSelect() {
-    this.displaySationModal = false;
+    this.displayStationModal = false;
   }
 
   selectStation(station: WeatherStation) {
@@ -124,5 +182,27 @@ export class EditPredictorFormComponent {
       this.predictorForm.controls.noLongerInUseYear.patchValue(parseInt(yearStr, 10));
       this.predictorForm.markAsDirty();
     }
+  }
+
+  onWeatherSelectionChange(
+    key: 'cdd' | 'hdd' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp' | 'precipitation',
+    event: Event
+  ) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const group = this.predictorForm.get('weatherSelections') as FormGroup;
+    if (!group) return;
+
+    if (this.addOrEdit === 'edit' && checked) {
+      const keys = ['cdd', 'hdd', 'relativeHumidity', 'dryBulbTemp', 'wetBulbTemp', 'dewPointTemp', 'precipitation'];
+      for (const k of keys) {
+        if (k !== key) {
+          group.get(k)?.patchValue(false, { emitEvent: false });
+        }
+      }
+    }
+
+    group.get(key)?.patchValue(checked, { emitEvent: false });
+    this.setValidators();
+    this.predictorForm.markAsDirty();
   }
 }
