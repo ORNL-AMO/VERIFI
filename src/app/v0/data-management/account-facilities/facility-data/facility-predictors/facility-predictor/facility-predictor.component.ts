@@ -16,7 +16,7 @@ import { EditPredictorFormService } from '@v0/shared/shared-predictors-content/e
 import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
 import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
-import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
+import { getDetailedDataForMonth, hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 import { Month, Months } from '@shared/form-data/months';
 import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
@@ -149,22 +149,19 @@ export class FacilityPredictorComponent {
           let dateString = month.abbreviation + ', ' + newDate.getFullYear();
           this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
           let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
-          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-            return degreeDay.gapInData == true
-          });
           let predictorExists: IdbPredictorData = predictorData.find(pData => { return checkSameMonthPredictorData(pData, newDate) });
           if (!predictorExists) {
             let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
             newPredictorData.month = newDate.getMonth() + 1;
             newPredictorData.year = newDate.getFullYear();
             newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-            newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+            newPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
             await this.predictorHandler.addPredictorData(newPredictorData, this.accountWorkspaceStore.account()?.guid);
           } else {
             predictorExists.month = newDate.getMonth() + 1;
             predictorExists.year = newDate.getFullYear();
             predictorExists.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-            predictorExists.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+            predictorExists.weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
             const accountGuid = this.accountWorkspaceStore.account()?.guid;
             await this.predictorHandler.updatePredictorData(predictorExists, accountGuid);
           }
