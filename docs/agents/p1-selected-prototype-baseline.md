@@ -2,7 +2,7 @@
 
 Use this note with issue #2557 as the selected P1 direction for production v1 work. It translates the first walkthrough feedback into a lightweight implementation baseline. It does not require a complete prototype of every screen before building.
 
-The source code, [Unified UI/UX migration guide](../unified-ux-migration.md), [Unified UI/UX current-state notes](../unified-ux-current-state.md), [UX redesign prototypes](ux-prototypes.md), [prototype design foundation](prototype-foundation.md), [P1 data workbench pattern](p1-data-workbench-pattern.md), and [P1 walkthrough feedback](p1-prototype-walkthrough-feedback.md) remain the supporting sources of truth.
+The source code, [Unified UI/UX migration guide](../unified-ux-migration.md), [Unified UI/UX current-state notes](../unified-ux-current-state.md), [UX redesign prototypes](ux-prototypes.md), [prototype design foundation](prototype-foundation.md), [v1 visual foundation](v1-visual-foundation.md), [P1 data workbench pattern](p1-data-workbench-pattern.md), and [P1 walkthrough feedback](p1-prototype-walkthrough-feedback.md) remain the supporting sources of truth.
 
 ## Acceptance framing
 
