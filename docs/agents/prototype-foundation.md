@@ -1,6 +1,6 @@
 # VERIFI prototype design foundation
 
-Use this guide as the shared foundation for VERIFI redesign prototypes. It is not a production design system and does not replace source code, architecture notes, or task-specific skills. It defines the product frame, preserved workflows, visual direction, responsive behavior, and content expectations that prototype agents should carry forward.
+Use this guide as the shared foundation for VERIFI redesign prototypes. It is not a production design system and does not replace source code, architecture notes, or task-specific skills. It defines the product frame, preserved workflows, visual direction, responsive behavior, and content expectations that prototype agents should carry forward. For the production v1 visual direction that grows from P1, see the [v1 visual foundation](v1-visual-foundation.md).
 
 ## Product frame
 

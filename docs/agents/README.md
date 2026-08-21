@@ -11,6 +11,7 @@ This directory indexes the repository context used by coding agents and human co
 | Unified UI/UX migration | v0/v1 boundaries, shared-contract protection, and just-in-time workflow notes | [`unified-ux-migration.md`](../unified-ux-migration.md) |
 | Unified UI/UX current state | Lightweight v0 current-state notes for issue #2558 and workflow migration decisions | [`unified-ux-current-state.md`](../unified-ux-current-state.md) |
 | P1 selected prototype baseline | Production v1 baseline, issue #2557 acceptance framing, and first implementation backlog | [`p1-selected-prototype-baseline.md`](p1-selected-prototype-baseline.md) |
+| v1 visual foundation | Living visual foundation, issue #2553 acceptance framing, theme policy, and durable interaction patterns | [`v1-visual-foundation.md`](v1-visual-foundation.md) |
 | Data workflow | Practical examples for workspace reads, selections, persistence, transactions, and committed refreshes | [`data-access-and-workspace.md`](../data-access-and-workspace.md) |
 | Task context | Minimal entrypoints, document sections, modes, skills, risks, and initial validation | [`context-index.md`](context-index.md) |
 | Prototype foundation | Shared product, workflow, visual, welcome-screen, and theming guidance for redesign prototypes | [`prototype-foundation.md`](prototype-foundation.md) |
