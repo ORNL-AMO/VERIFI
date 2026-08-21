@@ -1,11 +1,18 @@
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AccountAnalysisStatusCheck } from '@domain/calculations/status-check-calculations/accountAnalysisStatusCheck';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+
+interface AnalysisDetailsTableRow {
+  analysisItem: IdbAccountAnalysisItem,
+  statusCheck: AccountAnalysisStatusCheck | undefined
+}
 
 @Component({
   selector: 'app-account-report-analysis-selection',
@@ -16,86 +23,77 @@ import { CalanderizationService } from '@shared/helper-services/calanderization.
 export class AccountReportAnalysisSelectionComponent {
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly router = inject(Router);
+  private readonly calanderizationService = inject(CalanderizationService);
+  private readonly accountStatusCheckService = inject(AccountStatusCheckService);
 
   @Input({ required: true })
   reportForm: FormGroup;
 
-  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
-  itemToEdit: IdbAccountAnalysisItem;
-  baselineYears: Array<number> = [];
-  selectedBaselineYear: number | 'All' = 'All';
-  selectedCategory: string = 'All';
-  filteredAnalysisItems: Array<IdbAccountAnalysisItem>;
-  calanderizedMeterSub: Subscription;
+  calendarizedMeters = toSignal(this.calanderizationService.calanderizedMeters, { initialValue: [] });
+  selectedBaselineYear: WritableSignal<number | 'All'> = signal('All');
+  selectedCategory: WritableSignal<'All' | 'energy' | 'water'> = signal('All');
+  itemToEdit: WritableSignal<IdbAccountAnalysisItem | undefined> = signal(undefined);
+  accountStatusCheck = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
-  constructor(
-    private router: Router,
-    private calanderizationService: CalanderizationService
-  ) {
-  }
+  accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => {
+    this.calendarizedMeters();
+    return [...this.accountWorkspaceStore.accountAnalyses().filter(option => option.energyIsSource)];
+  });
 
-  ngOnInit() {
-    this.calanderizedMeterSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
-      this.setYearOptions();
-      this.setAnalysisOptions();
+  baselineYears: Signal<Array<number>> = computed(() => {
+    this.calendarizedMeters();
+    return this.calanderizationService.getYearOptions('all', true);
+  });
+
+  filteredAnalysisItems: Signal<Array<AnalysisDetailsTableRow>> = computed(() => {
+    const items = this.accountAnalysisItems();
+    const baselineYear = this.selectedBaselineYear();
+    const category = this.selectedCategory();
+    const accountStatusCheck = this.accountStatusCheck();
+    let filtered = [...items];
+    let analysisDetailItems: Array<AnalysisDetailsTableRow> = [];
+    if (baselineYear !== 'All') {
+      filtered = filtered.filter(item => item.baselineYear === baselineYear);
+    }
+    if (category !== 'All') {
+      filtered = filtered.filter(item => item.analysisCategory === category);
+    }
+    filtered.forEach(item => {
+      const status = accountStatusCheck?.getAccountAnalysisStatusCheckById(item.guid);
+      analysisDetailItems.push({ analysisItem: item, statusCheck: status });
+    });
+    return analysisDetailItems;
+  });
+
+
+  constructor() {
+    effect(() => {
+      const form = this.reportForm;
+      const filtered = this.filteredAnalysisItems();
+      const selectedItemId = form?.controls?.['analysisItemId']?.value;
+
+      if (!form || !selectedItemId) {
+        return;
+      }
+      const selectedItem = filtered.find(item => item.analysisItem.guid === selectedItemId);
+      if (!selectedItem) {
+        form.controls['analysisItemId'].patchValue(undefined);
+      }
     });
   }
 
-  ngOnDestroy() {
-    this.calanderizedMeterSub.unsubscribe();
-  }
-
-  setAnalysisOptions() {
-    let analysisOptions: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.energyIsSource });
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
-  }
-
   viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
-    this.itemToEdit = analysisItem;
+    this.itemToEdit.set(analysisItem);
   }
 
   confirmEditItem() {
-    this.accountWorkspaceService.selectAccountAnalysis((this.itemToEdit)?.guid);
+    const item = this.itemToEdit();
+    this.accountWorkspaceService.selectAccountAnalysis(item?.guid);
     this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
   }
 
   cancelEditItem() {
-    this.itemToEdit = undefined;
-  }
-
-  setSelectedAnalysisItem() {
-    let selectedItem: IdbAccountAnalysisItem;
-    if (!this.reportForm || !this.reportForm.controls['analysisItemId'] || !this.reportForm.controls['analysisItemId'].value) {
-      return;
-    }
-
-    //check item is in filtered list
-    selectedItem = this.filteredAnalysisItems.find(item => { return item.guid == this.reportForm.controls.analysisItemId.value });
-    //if item not in list set undefined
-    if (!selectedItem) {
-      this.reportForm.controls['analysisItemId'].patchValue(undefined);
-    }
-  }
-
-  setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true);
-    this.baselineYears = yearOptions;
-  }
-
-  applyFilters() {
-    this.filteredAnalysisItems = [...this.accountAnalysisItems];
-    if (this.selectedBaselineYear != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.baselineYear == this.selectedBaselineYear });
-    }
-    if (this.selectedCategory != 'All') {
-      this.filteredAnalysisItems = this.filteredAnalysisItems.filter(item => { return item.analysisCategory == this.selectedCategory });
-    }
-  }
-
-  onOptionChange() {
-    this.applyFilters();
-    this.setSelectedAnalysisItem();
+    this.itemToEdit.set(undefined);
   }
 }
