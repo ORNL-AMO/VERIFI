@@ -29,4 +29,5 @@
 </div>
 }
 
-<app-facility-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()" (onExportPpt)="downloadPpt()"></app-facility-print-report-button>
+<app-facility-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()"
+  (onExportPpt)="downloadPpt()" [pptReport]="true"></app-facility-print-report-button>

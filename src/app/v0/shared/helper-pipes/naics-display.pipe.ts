@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { getNAICS } from '@shared/form-data/naics-data';
 import { AccountAndFacility } from '@data/models/idbModels/accountAndFacility';
 
@@ -6,6 +6,9 @@ import { AccountAndFacility } from '@data/models/idbModels/accountAndFacility';
     name: 'naicsDisplay',
     standalone: false
 })
+@Injectable({
+  providedIn: 'root'
+}) 
 export class NaicsDisplayPipe implements PipeTransform {
 
   transform(accountOrFacility: AccountAndFacility): string {
