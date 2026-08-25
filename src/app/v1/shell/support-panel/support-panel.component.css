@@ -1,11 +1,14 @@
 :host {
-  display: contents;
+  display: block;
+  grid-area: panel;
+  min-width: 0;
+  min-height: 0;
 }
 
 .v1-panel {
-  grid-area: panel;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
   min-width: 0;
   min-height: 0;
   border-left: 1px solid var(--v1-border);
@@ -112,7 +115,7 @@
 }
 
 @media (max-width: 1160px) {
-  .v1-panel {
+  :host {
     display: none;
   }
 }
