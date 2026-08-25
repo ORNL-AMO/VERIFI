@@ -68,10 +68,7 @@
               <button
                 type="button"
                 class="v1-settings__swatch"
-                [class.v1-settings__swatch--default]="option.id === 'default'"
-                [class.v1-settings__swatch--steel]="option.id === 'steel'"
-                [class.v1-settings__swatch--blueprint]="option.id === 'blueprint'"
-                [class.v1-settings__swatch--forest]="option.id === 'forest'"
+                [ngClass]="option.swatchClass"
                 [class.active]="settings.palette === option.id"
                 (click)="appearance.setPalette(option.id)"
                 [attr.aria-pressed]="settings.palette === option.id"
@@ -93,19 +90,28 @@
             <span class="v1-settings__toggle-track" aria-hidden="true"><span></span></span>
           </button>
 
-          <span class="v1-settings__label">Density</span>
-          <div class="v1-settings__segment" role="group" aria-label="Workspace density">
-            @for (option of densityOptions; track option.id) {
-              <button
-                type="button"
-                [class.active]="settings.density === option.id"
-                (click)="appearance.setDensity(option.id)"
-                [attr.aria-pressed]="settings.density === option.id">
-                <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
-                {{ option.label }}
-              </button>
-            }
-          </div>
+          <button
+            type="button"
+            class="v1-settings__toggle"
+            [class.on]="settings.highContrast"
+            (click)="appearance.toggleHighContrast()"
+            [attr.aria-pressed]="settings.highContrast">
+            <span>High contrast</span>
+            <span class="v1-settings__toggle-track" aria-hidden="true"><span></span></span>
+          </button>
+
+          <label class="v1-settings__setting-row">
+            <span class="v1-settings__label">Background</span>
+            <select
+              class="v1-settings__select"
+              [value]="settings.backgroundPattern"
+              (change)="appearance.setBackgroundPattern($any($event.target).value)"
+              aria-label="Background pattern">
+              @for (option of patternOptions; track option.id) {
+                <option [value]="option.id">{{ option.label }}</option>
+              }
+            </select>
+          </label>
 
           <span class="v1-settings__label">Corners</span>
           <div class="v1-settings__segment" role="group" aria-label="Corner style">

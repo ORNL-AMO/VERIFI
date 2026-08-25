@@ -1,8 +1,15 @@
-.v1-rail {
+:host {
+  display: block;
   grid-area: rail;
+  min-width: 0;
+  min-height: 0;
+}
+
+.v1-rail {
   display: grid;
   align-content: start;
   gap: .45rem;
+  height: 100%;
   min-height: 0;
   padding: .7rem .5rem;
   border-right: 1px solid var(--v1-border);
@@ -40,6 +47,10 @@
 }
 
 @media (max-width: 820px) {
+  :host {
+    flex: 0 0 auto;
+  }
+
   .v1-rail {
     display: flex;
     overflow-x: auto;

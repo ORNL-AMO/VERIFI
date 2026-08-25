@@ -3,29 +3,45 @@ import { LocalStorageService } from 'ngx-webstorage';
 
 const STORAGE_KEY = 'v1Appearance';
 
-export type Palette = 'default' | 'steel' | 'blueprint' | 'forest';
+export type Palette = 'default' | 'steel' | 'blueprint' | 'neon' | 'aurora' | 'forest';
 export type ThemeMode = 'light' | 'dark';
-export type Density = 'comfortable' | 'compact';
 export type CornerStyle = 'soft' | 'square';
+export type BackgroundPattern = 'blueprint-grid' | 'steel-hatch' | 'neon-grid' | 'aurora-flow' | 'topographic-contours';
 
 export interface AppearanceSettings {
   readonly palette: Palette;
   readonly mode: ThemeMode;
-  readonly density: Density;
   readonly cornerStyle: CornerStyle;
+  readonly highContrast: boolean;
+  readonly backgroundPattern: BackgroundPattern;
 }
 
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
   palette: 'default',
   mode: 'light',
-  density: 'comfortable',
-  cornerStyle: 'soft'
+  cornerStyle: 'soft',
+  highContrast: false,
+  backgroundPattern: 'blueprint-grid'
 };
 
-const VALID_PALETTES: ReadonlyArray<Palette> = ['default', 'steel', 'blueprint', 'forest'];
+const VALID_PALETTES: ReadonlyArray<Palette> = ['default', 'steel', 'blueprint', 'neon', 'aurora', 'forest'];
 const VALID_MODES: ReadonlyArray<ThemeMode> = ['light', 'dark'];
-const VALID_DENSITIES: ReadonlyArray<Density> = ['comfortable', 'compact'];
 const VALID_CORNER_STYLES: ReadonlyArray<CornerStyle> = ['soft', 'square'];
+const VALID_BACKGROUND_PATTERNS: ReadonlyArray<BackgroundPattern> = [
+  'blueprint-grid',
+  'steel-hatch',
+  'neon-grid',
+  'aurora-flow',
+  'topographic-contours'
+];
+const PALETTE_BACKGROUND_PATTERNS: Readonly<Record<Palette, BackgroundPattern>> = {
+  default: 'blueprint-grid',
+  steel: 'steel-hatch',
+  blueprint: 'blueprint-grid',
+  neon: 'neon-grid',
+  aurora: 'aurora-flow',
+  forest: 'topographic-contours'
+};
 
 @Injectable({ providedIn: 'root' })
 export class AppearanceService {
@@ -33,15 +49,15 @@ export class AppearanceService {
 
   readonly settings = this.writableSettings.asReadonly();
   readonly isDark = computed(() => this.settings().mode === 'dark');
-  readonly isCompact = computed(() => this.settings().density === 'compact');
   readonly hasSquareCorners = computed(() => this.settings().cornerStyle === 'square');
+  readonly isHighContrast = computed(() => this.settings().highContrast);
 
   constructor(private localStorage: LocalStorageService) {
     this.writableSettings.set(readStoredAppearance(this.localStorage.retrieve(STORAGE_KEY)));
   }
 
   setPalette(palette: Palette): void {
-    this.update({ palette });
+    this.update({ palette, backgroundPattern: PALETTE_BACKGROUND_PATTERNS[palette] });
   }
 
   setMode(mode: ThemeMode): void {
@@ -52,12 +68,20 @@ export class AppearanceService {
     this.setMode(this.isDark() ? 'light' : 'dark');
   }
 
-  setDensity(density: Density): void {
-    this.update({ density });
-  }
-
   setCornerStyle(cornerStyle: CornerStyle): void {
     this.update({ cornerStyle });
+  }
+
+  setHighContrast(highContrast: boolean): void {
+    this.update({ highContrast });
+  }
+
+  toggleHighContrast(): void {
+    this.setHighContrast(!this.isHighContrast());
+  }
+
+  setBackgroundPattern(backgroundPattern: BackgroundPattern): void {
+    this.update({ backgroundPattern });
   }
 
   reset(): void {
@@ -80,10 +104,13 @@ function normalizeAppearance(value: Partial<AppearanceSettings>): AppearanceSett
   return {
     palette: isValid(value.palette, VALID_PALETTES) ? value.palette : DEFAULT_APPEARANCE.palette,
     mode: isValid(value.mode, VALID_MODES) ? value.mode : DEFAULT_APPEARANCE.mode,
-    density: isValid(value.density, VALID_DENSITIES) ? value.density : DEFAULT_APPEARANCE.density,
     cornerStyle: isValid(value.cornerStyle, VALID_CORNER_STYLES)
       ? value.cornerStyle
-      : DEFAULT_APPEARANCE.cornerStyle
+      : DEFAULT_APPEARANCE.cornerStyle,
+    highContrast: typeof value.highContrast === 'boolean' ? value.highContrast : DEFAULT_APPEARANCE.highContrast,
+    backgroundPattern: isValid(value.backgroundPattern, VALID_BACKGROUND_PATTERNS)
+      ? value.backgroundPattern
+      : DEFAULT_APPEARANCE.backgroundPattern
   };
 }
 

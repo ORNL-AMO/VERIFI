@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import {
   AppearanceService,
+  BackgroundPattern,
   CornerStyle,
-  Density,
   Palette
 } from '../../appearance/appearance.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
@@ -10,12 +10,18 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 interface PaletteOption {
   readonly id: Palette;
   readonly label: string;
+  readonly swatchClass: string;
 }
 
 interface SegmentOption<T> {
   readonly id: T;
   readonly label: string;
   readonly icon: string;
+}
+
+interface PatternOption {
+  readonly id: BackgroundPattern;
+  readonly label: string;
 }
 
 @Component({
@@ -29,20 +35,25 @@ export class ShellHeaderComponent {
   readonly appearance = inject(AppearanceService);
 
   readonly paletteOptions: Array<PaletteOption> = [
-    { id: 'default', label: 'Default' },
-    { id: 'steel', label: 'Steel' },
-    { id: 'blueprint', label: 'Blueprint' },
-    { id: 'forest', label: 'Forest' }
-  ];
-
-  readonly densityOptions: Array<SegmentOption<Density>> = [
-    { id: 'comfortable', label: 'Comfort', icon: 'fa-grip' },
-    { id: 'compact', label: 'Compact', icon: 'fa-table-cells' }
+    { id: 'default', label: 'Default', swatchClass: 'v1-settings__swatch--default' },
+    { id: 'steel', label: 'Steel', swatchClass: 'v1-settings__swatch--steel' },
+    { id: 'blueprint', label: 'Blueprint', swatchClass: 'v1-settings__swatch--blueprint' },
+    { id: 'neon', label: 'Neon', swatchClass: 'v1-settings__swatch--neon' },
+    { id: 'aurora', label: 'Aurora', swatchClass: 'v1-settings__swatch--aurora' },
+    { id: 'forest', label: 'Forest', swatchClass: 'v1-settings__swatch--forest' }
   ];
 
   readonly cornerOptions: Array<SegmentOption<CornerStyle>> = [
     { id: 'soft', label: 'Soft', icon: 'fa-square' },
     { id: 'square', label: 'Square', icon: 'fa-vector-square' }
+  ];
+
+  readonly patternOptions: Array<PatternOption> = [
+    { id: 'blueprint-grid', label: 'Blueprint grid' },
+    { id: 'steel-hatch', label: 'Machined hatch' },
+    { id: 'neon-grid', label: 'Neon grid' },
+    { id: 'aurora-flow', label: 'Aurora flow' },
+    { id: 'topographic-contours', label: 'Topographic contours' }
   ];
 
   isSettingsOpen = false;
