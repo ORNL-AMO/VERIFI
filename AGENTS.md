@@ -66,6 +66,7 @@ Use the mode and discoverable skill selected by the [task context index](docs/ag
 - Diagnose before editing when the request asks for analysis, investigation, or review only.
 - Keep changes scoped to the issue and preserve unrelated worktree changes.
 - Use the repository's NgModule-based Angular pattern; components are non-standalone unless the surrounding feature has deliberately migrated.
+- For Angular templates, follow the [Angular template guidance](docs/agents/angular-template-guidance.md) for signal reads, `@let`, computed state, and template-expression review expectations.
 - Follow the risk-based policy in [docs/testing.md](docs/testing.md): protect changed behavior with the lowest-cost valuable automated test, or document why automation is disproportionate and provide focused manual evidence. Do not rely on creation-only `should create` tests.
 - Use `npm run validate:agent -- --mode plan` before final validation to avoid over-running broad or Electron checks for routine web changes.
 - Treat stored user data as durable. Make migrations idempotent and preserve older backups and import formats where supported.
