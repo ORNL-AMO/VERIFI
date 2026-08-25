@@ -68,7 +68,6 @@
   color: var(--v1-text);
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.5;
-  overflow: hidden;
   text-rendering: optimizeLegibility;
 }
 
@@ -76,7 +75,6 @@
   display: block;
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
 }
 
 .v1-root a {
@@ -366,12 +364,6 @@
   white-space: nowrap;
 }
 
-/* Button color semantics:
-   primary = one main recommended/commit action in the local area;
-   secondary/blue = navigation, workspace movement, or structural context changes;
-   success = completed/success/account-context continuation;
-   danger = destructive action;
-   quiet/ghost = cancel, close, support, optional, or low-emphasis alternatives. */
 .v1-btn--primary {
   border-color: var(--v1-primary);
   background: var(--v1-primary);

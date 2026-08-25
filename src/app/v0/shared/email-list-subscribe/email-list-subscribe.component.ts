@@ -1,5 +1,5 @@
 import { Component, inject, Signal } from '@angular/core';
-import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-list-subscribe.service';
+import { EmailListSubscribeService } from '@v0/shared/email-list-subscribe/email-list-subscribe.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -17,7 +17,7 @@ export class EmailListSubscribeComponent {
 
   subscriberEmail: string;
   invalidEmailMessage: string;
-  submittedStatus: Signal<'error' | 'success' | 'sending' | undefined> = toSignal(this.emailSubscribeService.submittedStatus, { initialValue: undefined });
+  submittedStatus: Signal<'error' | 'success' | 'sending'> = toSignal(this.emailSubscribeService.submittedStatus, { initialValue: undefined });
 
   inHomeScreen: Signal<boolean> = toSignal(
     this.router.events.pipe(

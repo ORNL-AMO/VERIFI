@@ -1,198 +1,71 @@
-@let recent = recentAccount();
-
 <main class="v1-welcome" aria-labelledby="v1-welcome-title">
   <section class="v1-welcome__hero">
-    <div class="v1-welcome__copy">
-      <p class="v1-eyebrow">Utility tracking and analysis</p>
-      <h1 id="v1-welcome-title">VERIFI</h1>
-      @if(recent){
-      <p>
-        Track corporate and facility utility data, evaluate performance, and prepare reports from one practical
-        manufacturing workspace.
-      </p>
-      }
-      <div class="v1-welcome__hero-actions">
-        @if(recent){
-        <a class="v1-btn v1-btn--quiet" href="https://industrialresources.ornl.gov/verifi/home" target="_blank"
-          rel="noreferrer">
-          ORNL Industrial Resources
-        </a>
-        <button type="button" class="v1-btn v1-btn--primary" [disabled]="!!loadingAccountGuid()"
-          (click)="openRecentAccount()">
-          Return to recent account
-          <span class="fa fa-arrow-right" aria-hidden="true"></span>
-        </button>
-        }
-      </div>
-    </div>
-
-    <aside class="v1-welcome__snapshot" aria-label="Recent workspace snapshot">
-      @if (!recent) {
-      <blockquote class="v1-welcome__snapshot-quote">
-        <p>
-          Welcome to VERIFI! We're glad you're here. VERIFI is a free tool from Oak Ridge National Laboratory
-          that helps you make sense of how your facilities use energy and utilities — clearly, quickly, and
-          without needing to be an expert. Thank you for being part of this work.
-        </p>
-        <footer class="v1-welcome__snapshot-quote-attr">— The team at ORNL</footer>
-      </blockquote>
-      } @else {
-      <span>Recent workspace</span>
-      <strong>{{ recent.name }}</strong>
-      <dl>
-        <div>
-          <dt>Type</dt>
-          <dd>{{ accountTypeLabel(recent) }}</dd>
-        </div>
-        <div>
-          <dt>Updated</dt>
-          <dd>{{ formatModifiedDate(recent) }}</dd>
-        </div>
-        <div>
-          <dt>Status</dt>
-          <dd>Ready</dd>
-        </div>
-      </dl>
-      }
-    </aside>
-  </section>
-
-  <section class="v1-welcome__actions" aria-labelledby="v1-start-title">
-    <div class="v1-section-heading">
-      <div>
-        <p class="v1-eyebrow">Get started</p>
-      </div>
-    </div>
-    <div class="v1-welcome__action-grid">
-      @for (action of actions(); track action.title) {
-      <article [class]="'v1-welcome__action v1-welcome__action--' + action.tone">
-        <div class="v1-welcome__action-icon">
-          <span class="fa {{ action.icon }}" aria-hidden="true"></span>
-        </div>
-        <h3>{{ action.title }}</h3>
-        <p>{{ action.summary }}</p>
-        <button type="button" [class]="'v1-btn ' + getActionButtonClass(action.tone)"
-          [disabled]="!!loadingAccountGuid()" (click)="openPanel(action.action)">
-          {{ action.cta }}
-        </button>
-      </article>
-      }
+    <p class="v1-eyebrow">VERIFI v1</p>
+    <h1 id="v1-welcome-title">Utility tracking workspace</h1>
+    <p>
+      Open an existing account in the production v1 shell. Account setup, imports, and example loading remain available
+      in current VERIFI while the v1 workflows are built out.
+    </p>
+    <div class="v1-welcome__hero-actions">
+      <a class="v1-btn v1-btn--primary" routerLink="/welcome">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+        Create or Import Account
+      </a>
+      <a class="v1-btn v1-btn--quiet" routerLink="/welcome">
+        <span class="fa fa-arrow-left" aria-hidden="true"></span>
+        Current VERIFI
+      </a>
     </div>
   </section>
 
   @if (errorMessage(); as message) {
-  <section class="v1-alert v1-alert--danger" role="alert">
-    <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
-    <span>{{ message }}</span>
-  </section>
+    <section class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>{{ message }}</span>
+    </section>
   }
 
-  <section class="v1-welcome__portfolio" aria-labelledby="v1-accounts-title">
+  <section class="v1-welcome__accounts" aria-labelledby="v1-accounts-title">
     @let accountList = accounts();
     @let loadingGuid = loadingAccountGuid();
 
     <div class="v1-section-heading">
-      <div>
-        <p class="v1-eyebrow">Account portfolio</p>
-      </div>
-      <span>{{ accountCountLabel() }}</span>
+      <p class="v1-eyebrow">Account Portfolio</p>
+      <h2 id="v1-accounts-title">Choose a workspace</h2>
     </div>
 
     @if (accountList.length === 0) {
-    <article class="v1-empty-state">
-      <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
-      <h3>No accounts are available</h3>
-      <p>Use the get started options above to create, import, or load an account.</p>
-    </article>
+      <article class="v1-empty-state">
+        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <h3>No accounts are available</h3>
+        <p>Create a new account, upload an account backup, or load example data from current VERIFI.</p>
+        <a class="v1-btn v1-btn--primary" routerLink="/welcome">Go to Current VERIFI</a>
+      </article>
     } @else {
-    <div class="v1-account-grid">
-      @for (account of accountList; track account.guid) {
-      <button type="button" class="v1-account-card" [disabled]="!!loadingGuid" (click)="openAccount(account)"
-        [attr.aria-label]="'Open ' + account.name + ' in v1 workspace'">
-        <span class="v1-account-card__icon fa fa-building" aria-hidden="true"></span>
-        <span>
-          <strong>{{ account.name }}</strong>
-          <small>{{ formatModifiedDate(account) }}</small>
-        </span>
-        <span class="v1-account-card__meta">
-          {{ accountTypeLabel(account) }}
-        </span>
-        @if (loadingGuid === account.guid) {
-        <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
-        } @else {
-        <span class="fa fa-arrow-right" aria-hidden="true"></span>
+      <div class="v1-account-grid">
+        @for (account of accountList; track account.guid) {
+          <button
+            type="button"
+            class="v1-account-card"
+            [disabled]="!!loadingGuid"
+            (click)="openAccount(account)"
+            [attr.aria-label]="'Open ' + account.name + ' in v1 workspace'">
+            <span class="v1-account-card__icon fa fa-building" aria-hidden="true"></span>
+            <span>
+              <strong>{{ account.name }}</strong>
+              <small>{{ formatModifiedDate(account) }}</small>
+            </span>
+            <span class="v1-account-card__meta">
+              {{ account.isSingleFacilityCompany ? 'Single facility' : 'Portfolio' }}
+            </span>
+            @if (loadingGuid === account.guid) {
+              <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            } @else {
+              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            }
+          </button>
         }
-      </button>
-      }
-    </div>
+      </div>
     }
   </section>
-
-  <section class="v1-welcome__support" aria-label="Help, email list, and feedback">
-    <article>
-      <h2>ORNL Industrial Resources</h2>
-      <p>
-        For more information about VERIFI and related resources, visit
-        <a href="https://industrialresources.ornl.gov/verifi/home" target="_blank" rel="noreferrer">ORNL's Industrial
-          Resources</a>.
-      </p>
-      <p>
-        Dynamic help is available throughout VERIFI through the <span class="fa fa-question-circle"
-          aria-hidden="true"></span> help icon.
-      </p>
-    </article>
-    <article>
-      <app-email-list-signup></app-email-list-signup>
-    </article>
-    <article>
-      <h2>Contact and Feedback</h2>
-      <p>
-        If you have feedback or would like to contact the team behind VERIFI, reach out at
-        <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a>.
-      </p>
-    </article>
-  </section>
-
-  <section class="v1-experience-switcher" aria-labelledby="v1-experience-switcher-title">
-    <div class="v1-experience-switcher__intro">
-      <p class="v1-eyebrow">Experience switcher</p>
-      <h2 id="v1-experience-switcher-title">Move between VERIFI versions</h2>
-      <p>
-        Compare the current production workspace, the P1 prototype, and this new v1 production shell as the unified UX
-        takes shape.
-      </p>
-    </div>
-    <div class="v1-experience-switcher__options" aria-label="VERIFI experience options">
-      <a class="v1-experience-switcher__option" routerLink="/welcome">
-        <span>Current VERIFI</span>
-        <strong>Use the established app</strong>
-        <small>Full production workflows and existing navigation.</small>
-      </a>
-      <a class="v1-experience-switcher__option" routerLink="/p1">
-        <span>P1 prototype</span>
-        <strong>Explore the prototype</strong>
-        <small>Prototype workspace for testing the unified direction.</small>
-      </a>
-      <div class="v1-experience-switcher__option v1-experience-switcher__option--active" aria-current="page">
-        <span>v1 shell</span>
-        <strong>You are in v1</strong>
-        <small>The opt-in space where real v1 pages are landing.</small>
-      </div>
-    </div>
-  </section>
-
-  @if (activePanel() === 'create') {
-  <app-create-account-panel (closed)="closePanel()"
-    (completed)="openCreatedOrImportedAccount($any($event))"></app-create-account-panel>
-  }
-
-  @if (activePanel() === 'import') {
-  <app-import-account-backup-panel (closed)="closePanel()"
-    (completed)="openCreatedOrImportedAccount($any($event))"></app-import-account-backup-panel>
-  }
-
-  @if (activePanel() === 'example') {
-  <app-example-account-panel (closed)="closePanel()"
-    (completed)="openCreatedOrImportedAccount($any($event))"></app-example-account-panel>
-  }
 </main>
