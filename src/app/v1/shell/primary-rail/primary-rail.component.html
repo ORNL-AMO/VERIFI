@@ -1,10 +1,12 @@
 <nav class="v1-rail" aria-label="Primary workspace navigation">
+  @let activeSection = navigation.activeSection();
+
   @for (section of navigation.sections(); track section.id) {
     @if (section.enabled) {
       <button
         type="button"
         class="active"
-        [attr.aria-current]="navigation.activeSection() === section.id ? 'page' : null">
+        [attr.aria-current]="activeSection === section.id ? 'page' : null">
         <span [class]="'fa ' + section.icon" aria-hidden="true"></span>
         <span>{{ section.shortLabel }}</span>
       </button>

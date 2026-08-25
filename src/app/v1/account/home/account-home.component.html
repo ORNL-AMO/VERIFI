@@ -1,5 +1,7 @@
 <article class="v1-home v1-home--account" aria-labelledby="v1-account-home-title">
   @if (navigation.account(); as account) {
+    @let content = navigation.panelContent();
+
     <p class="v1-eyebrow">Account Home</p>
     <h1 id="v1-account-home-title">{{ account.name }}</h1>
     <p class="v1-home__summary">
@@ -14,15 +16,15 @@
       </article>
       <article>
         <span>Meters</span>
-        <strong>{{ navigation.panelContent().results[1].value }}</strong>
+        <strong>{{ content.results[1].value }}</strong>
       </article>
       <article>
         <span>Analyses</span>
-        <strong>{{ navigation.panelContent().results[3].value }}</strong>
+        <strong>{{ content.results[3].value }}</strong>
       </article>
       <article>
         <span>Reports</span>
-        <strong>{{ navigation.panelContent().results[4].value }}</strong>
+        <strong>{{ content.results[4].value }}</strong>
       </article>
     </div>
   }

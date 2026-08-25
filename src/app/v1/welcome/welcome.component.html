@@ -26,12 +26,15 @@
   }
 
   <section class="v1-welcome__accounts" aria-labelledby="v1-accounts-title">
+    @let accountList = accounts();
+    @let loadingGuid = loadingAccountGuid();
+
     <div class="v1-section-heading">
       <p class="v1-eyebrow">Account Portfolio</p>
       <h2 id="v1-accounts-title">Choose a workspace</h2>
     </div>
 
-    @if (accounts().length === 0) {
+    @if (accountList.length === 0) {
       <article class="v1-empty-state">
         <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
         <h3>No accounts are available</h3>
@@ -40,11 +43,11 @@
       </article>
     } @else {
       <div class="v1-account-grid">
-        @for (account of accounts(); track account.guid) {
+        @for (account of accountList; track account.guid) {
           <button
             type="button"
             class="v1-account-card"
-            [disabled]="!!loadingAccountGuid()"
+            [disabled]="!!loadingGuid"
             (click)="openAccount(account)"
             [attr.aria-label]="'Open ' + account.name + ' in v1 workspace'">
             <span class="v1-account-card__icon fa fa-building" aria-hidden="true"></span>
@@ -55,7 +58,7 @@
             <span class="v1-account-card__meta">
               {{ account.isSingleFacilityCompany ? 'Single facility' : 'Portfolio' }}
             </span>
-            @if (loadingAccountGuid() === account.guid) {
+            @if (loadingGuid === account.guid) {
               <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
             } @else {
               <span class="fa fa-arrow-right" aria-hidden="true"></span>

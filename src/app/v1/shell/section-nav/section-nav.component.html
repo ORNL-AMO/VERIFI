@@ -1,16 +1,21 @@
 <aside class="v1-nav" aria-label="Section navigation">
+  @let contextMode = navigation.contextMode();
+  @let facilities = navigation.facilities();
+  @let selectedFacility = navigation.facility();
+  @let account = navigation.account();
+
   <div class="v1-nav__context" role="group" aria-label="Switch workspace context">
     <button
       type="button"
-      [class.active]="navigation.contextMode() === 'account'"
+      [class.active]="contextMode === 'account'"
       (click)="navigation.setContext('account')">
       <span class="fa fa-building" aria-hidden="true"></span>
       Account
     </button>
     <button
       type="button"
-      [class.active]="navigation.contextMode() === 'facility'"
-      [disabled]="navigation.facilities().length === 0"
+      [class.active]="contextMode === 'facility'"
+      [disabled]="facilities.length === 0"
       (click)="navigation.setContext('facility')">
       <span class="fa fa-industry" aria-hidden="true"></span>
       Facility
@@ -21,9 +26,9 @@
     <span id="v1-home-nav-title" class="v1-nav__label">Home</span>
     <a
       class="active"
-      [routerLink]="navigation.contextMode() === 'facility' && navigation.facility()
-        ? navigation.facilityRoute(navigation.facility()!.guid)
-        : navigation.accountRoute(navigation.account()!.guid)"
+      [routerLink]="contextMode === 'facility' && selectedFacility
+        ? navigation.facilityRoute(selectedFacility.guid)
+        : navigation.accountRoute(account!.guid)"
       aria-current="page">
       <span class="fa fa-chart-pie" aria-hidden="true"></span>
       Overview

@@ -1,3 +1,5 @@
+@let isWorkspaceRoute = navigation.isWorkspaceRoute();
+
 <header class="v1-workspace__header" aria-label="Workspace header">
   @if (isSettingsOpen) {
     <button type="button" class="v1-workspace__backdrop" (click)="closeSettings()" aria-label="Close appearance menu"></button>
@@ -8,7 +10,10 @@
     <span>v1</span>
   </button>
 
-  @if (navigation.isWorkspaceRoute()) {
+  @if (isWorkspaceRoute) {
+    @let facilities = navigation.facilities();
+    @let selectedFacility = navigation.facility();
+
     <div class="v1-workspace__context" aria-label="Active workspace context">
       @if (navigation.account(); as account) {
         <button type="button" class="v1-context-pill v1-context-pill--account" (click)="navigation.setContext('account')">
@@ -17,14 +22,14 @@
         </button>
       }
 
-      @if (navigation.facilities().length > 0) {
+      @if (facilities.length > 0) {
         <div class="v1-context-select">
           <span class="fa fa-industry" aria-hidden="true"></span>
           <select
-            [value]="navigation.facility()?.guid || ''"
+            [value]="selectedFacility?.guid || ''"
             (change)="navigation.setFacility($any($event.target).value)"
             aria-label="Select facility">
-            @for (facility of navigation.facilities(); track facility.guid) {
+            @for (facility of facilities; track facility.guid) {
               <option [value]="facility.guid">{{ facility.name }}</option>
             }
           </select>
@@ -53,6 +58,9 @@
       </button>
 
       @if (isSettingsOpen) {
+        @let settings = appearance.settings();
+        @let isDark = appearance.isDark();
+
         <div class="v1-settings__menu" role="menu" aria-label="Appearance settings">
           <span class="v1-settings__label">Palette</span>
           <div class="v1-settings__palette" role="group" aria-label="Color palette">
@@ -64,9 +72,9 @@
                 [class.v1-settings__swatch--steel]="option.id === 'steel'"
                 [class.v1-settings__swatch--blueprint]="option.id === 'blueprint'"
                 [class.v1-settings__swatch--forest]="option.id === 'forest'"
-                [class.active]="appearance.settings().palette === option.id"
+                [class.active]="settings.palette === option.id"
                 (click)="appearance.setPalette(option.id)"
-                [attr.aria-pressed]="appearance.settings().palette === option.id"
+                [attr.aria-pressed]="settings.palette === option.id"
                 [attr.aria-label]="option.label + ' palette'">
                 <span aria-hidden="true"></span>
                 {{ option.label }}
@@ -78,9 +86,9 @@
           <button
             type="button"
             class="v1-settings__toggle"
-            [class.on]="appearance.isDark()"
+            [class.on]="isDark"
             (click)="appearance.toggleMode()"
-            [attr.aria-pressed]="appearance.isDark()">
+            [attr.aria-pressed]="isDark">
             <span>Dark mode</span>
             <span class="v1-settings__toggle-track" aria-hidden="true"><span></span></span>
           </button>
@@ -90,9 +98,9 @@
             @for (option of densityOptions; track option.id) {
               <button
                 type="button"
-                [class.active]="appearance.settings().density === option.id"
+                [class.active]="settings.density === option.id"
                 (click)="appearance.setDensity(option.id)"
-                [attr.aria-pressed]="appearance.settings().density === option.id">
+                [attr.aria-pressed]="settings.density === option.id">
                 <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
                 {{ option.label }}
               </button>
@@ -104,9 +112,9 @@
             @for (option of cornerOptions; track option.id) {
               <button
                 type="button"
-                [class.active]="appearance.settings().cornerStyle === option.id"
+                [class.active]="settings.cornerStyle === option.id"
                 (click)="appearance.setCornerStyle(option.id)"
-                [attr.aria-pressed]="appearance.settings().cornerStyle === option.id">
+                [attr.aria-pressed]="settings.cornerStyle === option.id">
                 <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
                 {{ option.label }}
               </button>
@@ -116,14 +124,16 @@
       }
     </div>
 
-    @if (navigation.isWorkspaceRoute()) {
+    @if (isWorkspaceRoute) {
+      @let isSupportPanelOpen = navigation.isSupportPanelOpen();
+
       <button
         type="button"
         class="v1-icon-btn"
         (click)="navigation.toggleSupportPanel()"
-        [attr.aria-pressed]="navigation.isSupportPanelOpen()"
+        [attr.aria-pressed]="isSupportPanelOpen"
         aria-label="Toggle support panel">
-        <span [class]="'fa ' + (navigation.isSupportPanelOpen() ? 'fa-chevron-right' : 'fa-chevron-left')" aria-hidden="true"></span>
+        <span [class]="'fa ' + (isSupportPanelOpen ? 'fa-chevron-right' : 'fa-chevron-left')" aria-hidden="true"></span>
       </button>
     }
   </div>

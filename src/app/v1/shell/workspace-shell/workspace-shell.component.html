@@ -1,8 +1,11 @@
+@let isSupportPanelOpen = navigation.isSupportPanelOpen();
+@let contextMode = navigation.contextMode();
+
 <main
   class="v1-workspace"
-  [class.v1-workspace--panel-closed]="!navigation.isSupportPanelOpen()"
-  [class.v1-workspace--account]="navigation.contextMode() === 'account'"
-  [class.v1-workspace--facility]="navigation.contextMode() === 'facility'"
+  [class.v1-workspace--panel-closed]="!isSupportPanelOpen"
+  [class.v1-workspace--account]="contextMode === 'account'"
+  [class.v1-workspace--facility]="contextMode === 'facility'"
   aria-label="v1 account workspace">
   <app-primary-rail></app-primary-rail>
   <app-section-nav></app-section-nav>
@@ -11,7 +14,7 @@
     <router-outlet></router-outlet>
   </section>
 
-  @if (navigation.isSupportPanelOpen()) {
+  @if (isSupportPanelOpen) {
     <app-support-panel></app-support-panel>
   }
 </main>
