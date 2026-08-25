@@ -1,0 +1,117 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: block;
+}
+
+.v1-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: var(--v1-backdrop);
+}
+
+.v1-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--v1-drawer-width-wide);
+  max-width: 100%;
+  height: 100%;
+  border-left: 1px solid var(--v1-border);
+  background: var(--v1-surface);
+  color: var(--v1-text);
+  box-shadow: -1rem 0 2.5rem var(--v1-shadow);
+}
+
+.v1-drawer__header,
+.v1-drawer__body,
+.v1-example-list,
+.v1-example,
+.v1-example__details {
+  display: grid;
+  gap: var(--v1-space-3);
+}
+
+.v1-drawer__header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  padding: var(--v1-space-4);
+  border-bottom: 1px solid var(--v1-border);
+}
+
+.v1-drawer__header h2,
+.v1-drawer__header p,
+.v1-drawer__intro,
+.v1-example h3,
+.v1-example p {
+  margin: 0;
+}
+
+.v1-drawer__body {
+  align-content: start;
+  overflow: auto;
+  padding: var(--v1-space-4);
+}
+
+.v1-drawer__intro,
+.v1-example p {
+  color: var(--v1-muted);
+}
+
+.v1-icon-btn {
+  display: inline-grid;
+  width: var(--v1-control-height);
+  height: var(--v1-control-height);
+  place-items: center;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-panel);
+}
+
+.v1-example {
+  padding: 1rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-panel);
+}
+
+.v1-example__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--v1-space-3);
+}
+
+.v1-example__header > .fa {
+  color: var(--v1-account);
+  font-size: 1.45rem;
+}
+
+.v1-example__highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.v1-example__highlights span {
+  padding: .2rem .45rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-pill);
+  background: var(--v1-surface);
+  color: var(--v1-muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.v1-example .v1-btn {
+  justify-self: start;
+}
+
+@media (max-width: 640px) {
+  .v1-drawer {
+    width: 100%;
+  }
+}

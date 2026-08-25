@@ -1,0 +1,71 @@
+<button
+  type="button"
+  class="v1-drawer-backdrop"
+  aria-label="Close example account panel"
+  [disabled]="!!loadingExamplePath"
+  (click)="close()"></button>
+
+<aside class="v1-drawer" role="dialog" aria-modal="true" aria-labelledby="v1-example-title">
+  <header class="v1-drawer__header">
+    <div>
+      <p class="v1-eyebrow">Example accounts</p>
+      <h2 id="v1-example-title">Load Example Account</h2>
+    </div>
+    <button
+      type="button"
+      class="v1-icon-btn"
+      title="Close example account panel"
+      aria-label="Close example account panel"
+      [disabled]="!!loadingExamplePath"
+      (click)="close()">
+      <span class="fa fa-xmark" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="v1-drawer__body">
+    <p class="v1-drawer__intro">
+      Example accounts create a real VERIFI workspace with demonstration data so you can explore setup, utility data,
+      analysis, reports, and account navigation without building an account from scratch.
+    </p>
+
+    @if (loadError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+        <span>{{ loadError }}</span>
+      </div>
+    }
+
+    <div class="v1-example-list">
+      @for (example of examples; track example.assetPath) {
+        <article class="v1-example">
+          <div class="v1-example__header">
+            <div>
+              <h3>{{ example.title }}</h3>
+              <p>{{ example.summary }}</p>
+            </div>
+            <span class="fa fa-industry" aria-hidden="true"></span>
+          </div>
+          <div class="v1-example__highlights" aria-label="Example contents">
+            @for (highlight of example.highlights; track highlight) {
+              <span>{{ highlight }}</span>
+            }
+          </div>
+          <div class="v1-example__details">
+            @for (detail of example.details; track detail) {
+              <p>{{ detail }}</p>
+            }
+          </div>
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="!!loadingExamplePath" (click)="loadExample(example)">
+            @if (loadingExamplePath === example.assetPath) {
+              <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+              Loading
+            } @else {
+              {{ example.cta }}
+              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            }
+          </button>
+        </article>
+      }
+    </div>
+  </div>
+</aside>

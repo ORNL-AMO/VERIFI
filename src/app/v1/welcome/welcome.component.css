@@ -1,59 +1,219 @@
 .v1-welcome {
   display: grid;
-  gap: 1rem;
-  max-width: 76rem;
+  gap: 1.25rem;
+  width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2.5rem) 0 3rem;
 }
 
 .v1-welcome__hero {
   display: grid;
-  gap: .85rem;
-  padding: clamp(1rem, 3vw, 2rem) 0;
-  border-bottom: 1px solid var(--v1-border);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 1fr);
+  gap: 1rem;
+  min-height: 24rem;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--v1-account) 88%, transparent), color-mix(in srgb, var(--v1-facility) 94%, transparent)), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 48px);
+  color: #fff;
+  overflow: hidden;
 }
 
-.v1-welcome__hero h1,
-.v1-welcome__hero p,
-.v1-section-heading h2,
-.v1-section-heading p,
-.v1-empty-state h3,
-.v1-empty-state p {
+.v1-welcome__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 44rem;
+}
+
+.v1-welcome h1,
+.v1-welcome h2,
+.v1-welcome h3,
+.v1-welcome p {
   margin: 0;
 }
 
 .v1-welcome__hero h1 {
-  color: var(--v1-text);
-  font-size: 3rem;
-  line-height: 1.05;
+  color: #fff;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  line-height: .95;
+}
+
+.v1-welcome__hero h1::first-letter {
+  color: var(--v1-primary);
 }
 
 .v1-welcome__hero p {
-  max-width: 48rem;
-  color: var(--v1-muted);
-  font-size: 1rem;
+  max-width: 38rem;
+  color: rgba(255, 255, 255, .86);
+  font-size: 1.12rem;
+}
+
+.v1-welcome__hero-actions,
+.v1-welcome__support {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
 }
 
 .v1-welcome__hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .65rem;
+  margin-top: 1.5rem;
 }
 
-.v1-welcome__accounts {
+.v1-welcome__snapshot {
+  align-self: center;
   display: grid;
-  gap: .85rem;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: var(--v1-radius);
+  background: rgba(255, 255, 255, .1);
+}
+
+.v1-welcome__snapshot span,
+.v1-welcome__snapshot dt,
+.v1-welcome__snapshot dd,
+.v1-welcome__snapshot p {
+  color: rgba(255, 255, 255, .78);
+  font-weight: 700;
+}
+
+.v1-welcome__snapshot strong,
+.v1-account-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v1-welcome__snapshot strong {
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+.v1-welcome__snapshot dl,
+.v1-welcome__actions,
+.v1-welcome__portfolio,
+.v1-welcome__action,
+.v1-welcome__support article,
+.v1-experience-switcher,
+.v1-experience-switcher__option {
+  display: grid;
+  gap: 1rem;
+}
+
+.v1-welcome__snapshot dl {
+  margin: 0;
+}
+
+.v1-welcome__snapshot div {
+  display: flex;
+  justify-content: space-between;
+  gap: .75rem;
+  padding-top: .6rem;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+}
+
+.v1-welcome__snapshot dd {
+  margin: 0;
+  text-align: right;
+}
+
+.v1-welcome__actions,
+.v1-welcome__portfolio,
+.v1-welcome__support article,
+.v1-experience-switcher {
+  padding: 1rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-section-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .v1-section-heading h2 {
   color: var(--v1-text);
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+}
+
+.v1-section-heading > span,
+.v1-welcome__action p,
+.v1-welcome__support p,
+.v1-experience-switcher p,
+.v1-experience-switcher small,
+.v1-account-card small,
+.v1-account-card__meta {
+  color: var(--v1-muted);
+}
+
+.v1-section-heading > span,
+.v1-experience-switcher__option span {
+  font-size: .85rem;
+  font-weight: 800;
+}
+
+.v1-welcome__action-grid,
+.v1-account-grid,
+.v1-experience-switcher__options {
+  display: grid;
+  gap: .75rem;
+}
+
+.v1-welcome__action-grid,
+.v1-experience-switcher__options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.v1-welcome__action {
+  align-content: start;
+  min-height: 15rem;
+  padding: 1rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-panel);
+}
+
+.v1-welcome__action h3 {
+  color: var(--v1-text);
+  font-size: 1.05rem;
+}
+
+.v1-welcome__action-icon,
+.v1-account-card__icon {
+  display: grid;
+  place-items: center;
+  border-radius: var(--v1-radius-sm);
+}
+
+.v1-welcome__action-icon {
+  width: 2.3rem;
+  height: 2.3rem;
+  background: color-mix(in srgb, var(--v1-facility) 10%, transparent);
+  color: var(--v1-facility);
+}
+
+.v1-welcome__action--primary .v1-welcome__action-icon {
+  background: color-mix(in srgb, var(--v1-primary) 12%, transparent);
+  color: var(--v1-primary);
+}
+
+.v1-welcome__action--success .v1-welcome__action-icon {
+  background: color-mix(in srgb, var(--v1-success) 12%, transparent);
+  color: var(--v1-success);
+}
+
+.v1-welcome__action .v1-btn {
+  align-self: end;
+  justify-self: start;
 }
 
 .v1-account-grid {
-  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  gap: .75rem;
 }
 
 .v1-account-card {
@@ -84,11 +244,8 @@
 }
 
 .v1-account-card__icon {
-  display: inline-grid;
   width: 2.25rem;
   height: 2.25rem;
-  place-items: center;
-  border-radius: var(--v1-radius-sm);
   background: color-mix(in srgb, var(--v1-account) 12%, var(--v1-surface));
   color: var(--v1-account);
 }
@@ -98,22 +255,13 @@
   display: block;
 }
 
-.v1-account-card strong {
-  overflow: hidden;
-  color: var(--v1-text);
-  font-size: .98rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .v1-account-card small,
 .v1-account-card__meta {
-  color: var(--v1-muted);
   font-size: .78rem;
 }
 
-.v1-account-card__meta {
-  white-space: nowrap;
+.v1-account-card > span:nth-child(2) {
+  min-width: 0;
 }
 
 .v1-empty-state {
@@ -131,9 +279,73 @@
   font-size: 1.5rem;
 }
 
+.v1-welcome__snapshot-quote {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-style: italic;
+  color: var(--v1-text);
+}
+
+.v1-welcome__snapshot-quote footer,
+.v1-welcome__snapshot-quote-attr {
+  margin-top: .5rem;
+  font-style: normal;
+  font-size: .85rem;
+  color: rgba(255, 255, 255, .55);
+}
+
+.v1-welcome__support article {
+  flex: 1 1 17rem;
+  align-content: start;
+}
+
+.v1-experience-switcher {
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+}
+
+.v1-experience-switcher__option {
+  min-height: 8.5rem;
+  padding: .85rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-panel);
+  color: var(--v1-text);
+  text-decoration: none;
+}
+
+.v1-experience-switcher__option--active {
+  border-color: var(--v1-primary);
+  background: color-mix(in srgb, var(--v1-primary) 8%, var(--v1-panel));
+}
+
+.v1-experience-switcher__option span {
+  width: fit-content;
+  padding: .2rem .45rem;
+  border-radius: var(--v1-radius-pill);
+  background: color-mix(in srgb, var(--v1-facility) 10%, transparent);
+  color: var(--v1-facility);
+}
+
+.v1-experience-switcher__option--active span {
+  background: var(--v1-primary);
+  color: #fff;
+}
+
 @media (max-width: 640px) {
+  .v1-welcome {
+    width: min(100%, calc(100% - 1rem));
+  }
+
+  .v1-welcome__hero,
+  .v1-experience-switcher,
+  .v1-welcome__action-grid,
+  .v1-experience-switcher__options {
+    grid-template-columns: 1fr;
+  }
+
   .v1-welcome__hero h1 {
-    font-size: 2rem;
+    font-size: 3rem;
   }
 
   .v1-account-card {

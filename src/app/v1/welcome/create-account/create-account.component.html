@@ -1,0 +1,74 @@
+<button
+  type="button"
+  class="v1-drawer-backdrop"
+  aria-label="Close create account panel"
+  [disabled]="isCreating"
+  (click)="close()"></button>
+
+<aside class="v1-drawer" role="dialog" aria-modal="true" aria-labelledby="v1-create-account-title">
+  <header class="v1-drawer__header">
+    <div>
+      <p class="v1-eyebrow">New workspace</p>
+      <h2 id="v1-create-account-title">Create Account</h2>
+    </div>
+    <button
+      type="button"
+      class="v1-icon-btn"
+      title="Close create account panel"
+      aria-label="Close create account panel"
+      [disabled]="isCreating"
+      (click)="close()">
+      <span class="fa fa-xmark" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="v1-drawer__body">
+    <p class="v1-drawer__intro" id="v1-create-account-description">
+      Start with an account name. Facility setup will be added in a later v1 workflow.
+    </p>
+
+    @if (createError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+        <span>{{ createError }}</span>
+      </div>
+    }
+
+    <form
+      class="v1-form"
+      aria-describedby="v1-create-account-description"
+      (ngSubmit)="createAccount()">
+      <label class="v1-form__field" for="v1-account-name">
+        <span>Account name <b>*</b></span>
+        <input
+          id="v1-account-name"
+          type="text"
+          [value]="createForm.controls.name.value"
+          maxlength="42"
+          autocomplete="organization"
+          [attr.aria-invalid]="accountNameInvalid"
+          aria-describedby="v1-account-name-error"
+          (input)="setAccountName($event)"
+          (blur)="createForm.controls.name.markAsTouched()">
+      </label>
+      @if (accountNameInvalid) {
+        <em id="v1-account-name-error" class="v1-field-error">Account name is required.</em>
+      } @else {
+        <small id="v1-account-name-error" class="v1-field-hint">Use the company, portfolio, or site name you recognize.</small>
+      }
+
+      <div class="v1-drawer__actions">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
+        <button type="submit" class="v1-btn v1-btn--primary" [disabled]="isCreating || createForm.invalid || !createForm.controls.name.value.trim()">
+          @if (isCreating) {
+            <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+            Creating
+          } @else {
+            Create account
+            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</aside>
