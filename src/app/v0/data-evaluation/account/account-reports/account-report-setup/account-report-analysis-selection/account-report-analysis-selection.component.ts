@@ -44,8 +44,7 @@ export class AccountReportAnalysisSelectionComponent {
   accountStatusCheck = toSignal(this.accountStatusCheckService.accountStatusCheck);
 
   accountAnalysisItems: Signal<Array<IdbAccountAnalysisItem>> = computed(() => {
-    this.calendarizedMeters();
-    return [...this.accountWorkspaceStore.accountAnalyses().filter(option => option.energyIsSource)];
+    return this.accountWorkspaceStore.accountAnalyses().filter(option => option.energyIsSource);
   });
 
   baselineYears: Signal<Array<number>> = computed(() => {

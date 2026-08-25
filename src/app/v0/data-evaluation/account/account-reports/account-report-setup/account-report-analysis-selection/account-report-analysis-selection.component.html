@@ -1,3 +1,6 @@
+@let _filteredAnalysisItems = filteredAnalysisItems();
+@let _itemToEdit = itemToEdit();
+
 <div class="d-flex align-items-center justify-content-center mb-4 p-3 rounded shadow-sm bg-light border">
     <div class="pe-4 select-width">
         <label class="form-label fw-bold">
@@ -27,7 +30,7 @@
     </div>
 </div>
 
-@if (filteredAnalysisItems() && filteredAnalysisItems().length > 0) {
+@if (_filteredAnalysisItems && _filteredAnalysisItems.length > 0) {
 <form [formGroup]="reportForm">
     <div class="col-12">
         <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
@@ -61,7 +64,7 @@
                 </thead>
 
                 <tbody class="table-group-divider">
-                    @for (filteredItem of filteredAnalysisItems(); track filteredItem.analysisItem.guid) {
+                    @for (filteredItem of _filteredAnalysisItems; track filteredItem.analysisItem.guid) {
                     <tr>
                         <td class="text-center">
                             <input type="radio" class="form-check-input" formControlName="analysisItemId"
@@ -139,16 +142,16 @@
 </form>
 }
 
-@if(filteredAnalysisItems() && filteredAnalysisItems().length == 0) {
+@if(_filteredAnalysisItems && _filteredAnalysisItems.length == 0) {
 <div class="alert alert-warning text-center">
     No analysis items matching selected filters. Please adjust filters to view analysis items.
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': itemToEdit()}"></div>
-<div class="popup" [class.open]="itemToEdit()">
-    @if (itemToEdit()) {
-    <div class="popup-header">Go To: {{itemToEdit()?.name}}
+<div [ngClass]="{'windowOverlay': _itemToEdit}"></div>
+<div class="popup" [class.open]="_itemToEdit">
+    @if (_itemToEdit) {
+    <div class="popup-header">Go To: {{_itemToEdit?.name}}
         <button class="item-right" (click)="cancelEditItem()">x</button>
     </div>
     }
