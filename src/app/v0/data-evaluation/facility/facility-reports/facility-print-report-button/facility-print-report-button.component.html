@@ -5,16 +5,18 @@
                 <span class="fa fa-file-pdf"></span>
             </button>
         </div>
-          <div class="p-2">
+        @if (pptReport) {
+        <div class="p-2">
             <button class="btn action-btn" (click)="exportPpt()" title="Generate PPT Report">
                 <span class="fa fa-file-powerpoint"></span>
             </button>
         </div>
+        }
     </div>
 </div>
 
 @if (isLoading) {
-    <div class="loading-overlay">
-        <app-calculating-spinner [message]="'Generating PDF...'"></app-calculating-spinner>
-    </div>
+<div class="loading-overlay">
+    <app-calculating-spinner [message]="'Generating PDF...'"></app-calculating-spinner>
+</div>
 }

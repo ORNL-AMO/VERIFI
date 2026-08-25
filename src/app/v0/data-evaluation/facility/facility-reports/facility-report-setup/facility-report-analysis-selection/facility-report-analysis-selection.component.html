@@ -1,10 +1,13 @@
+@let _filteredAnalysisTableRows = filteredAnalysisTableRows();
+
 <div class="d-flex align-items-center justify-content-center mb-4 p-3 rounded shadow-sm bg-light border">
     <div class="pe-4 select-width">
         <label class="form-label fw-bold">
             <i class="fa fa-filter text-primary"></i>
             Analysis Category
         </label>
-        <select class="form-select border-primary" [(ngModel)]="selectedCategory" (ngModelChange)="onOptionChange()">
+        <select class="form-select border-primary" [ngModel]="selectedCategory()"
+            (ngModelChange)="selectedCategory.set($event)">
             <option value="All">All</option>
             <option value="energy">Energy</option>
             <option value="water">Water</option>
@@ -16,8 +19,8 @@
             <i class="fa fa-filter text-primary"></i>
             Baseline Year
         </label>
-        <select class="form-select border-primary" [(ngModel)]="selectedBaselineYear"
-            (ngModelChange)="onOptionChange()">
+        <select class="form-select border-primary" [ngModel]="selectedBaselineYear()"
+            (ngModelChange)="selectedBaselineYear.set($event)">
             <option value="All">All</option>
             @for (year of baselineYears; track year) {
             <option [ngValue]="year">{{ year }}</option>
@@ -26,7 +29,7 @@
     </div>
 </div>
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+@if(_filteredAnalysisTableRows && _filteredAnalysisTableRows.length > 0) {
 <label class="bold mt-2">
     Select Analysis Item
 </label>
@@ -36,6 +39,9 @@
         <tr>
             <th>
 
+            </th>
+            <th class="text-center">
+                Status
             </th>
             <th>
                 Name
@@ -52,18 +58,49 @@
         </tr>
     </thead>
     <tbody>
-        @for (item of filteredAnalysisItems; track item) {
+        @for (item of _filteredAnalysisTableRows; track item.analysisItem.guid) {
         <tr>
             <td>
                 <div class="form-check">
-                    <input type="radio" class="form-check-input" name="{{item.name + '_item'}}" [value]="item.guid"
-                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId"
-                        (change)="onSelectedItemChange(item)">
+                    <input type="radio" class="form-check-input" name="{{item.analysisItem.name + '_item'}}"
+                        [value]="item.analysisItem.guid" id="{{item.analysisItem.name + '_item'}}"
+                        [(ngModel)]="facilityReport.analysisItemId" (change)="onSelectedItemChange(item.analysisItem)">
                 </div>
             </td>
+            <td class="text-center align-middle status-col">
+                @let sc = item.statusCheck;
+                <span class="fa fa-fw fa-lg" [ngClass]="{
+                'fa-circle-check text-success': sc?.status === 'good',
+                'fa-exclamation-triangle text-warning': sc?.status === 'warning',
+                'fa-circle-xmark text-danger': sc?.status === 'error'
+              }"></span>
+                @if (sc?.status !== 'good') {
+                <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+                    @if (sc?.hasSetupErrors) {
+                    <span class="badge bg-danger issue-badge">Setup Errors</span>
+                    }
+                    @if(sc?.hasMeterSetupErrors) {
+                    <span class="badge bg-danger issue-badge">Meter Errors</span>
+                    }
+
+                    @if(sc?.hasPredictorSetupErrors) {
+                    @if(sc?.status === 'error') {
+                    <span class="badge bg-danger issue-badge">Predictor Errors</span>
+                    } @else if (sc?.status === 'warning') {
+                    <span class="badge bg-warning text-dark issue-badge">Predictor Warnings</span>
+                    }
+                    }
+                    @if(sc?.analysisSetupErrors?.groupsHaveErrors || sc?.groupsHaveErrors) {
+                    <span class="badge bg-danger issue-badge">Group Errors</span>
+                    } @else if (sc?.groupsHaveWarnings) {
+                    <span class="badge bg-warning text-dark issue-badge">Group Warnings</span>
+                    }
+                </div>
+                }
+            </td>
             <td>
-                {{item.name}}
-                @let setupErrors = item.guid | invalidAnalysis;
+                {{item.analysisItem.name}}
+                @let setupErrors = item.analysisItem.guid | invalidAnalysis;
                 @if (setupErrors.hasError || setupErrors.groupsHaveErrors) {
                 <span class="text-danger ps-1">
                     <span class="fa fa-exclamation-circle"></span> Contains Errors
@@ -71,18 +108,18 @@
                 }
             </td>
             <td>
-                @if (item.analysisCategory == 'water') {
-                Water ({{ item.waterUnit}})
+                @if (item.analysisItem.analysisCategory == 'water') {
+                Water ({{ item.analysisItem.waterUnit}})
                 }
-                @if (item.analysisCategory == 'energy') {
-                Energy ({{ item.energyUnit}})
+                @if (item.analysisItem.analysisCategory == 'energy') {
+                Energy ({{ item.analysisItem.energyUnit}})
                 }
             </td>
             <td>
-                {{item.baselineYear}}
+                {{item.analysisItem.baselineYear}}
             </td>
             <td>
-                <a class="click-link" (click)="goToAnalysis(item)">View Analysis</a>
+                <a class="click-link" (click)="goToAnalysis(item.analysisItem)">View Analysis</a>
             </td>
         </tr>
         }

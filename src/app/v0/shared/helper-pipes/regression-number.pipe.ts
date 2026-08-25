@@ -1,8 +1,11 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'regressionNumber',
     standalone: false
+})
+@Injectable({
+  providedIn: 'root'
 })
 export class RegressionNumberPipe implements PipeTransform {
 

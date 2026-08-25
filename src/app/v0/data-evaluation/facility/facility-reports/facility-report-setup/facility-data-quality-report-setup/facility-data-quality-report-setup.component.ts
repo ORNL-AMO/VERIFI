@@ -52,6 +52,7 @@ export class FacilityDataQualityReportSetupComponent {
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.reportSettings = this.facilityReport.dataQualityReportSettings;
+      this.setYearOptions();
       this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
       this.facilityPredictors = this.accountWorkspaceQuery.getFacilityPredictors(this.facilityReport.facilityId);
       this.initializeSelections();
@@ -92,7 +93,13 @@ export class FacilityDataQualityReportSetupComponent {
   }
 
   setYearOptions() {
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, this.facilityReport.facilityId);
+    const facilityId = this.facilityReport?.facilityId;
+    if (!facilityId) {
+      this.reportYears = [];
+      this.baselineYears = [];
+      return;
+    }
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }

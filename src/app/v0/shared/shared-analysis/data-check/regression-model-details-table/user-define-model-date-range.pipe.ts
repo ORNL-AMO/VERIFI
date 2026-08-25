@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { AnalysisGroup } from '@data/models/analysis';
 import { Month, Months } from '@shared/form-data/months';
 
@@ -6,6 +6,9 @@ import { Month, Months } from '@shared/form-data/months';
   name: 'userDefineModelDateRange',
   standalone: false,
 })
+@Injectable({
+  providedIn: 'root'
+}) 
 export class UserDefineModelDateRangePipe implements PipeTransform {
 
   transform(analysisGroup: AnalysisGroup): string {
