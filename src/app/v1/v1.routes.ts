@@ -19,15 +19,14 @@ export const V1Routes: Routes = [
         component: WorkspaceShellComponent,
         canActivate: [accountGuidReadyGuard],
         children: [
-          { path: '', pathMatch: 'full', redirectTo: 'home/overview/help' },
-          { path: 'home', pathMatch: 'full', redirectTo: 'home/overview/help' },
-          { path: 'home/:detail', pathMatch: 'full', redirectTo: 'home/:detail/help' },
+          { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
+          { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
           {
-            path: 'home/:detail/:panelTab',
+            path: 'home/:detail',
             component: AccountHomeComponent,
             canActivate: [accountHomeCanonicalGuard]
           },
-          { path: '**', redirectTo: 'home/overview/help' }
+          { path: '**', redirectTo: 'home/overview' }
         ]
       },
       {
@@ -35,15 +34,14 @@ export const V1Routes: Routes = [
         component: WorkspaceShellComponent,
         canActivate: [facilityReadyGuard],
         children: [
-          { path: '', pathMatch: 'full', redirectTo: 'home/overview/help' },
-          { path: 'home', pathMatch: 'full', redirectTo: 'home/overview/help' },
-          { path: 'home/:detail', pathMatch: 'full', redirectTo: 'home/:detail/help' },
+          { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
+          { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
           {
-            path: 'home/:detail/:panelTab',
+            path: 'home/:detail',
             component: FacilityHomeComponent,
             canActivate: [facilityHomeCanonicalGuard]
           },
-          { path: '**', redirectTo: 'home/overview/help' }
+          { path: '**', redirectTo: 'home/overview' }
         ]
       },
       { path: '**', redirectTo: '' }

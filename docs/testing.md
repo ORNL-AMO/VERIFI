@@ -13,6 +13,7 @@ Every behavior-changing pull request must record a testing decision:
 - Bug fixes require a regression test whenever the failure can be reproduced at an existing test tier. An exception requires a linked follow-up issue.
 - Refactors must run the affected suite. Add characterization coverage when important existing behavior is otherwise unprotected, not for every mechanical edit.
 - Documentation, comments, styling-only work, and other non-behavioral changes do not need artificial unit tests. Use an appropriate build, visual check, or link/command validation instead.
+- Routine agent handoff uses focused checks plus web validation when relevant. Reserve full `test:all:ci`, Electron builds, and desktop checks for explicit pre-PR/release validation or changes that touch those runtime boundaries.
 
 A concise pull-request entry can use this shape:
 
@@ -49,7 +50,7 @@ Manual QA complements automated coverage. It must not be used to repeatedly rech
 | Import, export, or backup | Keep parsing and mapping tests fast where possible. Use representative fixtures for valid, malformed, missing, duplicate, compatibility, and round-trip cases. Add browser coverage when File APIs or IndexedDB are part of the behavior. |
 | IndexedDB service or migration | Fast tests for pure defaults and transformations, plus Chromium coverage for real storage behavior. Test empty and representative older data, idempotency, indexes, GUID relationships, and cleanup. |
 | Web Worker calculation or message contract | Fast coverage for the calculation and lifecycle wrapper. Add Chromium coverage for native Worker construction, request/result/error payloads, structured cloning, cancellation, and termination. |
-| Electron-only behavior | Fast tests for explicit wrappers and handler decisions, both production builds when runtime code changes, and a focused desktop check for the affected OS integration. Preserve behavior when `window.electronAPI` is absent. |
+| Electron-only behavior | Fast tests for explicit wrappers and handler decisions, the Electron production build when runtime code changes, and a focused desktop check for the affected OS integration. Preserve behavior when `window.electronAPI` is absent. |
 | Behavior-preserving refactor | Run the affected suite. Add characterization coverage only for a high-risk contract that lacks useful protection. Avoid tests coupled to the old implementation. |
 | Documentation, comment, or styling-only change | No unit test by default. Validate links and commands, build affected assets, or perform a focused visual/accessibility check as appropriate. |
 
@@ -106,10 +107,14 @@ Representative executable patterns already exist for a [pure calculation](../src
 | `npm run test:browser:ci` | Browser suite once in headless Chromium |
 | `npm run test:all:ci` | Required fast and browser gate |
 | `npm run test:coverage` | Informational scoped coverage in headless Chromium |
+| `npm run validate:agent -- --mode plan` | Advisory validation plan selected from changed files |
+| `npm run validate:agent -- --mode run` | Execute the advisory command plan and stop on first failure |
 
 Install Chromium once with `npx playwright install chromium` when it is not available locally.
 
 GitHub Actions runs `npm run test:all:ci` for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. The same test job gates downstream release workflows.
+
+The agent validation helper inspects changed tracked files from `git diff --name-only HEAD` plus untracked files. It is advisory: follow its selected commands by default, and add broader checks only for concrete risk, an explicit pre-PR/release request, or a boundary the helper cannot infer from filenames.
 
 Keep the fast suite below 60 seconds and the browser suite below 120 seconds in CI, excluding dependency and browser installation. These are maintainability targets rather than failure thresholds. Profile slow setup, remove unnecessary TestBed/module work, or split browser scenarios before accepting persistently slow feedback.
 

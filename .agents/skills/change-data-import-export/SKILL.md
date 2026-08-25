@@ -20,7 +20,7 @@ description: Change VERIFI spreadsheet templates, SheetJS parsers, ExcelJS write
 - Perform an import-persist-export round trip and compare key identities, dates, units, counts, and totals.
 - Inspect generated workbook sheets, headers, types, formulas, and ordering when spreadsheets change.
 - Run `npm run test:ci`; add browser tests for File APIs or IndexedDB integration when needed.
-- Run `npm run build-prod` and `npm run build-prod-electron` for shared file flows.
+- Use `validate-web-and-electron` and `npm run validate:agent -- --mode plan` for final command selection. Add Electron build/manual validation only for Electron backup, filesystem, dialog, IPC, Electron environment/config, or explicit desktop release behavior.
 
 ## Guardrails
 

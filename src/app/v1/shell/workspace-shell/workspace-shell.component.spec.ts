@@ -47,11 +47,11 @@ describe('WorkspaceShellComponent', () => {
       setPanelTab: vi.fn(),
       hideSupportPanel: vi.fn(),
       toggleSupportPanel: vi.fn(),
-      accountRoute: vi.fn((accountGuid: string, panelTab = 'help') =>
-        ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview', panelTab]
+      accountRoute: vi.fn((accountGuid: string) =>
+        ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview']
       ),
-      facilityRoute: vi.fn((facilityGuid: string, panelTab = 'help') =>
-        ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview', panelTab]
+      facilityRoute: vi.fn((facilityGuid: string) =>
+        ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview']
       )
     };
 

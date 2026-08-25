@@ -64,6 +64,7 @@
     "test:browser:ci": "ng run verifi:test-browser --no-watch --no-progress --headless",
     "test:all:ci": "npm run test:ci && npm run test:browser:ci",
     "test:coverage": "ng run verifi:test-coverage --no-watch --no-progress --headless",
+    "validate:agent": "node .agents/skills/validate-web-and-electron/scripts/validate-change.mjs",
     "lint": "ng lint",
     "electron": "electron .",
     "pack": "electron-builder --dir",

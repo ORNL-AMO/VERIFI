@@ -16,6 +16,6 @@ description: Design, implement, or review meaningful VERIFI tests and regression
 5. Build minimal deterministic fixtures. For a defect, reproduce the failure in a regression test before or alongside the fix when feasible.
 6. Assert public results, persisted shapes, state transitions, rendered output, emitted values, error handling, and cleanup. Do not add creation-only tests, arbitrary sleeps, real network calls, retry-based flake suppression, or assertions coupled to private implementation.
 7. Clean up databases, Workers, subscriptions, listeners, mocks, timers, TestBed state, and changed global values.
-8. Run the focused spec during iteration, then its required parent suite. Use `validate-web-and-electron` for the final matrix.
+8. Run the focused spec during iteration. Use `validate-web-and-electron` and `npm run validate:agent -- --mode plan` to select the final risk-based matrix instead of defaulting to broad or Electron checks.
 
 Complete with the behavior protected, selected tier and rationale, focused and parent-gate results, manual evidence, intentional gaps, and linked follow-up work.

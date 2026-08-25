@@ -41,7 +41,6 @@ interface RouteState {
   readonly facilityGuid?: string;
   readonly section: SectionId;
   readonly detail: string;
-  readonly panelTab: PanelTabId;
 }
 
 export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
@@ -71,17 +70,18 @@ export class WorkspaceNavigationService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly currentUrl = signal(this.router.url);
+  private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
 
   readonly sections = signal(WORKSPACE_SECTIONS).asReadonly();
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
+  readonly activePanelTab = this.activePanelTabState.asReadonly();
 
   readonly routeState = computed(() => parseWorkspaceRoute(this.currentUrl()));
   readonly isWorkspaceRoute = computed(() => this.routeState().view === 'workspace');
   readonly contextMode = computed(() => this.routeState().contextMode);
   readonly activeSection = computed(() => this.routeState().section);
   readonly activeDetail = computed(() => this.routeState().detail);
-  readonly activePanelTab = computed(() => this.routeState().panelTab);
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
@@ -99,7 +99,7 @@ export class WorkspaceNavigationService {
   async openAccount(accountGuid: string): Promise<void> {
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result === 'published') {
-      await this.router.navigate(['/v1', 'workspace', 'account', accountGuid, 'home', 'overview', 'help']);
+      await this.router.navigate(this.accountRoute(accountGuid));
     }
   }
 
@@ -108,36 +108,28 @@ export class WorkspaceNavigationService {
   }
 
   setContext(contextMode: ContextMode): void {
-    const state = this.routeState();
     if (contextMode === 'facility') {
       const facilityGuid = this.facility()?.guid || this.facilities()[0]?.guid;
       if (facilityGuid) {
-        void this.router.navigate(this.facilityRoute(facilityGuid, state.panelTab));
+        void this.router.navigate(this.facilityRoute(facilityGuid));
       }
       return;
     }
+    const state = this.routeState();
     const accountGuid = this.account()?.guid || state.accountGuid;
     if (accountGuid) {
-      void this.router.navigate(this.accountRoute(accountGuid, state.panelTab));
+      void this.router.navigate(this.accountRoute(accountGuid));
     }
   }
 
   setFacility(facilityGuid: string): void {
     this.workspaceService.selectFacility(facilityGuid);
-    void this.router.navigate(this.facilityRoute(facilityGuid, this.activePanelTab()));
+    void this.router.navigate(this.facilityRoute(facilityGuid));
   }
 
   setPanelTab(panelTab: PanelTabId): void {
+    this.activePanelTabState.set(panelTab);
     this.isSupportPanelOpen.set(true);
-    const state = this.routeState();
-    if (state.contextMode === 'facility' && state.facilityGuid) {
-      void this.router.navigate(this.facilityRoute(state.facilityGuid, panelTab));
-      return;
-    }
-    const accountGuid = this.account()?.guid || state.accountGuid;
-    if (accountGuid) {
-      void this.router.navigate(this.accountRoute(accountGuid, panelTab));
-    }
   }
 
   toggleSupportPanel(): void {
@@ -148,12 +140,12 @@ export class WorkspaceNavigationService {
     this.isSupportPanelOpen.set(false);
   }
 
-  accountRoute(accountGuid: string, panelTab: PanelTabId = DEFAULT_PANEL_TAB): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview', panelTab];
+  accountRoute(accountGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview'];
   }
 
-  facilityRoute(facilityGuid: string, panelTab: PanelTabId = DEFAULT_PANEL_TAB): Array<string> {
-    return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview', panelTab];
+  facilityRoute(facilityGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
   }
 
   private resolveAccount(): IdbAccount | undefined {
@@ -217,8 +209,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       view: 'welcome',
       contextMode: 'account',
       section: 'home',
-      detail: 'overview',
-      panelTab: DEFAULT_PANEL_TAB
+      detail: 'overview'
     };
   }
   if (routeParts[1] === 'facility') {
@@ -227,8 +218,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       contextMode: 'facility',
       facilityGuid: routeParts[2],
       section: 'home',
-      detail: routeParts[4] || 'overview',
-      panelTab: isPanelTab(routeParts[5]) ? routeParts[5] : DEFAULT_PANEL_TAB
+      detail: routeParts[4] || 'overview'
     };
   }
   return {
@@ -236,11 +226,6 @@ export function parseWorkspaceRoute(url: string): RouteState {
     contextMode: 'account',
     accountGuid: routeParts[2],
     section: 'home',
-    detail: routeParts[4] || 'overview',
-    panelTab: isPanelTab(routeParts[5]) ? routeParts[5] : DEFAULT_PANEL_TAB
+    detail: routeParts[4] || 'overview'
   };
-}
-
-export function isPanelTab(value: string | undefined): value is PanelTabId {
-  return !!value && SUPPORT_PANEL_TABS.some(tab => tab.id === value);
 }

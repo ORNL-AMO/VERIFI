@@ -22,8 +22,8 @@
     <a
       class="active"
       [routerLink]="navigation.contextMode() === 'facility' && navigation.facility()
-        ? navigation.facilityRoute(navigation.facility()!.guid, navigation.activePanelTab())
-        : navigation.accountRoute(navigation.account()!.guid, navigation.activePanelTab())"
+        ? navigation.facilityRoute(navigation.facility()!.guid)
+        : navigation.accountRoute(navigation.account()!.guid)"
       aria-current="page">
       <span class="fa fa-chart-pie" aria-hidden="true"></span>
       Overview

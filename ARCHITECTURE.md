@@ -137,7 +137,7 @@ Preserve these invariants:
 - Browser behavior must not assume the Electron bridge exists.
 - Electron changes must update the main handler, preload allowlist, renderer wrapper, and cleanup/listener behavior together.
 - Do not weaken context isolation or expose raw Node/Electron APIs to the renderer.
-- Shared renderer changes should build for both production web and Electron targets.
+- Electron-target builds are required for Electron boundary, Electron environment/config, desktop integration, or explicit desktop release validation. Routine web UI and routing changes normally use the production web build unless they touch one of those boundaries.
 
 ## UI architecture
 
@@ -170,6 +170,7 @@ Test targets are configured in `angular.json` and exposed through `package.json`
 The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. Web deployment builds `develop` for development and `master` for production. Desktop packaging runs for `master` and creates platform installers through Electron Builder.
 
 Agents and contributors must run the relevant local checks before opening a pull request; do not assume a pull-request event will run the workflow.
+Agents can use `npm run validate:agent -- --mode plan` to select a compact risk-based validation plan from the current diff before running final checks.
 
 Build artifacts belong in `dist/` and installers in `output/`. Neither directory is source.
 

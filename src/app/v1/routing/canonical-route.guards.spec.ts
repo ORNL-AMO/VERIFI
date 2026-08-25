@@ -20,17 +20,17 @@ describe('v1 canonical route guards', () => {
   });
 
   it('allows canonical account and facility home routes', () => {
-    expect(invoke(accountHomeCanonicalGuard, route({ detail: 'overview', panelTab: 'help' }, route({ accountGuid: 'account-a' }))))
+    expect(invoke(accountHomeCanonicalGuard, route({ detail: 'overview' }, route({ accountGuid: 'account-a' }))))
       .toBe(true);
-    expect(invoke(facilityHomeCanonicalGuard, route({ detail: 'overview', panelTab: 'details' }, route({ facilityGuid: 'facility-a' }))))
+    expect(invoke(facilityHomeCanonicalGuard, route({ detail: 'overview' }, route({ facilityGuid: 'facility-a' }))))
       .toBe(true);
   });
 
   it('redirects invalid account and facility home routes to canonical defaults', () => {
-    expect(invoke(accountHomeCanonicalGuard, route({ detail: 'todo-list', panelTab: 'bad' }, route({ accountGuid: 'account-a' }))))
+    expect(invoke(accountHomeCanonicalGuard, route({ detail: 'todo-list' }, route({ accountGuid: 'account-a' }))))
       .toEqual({ commands: accountHomeCommands('account-a') });
-    expect(invoke(facilityHomeCanonicalGuard, route({ detail: 'unknown', panelTab: 'results' }, route({ facilityGuid: 'facility-a' }))))
-      .toEqual({ commands: facilityHomeCommands('facility-a', 'results') });
+    expect(invoke(facilityHomeCanonicalGuard, route({ detail: 'unknown' }, route({ facilityGuid: 'facility-a' }))))
+      .toEqual({ commands: facilityHomeCommands('facility-a') });
   });
 });
 

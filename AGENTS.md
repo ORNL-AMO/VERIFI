@@ -48,9 +48,10 @@ Use non-watch commands for verification:
 | Browser tests | `npm run test:browser:ci` | IndexedDB, Web Workers, and behavior requiring native browser APIs |
 | Full test suite | `npm run test:all:ci` | Final verification before a pull request |
 | Informational coverage | `npm run test:coverage` | Scoped calculation, IndexedDB, and Web Worker coverage; not a gate |
+| Agent validation plan | `npm run validate:agent -- --mode plan` | Risk-based check selection from the current diff |
 | Development build | `npm run build` | General Angular/Electron renderer changes |
 | Production web build | `npm run build-prod` | Web deployment behavior and final validation |
-| Production Electron build | `npm run build-prod-electron` | Electron or shared renderer changes |
+| Production Electron build | `npm run build-prod-electron` | Electron runtime boundaries, Electron environment/config, desktop release validation |
 
 Install Chromium once with `npx playwright install chromium` when browser tests cannot find it. For interactive Electron development, run `npm run build-watch` and `npm run electron` in separate terminals.
 
@@ -66,6 +67,7 @@ Use the mode and discoverable skill selected by the [task context index](docs/ag
 - Keep changes scoped to the issue and preserve unrelated worktree changes.
 - Use the repository's NgModule-based Angular pattern; components are non-standalone unless the surrounding feature has deliberately migrated.
 - Follow the risk-based policy in [docs/testing.md](docs/testing.md): protect changed behavior with the lowest-cost valuable automated test, or document why automation is disproportionate and provide focused manual evidence. Do not rely on creation-only `should create` tests.
+- Use `npm run validate:agent -- --mode plan` before final validation to avoid over-running broad or Electron checks for routine web changes.
 - Treat stored user data as durable. Make migrations idempotent and preserve older backups and import formats where supported.
 - Preserve GUID-based domain relationships. Do not confuse IndexedDB's local numeric `id` with cross-record identifiers.
 - Keep calculations deterministic and verify every consumer when changing a shared result, unit, payload, or report field.

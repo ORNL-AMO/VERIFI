@@ -14,10 +14,10 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 
 ## Validate
 
-- Run `npm run test:ci` for ordinary component, service, pipe, and utility behavior.
-- Run `npm run test:browser:ci` when the feature uses IndexedDB, Web Workers, or native browser APIs.
-- Run `npm run build-prod` for web-facing changes.
-- Also run `npm run build-prod-electron` when shared renderer behavior, routing, files, or desktop presentation can be affected.
+- Use `validate-web-and-electron` and `npm run validate:agent -- --mode plan` to select the final risk-based matrix.
+- Prefer focused affected specs first, followed by `npx tsc -p tsconfig.app.json --noEmit` for app TypeScript changes and `npm run build-prod` for production Angular UI/routing/template/style changes.
+- Add browser tests only when IndexedDB, Web Workers, File APIs, or native browser APIs are exercised.
+- Add Electron build/manual validation only when Electron preload, IPC, filesystem, dialog, shell, updater, Electron environment/config, or explicit desktop release behavior is touched.
 - Perform a focused manual pass for interaction states, keyboard operation, responsive layout, charts, and printing when applicable.
 
 ## Guardrails

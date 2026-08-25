@@ -143,4 +143,4 @@ This replaces a broad second prototype phase unless maintainers explicitly reque
 
 For this documentation baseline, validate links and paths in the same change. Run TypeScript compilation only when documentation adds route-linked code examples that need source verification.
 
-For production v1 shell work, add focused component tests for context switching, canonical routing, panel state, and single-facility redirects. For workflow implementation, add focused tests for changed behavior and add browser tests only when IndexedDB, File APIs, or Workers are directly exercised. Run production web and Electron builds before handing off a production v1 slice.
+For production v1 shell work, add focused component tests for context switching, canonical routing, panel state, and single-facility redirects. For workflow implementation, add focused tests for changed behavior and add browser tests only when IndexedDB, File APIs, or Workers are directly exercised. Run the production web build before handing off a production v1 slice; add Electron build/manual validation only when Electron boundaries or explicit desktop release behavior are touched.
