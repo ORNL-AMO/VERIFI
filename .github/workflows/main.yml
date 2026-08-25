@@ -5,10 +5,12 @@ on:
     branches:
       - 'master'
       - 'develop'
+      - 'unified-ux' # temporary: remove when unified-ux is merged
   pull_request:
     branches:
       - 'master'
       - 'develop'
+      - 'unified-ux' # temporary: remove when unified-ux is merged
   workflow_dispatch:
 
 jobs:
