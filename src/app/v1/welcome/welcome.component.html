@@ -1,0 +1,71 @@
+<main class="v1-welcome" aria-labelledby="v1-welcome-title">
+  <section class="v1-welcome__hero">
+    <p class="v1-eyebrow">VERIFI v1</p>
+    <h1 id="v1-welcome-title">Utility tracking workspace</h1>
+    <p>
+      Open an existing account in the production v1 shell. Account setup, imports, and example loading remain available
+      in current VERIFI while the v1 workflows are built out.
+    </p>
+    <div class="v1-welcome__hero-actions">
+      <a class="v1-btn v1-btn--primary" routerLink="/welcome">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+        Create or Import Account
+      </a>
+      <a class="v1-btn v1-btn--quiet" routerLink="/welcome">
+        <span class="fa fa-arrow-left" aria-hidden="true"></span>
+        Current VERIFI
+      </a>
+    </div>
+  </section>
+
+  @if (errorMessage(); as message) {
+    <section class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>{{ message }}</span>
+    </section>
+  }
+
+  <section class="v1-welcome__accounts" aria-labelledby="v1-accounts-title">
+    @let accountList = accounts();
+    @let loadingGuid = loadingAccountGuid();
+
+    <div class="v1-section-heading">
+      <p class="v1-eyebrow">Account Portfolio</p>
+      <h2 id="v1-accounts-title">Choose a workspace</h2>
+    </div>
+
+    @if (accountList.length === 0) {
+      <article class="v1-empty-state">
+        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <h3>No accounts are available</h3>
+        <p>Create a new account, upload an account backup, or load example data from current VERIFI.</p>
+        <a class="v1-btn v1-btn--primary" routerLink="/welcome">Go to Current VERIFI</a>
+      </article>
+    } @else {
+      <div class="v1-account-grid">
+        @for (account of accountList; track account.guid) {
+          <button
+            type="button"
+            class="v1-account-card"
+            [disabled]="!!loadingGuid"
+            (click)="openAccount(account)"
+            [attr.aria-label]="'Open ' + account.name + ' in v1 workspace'">
+            <span class="v1-account-card__icon fa fa-building" aria-hidden="true"></span>
+            <span>
+              <strong>{{ account.name }}</strong>
+              <small>{{ formatModifiedDate(account) }}</small>
+            </span>
+            <span class="v1-account-card__meta">
+              {{ account.isSingleFacilityCompany ? 'Single facility' : 'Portfolio' }}
+            </span>
+            @if (loadingGuid === account.guid) {
+              <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            } @else {
+              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            }
+          </button>
+        }
+      </div>
+    }
+  </section>
+</main>

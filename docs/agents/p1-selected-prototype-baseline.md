@@ -30,7 +30,7 @@ The stable primary navigation model is:
 Production v1 should use these route patterns unless a workflow issue records a specific exception:
 
 - `/v1`
-- `/v1/workspace/account/:section/:detail/:panelTab`
+- `/v1/workspace/account/:accountGuid/:section/:detail/:panelTab`
 - `/v1/workspace/facility/:facilityGuid/:section/:detail/:panelTab`
 
 Omitted or invalid detail and panel values should redirect to canonical defaults. Account and facility routes should keep deep links stable enough for implementation, testing, and stakeholder review while the opt-in v1 experience matures.
@@ -72,7 +72,7 @@ Use these common rules as production v1 defaults:
 - Keep setup progress, validation status, next actions, blocked work, and errors visible.
 - Make important controls visually prominent, especially tabs, switches, meter and analysis group controls, and error states.
 - Reduce deep nesting and long explanatory text in the main work area.
-- Preserve dark-mode viability and theme options while bringing back more VERIFI character than the first P1 walkthrough.
+- Preserve dark-mode viability and theme options while bringing back more VERIFI character than the first P1 walkthrough. The first production shell starts with Default, Steel, Blueprint, and Forest palettes plus light/dark mode, density, and corner-style controls.
 - Design for dense industrial data, long names, wide tables, charts, units, responsive browser layouts, and Electron window sizes.
 - Cover loading, empty, validation, error, disabled, and success states as each workflow is implemented.
 
@@ -87,10 +87,20 @@ Start with:
 - primary rail;
 - section navigation;
 - right support panel;
-- placeholder workflow outlet pages;
+- account and facility Home outlet pages;
 - workflow pages added one at a time.
 
+For issue #2631, non-Home destinations are visible as disabled future navigation affordances rather than routed placeholder pages.
+
 Use P1 as a reference for composition and behavior, but rebuild production components in v1. Shared, version-neutral logic belongs in shared data, domain, platform, and helper layers only when it is not coupled to v0 or prototype presentation.
+
+## V1 code organization rules
+
+Organize production v1 by feature area, not by broad type buckets. Keep related component, template, style, and spec files together under folders such as `welcome/`, `shell/`, `account/home/`, `facility/home/`, `appearance/`, and `routing/`.
+
+Do not prepend `V1` or `v1-` to every v1 component, service, selector, filename, interface, type, or helper constant. The `/v1` route, `V1Module`, `V1Routes`, v1 route files, v1 theme classes, and v1 local storage keys stay versioned because they are compatibility boundaries. Names inside `src/app/v1/` should use their domain role, such as `WorkspaceShellComponent`, `PrimaryRailComponent`, `AccountHomeComponent`, `WorkspaceNavigationService`, `Palette`, and `PanelTabId`.
+
+Keep v1 CSS tokens and theme class names scoped while v0 coexists. Avoid importing from `@v0/*` in production v1; promote only version-neutral helpers into shared layers when a workflow issue needs them.
 
 ## Legacy capability disposition
 
@@ -109,7 +119,7 @@ No IndexedDB, backup, import/export, calculation, Worker, report, or Electron co
 
 Build v1 in thin production slices:
 
-1. Workspace shell with account/facility context, primary navigation, secondary navigation, right support panel, canonical routing, and placeholder workflow outlets.
+1. Workspace shell with account/facility context, primary navigation, secondary navigation, right support panel, canonical routing, Home outlets, and disabled future workflow affordances.
 2. Account and facility Home with overview, todo list, and goal progress using real workspace state where appropriate.
 3. First facility Data workflow using the P1 meter workbench as the reference pattern.
 4. Facility Analysis dashboard and workbench enough to validate the navigation and context model against real workflow pressure.
@@ -133,4 +143,4 @@ This replaces a broad second prototype phase unless maintainers explicitly reque
 
 For this documentation baseline, validate links and paths in the same change. Run TypeScript compilation only when documentation adds route-linked code examples that need source verification.
 
-For production v1 shell work, add focused component tests for context switching, canonical routing, panel state, and single-facility redirects. For workflow implementation, add focused tests for changed behavior and add browser tests only when IndexedDB, File APIs, or Workers are directly exercised. Run production web and Electron builds before handing off a production v1 slice.
+For production v1 shell work, add focused component tests for context switching, canonical routing, panel state, and single-facility redirects. For workflow implementation, add focused tests for changed behavior and add browser tests only when IndexedDB, File APIs, or Workers are directly exercised. Run the production web build before handing off a production v1 slice; add Electron build/manual validation only when Electron boundaries or explicit desktop release behavior are touched.

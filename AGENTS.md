@@ -19,7 +19,7 @@ Do not copy volatile package versions, scripts, database versions, or implementa
 
 VERIFI's Angular renderer ships for web and Electron. Use the [task context index](docs/agents/context-index.md) to choose entrypoints, minimum documentation, skill, mode, and first validation tier. Prefer established neighboring code over a new pattern.
 
-The current production UI lives under `src/app/v0/`. On unified-ux work, `/p1` is prototype reference material and `/v1` is the opt-in production UI. Use `@v0/shared/*` for legacy-only shared UI and `@shared/*` for version-neutral shared helpers and contracts. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. Do not import `@v0/*` from root shared, data, domain, platform, or production v1 code. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md) and [Current-State Notes Guide](docs/unified-ux-current-state.md); add workflow notes just-in-time rather than building exhaustive feature or current-state registers.
+The current production UI lives under `src/app/v0/`. On unified-ux work, `/p1` is prototype reference material and `/v1` is the opt-in production UI. Organize production v1 by feature folders under `src/app/v1/`, not broad `pages` or `components` buckets. Do not prepend `V1` or `v1-` to ordinary v1 components, services, selectors, filenames, interfaces, types, or helper constants; keep versioning only for real boundaries such as `/v1`, `V1Module`, `V1Routes`, v1 route files, v1 theme classes, and v1 local storage keys. Use `@v0/shared/*` for legacy-only shared UI and `@shared/*` for version-neutral shared helpers and contracts. Shared contracts live under `src/app/data/`, `src/app/domain/`, and `src/app/platform/`. Do not import `@v0/*` from root shared, data, domain, platform, or production v1 code. For unified UI/UX migration work, use the [Unified UI/UX Migration Guide](docs/unified-ux-migration.md), [Current-State Notes Guide](docs/unified-ux-current-state.md), and [P1 selected prototype baseline](docs/agents/p1-selected-prototype-baseline.md); add workflow notes just-in-time rather than building exhaustive feature or current-state registers.
 
 ## Context discipline
 
@@ -48,9 +48,10 @@ Use non-watch commands for verification:
 | Browser tests | `npm run test:browser:ci` | IndexedDB, Web Workers, and behavior requiring native browser APIs |
 | Full test suite | `npm run test:all:ci` | Final verification before a pull request |
 | Informational coverage | `npm run test:coverage` | Scoped calculation, IndexedDB, and Web Worker coverage; not a gate |
+| Agent validation plan | `npm run validate:agent -- --mode plan` | Risk-based check selection from the current diff |
 | Development build | `npm run build` | General Angular/Electron renderer changes |
 | Production web build | `npm run build-prod` | Web deployment behavior and final validation |
-| Production Electron build | `npm run build-prod-electron` | Electron or shared renderer changes |
+| Production Electron build | `npm run build-prod-electron` | Electron runtime boundaries, Electron environment/config, desktop release validation |
 
 Install Chromium once with `npx playwright install chromium` when browser tests cannot find it. For interactive Electron development, run `npm run build-watch` and `npm run electron` in separate terminals.
 
@@ -65,7 +66,9 @@ Use the mode and discoverable skill selected by the [task context index](docs/ag
 - Diagnose before editing when the request asks for analysis, investigation, or review only.
 - Keep changes scoped to the issue and preserve unrelated worktree changes.
 - Use the repository's NgModule-based Angular pattern; components are non-standalone unless the surrounding feature has deliberately migrated.
+- For Angular templates, follow the [Angular template guidance](docs/agents/angular-template-guidance.md) for signal reads, `@let`, computed state, and template-expression review expectations.
 - Follow the risk-based policy in [docs/testing.md](docs/testing.md): protect changed behavior with the lowest-cost valuable automated test, or document why automation is disproportionate and provide focused manual evidence. Do not rely on creation-only `should create` tests.
+- Use `npm run validate:agent -- --mode plan` before final validation to avoid over-running broad or Electron checks for routine web changes.
 - Treat stored user data as durable. Make migrations idempotent and preserve older backups and import formats where supported.
 - Preserve GUID-based domain relationships. Do not confuse IndexedDB's local numeric `id` with cross-record identifiers.
 - Keep calculations deterministic and verify every consumer when changing a shared result, unit, payload, or report field.

@@ -116,6 +116,15 @@ describe('workspace readiness guards', () => {
     expect(store.account()?.guid).toBe('account-b');
   });
 
+  it('loads an inactive account GUID from the v1 account route parameter', async () => {
+    store.publish(createSnapshot('account-a'));
+
+    await expect(invoke(accountGuidReadyGuard, route({ accountGuid: 'account-b' }), state('/v1/workspace/account/account-b/home')))
+      .resolves.toBe(true);
+
+    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+  });
+
   it('redirects a missing account GUID to account management', async () => {
     await expect(invoke(accountGuidReadyGuard, route({ id: 'missing' }), state('/data-management/missing/home')))
       .resolves.toEqual({ commands: ['/manage-accounts'] });
@@ -149,6 +158,26 @@ describe('workspace readiness guards', () => {
     });
 
     await expect(invoke(facilityReadyGuard, route({ id: 'facility-b' }), state('/data-evaluation/facility/facility-b')))
+      .resolves.toBe(true);
+
+    expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');
+    expect(workspace.selectFacility).toHaveBeenCalledWith('facility-b');
+  });
+
+  it('loads a facility owner workspace from the v1 facility route parameter', async () => {
+    store.publish(createSnapshot('account-a'));
+    facilities.getStoredByGuid.mockResolvedValue({
+      id: 20,
+      guid: 'facility-b',
+      accountId: 'account-b',
+      name: 'Facility B'
+    });
+    workspace.selectAccount.mockImplementationOnce(async () => {
+      store.publish(createSnapshot('account-b', 'facility-b'));
+      return 'published';
+    });
+
+    await expect(invoke(facilityReadyGuard, route({ facilityGuid: 'facility-b' }), state('/v1/workspace/facility/facility-b/home')))
       .resolves.toBe(true);
 
     expect(workspace.selectAccount).toHaveBeenCalledWith('account-b');

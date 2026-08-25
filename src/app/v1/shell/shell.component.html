@@ -1,0 +1,14 @@
+@let settings = appearance.settings();
+
+<section
+  class="v1-root"
+  [class.v1-theme-dark]="appearance.isDark()"
+  [class.v1-palette-steel]="settings.palette === 'steel'"
+  [class.v1-palette-blueprint]="settings.palette === 'blueprint'"
+  [class.v1-palette-forest]="settings.palette === 'forest'"
+  [class.v1-density-compact]="appearance.isCompact()"
+  [class.v1-corners-square]="appearance.hasSquareCorners()"
+  aria-label="VERIFI v1 production workspace">
+  <app-shell-header></app-shell-header>
+  <router-outlet></router-outlet>
+</section>

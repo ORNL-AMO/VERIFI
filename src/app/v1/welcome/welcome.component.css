@@ -1,0 +1,146 @@
+.v1-welcome {
+  display: grid;
+  gap: 1rem;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.v1-welcome__hero {
+  display: grid;
+  gap: .85rem;
+  padding: clamp(1rem, 3vw, 2rem) 0;
+  border-bottom: 1px solid var(--v1-border);
+}
+
+.v1-welcome__hero h1,
+.v1-welcome__hero p,
+.v1-section-heading h2,
+.v1-section-heading p,
+.v1-empty-state h3,
+.v1-empty-state p {
+  margin: 0;
+}
+
+.v1-welcome__hero h1 {
+  color: var(--v1-text);
+  font-size: 3rem;
+  line-height: 1.05;
+}
+
+.v1-welcome__hero p {
+  max-width: 48rem;
+  color: var(--v1-muted);
+  font-size: 1rem;
+}
+
+.v1-welcome__hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+.v1-welcome__accounts {
+  display: grid;
+  gap: .85rem;
+}
+
+.v1-section-heading h2 {
+  color: var(--v1-text);
+  font-size: 1.2rem;
+}
+
+.v1-account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: .75rem;
+}
+
+.v1-account-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: .75rem;
+  align-items: center;
+  min-height: 5.2rem;
+  padding: .9rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+  color: var(--v1-text);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 .55rem 1.35rem var(--v1-shadow);
+}
+
+.v1-account-card:hover,
+.v1-account-card:focus-visible {
+  border-color: var(--v1-account);
+  background: var(--v1-panel);
+}
+
+.v1-account-card:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.v1-account-card__icon {
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--v1-account) 12%, var(--v1-surface));
+  color: var(--v1-account);
+}
+
+.v1-account-card strong,
+.v1-account-card small {
+  display: block;
+}
+
+.v1-account-card strong {
+  overflow: hidden;
+  color: var(--v1-text);
+  font-size: .98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v1-account-card small,
+.v1-account-card__meta {
+  color: var(--v1-muted);
+  font-size: .78rem;
+}
+
+.v1-account-card__meta {
+  white-space: nowrap;
+}
+
+.v1-empty-state {
+  display: grid;
+  gap: .55rem;
+  justify-items: start;
+  padding: 1rem;
+  border: 1px dashed var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-panel);
+}
+
+.v1-empty-state > .fa {
+  color: var(--v1-primary);
+  font-size: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .v1-welcome__hero h1 {
+    font-size: 2rem;
+  }
+
+  .v1-account-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .v1-account-card__meta {
+    grid-column: 2 / -1;
+  }
+}

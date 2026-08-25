@@ -1,0 +1,71 @@
+<aside class="v1-panel" aria-label="Workspace support panel">
+  @let content = navigation.panelContent();
+  @let activeTab = navigation.activePanelTab();
+
+  <header class="v1-panel__header">
+    <div>
+      <span>{{ navigation.contextMode() }} support</span>
+      <strong>Home</strong>
+    </div>
+    <button type="button" class="v1-icon-btn" (click)="navigation.hideSupportPanel()" aria-label="Hide support panel">
+      <span class="fa fa-xmark" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="v1-panel__tabs" role="tablist" aria-label="Support panel tabs">
+    @for (tab of navigation.panelTabs(); track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab === tab.id"
+        [class.active]="activeTab === tab.id"
+        (click)="navigation.setPanelTab(tab.id)">
+        <span [class]="'fa ' + tab.icon" aria-hidden="true"></span>
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <div class="v1-panel__content">
+    @if (activeTab === 'help') {
+      <section aria-label="Help content">
+        @for (item of content.help; track item) {
+          <p>{{ item }}</p>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'todos') {
+      <section class="v1-panel__list" aria-label="Todo items">
+        @for (item of content.todos; track item) {
+          <article class="v1-panel__item">
+            <span>Future workflow</span>
+            <p>{{ item }}</p>
+          </article>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'results') {
+      <section class="v1-panel__results" aria-label="Results summary">
+        @for (item of content.results; track item.label) {
+          <article [class]="'v1-panel__result v1-panel__result--' + item.tone">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </article>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'details') {
+      <section class="v1-panel__list" aria-label="Detailed support content">
+        @for (item of content.details; track item.label) {
+          <article class="v1-panel__item">
+            <span>{{ item.label }}</span>
+            <p>{{ item.value }}</p>
+          </article>
+        }
+      </section>
+    }
+  </div>
+</aside>

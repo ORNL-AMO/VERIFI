@@ -18,7 +18,7 @@ description: Change VERIFI calculations, conversions, validation/status checks, 
 - Run `npm run test:ci` for pure calculations and report assembly.
 - Run `npm run test:browser:ci` when Worker creation or messaging changes.
 - Compare representative before/after outputs and explain every intentional delta.
-- Run `npm run build-prod` and `npm run build-prod-electron` for changed report or shared renderer paths.
+- Use `validate-web-and-electron` and `npm run validate:agent -- --mode plan` for final command selection. Add Electron build/manual validation only when an Electron boundary, Electron environment/config, desktop file flow, or explicit desktop release check is touched.
 - Manually inspect generated files or printable output when automated assertions cannot establish layout or workbook fidelity.
 
 ## Guardrails

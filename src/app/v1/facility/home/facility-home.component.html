@@ -1,0 +1,31 @@
+<article class="v1-home v1-home--facility" aria-labelledby="v1-facility-home-title">
+  @if (navigation.facility(); as facility) {
+    @let content = navigation.panelContent();
+
+    <p class="v1-eyebrow">Facility Home</p>
+    <h1 id="v1-facility-home-title">{{ facility.name }}</h1>
+    <p class="v1-home__summary">
+      Facility workspace shell is ready for {{ facility.name }}. Facility-specific data, analysis, and reporting pages
+      will plug into this frame as v1 workflows migrate.
+    </p>
+
+    <div class="v1-home__metrics" aria-label="Facility summary">
+      <article>
+        <span>Meters</span>
+        <strong>{{ content.results[1].value }}</strong>
+      </article>
+      <article>
+        <span>Predictors</span>
+        <strong>{{ content.results[2].value }}</strong>
+      </article>
+      <article>
+        <span>Analyses</span>
+        <strong>{{ content.results[3].value }}</strong>
+      </article>
+      <article>
+        <span>Reports</span>
+        <strong>{{ content.results[4].value }}</strong>
+      </article>
+    </div>
+  }
+</article>

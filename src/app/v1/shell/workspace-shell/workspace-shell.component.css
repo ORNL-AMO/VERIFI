@@ -1,0 +1,36 @@
+.v1-workspace {
+  display: grid;
+  grid-template-areas: "rail nav main panel";
+  grid-template-columns: var(--v1-rail-width) var(--v1-nav-width) minmax(0, 1fr) var(--v1-panel-width);
+  height: 100%;
+  min-height: 0;
+  background: var(--v1-bg);
+}
+
+.v1-workspace--panel-closed {
+  grid-template-areas: "rail nav main";
+  grid-template-columns: var(--v1-rail-width) var(--v1-nav-width) minmax(0, 1fr);
+}
+
+.v1-workspace__main {
+  grid-area: main;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--v1-primary) 4%, transparent), transparent 36%), var(--v1-bg);
+}
+
+@media (max-width: 1160px) {
+  .v1-workspace {
+    grid-template-areas: "rail nav main";
+    grid-template-columns: var(--v1-rail-width) var(--v1-nav-width) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .v1-workspace,
+  .v1-workspace--panel-closed {
+    display: block;
+    min-height: 100%;
+  }
+}

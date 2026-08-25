@@ -1,0 +1,114 @@
+.v1-panel {
+  grid-area: panel;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--v1-border);
+  background: var(--v1-surface);
+}
+
+.v1-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .75rem;
+  border-bottom: 1px solid var(--v1-border);
+}
+
+.v1-panel__header span,
+.v1-panel__item span,
+.v1-panel__result span {
+  display: block;
+  color: var(--v1-muted);
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.v1-panel__header strong {
+  display: block;
+  color: var(--v1-text);
+  font-size: 1rem;
+}
+
+.v1-panel__tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .3rem;
+  padding: .55rem;
+  border-bottom: 1px solid var(--v1-border);
+}
+
+.v1-panel__tabs button {
+  display: grid;
+  gap: .2rem;
+  justify-items: center;
+  min-height: 3rem;
+  padding: .35rem .15rem;
+  border: 1px solid transparent;
+  border-radius: var(--v1-radius-sm);
+  background: transparent;
+  color: var(--v1-muted);
+  font-size: .7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.v1-panel__tabs button.active {
+  border-color: color-mix(in srgb, var(--v1-primary) 40%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-primary) 8%, var(--v1-surface));
+  color: var(--v1-primary);
+}
+
+.v1-panel__content {
+  display: grid;
+  gap: .75rem;
+  min-height: 0;
+  padding: .75rem;
+  overflow: auto;
+}
+
+.v1-panel__content p {
+  margin: 0 0 .7rem;
+  color: var(--v1-muted);
+}
+
+.v1-panel__list,
+.v1-panel__results {
+  display: grid;
+  gap: .55rem;
+}
+
+.v1-panel__item,
+.v1-panel__result {
+  padding: .65rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-panel);
+}
+
+.v1-panel__item p {
+  margin: .25rem 0 0;
+}
+
+.v1-panel__result strong {
+  display: block;
+  color: var(--v1-text);
+  font-size: 1.2rem;
+}
+
+.v1-panel__result--success {
+  border-color: color-mix(in srgb, var(--v1-success) 35%, var(--v1-border));
+}
+
+.v1-panel__result--info {
+  border-color: color-mix(in srgb, var(--v1-info) 35%, var(--v1-border));
+}
+
+@media (max-width: 1160px) {
+  .v1-panel {
+    display: none;
+  }
+}
