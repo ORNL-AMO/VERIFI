@@ -1,0 +1,29 @@
+<article class="v1-home v1-home--account" aria-labelledby="v1-account-home-title">
+  @if (navigation.account(); as account) {
+    <p class="v1-eyebrow">Account Home</p>
+    <h1 id="v1-account-home-title">{{ account.name }}</h1>
+    <p class="v1-home__summary">
+      Account workspace shell is ready. The migrated Home page starts here while detailed setup, data, analysis, and
+      report workflows remain in current VERIFI.
+    </p>
+
+    <div class="v1-home__metrics" aria-label="Account summary">
+      <article>
+        <span>Facilities</span>
+        <strong>{{ navigation.facilities().length }}</strong>
+      </article>
+      <article>
+        <span>Meters</span>
+        <strong>{{ navigation.panelContent().results[1].value }}</strong>
+      </article>
+      <article>
+        <span>Analyses</span>
+        <strong>{{ navigation.panelContent().results[3].value }}</strong>
+      </article>
+      <article>
+        <span>Reports</span>
+        <strong>{{ navigation.panelContent().results[4].value }}</strong>
+      </article>
+    </div>
+  }
+</article>

@@ -23,7 +23,7 @@ export const accountReadyGuard: CanActivateFn = async () => {
 };
 
 export const accountGuidReadyGuard: CanActivateFn = async route => {
-  return ensureActiveAccountWorkspace(route.paramMap.get('id') ?? undefined);
+  return ensureActiveAccountWorkspace(route.paramMap.get('id') ?? route.paramMap.get('accountGuid') ?? undefined);
 };
 
 export const dataManagementChildGuard: CanActivateChildFn = async (route, state) => {
@@ -44,7 +44,7 @@ export const facilityReadyGuard: CanActivateFn = async route => {
   if (startup.status === 'error') { return false; }
   if (startup.status === 'empty' && !store.isReady()) { return accountManagement(router); }
 
-  const facilityGuid = route.paramMap.get('id');
+  const facilityGuid = route.paramMap.get('id') ?? route.paramMap.get('facilityGuid');
   if (!facilityGuid) { return activeAccountHome(router, route); }
   const facility = await facilities.getStoredByGuid(facilityGuid);
   if (!facility?.accountId) { return activeAccountHome(router, route); }

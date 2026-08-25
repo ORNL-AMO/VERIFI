@@ -1,0 +1,49 @@
+.v1-home {
+  display: grid;
+  gap: .85rem;
+  max-width: 62rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.v1-home h1,
+.v1-home p {
+  margin: 0;
+}
+
+.v1-home h1 {
+  color: var(--v1-text);
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.v1-home__summary {
+  max-width: 44rem;
+  color: var(--v1-muted);
+}
+
+.v1-home__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: .7rem;
+}
+
+.v1-home__metrics article {
+  padding: .85rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-home__metrics span {
+  display: block;
+  color: var(--v1-muted);
+  font-size: .75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.v1-home__metrics strong {
+  display: block;
+  color: var(--v1-account);
+  font-size: 1.75rem;
+}

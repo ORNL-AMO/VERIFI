@@ -1,0 +1,17 @@
+<main
+  class="v1-workspace"
+  [class.v1-workspace--panel-closed]="!navigation.isSupportPanelOpen()"
+  [class.v1-workspace--account]="navigation.contextMode() === 'account'"
+  [class.v1-workspace--facility]="navigation.contextMode() === 'facility'"
+  aria-label="v1 account workspace">
+  <app-primary-rail></app-primary-rail>
+  <app-section-nav></app-section-nav>
+
+  <section class="v1-workspace__main" aria-label="Workspace content">
+    <router-outlet></router-outlet>
+  </section>
+
+  @if (navigation.isSupportPanelOpen()) {
+    <app-support-panel></app-support-panel>
+  }
+</main>

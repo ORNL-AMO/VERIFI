@@ -1,0 +1,38 @@
+<aside class="v1-nav" aria-label="Section navigation">
+  <div class="v1-nav__context" role="group" aria-label="Switch workspace context">
+    <button
+      type="button"
+      [class.active]="navigation.contextMode() === 'account'"
+      (click)="navigation.setContext('account')">
+      <span class="fa fa-building" aria-hidden="true"></span>
+      Account
+    </button>
+    <button
+      type="button"
+      [class.active]="navigation.contextMode() === 'facility'"
+      [disabled]="navigation.facilities().length === 0"
+      (click)="navigation.setContext('facility')">
+      <span class="fa fa-industry" aria-hidden="true"></span>
+      Facility
+    </button>
+  </div>
+
+  <section class="v1-nav__group" aria-labelledby="v1-home-nav-title">
+    <span id="v1-home-nav-title" class="v1-nav__label">Home</span>
+    <a
+      class="active"
+      [routerLink]="navigation.contextMode() === 'facility' && navigation.facility()
+        ? navigation.facilityRoute(navigation.facility()!.guid, navigation.activePanelTab())
+        : navigation.accountRoute(navigation.account()!.guid, navigation.activePanelTab())"
+      aria-current="page">
+      <span class="fa fa-chart-pie" aria-hidden="true"></span>
+      Overview
+    </a>
+  </section>
+
+  <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">
+    <span id="v1-future-nav-title" class="v1-nav__label">Coming next</span>
+    <button type="button" disabled>Goal progress</button>
+    <button type="button" disabled>Todo list</button>
+  </section>
+</aside>
