@@ -95,7 +95,7 @@ describe('WelcomeComponent', () => {
     expect(createButtons).toHaveLength(1);
   });
 
-  it('disables the recent account action when unavailable or busy', () => {
+  it('disables the recent account action when busy', () => {
     const component = fixture.componentInstance;
     const recentButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.v1-welcome__hero-actions button');
 
@@ -104,11 +104,13 @@ describe('WelcomeComponent', () => {
     component.loadingAccountGuid.set('account-a');
     fixture.detectChanges();
     expect(recentButton().disabled).toBe(true);
+  });
 
-    component.loadingAccountGuid.set(undefined);
+  it('hides the recent account action when no accounts exist', () => {
     usableAccounts.set([]);
     fixture.detectChanges();
-    expect(recentButton().disabled).toBe(true);
+    const recentButton: HTMLButtonElement | null = fixture.nativeElement.querySelector('.v1-welcome__hero-actions button');
+    expect(recentButton).toBeNull();
   });
 
   it('shows an error if an account cannot be opened', async () => {
