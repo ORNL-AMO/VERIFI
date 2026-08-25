@@ -1,0 +1,46 @@
+@let status = submittedStatus();
+
+<section class="v1-email-signup" aria-labelledby="v1-email-signup-title">
+  <h2 id="v1-email-signup-title">Email List</h2>
+
+  @if (!status || status === 'error') {
+    <p>
+      Subscribe for VERIFI release notes, webinars, and training resources. Your email address will only be used
+      for VERIFI communications.
+    </p>
+    <form class="v1-email-signup__form" aria-label="Email list signup" (ngSubmit)="submitSubscriber()">
+      <label for="v1-email-signup-input">Email address</label>
+      <div>
+        <input
+          id="v1-email-signup-input"
+          type="email"
+          [value]="email.value"
+          placeholder="name@company.com"
+          [attr.aria-invalid]="!!invalidEmailMessage"
+          aria-describedby="v1-email-signup-message"
+          (input)="setEmail($event)">
+        <button type="submit" class="v1-btn v1-btn--primary">Subscribe</button>
+      </div>
+    </form>
+    @if (invalidEmailMessage) {
+      <div id="v1-email-signup-message" class="v1-alert v1-alert--danger" role="alert">{{ invalidEmailMessage }}</div>
+    }
+  }
+
+  @if (status === 'success') {
+    <div id="v1-email-signup-message" class="v1-alert v1-alert--success" role="status">
+      A confirmation email has been sent to {{ email.value }}. Click the opt-in link in the email to complete your subscription.
+    </div>
+  }
+
+  @if (status === 'error') {
+    <div class="v1-alert v1-alert--danger" role="alert">Please verify your network connection and try again.</div>
+  }
+
+  @if (status === 'sending') {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+      Sending subscription request...
+    </div>
+  }
+</section>
