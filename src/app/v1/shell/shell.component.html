@@ -2,12 +2,19 @@
 
 <section
   class="v1-root"
-  [class.v1-theme-dark]="appearance.isDark()"
+  [class.v1-theme-dark]="settings.mode === 'dark'"
   [class.v1-palette-steel]="settings.palette === 'steel'"
   [class.v1-palette-blueprint]="settings.palette === 'blueprint'"
+  [class.v1-palette-neon]="settings.palette === 'neon'"
+  [class.v1-palette-aurora]="settings.palette === 'aurora'"
   [class.v1-palette-forest]="settings.palette === 'forest'"
-  [class.v1-density-compact]="appearance.isCompact()"
-  [class.v1-corners-square]="appearance.hasSquareCorners()"
+  [class.v1-corners-square]="settings.cornerStyle === 'square'"
+  [class.v1-contrast-strong]="settings.highContrast"
+  [class.v1-background-blueprint-grid]="settings.backgroundPattern === 'blueprint-grid'"
+  [class.v1-background-steel-hatch]="settings.backgroundPattern === 'steel-hatch'"
+  [class.v1-background-neon-grid]="settings.backgroundPattern === 'neon-grid'"
+  [class.v1-background-aurora-flow]="settings.backgroundPattern === 'aurora-flow'"
+  [class.v1-background-topographic-contours]="settings.backgroundPattern === 'topographic-contours'"
   aria-label="VERIFI v1 production workspace">
   <app-shell-header></app-shell-header>
   <router-outlet></router-outlet>

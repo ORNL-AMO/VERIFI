@@ -78,6 +78,7 @@
               "src/styles/plotly.css",
               "src/styles/dataManagement.css",
               "src/styles/reports.css",
+              "src/app/v1/styles/foundation.css",
               "src/app/ux-prototypes/styles/prototype-reset.css",
               "src/app/ux-prototypes/p1/p1-globals.css"
             ],
@@ -153,6 +154,7 @@
                 "src/styles/buttons.css",
                 "src/styles/banners.css",
                 "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                "src/app/v1/styles/foundation.css",
                 "src/styles/printing.css"
               ],
               "scripts": []

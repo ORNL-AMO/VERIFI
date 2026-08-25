@@ -1,3 +1,7 @@
+:host {
+  display: contents;
+}
+
 .v1-panel {
   grid-area: panel;
   display: grid;

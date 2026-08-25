@@ -1,3 +1,7 @@
+:host {
+  display: contents;
+}
+
 .v1-nav {
   grid-area: nav;
   display: grid;

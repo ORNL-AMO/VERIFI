@@ -17,7 +17,13 @@ describe('ShellHeaderComponent', () => {
     settingsButton.click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.v1-settings__menu')?.textContent).toContain('Forest');
+    const menuText = fixture.nativeElement.querySelector('.v1-settings__menu')?.textContent;
+    expect(menuText).toContain('Forest');
+    expect(menuText).toContain('Neon');
+    expect(menuText).toContain('Aurora');
+    expect(menuText).toContain('High contrast');
+    expect(menuText).toContain('Background');
+    expect(menuText).toContain('Topographic contours');
   });
 
   it('shows workspace context and support panel control on workspace routes', () => {
@@ -38,11 +44,18 @@ function setup(isWorkspaceRoute: boolean): {
   navigation: any;
 } {
   const appearance = {
-    settings: vi.fn(() => ({ palette: 'default', mode: 'light', density: 'comfortable', cornerStyle: 'soft' })),
+    settings: vi.fn(() => ({
+      palette: 'default',
+      mode: 'light',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'blueprint-grid'
+    })),
     isDark: vi.fn(() => false),
     setPalette: vi.fn(),
     toggleMode: vi.fn(),
-    setDensity: vi.fn(),
+    toggleHighContrast: vi.fn(),
+    setBackgroundPattern: vi.fn(),
     setCornerStyle: vi.fn()
   };
   const navigation = {

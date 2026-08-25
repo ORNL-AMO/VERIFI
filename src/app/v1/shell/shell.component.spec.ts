@@ -17,22 +17,17 @@ class ShellTestModule { }
 describe('ShellComponent', () => {
   let fixture: ComponentFixture<ShellComponent>;
   let appearance: {
-    isDark: ReturnType<typeof vi.fn>;
-    isCompact: ReturnType<typeof vi.fn>;
-    hasSquareCorners: ReturnType<typeof vi.fn>;
     settings: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     appearance = {
-      isDark: vi.fn(() => true),
-      isCompact: vi.fn(() => true),
-      hasSquareCorners: vi.fn(() => false),
       settings: vi.fn(() => ({
-        palette: 'blueprint',
+        palette: 'neon',
         mode: 'dark',
-        density: 'compact',
-        cornerStyle: 'soft'
+        cornerStyle: 'square',
+        highContrast: true,
+        backgroundPattern: 'neon-grid'
       }))
     };
     TestBed.configureTestingModule({
@@ -50,9 +45,10 @@ describe('ShellComponent', () => {
     const root = fixture.nativeElement.querySelector('.v1-root');
 
     expect(root.classList.contains('v1-theme-dark')).toBe(true);
-    expect(root.classList.contains('v1-palette-blueprint')).toBe(true);
-    expect(root.classList.contains('v1-density-compact')).toBe(true);
-    expect(root.classList.contains('v1-corners-square')).toBe(false);
+    expect(root.classList.contains('v1-palette-neon')).toBe(true);
+    expect(root.classList.contains('v1-background-neon-grid')).toBe(true);
+    expect(root.classList.contains('v1-contrast-strong')).toBe(true);
+    expect(root.classList.contains('v1-corners-square')).toBe(true);
   });
 
   it('hosts the shared shell header above routed content', () => {

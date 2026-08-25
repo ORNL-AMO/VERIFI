@@ -23,12 +23,12 @@ Use VERIFI's existing colors as semantic anchors:
 | Account context and energy/completion | `#145a32` | Account-level cues, success, completion, energy-positive states |
 | Facility context and navigation | `#2c386b` | Facility-level cues, structural navigation, selected facility work |
 
-Define production v1 styling through semantic token categories instead of one-off component colors:
+Define production v1 styling through semantic token categories instead of one-off component colors. Durable v1 foundation styles live in V1-owned scoped CSS under `src/app/v1/styles/`; every production foundation selector must be rooted under `.v1-root` or use a `v1-*` class so the legacy v0 UI can coexist unchanged.
 
 - Background, surface, panel, muted surface, border, divider, shadow, and backdrop.
 - Text, muted text, inverse text, link, focus, disabled, and placeholder.
 - Primary, account, facility, success, warning, danger, info, and neutral status.
-- Spacing, density, radius, elevation, table row, form field, drawer width, and shell column sizing.
+- Spacing, radius, elevation, table row, form field, drawer width, and shell column sizing.
 - Chart series, chart grid, chart annotation, and chart status colors.
 
 Typography should stay practical and dense. Use readable application-scale headings, compact labels, strong numeric hierarchy for metrics, and no viewport-scaled font sizes. Keep letter spacing at normal except for small uppercase labels where the pattern already exists and remains readable.
@@ -89,11 +89,13 @@ Promote a small production-ready theme set first:
 - Default
 - Steel
 - Blueprint
+- Neon
+- Aurora
 - Forest
 
-Keep more expressive P1 palettes, such as Neon and Aurora, as experimental references unless maintainers approve them for production. New themes must be built from semantic tokens, pass contrast checks in light and dark mode, and work with tables, charts, forms, drawers, modals, and status colors.
+Neon and Aurora are supported as experimental v1 palettes. Every theme must be built from semantic tokens, pass contrast checks in light and dark mode, and work with tables, charts, forms, drawers, modals, and status colors.
 
-Density and corner-style options may continue as v1 appearance settings when the first production shell can support them cleanly. Background patterns and glow effects should remain secondary and must never reduce readability or status clarity.
+Corner-style and high-contrast options are v1 appearance settings. Palette-matched background patterns are supported for the promoted theme set: Default and Blueprint use Blueprint grid, Steel uses Machined hatch, Neon uses Neon grid, Aurora uses Aurora flow, and Forest uses Topographic contours. Backgrounds remain secondary and must never reduce readability or status clarity. Glow effects remain a prototype-only reference until a production issue explicitly promotes them.
 
 ## Accessibility and responsive expectations
 
