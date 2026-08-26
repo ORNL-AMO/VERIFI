@@ -10,6 +10,10 @@
   --v1-surface: #ffffff;
   --v1-surface-muted: #eef4f1;
   --v1-panel: #f8faf9;
+  --v1-content-block: color-mix(in srgb, var(--v1-surface-muted) 55%, var(--v1-surface));
+  --v1-control-surface: color-mix(in srgb, var(--v1-surface) 84%, var(--v1-bg));
+  --v1-control-addon-surface: color-mix(in srgb, var(--v1-surface-muted) 72%, var(--v1-surface));
+  --v1-control-border: color-mix(in srgb, var(--v1-border) 78%, var(--v1-text));
   --v1-text: #17231f;
   --v1-muted: #5f6f68;
   --v1-inverse-text: #ffffff;
@@ -468,6 +472,32 @@
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.v1-section-header {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-section-header h1,
+.v1-section-header p {
+  margin: 0;
+}
+
+.v1-section-header h1 {
+  color: var(--v1-text);
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.v1-section-header__summary {
+  max-width: 44rem;
+  color: var(--v1-muted);
 }
 
 .v1-label {

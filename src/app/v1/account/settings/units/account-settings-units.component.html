@@ -1,0 +1,96 @@
+@if (form) {
+  <form class="v1-settings-panel" [formGroup]="form" aria-label="Account units">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Units</p>
+        <h2>Units of measure</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Saving
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <label>
+        <span>Units of measure</span>
+        <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+          <option [ngValue]="'Imperial'">Imperial</option>
+          <option [ngValue]="'Metric'">Metric</option>
+          <option [ngValue]="'Custom'">Custom</option>
+        </select>
+      </label>
+      <fieldset>
+        <legend>Energy boundary</legend>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="energyIsSource" [value]="true" (change)="saveUnits()">
+          <span>Source energy</span>
+        </label>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="energyIsSource" [value]="false" (change)="saveUnits()">
+          <span>Site energy</span>
+        </label>
+      </fieldset>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <label>
+        <span>Result energy unit</span>
+        <select formControlName="energyUnit" (change)="saveUnits()">
+          @for (option of energyUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Electricity unit</span>
+        <select formControlName="electricityUnit" (change)="saveUnits()">
+          @for (option of energyUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Liquid volume unit</span>
+        <select formControlName="volumeLiquidUnit" (change)="saveUnits()">
+          @for (option of volumeLiquidOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Gas volume unit</span>
+        <select formControlName="volumeGasUnit" (change)="saveUnits()">
+          @for (option of volumeGasOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Mass unit</span>
+        <select formControlName="massUnit" (change)="saveUnits()">
+          @for (option of massUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>eGRID subregion</span>
+        <select formControlName="eGridSubregion" (change)="saveUnits()">
+          @for (subregion of subregionOptions(); track subregion) {
+            <option [ngValue]="subregion">{{ subregion }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+  </form>
+}

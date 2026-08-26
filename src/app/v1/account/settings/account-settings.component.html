@@ -1,0 +1,27 @@
+@let currentAccount = account();
+
+<section class="v1-account-settings" aria-labelledby="v1-account-settings-title">
+  <header class="v1-section-header">
+    <div>
+      <p class="v1-eyebrow">Account settings</p>
+      <h1 id="v1-account-settings-title">{{ currentAccount?.name || 'Account settings' }}</h1>
+    </div>
+  </header>
+
+  @if (!currentAccount) {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+      <h2>No account loaded</h2>
+      <p>Open an account workspace to edit account settings.</p>
+    </article>
+  } @else {
+    @if (!canWrite()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <span class="fa fa-lock" aria-hidden="true"></span>
+        <span>Settings are unavailable while the workspace is loading or switching.</span>
+      </div>
+    }
+
+    <router-outlet></router-outlet>
+  }
+</section>

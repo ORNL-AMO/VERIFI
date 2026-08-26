@@ -1,0 +1,176 @@
+@if (form) {
+  <form class="v1-settings-panel" [formGroup]="form" aria-label="Reduction goals">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Goals</p>
+        <h2>Organizational goals</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Saving
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    <label class="v1-settings-choice v1-settings-choice--block">
+      <input type="checkbox" formControlName="isBetterPlantsPartner" (change)="saveGoals()">
+      <span>Better Plants Program Partner</span>
+    </label>
+
+    <div class="v1-settings-goal v1-settings-choice--block">
+      <label class="v1-settings-choice">
+        <input type="checkbox" formControlName="energyReductionGoal" (change)="saveGoals()">
+        <span>Energy reduction goal</span>
+      </label>
+      @if (form.controls['energyReductionGoal'].value) {
+        <div class="v1-settings-grid v1-settings-grid--4">
+          <label>
+            <span>Reduction goal</span>
+            <div class="input-group">
+              <input type="number" class="form-control" formControlName="energyReductionPercent" min="0" max="100"
+                (input)="scheduleGoalsSave()" (blur)="flushGoalsSave()">
+              <span class="input-group-text">%</span>
+            </div>
+          </label>
+          <label>
+            <span>Baseline year</span>
+            <select formControlName="energyReductionBaselineYear"
+              (change)="changeBaselineYear('energyReductionBaselineYear', 'energyReductionTargetYear')">
+              @for (year of years; track year) { <option [ngValue]="year">{{ year }}</option> }
+            </select>
+          </label>
+          <label>
+            <span>Target year</span>
+            <select formControlName="energyReductionTargetYear" (change)="saveGoals()">
+              @for (year of years; track year) { <option [ngValue]="year">{{ year }}</option> }
+            </select>
+          </label>
+          <fieldset>
+            <legend>Goal type</legend>
+            <label class="v1-settings-choice">
+              <input type="radio" formControlName="energyIsAbsolute" [value]="true" (change)="saveGoals()">
+              <span>Absolute</span>
+            </label>
+            <label class="v1-settings-choice">
+              <input type="radio" formControlName="energyIsAbsolute" [value]="false" (change)="saveGoals()">
+              <span>Intensity</span>
+            </label>
+          </fieldset>
+        </div>
+      }
+    </div>
+
+    <div class="v1-settings-goal v1-settings-choice--block">
+      <label class="v1-settings-choice">
+        <input type="checkbox" formControlName="waterReductionGoal" (change)="saveGoals()">
+        <span>Water reduction goal</span>
+      </label>
+      @if (form.controls['waterReductionGoal'].value) {
+        <div class="v1-settings-grid v1-settings-grid--4">
+          <label>
+            <span>Reduction goal</span>
+            <div class="input-group">
+              <input type="number" class="form-control" formControlName="waterReductionPercent" min="0" max="100"
+                (input)="scheduleGoalsSave()" (blur)="flushGoalsSave()">
+              <span class="input-group-text">%</span>
+            </div>
+          </label>
+          <label>
+            <span>Baseline year</span>
+            <select formControlName="waterReductionBaselineYear"
+              (change)="changeBaselineYear('waterReductionBaselineYear', 'waterReductionTargetYear')">
+              @for (year of years; track year) { <option [ngValue]="year">{{ year }}</option> }
+            </select>
+          </label>
+          <label>
+            <span>Target year</span>
+            <select formControlName="waterReductionTargetYear" (change)="saveGoals()">
+              @for (year of years; track year) { <option [ngValue]="year">{{ year }}</option> }
+            </select>
+          </label>
+          <fieldset>
+            <legend>Goal type</legend>
+            <label class="v1-settings-choice">
+              <input type="radio" formControlName="waterIsAbsolute" [value]="true" (change)="saveGoals()">
+              <span>Absolute</span>
+            </label>
+            <label class="v1-settings-choice">
+              <input type="radio" formControlName="waterIsAbsolute" [value]="false" (change)="saveGoals()">
+              <span>Intensity</span>
+            </label>
+          </fieldset>
+        </div>
+      }
+    </div>
+
+    <div class="v1-settings-goal v1-settings-choice--block">
+      <label class="v1-settings-choice">
+        <input type="checkbox" formControlName="displayEmissions" (change)="saveGoals()">
+        <span>Assess other impacts of operations</span>
+      </label>
+      @if (form.controls['displayEmissions'].value) {
+        <fieldset>
+          <legend>IPCC assessment report version</legend>
+          @for (version of assessmentReportVersions; track version) {
+            <label class="v1-settings-choice">
+              <input type="radio" formControlName="assessmentReportVersion" [value]="version" (change)="saveGoals()">
+              <span>{{ version }}</span>
+            </label>
+          }
+        </fieldset>
+      }
+    </div>
+
+    @if (form.controls['displayEmissions'].value) {
+      <div class="v1-settings-goal v1-settings-choice--block">
+        <label class="v1-settings-choice">
+          <input type="checkbox" formControlName="greenhouseReductionGoal" (change)="saveGoals()">
+          <span>Greenhouse emission/carbon reduction goal</span>
+        </label>
+        @if (form.controls['greenhouseReductionGoal'].value) {
+          <div class="v1-settings-grid v1-settings-grid--4">
+            <label>
+              <span>Reduction goal</span>
+              <div class="input-group">
+                <input type="number" class="form-control" formControlName="greenhouseReductionPercent" min="0" max="100"
+                  (input)="scheduleGoalsSave()" (blur)="flushGoalsSave()">
+                <span class="input-group-text">%</span>
+              </div>
+            </label>
+            <label>
+              <span>Baseline year</span>
+              <select formControlName="greenhouseReductionBaselineYear"
+                (change)="changeBaselineYear('greenhouseReductionBaselineYear', 'greenhouseReductionTargetYear')">
+                @for (year of years; track year) { <option [ngValue]="year">{{ year }}</option> }
+              </select>
+            </label>
+            <label>
+              <span>Target year</span>
+              <select formControlName="greenhouseReductionTargetYear" (change)="saveGoals()">
+                @for (year of years; track year) { <option [ngValue]="year">{{ year }}</option> }
+              </select>
+            </label>
+            <fieldset>
+              <legend>Goal type</legend>
+              <label class="v1-settings-choice">
+                <input type="radio" formControlName="greenhouseIsAbsolute" [value]="true" (change)="saveGoals()">
+                <span>Absolute</span>
+              </label>
+              <label class="v1-settings-choice">
+                <input type="radio" formControlName="greenhouseIsAbsolute" [value]="false" (change)="saveGoals()">
+                <span>Intensity</span>
+              </label>
+            </fieldset>
+          </div>
+        }
+      </div>
+    }
+  </form>
+}

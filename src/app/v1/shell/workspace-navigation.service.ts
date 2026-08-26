@@ -50,7 +50,7 @@ export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
   { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'fa-chart-line', enabled: false },
   { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'fa-chart-simple', enabled: false },
   { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'fa-file-lines', enabled: false },
-  { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'fa-sliders', enabled: false },
+  { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'fa-sliders', enabled: true },
   { id: 'imports', label: 'Imports & Backup', shortLabel: 'Imports', icon: 'fa-file-import', enabled: false }
 ];
 
@@ -62,6 +62,16 @@ export const SUPPORT_PANEL_TABS: ReadonlyArray<PanelTab> = [
 ];
 
 const DEFAULT_PANEL_TAB: PanelTabId = 'help';
+const VALID_SECTION_IDS: ReadonlyArray<SectionId> = ['home', 'data', 'visualization', 'analysis', 'reports', 'settings', 'imports'];
+const DEFAULT_DETAILS: Record<SectionId, string> = {
+  home: 'overview',
+  data: 'facilities',
+  visualization: 'time-series',
+  analysis: 'rollup',
+  reports: 'setup',
+  settings: 'profile',
+  imports: 'template'
+};
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceNavigationService {
@@ -74,7 +84,10 @@ export class WorkspaceNavigationService {
   private readonly previousUrl = signal(this.router.url);
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
 
-  readonly sections = signal(WORKSPACE_SECTIONS).asReadonly();
+  readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
+    ...section,
+    enabled: section.id === 'settings' ? this.contextMode() === 'account' : section.enabled
+  })));
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
   readonly activePanelTab = this.activePanelTabState.asReadonly();
@@ -146,8 +159,26 @@ export class WorkspaceNavigationService {
     this.isSupportPanelOpen.set(false);
   }
 
+  openSection(sectionId: SectionId): void {
+    const contextMode = this.contextMode();
+    if (sectionId === 'home') {
+      this.setContext(contextMode);
+      return;
+    }
+    if (sectionId === 'settings' && contextMode === 'account') {
+      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
+      if (accountGuid) {
+        void this.router.navigate(this.accountSettingsRoute(accountGuid));
+      }
+    }
+  }
+
   accountRoute(accountGuid: string): Array<string> {
     return ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview'];
+  }
+
+  accountSettingsRoute(accountGuid: string, detail = 'profile'): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'settings', detail];
   }
 
   facilityRoute(facilityGuid: string): Array<string> {
@@ -187,8 +218,8 @@ export class WorkspaceNavigationService {
         'Use the rail and context controls to confirm account and facility navigation before workflow pages are migrated.'
       ],
       todos: [
-        isFacility ? 'Review facility setup and migrated workflow readiness.' : 'Review account setup and portfolio readiness.',
-        'Data, analysis, reports, settings, and import workflows remain in current VERIFI until their v1 slices are built.'
+        isFacility ? 'Review facility setup and migrated workflow readiness.' : this.activeSection() === 'settings' ? 'Confirm account settings before detailed workflows use them.' : 'Review account setup and portfolio readiness.',
+        'Data, analysis, reports, and import workflows remain in current VERIFI until their v1 slices are built.'
       ],
       results: [
         { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
@@ -199,7 +230,7 @@ export class WorkspaceNavigationService {
       ],
       details: [
         { label: 'Context', value: isFacility ? 'Facility workspace' : 'Account workspace' },
-        { label: 'Active section', value: 'Home / Overview' },
+        { label: 'Active section', value: `${this.activeSection()} / ${this.activeDetail()}` },
         { label: 'Support tab', value: this.activePanelTab() }
       ]
     };
@@ -232,19 +263,25 @@ export function parseWorkspaceRoute(url: string): RouteState {
     };
   }
   if (routeParts[1] === 'facility') {
+    const section = normalizeSection(routeParts[3]);
     return {
       view: 'workspace',
       contextMode: 'facility',
       facilityGuid: routeParts[2],
-      section: 'home',
-      detail: routeParts[4] || 'overview'
+      section,
+      detail: routeParts[4] || DEFAULT_DETAILS[section]
     };
   }
+  const section = normalizeSection(routeParts[3]);
   return {
     view: 'workspace',
     contextMode: 'account',
     accountGuid: routeParts[2],
-    section: 'home',
-    detail: routeParts[4] || 'overview'
+    section,
+    detail: routeParts[4] || DEFAULT_DETAILS[section]
   };
+}
+
+function normalizeSection(section: string | undefined): SectionId {
+  return VALID_SECTION_IDS.includes(section as SectionId) ? section as SectionId : 'home';
 }
