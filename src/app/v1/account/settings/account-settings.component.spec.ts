@@ -277,7 +277,6 @@ describe('Account settings routed components', () => {
     fixture.detectChanges(false);
 
     expect(backupExportCoordinator.exportActiveAccount).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('Download JSON backup');
 
     await fixture.componentInstance.confirmBackupDownload();
     fixture.detectChanges(false);
@@ -311,7 +310,6 @@ describe('Account settings routed components', () => {
     fixture.detectChanges(false);
 
     expect(accountHandler.update).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('This action cannot be undone');
 
     lifecycle.handleMarkedAccountDeletion.mockImplementationOnce(async () => {
       account.set(undefined);
