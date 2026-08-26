@@ -35,6 +35,12 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
   showImportPanel = false;
   isBackingUp = false;
 
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.showBackupConfirm = false;
+    this.modalPortal.hide();
+  }
+
   get automaticBackupLabel(): string {
     if (!this.backupGateway.isAvailable) {
       return 'Available in the desktop application';

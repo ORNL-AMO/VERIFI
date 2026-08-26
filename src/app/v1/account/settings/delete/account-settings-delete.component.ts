@@ -21,6 +21,12 @@ export class AccountSettingsDeleteComponent extends AccountSettingsDetailBase {
   showDeleteConfirm = false;
   isDeleting = false;
 
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.showDeleteConfirm = false;
+    this.modalPortal.hide();
+  }
+
   openDeleteConfirm(): void {
     if (!this.account() || !this.canWrite() || this.isDeleting) {
       return;

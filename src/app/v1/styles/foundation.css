@@ -781,7 +781,7 @@
 .v1-modal__header,
 .v1-modal__body,
 .v1-modal__footer {
-  padding: clamp(.5rem, 3vw, .5rem);
+  padding: clamp(.3rem, 3vw, .75rem);
 }
 
 .v1-drawer__body {
