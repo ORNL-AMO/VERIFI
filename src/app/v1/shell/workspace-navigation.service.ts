@@ -9,6 +9,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 
 export type ContextMode = 'account' | 'facility';
+export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
@@ -70,6 +71,7 @@ export class WorkspaceNavigationService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly currentUrl = signal(this.router.url);
+  private readonly previousUrl = signal(this.router.url);
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
 
   readonly sections = signal(WORKSPACE_SECTIONS).asReadonly();
@@ -78,6 +80,7 @@ export class WorkspaceNavigationService {
   readonly activePanelTab = this.activePanelTabState.asReadonly();
 
   readonly routeState = computed(() => parseWorkspaceRoute(this.currentUrl()));
+  readonly routeMotion = computed(() => this.resolveRouteMotion());
   readonly isWorkspaceRoute = computed(() => this.routeState().view === 'workspace');
   readonly contextMode = computed(() => this.routeState().contextMode);
   readonly activeSection = computed(() => this.routeState().section);
@@ -93,7 +96,10 @@ export class WorkspaceNavigationService {
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(event => this.currentUrl.set(event.urlAfterRedirects));
+      .subscribe(event => {
+        this.previousUrl.set(this.currentUrl());
+        this.currentUrl.set(event.urlAfterRedirects);
+      });
   }
 
   async openAccount(accountGuid: string): Promise<void> {
@@ -197,6 +203,19 @@ export class WorkspaceNavigationService {
         { label: 'Support tab', value: this.activePanelTab() }
       ]
     };
+  }
+
+  private resolveRouteMotion(): WorkspaceRouteMotion {
+    const previous = parseWorkspaceRoute(this.previousUrl());
+    const current = this.routeState();
+
+    if (previous.view === 'welcome' && current.view === 'workspace') {
+      return 'workspace-entry';
+    }
+    if (previous.view === 'workspace' && current.view === 'workspace' && previous.contextMode !== current.contextMode) {
+      return current.contextMode === 'facility' ? 'facility-drill-in' : 'account-drill-out';
+    }
+    return 'none';
   }
 }
 

@@ -17,5 +17,10 @@
   [class.v1-background-topographic-contours]="settings.backgroundPattern === 'topographic-contours'"
   aria-label="VERIFI v1 production workspace">
   <app-shell-header></app-shell-header>
-  <router-outlet></router-outlet>
+  <div
+    class="v1-route-stage"
+    [@v1RouteMotion]="routeMotion()"
+    [@.disabled]="prefersReducedMotion()">
+    <router-outlet></router-outlet>
+  </div>
 </section>

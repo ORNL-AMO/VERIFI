@@ -30,6 +30,7 @@ describe('WorkspaceShellComponent', () => {
       panelTabs: vi.fn(() => SUPPORT_PANEL_TABS),
       isSupportPanelOpen: vi.fn(() => true),
       contextMode: vi.fn(() => 'account'),
+      routeMotion: vi.fn(() => 'workspace-entry'),
       account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
       facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
       facility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),
@@ -69,5 +70,12 @@ describe('WorkspaceShellComponent', () => {
     expect(fixture.nativeElement.querySelector('app-primary-rail')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-section-nav')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-support-panel')).not.toBeNull();
+  });
+
+  it('applies motion classes from the current v1 route transition', () => {
+    const workspace = fixture.nativeElement.querySelector('.v1-workspace');
+
+    expect(workspace.classList.contains('v1-workspace--entry')).toBe(true);
+    expect(workspace.classList.contains('v1-workspace--account')).toBe(true);
   });
 });

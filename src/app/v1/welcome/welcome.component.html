@@ -1,7 +1,7 @@
 @let recent = recentAccount();
 
 <main class="v1-welcome" aria-labelledby="v1-welcome-title">
-  <section class="v1-welcome__hero">
+  <section class="v1-welcome__hero v1-welcome__motion-card">
     <div class="v1-welcome__copy">
       <p class="v1-eyebrow">Utility tracking and analysis</p>
       <h1 id="v1-welcome-title">VERIFI</h1>
@@ -57,7 +57,7 @@
     </aside>
   </section>
 
-  <section class="v1-welcome__actions" aria-labelledby="v1-start-title">
+  <section class="v1-welcome__actions v1-welcome__motion-card" aria-labelledby="v1-start-title">
     <div class="v1-section-heading">
       <div>
         <p id="v1-start-title" class="v1-eyebrow">Get started</p>
@@ -82,13 +82,13 @@
   </section>
 
   @if (errorMessage(); as message) {
-  <section class="v1-alert v1-alert--danger" role="alert">
+  <section class="v1-alert v1-alert--danger v1-welcome__motion-card" role="alert">
     <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
     <span>{{ message }}</span>
   </section>
   }
 
-  <section class="v1-welcome__portfolio" aria-labelledby="v1-accounts-title">
+  <section class="v1-welcome__portfolio v1-welcome__motion-card" aria-labelledby="v1-accounts-title">
     @let accountList = accounts();
     @let loadingGuid = loadingAccountGuid();
 
@@ -135,7 +135,7 @@
     }
   </section>
 
-  <section class="v1-welcome__support" aria-label="Help, email list, and feedback">
+  <section class="v1-welcome__support v1-welcome__motion-card" aria-label="Help, email list, and feedback">
     <article>
       <h2>ORNL Industrial Resources</h2>
       <p>
@@ -160,7 +160,7 @@
     </article>
   </section>
 
-  <section class="v1-experience-switcher" aria-labelledby="v1-experience-switcher-title">
+  <section class="v1-experience-switcher v1-welcome__motion-card" aria-labelledby="v1-experience-switcher-title">
     <div class="v1-experience-switcher__intro">
       <p class="v1-eyebrow">Experience switcher</p>
       <h2 id="v1-experience-switcher-title">Move between VERIFI versions</h2>
