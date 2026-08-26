@@ -38,14 +38,16 @@
       </section>
     }
     @case ('settings') {
-      @if (contextMode === 'account' && account) {
+      @if (account && (contextMode === 'account' || selectedFacility)) {
         <section class="v1-nav__group" aria-labelledby="v1-settings-nav-title">
-          <span id="v1-settings-nav-title" class="v1-nav__label">Account Settings</span>
-          @for (item of settingsItems; track item.id) {
+          <span id="v1-settings-nav-title" class="v1-nav__label">{{ settingsTitle() }}</span>
+          @for (item of settingsItems(); track item.id) {
             <a
               [class.active]="navigation.activeDetail() === item.id"
               [class.v1-nav__item--danger]="item.tone === 'danger'"
-              [routerLink]="navigation.accountSettingsRoute(account.guid, item.id)"
+              [routerLink]="contextMode === 'facility' && selectedFacility
+                ? navigation.facilitySettingsRoute(selectedFacility.guid, item.id)
+                : navigation.accountSettingsRoute(account.guid, item.id)"
               [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
               <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
               {{ item.label }}

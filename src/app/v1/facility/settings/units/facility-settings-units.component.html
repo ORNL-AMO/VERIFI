@@ -1,0 +1,127 @@
+@let currentAccount = account();
+
+@if (form && currentAccount) {
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility units">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Units</p>
+        <h2>Units of measure</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Saving
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    @if (unitsDiffer()) {
+      <div class="v1-alert v1-alert--info">
+        <span class="fa fa-circle-info" aria-hidden="true"></span>
+        <span>This facility has unit settings that differ from {{ currentAccount.name }}.</span>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canWrite()" (click)="openAccountUpdateConfirm()">
+          Update from account settings
+        </button>
+      </div>
+    }
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <label>
+        <span>Units of measure</span>
+        <select formControlName="unitsOfMeasure" (change)="setUnitsOfMeasure()">
+          <option [ngValue]="'Imperial'">Imperial</option>
+          <option [ngValue]="'Metric'">Metric</option>
+          <option [ngValue]="'Custom'">Custom</option>
+        </select>
+      </label>
+      <fieldset>
+        <legend>Boundary for analysis and display</legend>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="energyIsSource" [value]="true" (change)="saveUnits()">
+          <span>Source energy</span>
+        </label>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="energyIsSource" [value]="false" (change)="saveUnits()">
+          <span>Site energy</span>
+        </label>
+      </fieldset>
+      <label>
+        <span>Result energy unit</span>
+        <select formControlName="energyUnit" (change)="saveUnits()">
+          @for (option of energyUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Electricity unit</span>
+        <select formControlName="electricityUnit" (change)="saveUnits()">
+          @for (option of energyUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Liquid volume unit</span>
+        <select formControlName="volumeLiquidUnit" (change)="saveUnits()">
+          @for (option of volumeLiquidOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Gas volume unit</span>
+        <select formControlName="volumeGasUnit" (change)="saveUnits()">
+          @for (option of volumeGasOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Mass unit</span>
+        <select formControlName="massUnit" (change)="saveUnits()">
+          @for (option of massUnitOptions; track option.value) {
+            <option [ngValue]="option.value" [innerHTML]="option.display"></option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>eGRID subregion</span>
+        <select formControlName="eGridSubregion" (change)="saveUnits()">
+          @for (subregion of subregionOptions(); track subregion) {
+            <option [ngValue]="subregion">{{ subregion }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </form>
+}
+
+<ng-template #accountUpdateConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel account settings update"
+      (click)="cancelAccountUpdateConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-update-facility-units-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-update-facility-units-title">Update this facility with the account settings?</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel account settings update"
+          (click)="cancelAccountUpdateConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        <p>The current facility unit settings will be replaced with the unit settings from {{ account()?.name }}.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAccountUpdateConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update facility</button>
+      </footer>
+    </section>
+  </div>
+</ng-template>

@@ -2,7 +2,7 @@ import { Component, effect, inject, untracked } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { DATA_STALENESS_OPTIONS } from '@domain/calculations/status-check-calculations/statusCheckModels';
-import { AccountSettingsFormService } from '@shared/settings-forms/account-settings-form.service';
+import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 @Component({
@@ -13,7 +13,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
   standalone: false
 })
 export class AccountSettingsStalenessComponent extends AccountSettingsDetailBase {
-  private readonly settingsForms = inject(AccountSettingsFormService);
+  private readonly settingsForms = inject(SettingsFormService);
 
   readonly stalenessOptions = DATA_STALENESS_OPTIONS;
   form: FormGroup;

@@ -91,22 +91,25 @@ export class BackupImportCoordinator {
     backup: PreparedBackupFile,
     selectedAccount: IdbAccount,
     facilityToReplace: IdbFacility
-  ): Promise<void> {
+  ): Promise<IdbFacility> {
     this.analytics.sendEvent('import_backup_file');
-    await this.commandBoundary.execute(
+    const result = await this.commandBoundary.execute(
       { entityKind: 'facility', changeKind: 'bulk', label: 'Replacing facility' },
       async () => {
         FACILITY_DELETION_MESSAGES.forEach(message => this.loadingService.addLoadingMessage(message));
         this.loadingService.setContext('import-facility-backup');
         this.loadingService.setTitle('Replacing facility');
-        await this.backupImportCommand.replaceFacilityBackupFile(
+        const { facility } = await this.backupImportCommand.replaceFacilityBackupFile(
           backup,
           selectedAccount.guid,
           facilityToReplace,
           0
         );
+        return facility;
       }
     );
+    this.workspaceService.selectFacility(result.value.guid);
+    return result.value;
   }
 
   async importSelectedFacilities(

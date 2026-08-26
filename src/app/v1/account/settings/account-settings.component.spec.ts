@@ -16,7 +16,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { EGridService } from '@shared/helper-services/e-grid.service';
-import { AccountSettingsFormService } from '@shared/settings-forms/account-settings-form.service';
+import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { AccountSettingsComponent } from './account-settings.component';
 import { AccountSettingsModule } from './account-settings.module';
 import { AccountSettingsBackupComponent } from './backup/account-settings-backup.component';
@@ -103,7 +103,7 @@ describe('Account settings routed components', () => {
         AccountSettingsModule
       ],
       providers: [
-        AccountSettingsFormService,
+        SettingsFormService,
         {
           provide: AccountWorkspaceStore,
           useValue: {

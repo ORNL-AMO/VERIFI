@@ -1,0 +1,86 @@
+@let currentAccount = account();
+@let currentFacility = facility();
+
+@if (currentAccount && currentFacility) {
+  <section class="v1-settings-panel v1-settings-panel--danger" aria-label="Delete facility">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Safety</p>
+        <h2>{{ isSingleFacilityAccount() ? 'Delete account' : 'Delete facility' }}</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (isDeleting || saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Deleting
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not deleted
+        }
+      </span>
+    </div>
+
+    @if (saveError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <span>{{ saveError }}</span>
+      </div>
+    }
+
+    <article class="v1-settings-card v1-settings-card--danger">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      @if (isSingleFacilityAccount()) {
+        <h3>Permanent account removal</h3>
+        <p>Deleting this account removes the account, facility, meters, predictors, analyses, reports, and settings.</p>
+      } @else {
+        <h3>Permanent facility removal</h3>
+        <p>Deleting this facility removes its meters, predictors, analyses, reports, and related data.</p>
+      }
+      <p>Create a backup before continuing if this data may be needed later.</p>
+      <div class="v1-settings-actions">
+        <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canWrite() || isDeleting"
+          (click)="openDeleteConfirm()">
+          {{ isSingleFacilityAccount() ? 'Delete account' : 'Delete facility' }}
+          <span class="fa fa-trash" aria-hidden="true"></span>
+        </button>
+      </div>
+    </article>
+  </section>
+}
+
+<ng-template #deleteConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel deletion" [disabled]="isDeleting"
+      (click)="cancelDeleteConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-facility-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-delete-facility-title">{{ isSingleFacilityAccount() ? 'Delete ' + account()?.name : 'Delete ' + facility()?.name }}</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel deletion" [disabled]="isDeleting"
+          (click)="cancelDeleteConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        @if (isSingleFacilityAccount()) {
+          <p>Deleting this account will permanently remove its facility, meters, predictors, analyses, reports, and settings.</p>
+        } @else {
+          <p>Deleting this facility will permanently remove its meters, predictors, analyses, reports, and related data.</p>
+        }
+        <p>This action cannot be undone. Create a backup before continuing if this data may be needed later.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting"
+          (click)="cancelDeleteConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canWrite() || isDeleting"
+          (click)="confirmDelete()">
+          @if (isDeleting) {
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            Deleting
+          } @else {
+            {{ isSingleFacilityAccount() ? 'Delete account' : 'Delete facility' }}
+            <span class="fa fa-trash" aria-hidden="true"></span>
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
+</ng-template>

@@ -1,0 +1,86 @@
+@let currentAccount = account();
+
+@if (form && currentAccount) {
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility financial reporting">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Reporting</p>
+        <h2>Financial reporting</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Saving
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    @if (financialDiffer()) {
+      <div class="v1-alert v1-alert--info">
+        <span class="fa fa-circle-info" aria-hidden="true"></span>
+        <span>Facility fiscal-year settings differ from {{ currentAccount.name }}.</span>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canWrite()" (click)="openAccountUpdateConfirm()">
+          Update from account settings
+        </button>
+      </div>
+    }
+
+    <fieldset>
+      <legend>Fiscal year</legend>
+      <label class="v1-settings-choice">
+        <input type="radio" formControlName="fiscalYear" value="calendarYear" (change)="saveFinancial()">
+        <span>Calendar year</span>
+      </label>
+      <label class="v1-settings-choice">
+        <input type="radio" formControlName="fiscalYear" value="nonCalendarYear" (change)="saveFinancial()">
+        <span>Non-calendar year</span>
+      </label>
+    </fieldset>
+
+    @if (form.controls['fiscalYear'].value === 'nonCalendarYear') {
+      <div class="v1-settings-grid v1-settings-grid--2">
+        <label>
+          <span>Start month</span>
+          <select formControlName="fiscalYearMonth" (change)="saveFinancial()">
+            @for (month of months; track month.monthNumValue) {
+              <option [ngValue]="month.monthNumValue">{{ month.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="v1-settings-choice v1-settings-choice--block">
+          <input type="checkbox" formControlName="fiscalYearCalendarEnd" (change)="saveFinancial()">
+          <span>Fiscal year is denoted by the calendar year in which it ends</span>
+        </label>
+      </div>
+    }
+  </form>
+}
+
+<ng-template #accountUpdateConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel account settings update"
+      (click)="cancelAccountUpdateConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-update-facility-financial-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-update-facility-financial-title">Update this facility with the account settings?</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel account settings update"
+          (click)="cancelAccountUpdateConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        <p>The current facility financial reporting settings will be replaced with the reporting settings from {{ account()?.name }}.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAccountUpdateConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update facility</button>
+      </footer>
+    </section>
+  </div>
+</ng-template>

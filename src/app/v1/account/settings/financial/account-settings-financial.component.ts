@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { Months } from '@shared/form-data/months';
-import { AccountSettingsFormService } from '@shared/settings-forms/account-settings-form.service';
+import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 @Component({
@@ -14,7 +14,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
   standalone: false
 })
 export class AccountSettingsFinancialComponent extends AccountSettingsDetailBase {
-  private readonly settingsForms = inject(AccountSettingsFormService);
+  private readonly settingsForms = inject(SettingsFormService);
   private readonly facilityHandler = inject(FacilityCommandHandler);
 
   readonly facilities = this.workspace.facilities;

@@ -6,6 +6,7 @@ import { PortalModule } from '@angular/cdk/portal';
 import { AccountHomeComponent } from './account/home/account-home.component';
 import { AccountSettingsModule } from './account/settings/account-settings.module';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
+import { FacilitySettingsModule } from './facility/settings/facility-settings.module';
 import { ShellHeaderComponent } from './shell/header/shell-header.component';
 import { PrimaryRailComponent } from './shell/primary-rail/primary-rail.component';
 import { SectionNavComponent } from './shell/section-nav/section-nav.component';
@@ -30,6 +31,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
     CommonModule,
     PortalModule,
     AccountSettingsModule,
+    FacilitySettingsModule,
     WelcomeComponent,
     RouterModule.forChild(V1Routes)
   ]

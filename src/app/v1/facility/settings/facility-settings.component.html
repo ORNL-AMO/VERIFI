@@ -1,0 +1,27 @@
+@let currentFacility = facility();
+
+<section class="v1-facility-settings" aria-labelledby="v1-facility-settings-title">
+  <header class="v1-section-header">
+    <div>
+      <p class="v1-eyebrow">Facility settings</p>
+      <h1 id="v1-facility-settings-title">{{ currentFacility?.name || 'Facility settings' }}</h1>
+    </div>
+  </header>
+
+  @if (!currentFacility) {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-industry" aria-hidden="true"></span>
+      <h2>No facility selected</h2>
+      <p>Select a facility to edit facility settings.</p>
+    </article>
+  } @else {
+    @if (!canWrite()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <span class="fa fa-lock" aria-hidden="true"></span>
+        <span>Settings are unavailable while the workspace is loading or switching.</span>
+      </div>
+    }
+
+    <router-outlet></router-outlet>
+  }
+</section>
