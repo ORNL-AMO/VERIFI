@@ -73,7 +73,7 @@ describe('WelcomeComponent', () => {
   });
 
   it('renders existing accounts and opens the selected account', async () => {
-    const buttons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-card'));
+    const buttons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-row'));
     expect(buttons.map(button => button.textContent)).toEqual([
       expect.stringContaining('Account B'),
       expect.stringContaining('Account A')
@@ -85,6 +85,31 @@ describe('WelcomeComponent', () => {
     expect(navigation.openAccount).toHaveBeenCalledWith('account-b');
   });
 
+  it('renders the account portfolio as a card section with flat account rows', () => {
+    const portfolio: HTMLElement = fixture.nativeElement.querySelector('.v1-welcome__portfolio');
+    const list: HTMLElement = fixture.nativeElement.querySelector('.v1-account-list');
+    const rows: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-row'));
+
+    expect(portfolio).toBeTruthy();
+    expect(list).toBeTruthy();
+    expect(rows).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('.v1-account-grid')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-account-card')).toBeNull();
+    expect(rows[0].textContent).toContain('Open');
+  });
+
+  it('keeps long account names accessible while truncating visually', () => {
+    const longName = 'A very long manufacturing account name that should remain fully available to assistive technology';
+    usableAccounts.set([
+      { id: 3, guid: 'account-long', name: longName, modifiedDate: new Date('2026-04-05'), isSingleFacilityCompany: false }
+    ]);
+    fixture.detectChanges();
+
+    const row: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-account-row');
+    expect(row.getAttribute('aria-label')).toBe(`Open ${longName} in v1 workspace`);
+    expect(row.querySelector('.v1-account-row__summary strong')?.textContent).toContain(longName);
+  });
+
   it('shows a v1 setup path when no accounts exist', () => {
     usableAccounts.set([]);
     fixture.detectChanges();
@@ -92,6 +117,8 @@ describe('WelcomeComponent', () => {
       .filter(button => button.textContent?.trim() === 'Create account');
 
     expect(fixture.nativeElement.querySelector('.v1-empty-state')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.v1-empty-state')?.textContent).toContain('Use the get started options above to create, import, or load an account.');
+    expect(fixture.nativeElement.querySelector('.v1-account-list')).toBeTruthy();
     expect(createButtons).toHaveLength(1);
   });
 
@@ -113,10 +140,23 @@ describe('WelcomeComponent', () => {
     expect(recentButton).toBeNull();
   });
 
+  it('disables account rows while opening a workspace', () => {
+    const component = fixture.componentInstance;
+    const accountRows = (): Array<HTMLButtonElement> => Array.from(fixture.nativeElement.querySelectorAll('.v1-account-row'));
+
+    expect(accountRows().every(row => row.disabled)).toBe(false);
+
+    component.loadingAccountGuid.set('account-b');
+    fixture.detectChanges();
+
+    expect(accountRows().every(row => row.disabled)).toBe(true);
+    expect(accountRows()[0].textContent).toContain('Opening');
+  });
+
   it('shows an error if an account cannot be opened', async () => {
     navigation.openAccount.mockRejectedValueOnce(new Error('nope'));
 
-    const buttons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-card'));
+    const buttons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-row'));
     buttons[0].click();
     await fixture.whenStable();
     fixture.detectChanges();

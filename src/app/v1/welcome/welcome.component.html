@@ -94,34 +94,41 @@
     <div class="v1-section-heading">
       <div>
         <p class="v1-eyebrow">Account portfolio</p>
+        <!-- <h2 id="v1-accounts-title">Open a workspace</h2> -->
       </div>
       <span>{{ accountCountLabel() }}</span>
     </div>
 
     @if (accountList.length === 0) {
-    <article class="v1-empty-state">
+    <div class="v1-account-list" role="status" aria-live="polite">
+      <article class="v1-empty-state">
       <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
       <h3>No accounts are available</h3>
       <p>Use the get started options above to create, import, or load an account.</p>
-    </article>
+      </article>
+    </div>
     } @else {
-    <div class="v1-account-grid">
+    <div class="v1-account-list" aria-label="Available workspaces">
       @for (account of accountList; track account.guid) {
-      <button type="button" class="v1-account-card" [disabled]="!!loadingGuid" (click)="openAccount(account)"
+      <button type="button" class="v1-account-row" [disabled]="!!loadingGuid" (click)="openAccount(account)"
         [attr.aria-label]="'Open ' + account.name + ' in v1 workspace'">
-        <span class="v1-account-card__icon fa fa-building" aria-hidden="true"></span>
-        <span>
+        <span class="v1-account-row__icon fa fa-building" aria-hidden="true"></span>
+        <span class="v1-account-row__summary">
           <strong>{{ account.name }}</strong>
           <small>{{ formatModifiedDate(account) }}</small>
         </span>
-        <span class="v1-account-card__meta">
+        <span class="v1-account-row__type">
           {{ accountTypeLabel(account) }}
         </span>
+        <span class="v1-account-row__action">
         @if (loadingGuid === account.guid) {
-        <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <span>Opening</span>
         } @else {
-        <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          <span>Open</span>
+          <span class="fa fa-arrow-right" aria-hidden="true"></span>
         }
+        </span>
       </button>
       }
     </div>
