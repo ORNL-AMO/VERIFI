@@ -12,12 +12,11 @@ export const V1Routes: Routes = [
     path: '',
     component: ShellComponent,
     children: [
-      { path: '', component: WelcomeComponent, canActivate: [persistenceReadyGuard], data: { motion: 'welcome' } },
+      { path: '', component: WelcomeComponent, canActivate: [persistenceReadyGuard]},
       { path: 'workspace', pathMatch: 'full', redirectTo: '' },
       {
         path: 'workspace/account/:accountGuid',
         component: WorkspaceShellComponent,
-        data: { motion: 'workspace' },
         canActivate: [accountGuidReadyGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
@@ -33,7 +32,6 @@ export const V1Routes: Routes = [
       {
         path: 'workspace/facility/:facilityGuid',
         component: WorkspaceShellComponent,
-        data: { motion: 'workspace' },
         canActivate: [facilityReadyGuard],
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
