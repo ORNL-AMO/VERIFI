@@ -2,12 +2,14 @@
   @if (navigation.account(); as account) {
     @let content = navigation.panelContent();
 
-    <p class="v1-eyebrow">Account Home</p>
-    <h1 id="v1-account-home-title">{{ account.name }}</h1>
-    <p class="v1-home__summary">
-      Account workspace shell is ready. The migrated Home page starts here while detailed setup, data, analysis, and
-      report workflows remain in current VERIFI.
-    </p>
+    <header class="v1-section-header">
+      <p class="v1-eyebrow">Account Home</p>
+      <h1 id="v1-account-home-title">{{ account.name }}</h1>
+      <p class="v1-section-header__summary">
+        Account workspace shell is ready. The migrated Home page starts here while detailed setup, data, analysis, and
+        report workflows remain in current VERIFI.
+      </p>
+    </header>
 
     <div class="v1-home__metrics" aria-label="Account summary">
       <article>

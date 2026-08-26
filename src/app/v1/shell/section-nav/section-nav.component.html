@@ -22,22 +22,43 @@
     </button>
   </div>
 
-  <section class="v1-nav__group" aria-labelledby="v1-home-nav-title">
-    <span id="v1-home-nav-title" class="v1-nav__label">Home</span>
-    <a
-      class="active"
-      [routerLink]="contextMode === 'facility' && selectedFacility
-        ? navigation.facilityRoute(selectedFacility.guid)
-        : navigation.accountRoute(account!.guid)"
-      aria-current="page">
-      <span class="fa fa-chart-pie" aria-hidden="true"></span>
-      Overview
-    </a>
-  </section>
-
-  <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">
-    <span id="v1-future-nav-title" class="v1-nav__label">Coming next</span>
-    <button type="button" disabled>Goal progress</button>
-    <button type="button" disabled>Todo list</button>
-  </section>
+  @switch (navigation.activeSection()) {
+    @case ('home') {
+      <section class="v1-nav__group" aria-labelledby="v1-home-nav-title">
+        <span id="v1-home-nav-title" class="v1-nav__label">{{ contextMode === 'account' ? 'Account Home' : 'Facility Home' }}</span>
+        <a
+          class="active"
+          [routerLink]="contextMode === 'facility' && selectedFacility
+            ? navigation.facilityRoute(selectedFacility.guid)
+            : navigation.accountRoute(account!.guid)"
+          aria-current="page">
+          <span class="fa fa-chart-pie" aria-hidden="true"></span>
+          Overview
+        </a>
+      </section>
+    }
+    @case ('settings') {
+      @if (contextMode === 'account' && account) {
+        <section class="v1-nav__group" aria-labelledby="v1-settings-nav-title">
+          <span id="v1-settings-nav-title" class="v1-nav__label">Account Settings</span>
+          @for (item of settingsItems; track item.id) {
+            <a
+              [class.active]="navigation.activeDetail() === item.id"
+              [class.v1-nav__item--danger]="item.tone === 'danger'"
+              [routerLink]="navigation.accountSettingsRoute(account.guid, item.id)"
+              [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
+              <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+              {{ item.label }}
+            </a>
+          }
+        </section>
+      }
+    }
+    @default {
+      <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">
+        <span id="v1-future-nav-title" class="v1-nav__label">{{ navigation.activeSection() }}</span>
+        <button type="button" disabled>Available in current VERIFI</button>
+      </section>
+    }
+  }
 </aside>

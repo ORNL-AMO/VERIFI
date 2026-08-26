@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { PortalModule } from '@angular/cdk/portal';
 import { NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -10,7 +11,7 @@ import { ShellComponent } from './shell.component';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 
 @NgModule({
-  imports: [CommonModule, NoopAnimationsModule, RouterModule.forRoot([])],
+  imports: [CommonModule, NoopAnimationsModule, PortalModule, RouterModule.forRoot([])],
   declarations: [ShellComponent, ShellHeaderComponent]
 })
 class ShellTestModule { }

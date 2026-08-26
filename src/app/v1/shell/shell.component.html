@@ -23,4 +23,5 @@
     [@.disabled]="prefersReducedMotion()">
     <router-outlet></router-outlet>
   </div>
+  <ng-container [cdkPortalOutlet]="modalPortal.activePortal()"></ng-container>
 </section>

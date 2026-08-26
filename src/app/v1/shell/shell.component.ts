@@ -4,6 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AppearanceService } from '../appearance/appearance.service';
+import { ModalPortalService } from './modal-portal.service';
 
 @Component({
   selector: 'app-shell',
@@ -67,6 +68,7 @@ export class ShellComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   readonly appearance = inject(AppearanceService);
+  readonly modalPortal = inject(ModalPortalService);
   readonly prefersReducedMotion = signal(this.resolveReducedMotionPreference());
   readonly routeMotion = signal(this.resolveRouteMotion());
 

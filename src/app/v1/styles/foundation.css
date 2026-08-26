@@ -10,6 +10,10 @@
   --v1-surface: #ffffff;
   --v1-surface-muted: #eef4f1;
   --v1-panel: #f8faf9;
+  --v1-content-block: color-mix(in srgb, var(--v1-surface-muted) 55%, var(--v1-surface));
+  --v1-control-surface: color-mix(in srgb, var(--v1-surface) 84%, var(--v1-bg));
+  --v1-control-addon-surface: color-mix(in srgb, var(--v1-surface-muted) 72%, var(--v1-surface));
+  --v1-control-border: color-mix(in srgb, var(--v1-border) 78%, var(--v1-text));
   --v1-text: #17231f;
   --v1-muted: #5f6f68;
   --v1-inverse-text: #ffffff;
@@ -470,6 +474,32 @@
   text-transform: uppercase;
 }
 
+.v1-section-header {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-section-header h1,
+.v1-section-header p {
+  margin: 0;
+}
+
+.v1-section-header h1 {
+  color: var(--v1-text);
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.v1-section-header__summary {
+  max-width: 44rem;
+  color: var(--v1-muted);
+}
+
 .v1-label {
   display: block;
   color: var(--v1-muted);
@@ -733,10 +763,25 @@
 .v1-drawer__header,
 .v1-drawer__body,
 .v1-drawer__footer,
+.v1-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.v1-modal__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: auto;
+}
+
 .v1-modal__header,
 .v1-modal__body,
 .v1-modal__footer {
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(.3rem, 3vw, .75rem);
 }
 
 .v1-drawer__body {

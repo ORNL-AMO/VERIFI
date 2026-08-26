@@ -5,8 +5,9 @@
     @if (section.enabled) {
       <button
         type="button"
-        class="active"
-        [attr.aria-current]="activeSection === section.id ? 'page' : null">
+        [class.active]="activeSection === section.id"
+        [attr.aria-current]="activeSection === section.id ? 'page' : null"
+        (click)="navigation.openSection(section.id)">
         <span [class]="'fa ' + section.icon" aria-hidden="true"></span>
         <span>{{ section.shortLabel }}</span>
       </button>

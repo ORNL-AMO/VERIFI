@@ -2,12 +2,14 @@
   @if (navigation.facility(); as facility) {
     @let content = navigation.panelContent();
 
-    <p class="v1-eyebrow">Facility Home</p>
-    <h1 id="v1-facility-home-title">{{ facility.name }}</h1>
-    <p class="v1-home__summary">
-      Facility workspace shell is ready for {{ facility.name }}. Facility-specific data, analysis, and reporting pages
-      will plug into this frame as v1 workflows migrate.
-    </p>
+    <header class="v1-section-header">
+      <p class="v1-eyebrow">Facility Home</p>
+      <h1 id="v1-facility-home-title">{{ facility.name }}</h1>
+      <p class="v1-section-header__summary">
+        Facility workspace shell is ready for {{ facility.name }}. Facility-specific data, analysis, and reporting pages
+        will plug into this frame as v1 workflows migrate.
+      </p>
+    </header>
 
     <div class="v1-home__metrics" aria-label="Facility summary">
       <article>

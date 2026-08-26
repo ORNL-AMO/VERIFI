@@ -108,6 +108,16 @@
   box-shadow: inset 3px 0 0 var(--v1-facility);
 }
 
+.v1-nav__group a.v1-nav__item--danger {
+  color: var(--v1-danger);
+}
+
+.v1-nav__group a.v1-nav__item--danger.active {
+  border-color: color-mix(in srgb, var(--v1-danger) 38%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-danger) 8%, var(--v1-surface));
+  box-shadow: inset 3px 0 0 var(--v1-danger);
+}
+
 .v1-nav__group button:disabled {
   cursor: not-allowed;
   opacity: .58;

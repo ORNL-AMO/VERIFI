@@ -5,22 +5,6 @@
   padding: clamp(1rem, 3vw, 1.5rem);
 }
 
-.v1-home h1,
-.v1-home p {
-  margin: 0;
-}
-
-.v1-home h1 {
-  color: var(--v1-text);
-  font-size: 1.8rem;
-  line-height: 1.15;
-}
-
-.v1-home__summary {
-  max-width: 44rem;
-  color: var(--v1-muted);
-}
-
 .v1-home__metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));

@@ -1,0 +1,141 @@
+@let currentAccount = account();
+
+@if (form && currentAccount) {
+  <section class="v1-settings-panel" aria-label="Backup and import" [formGroup]="form">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Backup</p>
+        <h2>Backup and import</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving' || isBackingUp || automaticBackupSaving()) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Working
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <article class="v1-settings-card">
+        <span class="fa fa-file-arrow-down" aria-hidden="true"></span>
+        <h3>Manual account backup</h3>
+        <p>Download a JSON backup for this account.</p>
+        <div class="v1-settings-actions">
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="openBackupConfirm()">
+            Backup account
+            <span class="fa fa-download" aria-hidden="true"></span>
+          </button>
+        </div>
+      </article>
+
+      <article class="v1-settings-card">
+        <span class="fa fa-file-import" aria-hidden="true"></span>
+        <h3>Import backup file</h3>
+        <p>Open the v1 account backup import panel.</p>
+        <div class="v1-settings-actions">
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="openImportPanel()">
+            Import backup
+            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <article class="v1-settings-card">
+      <span class="fa fa-rotate" aria-hidden="true"></span>
+      <h3>Automatic account backup</h3>
+      <p>{{ automaticBackupLabel }}</p>
+      @if (currentAccount.dataBackupFilePath) {
+        <small>{{ currentAccount.dataBackupFilePath }}</small>
+      }
+      <div class="v1-settings-actions">
+        <button type="button" class="v1-btn v1-btn--quiet"
+          [disabled]="!canWrite() || saveState === 'saving' || !backupGateway.isAvailable || automaticBackupSaving()"
+          (click)="chooseAutomaticBackupLocation()">
+          {{ currentAccount.dataBackupFilePath ? 'Change backup file' : 'Select backup file' }}
+        </button>
+      </div>
+    </article>
+
+    @if (currentAccount.dataBackupFilePath) {
+      <fieldset>
+        <legend>Shared backup file</legend>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="isSharedBackupFile" [value]="false" (change)="saveBackupSettings()">
+          <span>No, this computer is the only one that will modify this file.</span>
+        </label>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="isSharedBackupFile" [value]="true" (change)="saveBackupSettings()">
+          <span>Yes, this is a shared file that may be edited on another computer.</span>
+        </label>
+        @if (form.controls['isSharedBackupFile'].value) {
+          <label>
+            <span>Shared file author</span>
+            <input type="text" formControlName="sharedFileAuthor"
+              (input)="scheduleBackupSettingsSave()" (blur)="flushBackupSettingsSave()">
+          </label>
+        }
+      </fieldset>
+
+      <fieldset>
+        <legend>Archive version history</legend>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="archiveOption" value="skip" (change)="saveBackupSettings()">
+          <span>Ask me to archive when account is opened</span>
+        </label>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="archiveOption" value="always" (change)="saveBackupSettings()">
+          <span>Always archive</span>
+        </label>
+        <label class="v1-settings-choice">
+          <input type="radio" formControlName="archiveOption" value="never" (change)="saveBackupSettings()">
+          <span>Never archive</span>
+        </label>
+      </fieldset>
+    }
+  </section>
+}
+
+<ng-template #backupConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel account backup" [disabled]="isBackingUp"
+      (click)="cancelBackupConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-backup-confirm-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-backup-confirm-title">Backup {{ account()?.name }}</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel account backup" [disabled]="isBackingUp"
+          (click)="cancelBackupConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        <p>Download a JSON backup for this account, including facilities, meters, predictors, analyses, reports, and account settings.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="confirmBackupDownload()">
+          @if (isBackingUp) {
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            Preparing
+          } @else {
+            Download JSON backup
+            <span class="fa fa-download" aria-hidden="true"></span>
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
+</ng-template>
+
+@if (showImportPanel) {
+  <app-import-account-backup-panel
+    (closed)="closeImportPanel()"
+    (completed)="openImportedAccount($any($event))">
+  </app-import-account-backup-panel>
+}
