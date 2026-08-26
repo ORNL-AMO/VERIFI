@@ -38,6 +38,12 @@
   border-radius: var(--v1-radius-sm);
   font-weight: 800;
   text-decoration: none;
+  transition:
+    border-color .18s ease,
+    background-color .18s ease,
+    box-shadow .18s ease,
+    color .18s ease,
+    transform .18s ease;
 }
 
 .v1-nav__context button {
@@ -92,6 +98,16 @@
   box-shadow: inset 3px 0 0 var(--v1-facility);
 }
 
+:host-context(.v1-workspace--account) .v1-nav__group a.active {
+  border-color: color-mix(in srgb, var(--v1-account) 30%, var(--v1-border));
+  box-shadow: inset 3px 0 0 var(--v1-account);
+}
+
+:host-context(.v1-workspace--facility) .v1-nav__group a.active {
+  border-color: color-mix(in srgb, var(--v1-facility) 30%, var(--v1-border));
+  box-shadow: inset 3px 0 0 var(--v1-facility);
+}
+
 .v1-nav__group button:disabled {
   cursor: not-allowed;
   opacity: .58;
@@ -105,5 +121,13 @@
   .v1-nav {
     border-right: 0;
     border-bottom: 1px solid var(--v1-border);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v1-nav__context button,
+  .v1-nav__group a,
+  .v1-nav__group button {
+    transition: none;
   }
 }

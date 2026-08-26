@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
@@ -91,5 +91,35 @@ describe('WorkspaceNavigationService', () => {
       'home',
       'overview'
     ]);
+  });
+
+  it('marks route motion when entering the workspace from welcome', () => {
+    router.events.next(new NavigationEnd(1, '/v1', '/v1'));
+
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/account/account-a/home/overview',
+      '/v1/workspace/account/account-a/home/overview'
+    ));
+
+    expect(service.routeMotion()).toBe('workspace-entry');
+  });
+
+  it('marks directional route motion when changing account and facility contexts', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/home/overview',
+      '/v1/workspace/facility/facility-a/home/overview'
+    ));
+
+    expect(service.routeMotion()).toBe('facility-drill-in');
+
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/account/account-a/home/overview',
+      '/v1/workspace/account/account-a/home/overview'
+    ));
+
+    expect(service.routeMotion()).toBe('account-drill-out');
   });
 });

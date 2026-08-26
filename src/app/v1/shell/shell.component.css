@@ -1,1 +1,18 @@
+.v1-route-stage {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
 
+.v1-route-stage > router-outlet + * {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.v1-route-stage > app-workspace-shell {
+  overflow: hidden;
+}

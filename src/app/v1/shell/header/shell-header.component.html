@@ -13,17 +13,22 @@
   @if (isWorkspaceRoute) {
     @let facilities = navigation.facilities();
     @let selectedFacility = navigation.facility();
+    @let contextMode = navigation.contextMode();
 
     <div class="v1-workspace__context" aria-label="Active workspace context">
       @if (navigation.account(); as account) {
-        <button type="button" class="v1-context-pill v1-context-pill--account" (click)="navigation.setContext('account')">
+        <button
+          type="button"
+          class="v1-context-pill v1-context-pill--account"
+          [class.v1-context-pill--active]="contextMode === 'account'"
+          (click)="navigation.setContext('account')">
           <span class="fa fa-building" aria-hidden="true"></span>
           <span>{{ account.name }}</span>
         </button>
       }
 
       @if (facilities.length > 0) {
-        <div class="v1-context-select">
+        <div class="v1-context-select" [class.v1-context-select--active]="contextMode === 'facility'">
           <span class="fa fa-industry" aria-hidden="true"></span>
           <select
             [value]="selectedFacility?.guid || ''"

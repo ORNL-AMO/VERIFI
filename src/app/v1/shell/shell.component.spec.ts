@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AppearanceService } from '../appearance/appearance.service';
@@ -9,7 +10,7 @@ import { ShellComponent } from './shell.component';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forRoot([])],
+  imports: [CommonModule, NoopAnimationsModule, RouterModule.forRoot([])],
   declarations: [ShellComponent, ShellHeaderComponent]
 })
 class ShellTestModule { }
@@ -53,6 +54,11 @@ describe('ShellComponent', () => {
 
   it('hosts the shared shell header above routed content', () => {
     expect(fixture.nativeElement.querySelector('app-shell-header')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-route-stage router-outlet')).not.toBeNull();
+  });
+
+  it('starts the route animation stage in the welcome state', () => {
+    expect(fixture.componentInstance.routeMotion()).toBe('welcome');
   });
 });
 

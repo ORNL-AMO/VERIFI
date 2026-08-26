@@ -1,11 +1,15 @@
 @let isSupportPanelOpen = navigation.isSupportPanelOpen();
 @let contextMode = navigation.contextMode();
+@let routeMotion = navigation.routeMotion();
 
 <main
   class="v1-workspace"
   [class.v1-workspace--panel-closed]="!isSupportPanelOpen"
   [class.v1-workspace--account]="contextMode === 'account'"
   [class.v1-workspace--facility]="contextMode === 'facility'"
+  [class.v1-workspace--entry]="routeMotion === 'workspace-entry'"
+  [class.v1-workspace--drill-in]="routeMotion === 'facility-drill-in'"
+  [class.v1-workspace--drill-out]="routeMotion === 'account-drill-out'"
   aria-label="v1 account workspace">
   <app-primary-rail></app-primary-rail>
   <app-section-nav></app-section-nav>

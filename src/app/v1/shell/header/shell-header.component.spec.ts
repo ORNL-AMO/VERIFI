@@ -31,6 +31,7 @@ describe('ShellHeaderComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.v1-workspace__context')?.textContent).toContain('Account A');
     expect(fixture.nativeElement.querySelector('.v1-workspace__context')?.textContent).toContain('Facility A');
+    expect(fixture.nativeElement.querySelector('.v1-context-pill--active')).not.toBeNull();
 
     const panelButton: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Toggle support panel"]');
     panelButton.click();
@@ -61,6 +62,7 @@ function setup(isWorkspaceRoute: boolean): {
   const navigation = {
     isWorkspaceRoute: vi.fn(() => isWorkspaceRoute),
     isSupportPanelOpen: vi.fn(() => true),
+    contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
     facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
     facility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),

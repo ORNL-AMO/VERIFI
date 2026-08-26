@@ -5,6 +5,11 @@
 }
 
 .v1-workspace {
+  --v1-motion-accent: var(--v1-account);
+  --v1-context-enter-x: 0;
+
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-areas: "rail nav main panel";
   grid-template-columns: var(--v1-rail-width) var(--v1-nav-width) minmax(0, 1fr) var(--v1-panel-width);
@@ -13,6 +18,49 @@
   height: 100%;
   min-height: 0;
   background: transparent;
+  overflow: hidden;
+}
+
+.v1-workspace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--v1-motion-accent) 12%, transparent) 42%,
+      color-mix(in srgb, var(--v1-motion-accent) 18%, transparent) 50%,
+      transparent 72%);
+  opacity: 0;
+  transform: translateX(-28%);
+}
+
+.v1-workspace > * {
+  position: relative;
+  z-index: 1;
+}
+
+.v1-workspace--facility {
+  --v1-motion-accent: var(--v1-facility);
+  --v1-context-enter-x: 1rem;
+}
+
+.v1-workspace--account {
+  --v1-context-enter-x: -1rem;
+}
+
+.v1-workspace--entry::before {
+  animation: v1-workspace-entry-sweep .58s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.v1-workspace--drill-in::before {
+  animation: v1-workspace-context-sweep-in .44s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.v1-workspace--drill-out::before {
+  animation: v1-workspace-context-sweep-out .44s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 .v1-workspace--panel-closed {
@@ -30,6 +78,75 @@
   background: transparent;
 }
 
+.v1-workspace__main > router-outlet + * {
+  display: block;
+}
+
+.v1-workspace--drill-in .v1-workspace__main > router-outlet + *,
+.v1-workspace--drill-out .v1-workspace__main > router-outlet + * {
+  animation: v1-context-page-enter .24s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes v1-context-page-enter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--v1-context-enter-x));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes v1-workspace-entry-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-34%);
+  }
+
+  36% {
+    opacity: .9;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(42%);
+  }
+}
+
+@keyframes v1-workspace-context-sweep-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-18%);
+  }
+
+  45% {
+    opacity: .75;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(24%);
+  }
+}
+
+@keyframes v1-workspace-context-sweep-out {
+  0% {
+    opacity: 0;
+    transform: translateX(18%);
+  }
+
+  45% {
+    opacity: .75;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-24%);
+  }
+}
+
 @media (max-width: 1160px) {
   .v1-workspace {
     grid-template-areas: "rail nav main";
@@ -43,5 +160,14 @@
     display: flex;
     flex-direction: column;
     min-height: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v1-workspace,
+  .v1-workspace::before,
+  .v1-workspace__main > router-outlet + * {
+    animation: none;
+    transform: none;
   }
 }
