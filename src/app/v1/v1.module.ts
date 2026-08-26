@@ -17,7 +17,6 @@ import { WelcomeComponent } from './welcome/welcome.component';
   declarations: [
     ShellComponent,
     ShellHeaderComponent,
-    WelcomeComponent,
     WorkspaceShellComponent,
     PrimaryRailComponent,
     SectionNavComponent,
@@ -27,6 +26,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
   ],
   imports: [
     CommonModule,
+    WelcomeComponent,
     RouterModule.forChild(V1Routes)
   ]
 })

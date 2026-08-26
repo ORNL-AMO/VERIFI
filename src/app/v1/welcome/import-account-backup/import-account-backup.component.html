@@ -1,0 +1,74 @@
+<button
+  type="button"
+  class="v1-drawer-backdrop"
+  aria-label="Close account backup panel"
+  [disabled]="isImporting"
+  (click)="close()"></button>
+
+<aside class="v1-drawer" role="dialog" aria-modal="true" aria-labelledby="v1-import-backup-title"
+  appDrawerFocusTrap (escapePressed)="close()">
+  <header class="v1-drawer__header">
+    <div>
+      <p class="v1-eyebrow">Account backup</p>
+      <h2 id="v1-import-backup-title">Upload Account Backup</h2>
+    </div>
+    <button
+      type="button"
+      class="v1-icon-btn"
+      title="Close account backup panel"
+      aria-label="Close account backup panel"
+      [disabled]="isImporting"
+      (click)="close()">
+      <span class="fa fa-xmark" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="v1-drawer__body">
+    <p class="v1-drawer__intro" id="v1-import-backup-description">
+      Import a VERIFI account backup exported as a JSON file. Facility-only backups are added from inside an account workspace.
+    </p>
+
+    <label class="v1-file-picker" for="v1-account-backup-file">
+      <span class="fa fa-file-arrow-up" aria-hidden="true"></span>
+      <strong>{{ selectedFileName || 'Choose account backup file' }}</strong>
+      <small>JSON backup exported from VERIFI</small>
+      <input
+        id="v1-account-backup-file"
+        type="file"
+        accept=".json,application/json"
+        [disabled]="isImporting"
+        aria-describedby="v1-import-backup-description"
+        (change)="setImportFile($event)">
+    </label>
+
+    @if (backupFileError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+        <span>{{ backupFileError }}</span>
+      </div>
+    }
+
+    @if (backupFile && !backupFileError) {
+      <article class="v1-import-summary" aria-label="Selected account backup">
+        <span class="fa fa-building" aria-hidden="true"></span>
+        <div>
+          <strong>{{ backupName }}</strong>
+          <small>{{ facilityCount }} facilities / {{ meterCount }} meters</small>
+        </div>
+      </article>
+    }
+
+    <div class="v1-drawer__actions">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isImporting" (click)="close()">Cancel</button>
+      <button type="button" class="v1-btn v1-btn--primary" [disabled]="!backupFile || !!backupFileError || isImporting" (click)="importBackupFile()">
+        @if (isImporting) {
+          <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+          Importing
+        } @else {
+          Import backup
+          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+        }
+      </button>
+    </div>
+  </div>
+</aside>

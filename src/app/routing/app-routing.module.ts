@@ -3,6 +3,7 @@ import { Routes, RouterModule, ExtraOptions } from '@angular/router';
 import { environment } from 'src/environments/environment';
 
 const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'v1' },
   { path: 'p1', loadChildren: () => import('../ux-prototypes/ux-prototypes.module').then(module => module.UxPrototypesModule) },
   { path: 'v1', loadChildren: () => import('../v1/v1.module').then(module => module.V1Module) },
   { path: '', loadChildren: () => import('../v0/v0.module').then(module => module.V0Module) }

@@ -37,7 +37,7 @@ jobs:
 
   qa:
     needs: test
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'unified-ux'
     uses: ./.github/workflows/release_qa.yml
 
   web:

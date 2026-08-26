@@ -60,6 +60,10 @@ Standardize these common controls as they appear in v1:
 
 Use Font Awesome or established repository icon conventions for symbolic buttons. Icon-only controls need accessible labels and visible focus. Do not rely on hover-only help for required instructions or blocking validation.
 
+Button color should communicate the action's consequence, not decorative emphasis. Use orange primary buttons only for the main recommended or commit action in a local decision area. Use blue secondary buttons for navigation, workspace movement, opening details, switching contexts, or facility-structured actions. Use green success buttons only for success continuation, completion, account-context confirmation, or energy-positive states. Use red danger buttons only for destructive actions such as delete, remove, reset, discard, overwrite, or other data-loss paths. Use quiet or ghost buttons for cancel, close, skip, external/support links, optional utilities, and alternate actions that should not compete with the primary path.
+
+Keep one filled orange button per section, card group, or dialog footer. Icon-only buttons should stay neutral unless they are destructive or actively selected. Disabled buttons should not rely on color to explain state; pair the disabled state with labels, helper text, validation, or status copy where the reason is not obvious.
+
 ## Drawers and modals
 
 Use contextual slideout drawers for meaningful form and data-entry work:

@@ -1,0 +1,40 @@
+.v1-email-signup,
+.v1-email-signup__form {
+  display: grid;
+  gap: var(--v1-space-3);
+}
+
+.v1-email-signup h2,
+.v1-email-signup p {
+  margin: 0;
+}
+
+.v1-email-signup p {
+  color: var(--v1-muted);
+}
+
+.v1-email-signup__form label {
+  font-weight: 800;
+}
+
+.v1-email-signup__form div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--v1-space-2);
+}
+
+.v1-email-signup input {
+  min-height: var(--v1-control-height);
+  width: 100%;
+  padding: .55rem .7rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-panel);
+  color: var(--v1-text);
+}
+
+@media (max-width: 640px) {
+  .v1-email-signup__form div {
+    grid-template-columns: 1fr;
+  }
+}

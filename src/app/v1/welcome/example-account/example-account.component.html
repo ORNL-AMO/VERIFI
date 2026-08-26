@@ -1,0 +1,65 @@
+<button
+  type="button"
+  class="v1-drawer-backdrop"
+  aria-label="Close example account panel"
+  [disabled]="!!loadingExamplePath"
+  (click)="close()"></button>
+
+<aside class="v1-drawer" role="dialog" aria-modal="true" aria-labelledby="v1-example-title"
+  appDrawerFocusTrap (escapePressed)="close()">
+  <header class="v1-drawer__header">
+    <div>
+      <p class="v1-eyebrow">Example accounts</p>
+      <h2 id="v1-example-title">Choose an Example Account</h2>
+    </div>
+    <button
+      type="button"
+      class="v1-icon-btn"
+      title="Close example account panel"
+      aria-label="Close example account panel"
+      [disabled]="!!loadingExamplePath"
+      (click)="close()">
+      <span class="fa fa-xmark" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="v1-drawer__body">
+    @if (loadError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+        <span>{{ loadError }}</span>
+      </div>
+    }
+
+    <div class="v1-example-list">
+      @for (example of examples; track example.assetPath) {
+        <button
+          type="button"
+          class="v1-example"
+          [class.v1-example--single]="example.isSingleFacilityCompany"
+          [disabled]="!!loadingExamplePath"
+          [attr.aria-label]="example.cta + '. ' + example.summary"
+          (click)="loadExample(example)">
+          <span class="v1-example__header">
+            <span class="v1-example__icon" aria-hidden="true">
+              <span
+                class="fa"
+                [class.fa-building]="!example.isSingleFacilityCompany"
+                [class.fa-industry]="example.isSingleFacilityCompany"
+                aria-hidden="true"></span>
+            </span>
+            <span class="v1-example__copy">
+              <strong>{{ example.choiceLabel }}</strong>
+              <small><span>Best for</span> {{ example.choiceHint }}</small>
+            </span>
+            @if (loadingExamplePath === example.assetPath) {
+              <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+            } @else {
+              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </div>
+</aside>
