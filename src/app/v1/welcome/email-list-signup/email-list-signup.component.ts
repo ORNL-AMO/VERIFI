@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-list-subscribe.service';
@@ -7,6 +8,7 @@ import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-li
   selector: 'app-email-list-signup',
   templateUrl: './email-list-signup.component.html',
   styleUrls: ['./email-list-signup.component.css'],
+  imports: [FormsModule],
   standalone: true
 })
 export class EmailListSignupComponent {

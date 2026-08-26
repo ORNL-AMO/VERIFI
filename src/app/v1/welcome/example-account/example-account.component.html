@@ -5,7 +5,8 @@
   [disabled]="!!loadingExamplePath"
   (click)="close()"></button>
 
-<aside class="v1-drawer" role="dialog" aria-modal="true" aria-labelledby="v1-example-title">
+<aside class="v1-drawer" role="dialog" aria-modal="true" aria-labelledby="v1-example-title"
+  appDrawerFocusTrap (escapePressed)="close()">
   <header class="v1-drawer__header">
     <div>
       <p class="v1-eyebrow">Example accounts</p>

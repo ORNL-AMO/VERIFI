@@ -1,12 +1,15 @@
 import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
+import { DrawerFocusTrapDirective } from '../shared/drawer-focus-trap.directive';
 
 @Component({
   selector: 'app-create-account-panel',
   templateUrl: './create-account.component.html',
   styleUrls: ['./create-account.component.css'],
+  imports: [FormsModule, DrawerFocusTrapDirective],
   standalone: true
 })
 export class CreateAccountComponent {

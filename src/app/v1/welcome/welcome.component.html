@@ -65,11 +65,8 @@
     </div>
     <div class="v1-welcome__action-grid">
       @for (action of actions(); track action.title) {
-      <button
-        type="button"
-        [class]="'v1-welcome__action v1-welcome__action--' + action.tone"
-        [disabled]="!!loadingAccountGuid()"
-        [attr.aria-label]="action.cta + '. ' + action.summary"
+      <button type="button" [class]="'v1-welcome__action v1-welcome__action--' + action.tone"
+        [disabled]="!!loadingAccountGuid()" [attr.aria-label]="action.cta + '. ' + action.summary"
         (click)="openPanel(action.action)">
         <span class="v1-welcome__action-icon" aria-hidden="true">
           <span class="fa {{ action.icon }}" aria-hidden="true"></span>
@@ -97,8 +94,7 @@
 
     <div class="v1-section-heading">
       <div>
-        <p class="v1-eyebrow">Account portfolio</p>
-        <!-- <h2 id="v1-accounts-title">Open a workspace</h2> -->
+        <p id="v1-accounts-title" class="v1-eyebrow">Account portfolio</p>
       </div>
       <span>{{ accountCountLabel() }}</span>
     </div>
@@ -106,9 +102,9 @@
     @if (accountList.length === 0) {
     <div class="v1-account-list" role="status" aria-live="polite">
       <article class="v1-empty-state">
-      <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
-      <h3>No accounts are available</h3>
-      <p>Use the get started options above to create, import, or load an account.</p>
+        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <h3>No accounts are available</h3>
+        <p>Use the get started options above to create, import, or load an account.</p>
       </article>
     </div>
     } @else {
@@ -125,13 +121,13 @@
           {{ accountTypeLabel(account) }}
         </span>
         <span class="v1-account-row__action">
-        @if (loadingGuid === account.guid) {
+          @if (loadingGuid === account.guid) {
           <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
           <span>Opening</span>
-        } @else {
+          } @else {
           <span>Open</span>
           <span class="fa fa-arrow-right" aria-hidden="true"></span>
-        }
+          }
         </span>
       </button>
       }
