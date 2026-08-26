@@ -44,6 +44,7 @@
           @for (item of settingsItems; track item.id) {
             <a
               [class.active]="navigation.activeDetail() === item.id"
+              [class.v1-nav__item--danger]="item.tone === 'danger'"
               [routerLink]="navigation.accountSettingsRoute(account.guid, item.id)"
               [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
               <span [class]="'fa ' + item.icon" aria-hidden="true"></span>

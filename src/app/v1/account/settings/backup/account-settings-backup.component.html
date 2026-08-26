@@ -102,34 +102,36 @@
   </section>
 }
 
-@if (showBackupConfirm && currentAccount) {
-  <button type="button" class="v1-modal-backdrop" aria-label="Cancel account backup" [disabled]="isBackingUp"
-    (click)="cancelBackupConfirm()"></button>
-  <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-backup-confirm-title">
-    <header class="v1-modal__header">
-      <h2 id="v1-backup-confirm-title">Backup {{ currentAccount.name }}</h2>
-      <button type="button" class="v1-icon-btn" aria-label="Cancel account backup" [disabled]="isBackingUp"
-        (click)="cancelBackupConfirm()">
-        <span class="fa fa-xmark" aria-hidden="true"></span>
-      </button>
-    </header>
-    <div class="v1-modal__body">
-      <p>Download a JSON backup for this account, including facilities, meters, predictors, analyses, reports, and account settings.</p>
-    </div>
-    <footer class="v1-modal__footer">
-      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
-      <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="confirmBackupDownload()">
-        @if (isBackingUp) {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
-          Preparing
-        } @else {
-          Download JSON backup
-          <span class="fa fa-download" aria-hidden="true"></span>
-        }
-      </button>
-    </footer>
-  </section>
-}
+<ng-template #backupConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel account backup" [disabled]="isBackingUp"
+      (click)="cancelBackupConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-backup-confirm-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-backup-confirm-title">Backup {{ account()?.name }}</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel account backup" [disabled]="isBackingUp"
+          (click)="cancelBackupConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        <p>Download a JSON backup for this account, including facilities, meters, predictors, analyses, reports, and account settings.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="confirmBackupDownload()">
+          @if (isBackingUp) {
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            Preparing
+          } @else {
+            Download JSON backup
+            <span class="fa fa-download" aria-hidden="true"></span>
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
+</ng-template>
 
 @if (showImportPanel) {
   <app-import-account-backup-panel

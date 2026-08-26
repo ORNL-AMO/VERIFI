@@ -1,11 +1,13 @@
-import { Component, effect, inject, untracked } from '@angular/core';
+import { Component, TemplateRef, ViewChild, ViewContainerRef, effect, inject, untracked } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
+import { ModalPortalService } from '../../../shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 @Component({
@@ -19,10 +21,14 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
   private readonly backupExportCoordinator = inject(BackupExportCoordinator);
   private readonly automaticBackups = inject(AutomaticBackupsService);
   private readonly navigation = inject(WorkspaceNavigationService);
+  private readonly modalPortal = inject(ModalPortalService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
   readonly backupGateway = inject(ElectronBackupFileGateway);
 
   readonly automaticBackupStatus = toSignal(this.automaticBackups.status, { initialValue: 'disabled' as AutomaticBackupStatus });
   readonly automaticBackupSaving = toSignal(this.automaticBackups.saving, { initialValue: false });
+
+  @ViewChild('backupConfirmModal') private readonly backupConfirmModal!: TemplateRef<unknown>;
 
   form: FormGroup;
   showBackupConfirm = false;
@@ -96,11 +102,13 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
     }
     this.showBackupConfirm = true;
     this.saveError = '';
+    this.modalPortal.show(new TemplatePortal(this.backupConfirmModal, this.viewContainerRef));
   }
 
   cancelBackupConfirm(): void {
     if (!this.isBackingUp) {
       this.showBackupConfirm = false;
+      this.modalPortal.hide();
     }
   }
 
@@ -109,6 +117,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
       return;
     }
     this.showBackupConfirm = false;
+    this.modalPortal.hide();
     this.isBackingUp = true;
     await this.runSave('Preparing account backup', async () => {
       await this.backupExportCoordinator.exportActiveAccount({ downloadAsZip: false });

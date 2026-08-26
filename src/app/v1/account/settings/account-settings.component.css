@@ -97,6 +97,14 @@
   color: var(--v1-danger);
 }
 
+.v1-settings-panel--danger {
+  border-left-color: var(--v1-danger);
+}
+
+.v1-settings-panel--danger .v1-settings-panel__heading p {
+  color: var(--v1-danger);
+}
+
 .v1-settings-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -230,6 +238,15 @@
 
 .v1-settings-card h3 {
   font-size: 1rem;
+}
+
+.v1-settings-card--danger {
+  border-color: color-mix(in srgb, var(--v1-danger) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-danger) 7%, var(--v1-content-block));
+}
+
+.v1-settings-card--danger > .fa {
+  color: var(--v1-danger);
 }
 
 .v1-settings-actions {

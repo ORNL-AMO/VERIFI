@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ImportAccountBackupComponent } from '../../welcome/import-account-backup/import-account-backup.component';
 import { AccountSettingsComponent } from './account-settings.component';
 import { AccountSettingsBackupComponent } from './backup/account-settings-backup.component';
+import { AccountSettingsDeleteComponent } from './delete/account-settings-delete.component';
 import { AccountSettingsFinancialComponent } from './financial/account-settings-financial.component';
 import { AccountSettingsGoalsComponent } from './goals/account-settings-goals.component';
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
@@ -19,7 +20,8 @@ import { AccountSettingsUnitsComponent } from './units/account-settings-units.co
     AccountSettingsGoalsComponent,
     AccountSettingsFinancialComponent,
     AccountSettingsStalenessComponent,
-    AccountSettingsBackupComponent
+    AccountSettingsBackupComponent,
+    AccountSettingsDeleteComponent
   ],
   imports: [
     CommonModule,

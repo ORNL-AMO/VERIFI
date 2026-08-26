@@ -763,10 +763,25 @@
 .v1-drawer__header,
 .v1-drawer__body,
 .v1-drawer__footer,
+.v1-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.v1-modal__header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: auto;
+}
+
 .v1-modal__header,
 .v1-modal__body,
 .v1-modal__footer {
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(.5rem, 3vw, .5rem);
 }
 
 .v1-drawer__body {

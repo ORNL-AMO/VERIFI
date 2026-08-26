@@ -20,6 +20,7 @@ import { AccountSettingsFormService } from '@shared/settings-forms/account-setti
 import { AccountSettingsComponent } from './account-settings.component';
 import { AccountSettingsModule } from './account-settings.module';
 import { AccountSettingsBackupComponent } from './backup/account-settings-backup.component';
+import { AccountSettingsDeleteComponent } from './delete/account-settings-delete.component';
 import { AccountSettingsFinancialComponent } from './financial/account-settings-financial.component';
 import { AccountSettingsGoalsComponent } from './goals/account-settings-goals.component';
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
@@ -34,7 +35,10 @@ describe('Account settings routed components', () => {
   let commandBoundary: { execute: ReturnType<typeof vi.fn> };
   let accountHandler: { update: ReturnType<typeof vi.fn> };
   let facilityHandler: { update: ReturnType<typeof vi.fn> };
-  let lifecycle: { refreshAccountCatalog: ReturnType<typeof vi.fn> };
+  let lifecycle: {
+    refreshAccountCatalog: ReturnType<typeof vi.fn>;
+    handleMarkedAccountDeletion: ReturnType<typeof vi.fn>;
+  };
   let backupExportCoordinator: {
     exportActiveAccount: ReturnType<typeof vi.fn>;
     buildActiveAccountBackup: ReturnType<typeof vi.fn>;
@@ -50,7 +54,10 @@ describe('Account settings routed components', () => {
     addOrUpdateFile: ReturnType<typeof vi.fn>;
     inspectCurrentAccountFile: ReturnType<typeof vi.fn>;
   };
-  let navigation: { openAccount: ReturnType<typeof vi.fn> };
+  let navigation: {
+    openAccount: ReturnType<typeof vi.fn>;
+    showWelcome: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -67,7 +74,8 @@ describe('Account settings routed components', () => {
       update: vi.fn(async updated => updated)
     };
     lifecycle = {
-      refreshAccountCatalog: vi.fn(async () => undefined)
+      refreshAccountCatalog: vi.fn(async () => undefined),
+      handleMarkedAccountDeletion: vi.fn(async () => [])
     };
     backupExportCoordinator = {
       exportActiveAccount: vi.fn(async () => backupFile()),
@@ -85,7 +93,8 @@ describe('Account settings routed components', () => {
       inspectCurrentAccountFile: vi.fn(async () => undefined)
     };
     navigation = {
-      openAccount: vi.fn(async () => undefined)
+      openAccount: vi.fn(async () => undefined),
+      showWelcome: vi.fn()
     };
 
     TestBed.configureTestingModule({
@@ -144,7 +153,7 @@ describe('Account settings routed components', () => {
     const childPaths = settingsRoute?.children?.map(route => route.path);
 
     expect(settingsRoute?.component).toBe(AccountSettingsComponent);
-    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', '**']);
+    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete', '**']);
   });
 
   it('autosaves profile text locally after a debounce', async () => {
@@ -293,6 +302,27 @@ describe('Account settings routed components', () => {
     fixture = createDetail(AccountSettingsBackupComponent);
 
     expect(buttonByText(fixture, 'Select backup file').disabled).toBe(false);
+  });
+
+  it('confirms before deleting an account from the routed delete component', async () => {
+    const fixture = createDetail(AccountSettingsDeleteComponent);
+
+    buttonByText(fixture, 'Delete account').click();
+    fixture.detectChanges(false);
+
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('This action cannot be undone');
+
+    lifecycle.handleMarkedAccountDeletion.mockImplementationOnce(async () => {
+      account.set(undefined);
+      return [];
+    });
+    await fixture.componentInstance.confirmDeleteAccount();
+    fixture.detectChanges(false);
+
+    expect(accountHandler.update).toHaveBeenCalledWith(expect.objectContaining({ deleteAccount: true }), 'account-a');
+    expect(lifecycle.handleMarkedAccountDeletion).toHaveBeenCalledWith('account-a');
+    expect(navigation.showWelcome).toHaveBeenCalled();
   });
 });
 

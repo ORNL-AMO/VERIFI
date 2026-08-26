@@ -3,6 +3,7 @@ import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from
 import { AccountHomeComponent } from './account/home/account-home.component';
 import { AccountSettingsComponent } from './account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from './account/settings/backup/account-settings-backup.component';
+import { AccountSettingsDeleteComponent } from './account/settings/delete/account-settings-delete.component';
 import { AccountSettingsFinancialComponent } from './account/settings/financial/account-settings-financial.component';
 import { AccountSettingsGoalsComponent } from './account/settings/goals/account-settings-goals.component';
 import { AccountSettingsProfileComponent } from './account/settings/profile/account-settings-profile.component';
@@ -44,6 +45,7 @@ export const V1Routes: Routes = [
               { path: 'financial', component: AccountSettingsFinancialComponent },
               { path: 'staleness', component: AccountSettingsStalenessComponent },
               { path: 'backup', component: AccountSettingsBackupComponent },
+              { path: 'delete', component: AccountSettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }
             ]
           },
