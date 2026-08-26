@@ -1,5 +1,7 @@
 export interface WelcomeAction {
   readonly title: string;
+  readonly tileLabel: string;
+  readonly tileHint: string;
   readonly summary: string;
   readonly icon: string;
   readonly tone: 'primary' | 'secondary' | 'success';
@@ -9,6 +11,8 @@ export interface WelcomeAction {
 
 export interface WelcomeExample {
   readonly title: string;
+  readonly choiceLabel: string;
+  readonly choiceHint: string;
   readonly assetPath: string;
   readonly summary: string;
   readonly details: ReadonlyArray<string>;
@@ -20,6 +24,8 @@ export interface WelcomeExample {
 export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   {
     title: 'Create New Account',
+    tileLabel: 'Create',
+    tileHint: 'Start blank',
     summary: 'Start setup for an account, facilities, meters, predictors, analyses, reports, and backup preferences.',
     icon: 'fa-plus',
     tone: 'primary',
@@ -28,6 +34,8 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   },
   {
     title: 'Upload Account Backup',
+    tileLabel: 'Import',
+    tileHint: 'Use backup',
     summary: 'Restore or share an existing VERIFI account backup file from another system.',
     icon: 'fa-upload',
     tone: 'secondary',
@@ -36,6 +44,8 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   },
   {
     title: 'Load Example Account',
+    tileLabel: 'Example',
+    tileHint: 'Try demo',
     summary: 'Open a representative manufacturing account and explore the full workspace concept.',
     icon: 'fa-file-circle-plus',
     tone: 'secondary',
@@ -47,6 +57,8 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
 export const WELCOME_EXAMPLES: ReadonlyArray<WelcomeExample> = [
   {
     title: 'Cocoa Co. Portfolio',
+    choiceLabel: 'Portfolio',
+    choiceHint: 'Multi-site reporting',
     assetPath: 'assets/example-data/ExampleAccount.json',
     summary: 'A multi-facility account for exploring portfolio navigation, rollups, analyses, reports, and the broader workspace concept.',
     details: [
@@ -58,6 +70,8 @@ export const WELCOME_EXAMPLES: ReadonlyArray<WelcomeExample> = [
   },
   {
     title: 'Cocoa Co. Single Facility',
+    choiceLabel: 'Single Facility',
+    choiceHint: 'Quick walkthrough',
     assetPath: 'assets/example-data/SingleFacilityExample.json',
     summary: 'A smaller account for walking through one facility setup, meters, utility data, analysis, and focused workflows.',
     details: [

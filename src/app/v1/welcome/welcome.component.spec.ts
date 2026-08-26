@@ -45,31 +45,43 @@ describe('WelcomeComponent', () => {
 
     expect(fixture.nativeElement.querySelector('#v1-welcome-title')?.textContent).toContain('VERIFI');
     expect(text).toContain('Track corporate and facility utility data');
-    expect(text).toContain('Create New Account');
-    expect(text).toContain('Upload Account Backup');
-    expect(text).toContain('Load Example Account');
+    expect(text).toContain('Create');
+    expect(text).toContain('Import');
+    expect(text).toContain('Example');
     expect(text).toContain('ORNL Industrial Resources');
     expect(text).toContain('Contact and Feedback');
     expect(text).toContain('Experience switcher');
   });
 
-  it('uses semantic button colors for welcome entry actions', () => {
-    const actionButtons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-welcome__action button'));
+  it('uses graphic tiles for welcome entry actions', () => {
+    const actionButtons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'));
     const buttonByText = (label: string): HTMLButtonElement | undefined =>
       actionButtons.find(button => button.textContent?.includes(label));
 
-    expect(buttonByText('Create account')?.classList.contains('v1-btn--primary')).toBe(true);
-    expect(buttonByText('Upload backup')?.classList.contains('v1-btn--secondary')).toBe(true);
-    expect(buttonByText('Load example')?.classList.contains('v1-btn--secondary')).toBe(true);
-    expect(buttonByText('Load example')?.classList.contains('v1-btn--success')).toBe(false);
+    expect(actionButtons).toHaveLength(3);
+    expect(buttonByText('Create')?.classList.contains('v1-welcome__action--primary')).toBe(true);
+    expect(buttonByText('Import')?.classList.contains('v1-welcome__action--secondary')).toBe(true);
+    expect(buttonByText('Example')?.classList.contains('v1-welcome__action--secondary')).toBe(true);
+    expect(buttonByText('Create')?.getAttribute('aria-label')).toContain('Create account');
+    expect(buttonByText('Import')?.getAttribute('aria-label')).toContain('existing VERIFI account backup');
+    expect(buttonByText('Example')?.getAttribute('aria-label')).toContain('representative manufacturing account');
   });
 
-  it('shows a single create account button when accounts exist', () => {
-    const createButtons: Array<HTMLButtonElement> = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button'))
-      .filter(button => button.textContent?.trim() === 'Create account');
+  it('shows a single create account tile when accounts exist', () => {
+    const createButtons: Array<HTMLButtonElement> = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
+      .filter(button => button.textContent?.includes('Create'));
 
     expect(createButtons).toHaveLength(1);
-    expect(createButtons[0].classList.contains('v1-btn--primary')).toBe(true);
+    expect(createButtons[0].classList.contains('v1-welcome__action--primary')).toBe(true);
+  });
+
+  it('opens the selected welcome panel from its graphic tile', () => {
+    const importTile: HTMLButtonElement | undefined = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
+      .find(button => button.textContent?.includes('Import'));
+
+    importTile?.click();
+
+    expect(fixture.componentInstance.activePanel()).toBe('import');
   });
 
   it('renders existing accounts and opens the selected account', async () => {
@@ -113,8 +125,8 @@ describe('WelcomeComponent', () => {
   it('shows a v1 setup path when no accounts exist', () => {
     usableAccounts.set([]);
     fixture.detectChanges();
-    const createButtons: Array<HTMLButtonElement> = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button'))
-      .filter(button => button.textContent?.trim() === 'Create account');
+    const createButtons: Array<HTMLButtonElement> = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
+      .filter(button => button.textContent?.includes('Create'));
 
     expect(fixture.nativeElement.querySelector('.v1-empty-state')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.v1-empty-state')?.textContent).toContain('Use the get started options above to create, import, or load an account.');

@@ -9,7 +9,7 @@
   <header class="v1-drawer__header">
     <div>
       <p class="v1-eyebrow">Example accounts</p>
-      <h2 id="v1-example-title">Load Example Account</h2>
+      <h2 id="v1-example-title">Choose an Example Account</h2>
     </div>
     <button
       type="button"
@@ -23,11 +23,6 @@
   </header>
 
   <div class="v1-drawer__body">
-    <p class="v1-drawer__intro">
-      Example accounts create a real VERIFI workspace with demonstration data so you can explore setup, utility data,
-      analysis, reports, and account navigation without building an account from scratch.
-    </p>
-
     @if (loadError) {
       <div class="v1-alert v1-alert--danger" role="alert">
         <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
@@ -37,34 +32,32 @@
 
     <div class="v1-example-list">
       @for (example of examples; track example.assetPath) {
-        <article class="v1-example">
-          <div class="v1-example__header">
-            <div>
-              <h3>{{ example.title }}</h3>
-              <p>{{ example.summary }}</p>
-            </div>
-            <span class="fa fa-industry" aria-hidden="true"></span>
-          </div>
-          <div class="v1-example__highlights" aria-label="Example contents">
-            @for (highlight of example.highlights; track highlight) {
-              <span>{{ highlight }}</span>
-            }
-          </div>
-          <div class="v1-example__details">
-            @for (detail of example.details; track detail) {
-              <p>{{ detail }}</p>
-            }
-          </div>
-          <button type="button" class="v1-btn v1-btn--primary" [disabled]="!!loadingExamplePath" (click)="loadExample(example)">
+        <button
+          type="button"
+          class="v1-example"
+          [class.v1-example--single]="example.isSingleFacilityCompany"
+          [disabled]="!!loadingExamplePath"
+          [attr.aria-label]="example.cta + '. ' + example.summary"
+          (click)="loadExample(example)">
+          <span class="v1-example__header">
+            <span class="v1-example__icon" aria-hidden="true">
+              <span
+                class="fa"
+                [class.fa-building]="!example.isSingleFacilityCompany"
+                [class.fa-industry]="example.isSingleFacilityCompany"
+                aria-hidden="true"></span>
+            </span>
+            <span class="v1-example__copy">
+              <strong>{{ example.choiceLabel }}</strong>
+              <small><span>Best for</span> {{ example.choiceHint }}</small>
+            </span>
             @if (loadingExamplePath === example.assetPath) {
               <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
-              Loading
             } @else {
-              {{ example.cta }}
               <span class="fa fa-arrow-right" aria-hidden="true"></span>
             }
-          </button>
-        </article>
+          </span>
+        </button>
       }
     </div>
   </div>

@@ -60,22 +60,26 @@
   <section class="v1-welcome__actions" aria-labelledby="v1-start-title">
     <div class="v1-section-heading">
       <div>
-        <p class="v1-eyebrow">Get started</p>
+        <p id="v1-start-title" class="v1-eyebrow">Get started</p>
       </div>
     </div>
     <div class="v1-welcome__action-grid">
       @for (action of actions(); track action.title) {
-      <article [class]="'v1-welcome__action v1-welcome__action--' + action.tone">
-        <div class="v1-welcome__action-icon">
+      <button
+        type="button"
+        [class]="'v1-welcome__action v1-welcome__action--' + action.tone"
+        [disabled]="!!loadingAccountGuid()"
+        [attr.aria-label]="action.cta + '. ' + action.summary"
+        (click)="openPanel(action.action)">
+        <span class="v1-welcome__action-icon" aria-hidden="true">
           <span class="fa {{ action.icon }}" aria-hidden="true"></span>
-        </div>
-        <h3>{{ action.title }}</h3>
-        <p>{{ action.summary }}</p>
-        <button type="button" [class]="'v1-btn ' + getActionButtonClass(action.tone)"
-          [disabled]="!!loadingAccountGuid()" (click)="openPanel(action.action)">
-          {{ action.cta }}
-        </button>
-      </article>
+        </span>
+        <span class="v1-welcome__action-copy">
+          <strong>{{ action.tileLabel }}</strong>
+          <small>{{ action.tileHint }}</small>
+        </span>
+        <span class="v1-welcome__action-arrow fa fa-arrow-right" aria-hidden="true"></span>
+      </button>
       }
     </div>
   </section>

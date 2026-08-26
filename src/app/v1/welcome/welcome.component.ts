@@ -7,7 +7,7 @@ import { CreateAccountComponent } from './create-account/create-account.componen
 import { EmailListSignupComponent } from './email-list-signup/email-list-signup.component';
 import { ExampleAccountComponent } from './example-account/example-account.component';
 import { ImportAccountBackupComponent } from './import-account-backup/import-account-backup.component';
-import { WELCOME_ACTIONS, type WelcomeAction } from './welcome.models';
+import { WELCOME_ACTIONS } from './welcome.models';
 
 @Component({
   selector: 'app-welcome',
@@ -73,19 +73,6 @@ export class WelcomeComponent {
     if (account) {
       await this.openAccount(account);
     }
-  }
-
-  getActionButtonClass(tone: WelcomeAction['tone']): string {
-    if (tone === 'primary') {
-      return 'v1-btn--primary';
-    }
-    if (tone === 'secondary') {
-      return 'v1-btn--secondary';
-    }
-    if (tone === 'success') {
-      return 'v1-btn--success';
-    }
-    return 'v1-btn--quiet';
   }
 
   formatModifiedDate(account: IdbAccount): string {
