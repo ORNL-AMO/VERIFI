@@ -21,6 +21,7 @@
           type="button"
           class="v1-context-pill v1-context-pill--account"
           [class.v1-context-pill--active]="contextMode === 'account'"
+          [attr.aria-pressed]="contextMode === 'account'"
           (click)="navigation.setContext('account')">
           <span class="fa fa-building" aria-hidden="true"></span>
           <span>{{ account.name }}</span>
