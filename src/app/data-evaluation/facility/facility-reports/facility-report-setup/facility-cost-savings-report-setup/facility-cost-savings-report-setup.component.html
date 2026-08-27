@@ -77,11 +77,7 @@
     </div>
     }
   </div>
-  <div class="mt-4 checkbox-large">
-    <input type="checkbox" class="form-check-input" id="useRawCostData"
-      [(ngModel)]="reportSettings.isRawDataChecked" (change)="save()">
-    <label class="form-check-label ms-2" for="useRawCostData">Use calendarized cost</label>
-  </div>
+
   <div class="table-responsive mt-4">
     <table class="table table-bordered table-hover">
       <thead class="text-center">
@@ -134,6 +130,28 @@
     <span class="bold">
       Choose Report Content
     </span>
+    <div class="col-12 mt-3 mb-4">
+      <div class="cost-basis-panel">
+        <div class="form-check form-switch cost-basis-switch mt-2">
+          <input class="form-check-input" type="checkbox" id="useCalculatedCostsInsteadOfBillData"
+            name="useCalculatedCostsInsteadOfBillData" [(ngModel)]="reportSettings.useCalculatedCostsInsteadOfBillData"
+            (change)="save()" aria-describedby="costBasisHelp">
+
+          <label class="form-check-label ms-2" for="useCalculatedCostsInsteadOfBillData">
+            Use calculated costs instead of bill data
+          </label>
+        </div>
+
+        <div class="cost-basis-state mt-2">
+          @if (reportSettings.useCalculatedCostsInsteadOfBillData) {
+          <span class="badge text-bg-success">Using calculated costs</span>
+          } @else {
+          <span class="badge text-bg-secondary">Using bill data</span>
+          }
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col">
         <div class="form-check">

@@ -297,7 +297,7 @@ export function getCostSavingsReportSettings(): CostSavingsReportSettings {
         includeAnnual: true,
         includeMonthly: true,
         includeGroup: true,
-        isRawDataChecked: false,
+        useCalculatedCostsInsteadOfBillData: true,
         calendarizedMetersActualCost: {}
     };
 }
@@ -325,7 +325,7 @@ export interface CostSavingsReportSettings {
     includeAnnual: boolean,
     includeMonthly: boolean,
     includeGroup: boolean,
-    isRawDataChecked: boolean,
+    useCalculatedCostsInsteadOfBillData: boolean,
     calendarizedMetersActualCost?: YearGroupData
 }
 

@@ -417,6 +417,7 @@ export class FacilityCostSavingsReportSetupComponent {
   calculateCostFromCalendarizedMeters() {
     this.showMissingCostWarning = true;
     this.calculateCalendarizedCosts(true, true);
+    this.reportSettings.useCalculatedCostsInsteadOfBillData = false;
     this.updateReportSettings();
   }
 

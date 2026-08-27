@@ -7,26 +7,18 @@
   border-color: #d8e2dc;
 }
 
-.checkbox-large {
-  display: inline-flex !important;
-  align-items: center !important; 
-  justify-content: center !important;
-  vertical-align: middle !important;
-  font-size: 1.25rem;
+.cost-basis-panel {
+  border: 1px solid #b7c8c0;
+  background: #edf3f0;
+  border-radius: 0.375rem;
+  padding: 0.875rem 1rem;
+}
+
+.cost-basis-switch .form-check-input {
   cursor: pointer;
 }
 
-.checkbox-large .form-check-input {
-  width: 1.25em;   
-  height: 1.25em;  
-  margin-top: 0 !important;
-  margin-left: 0 !important;
-  position: relative; 
+.cost-basis-switch .form-check-label {
+  font-weight: 600;
   cursor: pointer;
-  border: 2px solid #6c757d;
-}
-
-.checkbox-large label {
-  font-size: 1.1rem;
-  font-weight: bold;
 }
