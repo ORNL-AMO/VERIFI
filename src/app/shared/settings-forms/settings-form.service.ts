@@ -15,7 +15,7 @@ export class SettingsFormService {
 
   getGeneralInformationForm(generalInformation: AccountAndFacility): FormGroup {
     return this.formBuilder.group({
-      name: [generalInformation.name, [Validators.required, Validators.maxLength(42)]],
+      name: [generalInformation.name, [Validators.required]],
       country: [generalInformation.country],
       city: [generalInformation.city],
       state: [generalInformation.state],
