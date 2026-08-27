@@ -61,6 +61,7 @@ Manual QA complements automated coverage. It must not be used to repeatedly rech
 - Name the condition and expected outcome: `rejects an incomplete fiscal year`, not `works correctly`.
 - Prefer exact domain results, state transitions, rendered messages, emitted values, persisted shapes, and cleanup effects.
 - Do not assert private methods, private fields, internal helper ordering, or every collaborator call unless the call itself is an external contract.
+- Do not assert ordinary HTML copy, option order, CSS class names, or layout structure unless that text, order, class, or structure is the behavior being protected. For beginner guidance, marketing copy, dashboard labels, and visual hierarchy, prefer a focused manual/visual review or an accessibility assertion tied to a real user outcome.
 - A valuable test should fail for a plausible regression and make the broken contract clear from its name and failure output.
 
 ### Direct construction or TestBed
@@ -115,6 +116,8 @@ Install Chromium once with `npx playwright install chromium` when it is not avai
 GitHub Actions runs `npm run test:all:ci` for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. The same test job gates downstream release workflows.
 
 The agent validation helper inspects changed tracked files from `git diff --name-only HEAD` plus untracked files. It is advisory: follow its selected commands by default, and add broader checks only for concrete risk, an explicit pre-PR/release request, or a boundary the helper cannot infer from filenames.
+
+When working inside a larger dirty diff, pass the files actually touched by the current fix to `npm run validate:agent -- --mode plan -- <files...>`. Do not let unrelated pending UI or routing changes force a broader validation matrix for a narrow docs, test, or styling follow-up.
 
 Keep the fast suite below 60 seconds and the browser suite below 120 seconds in CI, excluding dependency and browser installation. These are maintainability targets rather than failure thresholds. Profile slow setup, remove unnecessary TestBed/module work, or split browser scenarios before accepting persistently slow feedback.
 

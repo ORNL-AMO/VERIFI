@@ -18,7 +18,7 @@
   right: 0;
   display: flex;
   flex-direction: column;
-  width: var(--v1-drawer-width-narrow);
+  width: var(--v1-drawer-width-wide);
   max-width: 100%;
   height: 100%;
   border-left: 1px solid var(--v1-border);
@@ -31,9 +31,14 @@
 .v1-drawer__body,
 .v1-drawer__actions,
 .v1-form,
+.v1-path-picker,
 .v1-form__field {
   display: grid;
   gap: var(--v1-space-3);
+}
+
+.v1-form {
+  width: 100%;
 }
 
 .v1-drawer__header {
@@ -50,6 +55,7 @@
 }
 
 .v1-drawer__body {
+  align-items: stretch;
   align-content: start;
   overflow: auto;
   padding: var(--v1-space-4);
@@ -58,6 +64,10 @@
 .v1-drawer__intro,
 .v1-field-hint {
   color: var(--v1-muted);
+}
+
+.v1-drawer__recovery {
+  justify-self: start;
 }
 
 .v1-icon-btn {
@@ -71,6 +81,114 @@
   color: var(--v1-text);
 }
 
+.v1-path-choice {
+  --v1-path-accent: var(--v1-account);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--v1-space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 6.8rem;
+  padding: 1rem;
+  padding-right: 3rem;
+  border: 1.5px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-panel);
+  color: var(--v1-text);
+  text-align: left;
+}
+
+.v1-path-choice::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid var(--v1-border);
+  border-radius: 50%;
+  background: var(--v1-surface);
+}
+
+.v1-path-choice--bills {
+  --v1-path-accent: var(--v1-success);
+}
+
+.v1-path-choice--facility {
+  --v1-path-accent: var(--v1-facility);
+}
+
+.v1-path-choice--portfolio {
+  --v1-path-accent: var(--v1-account);
+}
+
+.v1-path-choice:hover,
+.v1-path-choice:focus-visible {
+  border-color: color-mix(in srgb, var(--v1-focus) 40%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-focus) 4%, var(--v1-panel));
+  box-shadow: 0 .45rem 1.3rem var(--v1-shadow-soft);
+}
+
+.v1-path-choice:hover::after,
+.v1-path-choice:focus-visible::after {
+  border-color: color-mix(in srgb, var(--v1-focus) 55%, var(--v1-border));
+}
+
+.v1-path-choice--selected {
+  border-color: var(--v1-focus);
+  border-width: 2px;
+  background: color-mix(in srgb, var(--v1-focus) 5%, var(--v1-panel));
+  box-shadow: 0 .45rem 1.3rem var(--v1-shadow-soft);
+}
+
+.v1-path-choice--selected::after {
+  border-color: var(--v1-focus);
+  background: var(--v1-focus);
+  box-shadow: inset 0 0 0 3px var(--v1-surface);
+}
+
+.v1-path-choice:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.v1-path-choice__icon {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--v1-path-accent) 12%, transparent);
+  color: var(--v1-path-accent);
+  font-size: 1.25rem;
+}
+
+.v1-path-choice__copy {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.v1-path-choice__copy small {
+  color: var(--v1-path-accent);
+  font-size: .76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.v1-path-choice__copy strong {
+  font-size: 1.28rem;
+  line-height: 1.12;
+}
+
+.v1-path-choice__copy span {
+  color: var(--v1-muted);
+  line-height: 1.35;
+}
+
 .v1-form__field span {
   font-weight: 800;
 }
@@ -81,8 +199,9 @@
   padding: .55rem .7rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius-sm);
-  background: var(--v1-panel);
+  background: var(--v1-control-surface);
   color: var(--v1-text);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--v1-surface) 70%, transparent);
 }
 
 .v1-field-error {

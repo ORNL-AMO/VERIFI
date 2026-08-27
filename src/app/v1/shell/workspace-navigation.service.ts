@@ -122,6 +122,16 @@ export class WorkspaceNavigationService {
     }
   }
 
+  async openFacility(facilityGuid: string): Promise<void> {
+    this.workspaceService.selectFacility(facilityGuid);
+    await this.router.navigate(this.facilityRoute(facilityGuid));
+  }
+
+  async openGuidedBills(facilityGuid: string): Promise<void> {
+    this.workspaceService.selectFacility(facilityGuid);
+    await this.router.navigate(this.guidedBillsRoute(facilityGuid));
+  }
+
   showWelcome(): void {
     void this.router.navigate(['/v1']);
   }
@@ -194,6 +204,10 @@ export class WorkspaceNavigationService {
 
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
+  }
+
+  guidedBillsRoute(facilityGuid: string): Array<string> {
+    return ['/v1', 'guided-bills', facilityGuid];
   }
 
   private resolveAccount(): IdbAccount | undefined {

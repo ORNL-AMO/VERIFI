@@ -58,6 +58,8 @@ Standardize these common controls as they appear in v1:
 - Alerts and status rows: visible warning, error, success, loading, empty, blocked, and pending states.
 - Support panel content: help, todos, results, and details with consistent tab behavior.
 
+Editable inputs, selects, and textareas should use `--v1-control-surface` or an equally active field surface. Do not use the muted grey `--v1-panel` background for editable controls, because it reads as disabled in form workflows. Reserve muted panel backgrounds for passive panels, cards, add-ons, or explicitly disabled/read-only treatments.
+
 Use Font Awesome or established repository icon conventions for symbolic buttons. Icon-only controls need accessible labels and visible focus. Do not rely on hover-only help for required instructions or blocking validation.
 
 Button color should communicate the action's consequence, not decorative emphasis. Use orange primary buttons only for the main recommended or commit action in a local decision area. Use blue secondary buttons for navigation, workspace movement, opening details, switching contexts, or facility-structured actions. Use green success buttons only for success continuation, completion, account-context confirmation, or energy-positive states. Use red danger buttons only for destructive actions such as delete, remove, reset, discard, overwrite, or other data-loss paths. Use quiet or ghost buttons for cancel, close, skip, external/support links, optional utilities, and alternate actions that should not compete with the primary path.

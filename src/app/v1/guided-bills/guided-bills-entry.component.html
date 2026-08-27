@@ -1,0 +1,46 @@
+<main class="v1-guided-bills" aria-labelledby="v1-guided-bills-title">
+  <section class="v1-guided-bills__hero">
+    <div class="v1-guided-bills__copy">
+      <p class="v1-eyebrow">Simple guided path</p>
+      <h1 id="v1-guided-bills-title">Start With Utility Bills</h1>
+      @if (navigation.facility(); as facility) {
+        <p>
+          {{ facility.name }} is ready for the simplified bill workflow. This path will guide you from utility bills
+          toward regression analysis without asking you to manage the full workspace first.
+        </p>
+      } @else {
+        <p>
+          This path will guide you from utility bills toward regression analysis without asking you to manage the full
+          workspace first.
+        </p>
+      }
+      <div class="v1-guided-bills__actions">
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="navigation.showWelcome()">
+          Back to welcome
+        </button>
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="openFullWorkspace()">
+          Open full workspace
+          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <aside class="v1-guided-bills__panel" aria-label="Guided bills workflow preview">
+      <span class="v1-guided-bills__icon fa fa-receipt" aria-hidden="true"></span>
+      <ol>
+        <li>
+          <strong>Add bills</strong>
+          <span>Enter utility use, cost, and bill dates in a focused flow.</span>
+        </li>
+        <li>
+          <strong>Add drivers</strong>
+          <span>Bring in production or weather context when you are ready.</span>
+        </li>
+        <li>
+          <strong>Review regression</strong>
+          <span>Use the saved workspace data to move into analysis.</span>
+        </li>
+      </ol>
+    </aside>
+  </section>
+</main>

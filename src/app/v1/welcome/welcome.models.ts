@@ -1,3 +1,6 @@
+import type { IdbAccount } from '@data/models/idbModels/account';
+import type { IdbFacility } from '@data/models/idbModels/facility';
+
 export interface WelcomeAction {
   readonly title: string;
   readonly tileLabel: string;
@@ -20,6 +23,50 @@ export interface WelcomeExample {
   readonly cta: string;
   readonly isSingleFacilityCompany?: boolean;
 }
+
+export type CreateAccountPath = 'bills' | 'singleFacility' | 'portfolio';
+
+export interface CreateAccountChoice {
+  readonly path: CreateAccountPath;
+  readonly label: string;
+  readonly eyebrow: string;
+  readonly summary: string;
+  readonly icon: string;
+  readonly tone: 'bills' | 'facility' | 'portfolio';
+}
+
+export interface CreateAccountResult {
+  readonly path: CreateAccountPath;
+  readonly account: IdbAccount;
+  readonly facility?: IdbFacility;
+}
+
+export const CREATE_ACCOUNT_CHOICES: ReadonlyArray<CreateAccountChoice> = [
+  {
+    path: 'singleFacility',
+    label: 'One facility',
+    eyebrow: 'One site',
+    summary: 'Create one site workspace for meters, readings, analysis, and reports.',
+    icon: 'fa-industry',
+    tone: 'facility'
+  },
+  {
+    path: 'portfolio',
+    label: 'Multiple facilities',
+    eyebrow: 'Portfolio',
+    summary: 'Create an account workspace for several facilities and portfolio-level setup.',
+    icon: 'fa-building',
+    tone: 'portfolio'
+  },
+  {
+    path: 'bills',
+    label: 'I have bills',
+    eyebrow: 'Simple guided path',
+    summary: 'Start with utility bills and let VERIFI guide you toward regression analysis later.',
+    icon: 'fa-receipt',
+    tone: 'bills'
+  }
+];
 
 export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   {

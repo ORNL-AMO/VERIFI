@@ -28,15 +28,16 @@
 }
 
 .v1-drawer__header,
-.v1-drawer__body,
-.v1-example-list,
 .v1-example {
   display: grid;
   gap: var(--v1-space-3);
 }
 
+.v1-drawer__body,
 .v1-example-list {
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v1-space-3);
 }
 
 .v1-drawer__header {
@@ -53,6 +54,7 @@
 }
 
 .v1-drawer__body {
+  align-items: stretch;
   align-content: start;
   overflow: auto;
   padding: var(--v1-space-4);
@@ -75,6 +77,7 @@
 .v1-example {
   --v1-example-accent: var(--v1-account);
 
+  width: 100%;
   min-height: 8rem;
   padding: 1.25rem;
   border: 1px solid var(--v1-border);
