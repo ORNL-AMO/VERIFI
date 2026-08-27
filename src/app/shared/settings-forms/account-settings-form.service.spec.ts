@@ -2,16 +2,17 @@ import { TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { DEFAULT_DATA_STALENESS_MONTHS } from '@domain/calculations/status-check-calculations/statusCheckModels';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { AccountSettingsFormService } from './account-settings-form.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { SettingsFormService } from './settings-form.service';
 
-describe('AccountSettingsFormService', () => {
-  let service: AccountSettingsFormService;
+describe('SettingsFormService', () => {
+  let service: SettingsFormService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FormBuilder, AccountSettingsFormService]
+      providers: [FormBuilder, SettingsFormService]
     });
-    service = TestBed.inject(AccountSettingsFormService);
+    service = TestBed.inject(SettingsFormService);
   });
 
   it('maps account profile fields without changing identifiers', () => {
@@ -112,6 +113,104 @@ describe('AccountSettingsFormService', () => {
     expect(updated.fiscalYearCalendarEnd).toBe(false);
     expect(updated.dataStalenessSettings).toEqual({ enabled: false, thresholdMonths: 18 });
   });
+
+  it('maps facility profile fields without changing identifiers', () => {
+    const facility = facilityFixture();
+    const form = service.getGeneralInformationForm(facility);
+
+    form.patchValue({
+      name: ' Updated Facility ',
+      city: 'Oak Ridge',
+      size: 45000
+    });
+
+    const updated = service.updateFacilityFromGeneralInformationForm(form, { ...facility });
+
+    expect(updated.guid).toBe('facility-a');
+    expect(updated.accountId).toBe('account-a');
+    expect(updated.name).toBe('Updated Facility');
+    expect(updated.city).toBe('Oak Ridge');
+    expect(updated.size).toBe(45000);
+  });
+
+  it('detects and copies account unit settings for facilities', () => {
+    const account = accountFixture();
+    const facility = {
+      ...facilityFixture(),
+      energyUnit: 'GJ',
+      eGridSubregion: 'SRTV'
+    };
+    const form = service.getUnitsForm(facility);
+
+    expect(service.areAccountAndFacilityUnitsDifferent(account, facility)).toBe(true);
+
+    service.setAccountUnits(form, account);
+    const updated = service.updateFacilityFromUnitsForm(form, { ...facility });
+
+    expect(updated.energyUnit).toBe(account.energyUnit);
+    expect(updated.eGridSubregion).toBe(account.eGridSubregion);
+    expect(service.areAccountAndFacilityUnitsDifferent(account, updated)).toBe(false);
+  });
+
+  it('detects and copies account goal settings for facilities without account-only controls', () => {
+    const account = accountFixture();
+    const facility = {
+      ...facilityFixture(),
+      sustainabilityQuestions: {
+        ...account.sustainabilityQuestions,
+        energyReductionPercent: 10
+      }
+    };
+    const form = service.getFacilitySustainabilityQuestionsForm(facility);
+
+    expect(form.controls['displayEmissions']).toBeUndefined();
+    expect(service.areAccountAndFacilitySustainabilityQuestionsDifferent(account, facility)).toBe(true);
+
+    service.setAccountSustainabilityQuestions(form, account);
+    const updatedFacility = service.updateFacilityFromSustainabilityQuestionsForm(form, { ...facility });
+    const updatedAccount = service.updateAccountFromSustainabilityQuestionsForm(form, { ...account });
+
+    expect(updatedFacility.sustainabilityQuestions.energyReductionPercent).toBe(25);
+    expect(updatedAccount.displayEmissions).toBe(false);
+    expect(service.areAccountAndFacilitySustainabilityQuestionsDifferent(account, updatedFacility)).toBe(false);
+  });
+
+  it('detects and copies account financial reporting for facilities', () => {
+    const account = { ...accountFixture(), fiscalYear: 'nonCalendarYear' as const, fiscalYearMonth: 6 };
+    const facility = facilityFixture();
+    const form = service.getFiscalYearForm(facility);
+
+    expect(service.areAccountAndFacilityFinancialReportingDifferent(account, facility)).toBe(true);
+
+    service.setAccountFinancialReporting(form, account);
+    const updated = service.updateFacilityFromFiscalForm(form, { ...facility });
+
+    expect(updated.fiscalYear).toBe('nonCalendarYear');
+    expect(updated.fiscalYearMonth).toBe(6);
+    expect(service.areAccountAndFacilityFinancialReportingDifferent(account, updated)).toBe(false);
+  });
+
+  it('normalizes and copies facility staleness settings', () => {
+    const account = {
+      ...accountFixture(),
+      dataStalenessSettings: { enabled: false, thresholdMonths: 12 as const }
+    };
+    const facility = {
+      ...facilityFixture(),
+      dataStalenessSettings: undefined
+    } as IdbFacility;
+    const form = service.getFacilityStalenessForm(facility.dataStalenessSettings, account.dataStalenessSettings);
+
+    expect(form.controls['enabled'].value).toBe(false);
+    expect(form.controls['thresholdMonths'].value).toBe(12);
+    expect(form.controls['useAccountSettings'].value).toBe(true);
+
+    service.setAccountStaleness(form, account);
+    const updated = service.updateFacilityFromStalenessForm(form, { ...facility });
+
+    expect(updated.dataStalenessSettings).toEqual({ enabled: false, thresholdMonths: 12, useAccountSettings: true });
+    expect(service.areAccountAndFacilityStalenessDifferent(account, updated)).toBe(false);
+  });
 });
 
 function accountFixture(): IdbAccount {
@@ -167,4 +266,21 @@ function accountFixture(): IdbAccount {
       thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS
     }
   } as IdbAccount;
+}
+
+function facilityFixture(): IdbFacility {
+  return {
+    ...accountFixture(),
+    guid: 'facility-a',
+    accountId: 'account-a',
+    name: 'Facility A',
+    size: 10000,
+    classification: 'Manufacturing',
+    isNewFacility: false,
+    dataStalenessSettings: {
+      enabled: true,
+      thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS,
+      useAccountSettings: false
+    }
+  } as IdbFacility;
 }

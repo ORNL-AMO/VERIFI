@@ -1,37 +1,38 @@
 import { Component, effect, inject, untracked } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
+import { FacilityClassifications } from '@data/models/constantsAndTypes';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { Countries } from '@shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from '@shared/form-data/naics-data';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
-import { IdbAccount } from '@data/models/idbModels/account';
-import { AccountSettingsDetailBase } from '../account-settings-detail.base';
+import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 @Component({
-  selector: 'app-account-settings-profile',
-  templateUrl: './account-settings-profile.component.html',
-  styleUrls: ['../account-settings.component.css'],
+  selector: 'app-facility-settings-profile',
+  templateUrl: './facility-settings-profile.component.html',
   host: { style: 'display: block;' },
   standalone: false
 })
-export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
+export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase {
   private readonly settingsForms = inject(SettingsFormService);
 
   readonly countries = Countries;
   readonly firstNaicsList = FirstNaicsList;
+  readonly facilityClassifications = FacilityClassifications;
   form: FormGroup;
 
   constructor() {
     super();
     effect(() => {
-      const account = this.account();
-      if (!account) {
+      const facility = this.facility();
+      if (!facility) {
         return;
       }
       if (this.skipNextWorkspaceRefresh) {
         this.skipNextWorkspaceRefresh = false;
         return;
       }
-      this.buildForm(account);
+      this.buildForm(facility);
     });
     effect(() => {
       this.applyFormAvailability(this.canWrite());
@@ -60,8 +61,14 @@ export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
       this.form?.markAllAsTouched();
       return;
     }
-    await this.saveAccount('Saving profile settings', account =>
-      this.settingsForms.updateAccountFromGeneralInformationForm(this.form, account)
+    await this.saveFacility(
+      'Saving facility profile',
+      facility => {
+        const updated = this.settingsForms.updateFacilityFromGeneralInformationForm(this.form, facility);
+        updated.classification = this.form.controls['classification'].value;
+        return updated;
+      },
+      account => this.settingsForms.updateAccountFromGeneralInformationForm(this.form, account)
     );
   }
 
@@ -93,8 +100,9 @@ export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
     this.scheduleProfileSave();
   }
 
-  private buildForm(account: IdbAccount): void {
-    this.form = this.settingsForms.getGeneralInformationForm(account);
+  private buildForm(facility: IdbFacility): void {
+    this.form = this.settingsForms.getGeneralInformationForm(facility);
+    this.form.addControl('classification', new FormControl(facility.classification || 'Manufacturing'));
     this.applyFormAvailability(untracked(() => this.canWrite()));
   }
 

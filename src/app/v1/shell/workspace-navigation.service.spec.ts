@@ -86,6 +86,14 @@ describe('WorkspaceNavigationService', () => {
       'home',
       'overview'
     ]);
+    expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'settings',
+      'goals'
+    ]);
   });
 
   it('keeps support panel tab changes in shell state instead of navigating', () => {
@@ -112,7 +120,7 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('parses account settings routes and enables settings only for account context', () => {
+  it('parses account and facility settings routes and enables settings in workspace context', () => {
     router.events.next(new NavigationEnd(
       1,
       '/v1/workspace/account/account-a/settings/financial',
@@ -125,15 +133,16 @@ describe('WorkspaceNavigationService', () => {
 
     router.events.next(new NavigationEnd(
       2,
-      '/v1/workspace/facility/facility-a/home/overview',
-      '/v1/workspace/facility/facility-a/home/overview'
+      '/v1/workspace/facility/facility-a/settings/units',
+      '/v1/workspace/facility/facility-a/settings/units'
     ));
 
-    expect(service.activeSection()).toBe('home');
-    expect(service.sections().find(section => section.id === 'settings')?.enabled).toBe(false);
+    expect(service.activeSection()).toBe('settings');
+    expect(service.activeDetail()).toBe('units');
+    expect(service.sections().find(section => section.id === 'settings')?.enabled).toBe(true);
   });
 
-  it('opens account settings from the account section rail only', () => {
+  it('opens settings from the active workspace context', () => {
     service.openSection('settings');
 
     expect(router.navigate).toHaveBeenCalledWith([
@@ -154,7 +163,14 @@ describe('WorkspaceNavigationService', () => {
 
     service.openSection('settings');
 
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'settings',
+      'profile'
+    ]);
   });
 
   it('marks route motion when entering the workspace from welcome', () => {

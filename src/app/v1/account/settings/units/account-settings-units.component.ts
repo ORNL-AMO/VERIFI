@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { EGridService } from '@shared/helper-services/e-grid.service';
-import { AccountSettingsFormService } from '@shared/settings-forms/account-settings-form.service';
+import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { EnergyUnitOptions, MassUnitOptions, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
@@ -14,7 +14,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
   standalone: false
 })
 export class AccountSettingsUnitsComponent extends AccountSettingsDetailBase {
-  private readonly settingsForms = inject(AccountSettingsFormService);
+  private readonly settingsForms = inject(SettingsFormService);
   private readonly eGridService = inject(EGridService);
 
   readonly energyUnitOptions = EnergyUnitOptions;

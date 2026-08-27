@@ -1,0 +1,134 @@
+@if (form) {
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility information">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Profile</p>
+        <h2>Facility information</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Saving
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <label>
+        <span>Facility name</span>
+        <input type="text" formControlName="name" maxlength="42"
+          (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+        @if (form.controls['name'].invalid && (form.controls['name'].dirty || form.controls['name'].touched)) {
+          <em>Name is required.</em>
+        }
+      </label>
+      <label>
+        <span>Facility classification</span>
+        <select formControlName="classification" (change)="saveProfile()">
+          @for (classification of facilityClassifications; track classification) {
+            <option [ngValue]="classification">{{ classification }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Country</span>
+        <select formControlName="country" (change)="saveProfile()">
+          @for (country of countries; track country.code) {
+            <option [ngValue]="country.code">{{ country.name }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Facility area</span>
+        <input type="number" formControlName="size" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+      </label>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <label>
+        <span>Address</span>
+        <input type="text" formControlName="address" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+      </label>
+      <label>
+        <span>Facility color</span>
+        <input type="color" formControlName="color" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+      </label>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--3">
+      <label>
+        <span>City</span>
+        <input type="text" formControlName="city" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+      </label>
+      @if (form.controls['country'].value === 'US') {
+        <label>
+          <span>State</span>
+          <input type="text" formControlName="state" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+        </label>
+        <label>
+          <span>Zip</span>
+          <input type="text" formControlName="zip" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+        </label>
+      }
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--3">
+      <label>
+        <span>NAICS level 1</span>
+        <select formControlName="naics1" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of firstNaicsList; track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 2</span>
+        <select formControlName="naics2" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of secondNaicsOptions(form.controls['naics1'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>NAICS level 3</span>
+        <select formControlName="naics3" (change)="checkNAICS()">
+          <option [ngValue]="null"></option>
+          @for (naics of thirdNaicsOptions(form.controls['naics2'].value); track naics.code) {
+            <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      <span>Notes</span>
+      <textarea formControlName="notes" (input)="scheduleProfileSave()" (blur)="flushProfileSave()"></textarea>
+    </label>
+
+    <div class="v1-settings-grid v1-settings-grid--3">
+      <label>
+        <span>Contact name</span>
+        <input type="text" formControlName="contactName" maxlength="60"
+          (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+      </label>
+      <label>
+        <span>Contact phone</span>
+        <input type="text" formControlName="contactPhone" maxlength="12"
+          (input)="formatPhone($event)" (blur)="flushProfileSave()">
+      </label>
+      <label>
+        <span>Contact email</span>
+        <input type="email" formControlName="contactEmail" maxlength="85"
+          (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
+      </label>
+    </div>
+  </form>
+}

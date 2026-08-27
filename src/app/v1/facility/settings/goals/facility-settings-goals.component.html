@@ -1,0 +1,186 @@
+@let currentAccount = account();
+
+@if (form && currentAccount) {
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility reduction goals">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Goals</p>
+        <h2>Reduction goals</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Saving
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    @if (goalsDiffer()) {
+      <div class="v1-alert v1-alert--info">
+        <span class="fa fa-circle-info" aria-hidden="true"></span>
+        <span>Facility goals differ from {{ currentAccount.name }}.</span>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canWrite()" (click)="openAccountUpdateConfirm()">
+          Update from account settings
+        </button>
+      </div>
+      <label class="v1-settings-choice v1-settings-choice--block">
+        <input type="checkbox" formControlName="isNewFacility" (change)="saveGoals()">
+        <span>This is a new facility</span>
+      </label>
+    }
+
+    <div class="v1-settings-goal">
+      <label class="v1-settings-choice v1-settings-choice--block">
+        <input type="checkbox" formControlName="energyReductionGoal" (change)="saveGoals()">
+        <span>Energy reduction goal</span>
+      </label>
+      @if (form.controls['energyReductionGoal'].value) {
+        <div class="v1-settings-grid v1-settings-grid--4">
+          <label>
+            <span>Reduction goal</span>
+            <div class="input-group">
+              <input class="form-control" type="number" formControlName="energyReductionPercent" min="0" max="100"
+                (input)="scheduleGoalsSave()" (blur)="flushGoalsSave()">
+              <span class="input-group-text">%</span>
+            </div>
+          </label>
+          <label>
+            <span>Baseline year</span>
+            <select formControlName="energyReductionBaselineYear"
+              (change)="changeBaselineYear('energyReductionBaselineYear', 'energyReductionTargetYear')">
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Target year</span>
+            <select formControlName="energyReductionTargetYear" (change)="saveGoals()">
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </label>
+          <fieldset>
+            <legend>Goal type</legend>
+            <label class="v1-settings-choice"><input type="radio" formControlName="energyIsAbsolute" [value]="true" (change)="saveGoals()"><span>Absolute</span></label>
+            <label class="v1-settings-choice"><input type="radio" formControlName="energyIsAbsolute" [value]="false" (change)="saveGoals()"><span>Intensity</span></label>
+          </fieldset>
+        </div>
+      }
+    </div>
+
+    <div class="v1-settings-goal">
+      <label class="v1-settings-choice v1-settings-choice--block">
+        <input type="checkbox" formControlName="waterReductionGoal" (change)="saveGoals()">
+        <span>Water reduction goal</span>
+      </label>
+      @if (form.controls['waterReductionGoal'].value) {
+        <div class="v1-settings-grid v1-settings-grid--4">
+          <label>
+            <span>Reduction goal</span>
+            <div class="input-group">
+              <input class="form-control" type="number" formControlName="waterReductionPercent" min="0" max="100"
+                (input)="scheduleGoalsSave()" (blur)="flushGoalsSave()">
+              <span class="input-group-text">%</span>
+            </div>
+          </label>
+          <label>
+            <span>Baseline year</span>
+            <select formControlName="waterReductionBaselineYear"
+              (change)="changeBaselineYear('waterReductionBaselineYear', 'waterReductionTargetYear')">
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Target year</span>
+            <select formControlName="waterReductionTargetYear" (change)="saveGoals()">
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </label>
+          <fieldset>
+            <legend>Goal type</legend>
+            <label class="v1-settings-choice"><input type="radio" formControlName="waterIsAbsolute" [value]="true" (change)="saveGoals()"><span>Absolute</span></label>
+            <label class="v1-settings-choice"><input type="radio" formControlName="waterIsAbsolute" [value]="false" (change)="saveGoals()"><span>Intensity</span></label>
+          </fieldset>
+        </div>
+      }
+    </div>
+
+    @if (displayGreenhouseGoals()) {
+      <div class="v1-settings-goal">
+        <label class="v1-settings-choice v1-settings-choice--block">
+          <input type="checkbox" formControlName="greenhouseReductionGoal" (change)="saveGoals()">
+          <span>Greenhouse emission/carbon reduction goal</span>
+        </label>
+        @if (form.controls['greenhouseReductionGoal'].value) {
+          <div class="v1-settings-grid v1-settings-grid--4">
+            <label>
+              <span>Reduction goal</span>
+              <div class="input-group">
+                <input class="form-control" type="number" formControlName="greenhouseReductionPercent" min="0" max="100"
+                  (input)="scheduleGoalsSave()" (blur)="flushGoalsSave()">
+                <span class="input-group-text">%</span>
+              </div>
+            </label>
+            <label>
+              <span>Baseline year</span>
+              <select formControlName="greenhouseReductionBaselineYear"
+                (change)="changeBaselineYear('greenhouseReductionBaselineYear', 'greenhouseReductionTargetYear')">
+                @for (year of years; track year) {
+                  <option [ngValue]="year">{{ year }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              <span>Target year</span>
+              <select formControlName="greenhouseReductionTargetYear" (change)="saveGoals()">
+                @for (year of years; track year) {
+                  <option [ngValue]="year">{{ year }}</option>
+                }
+              </select>
+            </label>
+            <fieldset>
+              <legend>Goal type</legend>
+              <label class="v1-settings-choice"><input type="radio" formControlName="greenhouseIsAbsolute" [value]="true" (change)="saveGoals()"><span>Absolute</span></label>
+              <label class="v1-settings-choice"><input type="radio" formControlName="greenhouseIsAbsolute" [value]="false" (change)="saveGoals()"><span>Intensity</span></label>
+            </fieldset>
+          </div>
+        }
+      </div>
+    }
+  </form>
+}
+
+<ng-template #accountUpdateConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel account settings update"
+      (click)="cancelAccountUpdateConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-update-facility-goals-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-update-facility-goals-title">Update this facility with the account settings?</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel account settings update"
+          (click)="cancelAccountUpdateConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        <p>The current facility goals will be replaced with the goals from {{ account()?.name }}.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAccountUpdateConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update facility</button>
+      </footer>
+    </section>
+  </div>
+</ng-template>

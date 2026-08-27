@@ -3,7 +3,7 @@
   min-width: 0;
 }
 
-.v1-account-settings {
+.v1-facility-settings {
   display: grid;
   gap: 1rem;
   padding: clamp(1rem, 3vw, 1.5rem);

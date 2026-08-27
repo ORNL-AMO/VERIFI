@@ -1,0 +1,88 @@
+@let currentFacility = facility();
+
+@if (currentFacility) {
+  <section class="v1-settings-panel v1-settings-panel--facility" aria-label="Facility backup and import">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Backup</p>
+        <h2>Backup and import</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (saveState === 'saving' || isBackingUp) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Working
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    <div class="v1-settings-grid v1-settings-grid--2">
+      <article class="v1-settings-card">
+        <span class="fa fa-file-arrow-down" aria-hidden="true"></span>
+        <h3>Manual facility backup</h3>
+        <p>Download a JSON backup for this facility.</p>
+        <div class="v1-settings-actions">
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="openBackupConfirm()">
+            Backup facility
+            <span class="fa fa-download" aria-hidden="true"></span>
+          </button>
+        </div>
+      </article>
+
+      <article class="v1-settings-card">
+        <span class="fa fa-file-import" aria-hidden="true"></span>
+        <h3>Import facility backup</h3>
+        <p>Import a facility JSON backup into the active account.</p>
+        <div class="v1-settings-actions">
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="openImportPanel()">
+            Import backup
+            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+}
+
+<ng-template #backupConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel facility backup" [disabled]="isBackingUp"
+      (click)="cancelBackupConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-facility-backup-confirm-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-facility-backup-confirm-title">Backup {{ facility()?.name }}</h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel facility backup" [disabled]="isBackingUp"
+          (click)="cancelBackupConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        <p>Download a JSON backup for this facility, including its meters, predictors, analyses, reports, and settings.</p>
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="confirmBackupDownload()">
+          @if (isBackingUp) {
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            Preparing
+          } @else {
+            Download JSON backup
+            <span class="fa fa-download" aria-hidden="true"></span>
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
+</ng-template>
+
+@if (showImportPanel) {
+  <app-import-facility-backup-panel
+    (closed)="closeImportPanel()"
+    (completed)="openImportedFacility($any($event))">
+  </app-import-facility-backup-panel>
+}

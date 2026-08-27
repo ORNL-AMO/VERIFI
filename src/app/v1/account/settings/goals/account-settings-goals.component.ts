@@ -1,7 +1,7 @@
 import { Component, effect, inject, untracked } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { AccountSettingsFormService } from '@shared/settings-forms/account-settings-form.service';
+import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 @Component({
@@ -12,7 +12,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
   standalone: false
 })
 export class AccountSettingsGoalsComponent extends AccountSettingsDetailBase {
-  private readonly settingsForms = inject(AccountSettingsFormService);
+  private readonly settingsForms = inject(SettingsFormService);
 
   readonly years = Array.from({ length: 50 }, (_, index) => 2050 - index);
   readonly assessmentReportVersions = ['AR4', 'AR5', 'AR6'];

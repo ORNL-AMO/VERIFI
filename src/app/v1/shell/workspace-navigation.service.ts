@@ -86,7 +86,7 @@ export class WorkspaceNavigationService {
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
     ...section,
-    enabled: section.id === 'settings' ? this.contextMode() === 'account' : section.enabled
+    enabled: section.id === 'settings' ? this.isWorkspaceRoute() : section.enabled
   })));
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
@@ -170,6 +170,13 @@ export class WorkspaceNavigationService {
       if (accountGuid) {
         void this.router.navigate(this.accountSettingsRoute(accountGuid));
       }
+      return;
+    }
+    if (sectionId === 'settings' && contextMode === 'facility') {
+      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
+      if (facilityGuid) {
+        void this.router.navigate(this.facilitySettingsRoute(facilityGuid));
+      }
     }
   }
 
@@ -183,6 +190,10 @@ export class WorkspaceNavigationService {
 
   facilityRoute(facilityGuid: string): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
+  }
+
+  facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
 
   private resolveAccount(): IdbAccount | undefined {
