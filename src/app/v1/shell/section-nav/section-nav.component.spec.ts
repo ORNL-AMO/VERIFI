@@ -68,6 +68,7 @@ describe('SectionNavComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Account Settings');
     expect(fixture.nativeElement.textContent).toContain('Profile');
+    expect(fixture.nativeElement.textContent).toContain('Portfolio');
     expect(fixture.nativeElement.textContent).toContain('Delete account');
     expect(fixture.nativeElement.textContent).not.toContain('Account Home');
     expect(fixture.nativeElement.textContent).not.toContain('Overview');

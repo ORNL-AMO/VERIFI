@@ -7,6 +7,7 @@ import { AccountSettingsBackupComponent } from './account/settings/backup/accoun
 import { AccountSettingsDeleteComponent } from './account/settings/delete/account-settings-delete.component';
 import { AccountSettingsFinancialComponent } from './account/settings/financial/account-settings-financial.component';
 import { AccountSettingsGoalsComponent } from './account/settings/goals/account-settings-goals.component';
+import { AccountSettingsPortfolioComponent } from './account/settings/portfolio/account-settings-portfolio.component';
 import { AccountSettingsProfileComponent } from './account/settings/profile/account-settings-profile.component';
 import { AccountSettingsStalenessComponent } from './account/settings/staleness/account-settings-staleness.component';
 import { AccountSettingsUnitsComponent } from './account/settings/units/account-settings-units.component';
@@ -63,6 +64,7 @@ export const V1Routes: Routes = [
               { path: 'financial', component: AccountSettingsFinancialComponent },
               { path: 'staleness', component: AccountSettingsStalenessComponent },
               { path: 'backup', component: AccountSettingsBackupComponent },
+              { path: 'portfolio', component: AccountSettingsPortfolioComponent },
               { path: 'delete', component: AccountSettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }
             ]

@@ -25,6 +25,7 @@ const ACCOUNT_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'financial', label: 'Financial', icon: 'fa-calendar-days' },
   { id: 'staleness', label: 'Staleness', icon: 'fa-clock' },
   { id: 'backup', label: 'Backup', icon: 'fa-file-arrow-down' },
+  { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' },
   { id: 'delete', label: 'Delete account', icon: 'fa-trash', tone: 'danger' }
 ];
 
