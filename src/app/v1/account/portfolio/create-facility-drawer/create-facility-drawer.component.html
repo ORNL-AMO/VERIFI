@@ -1,0 +1,175 @@
+<button
+  type="button"
+  class="v1-drawer-backdrop"
+  aria-label="Close create facility panel"
+  [disabled]="isCreating"
+  (click)="close()"></button>
+
+<aside class="v1-drawer v1-drawer--wide" role="dialog" aria-modal="true" aria-labelledby="v1-create-facility-title">
+  <header class="v1-drawer__header">
+    <div>
+      <p class="v1-eyebrow">New facility</p>
+      <h2 id="v1-create-facility-title">Create Facility</h2>
+    </div>
+    <button
+      type="button"
+      class="v1-icon-btn"
+      title="Close create facility panel"
+      aria-label="Close create facility panel"
+      [disabled]="isCreating"
+      (click)="close()">
+      <span class="fa fa-xmark" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <form class="v1-drawer__body v1-settings-panel" [formGroup]="form" aria-label="Create facility" (ngSubmit)="createFacility()">
+    @if (createError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+        <span>{{ createError }}</span>
+      </div>
+    }
+
+    <label>
+      <span>Facility name <b>*</b></span>
+      <input
+        type="text"
+        formControlName="name"
+        maxlength="42"
+        autocomplete="organization"
+        required
+        [attr.aria-invalid]="facilityNameInvalid ? 'true' : null"
+        aria-describedby="v1-facility-name-error"
+        placeholder="Ex: Plant 1">
+      @if (facilityNameInvalid) {
+        <em id="v1-facility-name-error">Name is required.</em>
+      } @else {
+        <small id="v1-facility-name-error">Additional profile details can be filled now or later in facility settings.</small>
+      }
+    </label>
+
+    <button
+      type="button"
+      class="v1-portfolio-disclosure"
+      [attr.aria-expanded]="showProfileDetails"
+      (click)="toggleProfileDetails()">
+      <span class="fa" [class.fa-chevron-down]="!showProfileDetails" [class.fa-chevron-up]="showProfileDetails" aria-hidden="true"></span>
+      Additional profile details
+    </button>
+
+    @if (showProfileDetails) {
+      <div class="v1-settings-grid v1-settings-grid--2">
+        <label>
+          <span>Facility classification</span>
+          <select formControlName="classification">
+            @for (classification of facilityClassifications; track classification) {
+              <option [ngValue]="classification">{{ classification }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Country</span>
+          <select formControlName="country">
+            @for (country of countries; track country.code) {
+              <option [ngValue]="country.code">{{ country.name }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="v1-settings-grid">
+        <label>
+          <span>Address</span>
+          <input type="text" formControlName="address">
+        </label>
+      </div>
+
+      <div class="v1-settings-grid v1-settings-grid--3">
+        <label>
+          <span>City</span>
+          <input type="text" formControlName="city">
+        </label>
+        @if (form.controls['country'].value === 'US') {
+          <label>
+            <span>State</span>
+            <input type="text" formControlName="state">
+          </label>
+          <label>
+            <span>Zip</span>
+            <input type="text" formControlName="zip">
+          </label>
+        }
+      </div>
+
+      <div class="v1-settings-grid v1-settings-grid--3">
+        <label>
+          <span>NAICS level 1</span>
+          <select formControlName="naics1" (change)="checkNAICS()">
+            <option [ngValue]="null"></option>
+            @for (naics of firstNaicsList; track naics.code) {
+              <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>NAICS level 2</span>
+          <select formControlName="naics2" (change)="checkNAICS()">
+            <option [ngValue]="null"></option>
+            @for (naics of secondNaicsOptions(form.controls['naics1'].value); track naics.code) {
+              <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>NAICS level 3</span>
+          <select formControlName="naics3" (change)="checkNAICS()">
+            <option [ngValue]="null"></option>
+            @for (naics of thirdNaicsOptions(form.controls['naics2'].value); track naics.code) {
+              <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="v1-settings-grid v1-settings-grid--2">
+        <label>
+          <span>Facility area</span>
+          <input type="number" formControlName="size">
+        </label>
+        <label>
+          <span>Contact phone</span>
+          <input type="text" formControlName="contactPhone" maxlength="12" (input)="formatPhone($event)">
+        </label>
+      </div>
+
+      <div class="v1-settings-grid v1-settings-grid--2">
+        <label>
+          <span>Contact name</span>
+          <input type="text" formControlName="contactName" maxlength="60">
+        </label>
+        <label>
+          <span>Contact email</span>
+          <input type="email" formControlName="contactEmail" maxlength="85">
+        </label>
+      </div>
+
+      <label>
+        <span>Notes</span>
+        <textarea formControlName="notes"></textarea>
+      </label>
+    }
+
+    <footer class="v1-drawer__footer">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--primary" [disabled]="isCreating || form.invalid">
+        @if (isCreating) {
+          <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+          Creating
+        } @else {
+          Create facility
+          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+        }
+      </button>
+    </footer>
+  </form>
+</aside>

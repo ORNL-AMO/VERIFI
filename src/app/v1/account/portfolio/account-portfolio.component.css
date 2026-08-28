@@ -8,3 +8,23 @@
   gap: 1rem;
   padding: clamp(1rem, 3vw, 1.5rem);
 }
+
+.v1-portfolio-disclosure {
+  align-items: center;
+  align-self: start;
+  background: transparent;
+  border: 0;
+  color: var(--v1-link);
+  display: inline-flex;
+  font: inherit;
+  font-weight: 700;
+  gap: .45rem;
+  justify-content: flex-start;
+  padding: 0;
+  text-align: left;
+}
+
+.v1-portfolio-disclosure:focus-visible {
+  outline: 3px solid var(--v1-focus);
+  outline-offset: 3px;
+}
