@@ -19,6 +19,7 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
 
+  @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
   @ViewChild('portfolioActionModal') private readonly portfolioActionModal!: TemplateRef<unknown>;
 
   readonly facilities = this.workspace.facilities;
@@ -74,10 +75,12 @@ export class AccountSettingsPortfolioComponent extends AccountSettingsDetailBase
     }
     this.saveError = '';
     this.isCreateFacilityDrawerOpen = true;
+    this.modalPortal.show(new TemplatePortal(this.createFacilityDrawer, this.viewContainerRef));
   }
 
   closeCreateFacilityDrawer(): void {
     this.isCreateFacilityDrawerOpen = false;
+    this.modalPortal.hide();
   }
 
   openApplyConfirm(): void {

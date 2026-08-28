@@ -6,13 +6,13 @@ import { getNewIdbFacility } from '@data/models/idbModels/facility';
 import { Countries } from '@shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from '@shared/form-data/naics-data';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { PortfolioFacilityDraft, PortfolioFacilityService } from '../portfolio-facility.service';
+import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
+import { PortfolioFacilityDraft, PortfolioFacilityService } from '../portfolio/portfolio-facility.service';
 
 @Component({
   selector: 'app-create-portfolio-facility-drawer',
   templateUrl: './create-facility-drawer.component.html',
-  styleUrls: ['../account-portfolio.component.css'],
+  styleUrls: ['./create-facility-drawer.component.css'],
   standalone: false
 })
 export class CreateFacilityDrawerComponent {

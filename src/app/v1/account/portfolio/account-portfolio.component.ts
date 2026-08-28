@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -10,6 +11,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { ModalPortalService } from '../../shell/modal-portal.service';
 import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
 import { PortfolioFacilityService } from './portfolio-facility.service';
 
@@ -61,11 +63,15 @@ interface PortfolioTotals {
   styleUrls: ['./account-portfolio.component.css'],
   standalone: false
 })
-export class AccountPortfolioComponent {
+export class AccountPortfolioComponent implements OnDestroy {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly router = inject(Router);
   private readonly portfolioFacilities = inject(PortfolioFacilityService);
+  private readonly modalPortal = inject(ModalPortalService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+
+  @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
 
   readonly navigation = inject(WorkspaceNavigationService);
   readonly account = this.workspace.account;
@@ -80,6 +86,10 @@ export class AccountPortfolioComponent {
   actionMessage = '';
   actionError = '';
   isDeleting = false;
+
+  ngOnDestroy(): void {
+    this.modalPortal.hide();
+  }
 
   readonly facilitySummaries = computed<PortfolioFacilitySummary[]>(() => {
     const meters = this.workspace.meters();
@@ -141,10 +151,12 @@ export class AccountPortfolioComponent {
     }
     this.actionError = '';
     this.isCreateFacilityDrawerOpen.set(true);
+    this.modalPortal.show(new TemplatePortal(this.createFacilityDrawer, this.viewContainerRef));
   }
 
   closeCreateFacilityDrawer(): void {
     this.isCreateFacilityDrawerOpen.set(false);
+    this.modalPortal.hide();
   }
 
   openFacility(facility: IdbFacility): void {

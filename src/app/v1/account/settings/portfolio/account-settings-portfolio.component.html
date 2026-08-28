@@ -81,11 +81,14 @@
       </div>
     }
 
-    @if (isCreateFacilityDrawerOpen) {
-      <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
-    }
   </section>
 }
+
+<ng-template #createFacilityDrawer>
+  @if (isCreateFacilityDrawerOpen) {
+    <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
+  }
+</ng-template>
 
 <ng-template #portfolioActionModal>
   <div class="v1-modal-layer">

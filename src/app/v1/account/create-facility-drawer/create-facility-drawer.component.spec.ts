@@ -5,9 +5,9 @@ import { vi } from 'vitest';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { AccountPortfolioModule } from '../account-portfolio.module';
-import { PortfolioFacilityService } from '../portfolio-facility.service';
+import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
+import { AccountPortfolioModule } from '../portfolio/account-portfolio.module';
+import { PortfolioFacilityService } from '../portfolio/portfolio-facility.service';
 import { CreateFacilityDrawerComponent } from './create-facility-drawer.component';
 
 describe('CreateFacilityDrawerComponent', () => {
@@ -68,6 +68,16 @@ describe('CreateFacilityDrawerComponent', () => {
     expect(portfolioFacilities.createFacility).not.toHaveBeenCalled();
   });
 
+  it('uses the create account drawer structure instead of a settings panel body', () => {
+    const drawerLayer: HTMLElement | null = fixture.nativeElement.querySelector('.v1-drawer-layer');
+    const drawerBody: HTMLElement | null = fixture.nativeElement.querySelector('.v1-drawer__body');
+
+    expect(drawerLayer).toBeTruthy();
+    expect(drawerBody).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('form.v1-form')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('form.v1-settings-panel')).toBeNull();
+  });
+
   it('creates with name-only defaults when optional profile details stay collapsed', async () => {
     fixture.componentInstance.form.controls['name'].setValue('  New Plant  ');
 
@@ -116,5 +126,28 @@ describe('CreateFacilityDrawerComponent', () => {
     expect(fixture.componentInstance.form.controls['name'].value).toBe('Unsaved Plant');
     expect(fixture.nativeElement.textContent).toContain('Facility could not be created');
     expect(closed).not.toHaveBeenCalled();
+  });
+
+  describe('drawer focus lifecycle', () => {
+    function dispatchKey(el: HTMLElement, key: string): void {
+      el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+    }
+
+    it('emits closed when Escape is pressed on the drawer', () => {
+      const aside = fixture.nativeElement.querySelector('aside') as HTMLElement;
+
+      dispatchKey(aside, 'Escape');
+
+      expect(closed).toHaveBeenCalled();
+    });
+
+    it('does not emit closed on Escape while creating', () => {
+      fixture.componentInstance.isCreating = true;
+      const aside = fixture.nativeElement.querySelector('aside') as HTMLElement;
+
+      dispatchKey(aside, 'Escape');
+
+      expect(closed).not.toHaveBeenCalled();
+    });
   });
 });

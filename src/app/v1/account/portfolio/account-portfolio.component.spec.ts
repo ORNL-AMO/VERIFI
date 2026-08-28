@@ -7,6 +7,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
+import { ModalPortalService } from '../../shell/modal-portal.service';
 import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
 import { AccountPortfolioModule } from './account-portfolio.module';
 import { AccountPortfolioComponent } from './account-portfolio.component';
@@ -26,6 +27,7 @@ describe('AccountPortfolioComponent', () => {
   };
   let workspaceService: { selectFacility: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let modalPortal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -51,6 +53,10 @@ describe('AccountPortfolioComponent', () => {
     };
     workspaceService = { selectFacility: vi.fn() };
     router = { navigate: vi.fn(async () => true) };
+    modalPortal = {
+      show: vi.fn(),
+      hide: vi.fn()
+    };
 
     TestBed.configureTestingModule({
       imports: [
@@ -78,6 +84,7 @@ describe('AccountPortfolioComponent', () => {
         { provide: PortfolioFacilityService, useValue: portfolioFacilities },
         { provide: WorkspaceNavigationService, useValue: navigation },
         { provide: AccountWorkspaceService, useValue: workspaceService },
+        { provide: ModalPortalService, useValue: modalPortal },
         { provide: Router, useValue: router }
       ]
     });
@@ -125,7 +132,8 @@ describe('AccountPortfolioComponent', () => {
     buttonByText('Add facility').click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('app-create-portfolio-facility-drawer')).not.toBeNull();
+    expect(modalPortal.show).toHaveBeenCalled();
+    expect(fixture.componentInstance.isCreateFacilityDrawerOpen()).toBe(true);
   });
 
   it('opens the facility workspace and settings routes', () => {

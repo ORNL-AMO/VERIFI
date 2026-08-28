@@ -184,10 +184,6 @@
       }
     }
 
-    @if (isCreateFacilityDrawerOpen()) {
-      <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
-    }
-
     @if (pendingDelete) {
       <div class="v1-modal-layer">
         <button
@@ -223,3 +219,9 @@
     }
   }
 </section>
+
+<ng-template #createFacilityDrawer>
+  @if (isCreateFacilityDrawerOpen()) {
+    <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
+  }
+</ng-template>
