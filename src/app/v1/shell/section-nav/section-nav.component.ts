@@ -35,6 +35,8 @@ const FACILITY_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
 })
 export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly isSingleSiteWorkspace = this.navigation.isSingleSiteWorkspace;
+  readonly hasSingleSiteRecovery = this.navigation.hasSingleSiteRecovery;
   readonly settingsItems = computed(() => {
     if (this.navigation.contextMode() !== 'facility') {
       return ACCOUNT_SETTINGS_ITEMS;
@@ -45,5 +47,26 @@ export class SectionNavComponent {
       { id: 'delete', label: deleteLabel, icon: 'fa-trash', tone: 'danger' as const }
     ];
   });
-  readonly settingsTitle = computed(() => this.navigation.contextMode() === 'facility' ? 'Facility Settings' : 'Account Settings');
+  readonly settingsTitle = computed(() => {
+    if (this.isSingleSiteWorkspace() && this.navigation.contextMode() === 'facility') {
+      return 'Site Setup';
+    }
+    return this.navigation.contextMode() === 'facility' ? 'Facility Settings' : 'Account Settings';
+  });
+  readonly homeTitle = computed(() => {
+    if (this.isSingleSiteWorkspace() && this.navigation.contextMode() === 'facility') {
+      return 'Site Home';
+    }
+    return this.navigation.contextMode() === 'facility' ? 'Facility Home' : 'Account Home';
+  });
+  readonly recoveryTitle = computed(() =>
+    this.navigation.singleSiteWorkspaceState() === 'missing-facility'
+      ? 'Single-site setup needs a facility'
+      : 'Single-site setup needs one facility'
+  );
+  readonly recoveryMessage = computed(() =>
+    this.navigation.singleSiteWorkspaceState() === 'missing-facility'
+      ? 'This account is marked as single-site, but no facility is available yet.'
+      : 'This account is marked as single-site, but it has more than one facility.'
+  );
 }

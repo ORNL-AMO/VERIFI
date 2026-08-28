@@ -1,7 +1,8 @@
 @let currentAccount = account();
+@let isSingleSite = isSingleSiteSetup();
 
 @if (form && currentAccount) {
-  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility units">
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" [attr.aria-label]="isSingleSite ? 'Site units' : 'Facility units'">
     <div class="v1-settings-panel__heading">
       <div>
         <p>Units</p>
@@ -24,7 +25,7 @@
     @if (unitsDiffer()) {
       <div class="v1-alert v1-alert--info">
         <span class="fa fa-circle-info" aria-hidden="true"></span>
-        <span>This facility has unit settings that differ from {{ currentAccount.name }}.</span>
+        <span>This {{ isSingleSite ? 'site' : 'facility' }} has unit settings that differ from {{ currentAccount.name }}.</span>
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canWrite()" (click)="openAccountUpdateConfirm()">
           Update from account settings
         </button>
@@ -109,18 +110,18 @@
       (click)="cancelAccountUpdateConfirm()"></button>
     <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-update-facility-units-title">
       <header class="v1-modal__header">
-        <h2 id="v1-update-facility-units-title">Update this facility with the account settings?</h2>
+        <h2 id="v1-update-facility-units-title">Update this {{ isSingleSite ? 'site' : 'facility' }} with the account settings?</h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel account settings update"
           (click)="cancelAccountUpdateConfirm()">
           <span class="fa fa-xmark" aria-hidden="true"></span>
         </button>
       </header>
       <div class="v1-modal__body">
-        <p>The current facility unit settings will be replaced with the unit settings from {{ account()?.name }}.</p>
+        <p>The current {{ isSingleSite ? 'site' : 'facility' }} unit settings will be replaced with the unit settings from {{ account()?.name }}.</p>
       </div>
       <footer class="v1-modal__footer">
         <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAccountUpdateConfirm()">Cancel</button>
-        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update facility</button>
+        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update {{ isSingleSite ? 'site' : 'facility' }}</button>
       </footer>
     </section>
   </div>

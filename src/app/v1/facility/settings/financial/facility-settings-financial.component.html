@@ -1,7 +1,8 @@
 @let currentAccount = account();
+@let isSingleSite = isSingleSiteSetup();
 
 @if (form && currentAccount) {
-  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility financial reporting">
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" [attr.aria-label]="isSingleSite ? 'Site financial reporting' : 'Facility financial reporting'">
     <div class="v1-settings-panel__heading">
       <div>
         <p>Reporting</p>
@@ -24,7 +25,7 @@
     @if (financialDiffer()) {
       <div class="v1-alert v1-alert--info">
         <span class="fa fa-circle-info" aria-hidden="true"></span>
-        <span>Facility fiscal-year settings differ from {{ currentAccount.name }}.</span>
+        <span>{{ isSingleSite ? 'Site' : 'Facility' }} fiscal-year settings differ from {{ currentAccount.name }}.</span>
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canWrite()" (click)="openAccountUpdateConfirm()">
           Update from account settings
         </button>
@@ -68,18 +69,18 @@
       (click)="cancelAccountUpdateConfirm()"></button>
     <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-update-facility-financial-title">
       <header class="v1-modal__header">
-        <h2 id="v1-update-facility-financial-title">Update this facility with the account settings?</h2>
+        <h2 id="v1-update-facility-financial-title">Update this {{ isSingleSite ? 'site' : 'facility' }} with the account settings?</h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel account settings update"
           (click)="cancelAccountUpdateConfirm()">
           <span class="fa fa-xmark" aria-hidden="true"></span>
         </button>
       </header>
       <div class="v1-modal__body">
-        <p>The current facility financial reporting settings will be replaced with the reporting settings from {{ account()?.name }}.</p>
+        <p>The current {{ isSingleSite ? 'site' : 'facility' }} financial reporting settings will be replaced with the reporting settings from {{ account()?.name }}.</p>
       </div>
       <footer class="v1-modal__footer">
         <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAccountUpdateConfirm()">Cancel</button>
-        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update facility</button>
+        <button type="button" class="v1-btn v1-btn--primary" (click)="confirmAccountSettingsUpdate()">Update {{ isSingleSite ? 'site' : 'facility' }}</button>
       </footer>
     </section>
   </div>

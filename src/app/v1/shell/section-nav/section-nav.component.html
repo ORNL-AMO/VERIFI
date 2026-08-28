@@ -4,28 +4,41 @@
   @let selectedFacility = navigation.facility();
   @let account = navigation.account();
 
-  <div class="v1-nav__context" role="group" aria-label="Switch workspace context">
-    <button
-      type="button"
-      [class.active]="contextMode === 'account'"
-      (click)="navigation.setContext('account')">
-      <span class="fa fa-building" aria-hidden="true"></span>
-      Account
-    </button>
-    <button
-      type="button"
-      [class.active]="contextMode === 'facility'"
-      [disabled]="facilities.length === 0"
-      (click)="navigation.setContext('facility')">
-      <span class="fa fa-industry" aria-hidden="true"></span>
-      Facility
-    </button>
-  </div>
+  @if (!isSingleSiteWorkspace()) {
+    <div class="v1-nav__context" role="group" aria-label="Switch workspace context">
+      <button
+        type="button"
+        [class.active]="contextMode === 'account'"
+        (click)="navigation.setContext('account')">
+        <span class="fa fa-building" aria-hidden="true"></span>
+        Account
+      </button>
+      <button
+        type="button"
+        [class.active]="contextMode === 'facility'"
+        [disabled]="facilities.length === 0"
+        (click)="navigation.setContext('facility')">
+        <span class="fa fa-industry" aria-hidden="true"></span>
+        Facility
+      </button>
+    </div>
+  }
+
+  @if (hasSingleSiteRecovery() && account) {
+    <section class="v1-nav__recovery" aria-labelledby="v1-single-site-recovery-title">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <div>
+        <strong id="v1-single-site-recovery-title">{{ recoveryTitle() }}</strong>
+        <p>{{ recoveryMessage() }}</p>
+        <a [routerLink]="navigation.legacyFacilityManagementRoute(account.guid)">Open facility management</a>
+      </div>
+    </section>
+  }
 
   @switch (navigation.activeSection()) {
     @case ('home') {
       <section class="v1-nav__group" aria-labelledby="v1-home-nav-title">
-        <span id="v1-home-nav-title" class="v1-nav__label">{{ contextMode === 'account' ? 'Account Home' : 'Facility Home' }}</span>
+        <span id="v1-home-nav-title" class="v1-nav__label">{{ homeTitle() }}</span>
         <a
           class="active"
           [routerLink]="contextMode === 'facility' && selectedFacility

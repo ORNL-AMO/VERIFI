@@ -3,8 +3,8 @@
 <section class="v1-facility-settings" aria-labelledby="v1-facility-settings-title">
   <header class="v1-section-header">
     <div>
-      <p class="v1-eyebrow">Facility settings</p>
-      <h1 id="v1-facility-settings-title">{{ currentFacility?.name || 'Facility settings' }}</h1>
+      <p class="v1-eyebrow">{{ isSingleSiteSetup() ? 'Site setup' : 'Facility settings' }}</p>
+      <h1 id="v1-facility-settings-title">{{ currentFacility?.name || (isSingleSiteSetup() ? 'Site setup' : 'Facility settings') }}</h1>
     </div>
   </header>
 

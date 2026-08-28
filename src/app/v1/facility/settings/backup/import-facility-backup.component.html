@@ -1,7 +1,9 @@
+@let isSingleSite = isSingleSiteSetup();
+
 <button
   type="button"
   class="v1-drawer-backdrop"
-  aria-label="Close facility backup panel"
+  [attr.aria-label]="isSingleSite ? 'Close site backup panel' : 'Close facility backup panel'"
   [disabled]="isImporting"
   (click)="close()"></button>
 
@@ -9,14 +11,14 @@
   appDrawerFocusTrap (escapePressed)="close()">
   <header class="v1-drawer__header">
     <div>
-      <p class="v1-eyebrow">Facility backup</p>
-      <h2 id="v1-import-facility-backup-title">Upload Facility Backup</h2>
+      <p class="v1-eyebrow">{{ isSingleSite ? 'Site backup' : 'Facility backup' }}</p>
+      <h2 id="v1-import-facility-backup-title">Upload {{ isSingleSite ? 'Site' : 'Facility' }} Backup</h2>
     </div>
     <button
       type="button"
       class="v1-icon-btn"
-      title="Close facility backup panel"
-      aria-label="Close facility backup panel"
+      [title]="isSingleSite ? 'Close site backup panel' : 'Close facility backup panel'"
+      [attr.aria-label]="isSingleSite ? 'Close site backup panel' : 'Close facility backup panel'"
       [disabled]="isImporting"
       (click)="close()">
       <span class="fa fa-xmark" aria-hidden="true"></span>
@@ -25,13 +27,13 @@
 
   <div class="v1-drawer__body">
     <p class="v1-drawer__intro" id="v1-import-facility-backup-description">
-      Import a VERIFI facility backup exported as a JSON file.
+      Import a VERIFI {{ isSingleSite ? 'site' : 'facility' }} backup exported as a JSON file.
     </p>
 
     <label class="v1-file-picker" for="v1-facility-backup-file">
       <span class="fa fa-file-arrow-up" aria-hidden="true"></span>
-      <strong>{{ selectedFileName || 'Choose facility backup file' }}</strong>
-      <small>JSON facility backup exported from VERIFI</small>
+      <strong>{{ selectedFileName || (isSingleSite ? 'Choose site backup file' : 'Choose facility backup file') }}</strong>
+      <small>JSON {{ isSingleSite ? 'site' : 'facility' }} backup exported from VERIFI</small>
       <input
         id="v1-facility-backup-file"
         type="file"
@@ -49,7 +51,7 @@
     }
 
     @if (backupFile && !backupFileError) {
-      <article class="v1-import-summary" aria-label="Selected facility backup">
+      <article class="v1-import-summary" [attr.aria-label]="isSingleSite ? 'Selected site backup' : 'Selected facility backup'">
         <span class="fa fa-industry" aria-hidden="true"></span>
         <div>
           <strong>{{ backupName }}</strong>
@@ -62,19 +64,19 @@
         <label class="v1-settings-choice">
           <input type="radio" name="facilityImportMode" [checked]="importMode === 'replace'"
             [disabled]="isImporting" (change)="importMode = 'replace'">
-          <span>Replace {{ facility()?.name || 'the selected facility' }}</span>
+          <span>Replace {{ facility()?.name || (isSingleSite ? 'the selected site' : 'the selected facility') }}</span>
         </label>
         <label class="v1-settings-choice">
           <input type="radio" name="facilityImportMode" [checked]="importMode === 'new'"
             [disabled]="isImporting" (change)="importMode = 'new'">
-          <span>Create as a new facility</span>
+          <span>Create as a new {{ isSingleSite ? 'site' : 'facility' }}</span>
         </label>
       </fieldset>
 
       @if (importMode === 'replace') {
         <div class="v1-alert v1-alert--warning">
           <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
-          <span>Replacing a facility removes its current meters, predictors, analyses, reports, and related data before importing the backup.</span>
+          <span>Replacing a {{ isSingleSite ? 'site' : 'facility' }} removes its current meters, predictors, analyses, reports, and related data before importing the backup.</span>
         </div>
       }
     }

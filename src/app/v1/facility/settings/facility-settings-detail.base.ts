@@ -1,4 +1,4 @@
-import { Directive, inject } from '@angular/core';
+import { Directive, computed, inject } from '@angular/core';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
@@ -38,6 +38,9 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
   readonly facility = this.workspace.selectedFacility;
   readonly facilities = this.workspace.facilities;
   readonly canWrite = this.workspace.canWrite;
+  readonly isSingleSiteSetup = computed(() =>
+    this.account()?.isSingleFacilityCompany === true && this.facilities().length === 1
+  );
 
   protected async saveFacility(
     label: string,
