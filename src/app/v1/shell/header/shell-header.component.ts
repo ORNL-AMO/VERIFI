@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import {
   AppearanceService,
   BackgroundPattern,
@@ -57,12 +57,38 @@ export class ShellHeaderComponent {
   ];
 
   isSettingsOpen = false;
+  accountMenuOpen = false;
 
-  closeSettings(): void {
-    this.isSettingsOpen = false;
+  get hasBackdrop(): boolean {
+    return this.isSettingsOpen || this.accountMenuOpen;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeOnEscape(): void {
+    this.closeAll();
   }
 
   toggleSettings(): void {
     this.isSettingsOpen = !this.isSettingsOpen;
+    if (this.isSettingsOpen) {
+      this.accountMenuOpen = false;
+    }
+  }
+
+  toggleAccountMenu(): void {
+    this.accountMenuOpen = !this.accountMenuOpen;
+    if (this.accountMenuOpen) {
+      this.isSettingsOpen = false;
+    }
+  }
+
+  selectAccount(accountGuid: string): void {
+    this.closeAll();
+    void this.navigation.openWorkspace(accountGuid);
+  }
+
+  closeAll(): void {
+    this.isSettingsOpen = false;
+    this.accountMenuOpen = false;
   }
 }
