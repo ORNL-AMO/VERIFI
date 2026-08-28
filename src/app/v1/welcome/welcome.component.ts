@@ -3,6 +3,8 @@ import { RouterModule } from '@angular/router';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { WorkspaceNavigationService } from '../shell/workspace-navigation.service';
+import { NotificationService } from '../shared/notifications/notification.service';
+import { NotificationsModule } from '../shared/notifications/notifications.module';
 import { CreateAccountComponent } from './create-account/create-account.component';
 import { EmailListSignupComponent } from './email-list-signup/email-list-signup.component';
 import { ExampleAccountComponent } from './example-account/example-account.component';
@@ -18,12 +20,14 @@ import { CreateAccountResult, WELCOME_ACTIONS } from './welcome.models';
     CreateAccountComponent,
     ImportAccountBackupComponent,
     ExampleAccountComponent,
-    EmailListSignupComponent
+    EmailListSignupComponent,
+    NotificationsModule
   ],
   standalone: true
 })
 export class WelcomeComponent {
   private readonly lifecycle = inject(ApplicationLifecycleService);
+  private readonly notifications = inject(NotificationService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly actions = signal(WELCOME_ACTIONS);
   readonly loadingAccountGuid = signal<string | undefined>(undefined);
@@ -66,6 +70,7 @@ export class WelcomeComponent {
   async openCreatedOrImportedAccount(result: IdbAccount | CreateAccountResult): Promise<void> {
     this.closePanel();
     if (isCreateAccountResult(result)) {
+      this.notifications.success('Account created', { message: result.account.name });
       if (result.path === 'singleFacility' && result.facility) {
         await this.navigation.openFacility(result.facility.guid);
         return;
@@ -73,6 +78,7 @@ export class WelcomeComponent {
       await this.openAccount(result.account);
       return;
     }
+    this.notifications.success('Account imported', { message: result.name });
     await this.openAccount(result);
   }
 

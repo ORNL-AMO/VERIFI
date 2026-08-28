@@ -1,0 +1,36 @@
+@let visibleNotifications = notifications();
+
+@if (visibleNotifications.length > 0) {
+  <aside class="v1-toast-stack" aria-label="Notifications">
+    @for (notification of visibleNotifications; track notification.id) {
+      @let metadata = toneMetadata[notification.tone];
+
+      <article
+        class="v1-toast"
+        [class.v1-toast--success]="notification.tone === 'success'"
+        [class.v1-toast--danger]="notification.tone === 'danger'"
+        [class.v1-toast--warning]="notification.tone === 'warning'"
+        [class.v1-toast--info]="notification.tone === 'info'"
+        [attr.role]="metadata.role"
+        [attr.aria-live]="metadata.live">
+        <span class="v1-toast__icon fa {{ metadata.iconClass }}" aria-hidden="true"></span>
+        <div class="v1-toast__content">
+          <strong>{{ notification.title }}</strong>
+          @if (notification.message) {
+            <p>{{ notification.message }}</p>
+          }
+        </div>
+        @if (notification.dismissible) {
+          <button
+            type="button"
+            class="v1-toast__close"
+            title="Dismiss notification"
+            [attr.aria-label]="'Dismiss notification: ' + notification.title"
+            (click)="dismiss(notification.id)">
+            <span class="fa fa-xmark" aria-hidden="true"></span>
+          </button>
+        }
+      </article>
+    }
+  </aside>
+}

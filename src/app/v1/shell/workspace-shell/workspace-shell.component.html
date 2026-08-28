@@ -18,6 +18,10 @@
     <router-outlet></router-outlet>
   </section>
 
+  <div class="v1-workspace__notifications">
+    <app-notification-toast-host></app-notification-toast-host>
+  </div>
+
   @if (isSupportPanelOpen) {
     <app-support-panel></app-support-panel>
   }

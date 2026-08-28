@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { CommandNotificationBridgeService } from '../../shared/notifications/command-notification-bridge.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 @Component({
@@ -8,5 +9,6 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
   standalone: false
 })
 export class WorkspaceShellComponent {
+  private readonly commandNotificationBridge = inject(CommandNotificationBridgeService);
   readonly navigation = inject(WorkspaceNavigationService);
 }

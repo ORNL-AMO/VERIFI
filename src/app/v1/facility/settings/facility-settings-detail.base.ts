@@ -63,6 +63,7 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
           changeKind: 'update',
           entityGuid: updatedAccount?.guid ?? updatedFacility.guid,
           label,
+          notification: { suppressSuccessToast: true },
           publication: {
             mode: 'patch',
             buildPatch: value => ({

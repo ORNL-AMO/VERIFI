@@ -1,0 +1,108 @@
+:host {
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+
+.v1-toast-stack {
+  display: grid;
+  gap: .65rem;
+}
+
+.v1-toast {
+  --v1-toast-accent: var(--v1-info);
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: .7rem;
+  align-items: start;
+  min-height: 4rem;
+  padding: .85rem;
+  border: 1px solid color-mix(in srgb, var(--v1-toast-accent) 42%, var(--v1-border));
+  border-left-width: 4px;
+  border-radius: var(--v1-radius);
+  background: color-mix(in srgb, var(--v1-toast-accent) 7%, var(--v1-surface));
+  color: var(--v1-text);
+  box-shadow: 0 .7rem 2rem var(--v1-shadow);
+  pointer-events: auto;
+}
+
+.v1-toast--success {
+  --v1-toast-accent: var(--v1-success);
+}
+
+.v1-toast--danger {
+  --v1-toast-accent: var(--v1-danger);
+}
+
+.v1-toast--warning {
+  --v1-toast-accent: var(--v1-warning);
+}
+
+.v1-toast--info {
+  --v1-toast-accent: var(--v1-info);
+}
+
+.v1-toast__icon {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  color: var(--v1-toast-accent);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.v1-toast__content {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.v1-toast__content strong,
+.v1-toast__content p {
+  margin: 0;
+}
+
+.v1-toast__content strong {
+  color: var(--v1-text);
+  font-size: .92rem;
+  line-height: 1.2;
+}
+
+.v1-toast__content p {
+  color: var(--v1-muted);
+  font-size: .82rem;
+  line-height: 1.35;
+}
+
+.v1-toast__close {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--v1-radius-sm);
+  background: transparent;
+  color: var(--v1-muted);
+  cursor: pointer;
+}
+
+.v1-toast__close:hover,
+.v1-toast__close:focus-visible {
+  border-color: color-mix(in srgb, var(--v1-toast-accent) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-toast-accent) 10%, var(--v1-surface));
+  color: var(--v1-toast-accent);
+}
+
+:host-context(.v1-contrast-strong) .v1-toast {
+  border-width: 2px;
+  border-left-width: 5px;
+}
+
+@media (max-width: 640px) {
+  :host {
+    width: 100%;
+  }
+}

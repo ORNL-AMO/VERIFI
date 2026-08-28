@@ -78,6 +78,16 @@
   background: transparent;
 }
 
+.v1-workspace__notifications {
+  grid-area: main;
+  align-self: end;
+  justify-self: end;
+  z-index: 4;
+  width: min(24rem, calc(100% - 1.5rem));
+  margin: clamp(.75rem, 2vw, 1.25rem);
+  pointer-events: none;
+}
+
 .v1-workspace__main > router-outlet + * {
   display: block;
 }
@@ -160,6 +170,15 @@
     display: flex;
     flex-direction: column;
     min-height: 100%;
+  }
+
+  .v1-workspace__notifications {
+    position: absolute;
+    right: .75rem;
+    bottom: .75rem;
+    left: .75rem;
+    width: auto;
+    margin: 0;
   }
 }
 

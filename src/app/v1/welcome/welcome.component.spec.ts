@@ -7,6 +7,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-list-subscribe.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { WorkspaceNavigationService } from '../shell/workspace-navigation.service';
+import { NotificationService } from '../shared/notifications/notification.service';
 import { WelcomeComponent } from './welcome.component';
 
 describe('WelcomeComponent', () => {
@@ -46,6 +47,10 @@ describe('WelcomeComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    TestBed.inject(NotificationService).dismissAll();
+  });
+
   it('opens the selected welcome panel from its graphic tile', () => {
     const importTile: HTMLButtonElement | undefined = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
       .find(button => button.textContent?.includes('Import'));
@@ -64,6 +69,18 @@ describe('WelcomeComponent', () => {
 
     expect(navigation.openFacility).toHaveBeenCalledWith('facility-new');
     expect(navigation.openWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('mounts the notification host and shows account creation feedback', async () => {
+    await fixture.componentInstance.openCreatedOrImportedAccount({
+      path: 'portfolio',
+      account: { guid: 'account-new', name: 'New Portfolio' } as any
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-notification-toast-host')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-toast--success')?.textContent).toContain('Account created');
+    expect(fixture.nativeElement.querySelector('.v1-toast--success')?.textContent).toContain('New Portfolio');
   });
 
   it('opens the workspace default after portfolio creation or existing import paths', async () => {

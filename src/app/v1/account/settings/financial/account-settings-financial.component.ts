@@ -58,6 +58,7 @@ export class AccountSettingsFinancialComponent extends AccountSettingsDetailBase
           changeKind: 'update',
           entityGuid: activeAccountGuid,
           label: 'Saving financial reporting settings',
+          notification: { suppressSuccessToast: true },
           publication: {
             mode: 'patch',
             buildPatch: value => ({

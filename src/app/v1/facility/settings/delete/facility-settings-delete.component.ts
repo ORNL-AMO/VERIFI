@@ -3,6 +3,7 @@ import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject }
 import { Router } from '@angular/router';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { FACILITY_DELETION_MESSAGES } from '@data/indexedDB/facility-deletion.config';
+import { NotificationService } from '../../../shared/notifications/notification.service';
 import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
 import { ModalPortalService } from '../../../shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
@@ -15,6 +16,7 @@ import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 })
 export class FacilitySettingsDeleteComponent extends FacilitySettingsDetailBase {
   private readonly loadingService = inject(LoadingService);
+  private readonly notifications = inject(NotificationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly navigation = inject(WorkspaceNavigationService);
@@ -73,6 +75,7 @@ export class FacilitySettingsDeleteComponent extends FacilitySettingsDetailBase 
           changeKind: 'delete',
           entityGuid: account.guid,
           label: 'Deleting account',
+          notification: { suppressSuccessToast: true },
           publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
         },
         () => this.accountHandler.update({ ...account, deleteAccount: true }, account.guid)
@@ -84,6 +87,7 @@ export class FacilitySettingsDeleteComponent extends FacilitySettingsDetailBase 
     if (this.saveState === 'error') {
       return;
     }
+    this.notifications.success('Account deleted', { message: account.name });
     const nextAccount = this.account();
     if (nextAccount?.guid) {
       await this.navigation.openAccount(nextAccount.guid);
@@ -111,7 +115,13 @@ export class FacilitySettingsDeleteComponent extends FacilitySettingsDetailBase 
 
     await this.runSave('Deleting facility', async () => {
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'delete', entityGuid: facility.guid, label: 'Deleting facility' },
+        {
+          entityKind: 'facility',
+          changeKind: 'delete',
+          entityGuid: facility.guid,
+          label: 'Deleting facility',
+          notification: { entityName: facility.name }
+        },
         () => this.facilityHandler.delete(facility, account.guid, phase => {
           this.loadingService.setCurrentLoadingIndex(phase.index);
         })

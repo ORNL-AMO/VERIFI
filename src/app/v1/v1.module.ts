@@ -10,6 +10,7 @@ import { FacilitySettingsModule } from './facility/settings/facility-settings.mo
 import { ShellHeaderComponent } from './shell/header/shell-header.component';
 import { PrimaryRailComponent } from './shell/primary-rail/primary-rail.component';
 import { SectionNavComponent } from './shell/section-nav/section-nav.component';
+import { NotificationsModule } from './shared/notifications/notifications.module';
 import { ShellComponent } from './shell/shell.component';
 import { SupportPanelComponent } from './shell/support-panel/support-panel.component';
 import { WorkspaceShellComponent } from './shell/workspace-shell/workspace-shell.component';
@@ -29,6 +30,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
   ],
   imports: [
     CommonModule,
+    NotificationsModule,
     PortalModule,
     AccountSettingsModule,
     FacilitySettingsModule,

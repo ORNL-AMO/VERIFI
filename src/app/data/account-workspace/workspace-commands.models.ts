@@ -31,6 +31,17 @@ export type WorkspaceEntityKind =
 export type WorkspaceChangeKind = 'add' | 'update' | 'delete' | 'bulk';
 
 // ---------------------------------------------------------------------------
+// Optional UI notification hints
+// ---------------------------------------------------------------------------
+
+export interface WorkspaceCommandNotificationOptions {
+  readonly suppressSuccessToast?: boolean;
+  readonly successTitle?: string;
+  readonly successMessage?: string;
+  readonly entityName?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Committed-change event
 // ---------------------------------------------------------------------------
 
@@ -40,6 +51,7 @@ export interface WorkspaceCommittedChange {
   /** GUID of the affected entity, or the account GUID for bulk/account-level changes. */
   readonly entityGuid?: string;
   readonly accountGuid: string;
+  readonly notification?: WorkspaceCommandNotificationOptions;
 }
 
 // ---------------------------------------------------------------------------

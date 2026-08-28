@@ -1,6 +1,10 @@
 @let recent = recentAccount();
 
 <main class="v1-welcome" aria-labelledby="v1-welcome-title">
+  <div class="v1-welcome__notifications">
+    <app-notification-toast-host></app-notification-toast-host>
+  </div>
+
   <section class="v1-welcome__hero v1-welcome__motion-card">
     <div class="v1-welcome__copy">
       <p class="v1-eyebrow">Utility tracking and analysis</p>

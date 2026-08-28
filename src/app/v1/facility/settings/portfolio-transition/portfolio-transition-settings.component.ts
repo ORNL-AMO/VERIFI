@@ -103,6 +103,10 @@ export class PortfolioTransitionSettingsComponent extends FacilitySettingsDetail
           changeKind: 'update',
           entityGuid: account.guid,
           label: 'Converting to portfolio',
+          notification: {
+            successTitle: 'Portfolio mode enabled',
+            successMessage: addFacility ? `${newFacilityName} was added to the account.` : undefined
+          },
           publication: { mode: 'reload' }
         },
         async (): Promise<PortfolioTransitionResult> => {
