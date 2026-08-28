@@ -95,6 +95,32 @@ describe('WorkspaceCommandBoundary', () => {
     });
   });
 
+  it('passes notification hints through committed-change events', async () => {
+    const { boundary, store, workspaceService } = createBoundary();
+    publishReady(store);
+    workspaceService.reloadActiveWorkspace.mockResolvedValue('published');
+
+    const changes: unknown[] = [];
+    boundary.committedChange$.subscribe(c => changes.push(c));
+
+    await boundary.execute({
+      ...makeOptions('facility', 'delete', 'facility-a'),
+      notification: {
+        entityName: 'North Plant',
+        successMessage: 'Meters and related data were removed.'
+      }
+    }, () => Promise.resolve(null));
+
+    expect(changes[0]).toMatchObject({
+      entityKind: 'facility',
+      changeKind: 'delete',
+      notification: {
+        entityName: 'North Plant',
+        successMessage: 'Meters and related data were removed.'
+      }
+    });
+  });
+
   it('publishes a committed patch without reloading the workspace', async () => {
     const { boundary, store, workspaceService } = createBoundary();
     publishReady(store);

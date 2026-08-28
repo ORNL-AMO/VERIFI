@@ -3,6 +3,8 @@ import { NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
+import { CommandNotificationBridgeService } from '../../shared/notifications/command-notification-bridge.service';
+import { NotificationsModule } from '../../shared/notifications/notifications.module';
 import { PrimaryRailComponent } from '../primary-rail/primary-rail.component';
 import { SectionNavComponent } from '../section-nav/section-nav.component';
 import { SupportPanelComponent } from '../support-panel/support-panel.component';
@@ -10,7 +12,7 @@ import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } fr
 import { WorkspaceShellComponent } from './workspace-shell.component';
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forRoot([])],
+  imports: [CommonModule, NotificationsModule, RouterModule.forRoot([])],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,
@@ -62,6 +64,7 @@ describe('WorkspaceShellComponent', () => {
     TestBed.configureTestingModule({
       imports: [WorkspaceShellTestModule],
       providers: [
+        { provide: CommandNotificationBridgeService, useValue: {} },
         { provide: WorkspaceNavigationService, useValue: navigation }
       ]
     });
@@ -73,6 +76,12 @@ describe('WorkspaceShellComponent', () => {
     expect(fixture.nativeElement.querySelector('app-primary-rail')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-section-nav')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-support-panel')).not.toBeNull();
+  });
+
+  it('mounts notification toasts in the main workspace grid area', () => {
+    const region = fixture.nativeElement.querySelector('.v1-workspace__notifications');
+
+    expect(region.querySelector('app-notification-toast-host')).not.toBeNull();
   });
 
   it('applies motion classes from the current v1 route transition', () => {

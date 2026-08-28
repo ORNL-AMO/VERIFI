@@ -136,7 +136,13 @@ export class CreateAccountComponent {
       name: account.name
     };
     const result = await this.commandBoundary.execute(
-      { entityKind: 'facility', changeKind: 'add', entityGuid: facility.guid, label: 'Adding starter site' },
+      {
+        entityKind: 'facility',
+        changeKind: 'add',
+        entityGuid: facility.guid,
+        label: 'Adding starter site',
+        notification: { suppressSuccessToast: true }
+      },
       () => this.facilityHandler.add(
         facility,
         account.guid,

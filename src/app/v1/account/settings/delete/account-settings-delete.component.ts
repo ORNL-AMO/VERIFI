@@ -1,5 +1,6 @@
 import { Component, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { NotificationService } from '../../../shared/notifications/notification.service';
 import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
 import { ModalPortalService } from '../../../shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
@@ -12,6 +13,7 @@ import { AccountSettingsDetailBase } from '../account-settings-detail.base';
   standalone: false
 })
 export class AccountSettingsDeleteComponent extends AccountSettingsDetailBase {
+  private readonly notifications = inject(NotificationService);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -59,6 +61,7 @@ export class AccountSettingsDeleteComponent extends AccountSettingsDetailBase {
           changeKind: 'delete',
           entityGuid: account.guid,
           label: 'Deleting account',
+          notification: { suppressSuccessToast: true },
           publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
         },
         () => this.accountHandler.update({ ...account, deleteAccount: true }, account.guid)
@@ -71,6 +74,7 @@ export class AccountSettingsDeleteComponent extends AccountSettingsDetailBase {
     if (this.saveState === 'error') {
       return;
     }
+    this.notifications.success('Account deleted', { message: account.name });
     if (nextAccount?.guid) {
       await this.navigation.openAccount(nextAccount.guid);
       return;

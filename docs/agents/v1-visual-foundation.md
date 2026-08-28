@@ -66,6 +66,18 @@ Button color should communicate the action's consequence, not decorative emphasi
 
 Keep one filled orange button per section, card group, or dialog footer. Icon-only buttons should stay neutral unless they are destructive or actively selected. Disabled buttons should not rely on color to explain state; pair the disabled state with labels, helper text, validation, or status copy where the reason is not obvious.
 
+## Toast notifications
+
+Use v1 toast notifications for brief, non-blocking feedback that confirms a completed action or reports a recoverable status after the user can safely keep working. Toasts support success, danger, warning, and info tones, and their styles must come from v1 semantic theme tokens.
+
+- Use success toasts for completed create, update, delete, and bulk operations after persistence and workspace publication succeed.
+- Suppress success toasts for high-frequency autosave typing, background backup observation, hydration, selection-only changes, or any workflow that already has persistent inline confirmation.
+- Use danger toasts only for recoverable, non-blocking failures when the relevant UI is no longer visible. Keep validation, destructive failures, and blocked states inline with `v1-alert`.
+- Use warning toasts for completed actions with caveats or follow-up needed.
+- Use info toasts for short-lived process or context feedback, not help text or persistent instructions.
+- Keep toast copy short, object-specific when possible, and plain text only.
+- Do not show duplicate inline success and toast success for the same event unless the inline state is deliberately persistent.
+
 ## Drawers and modals
 
 Use contextual slideout drawers for meaningful form and data-entry work:

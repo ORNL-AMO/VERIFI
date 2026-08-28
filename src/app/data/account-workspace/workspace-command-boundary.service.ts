@@ -18,6 +18,7 @@ import { WorkspacePatch } from './account-workspace.models';
 import {
   WorkspaceChangeKind,
   WorkspaceCommittedChange,
+  WorkspaceCommandNotificationOptions,
   WorkspaceCommandResult,
   WorkspaceEntityKind,
   WorkspaceWriteError
@@ -31,6 +32,7 @@ export interface WorkspaceCommandOptions {
   readonly entityGuid?: string;
   /** Human-readable label shown while the operation is in-flight. */
   readonly label: string;
+  readonly notification?: WorkspaceCommandNotificationOptions;
 }
 
 export type WorkspacePublication<T> =
@@ -166,7 +168,8 @@ export class WorkspaceCommandBoundary {
       entityKind: options.entityKind,
       changeKind: options.changeKind,
       entityGuid: options.entityGuid,
-      accountGuid: submittedAccountGuid
+      accountGuid: submittedAccountGuid,
+      notification: options.notification
     };
     this.committedChangeSubject.next(change);
 

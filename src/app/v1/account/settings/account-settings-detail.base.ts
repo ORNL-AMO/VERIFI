@@ -42,6 +42,7 @@ export abstract class AccountSettingsDetailBase extends SettingsDetailBase {
           changeKind: 'update',
           entityGuid: updatedAccount.guid,
           label,
+          notification: { suppressSuccessToast: true },
           publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
         },
         () => this.accountHandler.update({ ...updatedAccount }, updatedAccount.guid)

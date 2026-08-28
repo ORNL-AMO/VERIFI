@@ -157,6 +157,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
           changeKind: 'update',
           entityGuid: updatedAccount.guid,
           label: 'Saving automatic backup settings',
+          notification: { suppressSuccessToast: true },
           publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
         },
         () => this.accountHandler.update(updatedAccount, updatedAccount.guid)

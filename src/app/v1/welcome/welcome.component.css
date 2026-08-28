@@ -6,6 +6,15 @@
   padding: clamp(1rem, 3vw, 2.5rem) 0 3rem;
 }
 
+.v1-welcome__notifications {
+  position: fixed;
+  right: clamp(.75rem, 2vw, 1.25rem);
+  bottom: clamp(.75rem, 2vw, 1.25rem);
+  z-index: 80;
+  width: min(24rem, calc(100vw - 1.5rem));
+  pointer-events: none;
+}
+
 .v1-welcome__hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18rem, 1fr);
