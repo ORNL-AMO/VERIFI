@@ -87,6 +87,14 @@ describe('WorkspaceNavigationService', () => {
       'settings',
       'units'
     ]);
+    expect(service.accountDataRoute('account-a')).toEqual([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio'
+    ]);
     expect(service.facilityRoute('facility-a')).toEqual([
       '/v1',
       'workspace',
@@ -221,6 +229,20 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
+  it('opens account data after selecting the account', async () => {
+    await service.openAccountData('account-a');
+
+    expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-a');
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio'
+    ]);
+  });
+
   it('parses account and facility settings routes and enables settings in workspace context', () => {
     router.events.next(new NavigationEnd(
       1,
@@ -241,6 +263,18 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeSection()).toBe('settings');
     expect(service.activeDetail()).toBe('units');
     expect(service.sections().find(section => section.id === 'settings')?.enabled).toBe(true);
+  });
+
+  it('parses account data routes and enables data in workspace context', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/account/account-a/data/portfolio',
+      '/v1/workspace/account/account-a/data/portfolio'
+    ));
+
+    expect(service.activeSection()).toBe('data');
+    expect(service.activeDetail()).toBe('portfolio');
+    expect(service.sections().find(section => section.id === 'data')?.enabled).toBe(true);
   });
 
   it('opens settings from the active workspace context', () => {
@@ -271,6 +305,37 @@ describe('WorkspaceNavigationService', () => {
       'facility-a',
       'settings',
       'profile'
+    ]);
+  });
+
+  it('opens account portfolio data from the active workspace context', () => {
+    service.openSection('data');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio'
+    ]);
+
+    router.navigate.mockClear();
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/home/overview',
+      '/v1/workspace/facility/facility-a/home/overview'
+    ));
+
+    service.openSection('data');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio'
     ]);
   });
 

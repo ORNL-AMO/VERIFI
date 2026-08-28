@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { AccountHomeComponent } from './account/home/account-home.component';
+import { AccountPortfolioComponent } from './account/portfolio/account-portfolio.component';
 import { AccountSettingsComponent } from './account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from './account/settings/backup/account-settings-backup.component';
 import { AccountSettingsDeleteComponent } from './account/settings/delete/account-settings-delete.component';
@@ -42,6 +43,14 @@ export const V1Routes: Routes = [
             path: 'home/:detail',
             component: AccountHomeComponent,
             canActivate: [accountHomeCanonicalGuard]
+          },
+          {
+            path: 'data',
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'portfolio' },
+              { path: 'portfolio', component: AccountPortfolioComponent },
+              { path: '**', redirectTo: 'portfolio' }
+            ]
           },
           {
             path: 'settings',

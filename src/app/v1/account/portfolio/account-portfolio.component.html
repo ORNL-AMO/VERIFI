@@ -1,0 +1,19 @@
+<section class="v1-account-portfolio" aria-labelledby="v1-account-portfolio-title">
+  @if (navigation.account(); as account) {
+    <header class="v1-section-header">
+      <div>
+        <p class="v1-eyebrow">Account Data</p>
+        <h1 id="v1-account-portfolio-title">Portfolio</h1>
+        <p class="v1-section-header__summary">
+          Manage the facilities in {{ account.name }} and continue setup from each facility workspace.
+        </p>
+      </div>
+    </header>
+
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-layer-group" aria-hidden="true"></span>
+      <h2>Portfolio setup is ready for facility tools</h2>
+      <p>Facility management actions will be added here in the next implementation slice.</p>
+    </article>
+  }
+</section>

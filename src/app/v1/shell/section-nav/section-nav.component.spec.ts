@@ -12,6 +12,7 @@ describe('SectionNavComponent', () => {
   let isSingleSiteWorkspace: ReturnType<typeof signal<boolean>>;
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
+  let activeDetail: ReturnType<typeof signal<string>>;
 
   beforeEach(() => {
     activeSection = signal('home');
@@ -21,6 +22,7 @@ describe('SectionNavComponent', () => {
     isSingleSiteWorkspace = signal(false);
     hasSingleSiteRecovery = signal(false);
     singleSiteWorkspaceState = signal('portfolio');
+    activeDetail = signal('profile');
     TestBed.configureTestingModule({
       declarations: [SectionNavComponent],
       imports: [RouterModule.forRoot([])],
@@ -36,9 +38,10 @@ describe('SectionNavComponent', () => {
             hasSingleSiteRecovery,
             singleSiteWorkspaceState,
             activeSection,
-            activeDetail: signal('profile'),
+            activeDetail,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
+            accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -68,6 +71,17 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Delete account');
     expect(fixture.nativeElement.textContent).not.toContain('Account Home');
     expect(fixture.nativeElement.textContent).not.toContain('Overview');
+  });
+
+  it('shows account portfolio navigation when the Data rail section is active', () => {
+    activeSection.set('data');
+    activeDetail.set('portfolio');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Account Data');
+    expect(fixture.nativeElement.textContent).toContain('Portfolio');
+    expect(fixture.nativeElement.textContent).not.toContain('Account Settings');
   });
 
   it('shows facility settings navigation in facility context', () => {
