@@ -48,25 +48,19 @@ export class SectionNavComponent {
     ];
   });
   readonly settingsTitle = computed(() => {
-    if (this.isSingleSiteWorkspace() && this.navigation.contextMode() === 'facility') {
-      return 'Site Setup';
-    }
     return this.navigation.contextMode() === 'facility' ? 'Facility Settings' : 'Account Settings';
   });
   readonly homeTitle = computed(() => {
-    if (this.isSingleSiteWorkspace() && this.navigation.contextMode() === 'facility') {
-      return 'Site Home';
-    }
     return this.navigation.contextMode() === 'facility' ? 'Facility Home' : 'Account Home';
   });
   readonly recoveryTitle = computed(() =>
     this.navigation.singleSiteWorkspaceState() === 'missing-facility'
-      ? 'Single-site setup needs a facility'
-      : 'Single-site setup needs one facility'
+      ? 'Single-facility setup needs a facility'
+      : 'Single-facility setup needs one facility'
   );
   readonly recoveryMessage = computed(() =>
     this.navigation.singleSiteWorkspaceState() === 'missing-facility'
-      ? 'This account is marked as single-site, but no facility is available yet.'
-      : 'This account is marked as single-site, but it has more than one facility.'
+      ? 'This account is marked as single-facility, but no facility is available yet.'
+      : 'This account is marked as single-facility, but it has more than one facility.'
   );
 }

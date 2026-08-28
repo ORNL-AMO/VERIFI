@@ -366,7 +366,7 @@ function normalizeSection(section: string | undefined): SectionId {
 
 function accountDescriptor(account: IdbAccount): string {
   if (account.isSingleFacilityCompany === true) {
-    return 'Single site';
+    return 'Single facility';
   }
   const facilityCount = Number(account.numberOfFacilities);
   if (Number.isFinite(facilityCount)) {

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 
 @Component({
@@ -10,11 +10,6 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 export class FacilitySettingsComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
 
-  readonly account = this.workspace.account;
   readonly facility = this.workspace.selectedFacility;
-  readonly facilities = this.workspace.facilities;
   readonly canWrite = this.workspace.canWrite;
-  readonly isSingleSiteSetup = computed(() =>
-    this.account()?.isSingleFacilityCompany === true && this.facilities().length === 1
-  );
 }

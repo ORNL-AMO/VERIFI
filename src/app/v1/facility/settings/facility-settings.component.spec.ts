@@ -159,14 +159,14 @@ describe('Facility settings routed components', () => {
     expect(fixture.nativeElement.textContent).toContain('No facility selected');
   });
 
-  it('uses site setup terminology for valid single-facility accounts', () => {
+  it('keeps facility settings terminology for valid single-facility accounts', () => {
     account.set({ ...accountFixture(), isSingleFacilityCompany: true });
     facilities.set([selectedFacility()!]);
     const fixture = TestBed.createComponent(FacilitySettingsComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Site setup');
-    expect(fixture.nativeElement.textContent).not.toContain('Facility settings');
+    expect(fixture.nativeElement.textContent).toContain('Facility settings');
+    expect(fixture.nativeElement.textContent).not.toContain('Site setup');
   });
 
   it('defines facility settings details as child routes of the settings shell', () => {

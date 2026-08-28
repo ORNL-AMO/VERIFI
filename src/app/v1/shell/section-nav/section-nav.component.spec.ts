@@ -95,21 +95,21 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Delete account');
   });
 
-  it('hides context switching and uses site labels for a valid single-site workspace', () => {
+  it('hides context switching for a valid single-facility workspace', () => {
     isSingleSiteWorkspace.set(true);
     contextMode.set('facility');
-    selectedFacility.set({ guid: 'facility-a', name: 'Site A' });
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
     activeSection.set('home');
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.v1-nav__context')).toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Site Home');
+    expect(fixture.nativeElement.textContent).toContain('Facility Home');
 
     activeSection.set('settings');
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Site Setup');
+    expect(fixture.nativeElement.textContent).toContain('Facility Settings');
   });
 
   it('shows a recovery link for invalid single-site facility counts', () => {
@@ -119,7 +119,7 @@ describe('SectionNavComponent', () => {
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Single-site setup needs one facility');
+    expect(fixture.nativeElement.textContent).toContain('Single-facility setup needs one facility');
     expect(fixture.nativeElement.textContent).toContain('Open facility management');
     expect(fixture.nativeElement.querySelector('.v1-nav__context')).not.toBeNull();
   });

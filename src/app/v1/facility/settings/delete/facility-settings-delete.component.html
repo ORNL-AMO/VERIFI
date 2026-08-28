@@ -1,6 +1,5 @@
 @let currentAccount = account();
 @let currentFacility = facility();
-@let isSingleSite = isSingleSiteSetup();
 
 @if (currentAccount && currentFacility) {
   <section class="v1-settings-panel v1-settings-panel--danger" aria-label="Delete facility">
@@ -31,7 +30,7 @@
       <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
       @if (isSingleFacilityAccount()) {
         <h3>Permanent account removal</h3>
-        <p>Deleting this account removes the account, {{ isSingleSite ? 'site' : 'facility' }}, meters, predictors, analyses, reports, and settings.</p>
+        <p>Deleting this account removes the account, facility, meters, predictors, analyses, reports, and settings.</p>
       } @else {
         <h3>Permanent facility removal</h3>
         <p>Deleting this facility removes its meters, predictors, analyses, reports, and related data.</p>
@@ -62,7 +61,7 @@
       </header>
       <div class="v1-modal__body">
         @if (isSingleFacilityAccount()) {
-          <p>Deleting this account will permanently remove its {{ isSingleSite ? 'site' : 'facility' }}, meters, predictors, analyses, reports, and settings.</p>
+          <p>Deleting this account will permanently remove its facility, meters, predictors, analyses, reports, and settings.</p>
         } @else {
           <p>Deleting this facility will permanently remove its meters, predictors, analyses, reports, and related data.</p>
         }

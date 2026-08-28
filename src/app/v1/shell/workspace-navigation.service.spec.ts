@@ -203,7 +203,7 @@ describe('WorkspaceNavigationService', () => {
 
     expect(service.accountOptions()).toEqual([
       { guid: 'account-a', name: 'Account A', descriptor: '2 facilities', active: true },
-      { guid: 'account-b', name: 'Account B', descriptor: 'Single site', active: false }
+      { guid: 'account-b', name: 'Account B', descriptor: 'Single facility', active: false }
     ]);
   });
 

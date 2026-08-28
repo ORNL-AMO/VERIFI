@@ -1,11 +1,9 @@
-@let isSingleSite = isSingleSiteSetup();
-
 @if (form) {
-  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" [attr.aria-label]="isSingleSite ? 'Site information' : 'Facility information'">
+  <form class="v1-settings-panel v1-settings-panel--facility" [formGroup]="form" aria-label="Facility information">
     <div class="v1-settings-panel__heading">
       <div>
         <p>Profile</p>
-        <h2>{{ isSingleSite ? 'Site information' : 'Facility information' }}</h2>
+        <h2>Facility information</h2>
       </div>
       <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
         @if (saveState === 'saving') {
@@ -23,7 +21,7 @@
 
     <div class="v1-settings-grid v1-settings-grid--2">
       <label>
-        <span>{{ isSingleSite ? 'Site name' : 'Facility name' }}</span>
+        <span>Facility name</span>
         <input type="text" formControlName="name" maxlength="42"
           (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
         @if (form.controls['name'].invalid && (form.controls['name'].dirty || form.controls['name'].touched)) {
@@ -31,7 +29,7 @@
         }
       </label>
       <label>
-        <span>{{ isSingleSite ? 'Site classification' : 'Facility classification' }}</span>
+        <span>Facility classification</span>
         <select formControlName="classification" (change)="saveProfile()">
           @for (classification of facilityClassifications; track classification) {
             <option [ngValue]="classification">{{ classification }}</option>
@@ -47,7 +45,7 @@
         </select>
       </label>
       <label>
-        <span>{{ isSingleSite ? 'Site area' : 'Facility area' }}</span>
+        <span>Facility area</span>
         <input type="number" formControlName="size" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
       </label>
     </div>
@@ -58,7 +56,7 @@
         <input type="text" formControlName="address" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
       </label>
       <label>
-        <span>{{ isSingleSite ? 'Site color' : 'Facility color' }}</span>
+        <span>Facility color</span>
         <input type="color" formControlName="color" (input)="scheduleProfileSave()" (blur)="flushProfileSave()">
       </label>
     </div>

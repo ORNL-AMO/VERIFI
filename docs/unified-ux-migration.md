@@ -44,11 +44,11 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 
 If the workflow needs current-state detail, add a short current-state note using the template in the [current-state notes guide](unified-ux-current-state.md). Do not create a full application inventory as a prerequisite for v1 work.
 
-### Single-Site Setup Workflow
+### Single-Facility Setup Workflow
 
-- **Workflow:** v1 composite single-site setup, issue #2637.
+- **Workflow:** v1 composite single-facility setup, issue #2637.
 - **Existing v0 entry point:** Account setup and facility setup remain separate under the current Data Management routes.
-- **Decision:** Rebuild in v1 by routing valid single-site accounts into the sole facility workspace and using the facility settings surface as the combined site setup path.
+- **Decision:** Rebuild in v1 by routing valid single-facility accounts into the sole facility workspace and using the facility settings surface as the combined setup path.
 - **Parity:** Shared profile, location, units, goals, financial reporting, data staleness, backup, and delete behavior continue to save through existing account and facility command handlers.
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, or Electron contract changes.
 - **Tests:** Focused v1 navigation, header, side-nav, route guard, welcome, and facility settings specs; production web build before handoff.

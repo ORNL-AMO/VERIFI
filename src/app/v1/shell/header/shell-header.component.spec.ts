@@ -38,7 +38,7 @@ describe('ShellHeaderComponent', () => {
 
     const menu = fixture.nativeElement.querySelector('.v1-account-switcher__dropdown');
     expect(menu?.textContent).toContain('Account A');
-    expect(menu?.textContent).toContain('Single site');
+    expect(menu?.textContent).toContain('Single facility');
     expect(menu?.textContent).toContain('Account B');
     expect(menu?.textContent).toContain('Portfolio');
     expect(menu?.textContent).toContain('Add new account');
@@ -107,7 +107,7 @@ function setup(isWorkspaceRoute: boolean): {
     contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
     accountOptions: vi.fn(() => [
-      { guid: 'account-a', name: 'Account A', descriptor: 'Single site', active: true },
+      { guid: 'account-a', name: 'Account A', descriptor: 'Single facility', active: true },
       { guid: 'account-b', name: 'Account B', descriptor: 'Portfolio', active: false }
     ]),
     facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),

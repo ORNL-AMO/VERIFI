@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, computed, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { FutureBackupVersionError, PreparedBackupFile } from '@data/backup/backup-preparation.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -21,9 +21,6 @@ export class ImportFacilityBackupComponent {
 
   readonly account = this.workspace.account;
   readonly facility = this.workspace.selectedFacility;
-  readonly isSingleSiteSetup = computed(() =>
-    this.account()?.isSingleFacilityCompany === true && this.workspace.facilities().length === 1
-  );
 
   backupFile: PreparedBackupFile | undefined;
   backupFileError = '';

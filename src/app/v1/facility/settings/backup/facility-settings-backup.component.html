@@ -1,8 +1,7 @@
 @let currentFacility = facility();
-@let isSingleSite = isSingleSiteSetup();
 
 @if (currentFacility) {
-  <section class="v1-settings-panel v1-settings-panel--facility" [attr.aria-label]="isSingleSite ? 'Site backup and import' : 'Facility backup and import'">
+  <section class="v1-settings-panel v1-settings-panel--facility" aria-label="Facility backup and import">
     <div class="v1-settings-panel__heading">
       <div>
         <p>Backup</p>
@@ -25,11 +24,11 @@
     <div class="v1-settings-grid v1-settings-grid--2">
       <article class="v1-settings-card">
         <span class="fa fa-file-arrow-down" aria-hidden="true"></span>
-        <h3>Manual {{ isSingleSite ? 'site' : 'facility' }} backup</h3>
-        <p>Download a JSON backup for this {{ isSingleSite ? 'site' : 'facility' }}.</p>
+        <h3>Manual facility backup</h3>
+        <p>Download a JSON backup for this facility.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="openBackupConfirm()">
-            Backup {{ isSingleSite ? 'site' : 'facility' }}
+            Backup facility
             <span class="fa fa-download" aria-hidden="true"></span>
           </button>
         </div>
@@ -37,8 +36,8 @@
 
       <article class="v1-settings-card">
         <span class="fa fa-file-import" aria-hidden="true"></span>
-        <h3>Import {{ isSingleSite ? 'site' : 'facility' }} backup</h3>
-        <p>Import a {{ isSingleSite ? 'site' : 'facility' }} JSON backup into the active account.</p>
+        <h3>Import facility backup</h3>
+        <p>Import a facility JSON backup into the active account.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--secondary" (click)="openImportPanel()">
             Import backup
@@ -52,18 +51,18 @@
 
 <ng-template #backupConfirmModal>
   <div class="v1-modal-layer">
-    <button type="button" class="v1-modal-backdrop" [attr.aria-label]="isSingleSite ? 'Cancel site backup' : 'Cancel facility backup'" [disabled]="isBackingUp"
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel facility backup" [disabled]="isBackingUp"
       (click)="cancelBackupConfirm()"></button>
     <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-facility-backup-confirm-title">
       <header class="v1-modal__header">
         <h2 id="v1-facility-backup-confirm-title">Backup {{ facility()?.name }}</h2>
-        <button type="button" class="v1-icon-btn" [attr.aria-label]="isSingleSite ? 'Cancel site backup' : 'Cancel facility backup'" [disabled]="isBackingUp"
+        <button type="button" class="v1-icon-btn" aria-label="Cancel facility backup" [disabled]="isBackingUp"
           (click)="cancelBackupConfirm()">
           <span class="fa fa-xmark" aria-hidden="true"></span>
         </button>
       </header>
       <div class="v1-modal__body">
-        <p>Download a JSON backup for this {{ isSingleSite ? 'site' : 'facility' }}, including its meters, predictors, analyses, reports, and settings.</p>
+        <p>Download a JSON backup for this facility, including its meters, predictors, analyses, reports, and settings.</p>
       </div>
       <footer class="v1-modal__footer">
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
