@@ -26,6 +26,7 @@ import { FacilitySettingsComponent } from './facility-settings.component';
 import { FacilitySettingsModule } from './facility-settings.module';
 import { FacilitySettingsFinancialComponent } from './financial/facility-settings-financial.component';
 import { FacilitySettingsGoalsComponent } from './goals/facility-settings-goals.component';
+import { PortfolioTransitionSettingsComponent } from './portfolio-transition/portfolio-transition-settings.component';
 import { FacilitySettingsProfileComponent } from './profile/facility-settings-profile.component';
 import { FacilitySettingsStalenessComponent } from './staleness/facility-settings-staleness.component';
 import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.component';
@@ -38,6 +39,7 @@ describe('Facility settings routed components', () => {
   let commandBoundary: { execute: ReturnType<typeof vi.fn> };
   let accountHandler: { update: ReturnType<typeof vi.fn> };
   let facilityHandler: {
+    add: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
     delete: ReturnType<typeof vi.fn>;
   };
@@ -72,6 +74,7 @@ describe('Facility settings routed components', () => {
       update: vi.fn(async updated => updated)
     };
     facilityHandler = {
+      add: vi.fn(async (facility: IdbFacility) => ({ facility: { ...facility, id: 3, guid: 'facility-new' } })),
       update: vi.fn(async updated => updated),
       delete: vi.fn(async () => undefined)
     };
@@ -110,6 +113,8 @@ describe('Facility settings routed components', () => {
             account,
             selectedFacility,
             facilities,
+            accountAnalyses: signal([]),
+            accountReports: signal([]),
             canWrite,
             hasPending: signal(false),
             customEmissions: signal([])
@@ -175,7 +180,7 @@ describe('Facility settings routed components', () => {
     const childPaths = settingsRoute?.children?.map(route => route.path);
 
     expect(settingsRoute?.component).toBe(FacilitySettingsComponent);
-    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete', '**']);
+    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete', '**']);
   });
 
   it('autosaves facility profile text after a debounce without stealing focus', async () => {
@@ -499,6 +504,88 @@ describe('Facility settings routed components', () => {
     fixture.detectChanges(false);
 
     expect(fixture.nativeElement.textContent).toContain('Upload Facility Backup');
+  });
+
+  it('requires a facility name before converting a single-facility account', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = createDetail(PortfolioTransitionSettingsComponent);
+
+    buttonByText(fixture, 'Add facility and convert').click();
+    fixture.detectChanges(false);
+
+    expect(fixture.nativeElement.textContent).toContain('Name is required');
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(facilityHandler.add).not.toHaveBeenCalled();
+    expect(accountHandler.update).not.toHaveBeenCalled();
+  });
+
+  it('adds a facility and clears single-facility mode through one reload command', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = createDetail(PortfolioTransitionSettingsComponent);
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[formControlName="facilityName"]');
+    input.value = '  Second Site  ';
+    input.dispatchEvent(new Event('input'));
+
+    buttonByText(fixture, 'Add facility and convert').click();
+    fixture.detectChanges(false);
+
+    expect(fixture.componentInstance.showConfirm).toBe(true);
+    await fixture.componentInstance.confirmConversion();
+    fixture.detectChanges(false);
+
+    expect(commandBoundary.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityKind: 'account',
+        changeKind: 'update',
+        entityGuid: 'account-a',
+        publication: { mode: 'reload' }
+      }),
+      expect.any(Function)
+    );
+    expect(facilityHandler.add).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Second Site', accountId: 'account-a' }),
+      'account-a',
+      [],
+      []
+    );
+    expect(accountHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({ guid: 'account-a', isSingleFacilityCompany: false }),
+      'account-a'
+    );
+    expect(lifecycle.refreshAccountCatalog).toHaveBeenCalled();
+    expect(fixture.componentInstance.completedFacility).toEqual(expect.objectContaining({ guid: 'facility-new' }));
+  });
+
+  it('keeps the new facility name visible when conversion fails', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    commandBoundary.execute.mockRejectedValueOnce(new Error('persist failed'));
+    const fixture = createDetail(PortfolioTransitionSettingsComponent);
+    fixture.componentInstance.form.controls.facilityName.setValue('Unsaved Site');
+
+    await fixture.componentInstance.confirmConversion();
+    fixture.detectChanges(false);
+
+    expect(fixture.componentInstance.form.controls.facilityName.value).toBe('Unsaved Site');
+    expect(fixture.componentInstance.saveState).toBe('error');
+    expect(fixture.nativeElement.textContent).toContain('Changes could not be saved');
+  });
+
+  it('repairs single-facility accounts that already have multiple facilities without adding another facility', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!, facilityFixture('facility-b')]);
+    const fixture = createDetail(PortfolioTransitionSettingsComponent);
+
+    expect(fixture.nativeElement.textContent).toContain('Finish portfolio conversion');
+    await fixture.componentInstance.confirmConversion();
+
+    expect(facilityHandler.add).not.toHaveBeenCalled();
+    expect(accountHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({ guid: 'account-a', isSingleFacilityCompany: false }),
+      'account-a'
+    );
   });
 
   it('imports facility backups as replace or new from the v1 import panel', async () => {

@@ -8,6 +8,7 @@ import { FacilitySettingsComponent } from './facility-settings.component';
 import { FacilitySettingsDeleteComponent } from './delete/facility-settings-delete.component';
 import { FacilitySettingsFinancialComponent } from './financial/facility-settings-financial.component';
 import { FacilitySettingsGoalsComponent } from './goals/facility-settings-goals.component';
+import { PortfolioTransitionSettingsComponent } from './portfolio-transition/portfolio-transition-settings.component';
 import { FacilitySettingsProfileComponent } from './profile/facility-settings-profile.component';
 import { FacilitySettingsStalenessComponent } from './staleness/facility-settings-staleness.component';
 import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.component';
@@ -21,6 +22,7 @@ import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.
     FacilitySettingsFinancialComponent,
     FacilitySettingsStalenessComponent,
     FacilitySettingsBackupComponent,
+    PortfolioTransitionSettingsComponent,
     FacilitySettingsDeleteComponent
   ],
   imports: [

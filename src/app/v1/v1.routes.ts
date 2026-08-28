@@ -15,6 +15,7 @@ import { FacilitySettingsBackupComponent } from './facility/settings/backup/faci
 import { FacilitySettingsDeleteComponent } from './facility/settings/delete/facility-settings-delete.component';
 import { FacilitySettingsFinancialComponent } from './facility/settings/financial/facility-settings-financial.component';
 import { FacilitySettingsGoalsComponent } from './facility/settings/goals/facility-settings-goals.component';
+import { PortfolioTransitionSettingsComponent } from './facility/settings/portfolio-transition/portfolio-transition-settings.component';
 import { FacilitySettingsProfileComponent } from './facility/settings/profile/facility-settings-profile.component';
 import { FacilitySettingsStalenessComponent } from './facility/settings/staleness/facility-settings-staleness.component';
 import { FacilitySettingsUnitsComponent } from './facility/settings/units/facility-settings-units.component';
@@ -83,6 +84,7 @@ export const V1Routes: Routes = [
               { path: 'financial', component: FacilitySettingsFinancialComponent },
               { path: 'staleness', component: FacilitySettingsStalenessComponent },
               { path: 'backup', component: FacilitySettingsBackupComponent },
+              { path: 'portfolio', component: PortfolioTransitionSettingsComponent },
               { path: 'delete', component: FacilitySettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }
             ]

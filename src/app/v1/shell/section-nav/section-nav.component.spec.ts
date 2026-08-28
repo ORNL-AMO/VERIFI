@@ -80,6 +80,7 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Facility Settings');
     expect(fixture.nativeElement.textContent).toContain('Profile');
     expect(fixture.nativeElement.textContent).toContain('Delete facility');
+    expect(fixture.nativeElement.textContent).not.toContain('Portfolio');
     expect(fixture.nativeElement.textContent).not.toContain('Delete account');
   });
 
@@ -92,7 +93,13 @@ describe('SectionNavComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Facility Settings');
+    expect(fixture.nativeElement.textContent).toContain('Portfolio');
     expect(fixture.nativeElement.textContent).toContain('Delete account');
+
+    account.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: false });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Portfolio');
   });
 
   it('hides context switching for a valid single-facility workspace', () => {
