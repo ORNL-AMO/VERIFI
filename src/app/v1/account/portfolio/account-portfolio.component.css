@@ -28,3 +28,286 @@
   outline: 3px solid var(--v1-focus);
   outline-offset: 3px;
 }
+
+.v1-account-portfolio__header {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.v1-account-portfolio__totals {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.v1-account-portfolio__totals article,
+.v1-empty-state,
+.v1-facility-card {
+  background: var(--v1-surface);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  box-shadow: 0 1rem 2rem var(--v1-shadow-soft);
+}
+
+.v1-account-portfolio__totals article {
+  display: grid;
+  gap: .15rem;
+  min-width: 0;
+  padding: .85rem;
+}
+
+.v1-account-portfolio__totals span,
+.v1-facility-card dt,
+.v1-facility-card__details {
+  color: var(--v1-muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.v1-account-portfolio__totals strong {
+  color: var(--v1-text);
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.v1-account-portfolio__total--warn strong {
+  color: var(--v1-warning);
+}
+
+.v1-account-portfolio__notice {
+  background: color-mix(in srgb, var(--v1-success) 10%, var(--v1-surface));
+  border: 1px solid color-mix(in srgb, var(--v1-success) 32%, var(--v1-border));
+  border-radius: var(--v1-radius);
+  color: var(--v1-success);
+  font-weight: 700;
+  padding: .75rem .9rem;
+}
+
+.v1-account-portfolio__notice--error {
+  background: color-mix(in srgb, var(--v1-danger) 10%, var(--v1-surface));
+  border-color: color-mix(in srgb, var(--v1-danger) 35%, var(--v1-border));
+  color: var(--v1-danger);
+}
+
+.v1-empty-state {
+  align-items: start;
+  display: grid;
+  gap: .6rem;
+  justify-items: start;
+  padding: 1.25rem;
+}
+
+.v1-empty-state > .fa {
+  color: var(--v1-account);
+  font-size: 1.5rem;
+}
+
+.v1-empty-state h2,
+.v1-empty-state p {
+  margin: 0;
+}
+
+.v1-empty-state p {
+  color: var(--v1-muted);
+  max-width: 42rem;
+}
+
+.v1-account-portfolio__toolbar {
+  align-items: end;
+  background: var(--v1-content-block);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: minmax(14rem, 1fr) minmax(10rem, auto) minmax(10rem, auto);
+  padding: .85rem;
+}
+
+.v1-account-portfolio__toolbar label {
+  display: grid;
+  gap: .25rem;
+}
+
+.v1-account-portfolio__toolbar label > span {
+  color: var(--v1-muted);
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.v1-account-portfolio__toolbar input,
+.v1-account-portfolio__toolbar select {
+  background: var(--v1-control-surface);
+  border: 1px solid var(--v1-control-border);
+  border-radius: var(--v1-radius-sm);
+  color: var(--v1-text);
+  min-height: var(--v1-control-height);
+  min-width: 0;
+  padding: .45rem .65rem;
+  width: 100%;
+}
+
+.v1-account-portfolio__search {
+  position: relative;
+}
+
+.v1-account-portfolio__search .fa {
+  color: var(--v1-muted);
+  left: .65rem;
+  position: absolute;
+  top: 2.15rem;
+}
+
+.v1-account-portfolio__search input {
+  padding-left: 2rem;
+}
+
+.v1-account-portfolio__cards {
+  display: grid;
+  gap: .75rem;
+}
+
+.v1-facility-card {
+  align-items: center;
+  display: grid;
+  gap: .9rem;
+  grid-template-columns: minmax(14rem, 1.4fr) minmax(16rem, 1fr) minmax(13rem, 1fr) auto;
+  padding: 1rem;
+}
+
+.v1-facility-card--danger {
+  border-left: 4px solid var(--v1-danger);
+}
+
+.v1-facility-card--warning {
+  border-left: 4px solid var(--v1-warning);
+}
+
+.v1-facility-card--success {
+  border-left: 4px solid var(--v1-success);
+}
+
+.v1-facility-card__summary {
+  display: grid;
+  gap: .45rem;
+  min-width: 0;
+}
+
+.v1-facility-card__top,
+.v1-facility-card__details,
+.v1-facility-card__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.v1-chip {
+  background: var(--v1-surface-muted);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-pill);
+  color: var(--v1-muted);
+  display: inline-flex;
+  font-size: .72rem;
+  font-weight: 800;
+  padding: .2rem .5rem;
+}
+
+.v1-chip--danger {
+  background: color-mix(in srgb, var(--v1-danger) 10%, var(--v1-surface));
+  border-color: color-mix(in srgb, var(--v1-danger) 35%, var(--v1-border));
+  color: var(--v1-danger);
+}
+
+.v1-chip--warning {
+  background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface));
+  border-color: color-mix(in srgb, var(--v1-warning) 35%, var(--v1-border));
+  color: var(--v1-warning);
+}
+
+.v1-chip--success {
+  background: color-mix(in srgb, var(--v1-success) 10%, var(--v1-surface));
+  border-color: color-mix(in srgb, var(--v1-success) 35%, var(--v1-border));
+  color: var(--v1-success);
+}
+
+.v1-facility-card__title {
+  background: transparent;
+  border: 0;
+  color: var(--v1-link);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 800;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.v1-facility-card__location {
+  color: var(--v1-muted);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.v1-facility-card__meta {
+  display: grid;
+  gap: .5rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.v1-facility-card__meta div {
+  background: var(--v1-panel);
+  border-radius: var(--v1-radius-sm);
+  display: grid;
+  gap: .15rem;
+  min-width: 0;
+  padding: .55rem;
+}
+
+.v1-facility-card dd {
+  font-weight: 800;
+  margin: 0;
+}
+
+.v1-facility-card__details span {
+  align-items: center;
+  display: inline-flex;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.v1-facility-card__actions {
+  justify-content: end;
+}
+
+.v1-icon-btn--danger {
+  color: var(--v1-danger);
+}
+
+@media (max-width: 70rem) {
+  .v1-account-portfolio__totals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .v1-facility-card {
+    grid-template-columns: minmax(14rem, 1fr) minmax(16rem, 1fr);
+  }
+
+  .v1-facility-card__actions {
+    justify-content: start;
+  }
+}
+
+@media (max-width: 48rem) {
+  .v1-account-portfolio__header,
+  .v1-account-portfolio__toolbar,
+  .v1-facility-card {
+    grid-template-columns: 1fr;
+  }
+
+  .v1-account-portfolio__totals,
+  .v1-facility-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

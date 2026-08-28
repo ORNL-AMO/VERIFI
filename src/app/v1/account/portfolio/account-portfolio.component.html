@@ -1,19 +1,225 @@
+@let currentAccount = account();
+@let currentTotals = totals();
+@let summaries = filteredSummaries();
+@let pendingDelete = facilityToDelete();
+
 <section class="v1-account-portfolio" aria-labelledby="v1-account-portfolio-title">
-  @if (navigation.account(); as account) {
-    <header class="v1-section-header">
+  @if (currentAccount) {
+    <header class="v1-section-header v1-account-portfolio__header">
       <div>
         <p class="v1-eyebrow">Account Data</p>
         <h1 id="v1-account-portfolio-title">Portfolio</h1>
         <p class="v1-section-header__summary">
-          Manage the facilities in {{ account.name }} and continue setup from each facility workspace.
+          Manage facilities in {{ currentAccount.name }} and continue setup from each facility workspace.
         </p>
       </div>
+      <button
+        type="button"
+        class="v1-btn v1-btn--primary"
+        [disabled]="!canWrite() || hasPending()"
+        (click)="openCreateFacilityDrawer()">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+        Add facility
+      </button>
     </header>
 
-    <article class="v1-empty-state" role="status">
-      <span class="fa fa-layer-group" aria-hidden="true"></span>
-      <h2>Portfolio setup is ready for facility tools</h2>
-      <p>Facility management actions will be added here in the next implementation slice.</p>
-    </article>
+    <div class="v1-account-portfolio__totals" aria-label="Portfolio totals">
+      <article>
+        <span>Facilities</span>
+        <strong>{{ currentTotals.facilities }}</strong>
+      </article>
+      <article>
+        <span>Meters</span>
+        <strong>{{ currentTotals.meters }}</strong>
+      </article>
+      <article>
+        <span>Predictors</span>
+        <strong>{{ currentTotals.predictors }}</strong>
+      </article>
+      <article>
+        <span>Analyses</span>
+        <strong>{{ currentTotals.analyses }}</strong>
+      </article>
+      <article>
+        <span>Reports</span>
+        <strong>{{ currentTotals.reports }}</strong>
+      </article>
+      <article [class.v1-account-portfolio__total--warn]="currentTotals.attention > 0">
+        <span>Needs setup</span>
+        <strong>{{ currentTotals.attention }}</strong>
+      </article>
+    </div>
+
+    @if (!canWrite()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <span class="fa fa-lock" aria-hidden="true"></span>
+        <span>Portfolio actions are unavailable while the workspace is loading or switching.</span>
+      </div>
+    }
+
+    @if (actionMessage || actionError) {
+      <div class="v1-account-portfolio__notice" [class.v1-account-portfolio__notice--error]="actionError" aria-live="polite">
+        {{ actionError || actionMessage }}
+      </div>
+    }
+
+    @if (currentTotals.facilities === 0) {
+      <article class="v1-empty-state" role="status">
+        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <h2>No facilities yet</h2>
+        <p>Add the first facility to start portfolio setup. You will continue with profile, units, goals, financial reporting, and staleness in facility settings.</p>
+        <button
+          type="button"
+          class="v1-btn v1-btn--primary"
+          [disabled]="!canWrite() || hasPending()"
+          (click)="openCreateFacilityDrawer()">
+          <span class="fa fa-plus" aria-hidden="true"></span>
+          Add facility
+        </button>
+      </article>
+    } @else {
+      <form class="v1-account-portfolio__toolbar" aria-label="Facility filters">
+        <label class="v1-account-portfolio__search">
+          <span class="fa fa-search" aria-hidden="true"></span>
+          <input
+            type="search"
+            placeholder="Find facility, location, or type"
+            [value]="search()"
+            (input)="setSearch($any($event.target).value)">
+        </label>
+
+        <label>
+          <span>Status</span>
+          <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+            <option value="all">All</option>
+            <option value="attention">Needs setup</option>
+            <option value="noMeters">No meters</option>
+            <option value="noReadings">No readings</option>
+            <option value="noAnalyses">No analyses</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Sort</span>
+          <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+            <option value="attention">Setup first</option>
+            <option value="facilityName">Facility name</option>
+            <option value="modified">Latest activity</option>
+          </select>
+        </label>
+      </form>
+
+      @if (summaries.length === 0) {
+        <article class="v1-empty-state" role="status">
+          <span class="fa fa-filter-circle-xmark" aria-hidden="true"></span>
+          <h2>No facilities match these filters</h2>
+          <p>Adjust the search or filter controls to return to the full portfolio.</p>
+        </article>
+      } @else {
+        <div class="v1-account-portfolio__cards" role="list" aria-label="Facilities">
+          @for (summary of summaries; track summary.facility.guid) {
+            <article class="v1-facility-card" [ngClass]="'v1-facility-card--' + summary.statusTone" role="listitem">
+              <div class="v1-facility-card__summary">
+                <div class="v1-facility-card__top">
+                  <span class="v1-chip">{{ summary.classification }}</span>
+                  <span class="v1-chip" [ngClass]="'v1-chip--' + summary.statusTone">{{ summary.statusLabel }}</span>
+                </div>
+                <button type="button" class="v1-facility-card__title" (click)="openFacility(summary.facility)">
+                  {{ summary.facility.name }}
+                </button>
+                <span class="v1-facility-card__location">
+                  <span class="fa fa-location-dot" aria-hidden="true"></span>
+                  {{ summary.location }}
+                </span>
+              </div>
+
+              <dl class="v1-facility-card__meta">
+                @for (metric of summary.metrics; track metric.label) {
+                  <div>
+                    <dt>{{ metric.label }}</dt>
+                    <dd>{{ metric.value }}</dd>
+                  </div>
+                }
+              </dl>
+
+              <div class="v1-facility-card__details">
+                <span>
+                  <span class="fa fa-ruler-combined" aria-hidden="true"></span>
+                  {{ summary.unitSummary }}
+                </span>
+                <span>
+                  <span class="fa fa-clock" aria-hidden="true"></span>
+                  {{ summary.stalenessLabel }}
+                </span>
+                <span>
+                  <span class="fa fa-screwdriver-wrench" aria-hidden="true"></span>
+                  {{ summary.equipmentCount }} equipment
+                </span>
+                <span>
+                  <span class="fa fa-calendar-days" aria-hidden="true"></span>
+                  {{ summary.latestActivityLabel }}
+                </span>
+              </div>
+
+              <div class="v1-facility-card__actions">
+                <button type="button" class="v1-icon-btn" title="Open facility" aria-label="Open facility" (click)="openFacility(summary.facility)">
+                  <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="v1-icon-btn" title="Open facility settings" aria-label="Open facility settings" (click)="openFacilitySettings(summary.facility)">
+                  <span class="fa fa-sliders" aria-hidden="true"></span>
+                </button>
+                <button
+                  type="button"
+                  class="v1-icon-btn v1-icon-btn--danger"
+                  title="Delete facility"
+                  aria-label="Delete facility"
+                  [disabled]="!canWrite() || hasPending()"
+                  (click)="openDeleteFacility(summary.facility)">
+                  <span class="fa fa-trash" aria-hidden="true"></span>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+
+    @if (isCreateFacilityDrawerOpen()) {
+      <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
+    }
+
+    @if (pendingDelete) {
+      <div class="v1-modal-layer">
+        <button
+          type="button"
+          class="v1-modal-backdrop"
+          aria-label="Cancel facility deletion"
+          [disabled]="isDeleting"
+          (click)="cancelDeleteFacility()"></button>
+        <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-facility-title">
+          <header class="v1-modal__header">
+            <h2 id="v1-delete-facility-title">Delete {{ pendingDelete.name }}?</h2>
+            <button type="button" class="v1-icon-btn" aria-label="Cancel facility deletion" [disabled]="isDeleting" (click)="cancelDeleteFacility()">
+              <span class="fa fa-xmark" aria-hidden="true"></span>
+            </button>
+          </header>
+          <div class="v1-modal__body">
+            <p>Deleting this facility also deletes its meters, predictors, analyses, reports, equipment, and related data.</p>
+          </div>
+          <footer class="v1-modal__footer">
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting" (click)="cancelDeleteFacility()">Cancel</button>
+            <button type="button" class="v1-btn v1-btn--danger" [disabled]="isDeleting" (click)="confirmDeleteFacility()">
+              @if (isDeleting) {
+                <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+                Deleting
+              } @else {
+                Delete facility
+                <span class="fa fa-trash" aria-hidden="true"></span>
+              }
+            </button>
+          </footer>
+        </section>
+      </div>
+    }
   }
 </section>
