@@ -48,6 +48,9 @@ describe('WorkspaceShellComponent', () => {
       setPanelTab: vi.fn(),
       hideSupportPanel: vi.fn(),
       toggleSupportPanel: vi.fn(),
+      isSingleSiteWorkspace: vi.fn(() => false),
+      hasSingleSiteRecovery: vi.fn(() => false),
+      singleSiteWorkspaceState: vi.fn(() => 'none'),
       accountRoute: vi.fn((accountGuid: string) =>
         ['/v1', 'workspace', 'account', accountGuid, 'home', 'overview']
       ),
