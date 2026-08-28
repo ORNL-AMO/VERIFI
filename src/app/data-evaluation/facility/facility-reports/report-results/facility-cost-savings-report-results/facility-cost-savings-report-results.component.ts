@@ -260,10 +260,10 @@ export class FacilityCostSavingsReportResultsComponent {
 
   getChartImageProviders() {
     return {
-      annualCostSavingsGraph: async () => await this.annualSavingsGraph.getAnnualSavingsChartAsBase64Image() ?? '',
-      monthlyCostSavingsGraph: async () => await this.monthlySavingsGraph.getMonthlySavingsChartAsBase64Image() ?? '',
-      cumulativeAnnualCostSavingsGraph: async () => await this.cumulativeAnnualSavingsGraph.getAnnualSavingsChartAsBase64Image() ?? '',
-      cumulativeMonthlyCostSavingsGraph: async () => await this.cumulativeMonthlySavingsGraph.getMonthlySavingsChartAsBase64Image() ?? '',
+      annualCostSavingsGraph: async () => this.annualSavingsGraph?.getAnnualSavingsChartAsBase64Image() ?? '',
+      monthlyCostSavingsGraph: async () => this.monthlySavingsGraph?.getMonthlySavingsChartAsBase64Image() ?? '',
+      cumulativeAnnualCostSavingsGraph: async () => this.cumulativeAnnualSavingsGraph?.getAnnualSavingsChartAsBase64Image() ?? '',
+      cumulativeMonthlyCostSavingsGraph: async () => this.cumulativeMonthlySavingsGraph?.getMonthlySavingsChartAsBase64Image() ?? '',
       groupComparisonGraph: this.getGroupComparisonGraphProvider()
     };
   }

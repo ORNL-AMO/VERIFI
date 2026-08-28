@@ -128,6 +128,20 @@ export class FacilityCostSavingsReportSetupComponent {
       return item.guid == this.facilityReport.analysisItemId;
     });
     if (!matchedItem) {
+      if (this.selectedAnalysisItem) {
+      this.selectedAnalysisItem = undefined;
+      this.selectedYearError = false;
+      this.yearsList = [];
+      this.groupUnits = {};
+      this.groupMeterCalendarizedData = {};
+      this.missingCostData = {};
+      this.showMissingCostWarning = false;
+      this.showModal = false;
+      this.unitCostTable = {};
+      this.calendarizedMetersActualCost = {};
+      this.reportSettings.groupUnits = {};
+      void this.updateReportSettings();
+    }
       return;
     }
     this.selectedAnalysisItem = matchedItem;

@@ -135,7 +135,7 @@
         <div class="form-check form-switch cost-basis-switch mt-2">
           <input class="form-check-input" type="checkbox" id="useCalculatedCostsInsteadOfBillData"
             name="useCalculatedCostsInsteadOfBillData" [(ngModel)]="reportSettings.useCalculatedCostsInsteadOfBillData"
-            (change)="save()" aria-describedby="costBasisHelp">
+            (change)="updateReportSettings()">
 
           <label class="form-check-label ms-2" for="useCalculatedCostsInsteadOfBillData">
             Use calculated costs instead of bill data for baseline comparison

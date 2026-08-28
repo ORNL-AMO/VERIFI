@@ -295,10 +295,10 @@ export class FacilityCostSavingsReportAdapter {
     buildGroupSavingsTable(group: AnalysisGroup, costSavingsTable: YearGroupData, energyUseTable: YearGroupData, adjustedEnergyUseTable: YearGroupData, energySavingsTable: YearGroupData, estimatedEnergyCostTable: YearGroupData, expectedEnergyCostTable: YearGroupData, cumulativeCostSavingsTable: YearGroupData, title: string, rowKeys: (string | number)[], isMonthly: boolean): TableSection | undefined {
         let headers: string[] = [];
         if (!isMonthly) {
-            headers = ['Year', 'Actual Use', 'Actual Cost', 'Adjusted Use', 'Adjusted Cost', 'Enery Savings', 'Avoided Cost Savings', 'Cumulative Avoided Cost Savings'];
+            headers = ['Year', 'Actual Use', 'Actual Cost', 'Adjusted Use', 'Adjusted Cost', 'Energy Savings', 'Avoided Cost Savings', 'Cumulative Avoided Cost Savings'];
         }
         else {
-            headers = ['Month', 'Actual Use', 'Actual Cost', 'Adjusted Use', 'Adjusted Cost', 'Enery Savings', 'Avoided Cost Savings', 'Cumulative Avoided Cost Savings'];
+            headers = ['Month', 'Actual Use', 'Actual Cost', 'Adjusted Use', 'Adjusted Cost', 'Energy Savings', 'Avoided Cost Savings', 'Cumulative Avoided Cost Savings'];
         }
         let subheaders = ['', `${this.finalUnit}`, '$', `${this.finalUnit}`, '$', `${this.finalUnit}`, '$', '$'];
         let rows: string[][] = [];
