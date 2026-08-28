@@ -53,6 +53,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, or Electron contract changes.
 - **Tests:** Focused v1 navigation, header, side-nav, route guard, welcome, and facility settings specs; production web build before handoff.
 
+### Single-Site to Portfolio Conversion Workflow
+
+- **Workflow:** v1 single-site account conversion to portfolio presentation, issue #2641.
+- **Existing v0 entry point:** Facility management is available under the current Data Management facilities route.
+- **Decision:** Rebuild the scoped conversion path in v1 facility settings by adding a Portfolio detail between Backup and Delete account. Adding a second facility clears the existing `isSingleFacilityCompany` flag through account command handling.
+- **Parity:** Facility creation uses existing facility defaults and facility command handling; invalid single-site accounts with multiple facilities can clear the flag without creating another facility.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, or Electron contract changes.
+- **Tests:** Focused facility settings route/component specs and section navigation specs; validation planner decides parent checks.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.

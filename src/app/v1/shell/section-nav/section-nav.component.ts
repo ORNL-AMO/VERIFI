@@ -27,6 +27,8 @@ const FACILITY_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'backup', label: 'Backup', icon: 'fa-file-arrow-down' }
 ];
 
+const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' };
+
 @Component({
   selector: 'app-section-nav',
   templateUrl: './section-nav.component.html',
@@ -41,9 +43,14 @@ export class SectionNavComponent {
     if (this.navigation.contextMode() !== 'facility') {
       return ACCOUNT_SETTINGS_ITEMS;
     }
-    const deleteLabel = this.navigation.account()?.isSingleFacilityCompany ? 'Delete account' : 'Delete facility';
+    const account = this.navigation.account();
+    const isSingleFacilityAccount = !!account?.isSingleFacilityCompany;
+    const deleteLabel = isSingleFacilityAccount ? 'Delete account' : 'Delete facility';
+    const facilityItems = isSingleFacilityAccount
+      ? [...FACILITY_SETTINGS_ITEMS, PORTFOLIO_TRANSITION_ITEM]
+      : FACILITY_SETTINGS_ITEMS;
     return [
-      ...FACILITY_SETTINGS_ITEMS,
+      ...facilityItems,
       { id: 'delete', label: deleteLabel, icon: 'fa-trash', tone: 'danger' as const }
     ];
   });
