@@ -9,9 +9,6 @@
       <div>
         <p class="v1-eyebrow">Account Data</p>
         <h1 id="v1-account-portfolio-title">Portfolio</h1>
-        <p class="v1-section-header__summary">
-          Manage facilities in {{ currentAccount.name }} and continue setup from each facility workspace.
-        </p>
       </div>
       <button
         type="button"
@@ -79,14 +76,18 @@
       </article>
     } @else {
       <form class="v1-account-portfolio__toolbar" aria-label="Facility filters">
-        <label class="v1-account-portfolio__search">
-          <span class="fa fa-search" aria-hidden="true"></span>
+        <div class="v1-account-portfolio__search">
+          <span class="input-group-text">
+            <span class="fa fa-search" aria-hidden="true"></span>
+          </span>
           <input
+            id="v1-portfolio-search"
             type="search"
+            aria-label="Find facility, location, or type"
             placeholder="Find facility, location, or type"
             [value]="search()"
             (input)="setSearch($any($event.target).value)">
-        </label>
+        </div>
 
         <label>
           <span>Status</span>

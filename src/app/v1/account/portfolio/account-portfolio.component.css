@@ -123,12 +123,34 @@
   padding: .85rem;
 }
 
-.v1-account-portfolio__toolbar label {
+.v1-account-portfolio__search {
+  display: flex;
+  align-items: stretch;
+}
+
+.v1-account-portfolio__search .input-group-text {
+  align-items: center;
+  background: var(--v1-control-surface);
+  border: 1px solid var(--v1-control-border);
+  border-radius: var(--v1-radius-sm) 0 0 var(--v1-radius-sm);
+  border-right: none;
+  display: flex;
+  padding: .45rem .65rem;
+}
+
+.v1-account-portfolio__toolbar .v1-account-portfolio__search input {
+  border-left: none;
+  border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.v1-account-portfolio__toolbar label:not(.input-group-text) {
   display: grid;
   gap: .25rem;
 }
 
-.v1-account-portfolio__toolbar label > span {
+.v1-account-portfolio__toolbar label:not(.input-group-text) > span {
   color: var(--v1-muted);
   font-size: .78rem;
   font-weight: 800;
@@ -147,20 +169,6 @@
   width: 100%;
 }
 
-.v1-account-portfolio__search {
-  position: relative;
-}
-
-.v1-account-portfolio__search .fa {
-  color: var(--v1-muted);
-  left: .65rem;
-  position: absolute;
-  top: 2.15rem;
-}
-
-.v1-account-portfolio__search input {
-  padding-left: 2rem;
-}
 
 .v1-account-portfolio__cards {
   display: grid;
