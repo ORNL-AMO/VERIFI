@@ -24,7 +24,7 @@ export interface WelcomeExample {
   readonly isSingleFacilityCompany?: boolean;
 }
 
-export type CreateAccountPath = 'bills' | 'singleFacility' | 'portfolio';
+export type CreateAccountPath = 'singleFacility' | 'portfolio';
 
 export interface CreateAccountChoice {
   readonly path: CreateAccountPath;
@@ -32,7 +32,7 @@ export interface CreateAccountChoice {
   readonly eyebrow: string;
   readonly summary: string;
   readonly icon: string;
-  readonly tone: 'bills' | 'facility' | 'portfolio';
+  readonly tone: 'facility' | 'portfolio';
 }
 
 export interface CreateAccountResult {
@@ -57,21 +57,13 @@ export const CREATE_ACCOUNT_CHOICES: ReadonlyArray<CreateAccountChoice> = [
     summary: 'Create an account workspace for several facilities and portfolio-level setup.',
     icon: 'fa-building',
     tone: 'portfolio'
-  },
-  {
-    path: 'bills',
-    label: 'I have bills',
-    eyebrow: 'Simple guided path',
-    summary: 'Start with utility bills and let VERIFI guide you toward regression analysis later.',
-    icon: 'fa-receipt',
-    tone: 'bills'
   }
 ];
 
 export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   {
     title: 'Create New Account',
-    tileLabel: 'Create',
+    tileLabel: 'Create New',
     tileHint: 'Start blank',
     summary: 'Start setup for an account, facilities, meters, predictors, analyses, reports, and backup preferences.',
     icon: 'fa-plus',
@@ -81,8 +73,8 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   },
   {
     title: 'Upload Account Backup',
-    tileLabel: 'Import',
-    tileHint: 'Use backup',
+    tileLabel: 'Import Backup',
+    tileHint: 'Use backup .json file',
     summary: 'Restore or share an existing VERIFI account backup file from another system.',
     icon: 'fa-upload',
     tone: 'secondary',
@@ -91,8 +83,8 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
   },
   {
     title: 'Load Example Account',
-    tileLabel: 'Example',
-    tileHint: 'Try demo',
+    tileLabel: 'Try Example',
+    tileHint: 'Try demo account',
     summary: 'Open a representative manufacturing account and explore the full workspace concept.',
     icon: 'fa-file-circle-plus',
     tone: 'secondary',

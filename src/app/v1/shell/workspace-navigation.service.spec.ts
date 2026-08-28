@@ -94,11 +94,6 @@ describe('WorkspaceNavigationService', () => {
       'settings',
       'goals'
     ]);
-    expect(service.guidedBillsRoute('facility-a')).toEqual([
-      '/v1',
-      'guided-bills',
-      'facility-a'
-    ]);
   });
 
   it('keeps support panel tab changes in shell state instead of navigating', () => {
@@ -125,7 +120,7 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('opens facilities and guided bills routes after selecting the facility', async () => {
+  it('opens facilities on the canonical workspace route after selecting the facility', async () => {
     await service.openFacility('facility-a');
 
     expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
@@ -136,18 +131,6 @@ describe('WorkspaceNavigationService', () => {
       'facility-a',
       'home',
       'overview'
-    ]);
-
-    router.navigate.mockClear();
-    workspaceService.selectFacility.mockClear();
-
-    await service.openGuidedBills('facility-a');
-
-    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'guided-bills',
-      'facility-a'
     ]);
   });
 

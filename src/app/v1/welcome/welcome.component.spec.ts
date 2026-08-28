@@ -15,7 +15,6 @@ describe('WelcomeComponent', () => {
   let navigation: {
     openAccount: ReturnType<typeof vi.fn>;
     openFacility: ReturnType<typeof vi.fn>;
-    openGuidedBills: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -25,8 +24,7 @@ describe('WelcomeComponent', () => {
     ]);
     navigation = {
       openAccount: vi.fn().mockResolvedValue(undefined),
-      openFacility: vi.fn().mockResolvedValue(undefined),
-      openGuidedBills: vi.fn().mockResolvedValue(undefined)
+      openFacility: vi.fn().mockResolvedValue(undefined)
     };
 
     TestBed.configureTestingModule({
@@ -57,18 +55,6 @@ describe('WelcomeComponent', () => {
     expect(fixture.componentInstance.activePanel()).toBe('import');
   });
 
-  it('opens the guided bills path after bills workspace creation', async () => {
-    await fixture.componentInstance.openCreatedOrImportedAccount({
-      path: 'bills',
-      account: { guid: 'account-new', name: 'New Site' } as any,
-      facility: { guid: 'facility-new', name: 'New Site' } as any
-    });
-
-    expect(navigation.openGuidedBills).toHaveBeenCalledWith('facility-new');
-    expect(navigation.openFacility).not.toHaveBeenCalled();
-    expect(navigation.openAccount).not.toHaveBeenCalled();
-  });
-
   it('opens facility Home after single-facility workspace creation', async () => {
     await fixture.componentInstance.openCreatedOrImportedAccount({
       path: 'singleFacility',
@@ -77,7 +63,6 @@ describe('WelcomeComponent', () => {
     });
 
     expect(navigation.openFacility).toHaveBeenCalledWith('facility-new');
-    expect(navigation.openGuidedBills).not.toHaveBeenCalled();
     expect(navigation.openAccount).not.toHaveBeenCalled();
   });
 

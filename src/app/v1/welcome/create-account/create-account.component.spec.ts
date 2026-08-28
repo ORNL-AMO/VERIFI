@@ -39,7 +39,7 @@ describe('CreateAccountComponent', () => {
     fixture.detectChanges();
   });
 
-  it('uses the guided singleFacility path as the default creation path', () => {
+  it('uses the single-facility path as the default creation path', () => {
     expect(fixture.componentInstance.selectedPath).toBe('singleFacility');
   });
 
@@ -54,22 +54,6 @@ describe('CreateAccountComponent', () => {
     expect(component.accountNameInvalid).toBe(true);
   });
 
-  it('creates a guided bills workspace with a starter facility and emits it', async () => {
-    const component = fixture.componentInstance;
-    const completed = vi.fn();
-    component.completed.subscribe(completed);
-    component.createForm.controls.name.setValue('  Bill Site  ');
-
-    await component.createAccount();
-
-    const createdDraft = createAccount.mock.calls[0][0] as IdbAccount;
-    const facilityDraft = addFacility.mock.calls[0][0] as IdbFacility;
-    expect(createdDraft.name).toBe('Bill Site');
-    expect(createdDraft.isSingleFacilityCompany).toBe(true);
-    expect(facilityDraft.name).toBe('Bill Site');
-    expect(facilityDraft.accountId).toBe('new-account');
-  });
-
   it('creates a single-facility workspace with a starter facility and emits it', async () => {
     const component = fixture.componentInstance;
     const completed = vi.fn();
@@ -79,7 +63,12 @@ describe('CreateAccountComponent', () => {
 
     await component.createAccount();
 
-    expect((createAccount.mock.calls[0][0] as IdbAccount).isSingleFacilityCompany).toBe(true);
+    const createdDraft = createAccount.mock.calls[0][0] as IdbAccount;
+    const facilityDraft = addFacility.mock.calls[0][0] as IdbFacility;
+    expect(createdDraft.name).toBe('One Site');
+    expect(createdDraft.isSingleFacilityCompany).toBe(true);
+    expect(facilityDraft.name).toBe('One Site');
+    expect(facilityDraft.accountId).toBe('new-account');
     expect(addFacility).toHaveBeenCalledTimes(1);
     expect(completed).toHaveBeenCalledWith({
       path: 'singleFacility',

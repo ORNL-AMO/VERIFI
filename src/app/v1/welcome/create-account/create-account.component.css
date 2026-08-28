@@ -113,10 +113,6 @@
   background: var(--v1-surface);
 }
 
-.v1-path-choice--bills {
-  --v1-path-accent: var(--v1-success);
-}
-
 .v1-path-choice--facility {
   --v1-path-accent: var(--v1-facility);
 }

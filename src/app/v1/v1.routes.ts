@@ -18,7 +18,6 @@ import { FacilitySettingsGoalsComponent } from './facility/settings/goals/facili
 import { FacilitySettingsProfileComponent } from './facility/settings/profile/facility-settings-profile.component';
 import { FacilitySettingsStalenessComponent } from './facility/settings/staleness/facility-settings-staleness.component';
 import { FacilitySettingsUnitsComponent } from './facility/settings/units/facility-settings-units.component';
-import { GuidedBillsEntryComponent } from './guided-bills/guided-bills-entry.component';
 import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard } from './routing/canonical-route.guards';
 import { ShellComponent } from './shell/shell.component';
 import { WorkspaceShellComponent } from './shell/workspace-shell/workspace-shell.component';
@@ -31,11 +30,6 @@ export const V1Routes: Routes = [
     children: [
       { path: '', component: WelcomeComponent, canActivate: [persistenceReadyGuard] },
       { path: 'workspace', pathMatch: 'full', redirectTo: '' },
-      {
-        path: 'guided-bills/:facilityGuid',
-        component: GuidedBillsEntryComponent,
-        canActivate: [facilityReadyGuard]
-      },
       {
         path: 'workspace/account/:accountGuid',
         component: WorkspaceShellComponent,

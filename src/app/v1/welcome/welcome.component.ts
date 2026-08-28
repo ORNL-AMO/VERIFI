@@ -66,10 +66,6 @@ export class WelcomeComponent {
   async openCreatedOrImportedAccount(result: IdbAccount | CreateAccountResult): Promise<void> {
     this.closePanel();
     if (isCreateAccountResult(result)) {
-      if (result.path === 'bills' && result.facility) {
-        await this.navigation.openGuidedBills(result.facility.guid);
-        return;
-      }
       if (result.path === 'singleFacility' && result.facility) {
         await this.navigation.openFacility(result.facility.guid);
         return;

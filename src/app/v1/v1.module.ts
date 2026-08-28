@@ -7,7 +7,6 @@ import { AccountHomeComponent } from './account/home/account-home.component';
 import { AccountSettingsModule } from './account/settings/account-settings.module';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
 import { FacilitySettingsModule } from './facility/settings/facility-settings.module';
-import { GuidedBillsEntryComponent } from './guided-bills/guided-bills-entry.component';
 import { ShellHeaderComponent } from './shell/header/shell-header.component';
 import { PrimaryRailComponent } from './shell/primary-rail/primary-rail.component';
 import { SectionNavComponent } from './shell/section-nav/section-nav.component';
@@ -26,8 +25,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
     SectionNavComponent,
     SupportPanelComponent,
     AccountHomeComponent,
-    FacilityHomeComponent,
-    GuidedBillsEntryComponent
+    FacilityHomeComponent
   ],
   imports: [
     CommonModule,
