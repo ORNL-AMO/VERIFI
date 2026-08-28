@@ -35,6 +35,15 @@ export interface PanelContent {
   readonly details: ReadonlyArray<{ label: string; value: string }>;
 }
 
+export type SingleSiteWorkspaceState = 'portfolio' | 'valid' | 'missing-facility' | 'multiple-facilities';
+
+export interface AccountDropdownOption {
+  readonly guid: string;
+  readonly name: string;
+  readonly descriptor: string;
+  readonly active: boolean;
+}
+
 interface RouteState {
   readonly view: 'welcome' | 'workspace';
   readonly contextMode: ContextMode;
@@ -101,6 +110,13 @@ export class WorkspaceNavigationService {
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
+  readonly singleSiteWorkspaceState = computed(() => this.resolveSingleSiteWorkspaceState());
+  readonly isSingleSiteWorkspace = computed(() => this.singleSiteWorkspaceState() === 'valid');
+  readonly hasSingleSiteRecovery = computed(() => {
+    const state = this.singleSiteWorkspaceState();
+    return state === 'missing-facility' || state === 'multiple-facilities';
+  });
+  readonly accountOptions = computed(() => this.buildAccountOptions());
   readonly panelContent = computed(() => this.buildPanelContent());
 
   constructor() {
@@ -120,6 +136,23 @@ export class WorkspaceNavigationService {
     if (result === 'published') {
       await this.router.navigate(this.accountRoute(accountGuid));
     }
+  }
+
+  async openWorkspace(accountGuid: string): Promise<void> {
+    const result = await this.workspaceService.selectAccount(accountGuid);
+    if (result !== 'published') {
+      return;
+    }
+
+    const account = this.workspace.account();
+    const facilities = this.workspace.facilities();
+    if (account?.isSingleFacilityCompany === true && facilities.length === 1) {
+      this.workspaceService.selectFacility(facilities[0].guid);
+      await this.router.navigate(this.facilityRoute(facilities[0].guid));
+      return;
+    }
+
+    await this.router.navigate(this.accountRoute(accountGuid));
   }
 
   async openFacility(facilityGuid: string): Promise<void> {
@@ -201,6 +234,11 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
 
+  legacyFacilityManagementRoute(accountGuid?: string): Array<string> {
+    const guid = accountGuid || this.account()?.guid || this.routeState().accountGuid;
+    return guid ? ['/data-management', guid, 'facilities'] : ['/manage-accounts'];
+  }
+
   private resolveAccount(): IdbAccount | undefined {
     const state = this.routeState();
     return this.lifecycle.usableAccounts().find(account => account.guid === state.accountGuid)
@@ -215,6 +253,30 @@ export class WorkspaceNavigationService {
         || this.workspace.selectedFacility();
     }
     return this.workspace.selectedFacility() || this.facilities()[0];
+  }
+
+  private resolveSingleSiteWorkspaceState(): SingleSiteWorkspaceState {
+    const account = this.workspace.account() || this.account();
+    if (account?.isSingleFacilityCompany !== true) {
+      return 'portfolio';
+    }
+    const facilityCount = this.facilities().length;
+    if (facilityCount === 1) {
+      return 'valid';
+    }
+    return facilityCount === 0 ? 'missing-facility' : 'multiple-facilities';
+  }
+
+  private buildAccountOptions(): Array<AccountDropdownOption> {
+    const activeAccountGuid = this.workspace.account()?.guid || this.routeState().accountGuid;
+    return this.lifecycle.usableAccounts()
+      .filter(account => !account.deleteAccount)
+      .map(account => ({
+        guid: account.guid,
+        name: account.name || 'Untitled account',
+        descriptor: accountDescriptor(account),
+        active: account.guid === activeAccountGuid
+      }));
   }
 
   private buildPanelContent(): PanelContent {
@@ -300,4 +362,15 @@ export function parseWorkspaceRoute(url: string): RouteState {
 
 function normalizeSection(section: string | undefined): SectionId {
   return VALID_SECTION_IDS.includes(section as SectionId) ? section as SectionId : 'home';
+}
+
+function accountDescriptor(account: IdbAccount): string {
+  if (account.isSingleFacilityCompany === true) {
+    return 'Single site';
+  }
+  const facilityCount = Number(account.numberOfFacilities);
+  if (Number.isFinite(facilityCount)) {
+    return `${facilityCount} ${facilityCount === 1 ? 'facility' : 'facilities'}`;
+  }
+  return 'Portfolio';
 }

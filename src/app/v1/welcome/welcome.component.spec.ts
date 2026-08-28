@@ -13,7 +13,7 @@ describe('WelcomeComponent', () => {
   let fixture: ComponentFixture<WelcomeComponent>;
   let usableAccounts: ReturnType<typeof signal>;
   let navigation: {
-    openAccount: ReturnType<typeof vi.fn>;
+    openWorkspace: ReturnType<typeof vi.fn>;
     openFacility: ReturnType<typeof vi.fn>;
   };
 
@@ -23,7 +23,7 @@ describe('WelcomeComponent', () => {
       { id: 2, guid: 'account-b', name: 'Account B', modifiedDate: new Date('2026-03-04'), isSingleFacilityCompany: true }
     ]);
     navigation = {
-      openAccount: vi.fn().mockResolvedValue(undefined),
+      openWorkspace: vi.fn().mockResolvedValue(undefined),
       openFacility: vi.fn().mockResolvedValue(undefined)
     };
 
@@ -63,18 +63,18 @@ describe('WelcomeComponent', () => {
     });
 
     expect(navigation.openFacility).toHaveBeenCalledWith('facility-new');
-    expect(navigation.openAccount).not.toHaveBeenCalled();
+    expect(navigation.openWorkspace).not.toHaveBeenCalled();
   });
 
-  it('opens account Home after portfolio creation or existing import paths', async () => {
+  it('opens the workspace default after portfolio creation or existing import paths', async () => {
     await fixture.componentInstance.openCreatedOrImportedAccount({
       path: 'portfolio',
       account: { guid: 'account-new', name: 'New Portfolio' } as any
     });
     await fixture.componentInstance.openCreatedOrImportedAccount({ guid: 'account-import', name: 'Imported' } as any);
 
-    expect(navigation.openAccount).toHaveBeenCalledWith('account-new');
-    expect(navigation.openAccount).toHaveBeenCalledWith('account-import');
+    expect(navigation.openWorkspace).toHaveBeenCalledWith('account-new');
+    expect(navigation.openWorkspace).toHaveBeenCalledWith('account-import');
   });
 
   it('renders existing accounts and opens the selected account', async () => {
@@ -87,7 +87,7 @@ describe('WelcomeComponent', () => {
     buttons[0].click();
     await fixture.whenStable();
 
-    expect(navigation.openAccount).toHaveBeenCalledWith('account-b');
+    expect(navigation.openWorkspace).toHaveBeenCalledWith('account-b');
   });
 
   it('keeps long account names accessible while truncating visually', () => {
@@ -141,7 +141,7 @@ describe('WelcomeComponent', () => {
   });
 
   it('shows an error if an account cannot be opened', async () => {
-    navigation.openAccount.mockRejectedValueOnce(new Error('nope'));
+    navigation.openWorkspace.mockRejectedValueOnce(new Error('nope'));
 
     const buttons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-row'));
     buttons[0].click();

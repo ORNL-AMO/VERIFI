@@ -44,7 +44,7 @@ export class WelcomeComponent {
     this.loadingAccountGuid.set(account.guid);
     this.errorMessage.set(undefined);
     try {
-      await this.navigation.openAccount(account.guid);
+      await this.navigation.openWorkspace(account.guid);
     } catch {
       this.errorMessage.set(`${account.name} could not be opened in the v1 workspace.`);
     } finally {
