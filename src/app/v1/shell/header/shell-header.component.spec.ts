@@ -10,7 +10,7 @@ describe('ShellHeaderComponent', () => {
     const { fixture } = setup(false);
 
     expect(fixture.nativeElement.querySelector('.v1-workspace__brand')?.textContent).toContain('VERIFI');
-    expect(fixture.nativeElement.querySelector('.v1-workspace__context')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-workspace__account-menu')).toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Toggle support panel"]')).toBeNull();
 
     const settingsButton: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Appearance settings"]');
@@ -26,17 +26,59 @@ describe('ShellHeaderComponent', () => {
     expect(menuText).toContain('Topographic contours');
   });
 
-  it('shows workspace context and support panel control on workspace routes', () => {
+  it('shows the account dropdown and support panel control on workspace routes', () => {
     const { fixture, navigation } = setup(true);
 
-    expect(fixture.nativeElement.querySelector('.v1-workspace__context')?.textContent).toContain('Account A');
-    expect(fixture.nativeElement.querySelector('.v1-workspace__context')?.textContent).toContain('Facility A');
-    expect(fixture.nativeElement.querySelector('.v1-context-pill--active')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-account-switcher__button')?.textContent).toContain('Account A');
+    expect(fixture.nativeElement.querySelector('select[aria-label="Select facility"]')).toBeNull();
+
+    const accountButton: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-account-switcher__button');
+    accountButton.click();
+    fixture.detectChanges();
+
+    const menu = fixture.nativeElement.querySelector('.v1-account-switcher__dropdown');
+    expect(menu?.textContent).toContain('Account A');
+    expect(menu?.textContent).toContain('Single facility');
+    expect(menu?.textContent).toContain('Account B');
+    expect(menu?.textContent).toContain('Portfolio');
+    expect(menu?.textContent).toContain('Add new account');
+    expect(menu?.textContent).toContain('Import backup');
+    expect(menu?.textContent).toContain('Manage accounts');
+    expect(menu.querySelectorAll('button:disabled').length).toBe(3);
+
+    const accountItems: Array<HTMLButtonElement> = Array.from(menu.querySelectorAll('.v1-account-switcher__item:not(:disabled)'));
+    expect(accountItems[0].classList.contains('active')).toBe(true);
+    accountItems[1].click();
+    fixture.detectChanges();
+
+    expect(navigation.openWorkspace).toHaveBeenCalledWith('account-b');
+    expect(fixture.componentInstance.accountMenuOpen).toBe(false);
 
     const panelButton: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Toggle support panel"]');
     panelButton.click();
 
     expect(navigation.toggleSupportPanel).toHaveBeenCalled();
+  });
+
+  it('closes open header menus from the backdrop and Escape key', () => {
+    const { fixture } = setup(true);
+    const accountButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.v1-account-switcher__button');
+
+    accountButton().click();
+    fixture.detectChanges();
+
+    const backdrop: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-workspace__backdrop');
+    backdrop.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.accountMenuOpen).toBe(false);
+
+    accountButton().click();
+    fixture.detectChanges();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.accountMenuOpen).toBe(false);
   });
 });
 
@@ -64,9 +106,14 @@ function setup(isWorkspaceRoute: boolean): {
     isSupportPanelOpen: vi.fn(() => true),
     contextMode: vi.fn(() => 'account'),
     account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
+    accountOptions: vi.fn(() => [
+      { guid: 'account-a', name: 'Account A', descriptor: 'Single facility', active: true },
+      { guid: 'account-b', name: 'Account B', descriptor: 'Portfolio', active: false }
+    ]),
     facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
     facility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),
     showWelcome: vi.fn(),
+    openWorkspace: vi.fn(),
     setContext: vi.fn(),
     setFacility: vi.fn(),
     toggleSupportPanel: vi.fn()

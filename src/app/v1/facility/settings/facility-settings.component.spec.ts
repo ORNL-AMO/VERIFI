@@ -159,6 +159,16 @@ describe('Facility settings routed components', () => {
     expect(fixture.nativeElement.textContent).toContain('No facility selected');
   });
 
+  it('keeps facility settings terminology for valid single-facility accounts', () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = TestBed.createComponent(FacilitySettingsComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Facility settings');
+    expect(fixture.nativeElement.textContent).not.toContain('Site setup');
+  });
+
   it('defines facility settings details as child routes of the settings shell', () => {
     const facilityRoute = V1Routes[0].children?.find(route => route.path === 'workspace/facility/:facilityGuid');
     const settingsRoute = facilityRoute?.children?.find(route => route.path === 'settings');
@@ -228,6 +238,49 @@ describe('Facility settings routed components', () => {
     expect(input.disabled).toBe(true);
   });
 
+  it('mirrors matching profile fields to the account for single-facility accounts', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = createDetail(FacilitySettingsProfileComponent);
+    fixture.componentInstance.form.patchValue({
+      name: 'Updated Site',
+      city: 'Oak Ridge',
+      state: 'TN',
+      zip: '37830',
+      address: '2 Main St',
+      size: 45000,
+      classification: 'Manufacturing'
+    });
+
+    await fixture.componentInstance.saveProfile();
+
+    expect(commandBoundary.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityKind: 'account',
+        publication: expect.objectContaining({ mode: 'patch' })
+      }),
+      expect.any(Function)
+    );
+    expect(accountHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Updated Site',
+        city: 'Oak Ridge',
+        state: 'TN',
+        zip: '37830',
+        address: '2 Main St'
+      }),
+      'account-a'
+    );
+    expect(facilityHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Updated Site',
+        city: 'Oak Ridge',
+        classification: 'Manufacturing'
+      }),
+      'account-a'
+    );
+  });
+
   it('copies account units only after confirmation', async () => {
     selectedFacility.set({
       ...facilityFixture('facility-a'),
@@ -253,6 +306,46 @@ describe('Facility settings routed components', () => {
         massUnit: 'lb',
         electricityUnit: 'kWh',
         eGridSubregion: 'SRTV'
+      }),
+      'account-a'
+    );
+  });
+
+  it('mirrors matching unit fields to the account for single-facility accounts', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = createDetail(FacilitySettingsUnitsComponent);
+    fixture.componentInstance.form.patchValue({
+      unitsOfMeasure: 'Metric',
+      energyUnit: 'GJ',
+      electricityUnit: 'kWh',
+      volumeLiquidUnit: 'L',
+      volumeGasUnit: 'm3',
+      massUnit: 'kg',
+      energyIsSource: false
+    });
+
+    await fixture.componentInstance.saveUnits();
+
+    expect(accountHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unitsOfMeasure: 'Custom',
+        energyUnit: 'GJ',
+        volumeLiquidUnit: 'L',
+        volumeGasUnit: 'm3',
+        massUnit: 'kg',
+        energyIsSource: false
+      }),
+      'account-a'
+    );
+    expect(facilityHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unitsOfMeasure: 'Custom',
+        energyUnit: 'GJ',
+        volumeLiquidUnit: 'L',
+        volumeGasUnit: 'm3',
+        massUnit: 'kg',
+        energyIsSource: false
       }),
       'account-a'
     );
@@ -295,6 +388,28 @@ describe('Facility settings routed components', () => {
 
     expect(fixture.componentInstance.form.controls['energyReductionPercent'].value).toBe(40);
     expect(fixture.componentInstance.saveState).toBe('error');
+  });
+
+  it('mirrors matching goal fields to the account for single-facility accounts', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = createDetail(FacilitySettingsGoalsComponent);
+    fixture.componentInstance.form.controls['energyReductionPercent'].setValue(40);
+
+    await fixture.componentInstance.saveGoals();
+
+    expect(accountHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sustainabilityQuestions: expect.objectContaining({ energyReductionPercent: 40 })
+      }),
+      'account-a'
+    );
+    expect(facilityHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sustainabilityQuestions: expect.objectContaining({ energyReductionPercent: 40 })
+      }),
+      'account-a'
+    );
   });
 
   it('mirrors matching financial fields to the account for single-facility accounts', async () => {
@@ -340,6 +455,32 @@ describe('Facility settings routed components', () => {
       'account-a'
     );
     expect(fixture.componentInstance.form.controls['enabled'].disabled).toBe(true);
+  });
+
+  it('mirrors matching staleness fields to the account for single-facility accounts', async () => {
+    account.set({ ...accountFixture(), isSingleFacilityCompany: true });
+    facilities.set([selectedFacility()!]);
+    const fixture = createDetail(FacilitySettingsStalenessComponent);
+    fixture.componentInstance.form.patchValue({
+      useAccountSettings: false,
+      enabled: false,
+      thresholdMonths: 12
+    });
+
+    await fixture.componentInstance.saveStaleness();
+
+    expect(accountHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataStalenessSettings: { enabled: false, thresholdMonths: 12 }
+      }),
+      'account-a'
+    );
+    expect(facilityHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataStalenessSettings: { enabled: false, thresholdMonths: 12, useAccountSettings: false }
+      }),
+      'account-a'
+    );
   });
 
   it('confirms before exporting a facility backup and opens the v1 import panel', async () => {

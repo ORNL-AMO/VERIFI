@@ -1,8 +1,8 @@
 @let isWorkspaceRoute = navigation.isWorkspaceRoute();
 
 <header class="v1-workspace__header" aria-label="Workspace header">
-  @if (isSettingsOpen) {
-    <button type="button" class="v1-workspace__backdrop" (click)="closeSettings()" aria-label="Close appearance menu"></button>
+  @if (hasBackdrop) {
+    <button type="button" class="v1-workspace__backdrop" (click)="closeAll()" aria-label="Close open menu"></button>
   }
 
   <button type="button" class="v1-workspace__brand" (click)="navigation.showWelcome()" aria-label="Show v1 welcome">
@@ -11,40 +11,62 @@
   </button>
 
   @if (isWorkspaceRoute) {
-    @let facilities = navigation.facilities();
-    @let selectedFacility = navigation.facility();
-    @let contextMode = navigation.contextMode();
+    @let accountOptions = navigation.accountOptions();
 
-    <div class="v1-workspace__context" aria-label="Active workspace context">
+    <div class="v1-workspace__account-menu" aria-label="Account selection">
       @if (navigation.account(); as account) {
+        <div class="v1-account-switcher">
         <button
           type="button"
-          class="v1-context-pill v1-context-pill--account"
-          [class.v1-context-pill--active]="contextMode === 'account'"
-          [attr.aria-pressed]="contextMode === 'account'"
-          (click)="navigation.setContext('account')">
+          class="v1-account-switcher__button"
+          [class.open]="accountMenuOpen"
+          (click)="toggleAccountMenu()"
+          aria-haspopup="true"
+          [attr.aria-expanded]="accountMenuOpen">
           <span class="fa fa-building" aria-hidden="true"></span>
-          <span>{{ account.name }}</span>
+          <span class="v1-account-switcher__name">{{ account.name }}</span>
+          <span class="fa fa-chevron-down v1-account-switcher__chevron" aria-hidden="true"></span>
         </button>
-      }
 
-      @if (facilities.length > 0) {
-        <div class="v1-context-select" [class.v1-context-select--active]="contextMode === 'facility'">
-          <span class="fa fa-industry" aria-hidden="true"></span>
-          <select
-            [value]="selectedFacility?.guid || ''"
-            (change)="navigation.setFacility($any($event.target).value)"
-            aria-label="Select facility">
-            @for (facility of facilities; track facility.guid) {
-              <option [value]="facility.guid">{{ facility.name }}</option>
-            }
-          </select>
+        @if (accountMenuOpen) {
+          <div class="v1-account-switcher__dropdown" role="menu" aria-label="Switch account">
+            <div class="v1-account-switcher__section">
+              <span class="v1-account-switcher__label">Switch account</span>
+              @for (option of accountOptions; track option.guid) {
+                <button
+                  type="button"
+                  class="v1-account-switcher__item"
+                  role="menuitem"
+                  [class.active]="option.active"
+                  (click)="selectAccount(option.guid)">
+                  <span class="fa fa-check v1-account-switcher__check" aria-hidden="true"></span>
+                  <span>
+                    {{ option.name }}
+                    <small>{{ option.descriptor }}</small>
+                  </span>
+                </button>
+              }
+            </div>
+
+            <div class="v1-account-switcher__divider"></div>
+
+            <div class="v1-account-switcher__section">
+              <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
+                <span class="fa fa-plus" aria-hidden="true"></span>
+                Add new account
+              </button>
+              <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
+                <span class="fa fa-upload" aria-hidden="true"></span>
+                Import backup
+              </button>
+              <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
+                <span class="fa fa-gears" aria-hidden="true"></span>
+                Manage accounts
+              </button>
+            </div>
+          </div>
+        }
         </div>
-      } @else {
-        <span class="v1-context-pill v1-context-pill--disabled">
-          <span class="fa fa-industry" aria-hidden="true"></span>
-          No facilities
-        </span>
       }
     </div>
   } @else {

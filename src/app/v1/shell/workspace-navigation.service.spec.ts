@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -11,6 +12,10 @@ describe('WorkspaceNavigationService', () => {
   let service: WorkspaceNavigationService;
   let router: { url: string; events: Subject<unknown>; navigate: ReturnType<typeof vi.fn> };
   let workspaceService: { selectAccount: ReturnType<typeof vi.fn>; selectFacility: ReturnType<typeof vi.fn> };
+  let usableAccounts: ReturnType<typeof vi.fn>;
+  let accountSignal: ReturnType<typeof signal<any>>;
+  let facilitiesSignal: ReturnType<typeof signal<any[]>>;
+  let selectedFacilitySignal: ReturnType<typeof signal<any>>;
   let workspaceStore: {
     account: ReturnType<typeof vi.fn>;
     facilities: ReturnType<typeof vi.fn>;
@@ -35,10 +40,14 @@ describe('WorkspaceNavigationService', () => {
       selectAccount: vi.fn().mockResolvedValue('published'),
       selectFacility: vi.fn()
     };
+    usableAccounts = vi.fn(() => []);
+    accountSignal = signal({ guid: 'account-a', name: 'Account A' });
+    facilitiesSignal = signal([{ guid: 'facility-a', name: 'Facility A' }]);
+    selectedFacilitySignal = signal({ guid: 'facility-a', name: 'Facility A' });
     workspaceStore = {
-      account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
-      facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
-      selectedFacility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),
+      account: vi.fn(() => accountSignal()),
+      facilities: vi.fn(() => facilitiesSignal()),
+      selectedFacility: vi.fn(() => selectedFacilitySignal()),
       meters: vi.fn(() => []),
       facilityMeters: vi.fn(() => []),
       predictors: vi.fn(() => []),
@@ -53,7 +62,7 @@ describe('WorkspaceNavigationService', () => {
       providers: [
         WorkspaceNavigationService,
         { provide: Router, useValue: router },
-        { provide: ApplicationLifecycleService, useValue: { usableAccounts: vi.fn(() => []) } },
+        { provide: ApplicationLifecycleService, useValue: { usableAccounts } },
         { provide: AccountWorkspaceStore, useValue: workspaceStore },
         { provide: AccountWorkspaceService, useValue: workspaceService }
       ]
@@ -117,6 +126,84 @@ describe('WorkspaceNavigationService', () => {
       'account-a',
       'home',
       'overview'
+    ]);
+  });
+
+  it('opens valid single-site accounts on the sole facility workspace route', async () => {
+    accountSignal.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    facilitiesSignal.set([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);
+
+    await service.openWorkspace('account-a');
+
+    expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-a');
+    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'home',
+      'overview'
+    ]);
+  });
+
+  it('keeps portfolio and invalid single-site accounts on account workspace routes', async () => {
+    await service.openWorkspace('account-a');
+    expect(router.navigate).toHaveBeenLastCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'home',
+      'overview'
+    ]);
+
+    router.navigate.mockClear();
+    accountSignal.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    facilitiesSignal.set([]);
+
+    await service.openWorkspace('account-a');
+
+    expect(workspaceService.selectFacility).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenLastCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'home',
+      'overview'
+    ]);
+    expect(service.hasSingleSiteRecovery()).toBe(true);
+
+    router.navigate.mockClear();
+    facilitiesSignal.set([
+      { guid: 'facility-a', name: 'Facility A', accountId: 'account-a' },
+      { guid: 'facility-b', name: 'Facility B', accountId: 'account-a' }
+    ]);
+
+    await service.openWorkspace('account-a');
+
+    expect(router.navigate).toHaveBeenLastCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'home',
+      'overview'
+    ]);
+    expect(service.singleSiteWorkspaceState()).toBe('multiple-facilities');
+  });
+
+  it('exposes account dropdown options with descriptors and active state', () => {
+    usableAccounts.mockReturnValue([
+      { guid: 'account-a', name: 'Account A', numberOfFacilities: '2' },
+      { guid: 'account-b', name: 'Account B', isSingleFacilityCompany: true },
+      { guid: 'deleted-account', name: 'Deleted', deleteAccount: true }
+    ]);
+
+    expect(service.accountOptions()).toEqual([
+      { guid: 'account-a', name: 'Account A', descriptor: '2 facilities', active: true },
+      { guid: 'account-b', name: 'Account B', descriptor: 'Single facility', active: false }
     ]);
   });
 

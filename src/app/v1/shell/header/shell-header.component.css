@@ -50,21 +50,23 @@
 }
 
 .v1-workspace__spacer,
-.v1-workspace__context {
+.v1-workspace__account-menu {
   flex: 1 1 auto;
 }
 
-.v1-workspace__context {
+.v1-workspace__account-menu {
   display: flex;
-  flex-wrap: wrap;
-  gap: .45rem;
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
 }
 
-.v1-context-pill,
-.v1-context-select {
+.v1-account-switcher {
+  position: relative;
+  min-width: 0;
+}
+
+.v1-account-switcher__button {
   display: inline-flex;
   gap: .45rem;
   align-items: center;
@@ -77,57 +79,114 @@
   color: var(--v1-text);
   font-size: .86rem;
   font-weight: 800;
-  transition:
-    border-color .18s ease,
-    background-color .18s ease,
-    box-shadow .18s ease,
-    color .18s ease,
-    transform .18s ease;
-}
-
-.v1-context-pill {
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease;
   cursor: pointer;
 }
 
-.v1-context-pill span:last-child {
+.v1-account-switcher__button:hover,
+.v1-account-switcher__button.open {
+  border-color: color-mix(in srgb, var(--v1-account) 48%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-account) 9%, var(--v1-panel));
+  color: var(--v1-account);
+}
+
+.v1-account-switcher__name {
+  max-width: 16rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.v1-context-pill--account {
-  color: var(--v1-account);
+.v1-account-switcher__chevron {
+  flex-shrink: 0;
+  font-size: .65rem;
+  opacity: .68;
 }
 
-.v1-context-pill--active {
-  border-color: color-mix(in srgb, var(--v1-account) 48%, var(--v1-border));
-  background: color-mix(in srgb, var(--v1-account) 9%, var(--v1-panel));
-  box-shadow: inset 3px 0 0 var(--v1-account);
+.v1-account-switcher__dropdown,
+.v1-settings__menu {
+  position: absolute;
+  top: calc(100% + .5rem);
+  right: 0;
+  z-index: 20;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+  box-shadow: 0 .9rem 2.2rem var(--v1-shadow);
 }
 
-.v1-context-pill--disabled {
+.v1-account-switcher__dropdown {
+  width: min(18rem, calc(100vw - 2rem));
+  padding: .4rem;
+}
+
+.v1-account-switcher__section {
+  display: grid;
+  gap: .1rem;
+}
+
+.v1-account-switcher__label {
+  display: block;
+  padding: .3rem .55rem .2rem;
   color: var(--v1-muted);
-  cursor: default;
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
-.v1-context-select {
-  color: var(--v1-facility);
+.v1-account-switcher__divider {
+  height: 1px;
+  margin: .35rem .1rem;
+  background: var(--v1-border);
 }
 
-.v1-context-select--active {
-  border-color: color-mix(in srgb, var(--v1-facility) 48%, var(--v1-border));
-  background: color-mix(in srgb, var(--v1-facility) 9%, var(--v1-panel));
-  box-shadow: inset 3px 0 0 var(--v1-facility);
-}
-
-.v1-context-select select {
-  min-width: 8rem;
-  max-width: 17rem;
+.v1-account-switcher__item {
+  display: flex;
+  gap: .55rem;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: .45rem .55rem;
   border: 0;
+  border-radius: var(--v1-radius-sm);
   background: transparent;
   color: var(--v1-text);
-  font: inherit;
-  outline: 0;
+  font-size: .85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.v1-account-switcher__item small {
+  display: block;
+  color: var(--v1-muted);
+  font-size: .75rem;
+}
+
+.v1-account-switcher__item:hover:not(:disabled) {
+  background: var(--v1-surface-muted);
+}
+
+.v1-account-switcher__item.active {
+  color: var(--v1-account);
+  font-weight: 800;
+  box-shadow: inset 3px 0 0 currentColor;
+}
+
+.v1-account-switcher__item:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.v1-account-switcher__check {
+  flex-shrink: 0;
+  margin-top: .15rem;
+  color: var(--v1-account);
+  font-size: .8rem;
+  opacity: 0;
+}
+
+.v1-account-switcher__item.active .v1-account-switcher__check {
+  opacity: 1;
 }
 
 .v1-workspace__actions {
@@ -141,18 +200,10 @@
 }
 
 .v1-settings__menu {
-  position: absolute;
-  top: calc(100% + .5rem);
-  right: 0;
-  z-index: 20;
   display: grid;
   gap: .35rem;
   width: min(25rem, calc(100vw - 2rem));
   padding: .65rem;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius);
-  background: var(--v1-surface);
-  box-shadow: 0 .9rem 2.2rem var(--v1-shadow);
 }
 
 .v1-settings__label {
@@ -305,8 +356,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .v1-context-pill,
-  .v1-context-select,
+  .v1-account-switcher__button,
   .v1-settings__toggle-track span {
     transition: none;
   }
@@ -318,12 +368,17 @@
     flex-direction: column;
   }
 
-  .v1-workspace__context {
+  .v1-workspace__account-menu {
     justify-content: flex-start;
   }
 
-  .v1-context-pill,
-  .v1-context-select {
+  .v1-account-switcher,
+  .v1-account-switcher__button {
     max-width: 100%;
+  }
+
+  .v1-account-switcher__dropdown {
+    left: 0;
+    right: auto;
   }
 }
