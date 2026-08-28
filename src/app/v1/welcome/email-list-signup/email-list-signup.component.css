@@ -29,8 +29,9 @@
   padding: .55rem .7rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius-sm);
-  background: var(--v1-panel);
+  background: var(--v1-control-surface);
   color: var(--v1-text);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--v1-surface) 70%, transparent);
 }
 
 @media (max-width: 640px) {

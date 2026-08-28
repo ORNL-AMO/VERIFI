@@ -14,7 +14,7 @@ description: Design, implement, or review meaningful VERIFI tests and regression
    - Use focused Electron/manual evidence for operating-system integration that the existing automated tiers cannot represent.
 4. Inspect neighboring production code and specs. Reuse a real, cheap collaborator when it increases confidence; mock nondeterministic or external boundaries with the smallest realistic interface.
 5. Build minimal deterministic fixtures. For a defect, reproduce the failure in a regression test before or alongside the fix when feasible.
-6. Assert public results, persisted shapes, state transitions, rendered output, emitted values, error handling, and cleanup. Do not add creation-only tests, arbitrary sleeps, real network calls, retry-based flake suppression, or assertions coupled to private implementation.
+6. Assert public results, persisted shapes, state transitions, meaningful rendered output, emitted values, error handling, and cleanup. Do not add creation-only tests, arbitrary sleeps, real network calls, retry-based flake suppression, assertions coupled to private implementation, or ordinary copy/order/style assertions unless the specific text, sequence, or visual hook is the user-facing contract.
 7. Clean up databases, Workers, subscriptions, listeners, mocks, timers, TestBed state, and changed global values.
 8. Run the focused spec during iteration. Use `validate-web-and-electron` and `npm run validate:agent -- --mode plan` to select the final risk-based matrix instead of defaulting to broad or Electron checks.
 

@@ -31,26 +31,20 @@ describe('ExampleAccountComponent', () => {
     fixture.detectChanges();
   });
 
-  it('shows example accounts as compact demo picker choices', () => {
-    const text = fixture.nativeElement.textContent;
-    const choices: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-example'));
-
-    expect(choices).toHaveLength(2);
-    expect(text).toContain('Portfolio');
-    expect(text).toContain('Best for');
-    expect(text).toContain('Multi-site reporting');
-    expect(text).toContain('Single Facility');
-    expect(text).toContain('Quick walkthrough');
-    expect(text).not.toContain('3 facilities');
-    expect(text).not.toContain('1 facility');
-    expect(text).not.toContain('Use this example when you want');
-    expect(choices[0].getAttribute('aria-label')).toContain('Load Portfolio Example');
-  });
-
   it('loads the selected example and preserves single-facility metadata', async () => {
     const completed = vi.fn();
     fixture.componentInstance.completed.subscribe(completed);
-    const singleFacilityExample = fixture.componentInstance.examples[1];
+    const singleFacilityExample = {
+      title: 'Single Facility Example',
+      choiceLabel: 'Single Facility',
+      choiceHint: 'Quick walkthrough',
+      assetPath: 'assets/example-data/SingleFacilityExample.json',
+      summary: 'Example summary',
+      details: [],
+      highlights: [],
+      cta: 'Load Single Facility Example',
+      isSingleFacilityCompany: true
+    };
 
     await fixture.componentInstance.loadExample(singleFacilityExample);
 

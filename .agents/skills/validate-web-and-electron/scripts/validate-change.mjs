@@ -59,8 +59,11 @@ function buildValidationPlan(paths) {
   const hasAppSource = paths.some(path =>
     path.startsWith('src/') && /\.(ts|html|css|scss)$/.test(path)
   );
+  const hasAngularStyleSource = paths.some(path =>
+    path.startsWith('src/') && /\.(css|scss)$/.test(path)
+  );
   const hasTypeScriptSource = paths.some(path =>
-    (path.startsWith('src/') && path.endsWith('.ts')) ||
+    (path.startsWith('src/') && path.endsWith('.ts') && !isSpecFile(path)) ||
     /^tsconfig.*\.json$/.test(path) ||
     path === 'angular.json'
   );
@@ -78,16 +81,18 @@ function buildValidationPlan(paths) {
     path.startsWith('src/app/platform/electron/') ||
     path.includes('environment.electron')
   );
-  const hasProductionAngularSurface = paths.some(path =>
-    path === 'angular.json' ||
-    path === 'src/main.ts' ||
-    /^src\/app\/(app\.module|app\.component|main)\.ts$/.test(path) ||
-    /^src\/app\/routing\/.*\.(ts|html|css|scss)$/.test(path) ||
-    /^src\/app\/(v0|v1|ux-prototypes)\/.*\.(ts|html|css|scss)$/.test(path) ||
-    /^src\/app\/platform\/electron\/.*\.(ts|html|css|scss)$/.test(path) ||
-    /^src\/styles\/.*\.(css|scss)$/.test(path) ||
-    /^src\/environments\/environment(\.prod)?\.ts$/.test(path)
+  const hasProductionBuildSurface = paths.some(path =>
+    !isSpecFile(path) && (
+      path === 'angular.json' ||
+      path === 'src/main.ts' ||
+      /^src\/app\/(app\.module|app\.component|main)\.ts$/.test(path) ||
+      /^src\/app\/(v0|v1)\/v[01]\.(module|routes)\.ts$/.test(path) ||
+      /^src\/app\/routing\/.*\.(ts|html)$/.test(path) ||
+      /^src\/app\/platform\/electron\/.*\.(ts|html)$/.test(path) ||
+      /^src\/environments\/environment(\.prod)?\.ts$/.test(path)
+    )
   );
+  const hasStyleOnlyAngularSurface = hasAngularStyleSource && !hasProductionBuildSurface && !hasTypeScriptSource;
 
   const hasExplicitBrowserSpec = paths.some(path =>
     path.endsWith('.browser.spec.ts') ||
@@ -133,13 +138,16 @@ function buildValidationPlan(paths) {
     ));
   }
 
-  if (hasProductionAngularSurface) {
+  if (hasProductionBuildSurface) {
     commands.push(command(
       'Production web build',
       'npm',
       ['run', 'build-prod'],
-      'Production Angular UI, routing, styles, or build surface changed.'
+      'Production Angular routing, templates, modules, app entrypoints, environment files, or build surface changed.'
     ));
+  } else if (hasStyleOnlyAngularSurface) {
+    manual.push('Perform a focused visual/accessibility check for the affected styled UI state.');
+    reasons.push('Style-only Angular changes do not require build-prod by default; focused specs compile nearby component styles when available.');
   }
 
   if (hasElectronBoundary) {
@@ -264,6 +272,10 @@ function command(label, executable, args, reason) {
 
 function displayArgument(value) {
   return /\s/.test(value) ? JSON.stringify(value) : value;
+}
+
+function isSpecFile(path) {
+  return /\.browser\.spec\.ts$/.test(path) || /\.spec\.ts$/.test(path);
 }
 
 function isDocsOnly(path) {

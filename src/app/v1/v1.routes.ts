@@ -28,7 +28,7 @@ export const V1Routes: Routes = [
     path: '',
     component: ShellComponent,
     children: [
-      { path: '', component: WelcomeComponent, canActivate: [persistenceReadyGuard]},
+      { path: '', component: WelcomeComponent, canActivate: [persistenceReadyGuard] },
       { path: 'workspace', pathMatch: 'full', redirectTo: '' },
       {
         path: 'workspace/account/:accountGuid',

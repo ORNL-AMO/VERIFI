@@ -122,6 +122,11 @@ export class WorkspaceNavigationService {
     }
   }
 
+  async openFacility(facilityGuid: string): Promise<void> {
+    this.workspaceService.selectFacility(facilityGuid);
+    await this.router.navigate(this.facilityRoute(facilityGuid));
+  }
+
   showWelcome(): void {
     void this.router.navigate(['/v1']);
   }

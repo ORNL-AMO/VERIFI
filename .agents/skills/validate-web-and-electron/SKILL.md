@@ -6,7 +6,7 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 # Validate web and Electron behavior
 
 1. Read [what a change requires](../../../docs/testing.md#what-a-change-requires), [commands and CI](../../../docs/testing.md#commands-and-ci), [Web and Electron boundary](../../../ARCHITECTURE.md#web-and-electron-boundary), [tests, builds, and delivery](../../../ARCHITECTURE.md#tests-builds-and-delivery), and the [Reviewer](../../../docs/agents/personas.md#reviewer) and [Test Engineer](../../../docs/agents/personas.md#test-engineer) modes.
-2. Run `npm run validate:agent -- --mode plan` to classify the current diff, or pass explicit files when validating a narrower change. Use the output as the default command plan and adjust only when the diff has risk the helper cannot see.
+2. Run `npm run validate:agent -- --mode plan` to classify the current diff. When the work is a narrow follow-up inside a larger dirty diff, pass the files changed for that follow-up explicitly so unrelated pending route, template, or style files do not inflate the validation matrix. Use the output as the default command plan and adjust only when the diff has risk the helper cannot see.
 3. Run the smallest useful focused check while iterating. Before handoff, run the selected risk-based matrix, not the largest available matrix by habit.
 
 ## Command matrix
@@ -15,7 +15,8 @@ description: Select and run VERIFI tests, builds, and focused manual checks acro
 | --- | --- |
 | Ordinary logic or Angular behavior | Focused affected `*.spec.ts` first; use `npm run test:ci` when the touched behavior is broad or there is no reliable narrower suite |
 | TypeScript or app source changes | `npx tsc -p tsconfig.app.json --noEmit` |
-| Production Angular UI, routing, modules, templates, or styles | `npm run build-prod` |
+| Production Angular routing, modules, templates, app entrypoints, environment files, or release-sensitive UI behavior | `npm run build-prod` unless a known local exit-134 build abort has already been classified for the same checkout and the current change does not affect build configuration |
+| Styling-only Angular changes | Focused specs that compile the affected component styles when available, plus a focused visual/accessibility check; do not run `build-prod` by habit |
 | IndexedDB, Web Worker, File API, or native browser behavior | `npm run test:browser:ci` in addition to fast tests |
 | Explicit pre-PR or release gate | `npm run test:all:ci` plus production builds selected by the changed runtime boundaries |
 | Informational calculation, IndexedDB, and Worker coverage | `npm run test:coverage` when coverage evidence is requested; never treat it as a required gate |
@@ -26,7 +27,7 @@ Install Chromium with `npx playwright install chromium` only when the local brow
 ## Helper script
 
 - Use `npm run validate:agent -- --mode plan` for an advisory plan based on changed files from `git diff --name-only HEAD` plus untracked files.
-- Use `npm run validate:agent -- --mode plan -- <files...>` or pass file paths directly to classify a narrower set.
+- Use `npm run validate:agent -- --mode plan -- <files...>` or pass file paths directly to classify a narrower set, especially for small corrections made after a larger implementation diff.
 - Use `npm run validate:agent -- --mode run` only when the selected commands are appropriate for the current task; it executes the commands it prints and stops at the first failure.
 - The helper is a starting point. Add a broader suite only for explicit pre-PR/release requests or concrete risk not represented in the file paths.
 
@@ -40,7 +41,7 @@ Install Chromium with `npx playwright install chromium` only when the local brow
 ## Failure handling
 
 - Capture the failing command and first actionable error.
-- If an Angular test or build exits with code `134` after only Browserslist/browser-support warnings and no actionable test or compiler failure, treat it as a likely sandbox/runtime abort. Do not repeat the same sandbox command more than once; request approval to retry that exact validation outside the sandbox and report the classification.
+- If an Angular test or build exits with code `134` after only Browserslist/browser-support warnings and no actionable test or compiler failure, treat it as a likely sandbox/runtime abort. Do not repeat the same sandbox command more than once for the same checkout. For later narrow fixes, cite the known abort instead of rerunning `build-prod` unless the user asks for release validation or the new change affects build configuration, route/module compilation, environment files, or production-only behavior.
 - Determine whether the failure is introduced by the diff, pre-existing, or environment-specific; do not dismiss it without evidence.
 - Fix in-scope regressions and rerun the failed check followed by its parent gate.
 - Report checks that cannot run and the exact missing dependency or environment.

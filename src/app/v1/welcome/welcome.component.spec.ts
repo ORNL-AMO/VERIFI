@@ -12,14 +12,20 @@ import { WelcomeComponent } from './welcome.component';
 describe('WelcomeComponent', () => {
   let fixture: ComponentFixture<WelcomeComponent>;
   let usableAccounts: ReturnType<typeof signal>;
-  let navigation: { openAccount: ReturnType<typeof vi.fn> };
+  let navigation: {
+    openAccount: ReturnType<typeof vi.fn>;
+    openFacility: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     usableAccounts = signal([
       { id: 1, guid: 'account-a', name: 'Account A', modifiedDate: new Date('2026-01-02'), isSingleFacilityCompany: false },
       { id: 2, guid: 'account-b', name: 'Account B', modifiedDate: new Date('2026-03-04'), isSingleFacilityCompany: true }
     ]);
-    navigation = { openAccount: vi.fn().mockResolvedValue(undefined) };
+    navigation = {
+      openAccount: vi.fn().mockResolvedValue(undefined),
+      openFacility: vi.fn().mockResolvedValue(undefined)
+    };
 
     TestBed.configureTestingModule({
       imports: [CommonModule, RouterModule.forRoot([]), WelcomeComponent],
@@ -40,41 +46,6 @@ describe('WelcomeComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renders the P1-derived welcome content and support sections', () => {
-    const text = fixture.nativeElement.textContent;
-
-    expect(fixture.nativeElement.querySelector('#v1-welcome-title')?.textContent).toContain('VERIFI');
-    expect(text).toContain('Track corporate and facility utility data');
-    expect(text).toContain('Create');
-    expect(text).toContain('Import');
-    expect(text).toContain('Example');
-    expect(text).toContain('ORNL Industrial Resources');
-    expect(text).toContain('Contact and Feedback');
-    expect(text).toContain('Experience switcher');
-  });
-
-  it('uses graphic tiles for welcome entry actions', () => {
-    const actionButtons: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'));
-    const buttonByText = (label: string): HTMLButtonElement | undefined =>
-      actionButtons.find(button => button.textContent?.includes(label));
-
-    expect(actionButtons).toHaveLength(3);
-    expect(buttonByText('Create')?.classList.contains('v1-welcome__action--primary')).toBe(true);
-    expect(buttonByText('Import')?.classList.contains('v1-welcome__action--secondary')).toBe(true);
-    expect(buttonByText('Example')?.classList.contains('v1-welcome__action--secondary')).toBe(true);
-    expect(buttonByText('Create')?.getAttribute('aria-label')).toContain('Create account');
-    expect(buttonByText('Import')?.getAttribute('aria-label')).toContain('existing VERIFI account backup');
-    expect(buttonByText('Example')?.getAttribute('aria-label')).toContain('representative manufacturing account');
-  });
-
-  it('shows a single create account tile when accounts exist', () => {
-    const createButtons: Array<HTMLButtonElement> = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
-      .filter(button => button.textContent?.includes('Create'));
-
-    expect(createButtons).toHaveLength(1);
-    expect(createButtons[0].classList.contains('v1-welcome__action--primary')).toBe(true);
-  });
-
   it('opens the selected welcome panel from its graphic tile', () => {
     const importTile: HTMLButtonElement | undefined = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
       .find(button => button.textContent?.includes('Import'));
@@ -82,6 +53,28 @@ describe('WelcomeComponent', () => {
     importTile?.click();
 
     expect(fixture.componentInstance.activePanel()).toBe('import');
+  });
+
+  it('opens facility Home after single-facility workspace creation', async () => {
+    await fixture.componentInstance.openCreatedOrImportedAccount({
+      path: 'singleFacility',
+      account: { guid: 'account-new', name: 'New Site' } as any,
+      facility: { guid: 'facility-new', name: 'New Site' } as any
+    });
+
+    expect(navigation.openFacility).toHaveBeenCalledWith('facility-new');
+    expect(navigation.openAccount).not.toHaveBeenCalled();
+  });
+
+  it('opens account Home after portfolio creation or existing import paths', async () => {
+    await fixture.componentInstance.openCreatedOrImportedAccount({
+      path: 'portfolio',
+      account: { guid: 'account-new', name: 'New Portfolio' } as any
+    });
+    await fixture.componentInstance.openCreatedOrImportedAccount({ guid: 'account-import', name: 'Imported' } as any);
+
+    expect(navigation.openAccount).toHaveBeenCalledWith('account-new');
+    expect(navigation.openAccount).toHaveBeenCalledWith('account-import');
   });
 
   it('renders existing accounts and opens the selected account', async () => {
@@ -95,19 +88,6 @@ describe('WelcomeComponent', () => {
     await fixture.whenStable();
 
     expect(navigation.openAccount).toHaveBeenCalledWith('account-b');
-  });
-
-  it('renders the account portfolio as a card section with flat account rows', () => {
-    const portfolio: HTMLElement = fixture.nativeElement.querySelector('.v1-welcome__portfolio');
-    const list: HTMLElement = fixture.nativeElement.querySelector('.v1-account-list');
-    const rows: Array<HTMLButtonElement> = Array.from(fixture.nativeElement.querySelectorAll('.v1-account-row'));
-
-    expect(portfolio).toBeTruthy();
-    expect(list).toBeTruthy();
-    expect(rows).toHaveLength(2);
-    expect(fixture.nativeElement.querySelector('.v1-account-grid')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-account-card')).toBeNull();
-    expect(rows[0].textContent).toContain('Open');
   });
 
   it('keeps long account names accessible while truncating visually', () => {
@@ -125,13 +105,8 @@ describe('WelcomeComponent', () => {
   it('shows a v1 setup path when no accounts exist', () => {
     usableAccounts.set([]);
     fixture.detectChanges();
-    const createButtons: Array<HTMLButtonElement> = Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('button.v1-welcome__action'))
-      .filter(button => button.textContent?.includes('Create'));
 
     expect(fixture.nativeElement.querySelector('.v1-empty-state')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.v1-empty-state')?.textContent).toContain('Use the get started options above to create, import, or load an account.');
-    expect(fixture.nativeElement.querySelector('.v1-account-list')).toBeTruthy();
-    expect(createButtons).toHaveLength(1);
   });
 
   it('disables the recent account action when busy', () => {

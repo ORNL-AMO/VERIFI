@@ -120,6 +120,20 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
+  it('opens facilities on the canonical workspace route after selecting the facility', async () => {
+    await service.openFacility('facility-a');
+
+    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'home',
+      'overview'
+    ]);
+  });
+
   it('parses account and facility settings routes and enables settings in workspace context', () => {
     router.events.next(new NavigationEnd(
       1,

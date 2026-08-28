@@ -7,7 +7,7 @@ import { CreateAccountComponent } from './create-account/create-account.componen
 import { EmailListSignupComponent } from './email-list-signup/email-list-signup.component';
 import { ExampleAccountComponent } from './example-account/example-account.component';
 import { ImportAccountBackupComponent } from './import-account-backup/import-account-backup.component';
-import { WELCOME_ACTIONS } from './welcome.models';
+import { CreateAccountResult, WELCOME_ACTIONS } from './welcome.models';
 
 @Component({
   selector: 'app-welcome',
@@ -63,9 +63,17 @@ export class WelcomeComponent {
     this.activePanel.set(undefined);
   }
 
-  async openCreatedOrImportedAccount(account: IdbAccount): Promise<void> {
+  async openCreatedOrImportedAccount(result: IdbAccount | CreateAccountResult): Promise<void> {
     this.closePanel();
-    await this.openAccount(account);
+    if (isCreateAccountResult(result)) {
+      if (result.path === 'singleFacility' && result.facility) {
+        await this.navigation.openFacility(result.facility.guid);
+        return;
+      }
+      await this.openAccount(result.account);
+      return;
+    }
+    await this.openAccount(result);
   }
 
   async openRecentAccount(): Promise<void> {
@@ -85,4 +93,8 @@ export class WelcomeComponent {
   accountTypeLabel(account: IdbAccount): string {
     return account.isSingleFacilityCompany ? 'Single facility' : 'Portfolio';
   }
+}
+
+function isCreateAccountResult(result: IdbAccount | CreateAccountResult): result is CreateAccountResult {
+  return 'path' in result && 'account' in result;
 }
