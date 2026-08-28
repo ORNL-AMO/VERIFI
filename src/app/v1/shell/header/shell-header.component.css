@@ -79,12 +79,7 @@
   color: var(--v1-text);
   font-size: .86rem;
   font-weight: 800;
-  transition:
-    border-color .18s ease,
-    background-color .18s ease,
-    box-shadow .18s ease,
-    color .18s ease,
-    transform .18s ease;
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease;
   cursor: pointer;
 }
 
@@ -108,17 +103,21 @@
   opacity: .68;
 }
 
-.v1-account-switcher__dropdown {
+.v1-account-switcher__dropdown,
+.v1-settings__menu {
   position: absolute;
   top: calc(100% + .5rem);
   right: 0;
   z-index: 20;
-  width: min(18rem, calc(100vw - 2rem));
-  padding: .4rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius);
   background: var(--v1-surface);
   box-shadow: 0 .9rem 2.2rem var(--v1-shadow);
+}
+
+.v1-account-switcher__dropdown {
+  width: min(18rem, calc(100vw - 2rem));
+  padding: .4rem;
 }
 
 .v1-account-switcher__section {
@@ -201,18 +200,10 @@
 }
 
 .v1-settings__menu {
-  position: absolute;
-  top: calc(100% + .5rem);
-  right: 0;
-  z-index: 20;
   display: grid;
   gap: .35rem;
   width: min(25rem, calc(100vw - 2rem));
   padding: .65rem;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius);
-  background: var(--v1-surface);
-  box-shadow: 0 .9rem 2.2rem var(--v1-shadow);
 }
 
 .v1-settings__label {
