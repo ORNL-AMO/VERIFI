@@ -21,6 +21,12 @@ import { MeterEnergyHistogramComponent } from '@v0/shared/shared-data-quality-re
 import { MeterCostHistogramComponent } from '@v0/shared/shared-data-quality-report-meters/meter-cost-histogram/meter-cost-histogram.component';
 import { PredictorTimeseriesGraphComponent } from '@v0/shared/shared-data-quality-report-predictor/predictor-timeseries-graph/predictor-timeseries-graph.component';
 import { PredictorHistogramGraphComponent } from '@v0/shared/shared-data-quality-report-predictor/predictor-histogram-graph/predictor-histogram-graph.component';
+import { CalanderizedMeter } from '@app/data/models/calanderization';
+import { EGridService } from '@app/shared/helper-services/e-grid.service';
+import { IdbCustomFuel } from '@app/data/models/idbModels/customFuel';
+import { IdbCustomGWP } from '@app/data/models/idbModels/customGWP';
+import { IdbFacility } from '@app/data/models/idbModels/facility';
+import { getCalanderizedMeterData } from '@app/domain/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-facility-data-quality-report-results',
@@ -31,6 +37,7 @@ import { PredictorHistogramGraphComponent } from '@v0/shared/shared-data-quality
 export class FacilityDataQualityReportResultsComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly eGridService = inject(EGridService);
 
   facilityReport: IdbFacilityReport;
   facilityReportSub: Subscription;
@@ -134,6 +141,11 @@ export class FacilityDataQualityReportResultsComponent {
   }
 
   createMetersandPredictorsList() {
+    const customFuels: Array<IdbCustomFuel> = [...this.accountWorkspaceStore.customFuels()];
+    const selectedAccount = this.accountWorkspaceStore.account();
+    const customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
+    const selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+
     this.meterDataStatsList = this.selectedMeterIds.map(meterId => {
       let data = this.accountWorkspaceQuery.getMeterData(meterId);
       let meter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
@@ -143,7 +155,28 @@ export class FacilityDataQualityReportResultsComponent {
       let includeCosts = isNaN(costStats.average) == false && costStats.average != 0;
       let hasData = data.length > 0;
       let datesList = this.getDatesList(data);
-      return { meter, data, energyStats, costStats, energyOutlierCount, costOutlierCount, includeCosts, hasData, datesList };
+
+      const allCalanderizedMetersData: Array<CalanderizedMeter> = getCalanderizedMeterData(
+        [meter],
+        data,
+        selectedFacility,
+        false,
+        undefined,
+        this.eGridService.co2Emissions,
+        customFuels,
+        [selectedFacility],
+        selectedAccount.assessmentReportVersion,
+        customGWPs
+      );
+      const calanderizedMeter = allCalanderizedMetersData.find(cm => cm.meter.guid === meterId);
+      const consumptionLabel = meter.scope != 2 ? 'Consumption' : 'Distance';
+      let isRECs: boolean;
+      if (meter.source != 'Electricity') {
+        isRECs = false;
+      } else {
+        isRECs = (meter.agreementType == 4 || meter.agreementType == 6);
+      }
+      return { meter, data, energyStats, costStats, energyOutlierCount, costOutlierCount, includeCosts, hasData, datesList, calanderizedMeter, consumptionLabel, isRECs };
     });
 
     this.predictorDataStatsList = this.selectedPredictorIds.map(predictorId => {
@@ -279,6 +312,9 @@ export interface MeterDataStats {
   includeCosts: boolean;
   hasData: boolean;
   datesList: Array<{ monthYear: string }>;
+  calanderizedMeter: CalanderizedMeter;
+  consumptionLabel: 'Consumption' | 'Distance';
+  isRECs: boolean;
 }
 
 export interface PredictorDataStats {

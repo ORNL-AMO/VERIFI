@@ -46,6 +46,8 @@ import { AnnualSavingsTableComponent } from '@v0/data-evaluation/facility/facili
 import { MonthlySavingsGraphComponent } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-cost-savings-report-results/monthly-savings-graph/monthly-savings-graph.component';
 import { RegressionNumberPipe } from '@v0/shared/helper-pipes/regression-number.pipe';
 import { UserDefineModelDateRangePipe } from '@v0/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
+import { MeterAnnualTotalTableModule } from '@v0/shared/shared-meter-content/shared-meter-calendarization/meter-annual-total-table/meter-annual-total-table.module';
+import { SettingsLabelPipe } from '@app/v0/shared/helper-pipes/settings-label.pipe';
 
 
 
@@ -97,7 +99,8 @@ import { UserDefineModelDateRangePipe } from '@v0/shared/shared-analysis/data-ch
     SharedAnalysisModule,
     AccountReportsModule,
     SharedDataQualityReportMetersModule,
-    SharedDataQualityReportPredictorsModule
+    SharedDataQualityReportPredictorsModule,
+    MeterAnnualTotalTableModule
 ], 
 providers: [
     FacilityReportTypePipe,
@@ -105,7 +108,8 @@ providers: [
     SharedAnalysisModule,
     CustomNumberPipe,
     RegressionNumberPipe,
-    UserDefineModelDateRangePipe
+    UserDefineModelDateRangePipe,
+    SettingsLabelPipe
   ]
 })
 export class FacilityReportsModule { }

@@ -342,7 +342,8 @@ export function getDataQualityReportSettings(): DataQualityReportSettings {
         includePredictors: true,
         includePredictorStatisticsTable: true,
         includePredictorTimeseriesGraph: true,
-        includePredictorHistogram: true
+        includePredictorHistogram: true,
+        includeAnnualTotalsTable: true
     }
 }
 
@@ -361,5 +362,6 @@ export interface DataQualityReportSettings {
     includePredictors: boolean,
     includePredictorStatisticsTable: boolean,
     includePredictorTimeseriesGraph: boolean,
-    includePredictorHistogram: boolean
+    includePredictorHistogram: boolean,
+    includeAnnualTotalsTable?: boolean
 }

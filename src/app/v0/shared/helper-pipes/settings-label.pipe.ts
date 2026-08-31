@@ -1,10 +1,13 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 
 @Pipe({
     name: 'settingsLabel',
     standalone: false
 })
+@Injectable({
+  providedIn: 'root'
+}) 
 export class SettingsLabelPipe implements PipeTransform {
 
   constructor() { }

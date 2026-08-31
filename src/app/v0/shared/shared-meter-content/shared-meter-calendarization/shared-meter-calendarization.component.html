@@ -34,77 +34,86 @@
 </div>
 }
 @if (selectedMeter.meterReadingDataApplication) {
-<div class="d-flex pb-0 justify-content-end flex-wrap">
-  <!--Table/Chart Filters-->
-  @if (dataDisplay == 'table') {
-  <app-calanderization-filter></app-calanderization-filter>
-  <div class="ps-1 pe-1 mb-2">
-    <button class="btn action-btn" (click)="showDataApplicationModal()">Select
-      Method</button>
+<div class="d-flex mt-3 mb-2 justify-content-between">
+  <div class="d-flex">
+    @if (dataDisplay == 'table') {
+    <app-calanderization-filter></app-calanderization-filter>
+    <div class="ps-1 mb-2">
+      <app-table-items-dropdown></app-table-items-dropdown>
+    </div>
+    }
   </div>
-  }
-  <!--Items Per Page-->
-  @if (dataDisplay == 'table') {
-  <div class="ps-1 pe-1 mb-2">
-    <app-table-items-dropdown></app-table-items-dropdown>
-  </div>
-  }
-  <!--Chart Controls-->
-  @if (dataDisplay == 'graph') {
-  <div class="ps-2">
-    <span class="btn-label pe-2">Utility</span>
-    <div class="btn-group pe-2 me-2">
-      <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'bar'}"
-        (click)="setDisplayGraphEnergy('bar')">
-        <span class="fa fa-chart-simple"></span>
-      </button>
-      <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'scatter'}"
-        (click)="setDisplayGraphEnergy('scatter')">
-        <span class="fa fa-line-chart"></span>
+  <div class="d-flex">
+    <!--Table/Chart Filters-->
+    @if (dataDisplay == 'table') {
+    <div class="ps-1 pe-1 mb-2">
+      <button class="btn action-btn" (click)="showDataApplicationModal()">Select
+        Method</button>
+    </div>
+    <div class="pe-1">
+      <button class="btn action-btn" (click)="showTotalsModal()">
+        View Annual Total
       </button>
     </div>
-    <span class="btn-label pe-2">Cost</span>
-    <div class="btn-group pe-2 me-2">
-      <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'bar'}"
-        (click)="setDisplayGraphCost('bar')">
-        <span class="fa fa-chart-simple"></span>
+    }
+
+    <!--Chart Controls-->
+    @if (dataDisplay == 'graph') {
+    <div class="ps-2">
+      <span class="btn-label pe-2">Utility</span>
+      <div class="btn-group pe-2 me-2">
+        <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'bar'}"
+          (click)="setDisplayGraphEnergy('bar')">
+          <span class="fa fa-chart-simple"></span>
+        </button>
+        <button class="btn toggle-btn" [ngClass]="{'active': displayGraphEnergy == 'scatter'}"
+          (click)="setDisplayGraphEnergy('scatter')">
+          <span class="fa fa-line-chart"></span>
+        </button>
+      </div>
+      <span class="btn-label pe-2">Cost</span>
+      <div class="btn-group pe-2 me-2">
+        <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'bar'}"
+          (click)="setDisplayGraphCost('bar')">
+          <span class="fa fa-chart-simple"></span>
+        </button>
+        <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'scatter'}"
+          (click)="setDisplayGraphCost('scatter')">
+          <span class="fa fa-line-chart"></span>
+        </button>
+      </div>
+    </div>
+    }
+    <div class="btn-group pe-1 mb-2">
+      <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+        <span class="fa fa-chevron-right"></span>
+        Table
+        <span class="fa fa-chevron-left"></span>
       </button>
-      <button class="btn toggle-btn" [ngClass]="{'active': displayGraphCost == 'scatter'}"
-        (click)="setDisplayGraphCost('scatter')">
-        <span class="fa fa-line-chart"></span>
+      <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+        <span class="fa fa-chevron-right"></span>
+        Graph
+        <span class="fa fa-chevron-left"></span>
       </button>
     </div>
+    @if (selectedMeter.source != 'Water Discharge' && selectedMeter.source != 'Water Intake' && selectedMeter.source !=
+    'Other') {
+    <div class="btn-group pe-1 mb-2">
+      <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
+        [ngClass]="{'active': selectedFacility.energyIsSource == true}">
+        <span class="fa fa-chevron-right"></span>
+        Source Energy
+        <span class="fa fa-chevron-left"></span>
+      </button>
+      <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
+        [ngClass]="{'active': selectedFacility.energyIsSource == false}">
+        <span class="fa fa-chevron-right"></span>
+        Site Energy
+        <span class="fa fa-chevron-left"></span>
+      </button>
+    </div>
+    }
   </div>
-  }
-  <div class="btn-group pe-1 mb-2">
-    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
-      <span class="fa fa-chevron-right"></span>
-      Table
-      <span class="fa fa-chevron-left"></span>
-    </button>
-    <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
-      <span class="fa fa-chevron-right"></span>
-      Graph
-      <span class="fa fa-chevron-left"></span>
-    </button>
-  </div>
-  @if (selectedMeter.source != 'Water Discharge' && selectedMeter.source != 'Water Intake' && selectedMeter.source !=
-  'Other') {
-  <div class="btn-group pe-1 mb-2">
-    <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
-      [ngClass]="{'active': selectedFacility.energyIsSource == true}">
-      <span class="fa fa-chevron-right"></span>
-      Source Energy
-      <span class="fa fa-chevron-left"></span>
-    </button>
-    <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(false)"
-      [ngClass]="{'active': selectedFacility.energyIsSource == false}">
-      <span class="fa fa-chevron-right"></span>
-      Site Energy
-      <span class="fa fa-chevron-left"></span>
-    </button>
-  </div>
-  }
 </div>
 @if(calanderizingMeterData === false) {
 <div>
@@ -143,9 +152,7 @@
 }
 
 
-
-
-<div [ngClass]="{'windowOverlay':displayDataApplicationModal}"></div>
+<div [ngClass]="{'windowOverlay':displayDataApplicationModal || displayTotalsModal}"></div>
 <div class="popup calanderization" [class.open]="displayDataApplicationModal">
   @if (dataApplicationMeter) {
   <div class="popup-header">Select Calendarization Method:
@@ -161,5 +168,20 @@
   <div class="saveCancel popup-footer text-end">
     <button class="btn btn-secondary" (click)="cancelSetDataApplication()">Cancel</button>
     <button class="btn btn-success" (click)="setDataApplication()">Submit</button>
+  </div>
+</div>
+
+<div class="popup annual-total" [class.open]="displayTotalsModal">
+  <div class="popup-header">Annual Total
+    <button class="item-right" (click)="closeTotalsModal()">x</button>
+  </div>
+  @if (displayTotalsModal) {
+  <div class="popup-body">
+    <app-meter-annual-total-table [calanderizedMeter]="calanderizedMeter" [consumptionLabel]="consumptionLabel"
+      [isRECs]="isRECs"></app-meter-annual-total-table>
+  </div>
+  }
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="closeTotalsModal()">Cancel</button>
   </div>
 </div>
