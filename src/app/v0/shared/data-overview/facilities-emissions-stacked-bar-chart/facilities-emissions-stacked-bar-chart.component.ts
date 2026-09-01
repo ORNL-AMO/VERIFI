@@ -7,10 +7,10 @@ import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculat
 import { getEmissionsTypeColor } from '@data/models/eGridEmissions';
 
 @Component({
-    selector: 'app-facilities-emissions-stacked-bar-chart',
-    templateUrl: './facilities-emissions-stacked-bar-chart.component.html',
-    styleUrls: ['./facilities-emissions-stacked-bar-chart.component.css'],
-    standalone: false
+  selector: 'app-facilities-emissions-stacked-bar-chart',
+  templateUrl: './facilities-emissions-stacked-bar-chart.component.html',
+  styleUrls: ['./facilities-emissions-stacked-bar-chart.component.css'],
+  standalone: false
 })
 export class FacilitiesEmissionsStackedBarChartComponent {
   @Input()
@@ -168,5 +168,21 @@ export class FacilitiesEmissionsStackedBarChartComponent {
 
     data = _.orderBy(data, (d) => { return _.sum(d.y) }, 'desc');
     return data;
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.stackedBarChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.stackedBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
   }
 }

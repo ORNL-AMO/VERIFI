@@ -16,6 +16,8 @@ import { AccountWaterUsageDonutComponent } from '@v0/shared/data-overview/accoun
 import { FacilitiesUsageStackedBarChartComponent } from '@v0/shared/data-overview/facilities-usage-stacked-bar-chart/facilities-usage-stacked-bar-chart.component';
 import { AccountWaterStackedBarChartComponent } from '@v0/shared/data-overview/account-water-stacked-bar-chart/account-water-stacked-bar-chart.component';
 import { MonthlyUtilityUsageLineChartComponent } from '@v0/shared/data-overview/monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';
+import { EmissionsDonutComponent } from '@app/v0/shared/data-overview/emissions-donut/emissions-donut.component';
+import { FacilitiesEmissionsStackedBarChartComponent } from '@app/v0/shared/data-overview/facilities-emissions-stacked-bar-chart/facilities-emissions-stacked-bar-chart.component';
 
 @Component({
     selector: 'app-account-section-report',
@@ -61,8 +63,10 @@ export class AccountSectionReportComponent {
   @ViewChild(FacilityUsageDonutComponent) facilityUsageDonut: FacilityUsageDonutComponent;
   @ViewChild(AccountUtilityUsageDonutComponent) accountUtilityUsageDonut: AccountUtilityUsageDonutComponent;
   @ViewChild(AccountWaterUsageDonutComponent) accountWaterUsageDonut: AccountWaterUsageDonutComponent;
+  @ViewChild(EmissionsDonutComponent) emissionsUsageDonut: EmissionsDonutComponent;
   @ViewChild(FacilitiesUsageStackedBarChartComponent) usageStackedBarChart: FacilitiesUsageStackedBarChartComponent;
   @ViewChild(AccountWaterStackedBarChartComponent) accountWaterStackedBarChart: AccountWaterStackedBarChartComponent;
+  @ViewChild(FacilitiesEmissionsStackedBarChartComponent) accountEmissionsStackedBarChart: FacilitiesEmissionsStackedBarChartComponent;
   @ViewChild(MonthlyUtilityUsageLineChartComponent) monthlyUsageLineChart: MonthlyUtilityUsageLineChartComponent;
 
   constructor(
@@ -118,9 +122,25 @@ export class AccountSectionReportComponent {
     return '';
   }
 
+  async getEmissionsUsageDonutImage(): Promise<string> {
+    if (this.emissionsUsageDonut) {
+      const base64Str = await this.emissionsUsageDonut.getChartAsBase64Image();
+      return base64Str;
+    }
+    return '';
+  }
+
   async getUtilityUsageStackedBarImage(): Promise<string> {
     if (this.usageStackedBarChart) {
       const base64Str = await this.usageStackedBarChart.getChartAsBase64Image();
+      return base64Str;
+    }
+    return '';
+  }
+
+  async getEmissionsUsageStackedBarImage(): Promise<string> {
+    if (this.accountEmissionsStackedBarChart) {
+      const base64Str = await this.accountEmissionsStackedBarChart.getChartAsBase64Image();
       return base64Str;
     }
     return '';

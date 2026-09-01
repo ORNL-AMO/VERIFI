@@ -90,7 +90,7 @@
   </div>
 </div>
 }
-@if (overviewReportSettings.includeEmissionsSection) {
+@if (account.displayEmissions && overviewReportSettings.includeEmissionsSection) {
 <hr>
 <div class="report print-break-before" [ngClass]="{'print': print}">
   <!--facility emissions-->

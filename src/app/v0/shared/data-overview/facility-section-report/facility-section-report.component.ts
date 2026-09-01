@@ -14,6 +14,9 @@ import { MetersOverviewStackedLineChartComponent } from '@v0/shared/data-overvie
 import { MeterUsageDonutComponent } from '@v0/shared/data-overview/meter-usage-donut/meter-usage-donut.component';
 import { MonthlyUtilityUsageLineChartComponent } from '@v0/shared/data-overview/monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';
 import { UtilitiesUsageChartComponent } from '@v0/shared/data-overview/utilities-usage-chart/utilities-usage-chart.component';
+import { EmissionsStackedLineChartComponent } from '../emissions-stacked-line-chart/emissions-stacked-line-chart.component';
+import { EmissionsDonutComponent } from '../emissions-donut/emissions-donut.component';
+import { EmissionsUsageChartComponent } from '../emissions-usage-chart/emissions-usage-chart.component';
 
 @Component({
   selector: 'app-facility-section-report',
@@ -62,6 +65,9 @@ export class FacilitySectionReportComponent {
   @ViewChild('meterBarChart') meterBarChart !: MeterUsageDonutComponent;
   @ViewChild('annualBarChart') annualBarChart !: UtilitiesUsageChartComponent;
   @ViewChild('monthlyUsageLineChart') monthlyUsageLineChart !: MonthlyUtilityUsageLineChartComponent;
+  @ViewChild('meterStackedLineChartEmissions') meterStackedLineChartEmissions !: EmissionsStackedLineChartComponent;
+  @ViewChild('emissionsBarChart') emissionsBarChart !: EmissionsDonutComponent;
+  @ViewChild('annualBarChartEmissions') annualBarChartEmissions !: EmissionsUsageChartComponent;
 
   constructor(
     private dataEvaluationService: DataEvaluationService
@@ -98,6 +104,18 @@ export class FacilitySectionReportComponent {
 
   async getMonthlyUsageLineChartImage(): Promise<string> {
     return this.monthlyUsageLineChart ? await this.monthlyUsageLineChart.getChartAsBase64Image() : '';
+  }
+
+  async getMeterStackedLineChartEmissionsImage(): Promise<string> {
+    return this.meterStackedLineChartEmissions ? await this.meterStackedLineChartEmissions.getChartAsBase64Image() : '';
+  }
+
+  async getEmissionsBarChartImage(): Promise<string> {
+    return this.emissionsBarChart ? await this.emissionsBarChart.getChartAsBase64Image() : '';
+  }
+
+  async getAnnualBarChartEmissionsImage(): Promise<string> {
+    return this.annualBarChartEmissions ? await this.annualBarChartEmissions.getChartAsBase64Image() : '';
   }
 
   ngOnDestroy() {

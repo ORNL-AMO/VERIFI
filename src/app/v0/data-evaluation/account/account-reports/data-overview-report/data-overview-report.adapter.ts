@@ -1,4 +1,5 @@
 import { inject, Injectable } from "@angular/core";
+import * as _ from "lodash";
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/report-document.model";
 import { BaseSection, ChartSection, HeadingSection, StyledTextSection, TableHeaderCell, TableSection } from "@v0/shared/pdf-report/models/report-section.model";
@@ -11,6 +12,8 @@ import { IdbAccountReport } from "@data/models/idbModels/accountReport";
 import { NaicsDisplayPipe } from "@v0/shared/helper-pipes/naics-display.pipe";
 import { AccountOverviewFacility } from "@domain/calculations/dashboard-calculations/accountOverviewClass";
 import { FacilityOverviewReportAdapter } from "@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report.adapter";
+import { EmissionsResults } from "@app/data/models/eGridEmissions";
+import { formatDate } from "@angular/common";
 
 @Injectable({ providedIn: 'root' })
 export class DataOverviewReportAdapter {
@@ -26,6 +29,7 @@ export class DataOverviewReportAdapter {
     chartImageProviders?: any;
     energyUnit: string;
     waterUnit: string;
+    emissionsDisplay: "location" | "market";
 
     private mapAccountToFacilitySettings(): DataOverviewFacilityReportSettings {
         return {
@@ -79,6 +83,7 @@ export class DataOverviewReportAdapter {
         this.chartImageProviders = input.chartImageProviders;
         this.waterUnit = this.account.volumeLiquidUnit;
         this.energyUnit = this.account.energyUnit;
+        this.emissionsDisplay = input.emissionsDisplay;
 
         let metadata: ReportMetaData = {
             title: '',
@@ -115,6 +120,14 @@ export class DataOverviewReportAdapter {
                     sections.push(headingSection);
                     sections.push(...this.buildSection('cost', 'Account Costs'));
                 }
+                if (this.account.displayEmissions && this.reportSettings.includeEmissionsSection) {
+                    const headingSection: HeadingSection = {
+                        type: 'heading',
+                        title: 'Account Emissions'
+                    };
+                    sections.push(headingSection);
+                    sections.push(...this.buildAccountEmissionSection());
+                }
             }
         }
 
@@ -127,7 +140,9 @@ export class DataOverviewReportAdapter {
                     facilityOverviewData: facilityData.facilityOverviewData,
                     utilityUseAndCost: facilityData.utilityUseAndCost,
                     dateRange: facilityData.dateRange,
-                    chartImageProviders: input.facilityChartImageProviders?.[facilityData.facility.guid]
+                    emissionsDisplay: input.emissionsDisplay,
+                    chartImageProviders: input.facilityChartImageProviders?.[facilityData.facility.guid],
+                    emissionsChartImageProviders: input.facilityEmissionsChartImageProviders?.[facilityData.facility.guid]
                 });
                 sections.push(...facilityDocument.sections);
             }
@@ -184,7 +199,7 @@ export class DataOverviewReportAdapter {
             ],
             pageBreakAfter: true,
             tocInclude: isAccountReport ? true : false,
-            tocLabel: isAccountReport ? 'Account Overview': '',
+            tocLabel: isAccountReport ? 'Account Overview' : '',
             bookmarkLevel: 0
         };
         return [titleSection];
@@ -278,7 +293,94 @@ export class DataOverviewReportAdapter {
         return sections;
     }
 
-    private buildFacilityTableSection(type: 'energyUse' | 'cost' | 'water', title: string): TableSection | undefined {
+    private buildAccountEmissionSection(): BaseSection[] {
+        let sections: BaseSection[] = [];
+        if (this.reportSettings.includeMap) {
+            let chartSection = this.createChartSection(this.chartImageProviders?.utilityUsageMap?.['emissions'], '');
+            if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = 'Account Emissions Map';
+                chartSection.bookmarkLevel = 1;
+                chartSection.pageBreakAfter = true;
+                sections.push(chartSection);
+            }
+        }
+        if (this.reportSettings.includeFacilityTable) {
+            let tableSection = this.buildFacilityTableSection('emissions', `Emissions Breakdown By Facility`);
+            if (tableSection) {
+                tableSection.tocInclude = true;
+                tableSection.tocLabel = `Emissions Breakdown By Facility Table`;
+                tableSection.bookmarkLevel = 1;
+                tableSection.pageBreakAfter = true;
+                sections.push(tableSection);
+            }
+        }
+        if (this.reportSettings.includeFacilityDonut) {
+            let chartSection = this.createChartSection(this.chartImageProviders?.usageDonut?.['emissions'], '');
+            if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `Emissions Breakdown By Facility Chart`;
+                chartSection.bookmarkLevel = 1;
+                chartSection.pageBreakAfter = true;
+                sections.push(chartSection);
+            }
+        }
+        if (this.reportSettings.includeFacilityTable) {
+            let tableSection: TableSection | undefined;
+            tableSection = this.buildEmissionsUsageTableSection();
+            if (tableSection) {
+                tableSection.tocInclude = true;
+                tableSection.tocLabel = `$Emissions Breakdown Table`;
+                tableSection.bookmarkLevel = 1;
+                tableSection.pageBreakAfter = true;
+                sections.push(tableSection);
+            }
+        }
+        if (this.reportSettings.includeFacilityDonut) {
+            let chartSection: ChartSection | undefined;
+            chartSection = this.createChartSection(this.chartImageProviders?.utilityUsageDonut?.['emissions'], '');
+            if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `Emissions Breakdown Chart`;
+                chartSection.bookmarkLevel = 1;
+                chartSection.pageBreakAfter = true;
+                sections.push(chartSection);
+            }
+        }
+        if (this.reportSettings.includeUtilityTable) {
+            let tableSection = this.buildEmissionsUtilityTableSection();
+            if (tableSection) {
+                tableSection.tocInclude = true;
+                tableSection.tocLabel = `Account Emissions Comparison Table`;
+                tableSection.bookmarkLevel = 1;
+                tableSection.pageBreakAfter = true;
+                sections.push(tableSection);
+            }
+        }
+        if (this.reportSettings.includeStackedBarChart) {
+            let chartSection = this.createChartSection(this.chartImageProviders?.utilityUsageStackedBar?.['emissions'], '');
+            if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `Emissions Stacked Bar Chart`;
+                chartSection.bookmarkLevel = 1;
+                chartSection.pageBreakAfter = true;
+                sections.push(chartSection);
+            }
+        }
+        if (this.reportSettings.includeMonthlyLineChart) {
+            let chartSection = this.createChartSection(this.chartImageProviders?.monthlyUsageLineChart?.['emissions'], '');
+            if (chartSection) {
+                chartSection.tocInclude = true;
+                chartSection.tocLabel = `Monthly Emissions Chart`;
+                chartSection.bookmarkLevel = 1;
+                chartSection.pageBreakAfter = true;
+                sections.push(chartSection);
+            }
+        }
+        return sections;
+    }
+
+    private buildFacilityTableSection(type: 'energyUse' | 'cost' | 'water' | 'emissions', title: string): TableSection | undefined {
         let headers: string[] = [];
         let rows: string[][] = [];
         let accountOverviewFacilities: Array<AccountOverviewFacility> = [];
@@ -297,28 +399,58 @@ export class DataOverviewReportAdapter {
             totalConsumption = this.accountData.accountOverviewData.numberOfMeters;
             totalCost = this.accountData.accountOverviewData.totalAccountCost;
         }
-
         if (type === 'water') {
             headers = ['Facility', `Water Consumption (${this.waterUnit})`, 'Utility Cost'];
             accountOverviewFacilities = this.accountData.accountOverviewData.facilitiesWater;
             totalConsumption = this.accountData.accountOverviewData.totalWaterConsumption;
             totalCost = this.accountData.accountOverviewData.totalWaterCost;
         }
+        if (type === 'emissions') {
+            headers = ['Facility', 'Total With Market Emissions (tonne CO2e)', 'Total With Location Emissions (tonne CO2e)'];
+            if (this.emissionsDisplay === 'location') {
+                accountOverviewFacilities = _.orderBy(this.accountData.accountOverviewData.facilitiesCost, (accountOverviewFacility: AccountOverviewFacility) => {
+                    return accountOverviewFacility.emissions.totalWithLocationEmissions
+                }, 'desc');
+            } else {
+                accountOverviewFacilities = _.orderBy(this.accountData.accountOverviewData.facilitiesCost, (accountOverviewFacility: AccountOverviewFacility) => {
+                    return accountOverviewFacility.emissions.totalWithMarketEmissions
+                }, 'desc');
+            }
+        }
+
 
         if (accountOverviewFacilities) {
             for (let summary of accountOverviewFacilities) {
-                rows.push([
-                    summary.facility.name,
-                    type === 'cost' ? summary.numberOfMeters.toString() : this.checkNumber(summary.totalUsage),
-                    this.checkCurrency(summary.totalCost)
-                ]);
+                if (type !== 'emissions') {
+                    rows.push([
+                        summary.facility.name,
+                        type === 'cost' ? summary.numberOfMeters.toString() : this.checkNumber(summary.totalUsage),
+                        this.checkCurrency(summary.totalCost)
+                    ]);
+                }
+                else {
+                    rows.push([
+                        summary.facility.name,
+                        this.checkNumber(summary.emissions.totalWithMarketEmissions),
+                        this.checkNumber(summary.emissions.totalWithLocationEmissions)
+                    ]);
+                }
             }
         }
-        rows.push([
-            'Total',
-            this.checkNumber(totalConsumption),
-            this.checkCurrency(totalCost)
-        ]);
+        if (type !== 'emissions') {
+            rows.push([
+                'Total',
+                this.checkNumber(totalConsumption),
+                this.checkCurrency(totalCost)
+            ]);
+        }
+        else {
+            rows.push([
+                'Total',
+                this.checkNumber(this.accountData.accountOverviewData.emissionsTotals.totalWithMarketEmissions),
+                this.checkNumber(this.accountData.accountOverviewData.emissionsTotals.totalWithLocationEmissions)
+            ]);
+        }
 
         return {
             type: 'table',
@@ -400,6 +532,71 @@ export class DataOverviewReportAdapter {
         };
         return tableSection;
     }
+
+    private buildEmissionsUsageTableSection(): TableSection {
+        let headers: string[] = ['Emissions Type', 'Total With Market Emissions (tonne CO2e)', 'Total With Location Emissions (tonne CO2e)'];
+        let rows: string[][] = [];
+
+        const emissionTotals: EmissionsResults = this.accountData.accountOverviewData.emissionsTotals;
+
+        if (emissionTotals.stationaryEmissions) {
+            rows.push([
+                'Scope 1: Stationary',
+                this.checkNumber(emissionTotals.stationaryEmissions),
+                this.checkNumber(emissionTotals.stationaryEmissions)
+            ]);
+        }
+        if (emissionTotals.mobileTotalEmissions) {
+            rows.push([
+                'Scope 1: Mobile',
+                this.checkNumber(emissionTotals.mobileTotalEmissions),
+                this.checkNumber(emissionTotals.mobileTotalEmissions)
+            ]);
+        }
+        if (emissionTotals.fugitiveEmissions) {
+            rows.push([
+                'Scope 1: Fugitive',
+                this.checkNumber(emissionTotals.fugitiveEmissions),
+                this.checkNumber(emissionTotals.fugitiveEmissions)
+            ]);
+        }
+        if (emissionTotals.processEmissions) {
+            rows.push([
+                'Scope 1: Process',
+                this.checkNumber(emissionTotals.processEmissions),
+                this.checkNumber(emissionTotals.processEmissions)
+            ]);
+        }
+        if (emissionTotals.marketElectricityEmissions || emissionTotals.locationElectricityEmissions) {
+            rows.push([
+                'Scope 2: Electricity',
+                this.checkNumber(emissionTotals.marketElectricityEmissions),
+                this.checkNumber(emissionTotals.locationElectricityEmissions)
+            ]);
+        }
+        if (emissionTotals.otherScope2Emissions) {
+            rows.push([
+                'Scope 2: Other',
+                this.checkNumber(emissionTotals.otherScope2Emissions),
+                this.checkNumber(emissionTotals.otherScope2Emissions)
+            ]);
+        }
+        rows.push([
+            'Total',
+            this.checkNumber(emissionTotals.totalWithMarketEmissions),
+            this.checkNumber(emissionTotals.totalWithLocationEmissions)
+        ]);
+
+        const tableSection: TableSection = {
+            type: 'table',
+            title: 'Emissions Breakdown',
+            headers: headers,
+            rows: rows
+        };
+
+        return tableSection;
+    }
+
 
     private buildUtilityConsumptionTableSection(type: 'energyUse' | 'cost' | 'water', title: string): TableSection | undefined {
         let headers: Array<string | TableHeaderCell> = [];
@@ -492,6 +689,111 @@ export class DataOverviewReportAdapter {
         return tableSection;
     }
 
+    private buildEmissionsUtilityTableSection(): TableSection {
+        const endDate: string = this.accountData.dateRange.endDate ? '(' + this.formatDate(this.accountData.dateRange.endDate) + ')' : '';
+        const previousYear: string = this.accountData.utilityUseAndCost.previousYear ? '(' + this.formatDate(this.accountData.utilityUseAndCost.previousYear) + ')' : '';
+        const dateRange: string = this.accountData.dateRange.startDate ? '(' + this.formatDate(this.accountData.dateRange.startDate) + ' - ' + this.formatDate(this.accountData.dateRange.endDate) + ')' : '';
+        let headers = ['', `Latest Month \n${endDate}`, `Previous Year \n${previousYear}`, `Monthly Average \n${dateRange}`];
+        let subheaders = ['', '(tonne CO2e)', '(tonne CO2e)', '(tonne CO2e)'];
+        let rows: string[][] = [];
+
+        let showMobile = false, showFugitive = false, showProcess = false, showStationary = false, showScope2LocationElectricity = false, showScope2MarketElectricity = false, showScope2Other = false;
+        let useAndCostTotal = this.accountData.utilityUseAndCost.allSourcesTotal;
+        if (useAndCostTotal) {
+            showMobile = (this.checkValue(useAndCostTotal.average.mobileTotalEmissions) || this.checkValue(useAndCostTotal.end.mobileTotalEmissions) || this.checkValue(useAndCostTotal.previousYear.mobileTotalEmissions));
+            showFugitive = (this.checkValue(useAndCostTotal.average.fugitiveEmissions) || this.checkValue(useAndCostTotal.end.fugitiveEmissions) || this.checkValue(useAndCostTotal.previousYear.fugitiveEmissions));
+            showProcess = (this.checkValue(useAndCostTotal.average.processEmissions) || this.checkValue(useAndCostTotal.end.processEmissions) || this.checkValue(useAndCostTotal.previousYear.processEmissions));
+            showStationary = (this.checkValue(useAndCostTotal.average.stationaryEmissions) || this.checkValue(useAndCostTotal.end.stationaryEmissions) || this.checkValue(useAndCostTotal.previousYear.stationaryEmissions));
+            showScope2LocationElectricity = (this.checkValue(useAndCostTotal.average.locationElectricityEmissions) || this.checkValue(useAndCostTotal.end.locationElectricityEmissions) || this.checkValue(useAndCostTotal.previousYear.locationElectricityEmissions));
+            showScope2MarketElectricity = (this.checkValue(useAndCostTotal.average.marketElectricityEmissions) || this.checkValue(useAndCostTotal.end.marketElectricityEmissions) || this.checkValue(useAndCostTotal.previousYear.marketElectricityEmissions));
+            showScope2Other = (this.checkValue(useAndCostTotal.average.otherScope2Emissions) || this.checkValue(useAndCostTotal.end.otherScope2Emissions) || this.checkValue(useAndCostTotal.previousYear.otherScope2Emissions));
+        }
+
+        if (showMobile) {
+            rows.push([
+                'Scope 1: Mobile',
+                this.checkNumber(useAndCostTotal.end.mobileTotalEmissions),
+                this.checkNumber(useAndCostTotal.previousYear.mobileTotalEmissions),
+                this.checkNumber(useAndCostTotal.average.mobileTotalEmissions)
+            ]);
+        }
+        if (showFugitive) {
+            rows.push([
+                'Scope 1: Fugitive',
+                this.checkNumber(useAndCostTotal.end.fugitiveEmissions),
+                this.checkNumber(useAndCostTotal.previousYear.fugitiveEmissions),
+                this.checkNumber(useAndCostTotal.average.fugitiveEmissions)
+            ]);
+        }
+        if (showProcess) {
+            rows.push([
+                'Scope 1: Process',
+                this.checkNumber(useAndCostTotal.end.processEmissions),
+                this.checkNumber(useAndCostTotal.previousYear.processEmissions),
+                this.checkNumber(useAndCostTotal.average.processEmissions)
+            ]);
+        }
+        if (showStationary) {
+            rows.push([
+                'Scope 1: Stationary',
+                this.checkNumber(useAndCostTotal.end.stationaryEmissions),
+                this.checkNumber(useAndCostTotal.previousYear.stationaryEmissions),
+                this.checkNumber(useAndCostTotal.average.stationaryEmissions)
+            ]);
+        }
+        if (this.emissionsDisplay === 'location' && showScope2LocationElectricity) {
+            rows.push([
+                'Scope 2: Electricity (Location)',
+                this.checkNumber(useAndCostTotal.end.locationElectricityEmissions),
+                this.checkNumber(useAndCostTotal.previousYear.locationElectricityEmissions),
+                this.checkNumber(useAndCostTotal.average.locationElectricityEmissions)
+            ]);
+        }
+        if (this.emissionsDisplay === 'market' && showScope2MarketElectricity) {
+            rows.push([
+                'Scope 2: Electricity (Market)',
+                this.checkNumber(useAndCostTotal.end.marketElectricityEmissions),
+                this.checkNumber(useAndCostTotal.previousYear.marketElectricityEmissions),
+                this.checkNumber(useAndCostTotal.average.marketElectricityEmissions)
+            ]);
+        }
+        if (showScope2Other) {
+            rows.push([
+                'Scope 2: Other',
+                this.checkNumber(useAndCostTotal.end.otherScope2Emissions),
+                this.checkNumber(useAndCostTotal.previousYear.otherScope2Emissions),
+                this.checkNumber(useAndCostTotal.average.otherScope2Emissions)
+            ]);
+        }
+        let totalEnd: string, totalPrevious: string, totalAverage: string;
+        if (this.emissionsDisplay === 'market') {
+            totalEnd = this.checkNumber(useAndCostTotal.end.totalWithMarketEmissions);
+            totalPrevious = this.checkNumber(useAndCostTotal.previousYear.totalWithMarketEmissions);
+            totalAverage = this.checkNumber(useAndCostTotal.average.totalWithMarketEmissions);
+        }
+        if (this.emissionsDisplay === 'location') {
+            totalEnd = this.checkNumber(useAndCostTotal.end.totalWithLocationEmissions);
+            totalPrevious = this.checkNumber(useAndCostTotal.previousYear.totalWithLocationEmissions);
+            totalAverage = this.checkNumber(useAndCostTotal.average.totalWithLocationEmissions);
+        }
+        rows.push([
+            'Total',
+            totalEnd,
+            totalPrevious,
+            totalAverage
+        ]);
+
+        const tableSection: TableSection = {
+            type: 'table',
+            title: 'Utility Emissions Comparison',
+            headers: headers,
+            subHeaders: subheaders,
+            rows: rows
+        };
+
+        return tableSection;
+    }
+
     private createChartSection(chartImageProvider: any, title: string) {
         const chartSection: ChartSection = {
             type: 'chart',
@@ -499,6 +801,20 @@ export class DataOverviewReportAdapter {
             imageDataProvider: chartImageProvider ? chartImageProvider : undefined
         };
         return chartSection;
+    }
+
+    formatDate(date: Date): string {
+        if (!date) {
+            return '-';
+        }
+        return formatDate(date, 'MMM, yyyy', 'en-US');
+    }
+
+    checkValue(value: number): boolean {
+        if (value) {
+            return true;
+        }
+        return false;
     }
 
     checkNumber(value: number): string {
@@ -528,6 +844,7 @@ export interface DataOverviewReportData {
     overviewReport: DataOverviewReportSetup;
     accountData: DataOverviewAccount;
     facilitiesData: Array<DataOverviewFacility>;
+    emissionsDisplay: "market" | "location";
     chartImageProviders?: {
         utilityUsageMap?: Record<string, () => Promise<string>>;
         usageDonut?: Record<string, () => Promise<string>>;
@@ -540,5 +857,11 @@ export interface DataOverviewReportData {
         meterBarChart?: Record<string, () => Promise<string>>;
         annualBarChart?: Record<string, () => Promise<string>>;
         monthlyUsageLineChart?: Record<string, () => Promise<string>>;
+    }>;
+    facilityEmissionsChartImageProviders?: Record<string, {
+        meterStackedLineChartEmissions?: () => Promise<string>;
+        emissionsBarChart?: () => Promise<string>;
+        annualBarChartEmissions?: () => Promise<string>;
+        monthlyUsageLineChartEmissions?: () => Promise<string>;
     }>;
 }

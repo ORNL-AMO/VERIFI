@@ -21,6 +21,8 @@ import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-re
 import { FacilitySectionReportComponent } from '@v0/shared/data-overview/facility-section-report/facility-section-report.component';
 import { FacilityOverviewReportPptAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-ppt.adapter';
 import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
+import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
+import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-overview/facility-overview.service';
 
 @Component({
   selector: 'app-facility-overview-report-results',
@@ -50,6 +52,10 @@ export class FacilityOverviewReportResultsComponent {
   worker: Worker;
   calculating: boolean | 'error' = true;
 
+  emissionsDisplaySub: Subscription;
+  emissionsDisplay: "market" | "location";
+  account: IdbAccount;
+
   @ViewChildren(FacilitySectionReportComponent) sectionReports !: QueryList<FacilitySectionReportComponent>;
 
   constructor(
@@ -59,13 +65,17 @@ export class FacilityOverviewReportResultsComponent {
     private exportReportPdfService: ExportReportPdfService,
     private pptReportService: PptReportService,
     private facilityOverviewReportPptAdapter: FacilityOverviewReportPptAdapter,
-    private injector: Injector
+    private injector: Injector,
+    private accountOverviewService: AccountOverviewService,
+    private facilityOverviewService: FacilityOverviewService
 
   ) {
 
   }
 
   ngOnInit() {
+    this.facility = this.accountWorkspaceStore.selectedFacility();
+    this.account = this.accountWorkspaceStore.account();
     this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
       this.facilityReport = report;
       this.overviewReportSettings = this.facilityReport.dataOverviewReportSettings;
@@ -73,7 +83,17 @@ export class FacilityOverviewReportResultsComponent {
     });
     this.printSub = this.dataEvaluationService.print.subscribe(print => {
       this.print = print;
-    })
+    });
+    if (this.facility.guid) {
+      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(display => {
+        this.emissionsDisplay = display;
+      });
+    }
+    else {
+      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(display => {
+        this.emissionsDisplay = display;
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -82,11 +102,13 @@ export class FacilityOverviewReportResultsComponent {
     if (this.worker) {
       this.worker.terminate();
     }
+    if (this.emissionsDisplaySub) {
+      this.emissionsDisplaySub.unsubscribe();
+    }
   }
 
   calculateFacilitiesSummary() {
     this.calculating = true;
-    this.facility = this.accountWorkspaceStore.selectedFacility();
     let facilityMeters: Array<IdbUtilityMeter> = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
     let customGWPs: Array<IdbCustomGWP> = [...this.accountWorkspaceStore.customGWPs()];
     if (this.overviewReportSettings.includeAllMeterData == false) {
@@ -153,17 +175,19 @@ export class FacilityOverviewReportResultsComponent {
       facilityOverviewData: this.facilityOverviewData,
       utilityUseAndCost: this.utilityUseAndCost,
       dateRange: this.dateRange,
-      chartImageProviders: this.getChartImageProviders()
+      emissionsDisplay: this.emissionsDisplay,
+      chartImageProviders: this.getChartImageProviders(),
+      emissionsChartImageProviders: this.getEmissionsChartImageProviders()
     });
 
     this.exportReportPdfService.export(document, `${this.facilityReport.name} - Data Overview Report`);
   }
 
-  getSectionsByType(type: 'energyUse' | 'cost' | 'water') {
+  getSectionsByType(type: 'energyUse' | 'cost' | 'water' | 'emissions') {
     return this.sectionReports?.find(section => section.dataType == type);
   }
 
-  async getImage(type: 'energyUse' | 'cost' | 'water', chartType: 'meterStackedLineChart' | 'meterBarChart' | 'annualBarChart' | 'monthlyUsageLineChart'): Promise<string> {
+  async getImage(type: 'energyUse' | 'cost' | 'water' | 'emissions', chartType: 'meterStackedLineChart' | 'meterBarChart' | 'annualBarChart' | 'monthlyUsageLineChart' | 'meterStackedLineChartEmissions' | 'emissionsBarChart' | 'annualBarChartEmissions' | 'monthlyUsageLineChartEmissions'): Promise<string> {
     const section = this.getSectionsByType(type);
     if (!section) {
       return '';
@@ -176,6 +200,14 @@ export class FacilityOverviewReportResultsComponent {
       case 'annualBarChart':
         return await section.getAnnualBarChartImage();
       case 'monthlyUsageLineChart':
+        return await section.getMonthlyUsageLineChartImage();
+      case 'meterStackedLineChartEmissions':
+        return await section.getMeterStackedLineChartEmissionsImage();
+      case 'emissionsBarChart':
+        return await section.getEmissionsBarChartImage();
+      case 'annualBarChartEmissions':
+        return await section.getAnnualBarChartEmissionsImage();
+      case 'monthlyUsageLineChartEmissions':
         return await section.getMonthlyUsageLineChartImage();
     }
   }
@@ -190,7 +222,16 @@ export class FacilityOverviewReportResultsComponent {
       meterStackedLineChart: imageByType('meterStackedLineChart'),
       meterBarChart: imageByType('meterBarChart'),
       annualBarChart: imageByType('annualBarChart'),
-      monthlyUsageLineChart: imageByType('monthlyUsageLineChart')
+      monthlyUsageLineChart: imageByType('monthlyUsageLineChart'),
+    };
+  }
+
+  getEmissionsChartImageProviders() {
+    return {
+      meterStackedLineChartEmissions: async () => await this.getImage('emissions', 'meterStackedLineChartEmissions'),
+      emissionsBarChart: async () => await this.getImage('emissions', 'emissionsBarChart'),
+      annualBarChartEmissions: async () => await this.getImage('emissions', 'annualBarChartEmissions'),
+      monthlyUsageLineChartEmissions: async () => await this.getImage('emissions', 'monthlyUsageLineChart')
     };
   }
 
