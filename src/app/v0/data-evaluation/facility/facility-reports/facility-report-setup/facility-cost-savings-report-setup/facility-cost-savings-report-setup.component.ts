@@ -56,6 +56,8 @@ export class FacilityCostSavingsReportSetupComponent {
 
   groupMeterCalendarizedData: GroupMeterCalendarizedMap = {};
   missingCostData: { [meterId: string]: Date[] } = {};
+  calendarizedMetersActualCost: YearGroupData = {};
+  showMissingCostWarning: boolean = false;
 
   constructor(
     private calanderizationService: CalanderizationService,
@@ -72,6 +74,8 @@ export class FacilityCostSavingsReportSetupComponent {
       .subscribe(report => {
         this.facilityReport = report;
         this.setReportSettings();
+        this.setYearOptions();
+        this.setSelectedAnalysisItem();
       });
 
     this.analysisItemsSub = toObservable(this.accountWorkspaceStore.selectedFacilityAnalyses, { injector: this.injector })
@@ -81,13 +85,13 @@ export class FacilityCostSavingsReportSetupComponent {
       )
       .subscribe(items => {
         this.analysisItems = this.getEligibleAnalysisItems(items);
+        this.setSelectedAnalysisItem();
       });
 
     this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
       this.setYearOptions();
+      this.calculateCalendarizedCosts();
     });
-
-    this.setSelectedAnalysisItem();
   }
 
   ngOnDestroy() {
@@ -100,6 +104,14 @@ export class FacilityCostSavingsReportSetupComponent {
     this.selectedAnalysisItem = item;
     this.checkSelectedYearError();
     this.clearUnitCostData();
+    if (this.selectedYearError) {
+      this.missingCostData = {};
+      this.calendarizedMetersActualCost = {};
+      this.updateReportSettings();
+      return;
+    }
+    this.showMissingCostWarning = false;
+    this.calculateCalendarizedCosts();
     this.updateReportSettings();
   }
 
@@ -112,9 +124,27 @@ export class FacilityCostSavingsReportSetupComponent {
       return;
     }
 
-    this.selectedAnalysisItem = this.analysisItems.find(item => {
+    const matchedItem = this.analysisItems.find(item => {
       return item.guid == this.facilityReport.analysisItemId;
     });
+    if (!matchedItem) {
+      if (this.selectedAnalysisItem) {
+      this.selectedAnalysisItem = undefined;
+      this.selectedYearError = false;
+      this.yearsList = [];
+      this.groupUnits = {};
+      this.groupMeterCalendarizedData = {};
+      this.missingCostData = {};
+      this.showMissingCostWarning = false;
+      this.showModal = false;
+      this.unitCostTable = {};
+      this.calendarizedMetersActualCost = {};
+      this.reportSettings.groupUnits = {};
+      void this.updateReportSettings();
+    }
+      return;
+    }
+    this.selectedAnalysisItem = matchedItem;
     this.checkSelectedYearError();
   }
 
@@ -131,8 +161,14 @@ export class FacilityCostSavingsReportSetupComponent {
       return;
     }
     this.reportSettings = this.facilityReport.costSavingsReportSettings;
+    this.unitCostTable = {};
+    this.calendarizedMetersActualCost = {};
+    this.groupUnits = this.reportSettings?.groupUnits ? {...this.reportSettings.groupUnits} : {};
     if (this.reportSettings?.unitCostTable) {
       this.unitCostTable = JSON.parse(JSON.stringify(this.reportSettings.unitCostTable));
+    }
+    if (this.reportSettings?.calendarizedMetersActualCost) {
+      this.calendarizedMetersActualCost = JSON.parse(JSON.stringify(this.reportSettings.calendarizedMetersActualCost));
     }
   }
 
@@ -147,6 +183,9 @@ export class FacilityCostSavingsReportSetupComponent {
     }
     else {
       this.selectedYearError = true;
+      this.yearsList = [];
+      this.groupUnits = {};
+      this.reportSettings.groupUnits = {};
     }
   }
 
@@ -158,16 +197,29 @@ export class FacilityCostSavingsReportSetupComponent {
         this.setGroupUnits();
       } else {
         this.selectedYearError = true;
+        this.yearsList = [];
+        this.groupUnits = {};
+        this.reportSettings.groupUnits = {};
       }
     }
+    if (this.selectedYearError) {
+      this.missingCostData = {};
+      this.calendarizedMetersActualCost = {};
+      this.updateReportSettings();
+      return;
+    }
+    this.showMissingCostWarning = false;
+    this.calculateCalendarizedCosts();
     this.updateReportSettings();
   }
 
   async save() {
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     const { value: updatedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
+      {
+        entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }
+      },
       () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
     );
     this.facilityReport = updatedReport;
@@ -175,6 +227,11 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   setYearOptions() {
+    if (!this.facilityReport?.facilityId) {
+      this.reportYears = [];
+      this.baselineYears = [];
+      return;
+    }
     let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', false, this.facilityReport.facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
@@ -186,17 +243,20 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   clearUnitCostData() {
-    if (this.yearsList && this.selectedAnalysisItem) {
-      for (let year of this.yearsList) {
-        for (const group of this.selectedAnalysisItem.groups) {
-          if (!this.unitCostTable[year]) {
-            this.unitCostTable[year] = {};
-          }
-          this.unitCostTable[year][group.idbGroupId] = null;
-        }
+    this.unitCostTable = {};
+    this.calendarizedMetersActualCost = {};
+    this.missingCostData = {};
+    this.showMissingCostWarning = false;
+
+    if (!this.yearsList?.length) {
+      return;
+    }
+    for (let year of this.yearsList) {
+      this.unitCostTable[year] = {};
+      for (const group of this.filteredGroups) {
+        this.unitCostTable[year][group.idbGroupId] = null;
       }
     }
-    this.missingCostData = {};
   }
 
   setGroupMeterCalendarizedData() {
@@ -237,11 +297,14 @@ export class FacilityCostSavingsReportSetupComponent {
   }
 
   setCostValues() {
+    if (!this.yearsList?.length) {
+      return;
+    }
     for (let year of this.yearsList) {
       if (!this.unitCostTable[year]) {
         this.unitCostTable[year] = {};
       }
-      for (const group of this.selectedAnalysisItem?.groups ?? []) {
+      for (const group of this.filteredGroups ?? []) {
         if (this.unitCostTable[year][group.idbGroupId] === undefined) {
           this.unitCostTable[year][group.idbGroupId] = null;
         }
@@ -251,7 +314,7 @@ export class FacilityCostSavingsReportSetupComponent {
 
   setGroupUnits() {
     this.groupUnits = {};
-    for (const group of this.selectedAnalysisItem?.groups ?? []) {
+    for (const group of this.filteredGroups) {
       this.groupUnits[group.idbGroupId] = this.checkUnit(group);
     }
     this.reportSettings.groupUnits = { ...this.groupUnits };
@@ -291,10 +354,11 @@ export class FacilityCostSavingsReportSetupComponent {
     this.showModal = false;
   }
 
-  updateReportSettings() {
+  async updateReportSettings() {
     this.reportSettings.unitCostTable = JSON.parse(JSON.stringify(this.unitCostTable));
+    this.reportSettings.calendarizedMetersActualCost = JSON.parse(JSON.stringify(this.calendarizedMetersActualCost));
     this.reportSettings.isDataComplete = this.isDataComplete();
-    this.save();
+    await this.save();
   }
 
   isDataComplete(): boolean {
@@ -316,19 +380,30 @@ export class FacilityCostSavingsReportSetupComponent {
     return this.selectedAnalysisItem?.groups.filter(group => group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') ?? [];
   }
 
-  calculateCostFromCalendarizedMeters() {
-    this.missingCostData = {};
+  calculateCalendarizedCosts(overwriteManualValues: boolean = false, collectMissingCost: boolean = false) {
+    if (collectMissingCost) {
+      this.missingCostData = {};
+    }
+    this.calendarizedMetersActualCost = {};
+    if (!this.selectedAnalysisItem || !this.yearsList?.length) {
+      return;
+    }
+
     this.setGroupMeterCalendarizedData();
+
     for (let year of this.yearsList) {
+      if (!this.calendarizedMetersActualCost[year]) {
+        this.calendarizedMetersActualCost[year] = {};
+      }
       for (const group of this.filteredGroups) {
-        const groupCalendarizedMeters = this.groupMeterCalendarizedData[group.idbGroupId];
+        const groupCalendarizedMeters = this.groupMeterCalendarizedData[group.idbGroupId] ?? {};
         let totalEnergyCost = 0;
         let totalEnergyConsumption = 0;
 
         for (const meterId in groupCalendarizedMeters) {
           const meterData = groupCalendarizedMeters[meterId].monthlyData.filter(m => m.year == year);
           meterData.forEach(m => {
-            if (m.energyCost == 0) {
+            if (collectMissingCost && m.energyCost == 0) {
               if (!this.missingCostData[meterId]) {
                 this.missingCostData[meterId] = [];
               }
@@ -341,9 +416,22 @@ export class FacilityCostSavingsReportSetupComponent {
         }
 
         const blendedRate = totalEnergyConsumption > 0 ? totalEnergyCost / totalEnergyConsumption : 0;
-        this.unitCostTable[year][group.idbGroupId] = Math.round(blendedRate * 100) / 100;
+        if (overwriteManualValues) {
+          if (!this.unitCostTable[year]) {
+            this.unitCostTable[year] = {};
+          }
+          this.unitCostTable[year][group.idbGroupId] = Math.round(blendedRate * 100) / 100;
+        }
+        this.calendarizedMetersActualCost[year][group.idbGroupId] = totalEnergyCost;
+
       }
     }
+  }
+
+  calculateCostFromCalendarizedMeters() {
+    this.showMissingCostWarning = true;
+    this.calculateCalendarizedCosts(true, true);
+    this.reportSettings.useCalculatedCostsInsteadOfBillData = false;
     this.updateReportSettings();
   }
 
