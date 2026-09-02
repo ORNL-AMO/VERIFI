@@ -1,16 +1,16 @@
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
-import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
-import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFunctions';
-import { AllSources, MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
-import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
-import { StationaryGasOptions } from '../fuel-options/stationaryGasOptions';
-import { StationaryLiquidOptions } from '../fuel-options/stationaryLiquidOptions';
-import { StationarySolidOptions } from '../fuel-options/stationarySolidOptions';
-import { StationaryOtherEnergyOptions } from '../fuel-options/stationaryOtherEnergyOptions';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
+import { getIsEnergyMeter, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
+import { AllSources, MeterPhase, MeterSource } from '@data/models/constantsAndTypes';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { StationaryGasOptions } from '@shared/fuel-options/stationaryGasOptions';
+import { StationaryLiquidOptions } from '@shared/fuel-options/stationaryLiquidOptions';
+import { StationarySolidOptions } from '@shared/fuel-options/stationarySolidOptions';
+import { StationaryOtherEnergyOptions } from '@shared/fuel-options/stationaryOtherEnergyOptions';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 @Injectable({
   providedIn: 'root'

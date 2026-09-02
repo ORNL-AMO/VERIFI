@@ -1,4 +1,4 @@
-import { AccountAndFacility } from "src/app/models/idbModels/accountAndFacility";
+import { AccountAndFacility } from "@data/models/idbModels/accountAndFacility";
 
 export function getNAICS(accountOrFacility: AccountAndFacility): string {
   let matchingNAICS: NAICS;

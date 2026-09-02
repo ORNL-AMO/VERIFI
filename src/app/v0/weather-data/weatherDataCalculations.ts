@@ -1,0 +1,178 @@
+import { ConvertValue } from "@domain/calculations/conversions/convertValue";
+import { DetailDegreeDay, WeatherDataSelection, WeatherStation } from "@data/models/degreeDays";
+import { WeatherDataReading } from "@v0/weather-data/weather-data.service";
+
+
+export function getMonthlyDataFromYear(hourlyData: Array<WeatherDataReading>, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Array<DetailDegreeDay> {
+    let startDate: Date = new Date(year, 0, 1);
+    let endDate: Date = new Date(year + 1, 0, 1);
+    let detailedDegreeDays: Array<DetailDegreeDay> = new Array();
+    while (startDate < endDate) {
+        let monthDetailedDegreeDay: Array<DetailDegreeDay> = getDetailedDataForMonth(hourlyData, startDate.getMonth(), year, baseHeatingTemperature, baseCoolingTemperature, station.ID, station.name);
+        monthDetailedDegreeDay.forEach(detailDegreeDay => {
+            detailedDegreeDays.push(detailDegreeDay);
+        });
+        startDate.setMonth(startDate.getMonth() + 1);
+    }
+    return detailedDegreeDays;
+}
+
+export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string, stationName: string): Array<DetailDegreeDay> {
+    let results: Array<DetailDegreeDay> = new Array();
+    let localClimatologicalDataMonth: Array<WeatherDataReading> = hourlyData.filter(lcd => {
+        lcd.time = new Date(lcd.time);
+        return lcd.time.getMonth() == month && lcd.time.getFullYear() == year && isNaN(lcd.dry_bulb_temp) == false;
+    });
+    let minutesPerDay: number = 1440;
+    for (let i = 0; i < localClimatologicalDataMonth.length; i++) {
+        let previousDate: Date;
+        let previousDryBulbTemp: number;
+        let previousRelativeHumidity: number;
+        let previousWetBulbTemp: number;
+        let previousDewPointTemp: number;
+
+        if (i == 0) {
+            let startDate: Date = new Date(localClimatologicalDataMonth[i].time);
+            previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1, 0, 0);
+            previousDryBulbTemp = localClimatologicalDataMonth[i].dry_bulb_temp;
+            previousRelativeHumidity = localClimatologicalDataMonth[i].humidity;
+            previousWetBulbTemp = localClimatologicalDataMonth[i].wet_bulb_temp;
+            previousDewPointTemp = localClimatologicalDataMonth[i].dew_point_temp;
+        } else {
+            previousDate = new Date(localClimatologicalDataMonth[i - 1].time)
+            previousDryBulbTemp = localClimatologicalDataMonth[i - 1].dry_bulb_temp;
+            previousRelativeHumidity = localClimatologicalDataMonth[i - 1].humidity;
+            previousWetBulbTemp = localClimatologicalDataMonth[i - 1].wet_bulb_temp;
+            previousDewPointTemp = localClimatologicalDataMonth[i - 1].dew_point_temp;
+        }
+
+        let gapInData: boolean = false
+        let minutesBetween: number = getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].time);
+        if (minutesBetween > 720) {
+            gapInData = true;
+        }
+
+        if (i == (localClimatologicalDataMonth.length - 1)) {
+            let currentDate: Date = new Date(localClimatologicalDataMonth[i].time);
+            let endDate: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1, 0, 0);
+            let minutesBetween: number = getMinutesBetweenDates(localClimatologicalDataMonth[i].time, endDate);
+            if (minutesBetween > 720) {
+                gapInData = true;
+            }
+        }
+
+        let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].dry_bulb_temp + previousDryBulbTemp) / 2;
+        let averageWetBulbTemp: number = (localClimatologicalDataMonth[i].wet_bulb_temp + previousWetBulbTemp) / 2;
+        let averageDewPointTemp: number = (localClimatologicalDataMonth[i].dew_point_temp + previousDewPointTemp) / 2;
+
+        let baseRelativeHumidity: number = localClimatologicalDataMonth[i].humidity;
+        let averageRelativeHumidity: number = (baseRelativeHumidity + previousRelativeHumidity) / 2
+        let portionOfDay: number = (minutesBetween / minutesPerDay);
+
+        // weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
+        // weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100))),
+        let weightedRelativeHumidity: number = (averageRelativeHumidity * minutesBetween);
+        let weightedDryBulbTemp: number = (averageDryBulbTemp * minutesBetween);
+        let weightedWetBulbTemp: number = (averageWetBulbTemp * minutesBetween);
+        let weightedDewPointTemp: number = (averageDewPointTemp * minutesBetween);
+
+        if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
+            let heatingDegreeDay: number = 0;
+            let heatingDegreeDifference: number = 0;
+            let coolingDegreeDay: number = 0;
+            let coolingDegreeDifference: number = 0;
+            if (averageDryBulbTemp < baseHeatingTemperature) {
+                heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
+                heatingDegreeDay = heatingDegreeDifference * portionOfDay;
+            }
+
+            let minutesBetween: number = getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].time);
+            if (minutesBetween > 720) {
+                gapInData = true;
+            }
+            if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
+                if (averageDryBulbTemp < baseHeatingTemperature) {
+                    heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
+                    heatingDegreeDay = heatingDegreeDifference * portionOfDay;
+                }
+                if (averageDryBulbTemp > baseCoolingTemperature) {
+                    coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
+                    coolingDegreeDay = coolingDegreeDifference * portionOfDay;
+                }
+            }
+
+            results.push({
+                time: localClimatologicalDataMonth[i].time,
+                heatingDegreeDay: heatingDegreeDay,
+                heatingDegreeDifference: heatingDegreeDifference,
+                coolingDegreeDay: coolingDegreeDay,
+                coolingDegreeDifference: coolingDegreeDifference,
+                percentOfDay: portionOfDay,
+                dryBulbTemp: localClimatologicalDataMonth[i].dry_bulb_temp,
+                wetBulbTemp: localClimatologicalDataMonth[i].wet_bulb_temp,
+                dewPointTemp: localClimatologicalDataMonth[i].dew_point_temp,
+                lagDryBulbTemp: averageDryBulbTemp,
+                stationId: stationId,
+                stationName: stationName,
+                gapInData: gapInData,
+                relativeHumidity: localClimatologicalDataMonth[i].humidity,
+                weightedRelativeHumidity: weightedRelativeHumidity,
+                weightedDryBulbTemp: weightedDryBulbTemp,
+                weightedWetBulbTemp: weightedWetBulbTemp,
+                weightedDewPointTemp: weightedDewPointTemp,
+                precipitation: localClimatologicalDataMonth[i].precipitation,
+                minutesBetween: minutesBetween
+            })
+        } else {
+            results.push({
+                time: localClimatologicalDataMonth[i].time,
+                heatingDegreeDay: 0,
+                heatingDegreeDifference: 0,
+                coolingDegreeDay: 0,
+                coolingDegreeDifference: 0,
+                percentOfDay: portionOfDay,
+                dryBulbTemp: localClimatologicalDataMonth[i].dry_bulb_temp,
+                wetBulbTemp: localClimatologicalDataMonth[i].wet_bulb_temp,
+                dewPointTemp: localClimatologicalDataMonth[i].dew_point_temp,
+                lagDryBulbTemp: averageDryBulbTemp,
+                stationId: stationId,
+                stationName: stationName,
+                gapInData: gapInData,
+                relativeHumidity: localClimatologicalDataMonth[i].humidity,
+                weightedRelativeHumidity: weightedRelativeHumidity,
+                weightedDryBulbTemp: weightedDryBulbTemp,
+                weightedWetBulbTemp: weightedWetBulbTemp,
+                weightedDewPointTemp: weightedDewPointTemp,
+                precipitation: localClimatologicalDataMonth[i].precipitation,
+                minutesBetween: minutesBetween
+            })
+        }
+    }
+    return results;
+}
+
+export function hasWeatherDataWarning(degreeDays: Array<DetailDegreeDay>, weatherDataSelection: WeatherDataSelection): boolean {
+    if (degreeDays.length === 0) {
+        return true;
+    }
+    if (degreeDays.some(degreeDay => degreeDay.gapInData)) {
+        return true;
+    }
+    if (weatherDataSelection === 'relativeHumidity') {
+        return degreeDays.some(degreeDay => isMissingWeatherValue(degreeDay.relativeHumidity));
+    }
+    if (weatherDataSelection === 'wetBulbTemp') {
+        return degreeDays.some(degreeDay => isMissingWeatherValue(degreeDay.wetBulbTemp));
+    }
+    return false;
+}
+
+function isMissingWeatherValue(value: number): boolean {
+    return value === null || value === undefined || Number.isFinite(value) === false;
+}
+
+export function getMinutesBetweenDates(firstDate: Date, secondDate: Date): number {
+    let diffMilliseconds = Math.abs(new Date(firstDate).getTime() - new Date(secondDate).getTime());
+    let diffMinutes: number = new ConvertValue(diffMilliseconds, 'ms', 'min').convertedValue;
+    return diffMinutes;
+}

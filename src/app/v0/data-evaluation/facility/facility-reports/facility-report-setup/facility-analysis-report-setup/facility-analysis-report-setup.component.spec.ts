@@ -1,0 +1,130 @@
+import { Component, EventEmitter, Injector, Input, NgModule, Output } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { BehaviorSubject, of } from 'rxjs';
+import { vi } from 'vitest';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { ReportCommandHandler } from '@data/account-workspace/handlers/report-command-handler.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { getNewIdbFacilityReport, IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { FacilityAnalysisReportSetupComponent } from '@v0/data-evaluation/facility/facility-reports/facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
+
+@Component({
+  selector: 'app-facility-report-analysis-selection',
+  template: '',
+  standalone: false
+})
+export class FacilityReportAnalysisSelectionStubComponent {
+  @Input() facilityReport: IdbFacilityReport;
+  @Input() baselineYears: Array<number>;
+  @Input() selectedAnalysisItem: IdbAnalysisItem;
+  @Output() selectedAnalysisItemChange = new EventEmitter<IdbAnalysisItem>();
+  @Output() filteredItemsChange = new EventEmitter<Array<IdbAnalysisItem>>();
+}
+
+@NgModule({
+  declarations: [FacilityAnalysisReportSetupComponent, FacilityReportAnalysisSelectionStubComponent],
+  imports: [FormsModule]
+})
+class FacilityAnalysisReportSetupTestModule { }
+
+describe('FacilityAnalysisReportSetupComponent', () => {
+  it('saves through the boundary and reselects the committed report', async () => {
+    const store = new AccountWorkspaceStore();
+    const facility = { id: 2, guid: 'facility-a', accountId: 'account-a', name: 'Facility A' } as any;
+    const report = { ...getNewIdbFacilityReport('facility-a', 'account-a', 'analysis', []), id: 4 };
+    const analysis = { id: 3, guid: 'analysis-a', facilityId: 'facility-a', accountId: 'account-a', name: 'Analysis A' } as any;
+    const snapshot = {
+      account: { id: 1, guid: 'account-a', name: 'Account A' },
+      facilities: [facility],
+      meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
+      facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [report],
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    } as unknown as AccountWorkspaceSnapshot;
+    store.publish(snapshot, { facility, facilityReport: report });
+
+    const execute = vi.fn().mockImplementation(async (_options, persist) => {
+      const value = await persist();
+      return { value, change: {} };
+    });
+    const selectFacilityReport = vi.fn();
+    const updateFacilityReport = vi.fn(async (value: IdbFacilityReport) => ({ ...value }));
+
+    TestBed.configureTestingModule({
+      imports: [FacilityAnalysisReportSetupTestModule],
+      providers: [
+        { provide: AccountWorkspaceStore, useValue: store },
+        { provide: AccountWorkspaceService, useValue: { selectFacilityReport, reloadActiveWorkspace: vi.fn() } },
+        { provide: WorkspaceCommandBoundary, useValue: { execute } },
+        { provide: ReportCommandHandler, useValue: { updateFacilityReport } },
+        { provide: CalanderizationService, useValue: { calanderizedMeters: new BehaviorSubject([]), getYearOptions: vi.fn().mockReturnValue([2024]) } }
+      ]
+    });
+    const injector = TestBed.inject(Injector);
+    const component = TestBed.runInInjectionContext(() => new FacilityAnalysisReportSetupComponent(
+      TestBed.inject(CalanderizationService),
+      injector
+    ));
+
+    component.ngOnInit();
+    await component.save();
+
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(updateFacilityReport).toHaveBeenCalledWith(component.facilityReport, 'account-a');
+    expect(selectFacilityReport).toHaveBeenCalledWith(report.guid);
+
+    component.ngOnDestroy();
+  });
+
+  it('initializes a new report from workspace signals before observable emissions run', () => {
+    const store = new AccountWorkspaceStore();
+    const facility = { id: 2, guid: 'facility-a', accountId: 'account-a', name: 'Facility A' } as any;
+    const report = { ...getNewIdbFacilityReport('facility-a', 'account-a', 'analysis', []), id: 4 };
+    const analysis = {
+      id: 3,
+      guid: 'analysis-a',
+      facilityId: 'facility-a',
+      accountId: 'account-a',
+      name: 'Analysis A'
+    } as any;
+    const snapshot = {
+      account: { id: 1, guid: 'account-a', name: 'Account A' },
+      facilities: [facility],
+      meters: [], meterData: [], meterGroups: [], predictors: [], predictorData: [],
+      facilityAnalyses: [analysis], accountAnalyses: [], accountReports: [], facilityReports: [report],
+      customEmissions: [], customFuels: [], customGWPs: [], energyUseGroups: [], energyUseEquipment: []
+    } as unknown as AccountWorkspaceSnapshot;
+    store.publish(snapshot, { facility, facilityReport: report });
+    const calanderizedMeters = new BehaviorSubject([]);
+    const calendarization = {
+      calanderizedMeters,
+      getYearOptions: vi.fn().mockReturnValue([2024])
+    };
+    TestBed.configureTestingModule({
+      imports: [FacilityAnalysisReportSetupTestModule],
+      providers: [
+        { provide: AccountWorkspaceStore, useValue: store },
+        { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn() } },
+        { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn().mockResolvedValue({ value: {}, change: {} }) } },
+        { provide: ReportCommandHandler, useValue: { updateFacilityReport: vi.fn(v => Promise.resolve(v)) } },
+        { provide: CalanderizationService, useValue: calendarization }
+      ]
+    });
+    const injector = TestBed.inject(Injector);
+    const component = TestBed.runInInjectionContext(() => new FacilityAnalysisReportSetupComponent(
+      TestBed.inject(CalanderizationService),
+      injector
+    ));
+
+    expect(() => component.ngOnInit()).not.toThrow();
+    expect(component.facilityReport.guid).toBe(report.guid);
+    expect(component.analysisItems.map(item => item.guid)).toEqual(['analysis-a']);
+    expect(component.reportYears).toEqual([2024]);
+
+    component.ngOnDestroy();
+  });
+});

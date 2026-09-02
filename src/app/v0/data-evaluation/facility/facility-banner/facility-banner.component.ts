@@ -1,0 +1,61 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, computed, ElementRef, HostListener, inject, Signal, ViewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+
+@Component({
+  selector: 'app-facility-banner',
+  templateUrl: './facility-banner.component.html',
+  styleUrls: ['./facility-banner.component.css'],
+  standalone: false
+})
+export class FacilityBannerComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+
+  @ViewChild('navTabs') navTabs: ElementRef;
+
+  selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
+  facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+
+  disableTabs: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    return facilityStatusCheck ? facilityStatusCheck.hasNoMeterData : true;
+  });
+
+  hasUtilityDataWarning: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    return facilityStatusCheck.metersStatus != 'good' || facilityStatusCheck.predictorsStatus != 'good';
+  });
+
+  hasAnalysisWarning: Signal<boolean> = computed(() => {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!facilityStatusCheck) return false;
+    const energyAnalysisStatusCheck = facilityStatusCheck.energyAnalysisStatusCheck;
+    const waterAnalysisStatusCheck = facilityStatusCheck.waterAnalysisStatusCheck;
+    return (energyAnalysisStatusCheck && energyAnalysisStatusCheck.status != 'good') || (waterAnalysisStatusCheck && waterAnalysisStatusCheck.status != 'good');
+  });
+
+  hideTabText: boolean = false;
+  hideAllText: boolean = false;
+
+  ngAfterViewInit() {
+    this.setHideTabText();
+    this.cd.detectChanges();
+  }
+
+  setHideTabText() {
+    this.hideTabText = this.navTabs.nativeElement.offsetWidth < 750;
+    this.hideAllText = this.navTabs.nativeElement.offsetWidth < 550;
+  }
+
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.setHideTabText();
+  }
+}

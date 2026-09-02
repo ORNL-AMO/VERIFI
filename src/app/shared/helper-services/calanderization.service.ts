@@ -1,16 +1,16 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject, computed } from '@angular/core';
 import * as _ from 'lodash';
-import { CalanderizationFilters, CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationFilters, CalanderizedMeter } from '@data/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
-import { getIsEnergyMeter } from '../sharedHelperFunctions';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getAllYearsWithData, getYearsWithFullData } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { getAllYearsWithData, getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +57,7 @@ export class CalanderizationService {
       if(this.calanderizationWorker){
         this.calanderizationWorker.terminate();
       }
-      this.calanderizationWorker = new Worker(new URL('../../web-workers/calanderization.worker', import.meta.url));
+      this.calanderizationWorker = new Worker(new URL('../../platform/web-workers/calanderization.worker', import.meta.url));
       this.calanderizationWorker.onmessage = ({ data }) => {
         this.calanderizationWorker.terminate();
         if (!data.error) {

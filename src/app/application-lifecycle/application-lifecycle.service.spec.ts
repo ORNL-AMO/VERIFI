@@ -1,6 +1,6 @@
 import { of } from 'rxjs';
 import { vi } from 'vitest';
-import { AccountWorkspaceStore } from '../account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ApplicationLifecycleService } from './application-lifecycle.service';
 
 describe('ApplicationLifecycleService', () => {

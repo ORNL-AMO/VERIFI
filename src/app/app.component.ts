@@ -1,10 +1,10 @@
-import { Component, ElementRef, Signal, ViewChild } from '@angular/core';
+import { Component, Signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { AnalyticsService } from './analytics/analytics.service';
+import { AnalyticsService } from '@platform/analytics/analytics.service';
 import { ApplicationLifecycleService } from './application-lifecycle/application-lifecycle.service';
 import { AppStartupState } from './application-lifecycle/application-lifecycle.models';
-import { WorkspaceStatus } from './account-workspace/account-workspace.models';
-import { AccountWorkspaceStore } from './account-workspace/account-workspace.store';
+import { WorkspaceStatus } from '@data/account-workspace/account-workspace.models';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -14,12 +14,8 @@ import { environment } from 'src/environments/environment';
   standalone: false
 })
 export class AppComponent {
-  @ViewChild('header', { static: false }) header: ElementRef;
-
   readonly startupState: Signal<AppStartupState>;
-  readonly persistenceReady: Signal<boolean>;
   readonly workspaceStatus: Signal<WorkspaceStatus>;
-  inDataManagement = false;
 
   constructor(
     public router: Router,
@@ -28,7 +24,6 @@ export class AppComponent {
     private analyticsService: AnalyticsService
   ) {
     this.startupState = this.lifecycle.state;
-    this.persistenceReady = this.lifecycle.persistenceReady;
     this.workspaceStatus = this.workspace.status;
     if (environment.production) {
       try {
@@ -43,7 +38,6 @@ export class AppComponent {
     void this.lifecycle.initialize();
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.inDataManagement = this.router.url.includes('data-management');
         if (environment.production) {
           try {
             const pagePath = this.analyticsService.getPageWithoutId(event.urlAfterRedirects);
@@ -54,7 +48,6 @@ export class AppComponent {
         }
       }
     });
-    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   retryStartup(): void {

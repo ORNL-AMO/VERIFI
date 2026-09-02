@@ -1,21 +1,21 @@
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AccountWorkspaceStore } from 'src/app/account-workspace/account-workspace.store';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AutomaticBackupStatus, AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
-import { ElectronService } from 'src/app/electron/electron.service';
-import { BackupImportCoordinator } from 'src/app/backup/backup-import-coordinator.service';
-import { BackupExportCoordinator } from 'src/app/backup/backup-export-coordinator.service';
-import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { ElectronService } from '@platform/electron/electron.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { LoadingService } from '../loading/loading.service';
-import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
-import { BackupFile } from 'src/app/models/backup-file';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
-import { PreparedBackupFile } from 'src/app/backup/backup-preparation.service';
-import { WorkspaceCommandBoundary } from 'src/app/account-workspace/workspace-command-boundary.service';
-import { AccountCommandHandler } from 'src/app/account-workspace/handlers/account-command-handler.service';
-import { ElectronBackupFileGateway } from 'src/app/electron/electron-backup-file.gateway';
+import { DeleteDataService } from '@data/indexedDB/delete-data.service';
+import { BackupFile } from '@data/models/backup-file';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbElectronBackup } from '@data/models/idbModels/electronBackup';
+import { PreparedBackupFile } from '@data/backup/backup-preparation.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 
 @Component({
   selector: 'app-electron-backup-file',

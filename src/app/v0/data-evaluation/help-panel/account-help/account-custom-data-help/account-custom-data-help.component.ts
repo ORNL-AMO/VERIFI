@@ -1,0 +1,20 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
+import { IdbAccount } from '@data/models/idbModels/account';
+
+@Component({
+    selector: 'app-account-custom-data-help',
+    templateUrl: './account-custom-data-help.component.html',
+    styleUrls: ['./account-custom-data-help.component.css'],
+    standalone: false
+})
+export class AccountCustomDataHelpComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+    account: IdbAccount;
+
+
+    ngOnInit(): void {
+        this.account = this.accountWorkspaceStore.account();
+    }
+}

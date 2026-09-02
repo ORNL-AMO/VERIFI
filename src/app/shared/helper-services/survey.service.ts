@@ -2,12 +2,12 @@ import { ApplicationLifecycleService } from 'src/app/application-lifecycle/appli
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { UserSurvey } from 'src/app/models/userSurvey';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { UserSurvey } from '@data/models/userSurvey';
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
-import { getMinutesBetweenDates } from '../sharedHelperFunctions';
-import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { getMinutesBetweenDates } from '@shared/sharedHelperFunctions';
+import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 
 @Injectable({
   providedIn: 'root'
