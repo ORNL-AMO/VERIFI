@@ -242,7 +242,8 @@ export class FacilityOverviewReportResultsComponent {
       facility: this.facility,
       facilityOverviewData: this.facilityOverviewData,
       utilityUseAndCost: this.utilityUseAndCost,
-      dateRange: this.dateRange
+      dateRange: this.dateRange,
+      emissionsDisplay: this.emissionsDisplay
     });
     await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${this.facilityReport.name}.pptx`);
   }

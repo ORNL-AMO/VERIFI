@@ -403,11 +403,13 @@ export class DataOverviewReportComponent {
       energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
       cost: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'cost') ?? '',
       water: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'water') ?? '',
+      emissions: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'emissions') ?? ''
     }
     const mapImages = {
       energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'energyUse') ?? '',
       cost: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'cost') ?? '',
       water: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'water') ?? '',
+      emissions: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'emissions') ?? ''
     }
     const document = this.dataOverviewReportPptAdapter.buildDocument({
       account: this.account,
@@ -417,6 +419,7 @@ export class DataOverviewReportComponent {
       facilitiesData: this.facilitiesData,
       usageDonutImages: usageDonutImages,
       mapImages: mapImages,
+      emissionsDisplay: this.emissionsDisplay
     });
     await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${selectedReport?.name}.pptx`);
   }
