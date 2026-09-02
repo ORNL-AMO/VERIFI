@@ -134,12 +134,10 @@
 @if (hasWeatherDataWarning()) {
 <div class="alert alert-warning text-center">
   <span class="fa fa-exclamation-triangle"></span> "Weather Gap" Indicates that one or more predictor entries associated
-  with this
-  predictor was calculated off of weather readings with gaps of twelve hours or more. The data may not be
-  accurate. For closer inspection of that weather station click the <span class="fa fa-thermometer-half"></span>
-  button. It may be best to choose a different weather station
-  to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
-  area of this facility.
+  with this predictor was calculated from weather readings with gaps of twelve hours or more or missing source readings. The data may not be accurate. For closer inspection of that weather
+  station click the <span class="fa fa-thermometer-half"></span> button. It may be best to choose a different
+  weather station to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other
+  stations in the area of this facility.
   <div class="mt-2">
     <button class="btn btn-sm btn-outline-warning" (click)="openIgnoreAllWarningsModal()">
       <i class="fa fa-eye-slash"></i> Dismiss All Weather Gap Warnings

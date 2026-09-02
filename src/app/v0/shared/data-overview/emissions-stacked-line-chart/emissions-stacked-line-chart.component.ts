@@ -8,10 +8,10 @@ import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/
 
 
 @Component({
-    selector: 'app-emissions-stacked-line-chart',
-    templateUrl: './emissions-stacked-line-chart.component.html',
-    styleUrls: ['./emissions-stacked-line-chart.component.css'],
-    standalone: false
+  selector: 'app-emissions-stacked-line-chart',
+  templateUrl: './emissions-stacked-line-chart.component.html',
+  styleUrls: ['./emissions-stacked-line-chart.component.css'],
+  standalone: false
 })
 export class EmissionsStackedLineChartComponent {
   @Input()
@@ -149,7 +149,7 @@ export class EmissionsStackedLineChartComponent {
       }
       if (total) {
         y.push(total);
-      }else{
+      } else {
         y.push(0);
       }
       startDate.setMonth(startDate.getMonth() + 1);
@@ -171,4 +171,19 @@ export class EmissionsStackedLineChartComponent {
     return
   }
 
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.stackedAreaChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.stackedAreaChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }

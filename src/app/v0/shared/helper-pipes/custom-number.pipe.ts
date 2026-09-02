@@ -1,10 +1,13 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'customNumber',
     pure: false,
     standalone: false
 })
+@Injectable({
+  providedIn: 'root'
+}) 
 export class CustomNumberPipe implements PipeTransform {
 
   transform(value: number, isCurrency?: boolean): string {

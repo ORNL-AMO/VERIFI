@@ -6,7 +6,7 @@ import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.servi
 import { AccountSectionReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-account-report/account-section-report/account-section-report.component';
 
 type SectionType = 'usageDonut' | 'map' | 'utilityUsageDonut' | 'utilityUsageStackedBar' | 'monthlyUsageLineChart';
-type DataType = 'energyUse' | 'cost' | 'water';
+type DataType = 'energyUse' | 'cost' | 'water' | 'emissions';
 
 @Component({
   selector: 'app-data-overview-account-report',
@@ -51,12 +51,16 @@ export class DataOverviewAccountReportComponent {
       return await section.getUsageDonutImage();
     } else if (sectionType === 'map') {
       return await section.getMapImage();
-    } else if (sectionType === 'utilityUsageDonut' && dataType !== 'water') {
+    } else if (sectionType === 'utilityUsageDonut' && (dataType !== 'water' && dataType !== 'emissions')) {
       return await section.getUtilityUsageDonutImage();
     } else if (sectionType === 'utilityUsageDonut' && dataType === 'water') {
       return await section.getWaterUsageDonutImage();
-    } else if (sectionType === 'utilityUsageStackedBar' && dataType !== 'water') {
+    } else if (sectionType === 'utilityUsageDonut' && dataType === 'emissions') {
+      return await section.getEmissionsUsageDonutImage();
+    } else if (sectionType === 'utilityUsageStackedBar' && (dataType !== 'water' && dataType !== 'emissions')) {
       return await section.getUtilityUsageStackedBarImage();
+    } else if (sectionType === 'utilityUsageStackedBar' && dataType === 'emissions') {
+      return await section.getEmissionsUsageStackedBarImage();
     } else if (sectionType === 'utilityUsageStackedBar' && dataType === 'water') {
       return await section.getWaterUsageStackedBarImage();
     } else if (sectionType === 'monthlyUsageLineChart') {

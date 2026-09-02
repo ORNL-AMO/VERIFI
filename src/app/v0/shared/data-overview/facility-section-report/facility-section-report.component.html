@@ -2,7 +2,7 @@
   @if (sectionOptions.includeMeterUsageStackedLineChart) {
     <div class="col-12">
       @if (dataType == 'emissions') {
-        <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
+        <app-emissions-stacked-line-chart #meterStackedLineChartEmissions [calanderizedMeters]="calanderizedMeters"
         [dateRange]="dateRange"></app-emissions-stacked-line-chart>
       }
       @if (dataType != 'emissions') {
@@ -40,7 +40,7 @@
   @if (sectionOptions.includeMeterUsageDonut) {
     <div [ngClass]="{'col-10': print, 'col-6': !print}">
       @if (dataType == 'emissions') {
-        <app-emissions-donut [facilityId]="facility.guid"
+        <app-emissions-donut #emissionsBarChart [facilityId]="facility.guid"
         [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
       }
       @if (dataType == 'energyUse') {
@@ -76,7 +76,7 @@
     <div class="row print-break-avoid">
       <div class="col-12">
         @if (dataType == 'emissions') {
-          <app-emissions-usage-chart [facilityId]="facility.guid"
+          <app-emissions-usage-chart #annualBarChartEmissions [facilityId]="facility.guid"
           [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
         }
         @if (dataType != 'emissions') {

@@ -9,10 +9,10 @@ import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/
 import { IdbFacility } from '@data/models/idbModels/facility';
 
 @Component({
-    selector: 'app-emissions-usage-chart',
-    templateUrl: './emissions-usage-chart.component.html',
-    styleUrls: ['./emissions-usage-chart.component.css'],
-    standalone: false
+  selector: 'app-emissions-usage-chart',
+  templateUrl: './emissions-usage-chart.component.html',
+  styleUrls: ['./emissions-usage-chart.component.css'],
+  standalone: false
 })
 export class EmissionsUsageChartComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
@@ -106,7 +106,7 @@ export class EmissionsUsageChartComponent {
               return dataItem.totalEmissions.otherScope2Emissions;
             });
           }
-          if(total != undefined){
+          if (total != undefined) {
             yValues.push(total);
           }
         });
@@ -158,6 +158,22 @@ export class EmissionsUsageChartComponent {
       };
 
       this.plotlyService.newPlot(this.utilityBarChart.nativeElement, traceData, layout, config);
+    }
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.utilityBarChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.utilityBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
     }
   }
 }

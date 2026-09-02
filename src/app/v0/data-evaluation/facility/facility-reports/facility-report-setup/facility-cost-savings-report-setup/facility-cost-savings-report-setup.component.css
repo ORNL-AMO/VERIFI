@@ -6,3 +6,19 @@
   background-color: #d8e2dc;
   border-color: #d8e2dc;
 }
+
+.cost-basis-panel {
+  border: 1px solid #b7c8c0;
+  background: #edf3f0;
+  border-radius: 0.375rem;
+  padding: 0.875rem 1rem;
+}
+
+.cost-basis-switch .form-check-input {
+  cursor: pointer;
+}
+
+.cost-basis-switch .form-check-label {
+  font-weight: 600;
+  cursor: pointer;
+}

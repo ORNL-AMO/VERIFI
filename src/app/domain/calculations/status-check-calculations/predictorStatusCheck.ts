@@ -192,7 +192,7 @@ export class PredictorStatusCheck {
             this.actions.push({
                 label: 'Review weather data warnings for ' + predictor.name,
                 url: baseUrl + '/predictor-data',
-                description: `Some data entries for this weather predictor have been flagged with warnings. Review the data to ensure accuracy.`,
+                description: `Some entries for this weather predictor have long weather data gaps or missing source readings. Review the data to ensure accuracy.`,
                 facilityId: predictor.facilityId,
                 type: 'predictor',
                 status: 'warning',

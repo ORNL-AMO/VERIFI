@@ -90,7 +90,7 @@
   </div>
 </div>
 }
-@if (overviewReportSettings.includeEmissionsSection) {
+@if (account.displayEmissions && overviewReportSettings.includeEmissionsSection) {
 <hr>
 <div class="report print-break-before" [ngClass]="{'print': print}">
   <!--facility emissions-->
@@ -118,4 +118,4 @@
 }
 }
 <app-facility-print-report-button [isNewReport]="true" (exportPdf)="onExportPdf()"
-  (onExportPpt)="downloadPpt()"></app-facility-print-report-button>
+  (onExportPpt)="downloadPpt()" [includePpt]="true"></app-facility-print-report-button>
