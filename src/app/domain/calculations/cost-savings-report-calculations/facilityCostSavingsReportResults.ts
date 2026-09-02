@@ -45,7 +45,12 @@ export class FacilityCostSavingsReportResults {
         this.setValue(this.energyUseTable, year, groupId, energyUse);
         this.setValue(this.adjustedEnergyUseTable, year, groupId, adjusted);
         this.setValue(this.energySavingsTable, year, groupId, savings);
-        this.setValue(this.estimatedEnergyCostTable, year, groupId, energyUse * rate);
+        if (this.reportSettings.useCalculatedCostsInsteadOfBillData) {
+          this.setValue(this.estimatedEnergyCostTable, year, groupId, energyUse * rate);
+        }
+        else {
+          this.setValue(this.estimatedEnergyCostTable, year, groupId, this.reportSettings.calendarizedMetersActualCost?.[year]?.[groupId] ?? 0);
+        }
         this.setValue(this.expectedEnergyCostTable, year, groupId, adjusted * rate);
         const costSavings = (adjusted - energyUse) * rate;
         this.setValue(this.costSavingsTable, year, groupId, costSavings);

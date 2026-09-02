@@ -1,10 +1,14 @@
+@let _filteredAnalysisItems = filteredAnalysisItems();
+@let _itemToEdit = itemToEdit();
+
 <div class="d-flex align-items-center justify-content-center mb-4 p-3 rounded shadow-sm bg-light border">
     <div class="pe-4 select-width">
         <label class="form-label fw-bold">
             <i class="fa fa-filter text-success"></i>
             Analysis Category
         </label>
-        <select class="form-select border-success" [(ngModel)]="selectedCategory" (ngModelChange)="onOptionChange()">
+        <select class="form-select border-success" [ngModel]="selectedCategory()"
+            (ngModelChange)="selectedCategory.set($event)">
             <option value="All">All</option>
             <option value="energy">Energy</option>
             <option value="water">Water</option>
@@ -16,17 +20,17 @@
             <i class="fa fa-filter text-success"></i>
             Baseline Year
         </label>
-        <select class="form-select border-success" [(ngModel)]="selectedBaselineYear"
-            (ngModelChange)="onOptionChange()">
+        <select class="form-select border-success" [ngModel]="selectedBaselineYear()"
+            (ngModelChange)="selectedBaselineYear.set($event)">
             <option value="All">All</option>
-            @for (year of baselineYears; track year) {
+            @for (year of baselineYears(); track year) {
             <option [ngValue]="year">{{ year }}</option>
             }
         </select>
     </div>
 </div>
 
-@if (filteredAnalysisItems && filteredAnalysisItems.length > 0) {
+@if (_filteredAnalysisItems && _filteredAnalysisItems.length > 0) {
 <form [formGroup]="reportForm">
     <div class="col-12">
         <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
@@ -38,6 +42,9 @@
                     <tr>
                         <td>
 
+                        </td>
+                        <td class="text-center">
+                            Status
                         </td>
                         <td>
                             Analysis Name
@@ -57,15 +64,37 @@
                 </thead>
 
                 <tbody class="table-group-divider">
-                    @for (analysisItem of filteredAnalysisItems; track analysisItem.guid) {
+                    @for (filteredItem of _filteredAnalysisItems; track filteredItem.analysisItem.guid) {
                     <tr>
                         <td class="text-center">
                             <input type="radio" class="form-check-input" formControlName="analysisItemId"
-                                [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}">
+                                [value]="filteredItem.analysisItem.guid"
+                                id="{{filteredItem.analysisItem.guid+'_selectedAccountItemId'}}">
+                        </td>
+                        @let sc = filteredItem.statusCheck;
+                        <td class="text-center align-middle status-col">
+                            <span class="fa fa-fw fa-lg" [ngClass]="{
+                                'fa-circle-check text-success': sc?.status === 'good',
+                                'fa-exclamation-triangle text-warning': sc?.status === 'warning',
+                                'fa-circle-xmark text-danger': sc?.status === 'error'
+                            }"></span>
+                            @if (sc?.status === 'warning' || sc?.status === 'error') {
+                            <div class="d-flex flex-column gap-1 mt-1 align-items-center">
+                                @if (sc?.accountAnalysisSetupErrors?.hasSetupErrors) {
+                                <span class="badge bg-danger issue-badge">Setup Errors</span>
+                                }
+                                @if (sc?.accountAnalysisSetupErrors?.facilitiesSelectionsInvalid) {
+                                <span class="badge bg-danger issue-badge">Selection Errors</span>
+                                }
+                                @if (sc?.facilityAnalysisHasWarnings) {
+                                <span class="badge bg-warning text-dark issue-badge">Facility Warnings</span>
+                                }
+                            </div>
+                            }
                         </td>
                         <td>
-                            {{analysisItem.name}}
-                            @let setupErrors = analysisItem.guid | invalidAccountAnalysis;
+                            {{filteredItem.analysisItem.name}}
+                            @let setupErrors = filteredItem.analysisItem.guid | invalidAccountAnalysis;
                             @if(setupErrors.hasError || setupErrors.facilitiesSelectionsInvalid){
                             <span class="red">
                                 <span class="fa fa-exclamation-circle"></span> Contains Errors
@@ -73,25 +102,26 @@
                             }
                         </td>
                         <td>
-                            @if (analysisItem.analysisCategory == 'energy') {
+                            @if (filteredItem.analysisItem.analysisCategory == 'energy') {
                             Energy
                             }
-                            @if (analysisItem.analysisCategory == 'water') {
+                            @if (filteredItem.analysisItem.analysisCategory == 'water') {
                             Water
                             }
                         </td>
                         <td>
-                            {{analysisItem.baselineYear}}
+                            {{filteredItem.analysisItem.baselineYear}}
                         </td>
                         <td>
-                            @for (facilityItem of analysisItem.facilityAnalysisItems; track facilityItem.facilityId; let
+                            @for (facilityItem of filteredItem.analysisItem.facilityAnalysisItems; track
+                            facilityItem.facilityId; let
                             index =
                             $index) {
                             <span>
                                 @if (facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip') {
                                 <span>
                                     {{facilityItem.facilityId | facilityName}}@if (index !=
-                                    analysisItem.facilityAnalysisItems.length-1)
+                                    filteredItem.analysisItem.facilityAnalysisItems.length-1)
                                     {
                                     <span>,</span>
                                     }
@@ -101,7 +131,7 @@
                             }
                         </td>
                         <td class="text-center">
-                            <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
+                            <a class="click-link" (click)="viewAnalysis(filteredItem.analysisItem)">View Analysis</a>
                         </td>
                     </tr>
                     }
@@ -112,16 +142,16 @@
 </form>
 }
 
-@if(filteredAnalysisItems && filteredAnalysisItems.length == 0) {
+@if(_filteredAnalysisItems && _filteredAnalysisItems.length == 0) {
 <div class="alert alert-warning text-center">
     No analysis items matching selected filters. Please adjust filters to view analysis items.
 </div>
 }
 
-<div [ngClass]="{'windowOverlay': itemToEdit}"></div>
-<div class="popup" [class.open]="itemToEdit">
-    @if (itemToEdit) {
-    <div class="popup-header">Go To: {{itemToEdit.name}}
+<div [ngClass]="{'windowOverlay': _itemToEdit}"></div>
+<div class="popup" [class.open]="_itemToEdit">
+    @if (_itemToEdit) {
+    <div class="popup-header">Go To: {{_itemToEdit?.name}}
         <button class="item-right" (click)="cancelEditItem()">x</button>
     </div>
     }

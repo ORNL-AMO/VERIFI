@@ -20,6 +20,7 @@ import { PredictorDataHelperService } from '@shared/helper-services/predictor-da
 import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 import { Month, Months } from '@shared/form-data/months';
+import { hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -171,12 +172,9 @@ export class CalculatedPredictorDataUpdateComponent {
         let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
         if (degreeDays != 'error') {
-          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-            return degreeDay.gapInData == true
-          });
           this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
           this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
-          this.predictorData[predictorIndex].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+          this.predictorData[predictorIndex].weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
         } else {
           this.toastNotificationService.weatherDataErrorToast();
         }
@@ -246,14 +244,11 @@ export class CalculatedPredictorDataUpdateComponent {
       let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(newDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
       // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
       if (degreeDays != 'error') {
-        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-          return degreeDay.gapInData == true
-        });
         let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
         newPredictorData.year = newDate.getFullYear();
         newPredictorData.month = newDate.getMonth() + 1;
         newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        newPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
         let tableItem: CalculatedPredictorTableItem = {
           ...newPredictorData,
           updatedAmount: newPredictorData.amount,

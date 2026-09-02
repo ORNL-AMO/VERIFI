@@ -9,6 +9,7 @@ import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { Router } from '@angular/router';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
+import { hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
 
 @Component({
   selector: 'app-edit-predictor-data-entry-form',
@@ -57,21 +58,14 @@ export class EditPredictorDataEntryFormComponent {
   async setDegreeDayValues() {
     if (this.predictor.predictorType == 'Weather') {
       this.calculatingDegreeDays = true;
-      let hasWeatherDataWarning: boolean = false;
       if (!this.predictorData.weatherOverride) {
         // let stationId: string = this.predictor.weatherStationId;
         let entryDate: Date = getDateFromPredictorData(this.predictorData);
         let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
         if (degreeDays != 'error') {
-          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-            return degreeDay.gapInData == true
-          });
-          if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
-            hasWeatherDataWarning = true;
-          }
           this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-          this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+          this.predictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
         } else {
           this.predictorData.weatherDataWarning = true;
         }

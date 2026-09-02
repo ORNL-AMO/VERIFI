@@ -84,7 +84,13 @@
       @if ((charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable) {
       <th (click)="setOrderDataField(undefined, charge.guid, 'usage')"
         [ngClass]="{'active': _orderByChargeId == charge.guid && _orderByCharge == 'usage'}">
-        {{charge.name}} <br>({{_meter.demandUnit}})
+        {{charge.name}} <br>
+        @if (charge.chargeType === 'consumption') {
+        ({{_meter.startingUnit}})
+        }
+        @else {
+        ({{_meter.demandUnit}})
+        }
       </th>
       }
       @if (charge.displayChargeInTable) {

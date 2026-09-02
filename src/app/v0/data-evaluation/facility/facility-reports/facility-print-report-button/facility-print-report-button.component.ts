@@ -14,6 +14,8 @@ export class FacilityPrintReportButtonComponent {
   isNewReport: boolean = false;
   @Input()
   isLoading: boolean = false;
+  @Input()
+  includePpt: boolean = false;
 
   print: boolean;
   printSub: Subscription;

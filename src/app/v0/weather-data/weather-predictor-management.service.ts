@@ -6,7 +6,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
-import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
+import { getDetailedDataForMonth, hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
@@ -182,15 +182,12 @@ export class WeatherPredictorManagementService {
         //ISSUE: 1822
         let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
         // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp)
-        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-          return degreeDay.gapInData == true
-        });
         if (cddPredictor) {
           let newCddPredictorData: IdbPredictorData = getNewIdbPredictorData(cddPredictor);
           newCddPredictorData.month = entryDate.getMonth() + 1;
           newCddPredictorData.year = entryDate.getFullYear();
           newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
-          newCddPredictorData.weatherDataWarning = hasErrors != undefined;
+          newCddPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'CDD');
           predictorDataEntries.push(newCddPredictorData);
         }
 
@@ -199,7 +196,7 @@ export class WeatherPredictorManagementService {
           newHddPredictorData.month = entryDate.getMonth() + 1;
           newHddPredictorData.year = entryDate.getFullYear();
           newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
-          newHddPredictorData.weatherDataWarning = hasErrors != undefined;
+          newHddPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'HDD');
           predictorDataEntries.push(newHddPredictorData);
         }
 
@@ -208,7 +205,7 @@ export class WeatherPredictorManagementService {
           newRHPredictorData.month = entryDate.getMonth() + 1;
           newRHPredictorData.year = entryDate.getFullYear();
           newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
-          newRHPredictorData.weatherDataWarning = hasErrors != undefined;
+          newRHPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'relativeHumidity');
           predictorDataEntries.push(newRHPredictorData);
         }
 
@@ -217,7 +214,7 @@ export class WeatherPredictorManagementService {
           newDryBulbTempPredictorData.month = entryDate.getMonth() + 1;
           newDryBulbTempPredictorData.year = entryDate.getFullYear();
           newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
-          newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
+          newDryBulbTempPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'dryBulbTemp');
           predictorDataEntries.push(newDryBulbTempPredictorData);
         }
 
@@ -226,7 +223,7 @@ export class WeatherPredictorManagementService {
           newWetBulbTempPredictorData.month = entryDate.getMonth() + 1;
           newWetBulbTempPredictorData.year = entryDate.getFullYear();
           newWetBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'wetBulbTemp');
-          newWetBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
+          newWetBulbTempPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'wetBulbTemp');
           predictorDataEntries.push(newWetBulbTempPredictorData);
         }
 
@@ -235,7 +232,7 @@ export class WeatherPredictorManagementService {
           newDewPointTempPredictorData.month = entryDate.getMonth() + 1;
           newDewPointTempPredictorData.year = entryDate.getFullYear();
           newDewPointTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dewPointTemp');
-          newDewPointTempPredictorData.weatherDataWarning = hasErrors != undefined;
+          newDewPointTempPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'dewPointTemp');
           predictorDataEntries.push(newDewPointTempPredictorData);
         }
 
@@ -244,7 +241,7 @@ export class WeatherPredictorManagementService {
           newPrecipitationPredictorData.month = entryDate.getMonth() + 1;
           newPrecipitationPredictorData.year = entryDate.getFullYear();
           newPrecipitationPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
-          newPrecipitationPredictorData.weatherDataWarning = hasErrors != undefined;
+          newPrecipitationPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'precipitation');
           predictorDataEntries.push(newPrecipitationPredictorData);
         }
 
@@ -373,9 +370,6 @@ export class WeatherPredictorManagementService {
 
             if (weatherData != "error") {
               let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), weatherPredictor.heatingBaseTemperature, weatherPredictor.coolingBaseTemperature, weatherPredictor.weatherStationId, weatherPredictor.weatherStationName)
-              let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-                return degreeDay.gapInData == true
-              });
               let newPredictorData: IdbPredictorData = getNewIdbPredictorData(weatherPredictor);
               newPredictorData.month = entryDate.getMonth() + 1;
               newPredictorData.year = entryDate.getFullYear();
@@ -394,7 +388,7 @@ export class WeatherPredictorManagementService {
               } else if (weatherPredictor.weatherDataType == 'precipitation') {
                 newPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
               }
-              newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+              newPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, weatherPredictor.weatherDataType);
               if (newPredictorData.weatherDataWarning) {
                 this.hasWarning = true;
               }

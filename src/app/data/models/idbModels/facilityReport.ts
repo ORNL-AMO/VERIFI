@@ -282,20 +282,23 @@ export function getCostSavingsReportSettings(): CostSavingsReportSettings {
         isDataComplete: false,
         annualSavingsTable: true,
         annualSavingsGraph: true,
-        monthlySavingsTable: true,
+        monthlySavingsTable: false,
         monthlySavingsGraph: true,
         annualCumulativeSavingsTable: true,
         annualCumulativeSavingsGraph: true,
-        monthlyCumulativeSavingsTable: true,
+        monthlyCumulativeSavingsTable: false,
         monthlyCumulativeSavingsGraph: true,
         userCostSummary: true,
         calculatedCostSummary: true,
+        groupActualVsAdjustedTable: true,
         groupAnnualTable: true,
-        groupMonthlyTable: true,
+        groupMonthlyTable: false,
         includeFacility: true,
         includeAnnual: true,
         includeMonthly: true,
-        includeGroup: true
+        includeGroup: true,
+        useCalculatedCostsInsteadOfBillData: true,
+        calendarizedMetersActualCost: {}
     };
 }
 
@@ -315,12 +318,15 @@ export interface CostSavingsReportSettings {
     monthlyCumulativeSavingsGraph: boolean,
     userCostSummary: boolean,
     calculatedCostSummary: boolean,
+    groupActualVsAdjustedTable: boolean,
     groupAnnualTable: boolean,
     groupMonthlyTable: boolean,
     includeFacility: boolean,
     includeAnnual: boolean,
     includeMonthly: boolean,
-    includeGroup: boolean
+    includeGroup: boolean,
+    useCalculatedCostsInsteadOfBillData: boolean,
+    calendarizedMetersActualCost?: YearGroupData
 }
 
 export type YearGroupData = { [year: number]: { [groupId: string]: number } };

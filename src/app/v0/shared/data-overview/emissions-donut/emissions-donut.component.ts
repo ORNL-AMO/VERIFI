@@ -195,4 +195,20 @@ export class EmissionsDonutComponent {
     })
     return { values: values, includedEmissionsTypes: includedEmissionsTypes };
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.emissionsDonut?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.emissionsDonut.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }
