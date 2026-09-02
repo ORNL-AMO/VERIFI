@@ -23,6 +23,7 @@ import { DataOverviewAccountReportComponent } from '@v0/data-evaluation/account/
 import { DataOverviewFacilityReportComponent } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
 import { DataOverviewReportPptAdapter } from '@v0/data-evaluation/account/account-reports/data-overview-report/data-overview-report-ppt.adapter';
 import { PptReportService } from '@v0/shared/ppt-report/ppt-report.service';
+import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -52,6 +53,9 @@ export class DataOverviewReportComponent {
   calculatingAccounts: boolean = true;
   isExportingPdf: boolean = false;
 
+  emissionsDisplaySub: Subscription;
+  emissionsDisplay: "market" | "location";
+
   @ViewChild(DataOverviewAccountReportComponent) dataOverviewAccountReport: DataOverviewAccountReportComponent;
   @ViewChildren(DataOverviewFacilityReportComponent) dataOverviewFacilityReports!: QueryList<DataOverviewFacilityReportComponent>;
 
@@ -61,7 +65,8 @@ export class DataOverviewReportComponent {
     private exportReportPdfService: ExportReportPdfService,
     private dataOverviewReportAdapter: DataOverviewReportAdapter,
     private dataOverviewReportPptAdapter: DataOverviewReportPptAdapter,
-    private pptReportService: PptReportService
+    private pptReportService: PptReportService,
+    private accountOverviewService: AccountOverviewService
   ) {
 
   }
@@ -105,10 +110,17 @@ export class DataOverviewReportComponent {
     } else {
       this.calculatingFacilities = false;
     }
+
+    this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(display => {
+      this.emissionsDisplay = display;
+    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    if (this.emissionsDisplaySub) {
+      this.emissionsDisplaySub.unsubscribe();
+    }
   }
 
   //recursively function to calculate all facilities one at a time
@@ -281,8 +293,10 @@ export class DataOverviewReportComponent {
         overviewReport: this.overviewReport,
         accountData: this.accountData,
         facilitiesData: this.facilitiesData,
+        emissionsDisplay: this.emissionsDisplay,
         chartImageProviders: this.getChartImageProviders(),
-        facilityChartImageProviders: this.getFacilityChartImageProviders()
+        facilityChartImageProviders: this.getFacilityChartImageProviders(),
+        facilityEmissionsChartImageProviders: this.getFacilityEmissionsChartImageProviders()
       });
       await this.exportReportPdfService.export(document, `${selectedReport.name} - Data Overview Report`);
     } finally {
@@ -296,26 +310,31 @@ export class DataOverviewReportComponent {
         energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'energyUse') ?? '',
         cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'cost') ?? '',
         water: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'water') ?? '',
+        emissions: async () => this.dataOverviewAccountReport?.getChartImageProviders('map', 'emissions') ?? '',
       },
       usageDonut: {
         energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
         cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'cost') ?? '',
         water: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'water') ?? '',
+        emissions: async () => this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'emissions') ?? '',
       },
       utilityUsageDonut: {
         energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'energyUse') ?? '',
         cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'cost') ?? '',
         water: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'water') ?? '',
+        emissions: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageDonut', 'emissions') ?? '',
       },
       utilityUsageStackedBar: {
         energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'energyUse') ?? '',
         cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'cost') ?? '',
         water: async () => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'water') ?? '',
+        emissions: async() => this.dataOverviewAccountReport?.getChartImageProviders('utilityUsageStackedBar', 'emissions') ?? '',
       },
       monthlyUsageLineChart: {
         energyUse: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'energyUse') ?? '',
         cost: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'cost') ?? '',
         water: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'water') ?? '',
+        emissions: async () => this.dataOverviewAccountReport?.getChartImageProviders('monthlyUsageLineChart', 'emissions') ?? '',
       }
     };
   }
@@ -355,6 +374,25 @@ export class DataOverviewReportComponent {
     return map;
   }
 
+  getFacilityEmissionsChartImageProviders() {
+    const map: Record<string, any> = {};
+    const buildChartProviders = (facilityReport: DataOverviewFacilityReportComponent) => ({
+      meterStackedLineChartEmissions: async () => facilityReport.getImage('emissions', 'meterStackedLineChartEmissions'),
+      emissionsBarChart: async () => facilityReport.getImage('emissions', 'emissionsBarChart'),
+      annualBarChartEmissions: async () => facilityReport.getImage('emissions', 'annualBarChartEmissions'),
+      monthlyUsageLineChartEmissions: async () => facilityReport.getImage('emissions', 'monthlyUsageLineChart')
+    });
+
+    this.dataOverviewFacilityReports.forEach(facilityReport => {
+      const facilityId = facilityReport?.dataOverviewFacility?.facility?.guid;
+      if (facilityId) {
+        map[facilityId] = buildChartProviders(facilityReport);
+      }
+    });
+
+    return map;
+  }
+
   async downloadPpt(): Promise<void> {
     const selectedReport = this.accountWorkspaceStore.selectedAccountReport();
     if (!selectedReport) {
@@ -365,11 +403,13 @@ export class DataOverviewReportComponent {
       energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'energyUse') ?? '',
       cost: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'cost') ?? '',
       water: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'water') ?? '',
+      emissions: await this.dataOverviewAccountReport?.getChartImageProviders('usageDonut', 'emissions') ?? ''
     }
     const mapImages = {
       energyUse: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'energyUse') ?? '',
       cost: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'cost') ?? '',
       water: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'water') ?? '',
+      emissions: await this.dataOverviewAccountReport?.getChartImageProviders('map', 'emissions') ?? ''
     }
     const document = this.dataOverviewReportPptAdapter.buildDocument({
       account: this.account,
@@ -379,6 +419,7 @@ export class DataOverviewReportComponent {
       facilitiesData: this.facilitiesData,
       usageDonutImages: usageDonutImages,
       mapImages: mapImages,
+      emissionsDisplay: this.emissionsDisplay
     });
     await this.pptReportService.buildPowerpoint(document, `Data Overview Report - ${selectedReport?.name}.pptx`);
   }
