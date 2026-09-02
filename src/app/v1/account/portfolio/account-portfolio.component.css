@@ -34,13 +34,12 @@
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.v1-account-portfolio__totals {
+.v1-account-portfolio__selectors {
   display: grid;
   gap: .75rem;
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.v1-account-portfolio__totals article,
 .v1-empty-state,
 .v1-facility-card {
   background: var(--v1-surface);
@@ -49,29 +48,49 @@
   box-shadow: 0 1rem 2rem var(--v1-shadow-soft);
 }
 
-.v1-account-portfolio__totals article {
+.v1-portfolio-selector {
+  align-items: start;
+  background: var(--v1-surface);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  box-shadow: 0 1rem 2rem var(--v1-shadow-soft);
+  color: var(--v1-text);
   display: grid;
-  gap: .15rem;
+  gap: .22rem;
+  justify-items: start;
   min-width: 0;
   padding: .85rem;
+  text-align: left;
 }
 
-.v1-account-portfolio__totals span,
+.v1-portfolio-selector .fa {
+  color: var(--v1-muted);
+}
+
+.v1-portfolio-selector:hover,
+.v1-portfolio-selector:focus-visible,
+.v1-portfolio-selector--active {
+  border-color: color-mix(in srgb, var(--v1-primary) 55%, var(--v1-border));
+  box-shadow: inset 0 -3px 0 var(--v1-primary), 0 1rem 2rem var(--v1-shadow-soft);
+}
+
+.v1-portfolio-selector--active .fa,
+.v1-portfolio-selector--active span {
+  color: var(--v1-primary);
+}
+
+.v1-portfolio-selector span,
 .v1-facility-card dt,
 .v1-facility-card__details {
   color: var(--v1-muted);
-  font-size: .82rem;
-  font-weight: 700;
+  font-size: .78rem;
+  font-weight: 800;
 }
 
-.v1-account-portfolio__totals strong {
+.v1-portfolio-selector strong {
   color: var(--v1-text);
   font-size: 1.5rem;
   line-height: 1.1;
-}
-
-.v1-account-portfolio__total--warn strong {
-  color: var(--v1-warning);
 }
 
 .v1-account-portfolio__notice {
@@ -179,7 +198,7 @@
   align-items: center;
   display: grid;
   gap: .9rem;
-  grid-template-columns: minmax(14rem, 1.4fr) minmax(16rem, 1fr) minmax(13rem, 1fr) auto;
+  grid-template-columns: minmax(12rem, .85fr) minmax(0, 1.6fr) auto;
   padding: 1rem;
 }
 
@@ -196,47 +215,18 @@
 }
 
 .v1-facility-card__summary {
+  align-content: center;
   display: grid;
   gap: .45rem;
   min-width: 0;
 }
 
-.v1-facility-card__top,
 .v1-facility-card__details,
 .v1-facility-card__actions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: .45rem;
-}
-
-.v1-chip {
-  background: var(--v1-surface-muted);
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius-pill);
-  color: var(--v1-muted);
-  display: inline-flex;
-  font-size: .72rem;
-  font-weight: 800;
-  padding: .2rem .5rem;
-}
-
-.v1-chip--danger {
-  background: color-mix(in srgb, var(--v1-danger) 10%, var(--v1-surface));
-  border-color: color-mix(in srgb, var(--v1-danger) 35%, var(--v1-border));
-  color: var(--v1-danger);
-}
-
-.v1-chip--warning {
-  background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface));
-  border-color: color-mix(in srgb, var(--v1-warning) 35%, var(--v1-border));
-  color: var(--v1-warning);
-}
-
-.v1-chip--success {
-  background: color-mix(in srgb, var(--v1-success) 10%, var(--v1-surface));
-  border-color: color-mix(in srgb, var(--v1-success) 35%, var(--v1-border));
-  color: var(--v1-success);
 }
 
 .v1-facility-card__title {
@@ -257,25 +247,56 @@
   overflow-wrap: anywhere;
 }
 
+.v1-facility-card__modified {
+  align-items: center;
+  color: var(--v1-muted);
+  display: inline-flex;
+  font-size: .78rem;
+  gap: .35rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.v1-facility-card__content {
+  align-self: center;
+  display: grid;
+  gap: .6rem;
+  min-width: 0;
+}
+
+.v1-facility-card__empty {
+  color: var(--v1-muted);
+  font-size: .85rem;
+  margin: 0;
+}
+
 .v1-facility-card__meta {
   display: grid;
   gap: .5rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(5rem, 100%), 1fr));
   margin: 0;
 }
 
 .v1-facility-card__meta div {
+  align-content: center;
   background: var(--v1-panel);
   border-radius: var(--v1-radius-sm);
   display: grid;
   gap: .15rem;
+  min-height: 3.25rem;
   min-width: 0;
-  padding: .55rem;
+  padding: .5rem;
 }
 
 .v1-facility-card dd {
   font-weight: 800;
+  line-height: 1.1;
   margin: 0;
+}
+
+.v1-facility-card dt {
+  line-height: 1.15;
+  overflow-wrap: normal;
 }
 
 .v1-facility-card__details span {
@@ -294,16 +315,16 @@
 }
 
 @media (max-width: 70rem) {
-  .v1-account-portfolio__totals {
+  .v1-account-portfolio__selectors {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .v1-facility-card {
-    grid-template-columns: minmax(14rem, 1fr) minmax(16rem, 1fr);
+    grid-template-columns: minmax(12rem, .8fr) minmax(0, 1fr) auto;
   }
 
   .v1-facility-card__actions {
-    justify-content: start;
+    justify-content: end;
   }
 }
 
@@ -314,8 +335,11 @@
     grid-template-columns: 1fr;
   }
 
-  .v1-account-portfolio__totals,
   .v1-facility-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .v1-account-portfolio__selectors {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
