@@ -286,8 +286,8 @@ export class FacilityDataQualityReportAdapter {
             if (meterStats.calanderizedMeter.showProcessEmissions) {
                 headers.push(`Process Emissions (tonne CO2e)`);
             }
-            headers.push('Total Cost');
         }
+        headers.push('Total Cost');
 
         let annualTotals: Array<AnnualMeterTotal> = this.getAnnualTotals(meterStats.calanderizedMeter.monthlyData);
         for (let totals of annualTotals) {
@@ -337,7 +337,7 @@ export class FacilityDataQualityReportAdapter {
             row.push(this.checkNumber(totals.energyCost, true));
             rows.push(row);
         }
-        
+
         const tableSection: TableSection = {
             type: 'table',
             title: 'Annual Totals',

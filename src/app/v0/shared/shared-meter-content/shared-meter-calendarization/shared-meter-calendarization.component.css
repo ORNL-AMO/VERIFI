@@ -13,6 +13,6 @@
 }
 
 .popup.annual-total {
-    width: 800px;
-    left: calc(50% - 400px);
+    width: min(800px, calc(100vw - 2rem));
+    left: max(1rem, calc(50% - 400px));
 }

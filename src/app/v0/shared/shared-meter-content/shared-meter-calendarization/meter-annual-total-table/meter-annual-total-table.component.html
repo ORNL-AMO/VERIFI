@@ -20,14 +20,14 @@
                 <!--electricity-->
                 @if (calanderizedMeter.showElectricalEmissions) {
                 @if (!isRECs) {
-                <th (click)="setOrderDataField('marketEmissions')"
-                    [ngClass]="{'active': orderDataField == 'marketEmissions'}">
+                <th (click)="setOrderDataField('totalWithMarketEmissions')"
+                    [ngClass]="{'active': orderDataField == 'totalWithMarketEmissions'}">
                     Total <br>Market-Based<br>Emissions (tonne
                     CO<sub>2</sub>e)</th>
                 }
                 @if (!isRECs) {
-                <th (click)="setOrderDataField('locationEmissions')"
-                    [ngClass]="{'active': orderDataField == 'locationEmissions'}">
+                <th (click)="setOrderDataField('totalWithLocationEmissions')" 
+                    [ngClass]="{'active': orderDataField == 'totalWithLocationEmissions'}">
                     Total <br>Location-Based<br>Emissions (tonne
                     CO<sub>2</sub>e)</th>
                 }

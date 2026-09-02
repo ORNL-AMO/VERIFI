@@ -51,7 +51,8 @@
         Method</button>
     </div>
     <div class="pe-1">
-      <button class="btn action-btn" (click)="showTotalsModal()">
+      <button class="btn action-btn" (click)="showTotalsModal()"
+        [disabled]="calanderizingMeterData !== false || !calanderizedMeter">
         View Annual Total
       </button>
     </div>

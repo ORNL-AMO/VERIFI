@@ -34,7 +34,7 @@ export class MeterAnnualTotalTableComponent {
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
 
-  ngOnInit() {
+  ngOnChanges() {
     this.account = this.accountWorkspaceStore.account();
     if (this.calanderizedMeter) {
       this.monthlyData = this.calanderizedMeter.monthlyData;

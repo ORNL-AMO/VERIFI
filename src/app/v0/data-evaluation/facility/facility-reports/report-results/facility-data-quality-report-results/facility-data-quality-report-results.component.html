@@ -3,7 +3,8 @@ facilityReport.dataQualityReportSettings.includeMeterStatisticsTable ||
 facilityReport.dataQualityReportSettings.includeMeterConsumptionTimeseriesGraph ||
 facilityReport.dataQualityReportSettings.includeMeterCostTimeseriesGraph ||
 facilityReport.dataQualityReportSettings.includeMeterConsumptionHistogram ||
-facilityReport.dataQualityReportSettings.includeMeterCostHistogram
+facilityReport.dataQualityReportSettings.includeMeterCostHistogram ||
+facilityReport.dataQualityReportSettings.includeAnnualTotalsTable
 )) {
 @for(meterData of meterDataStatsList; track meterData.meter.id; let i = $index) {
 <div class="report">
