@@ -62,6 +62,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, or Electron contract changes.
 - **Tests:** Focused facility settings route/component specs and section navigation specs; validation planner decides parent checks.
 
+### Portfolio Setup and Facility Onboarding Workflow
+
+- **Workflow:** v1 portfolio setup and first-facility onboarding, issue #2638.
+- **Existing v0 entry point:** Account setup lives under `/data-management/:id/account-setup`; facility management and facility setup live under `/data-management/:id/facilities`.
+- **Decision:** Rebuild in v1 with account-level `Data > Portfolio` for facility portfolio management and `Account Settings > Portfolio` for add, delete, and selected-facility account-setting application.
+- **Parity:** Facility creation uses existing facility defaults from `getNewIdbFacility(account)` and continues setup through v1 facility settings for profile, units, goals, financial reporting, and data staleness.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
+- **Tests:** Focused v1 navigation, account data portfolio, account settings portfolio, and shared portfolio command specs; validation planner decides parent checks.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.

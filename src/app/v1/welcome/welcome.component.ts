@@ -75,7 +75,7 @@ export class WelcomeComponent {
         await this.navigation.openFacility(result.facility.guid);
         return;
       }
-      await this.openAccount(result.account);
+      await this.navigation.openAccountData(result.account.guid);
       return;
     }
     this.notifications.success('Account imported', { message: result.name });

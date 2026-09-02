@@ -69,6 +69,22 @@
         </section>
       }
     }
+    @case ('data') {
+      @if (account) {
+        <section class="v1-nav__group" aria-labelledby="v1-data-nav-title">
+          <span id="v1-data-nav-title" class="v1-nav__label">{{ dataTitle() }}</span>
+          @for (item of dataItems(); track item.id) {
+            <a
+              [class.active]="navigation.activeDetail() === item.id"
+              [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
+              [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
+              <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+              {{ item.label }}
+            </a>
+          }
+        </section>
+      }
+    }
     @default {
       <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">
         <span id="v1-future-nav-title" class="v1-nav__label">{{ navigation.activeSection() }}</span>

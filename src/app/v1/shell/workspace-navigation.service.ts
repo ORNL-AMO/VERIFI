@@ -74,7 +74,7 @@ const DEFAULT_PANEL_TAB: PanelTabId = 'help';
 const VALID_SECTION_IDS: ReadonlyArray<SectionId> = ['home', 'data', 'visualization', 'analysis', 'reports', 'settings', 'imports'];
 const DEFAULT_DETAILS: Record<SectionId, string> = {
   home: 'overview',
-  data: 'facilities',
+  data: 'portfolio',
   visualization: 'time-series',
   analysis: 'rollup',
   reports: 'setup',
@@ -95,7 +95,7 @@ export class WorkspaceNavigationService {
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
     ...section,
-    enabled: section.id === 'settings' ? this.isWorkspaceRoute() : section.enabled
+    enabled: section.id === 'settings' || section.id === 'data' ? this.isWorkspaceRoute() : section.enabled
   })));
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
@@ -160,6 +160,13 @@ export class WorkspaceNavigationService {
     await this.router.navigate(this.facilityRoute(facilityGuid));
   }
 
+  async openAccountData(accountGuid: string): Promise<void> {
+    const result = await this.workspaceService.selectAccount(accountGuid);
+    if (result === 'published') {
+      await this.router.navigate(this.accountDataRoute(accountGuid));
+    }
+  }
+
   showWelcome(): void {
     void this.router.navigate(['/v1']);
   }
@@ -210,6 +217,13 @@ export class WorkspaceNavigationService {
       }
       return;
     }
+    if (sectionId === 'data') {
+      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
+      if (accountGuid) {
+        void this.router.navigate(this.accountDataRoute(accountGuid));
+      }
+      return;
+    }
     if (sectionId === 'settings' && contextMode === 'facility') {
       const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
       if (facilityGuid) {
@@ -224,6 +238,10 @@ export class WorkspaceNavigationService {
 
   accountSettingsRoute(accountGuid: string, detail = 'profile'): Array<string> {
     return ['/v1', 'workspace', 'account', accountGuid, 'settings', detail];
+  }
+
+  accountDataRoute(accountGuid: string, detail = 'portfolio'): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'data', detail];
   }
 
   facilityRoute(facilityGuid: string): Array<string> {

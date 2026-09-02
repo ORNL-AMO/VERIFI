@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { PortalModule } from '@angular/cdk/portal';
 
 import { AccountHomeComponent } from './account/home/account-home.component';
+import { AccountPortfolioModule } from './account/portfolio/account-portfolio.module';
 import { AccountSettingsModule } from './account/settings/account-settings.module';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
 import { FacilitySettingsModule } from './facility/settings/facility-settings.module';
@@ -32,6 +33,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
     CommonModule,
     NotificationsModule,
     PortalModule,
+    AccountPortfolioModule,
     AccountSettingsModule,
     FacilitySettingsModule,
     WelcomeComponent,

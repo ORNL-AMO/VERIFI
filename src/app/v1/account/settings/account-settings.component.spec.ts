@@ -23,6 +23,7 @@ import { AccountSettingsBackupComponent } from './backup/account-settings-backup
 import { AccountSettingsDeleteComponent } from './delete/account-settings-delete.component';
 import { AccountSettingsFinancialComponent } from './financial/account-settings-financial.component';
 import { AccountSettingsGoalsComponent } from './goals/account-settings-goals.component';
+import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-portfolio.component';
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
 import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
@@ -32,9 +33,13 @@ describe('Account settings routed components', () => {
   let account: ReturnType<typeof signal<IdbAccount | undefined>>;
   let facilities: ReturnType<typeof signal<IdbFacility[]>>;
   let canWrite: ReturnType<typeof signal<boolean>>;
+  let hasPending: ReturnType<typeof signal<boolean>>;
   let commandBoundary: { execute: ReturnType<typeof vi.fn> };
   let accountHandler: { update: ReturnType<typeof vi.fn> };
-  let facilityHandler: { update: ReturnType<typeof vi.fn> };
+  let facilityHandler: {
+    update: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+  };
   let lifecycle: {
     refreshAccountCatalog: ReturnType<typeof vi.fn>;
     handleMarkedAccountDeletion: ReturnType<typeof vi.fn>;
@@ -64,6 +69,7 @@ describe('Account settings routed components', () => {
     account = signal(accountFixture());
     facilities = signal([facilityFixture('facility-a'), facilityFixture('facility-b')]);
     canWrite = signal(true);
+    hasPending = signal(false);
     commandBoundary = {
       execute: vi.fn(async (_metadata, operation: () => Promise<unknown>) => ({ value: await operation(), change: {} }))
     };
@@ -71,7 +77,8 @@ describe('Account settings routed components', () => {
       update: vi.fn(async updated => updated)
     };
     facilityHandler = {
-      update: vi.fn(async updated => updated)
+      update: vi.fn(async updated => updated),
+      delete: vi.fn(async () => ({ facilityId: 1 }))
     };
     lifecycle = {
       refreshAccountCatalog: vi.fn(async () => undefined),
@@ -110,7 +117,9 @@ describe('Account settings routed components', () => {
             account,
             facilities,
             canWrite,
-            hasPending: signal(false),
+            hasPending,
+            accountAnalyses: signal([]),
+            accountReports: signal([]),
             customEmissions: signal([])
           }
         },
@@ -153,7 +162,7 @@ describe('Account settings routed components', () => {
     const childPaths = settingsRoute?.children?.map(route => route.path);
 
     expect(settingsRoute?.component).toBe(AccountSettingsComponent);
-    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete', '**']);
+    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete', '**']);
   });
 
   it('autosaves profile text locally after a debounce', async () => {
@@ -301,6 +310,60 @@ describe('Account settings routed components', () => {
     fixture = createDetail(AccountSettingsBackupComponent);
 
     expect(buttonByText(fixture, 'Select backup file').disabled).toBe(false);
+  });
+
+  it('applies account settings to selected portfolio facilities only', async () => {
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+
+    fixture.componentInstance.toggleFacility('facility-b', true);
+    await fixture.componentInstance.confirmApplyAccountSettings();
+    fixture.detectChanges(false);
+
+    expect(facilityHandler.update).toHaveBeenCalledTimes(1);
+    expect(facilityHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({ guid: 'facility-b', name: 'facility-b', energyUnit: 'MMBtu' }),
+      'account-a'
+    );
+    expect(commandBoundary.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityKind: 'facility',
+        changeKind: 'bulk',
+        publication: expect.objectContaining({ mode: 'patch' })
+      }),
+      expect.any(Function)
+    );
+    expect(fixture.componentInstance.saveState).toBe('saved');
+  });
+
+  it('deletes selected portfolio facilities after confirmation', async () => {
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+
+    fixture.componentInstance.toggleFacility('facility-a', true);
+    fixture.componentInstance.toggleFacility('facility-b', true);
+    await fixture.componentInstance.confirmDeleteFacilities();
+    fixture.detectChanges(false);
+
+    expect(facilityHandler.delete).toHaveBeenCalledTimes(2);
+    expect(facilityHandler.delete).toHaveBeenCalledWith(facilities()[0], 'account-a');
+    expect(facilityHandler.delete).toHaveBeenCalledWith(facilities()[1], 'account-a');
+    expect(fixture.componentInstance.selectedCount).toBe(0);
+  });
+
+  it('disables portfolio write actions when workspace writes are unavailable or pending', () => {
+    const fixture = createDetail(AccountSettingsPortfolioComponent);
+
+    canWrite.set(false);
+    fixture.detectChanges(false);
+
+    expect(buttonByText(fixture, 'Add facility').disabled).toBe(true);
+    expect(buttonByText(fixture, 'Apply account settings').disabled).toBe(true);
+    expect(buttonByText(fixture, 'Delete selected').disabled).toBe(true);
+
+    canWrite.set(true);
+    hasPending.set(true);
+    fixture.detectChanges(false);
+
+    expect(buttonByText(fixture, 'Add facility').disabled).toBe(true);
   });
 
   it('confirms before deleting an account from the routed delete component', async () => {

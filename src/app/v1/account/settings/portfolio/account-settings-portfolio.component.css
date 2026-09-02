@@ -1,0 +1,60 @@
+.v1-portfolio-settings__toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.v1-portfolio-settings__selection {
+  display: grid;
+  gap: .75rem;
+}
+
+.v1-portfolio-settings__select-all {
+  justify-self: start;
+}
+
+.v1-portfolio-settings__list {
+  display: grid;
+  gap: .55rem;
+}
+
+.v1-portfolio-settings__facility {
+  align-items: center;
+  background: var(--v1-content-block);
+  border: 1px solid color-mix(in srgb, var(--v1-border) 86%, var(--v1-text));
+  border-radius: var(--v1-radius);
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: minmax(12rem, 1.2fr) minmax(12rem, 1fr) auto;
+  min-width: 0;
+  padding: .7rem .8rem;
+}
+
+.v1-portfolio-settings__facility span,
+.v1-portfolio-settings__facility small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.v1-portfolio-settings__facility > span,
+.v1-portfolio-settings__facility small,
+.v1-portfolio-settings__empty p {
+  color: var(--v1-muted);
+}
+
+.v1-portfolio-settings__facility small {
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.v1-portfolio-settings__empty > .fa {
+  color: var(--v1-account);
+}
+
+@media (max-width: 44rem) {
+  .v1-portfolio-settings__facility {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+}

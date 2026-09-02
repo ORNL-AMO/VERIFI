@@ -8,6 +8,16 @@ type SettingsNavItem = {
   readonly tone?: 'danger';
 };
 
+type DataNavItem = {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: string;
+};
+
+const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
+  { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' }
+];
+
 const ACCOUNT_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'profile', label: 'Profile', icon: 'fa-building' },
   { id: 'units', label: 'Units', icon: 'fa-ruler-combined' },
@@ -15,6 +25,7 @@ const ACCOUNT_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'financial', label: 'Financial', icon: 'fa-calendar-days' },
   { id: 'staleness', label: 'Staleness', icon: 'fa-clock' },
   { id: 'backup', label: 'Backup', icon: 'fa-file-arrow-down' },
+  { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' },
   { id: 'delete', label: 'Delete account', icon: 'fa-trash', tone: 'danger' }
 ];
 
@@ -39,6 +50,7 @@ export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly isSingleSiteWorkspace = this.navigation.isSingleSiteWorkspace;
   readonly hasSingleSiteRecovery = this.navigation.hasSingleSiteRecovery;
+  readonly dataItems = computed(() => ACCOUNT_DATA_ITEMS);
   readonly settingsItems = computed(() => {
     if (this.navigation.contextMode() !== 'facility') {
       return ACCOUNT_SETTINGS_ITEMS;
@@ -60,6 +72,7 @@ export class SectionNavComponent {
   readonly homeTitle = computed(() => {
     return this.navigation.contextMode() === 'facility' ? 'Facility Home' : 'Account Home';
   });
+  readonly dataTitle = computed(() => 'Account Data');
   readonly recoveryTitle = computed(() =>
     this.navigation.singleSiteWorkspaceState() === 'missing-facility'
       ? 'Single-facility setup needs a facility'

@@ -16,6 +16,7 @@ describe('WelcomeComponent', () => {
   let navigation: {
     openWorkspace: ReturnType<typeof vi.fn>;
     openFacility: ReturnType<typeof vi.fn>;
+    openAccountData: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -25,7 +26,8 @@ describe('WelcomeComponent', () => {
     ]);
     navigation = {
       openWorkspace: vi.fn().mockResolvedValue(undefined),
-      openFacility: vi.fn().mockResolvedValue(undefined)
+      openFacility: vi.fn().mockResolvedValue(undefined),
+      openAccountData: vi.fn().mockResolvedValue(undefined)
     };
 
     TestBed.configureTestingModule({
@@ -90,7 +92,7 @@ describe('WelcomeComponent', () => {
     });
     await fixture.componentInstance.openCreatedOrImportedAccount({ guid: 'account-import', name: 'Imported' } as any);
 
-    expect(navigation.openWorkspace).toHaveBeenCalledWith('account-new');
+    expect(navigation.openAccountData).toHaveBeenCalledWith('account-new');
     expect(navigation.openWorkspace).toHaveBeenCalledWith('account-import');
   });
 

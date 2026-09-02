@@ -8,9 +8,11 @@ import { AccountSettingsBackupComponent } from './backup/account-settings-backup
 import { AccountSettingsDeleteComponent } from './delete/account-settings-delete.component';
 import { AccountSettingsFinancialComponent } from './financial/account-settings-financial.component';
 import { AccountSettingsGoalsComponent } from './goals/account-settings-goals.component';
+import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-portfolio.component';
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
 import { AccountSettingsStalenessComponent } from './staleness/account-settings-staleness.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
+import { AccountPortfolioModule } from '../portfolio/account-portfolio.module';
 
 @NgModule({
   declarations: [
@@ -21,12 +23,14 @@ import { AccountSettingsUnitsComponent } from './units/account-settings-units.co
     AccountSettingsFinancialComponent,
     AccountSettingsStalenessComponent,
     AccountSettingsBackupComponent,
+    AccountSettingsPortfolioComponent,
     AccountSettingsDeleteComponent
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
+    AccountPortfolioModule,
     ImportAccountBackupComponent
   ],
   exports: [AccountSettingsComponent]

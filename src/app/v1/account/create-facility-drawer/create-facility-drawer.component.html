@@ -1,0 +1,180 @@
+<div class="v1-drawer-layer">
+  <button
+    type="button"
+    class="v1-drawer-backdrop"
+    aria-label="Close create facility panel"
+    [disabled]="isCreating"
+    (click)="close()"></button>
+
+  <aside class="v1-drawer v1-drawer--wide" role="dialog" aria-modal="true" aria-labelledby="v1-create-facility-title"
+    appDrawerFocusTrap (escapePressed)="close()">
+    <header class="v1-drawer__header">
+      <div>
+        <p class="v1-eyebrow">New facility</p>
+        <h2 id="v1-create-facility-title">Create Facility</h2>
+        <p class="v1-drawer__intro" id="v1-create-facility-description">Start with a facility name, then add optional profile details if they are ready.</p>
+      </div>
+      <button
+        type="button"
+        class="v1-icon-btn"
+        title="Close create facility panel"
+        aria-label="Close create facility panel"
+        [disabled]="isCreating"
+        (click)="close()">
+        <span class="fa fa-xmark" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <div class="v1-drawer__body">
+      @if (createError) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+          <span>{{ createError }}</span>
+        </div>
+      }
+
+      <form class="v1-form" [formGroup]="form" aria-describedby="v1-create-facility-description" (ngSubmit)="createFacility()">
+        <label class="v1-form__field" for="v1-facility-name">
+          <span>Facility name <b>*</b></span>
+          <input
+            id="v1-facility-name"
+            type="text"
+            formControlName="name"
+            maxlength="42"
+            autocomplete="organization"
+            required
+            [attr.aria-invalid]="facilityNameInvalid ? 'true' : null"
+            aria-describedby="v1-facility-name-error"
+            placeholder="Ex: Plant 1">
+        </label>
+        @if (facilityNameInvalid) {
+          <em id="v1-facility-name-error" class="v1-field-error">Name is required.</em>
+        }
+
+        <section class="v1-facility-profile">
+
+          <div class="v1-facility-profile__fields" [class.v1-facility-profile__fields--open]="showProfileDetails" aria-hidden="{{ !showProfileDetails }}">
+              <div class="v1-form-grid v1-form-grid--2">
+                <label class="v1-form__field">
+                  <span>Facility classification</span>
+                  <select formControlName="classification">
+                    @for (classification of facilityClassifications; track classification) {
+                      <option [ngValue]="classification">{{ classification }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="v1-form__field">
+                  <span>Country</span>
+                  <select formControlName="country">
+                    @for (country of countries; track country.code) {
+                      <option [ngValue]="country.code">{{ country.name }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+
+              <label class="v1-form__field">
+                <span>Address</span>
+                <input type="text" formControlName="address">
+              </label>
+
+              <div class="v1-form-grid v1-form-grid--3">
+                <label class="v1-form__field">
+                  <span>City</span>
+                  <input type="text" formControlName="city">
+                </label>
+                @if (form.controls['country'].value === 'US') {
+                  <label class="v1-form__field">
+                    <span>State</span>
+                    <input type="text" formControlName="state">
+                  </label>
+                  <label class="v1-form__field">
+                    <span>Zip</span>
+                    <input type="text" formControlName="zip">
+                  </label>
+                }
+              </div>
+
+              <div class="v1-form-grid v1-form-grid--3">
+                <label class="v1-form__field">
+                  <span>NAICS level 1</span>
+                  <select formControlName="naics1" (change)="checkNAICS()">
+                    <option [ngValue]="null"></option>
+                    @for (naics of firstNaicsList; track naics.code) {
+                      <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="v1-form__field">
+                  <span>NAICS level 2</span>
+                  <select formControlName="naics2" (change)="checkNAICS()">
+                    <option [ngValue]="null"></option>
+                    @for (naics of secondNaicsOptions(form.controls['naics1'].value); track naics.code) {
+                      <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="v1-form__field">
+                  <span>NAICS level 3</span>
+                  <select formControlName="naics3" (change)="checkNAICS()">
+                    <option [ngValue]="null"></option>
+                    @for (naics of thirdNaicsOptions(form.controls['naics2'].value); track naics.code) {
+                      <option [ngValue]="naics.code">{{ naics.code }} - {{ naics.industryType }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+
+              <div class="v1-form-grid v1-form-grid--2">
+                <label class="v1-form__field">
+                  <span>Facility area</span>
+                  <input type="number" formControlName="size">
+                </label>
+                <label class="v1-form__field">
+                  <span>Contact phone</span>
+                  <input type="text" formControlName="contactPhone" maxlength="12" (input)="formatPhone($event)">
+                </label>
+              </div>
+
+              <div class="v1-form-grid v1-form-grid--2">
+                <label class="v1-form__field">
+                  <span>Contact name</span>
+                  <input type="text" formControlName="contactName" maxlength="60">
+                </label>
+                <label class="v1-form__field">
+                  <span>Contact email</span>
+                  <input type="email" formControlName="contactEmail" maxlength="85">
+                </label>
+              </div>
+
+              <label class="v1-form__field">
+                <span>Notes</span>
+                <textarea formControlName="notes"></textarea>
+              </label>
+            </div>
+          <button
+            type="button"
+            class="v1-portfolio-disclosure"
+            [attr.aria-expanded]="showProfileDetails"
+            (click)="toggleProfileDetails()">
+            <span class="fa" [class.fa-chevron-down]="!showProfileDetails" [class.fa-chevron-up]="showProfileDetails" aria-hidden="true"></span>
+            Additional profile details
+          </button>
+        </section>
+
+        <div class="v1-drawer__actions">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
+          <button type="submit" class="v1-btn v1-btn--primary" [disabled]="!canCreateFacility">
+            @if (isCreating) {
+              <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+              Creating
+            } @else {
+              Create facility
+              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>

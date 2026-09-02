@@ -1,0 +1,135 @@
+@let currentAccount = account();
+@let facilitiesList = facilities();
+@let selected = selectedFacilities();
+
+@if (currentAccount) {
+  <section class="v1-settings-panel" aria-label="Portfolio settings">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Portfolio</p>
+        <h2>Facility actions</h2>
+      </div>
+      <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
+        @if (isApplying || isDeleting || saveState === 'saving') {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          Working
+        } @else if (saveState === 'saved') {
+          <span class="fa fa-check" aria-hidden="true"></span>
+          Saved
+        } @else if (saveState === 'error') {
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          Not saved
+        }
+      </span>
+    </div>
+
+    @if (saveError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <span>{{ saveError }}</span>
+      </div>
+    }
+
+    @if (!canWrite() || hasPending()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <span class="fa fa-lock" aria-hidden="true"></span>
+        <span>Portfolio actions are unavailable while the workspace is loading, switching, or saving.</span>
+      </div>
+    }
+
+    <div class="v1-portfolio-settings__toolbar">
+      <button type="button" class="v1-btn v1-btn--primary" [disabled]="actionsDisabled" (click)="openCreateFacilityDrawer()">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+        Add facility
+      </button>
+      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="actionsDisabled || selected.length === 0" (click)="openApplyConfirm()">
+        Apply account settings
+        <span class="fa fa-check" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="actionsDisabled || selected.length === 0" (click)="openDeleteConfirm()">
+        Delete selected
+        <span class="fa fa-trash" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    @if (facilitiesList.length === 0) {
+      <article class="v1-settings-card v1-portfolio-settings__empty" role="status">
+        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <h3>No facilities yet</h3>
+        <p>Add a facility to start managing this portfolio.</p>
+      </article>
+    } @else {
+      <div class="v1-portfolio-settings__selection" aria-label="Portfolio facilities">
+        <label class="v1-settings-choice v1-portfolio-settings__select-all">
+          <input type="checkbox" [checked]="allFacilitiesSelected()" [disabled]="actionsDisabled" (change)="toggleAllFacilities($any($event.target).checked)">
+          <span>Select all facilities</span>
+        </label>
+
+        <div class="v1-portfolio-settings__list" role="list">
+          @for (facility of facilitiesList; track facility.guid) {
+            <article class="v1-portfolio-settings__facility" role="listitem">
+              <label class="v1-settings-choice">
+                <input type="checkbox" [checked]="isSelected(facility.guid)" [disabled]="actionsDisabled"
+                  (change)="toggleFacility(facility.guid, $any($event.target).checked)">
+                <span>{{ facility.name }}</span>
+              </label>
+              <span>{{ facilityLocation(facility) }}</span>
+              <small>{{ facility.classification || 'Unclassified' }}</small>
+            </article>
+          }
+        </div>
+      </div>
+    }
+
+  </section>
+}
+
+<ng-template #createFacilityDrawer>
+  @if (isCreateFacilityDrawerOpen) {
+    <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
+  }
+</ng-template>
+
+<ng-template #portfolioActionModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel portfolio action" [disabled]="isApplying || isDeleting"
+      (click)="cancelConfirm()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-portfolio-action-title">
+      <header class="v1-modal__header">
+        <h2 id="v1-portfolio-action-title">
+          @if (pendingAction === 'apply') {
+            Apply account settings?
+          } @else {
+            Delete selected facilities?
+          }
+        </h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel portfolio action" [disabled]="isApplying || isDeleting"
+          (click)="cancelConfirm()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        @if (pendingAction === 'apply') {
+          <p>Apply units, goals, financial reporting, and data staleness from {{ account()?.name }} to {{ selectedCount }} selected facilities.</p>
+          <p>Facility profile, location, and classification details will not be changed.</p>
+        } @else {
+          <p>Deleting {{ selectedCount }} selected facilities also deletes their meters, predictors, analyses, reports, equipment, and related data.</p>
+        }
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isApplying || isDeleting" (click)="cancelConfirm()">Cancel</button>
+        @if (pendingAction === 'apply') {
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="actionsDisabled" (click)="confirmApplyAccountSettings()">
+            Apply settings
+            <span class="fa fa-check" aria-hidden="true"></span>
+          </button>
+        } @else {
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="actionsDisabled" (click)="confirmDeleteFacilities()">
+            Delete selected
+            <span class="fa fa-trash" aria-hidden="true"></span>
+          </button>
+        }
+      </footer>
+    </section>
+  </div>
+</ng-template>
