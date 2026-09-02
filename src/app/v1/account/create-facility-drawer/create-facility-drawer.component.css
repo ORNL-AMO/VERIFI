@@ -15,6 +15,10 @@
   margin: 0;
 }
 
+.v1-drawer__intro {
+  color: var(--v1-muted);
+}
+
 .v1-form,
 .v1-form__field,
 .v1-facility-profile,

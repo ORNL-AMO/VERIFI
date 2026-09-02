@@ -71,11 +71,24 @@ describe('CreateFacilityDrawerComponent', () => {
   it('uses the create account drawer structure instead of a settings panel body', () => {
     const drawerLayer: HTMLElement | null = fixture.nativeElement.querySelector('.v1-drawer-layer');
     const drawerBody: HTMLElement | null = fixture.nativeElement.querySelector('.v1-drawer__body');
+    const form: HTMLFormElement | null = fixture.nativeElement.querySelector('form.v1-form');
+    const description: HTMLElement | null = fixture.nativeElement.querySelector('#v1-create-facility-description');
 
     expect(drawerLayer).toBeTruthy();
     expect(drawerBody).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('form.v1-form')).toBeTruthy();
+    expect(form).toBeTruthy();
+    expect(description?.textContent).toContain('Start with a facility name');
+    expect(form?.getAttribute('aria-describedby')).toBe('v1-create-facility-description');
     expect(fixture.nativeElement.querySelector('form.v1-settings-panel')).toBeNull();
+  });
+
+  it('keeps create disabled when the facility name control has a nullable value', () => {
+    fixture.componentInstance.form.controls['name'].setValue(null);
+    fixture.detectChanges();
+
+    const submitButton = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+    expect(submitButton.disabled).toBe(true);
   });
 
   it('creates with name-only defaults when optional profile details stay collapsed', async () => {

@@ -237,14 +237,14 @@ describe('AccountPortfolioComponent', () => {
     deleteButtons[0].click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Delete Alpha Plant?');
+    expect(fixture.componentInstance.facilityToDelete()).toBe(facilities()[0]);
+    expect(modalPortal.show).toHaveBeenCalled();
     expect(portfolioFacilities.deleteFacility).not.toHaveBeenCalled();
 
     await fixture.componentInstance.confirmDeleteFacility();
-    fixture.detectChanges();
 
     expect(portfolioFacilities.deleteFacility).toHaveBeenCalledWith(facilities()[0]);
-    expect(fixture.nativeElement.textContent).toContain('Facility deleted');
+    expect(fixture.componentInstance.actionMessage).toBe('Facility deleted');
   });
 
   it('disables write actions while workspace writes are unavailable', () => {

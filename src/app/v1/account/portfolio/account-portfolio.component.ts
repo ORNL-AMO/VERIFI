@@ -141,23 +141,23 @@ export class AccountPortfolioComponent implements OnDestroy {
   }
 
   readonly facilitySummaries = computed<PortfolioFacilitySummary[]>(() => {
-    const meters = this.workspace.meters();
-    const meterData = this.workspace.meterData();
-    const predictors = this.workspace.predictors();
-    const predictorData = this.workspace.predictorData();
-    const analyses = this.workspace.facilityAnalyses();
-    const reports = this.workspace.facilityReports();
-    const equipment = this.workspace.energyUseEquipment();
+    const metersByFacility = this.groupByFacilityId(this.workspace.meters());
+    const meterDataByFacility = this.groupByFacilityId(this.workspace.meterData());
+    const predictorsByFacility = this.groupByFacilityId(this.workspace.predictors());
+    const predictorDataByFacility = this.groupByFacilityId(this.workspace.predictorData());
+    const analysesByFacility = this.groupByFacilityId(this.workspace.facilityAnalyses());
+    const reportsByFacility = this.groupByFacilityId(this.workspace.facilityReports());
+    const equipmentByFacility = this.groupByFacilityId(this.workspace.energyUseEquipment());
 
     return this.workspace.facilities().map(facility => this.buildFacilitySummary(
       facility,
-      meters.filter(meter => meter.facilityId === facility.guid),
-      meterData.filter(reading => reading.facilityId === facility.guid),
-      predictors.filter(predictor => predictor.facilityId === facility.guid),
-      predictorData.filter(reading => reading.facilityId === facility.guid),
-      analyses.filter(analysis => analysis.facilityId === facility.guid),
-      reports.filter(report => report.facilityId === facility.guid),
-      equipment.filter(item => item.facilityId === facility.guid)
+      metersByFacility.get(facility.guid) || [],
+      meterDataByFacility.get(facility.guid) || [],
+      predictorsByFacility.get(facility.guid) || [],
+      predictorDataByFacility.get(facility.guid) || [],
+      analysesByFacility.get(facility.guid) || [],
+      reportsByFacility.get(facility.guid) || [],
+      equipmentByFacility.get(facility.guid) || []
     ));
   });
 
@@ -348,6 +348,15 @@ export class AccountPortfolioComponent implements OnDestroy {
       ],
       selectedContentSortValue: 0
     };
+  }
+
+  private groupByFacilityId<T extends { readonly facilityId: string }>(items: readonly T[]): Map<string, T[]> {
+    return items.reduce((groups, item) => {
+      const facilityItems = groups.get(item.facilityId) || [];
+      facilityItems.push(item);
+      groups.set(item.facilityId, facilityItems);
+      return groups;
+    }, new Map<string, T[]>());
   }
 
   private matchesSearch(summary: PortfolioFacilitySummary, search: string): boolean {

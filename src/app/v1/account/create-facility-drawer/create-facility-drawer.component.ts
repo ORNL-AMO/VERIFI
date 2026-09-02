@@ -37,6 +37,10 @@ export class CreateFacilityDrawerComponent {
     return control.invalid && (control.touched || control.dirty);
   }
 
+  get canCreateFacility(): boolean {
+    return !this.isCreating && this.form.valid && String(this.form.controls['name'].value || '').trim().length > 0;
+  }
+
   close(): void {
     if (!this.isCreating) {
       this.closed.emit();

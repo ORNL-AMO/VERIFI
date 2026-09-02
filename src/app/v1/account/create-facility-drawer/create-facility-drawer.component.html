@@ -12,6 +12,7 @@
       <div>
         <p class="v1-eyebrow">New facility</p>
         <h2 id="v1-create-facility-title">Create Facility</h2>
+        <p class="v1-drawer__intro" id="v1-create-facility-description">Start with a facility name, then add optional profile details if they are ready.</p>
       </div>
       <button
         type="button"
@@ -163,7 +164,7 @@
 
         <div class="v1-drawer__actions">
           <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
-          <button type="submit" class="v1-btn v1-btn--primary" [disabled]="isCreating || form.invalid || !form.controls['name'].value.trim()">
+          <button type="submit" class="v1-btn v1-btn--primary" [disabled]="!canCreateFacility">
             @if (isCreating) {
               <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
               Creating
