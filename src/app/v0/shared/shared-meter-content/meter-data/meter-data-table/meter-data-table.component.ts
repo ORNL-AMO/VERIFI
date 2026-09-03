@@ -210,6 +210,7 @@ export class MeterDataTableComponent {
 
     this.loadingService.setLoadingMessage("Filling Missing Meter Data...");
     this.loadingService.setLoadingStatus(true);
+    this.cancelFillMissingDataModal();
     try {
       const accountMeterData = [...this.accountWorkspaceStore.meterData()];
       await this.commandBoundary.execute(
@@ -240,7 +241,6 @@ export class MeterDataTableComponent {
           return addedMeterData;
         }
       );
-      this.cancelFillMissingDataModal();
       this.toastNoticationService.showToast(
         `${missingMonths.length} Missing Month${missingMonths.length === 1 ? '' : 's'} Filled!`,
         undefined,
