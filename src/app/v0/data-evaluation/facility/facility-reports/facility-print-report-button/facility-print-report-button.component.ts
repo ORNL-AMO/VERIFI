@@ -15,7 +15,7 @@ export class FacilityPrintReportButtonComponent {
   @Input()
   isLoading: boolean = false;
   @Input()
-  pptReport: boolean = false;
+  includePpt: boolean = false;
 
   print: boolean;
   printSub: Subscription;

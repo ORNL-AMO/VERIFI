@@ -117,7 +117,7 @@ export class AnnualSavingsGraphComponent {
           title: { font: { size: 16 }, hoverformat: "%b, %y" },
           type: 'category',
         },
-        yaxis: { title: { text: 'Savings ($)', font: { size: 16 }, standoff: 18 }, automargin: true },
+        yaxis: { title: { text: 'Avoided Cost Savings ($)', font: { size: 16 }, standoff: 18 }, automargin: true },
         margin: { r: 0, t: 50 }
       };
       var config = {
@@ -130,4 +130,19 @@ export class AnnualSavingsGraphComponent {
     }
   }
 
+  async getAnnualSavingsChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.savingsGraph?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      const dataUrl = await rawPlotly.toImage(this.savingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
+      return dataUrl;
+    } catch (error) {
+      return '';
+    }
+  }
 }
