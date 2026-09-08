@@ -163,15 +163,19 @@ export class FacilityDataQualityReportSetupComponent {
   }
 
   validateDataQualityReport() {
-    if (this.selectionMode === 'analysis' && !this.selectedAnalysisItem) {
-      this.reportSettings.missingSelection = true;
+    const missingSelection = this.computeMissingSelection();
+    if (missingSelection === this.reportSettings.missingSelection) {
+      return;
     }
-    else if (this.selectionMode === 'manual' && this.selectedMeters.length === 0 && this.selectedPredictors.length === 0) {
-      this.reportSettings.missingSelection = true;
-    }
-    else
-      this.reportSettings.missingSelection = false;
+    this.reportSettings.missingSelection = missingSelection;
     this.save();
+  }
+
+  computeMissingSelection(): boolean {
+    if (this.selectionMode === 'analysis') {
+      return !this.selectedAnalysisItem;
+    }
+    return this.selectionMode === 'manual' && this.selectedMeters.length === 0 && this.selectedPredictors.length === 0;
   }
 
   onIncludeMeterChange() {
