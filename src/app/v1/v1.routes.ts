@@ -14,6 +14,8 @@ import { AccountSettingsStalenessComponent } from './account/settings/staleness/
 import { AccountSettingsUnitsComponent } from './account/settings/units/account-settings-units.component';
 import { FacilityDataPlaceholderComponent } from './facility/data/facility-data-placeholder.component';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
+import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/meter-workbench.component';
+import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
 import { FacilitySettingsComponent } from './facility/settings/facility-settings.component';
 import { FacilitySettingsBackupComponent } from './facility/settings/backup/facility-settings-backup.component';
@@ -96,17 +98,18 @@ export const V1Routes: Routes = [
               { path: '', pathMatch: 'full', redirectTo: 'meters' },
               {
                 path: 'meters',
+                component: FacilityMetersComponent,
                 children: [
-                  { path: '', pathMatch: 'full', component: FacilityMetersComponent },
+                  { path: '', pathMatch: 'full', component: MetersDashboardComponent },
                   {
                     path: ':meterGuid',
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
-                      { path: 'settings', component: FacilityMetersComponent, data: { meterTab: 'settings' } },
-                      { path: 'readings', component: FacilityMetersComponent, data: { meterTab: 'readings' } },
-                      { path: 'monthly', component: FacilityMetersComponent, data: { meterTab: 'monthly' } },
-                      { path: 'yearly', component: FacilityMetersComponent, data: { meterTab: 'yearly' } },
-                      { path: 'quality', component: FacilityMetersComponent, data: { meterTab: 'quality' } },
+                      { path: 'settings', component: MeterWorkbenchComponent, data: { meterTab: 'settings' } },
+                      { path: 'readings', component: MeterWorkbenchComponent, data: { meterTab: 'readings' } },
+                      { path: 'monthly', component: MeterWorkbenchComponent, data: { meterTab: 'monthly' } },
+                      { path: 'yearly', component: MeterWorkbenchComponent, data: { meterTab: 'yearly' } },
+                      { path: 'quality', component: MeterWorkbenchComponent, data: { meterTab: 'quality' } },
                       { path: '**', redirectTo: 'settings' }
                     ]
                   }

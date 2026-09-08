@@ -4,19 +4,25 @@ import { RouterModule } from '@angular/router';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
+import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
+import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
 
 @NgModule({
   declarations: [
     FacilityDataPlaceholderComponent,
-    FacilityMetersComponent
+    MetersDashboardComponent,
+    MeterWorkbenchComponent
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    FacilityMetersComponent
   ],
   exports: [
     FacilityDataPlaceholderComponent,
-    FacilityMetersComponent
+    FacilityMetersComponent,
+    MetersDashboardComponent,
+    MeterWorkbenchComponent
   ]
 })
 export class FacilityDataModule { }

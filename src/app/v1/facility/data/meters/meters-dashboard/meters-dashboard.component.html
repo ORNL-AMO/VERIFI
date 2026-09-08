@@ -1,0 +1,110 @@
+@let currentFacility = workspace.facility();
+
+@if (!currentFacility) {
+  <article class="v1-empty-state" role="status">
+    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility before managing meters and meter data.</p>
+  </article>
+} @else {
+  <header class="v1-section-header v1-facility-meters__header">
+    <div>
+      <p class="v1-eyebrow">Facility Data</p>
+      <h1 id="v1-facility-meters-title">Meters</h1>
+      <p class="v1-section-header__summary">
+        Review facility meters by group and open a meter workbench for settings, readings, monthly data, yearly data, and quality reports.
+      </p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--primary" disabled>
+      <span class="fa fa-plus" aria-hidden="true"></span>
+      Add meter WIP
+    </button>
+  </header>
+
+  @if (!workspace.canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <span class="fa fa-lock" aria-hidden="true"></span>
+      <span>Meter actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  } @else if (workspace.hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <span>Another workspace update is still finishing.</span>
+    </div>
+  }
+
+  <section class="v1-meter-grouping-panel" aria-labelledby="v1-meter-grouping-title">
+    <div>
+      <span class="v1-chip v1-chip--info">WIP</span>
+      <h2 id="v1-meter-grouping-title">Meter grouping</h2>
+      <p>Existing groups and assignments are shown here. Group creation and reassignment controls are staged for the next data-entry pass.</p>
+    </div>
+    <div class="v1-meter-grouping-panel__actions">
+      <button type="button" class="v1-btn v1-btn--quiet" disabled>
+        <span class="fa fa-layer-group" aria-hidden="true"></span>
+        Add group WIP
+      </button>
+      <button type="button" class="v1-btn v1-btn--quiet" disabled>
+        <span class="fa fa-arrow-right-arrow-left" aria-hidden="true"></span>
+        Reassign meters WIP
+      </button>
+    </div>
+  </section>
+
+  @if (workspace.meters().length === 0 && workspace.groupSections().length === 0) {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-gauge-high" aria-hidden="true"></span>
+      <h2>No meters yet</h2>
+      <p>Meter cards will appear here after utility meters are added or imported for this facility.</p>
+    </article>
+  } @else {
+    <div class="v1-facility-meters__groups" aria-label="Facility meters by group">
+      @for (section of workspace.groupSections(); track section.id) {
+        <section class="v1-meter-group v1-meter-group--{{ section.tone }}" [attr.aria-labelledby]="'v1-meter-group-' + section.id">
+          <header class="v1-meter-group__header">
+            <div>
+              <h2 [id]="'v1-meter-group-' + section.id">{{ section.label }}</h2>
+              <p>
+                {{ section.group?.groupType || 'No group assigned' }} - {{ section.meters.length }}
+                {{ section.meters.length === 1 ? 'meter' : 'meters' }}
+              </p>
+            </div>
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" disabled>
+              <span class="fa fa-pen" aria-hidden="true"></span>
+              Edit group WIP
+            </button>
+          </header>
+
+          @if (section.meters.length === 0) {
+            <p class="v1-meter-group__empty">No meters are assigned to this group yet.</p>
+          } @else {
+            <div class="v1-meter-card-grid" role="list" [attr.aria-label]="section.label + ' meters'">
+              @for (card of section.meters; track card.meter.guid) {
+                <article class="v1-meter-card" role="listitem">
+                  <div class="v1-meter-card__body">
+                    <span class="v1-chip">{{ card.meter.source }}</span>
+                    <h3>{{ card.meter.name }}</h3>
+                    <p>Coming soon</p>
+                  </div>
+                  <dl class="v1-meter-card__facts">
+                    <div>
+                      <dt>Readings</dt>
+                      <dd>{{ card.readingCount }}</dd>
+                    </div>
+                    <div>
+                      <dt>Group</dt>
+                      <dd>{{ card.group?.name || 'Ungrouped' }}</dd>
+                    </div>
+                  </dl>
+                  <button type="button" class="v1-icon-btn" title="Open meter" aria-label="Open meter" (click)="openMeter(card.meter)">
+                    <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                  </button>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+}

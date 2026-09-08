@@ -1,5 +1,7 @@
 import { Route } from '@angular/router';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
+import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/meter-workbench.component';
+import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { V1Routes } from './v1.routes';
 
 describe('V1Routes facility data meters routes', () => {
@@ -18,17 +20,18 @@ describe('V1Routes facility data meters routes', () => {
     const metersRoute = metersRouteConfig();
     const tabRoutes = meterGuidRoute().children ?? [];
 
+    expect(metersRoute.component).toBe(FacilityMetersComponent);
     expect(metersRoute.children?.find(route => route.path === '')).toMatchObject({
       path: '',
       pathMatch: 'full',
-      component: FacilityMetersComponent
+      component: MetersDashboardComponent
     });
     expect(tabRoutes.find(route => route.path === '')).toMatchObject({
       path: '',
       pathMatch: 'full',
       redirectTo: 'settings'
     });
-    expect(tabRoutes.filter(route => route.component === FacilityMetersComponent).map(route => route.path)).toEqual([
+    expect(tabRoutes.filter(route => route.component === MeterWorkbenchComponent).map(route => route.path)).toEqual([
       'settings',
       'readings',
       'monthly',

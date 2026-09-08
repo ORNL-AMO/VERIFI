@@ -1,0 +1,83 @@
+@let currentFacility = workspace.facility();
+@let currentMeter = workspace.selectedMeter();
+
+@if (!currentFacility) {
+  <article class="v1-empty-state" role="status">
+    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility before managing meters and meter data.</p>
+  </article>
+} @else if (workspace.hasMeterRoute() && !currentMeter) {
+  <article class="v1-empty-state" role="status">
+    <span class="fa fa-gauge-high" aria-hidden="true"></span>
+    <h1>Meter not found</h1>
+    <p>This meter is not available in {{ currentFacility.name }}.</p>
+    <button type="button" class="v1-btn v1-btn--secondary" (click)="openMeters()">
+      <span class="fa fa-arrow-left" aria-hidden="true"></span>
+      Back to meters
+    </button>
+  </article>
+} @else if (currentMeter) {
+  <header class="v1-section-header v1-facility-meters__header">
+    <div>
+      <p class="v1-eyebrow">Facility Data</p>
+      <h1 id="v1-facility-meters-title">{{ currentMeter.name }}</h1>
+      <p class="v1-section-header__summary">
+        {{ currentMeter.source }} meter - {{ workspace.selectedMeterReadingCount() }} readings -
+        {{ workspace.selectedMeterGroup()?.name || 'Ungrouped' }}
+      </p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--quiet" (click)="openMeters()">
+      <span class="fa fa-arrow-left" aria-hidden="true"></span>
+      Meters
+    </button>
+  </header>
+
+  @if (!workspace.canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <span class="fa fa-lock" aria-hidden="true"></span>
+      <span>Meter actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  } @else if (workspace.hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <span>Another workspace update is still finishing.</span>
+    </div>
+  }
+
+  <nav class="v1-facility-meters__tabs" aria-label="Meter workbench sections">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="v1-facility-meters__tab"
+        [class.v1-facility-meters__tab--active]="activeTab() === tab.id"
+        (click)="openMeter(tab.id)"
+        [attr.aria-current]="activeTab() === tab.id ? 'page' : null">
+        <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  <section class="v1-meter-workbench-panel" [attr.aria-label]="activeTabLabel()">
+    <div>
+      <span class="v1-chip v1-chip--info">WIP</span>
+      <h2>{{ activeTabLabel() }}</h2>
+      <p>{{ activeTabSummary() }}</p>
+    </div>
+    <dl class="v1-meter-workbench-panel__facts">
+      <div>
+        <dt>Meter source</dt>
+        <dd>{{ currentMeter.source }}</dd>
+      </div>
+      <div>
+        <dt>Group</dt>
+        <dd>{{ workspace.selectedMeterGroup()?.name || 'Ungrouped' }}</dd>
+      </div>
+      <div>
+        <dt>Readings</dt>
+        <dd>{{ workspace.selectedMeterReadingCount() }}</dd>
+      </div>
+    </dl>
+  </section>
+}
