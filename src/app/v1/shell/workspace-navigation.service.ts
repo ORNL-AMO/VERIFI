@@ -11,6 +11,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
+export type FacilityMeterRouteTab = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -266,6 +267,10 @@ export class WorkspaceNavigationService {
 
   facilityDataRoute(facilityGuid: string, detail = 'meters'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
+  }
+
+  facilityMeterRoute(facilityGuid: string, meterGuid: string, tab: FacilityMeterRouteTab = 'settings'): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab];
   }
 
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {

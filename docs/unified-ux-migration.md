@@ -80,6 +80,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 route helper, single-site redirect, and section navigation specs; validation planner decides parent checks.
 
+### Facility Meters Workspace Navigation Workflow
+
+- **Workflow:** v1 Facility Data > Meters workspace, issues #2644 and #2645.
+- **Existing v0 entry point:** Facility meter setup, meter readings, monthly data, meter grouping, and data quality are split across Data Management and Facility utility routes.
+- **Decision:** Rebuild the production v1 workflow as one Facility Data > Meters workspace with grouped meter cards and deep-linked selected-meter workbench tabs.
+- **Parity:** This first slice establishes navigation, grouped meter visibility, meter selection, workbench tabs, empty states, pending/read-only messaging, and WIP placeholders for detailed content.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
+- **Tests:** Focused v1 route/navigation specs and Facility Data Meters component specs; validation planner decides parent checks.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.

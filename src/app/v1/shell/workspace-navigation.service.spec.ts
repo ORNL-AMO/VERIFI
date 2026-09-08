@@ -111,6 +111,16 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'predictors'
     ]);
+    expect(service.facilityMeterRoute('facility-a', 'meter-a', 'readings')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-a',
+      'readings'
+    ]);
     expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
       '/v1',
       'workspace',
@@ -288,6 +298,15 @@ describe('WorkspaceNavigationService', () => {
       2,
       '/v1/workspace/facility/facility-a/data',
       '/v1/workspace/facility/facility-a/data'
+    ));
+
+    expect(service.activeSection()).toBe('data');
+    expect(service.activeDetail()).toBe('meters');
+
+    router.events.next(new NavigationEnd(
+      3,
+      '/v1/workspace/facility/facility-a/data/meters/meter-a/readings',
+      '/v1/workspace/facility/facility-a/data/meters/meter-a/readings'
     ));
 
     expect(service.activeSection()).toBe('data');
