@@ -73,7 +73,7 @@ export class UploadDataV3Service {
         }
         facility.address = facilityDataRow['Address'];
         facility.country = getCountryCode(facilityDataRow['Country']);
-        facility.state = getState(facilityDataRow['US State']);
+        facility.state = getState(facilityDataRow['U.S. State'] ?? facilityDataRow['US State']);
         facility.city = facilityDataRow['City'];
         facility.zip = getZip(facilityDataRow['ZIP Code']);
         facility.naics1 = parseNAICs(facilityDataRow['NAICS Code (2-digit)']);
@@ -746,13 +746,13 @@ export class UploadDataV3Service {
   addCharges(excelMeter, meter: IdbUtilityMeter) {
     for (let i = 1; i < 16; i++) {
       if (excelMeter['Charge ' + i + ' Name']) {
-        let chargeName: string = excelMeter['Cost ' + i + ' Name'];
+        let chargeName: string = excelMeter['Charge ' + i + ' Name'];
         let charge: MeterCharge = meter.charges.find(charge => {
           return charge.name == chargeName
         });
         if (charge) {
           charge.name = excelMeter['Charge ' + i + ' Name'];
-          charge.chargeType = this.getChargeType(excelMeter['Cost ' + i + ' Type']);
+          charge.chargeType = this.getChargeType(excelMeter['Charge ' + i + ' Type']);
         } else {
           charge = {
             guid: getGUID(),

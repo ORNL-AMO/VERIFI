@@ -48,7 +48,8 @@
       Update</button>
   </div>
   }
-  @if (_predictorStatusCheck && (_predictorStatusCheck.hasWeatherDataWarning || _predictorStatusCheck.hasNegativeData)) {
+  @if (_predictorStatusCheck && (_predictorStatusCheck.hasWeatherDataWarning || _predictorStatusCheck.hasNegativeData))
+  {
   <div class="ps-1 pe-1 mb-2">
     <button class="btn action-btn" (click)="toggleFilterErrors()">
       <i class="fa fa-filter"></i>
@@ -80,8 +81,8 @@
     data with gaps of twelve hours or more or missing source readings. The results
     may not be accurate. To inspect the weather data for that month, click the <span
       class="fa fa-thermometer-half"></span> button. To manually override the values click the <span
-      class="fa fa-pencil"></span> button. If you have several <span
-      class="fa fa-exclamation-circle"></span>, it may be best to select a different weather station for this
+      class="fa fa-pencil"></span> button. If you have several <span class="fa fa-exclamation-circle"></span>, it may be
+    best to select a different weather station for this
     facility - use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the area
     of this facility.
   </div>
@@ -108,6 +109,11 @@
   @for (monthYear of _predictorStatusCheck.missingEntryMonths; track monthYear.date) {
   <span class="badge bg-danger ms-1">{{monthYear.date | date:'MMM, yyyy'}}</span>
   }
+  <div class="mt-2">
+    <button class="btn btn-sm btn-danger" (click)="openFillMissingDataModal()">
+      Fill Missing Months with Zeros
+    </button>
+  </div>
 </div>
 }
 
@@ -122,8 +128,9 @@
 
 @if(_predictorStatusCheck && _predictorStatusCheck.hasNegativeData){
 <div class="alert alert-danger text-center p-1 fw-bold">
-  <span class="fa fa-triangle-exclamation"></span> Negative predictor entries found. To allow negative entries, edit the predictor setup by clicking
-    <a class="click-link" (click)="editPredictor()">here</a> and enabling the "Allow Negative Data" option.
+  <span class="fa fa-triangle-exclamation"></span> Negative predictor entries found. To allow negative entries, edit the
+  predictor setup by clicking
+  <a class="click-link" (click)="editPredictor()">here</a> and enabling the "Allow Negative Data" option.
 </div>
 }
 
@@ -188,14 +195,13 @@
           data-bs-html="true"></span>
         }
         @if (pData.amount != undefined) {
-          @if(pData.amount < 0 && !_predictor.canBeNegative) {
-            <span class="fa fa-exclamation-triangle"></span>  
+        @if(pData.amount < 0 && !_predictor.canBeNegative) { <span class="fa fa-exclamation-triangle"></span>
           }
           {{pData.amount | customNumber}}
-        }
-        @if (pData.amount == undefined) {
-        &mdash;
-        }
+          }
+          @if (pData.amount == undefined) {
+          &mdash;
+          }
       </td>
       @if (!copyingTable) {
       <td class="actions">
@@ -259,7 +265,9 @@
 }
 
 
-<div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete || showIgnoreWarningModal}"></div>
+<div
+  [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete || showIgnoreWarningModal || showFillMissingDataModal }">
+</div>
 <div class="popup" [class.open]="predictorDataToDelete">
   @if(predictorDataToDelete) {
   <div class="popup-header">
@@ -315,6 +323,28 @@
     <button class="btn btn-secondary" (click)="cancelIgnoreWarningModal()">Cancel</button>
     <button class="btn btn-warning" (click)="confirmIgnoreWarningModal()"><i class="fa fa-eye-slash"></i> Dismiss
       Warning</button>
+  </div>
+  }
+</div>
+<div class="popup" [class.open]="showFillMissingDataModal">
+  @if (showFillMissingDataModal) {
+  <div class="popup-header">
+    Fill Missing Predictor Data
+    <button class="item-right" (click)="closeFillMissingDataModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>
+      Zero-valued predictor entries will be added for the following months:
+    </p>
+    <div class="mb-3">
+      @for (monthYear of _predictorStatusCheck.missingEntryMonths; track monthYear.date) {
+      <span class="badge bg-secondary me-1 mb-1">{{monthYear.date | date:'MMMM, yyyy'}}</span>
+      }
+    </div>
+  </div>
+  <div class="saveCancel popup-footer text-end">
+    <button class="btn btn-secondary" (click)="closeFillMissingDataModal()">Cancel</button>
+    <button class="btn btn-danger" (click)="fillMissingDataWithZeros()">Fill with Zeros</button>
   </div>
   }
 </div>

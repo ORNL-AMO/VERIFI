@@ -19,6 +19,8 @@ import { checkSameMonthPredictorData } from '@shared/meter-date-helpers';
 import { FirstNaicsList, NAICS, SecondNaicsList } from '@shared/form-data/naics-data';
 import { ChargesTypes } from '@data/models/meter-charges-options';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
+import { Countries, Country } from '@shared/form-data/countries';
+import { States, State } from '@shared/form-data/states';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +44,7 @@ export class ExportToExcelTemplateV3Service {
     request.onload = () => {
       workbook.xlsx.load(request.response).then(async () => {
         await this.fillWorkbook(workbook, includeWeatherData, facilityId);
+        workbook.calcProperties.fullCalcOnLoad = true;
         workbook.xlsx.writeBuffer().then(excelData => {
           this.exportBlob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let date = new Date();
@@ -180,7 +183,7 @@ export class ExportToExcelTemplateV3Service {
       //C: Country
       worksheet.getCell('C' + index).value = this.getCountry(facility);
       //D: State
-      worksheet.getCell('D' + index).value = facility.state;
+      worksheet.getCell('D' + index).value = this.getState(facility);
       //E: City
       worksheet.getCell('E' + index).value = facility.city;
       //F: Zip
@@ -212,10 +215,34 @@ export class ExportToExcelTemplateV3Service {
 
   getCountry(facility: IdbFacility): string {
     if (facility.country) {
+      let countryClean: string = facility.country.toString().trim().toLocaleLowerCase();
+      let country: Country = Countries.find(countryOption => {
+        return countryOption.code.toLocaleLowerCase() == countryClean
+          || countryOption.code3.toLocaleLowerCase() == countryClean
+          || countryOption.name.toLocaleLowerCase() == countryClean;
+      });
+      if (country) {
+        return country.name;
+      }
       return facility.country;
     } else if (facility.state) {
       return 'United States of America (the)';
     };
+    return;
+  }
+
+  getState(facility: IdbFacility): string {
+    if (facility.state) {
+      let stateClean: string = facility.state.toString().trim().toLocaleLowerCase();
+      let state: State = States.find(stateOption => {
+        return stateOption.abbreviation.toLocaleLowerCase() == stateClean
+          || stateOption.name.toLocaleLowerCase() == stateClean;
+      });
+      if (state) {
+        return state.name;
+      }
+      return facility.state;
+    }
     return;
   }
 
