@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from '@angular/cdk/portal';
 
+import { AccountDataModule } from './account/data/account-data.module';
 import { AccountHomeComponent } from './account/home/account-home.component';
 import { AccountPortfolioModule } from './account/portfolio/account-portfolio.module';
 import { AccountSettingsModule } from './account/settings/account-settings.module';
+import { FacilityDataModule } from './facility/data/facility-data.module';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
 import { FacilitySettingsModule } from './facility/settings/facility-settings.module';
 import { ShellHeaderComponent } from './shell/header/shell-header.component';
@@ -37,7 +39,9 @@ import { WelcomeComponent } from './welcome/welcome.component';
     FormsModule,
     NotificationsModule,
     PortalModule,
+    AccountDataModule,
     AccountPortfolioModule,
+    FacilityDataModule,
     AccountSettingsModule,
     FacilitySettingsModule,
     WelcomeComponent,

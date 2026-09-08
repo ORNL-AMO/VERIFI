@@ -103,6 +103,14 @@ describe('WorkspaceNavigationService', () => {
       'home',
       'overview'
     ]);
+    expect(service.facilityDataRoute('facility-a', 'predictors')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'predictors'
+    ]);
     expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
       '/v1',
       'workspace',
@@ -265,7 +273,7 @@ describe('WorkspaceNavigationService', () => {
     expect(service.sections().find(section => section.id === 'settings')?.enabled).toBe(true);
   });
 
-  it('parses account data routes and enables data in workspace context', () => {
+  it('parses account and facility data routes and enables data in workspace context', () => {
     router.events.next(new NavigationEnd(
       1,
       '/v1/workspace/account/account-a/data/portfolio',
@@ -275,6 +283,15 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeSection()).toBe('data');
     expect(service.activeDetail()).toBe('portfolio');
     expect(service.sections().find(section => section.id === 'data')?.enabled).toBe(true);
+
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-a/data',
+      '/v1/workspace/facility/facility-a/data'
+    ));
+
+    expect(service.activeSection()).toBe('data');
+    expect(service.activeDetail()).toBe('meters');
   });
 
   it('opens settings from the active workspace context', () => {
@@ -308,7 +325,7 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('opens account portfolio data from the active workspace context', () => {
+  it('opens data from the active workspace context', () => {
     service.openSection('data');
 
     expect(router.navigate).toHaveBeenCalledWith([
@@ -332,10 +349,103 @@ describe('WorkspaceNavigationService', () => {
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters'
+    ]);
+  });
+
+  it('keeps the active rail section when toggling between account and facility contexts', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/account/account-a/data/custom-fuels',
+      '/v1/workspace/account/account-a/data/custom-fuels'
+    ));
+
+    service.setContext('facility');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters'
+    ]);
+
+    router.navigate.mockClear();
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-a/data/energy-uses',
+      '/v1/workspace/facility/facility-a/data/energy-uses'
+    ));
+
+    service.setContext('account');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
       'account',
       'account-a',
       'data',
       'portfolio'
+    ]);
+
+    router.navigate.mockClear();
+    router.events.next(new NavigationEnd(
+      3,
+      '/v1/workspace/facility/facility-a/settings/financial',
+      '/v1/workspace/facility/facility-a/settings/financial'
+    ));
+
+    service.setContext('account');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'settings',
+      'financial'
+    ]);
+  });
+
+  it('keeps the active facility rail route when switching facilities', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/data/predictors',
+      '/v1/workspace/facility/facility-a/data/predictors'
+    ));
+
+    service.setFacility('facility-b');
+
+    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-b');
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-b',
+      'data',
+      'predictors'
+    ]);
+
+    router.navigate.mockClear();
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-b/settings/staleness',
+      '/v1/workspace/facility/facility-b/settings/staleness'
+    ));
+
+    service.setFacility('facility-a');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'settings',
+      'staleness'
     ]);
   });
 

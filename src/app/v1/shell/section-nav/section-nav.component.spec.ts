@@ -12,7 +12,7 @@ describe('SectionNavComponent', () => {
   let contextMode: ReturnType<typeof signal<string>>;
   let facilities: ReturnType<typeof signal<ReadonlyArray<{ guid: string; name: string }>>>;
   let selectedFacility: ReturnType<typeof signal<{ guid: string; name: string } | undefined>>;
-  let account: ReturnType<typeof signal<{ guid: string; name: string; isSingleFacilityCompany?: boolean }>>;
+  let account: ReturnType<typeof signal<{ guid: string; name: string; isSingleFacilityCompany?: boolean; displayEmissions?: boolean }>>;
   let isSingleSiteWorkspace: ReturnType<typeof signal<boolean>>;
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
@@ -49,6 +49,7 @@ describe('SectionNavComponent', () => {
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
+            facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -82,7 +83,7 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Overview');
   });
 
-  it('shows account portfolio navigation when the Data rail section is active', () => {
+  it('shows account portfolio and fuels custom data navigation when the Data rail section is active', () => {
     activeSection.set('data');
     activeDetail.set('portfolio');
     const fixture = TestBed.createComponent(SectionNavComponent);
@@ -90,7 +91,40 @@ describe('SectionNavComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Account Data');
     expect(fixture.nativeElement.textContent).toContain('Portfolio');
+    expect(fixture.nativeElement.textContent).toContain('Custom Database Items');
+    expect(fixture.nativeElement.textContent).toContain('Fuels');
+    expect(fixture.nativeElement.textContent).not.toContain('Grid Factors');
+    expect(fixture.nativeElement.textContent).not.toContain('Global Warming Potentials');
     expect(fixture.nativeElement.textContent).not.toContain('Account Settings');
+  });
+
+  it('shows emissions custom data navigation only when emissions display is enabled', () => {
+    account.set({ guid: 'account-a', name: 'Account A', displayEmissions: true });
+    activeSection.set('data');
+    activeDetail.set('custom-grid-factors');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Grid Factors');
+    expect(fixture.nativeElement.textContent).toContain('Fuels');
+    expect(fixture.nativeElement.textContent).toContain('Global Warming Potentials');
+    expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Grid Factors']);
+  });
+
+  it('shows facility data navigation in facility context', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('predictors');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Facility Data');
+    expect(fixture.nativeElement.textContent).toContain('Meters');
+    expect(fixture.nativeElement.textContent).toContain('Predictors');
+    expect(fixture.nativeElement.textContent).toContain('Energy Uses');
+    expect(fixture.nativeElement.textContent).not.toContain('Custom Database Items');
+    expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Predictors']);
   });
 
   it('shows facility settings navigation in facility context', () => {
@@ -192,4 +226,8 @@ describe('SectionNavComponent', () => {
 
     expect(fixture.nativeElement.querySelector('app-facility-picker')).toBeNull();
   });
+
+  function activeLinks(element: HTMLElement): HTMLAnchorElement[] {
+    return Array.from<HTMLAnchorElement>(element.querySelectorAll('.v1-nav__group a.active'));
+  }
 });

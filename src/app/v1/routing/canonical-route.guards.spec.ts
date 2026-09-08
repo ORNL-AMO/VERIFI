@@ -60,6 +60,17 @@ describe('v1 canonical route guards', () => {
     )).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview']);
   });
 
+  it('keeps explicit account data routes reachable for valid single-site accounts', () => {
+    workspace.account.mockReturnValue({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);
+
+    expect(invoke(
+      singleSiteAccountRedirectGuard,
+      route({ accountGuid: 'account-a' }),
+      { url: '/v1/workspace/account/account-a/data/custom-fuels' }
+    )).toBe(true);
+  });
+
   it('does not redirect portfolio or invalid single-site account states', () => {
     expect(invoke(
       singleSiteAccountRedirectGuard,

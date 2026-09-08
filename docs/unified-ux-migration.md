@@ -71,6 +71,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 navigation, account data portfolio, account settings portfolio, and shared portfolio command specs; validation planner decides parent checks.
 
+### Data Navigation Foundation Workflow
+
+- **Workflow:** v1 account and facility Data section navigation, issue #2642.
+- **Existing v0 entry point:** Account custom data lives under `/data-management/:id/account-custom-data`; facility meters, predictors, and energy uses live under `/data-management/:id/facilities/:facilityGuid`.
+- **Decision:** Establish v1 Data routes and secondary navigation with placeholder destinations. Rebuild migrated content one workflow at a time.
+- **Parity:** Account Data keeps Portfolio and account-level custom database destinations; Facility Data exposes Meters, Predictors, and Energy Uses. Events remain deferred until a persisted event model is approved.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
+- **Tests:** Focused v1 route helper, single-site redirect, and section navigation specs; validation planner decides parent checks.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.
