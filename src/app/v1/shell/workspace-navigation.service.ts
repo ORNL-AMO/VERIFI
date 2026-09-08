@@ -81,6 +81,14 @@ const DEFAULT_DETAILS: Record<SectionId, string> = {
   settings: 'profile',
   imports: 'template'
 };
+const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
+  ...DEFAULT_DETAILS,
+  data: 'meters'
+};
+const ACCOUNT_DATA_DETAILS = new Set(['portfolio', 'custom-grid-factors', 'custom-fuels', 'custom-gwps']);
+const FACILITY_DATA_DETAILS = new Set(['meters', 'predictors', 'energy-uses']);
+const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete']);
+const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete']);
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceNavigationService {
@@ -172,23 +180,24 @@ export class WorkspaceNavigationService {
   }
 
   setContext(contextMode: ContextMode): void {
+    const state = this.routeState();
     if (contextMode === 'facility') {
       const facilityGuid = this.facility()?.guid || this.facilities()[0]?.guid;
       if (facilityGuid) {
-        void this.router.navigate(this.facilityRoute(facilityGuid));
+        void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
       }
       return;
     }
-    const state = this.routeState();
     const accountGuid = this.account()?.guid || state.accountGuid;
     if (accountGuid) {
-      void this.router.navigate(this.accountRoute(accountGuid));
+      void this.router.navigate(this.accountRouteForSection(accountGuid, state.section, state.detail));
     }
   }
 
   setFacility(facilityGuid: string): void {
+    const state = this.routeState();
     this.workspaceService.selectFacility(facilityGuid);
-    void this.router.navigate(this.facilityRoute(facilityGuid));
+    void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
   }
 
   setPanelTab(panelTab: PanelTabId): void {
@@ -218,6 +227,13 @@ export class WorkspaceNavigationService {
       return;
     }
     if (sectionId === 'data') {
+      if (contextMode === 'facility') {
+        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
+        if (facilityGuid) {
+          void this.router.navigate(this.facilityDataRoute(facilityGuid));
+        }
+        return;
+      }
       const accountGuid = this.account()?.guid || this.routeState().accountGuid;
       if (accountGuid) {
         void this.router.navigate(this.accountDataRoute(accountGuid));
@@ -248,8 +264,48 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
   }
 
+  facilityDataRoute(facilityGuid: string, detail = 'meters'): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
+  }
+
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
+  }
+
+  private accountRouteForSection(accountGuid: string, section: SectionId, detail: string): Array<string> {
+    if (section === 'settings') {
+      return this.accountSettingsRoute(accountGuid, this.resolveAccountSettingsDetail(detail));
+    }
+    if (section === 'data') {
+      return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
+    }
+    return this.accountRoute(accountGuid);
+  }
+
+  private facilityRouteForSection(facilityGuid: string, section: SectionId, detail: string): Array<string> {
+    if (section === 'settings') {
+      return this.facilitySettingsRoute(facilityGuid, this.resolveFacilitySettingsDetail(detail));
+    }
+    if (section === 'data') {
+      return this.facilityDataRoute(facilityGuid, this.resolveFacilityDataDetail(detail));
+    }
+    return this.facilityRoute(facilityGuid);
+  }
+
+  private resolveAccountDataDetail(detail: string): string {
+    return ACCOUNT_DATA_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.data;
+  }
+
+  private resolveFacilityDataDetail(detail: string): string {
+    return FACILITY_DATA_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.data;
+  }
+
+  private resolveAccountSettingsDetail(detail: string): string {
+    return ACCOUNT_SETTINGS_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.settings;
+  }
+
+  private resolveFacilitySettingsDetail(detail: string): string {
+    return FACILITY_SETTINGS_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.settings;
   }
 
   legacyFacilityManagementRoute(accountGuid?: string): Array<string> {
@@ -365,7 +421,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       contextMode: 'facility',
       facilityGuid: routeParts[2],
       section,
-      detail: routeParts[4] || DEFAULT_DETAILS[section]
+      detail: routeParts[4] || DEFAULT_FACILITY_DETAILS[section]
     };
   }
   const section = normalizeSection(routeParts[3]);

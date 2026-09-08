@@ -112,11 +112,25 @@
   gap: .25rem;
 }
 
+.v1-nav__subgroup {
+  display: grid;
+  gap: .25rem;
+  margin-top: .4rem;
+  padding-top: .45rem;
+  border-top: 1px solid var(--v1-divider);
+}
+
 .v1-nav__label {
   color: var(--v1-muted);
   font-size: .72rem;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.v1-nav__sublabel {
+  color: var(--v1-muted);
+  font-size: .68rem;
+  font-weight: 900;
 }
 
 .v1-nav__group a,

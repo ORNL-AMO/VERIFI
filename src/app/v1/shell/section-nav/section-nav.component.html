@@ -24,6 +24,14 @@
     </div>
   }
 
+  @if (!isSingleSiteWorkspace() && contextMode === 'facility' && facilities.length > 0) {
+    <app-facility-picker
+      [facilities]="facilities"
+      [selectedFacility]="selectedFacility"
+      (facilitySelected)="navigation.setFacility($event)">
+    </app-facility-picker>
+  }
+
   @if (hasSingleSiteRecovery() && account) {
     <section class="v1-nav__recovery" aria-labelledby="v1-single-site-recovery-title">
       <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
@@ -73,14 +81,39 @@
       @if (account) {
         <section class="v1-nav__group" aria-labelledby="v1-data-nav-title">
           <span id="v1-data-nav-title" class="v1-nav__label">{{ dataTitle() }}</span>
-          @for (item of dataItems(); track item.id) {
-            <a
-              [class.active]="navigation.activeDetail() === item.id"
-              [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
-              [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
-              <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
-              {{ item.label }}
-            </a>
+          @if (contextMode === 'facility' && selectedFacility) {
+            @for (item of facilityDataItems(); track item.id) {
+              <a
+                [class.active]="navigation.activeDetail() === item.id"
+                [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
+                [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
+                <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                {{ item.label }}
+              </a>
+            }
+          } @else {
+            @for (item of dataItems(); track item.id) {
+              <a
+                [class.active]="navigation.activeDetail() === item.id"
+                [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
+                [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
+                <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                {{ item.label }}
+              </a>
+            }
+
+            <div class="v1-nav__subgroup" aria-labelledby="v1-custom-data-nav-title">
+              <span id="v1-custom-data-nav-title" class="v1-nav__sublabel">Custom Database Items</span>
+              @for (item of accountCustomDataItems(); track item.id) {
+                <a
+                  [class.active]="navigation.activeDetail() === item.id"
+                  [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
+                  [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
+                  <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                  {{ item.label }}
+                </a>
+              }
+            </div>
           }
         </section>
       }

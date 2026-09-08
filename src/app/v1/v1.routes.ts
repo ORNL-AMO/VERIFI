@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
+import { AccountCustomDataPlaceholderComponent } from './account/data/account-custom-data-placeholder.component';
 import { AccountHomeComponent } from './account/home/account-home.component';
 import { AccountPortfolioComponent } from './account/portfolio/account-portfolio.component';
 import { AccountSettingsComponent } from './account/settings/account-settings.component';
@@ -11,6 +12,7 @@ import { AccountSettingsPortfolioComponent } from './account/settings/portfolio/
 import { AccountSettingsProfileComponent } from './account/settings/profile/account-settings-profile.component';
 import { AccountSettingsStalenessComponent } from './account/settings/staleness/account-settings-staleness.component';
 import { AccountSettingsUnitsComponent } from './account/settings/units/account-settings-units.component';
+import { FacilityDataPlaceholderComponent } from './facility/data/facility-data-placeholder.component';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
 import { FacilitySettingsComponent } from './facility/settings/facility-settings.component';
 import { FacilitySettingsBackupComponent } from './facility/settings/backup/facility-settings-backup.component';
@@ -50,6 +52,9 @@ export const V1Routes: Routes = [
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'portfolio' },
               { path: 'portfolio', component: AccountPortfolioComponent },
+              { path: 'custom-grid-factors', component: AccountCustomDataPlaceholderComponent, data: { title: 'Grid Factors' } },
+              { path: 'custom-fuels', component: AccountCustomDataPlaceholderComponent, data: { title: 'Fuels' } },
+              { path: 'custom-gwps', component: AccountCustomDataPlaceholderComponent, data: { title: 'Global Warming Potentials' } },
               { path: '**', redirectTo: 'portfolio' }
             ]
           },
@@ -83,6 +88,16 @@ export const V1Routes: Routes = [
             path: 'home/:detail',
             component: FacilityHomeComponent,
             canActivate: [facilityHomeCanonicalGuard]
+          },
+          {
+            path: 'data',
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'meters' },
+              { path: 'meters', component: FacilityDataPlaceholderComponent, data: { title: 'Meters' } },
+              { path: 'predictors', component: FacilityDataPlaceholderComponent, data: { title: 'Predictors' } },
+              { path: 'energy-uses', component: FacilityDataPlaceholderComponent, data: { title: 'Energy Uses' } },
+              { path: '**', redirectTo: 'meters' }
+            ]
           },
           {
             path: 'settings',

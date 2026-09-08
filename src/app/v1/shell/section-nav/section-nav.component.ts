@@ -18,6 +18,18 @@ const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
   { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' }
 ];
 
+const ACCOUNT_CUSTOM_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
+  { id: 'custom-grid-factors', label: 'Grid Factors', icon: 'fa-table-list' },
+  { id: 'custom-fuels', label: 'Fuels', icon: 'fa-fire-flame-simple' },
+  { id: 'custom-gwps', label: 'Global Warming Potentials', icon: 'fa-earth-americas' }
+];
+
+const FACILITY_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
+  { id: 'meters', label: 'Meters', icon: 'fa-gauge-high' },
+  { id: 'predictors', label: 'Predictors', icon: 'fa-chart-line' },
+  { id: 'energy-uses', label: 'Energy Uses', icon: 'fa-screwdriver-wrench' }
+];
+
 const ACCOUNT_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'profile', label: 'Profile', icon: 'fa-building' },
   { id: 'units', label: 'Units', icon: 'fa-ruler-combined' },
@@ -51,6 +63,13 @@ export class SectionNavComponent {
   readonly isSingleSiteWorkspace = this.navigation.isSingleSiteWorkspace;
   readonly hasSingleSiteRecovery = this.navigation.hasSingleSiteRecovery;
   readonly dataItems = computed(() => ACCOUNT_DATA_ITEMS);
+  readonly accountCustomDataItems = computed(() => {
+    const account = this.navigation.account();
+    return account?.displayEmissions
+      ? ACCOUNT_CUSTOM_DATA_ITEMS
+      : ACCOUNT_CUSTOM_DATA_ITEMS.filter(item => item.id === 'custom-fuels');
+  });
+  readonly facilityDataItems = computed(() => FACILITY_DATA_ITEMS);
   readonly settingsItems = computed(() => {
     if (this.navigation.contextMode() !== 'facility') {
       return ACCOUNT_SETTINGS_ITEMS;
@@ -72,7 +91,9 @@ export class SectionNavComponent {
   readonly homeTitle = computed(() => {
     return this.navigation.contextMode() === 'facility' ? 'Facility Home' : 'Account Home';
   });
-  readonly dataTitle = computed(() => 'Account Data');
+  readonly dataTitle = computed(() => {
+    return this.navigation.contextMode() === 'facility' ? 'Facility Data' : 'Account Data';
+  });
   readonly recoveryTitle = computed(() =>
     this.navigation.singleSiteWorkspaceState() === 'missing-facility'
       ? 'Single-facility setup needs a facility'

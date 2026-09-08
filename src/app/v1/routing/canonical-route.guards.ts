@@ -28,6 +28,10 @@ export const singleSiteAccountRedirectGuard: CanActivateFn = (_route, state) => 
     return true;
   }
 
+  if (isAccountDataRoute(state)) {
+    return true;
+  }
+
   const commands = singleSiteRedirectCommands(state, facilities[0].guid);
   return inject(Router).createUrlTree(commands);
 };
@@ -52,4 +56,12 @@ export function singleSiteRedirectCommands(state: RouterStateSnapshot, facilityG
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail || 'profile'];
   }
   return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
+}
+
+function isAccountDataRoute(state: RouterStateSnapshot): boolean {
+  const path = state.url.split(/[?#]/, 1)[0];
+  const parts = path.split('/').filter(Boolean);
+  const workspaceIndex = parts.indexOf('workspace');
+  const accountRouteParts = workspaceIndex >= 0 ? parts.slice(workspaceIndex) : [];
+  return accountRouteParts[3] === 'data';
 }
