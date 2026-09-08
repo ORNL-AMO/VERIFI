@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { MeterDataQualityReportComponent } from '@v0/shared/shared-data-quality-report-meters/meter-data-quality-report/meter-data-quality-report.component';
 import { MeterDataQualityReportModalComponent } from '@v0/shared/shared-data-quality-report-meters/meter-data-quality-report-modal/meter-data-quality-report-modal.component';
 import { MeterDataQualityStatusPipe } from '@v0/shared/shared-data-quality-report-meters/meter-data-quality-status.pipe';
+import { MeterAnnualTotalTableModule } from "@v0/shared/shared-meter-content/shared-meter-calendarization/meter-annual-total-table/meter-annual-total-table.module";
 
 
 @NgModule({
@@ -27,6 +28,7 @@ import { MeterDataQualityStatusPipe } from '@v0/shared/shared-data-quality-repor
     CommonModule,
     HelperPipesModule,
     FormsModule,
+    MeterAnnualTotalTableModule
 ],
   exports: [
     MeterDataQualityReportModalComponent,

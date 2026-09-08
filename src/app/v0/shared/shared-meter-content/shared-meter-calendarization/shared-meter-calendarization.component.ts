@@ -50,6 +50,7 @@ export class SharedMeterCalendarizationComponent {
   hasMeterData: boolean;
   consumptionLabel: 'Consumption' | 'Distance';
   isRECs: boolean;
+  displayTotalsModal: boolean = false;
 
   calanderizationWorker: Worker;
   calanderizingMeterData: boolean | 'error' = false;
@@ -281,8 +282,10 @@ export class SharedMeterCalendarizationComponent {
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const meter = this.dataApplicationMeter;
     await this.commandBoundary.execute(
-      { entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Update Data Application' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }},
+      {
+        entityKind: 'meter', changeKind: 'update', entityGuid: meter.guid, label: 'Update Data Application',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'meters', upsert: [value] }] }) }
+      },
       () => this.meterHandler.updateMeter(meter, accountGuid)
     );
     this.selectedMeter = this.dataApplicationMeter;
@@ -300,8 +303,10 @@ export class SharedMeterCalendarizationComponent {
       const updatedFacility: IdbFacility = { ...this.selectedFacility, energyIsSource };
       const accountGuid = this.accountWorkspaceStore.account()?.guid;
       await this.commandBoundary.execute(
-        { entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source' ,
-          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }},
+        {
+          entityKind: 'facility', changeKind: 'update', entityGuid: updatedFacility.guid, label: 'Update Facility Energy Source',
+          publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilities', upsert: [value] }] }) }
+        },
         () => this.facilityHandler.update(updatedFacility, accountGuid)
       );
       this.setCalanderizedMeterData();
@@ -331,5 +336,15 @@ export class SharedMeterCalendarizationComponent {
       let facility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
       this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.guid + '/new-bill');
     }
+  }
+
+  showTotalsModal() {
+    this.sharedDataService.modalOpen.next(true);
+    this.displayTotalsModal = true;
+  }
+
+  closeTotalsModal() {
+    this.sharedDataService.modalOpen.next(false);
+    this.displayTotalsModal = false;
   }
 }

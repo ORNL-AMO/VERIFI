@@ -12,7 +12,15 @@ export { checkSameMonth, checkSameMonthPredictorData } from '@shared/meter-date-
 
 export function getCountryCode(country: string): string {
     if (country) {
+        let countryClean: string = country.toString().trim().toLocaleLowerCase();
         let findCountry: Country = Countries.find(countryOption => { return countryOption.name == country });
+        if (!findCountry) {
+            findCountry = Countries.find(countryOption => {
+                return countryOption.name.toLocaleLowerCase() == countryClean
+                    || countryOption.code.toLocaleLowerCase() == countryClean
+                    || countryOption.code3.toLocaleLowerCase() == countryClean;
+            });
+        }
         if (findCountry) {
             return findCountry.code
         }
@@ -24,8 +32,9 @@ export function getCountryCode(country: string): string {
 
 export function getState(stateStr: string): string {
     if (stateStr) {
+        let stateStrClean: string = stateStr.toString().trim().toLocaleLowerCase();
         let state: State = States.find(state => {
-            return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
+            return stateStrClean == state.abbreviation.toLocaleLowerCase() || stateStrClean == state.name.toLocaleLowerCase();
         });
         if (state) {
             return state.name;
