@@ -24,6 +24,14 @@
     </div>
   }
 
+  @if (!isSingleSiteWorkspace() && contextMode === 'facility' && facilities.length > 0) {
+    <app-facility-picker
+      [facilities]="facilities"
+      [selectedFacility]="selectedFacility"
+      (facilitySelected)="navigation.setFacility($event)">
+    </app-facility-picker>
+  }
+
   @if (hasSingleSiteRecovery() && account) {
     <section class="v1-nav__recovery" aria-labelledby="v1-single-site-recovery-title">
       <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>

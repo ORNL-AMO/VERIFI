@@ -1,0 +1,61 @@
+<div class="v1-facility-picker" (keydown.escape)="onEscape()">
+  @if (facilities.length <= 1) {
+    <div class="v1-facility-picker__single">
+      <span class="fa fa-industry" aria-hidden="true"></span>
+      <span>{{ facilities[0]?.name ?? 'Select facility' }}</span>
+    </div>
+  } @else {
+    <div class="v1-facility-picker__wrap" [class.open]="open">
+      <button
+        #toggleButton
+        type="button"
+        class="v1-facility-picker__toggle"
+        (click)="toggle()"
+        [attr.aria-expanded]="open"
+        aria-haspopup="true">
+        <span class="fa fa-industry" aria-hidden="true"></span>
+        <span class="v1-facility-picker__label">{{ selectedFacility?.name ?? 'Select facility' }}</span>
+        <span class="fa fa-chevron-down v1-facility-picker__chevron" aria-hidden="true"></span>
+      </button>
+
+      @if (open) {
+        <div class="v1-facility-picker__backdrop" (click)="close()" aria-hidden="true"></div>
+        <div class="v1-facility-picker__menu" role="menu" aria-label="Switch facility">
+          @if (showSearch) {
+            <div class="v1-facility-picker__search">
+              <span class="fa fa-search v1-facility-picker__search-icon" aria-hidden="true"></span>
+              <input
+                class="v1-facility-picker__search-input"
+                type="search"
+                placeholder="Search facilities…"
+                aria-label="Search facilities"
+                autocomplete="off"
+                [(ngModel)]="search" />
+            </div>
+          }
+          <div class="v1-facility-picker__list">
+            @for (facility of filteredFacilities; track facility.guid) {
+              <button
+                type="button"
+                class="v1-facility-picker__item"
+                role="menuitem"
+                [class.active]="facility.guid === selectedFacility?.guid"
+                (click)="select(facility.guid)">
+                <span class="fa fa-check v1-facility-picker__check" aria-hidden="true"></span>
+                <span class="v1-facility-picker__item-text">
+                  {{ facility.name }}
+                  @if (facilityLocation(facility)) {
+                    <small>{{ facilityLocation(facility) }}</small>
+                  }
+                </span>
+              </button>
+            }
+            @if (filteredFacilities.length === 0) {
+              <span class="v1-facility-picker__empty">No facilities match</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

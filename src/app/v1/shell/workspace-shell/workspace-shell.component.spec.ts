@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { CommandNotificationBridgeService } from '../../shared/notifications/command-notification-bridge.service';
 import { NotificationsModule } from '../../shared/notifications/notifications.module';
+import { FacilityPickerComponent } from '../section-nav/facility-picker/facility-picker.component';
 import { PrimaryRailComponent } from '../primary-rail/primary-rail.component';
 import { SectionNavComponent } from '../section-nav/section-nav.component';
 import { SupportPanelComponent } from '../support-panel/support-panel.component';
@@ -12,11 +14,12 @@ import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } fr
 import { WorkspaceShellComponent } from './workspace-shell.component';
 
 @NgModule({
-  imports: [CommonModule, NotificationsModule, RouterModule.forRoot([])],
+  imports: [CommonModule, FormsModule, NotificationsModule, RouterModule.forRoot([])],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,
     SectionNavComponent,
+    FacilityPickerComponent,
     SupportPanelComponent
   ]
 })
