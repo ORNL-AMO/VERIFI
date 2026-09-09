@@ -1,0 +1,40 @@
+<div class="v1-meters-browse" aria-label="Facility meters">
+  <div class="v1-meter-dashboard-action-bar" aria-label="Meter actions">
+    <div class="v1-meter-dashboard-action-bar__primary">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+        Add meter
+      </button>
+    </div>
+  </div>
+
+  @if (actionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>{{ actionError() }}</span>
+    </div>
+  }
+
+  @if (workspace.meterCards().length === 0) {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-gauge-high" aria-hidden="true"></span>
+      <h2>No meters yet</h2>
+      <p>Meter cards will appear here after utility meters are added or imported for this facility.</p>
+    </article>
+  } @else {
+    <div class="v1-meters-browse__grid" role="list">
+      @for (card of workspace.meterCards(); track card.meter.guid) {
+        <app-meter-browse-card [card]="card" (opened)="openMeterCard($event)"></app-meter-browse-card>
+      }
+    </div>
+  }
+
+  @if (addMeterOpen()) {
+    <app-meter-draft-slideout
+      [groups]="workspace.meterGroups()"
+      [saving]="saving()"
+      (submitted)="saveMeterDraft($event)"
+      (cancelled)="closeAddMeter()">
+    </app-meter-draft-slideout>
+  }
+</div>

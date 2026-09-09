@@ -4,7 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { buildMeterGroupSections } from './facility-meters.models';
+import { buildMeterCards, buildMeterGroupSections } from './facility-meters.models';
 
 @Injectable()
 export class FacilityMetersWorkspaceService {
@@ -20,6 +20,11 @@ export class FacilityMetersWorkspaceService {
   readonly meters = computed(() => [...this.workspace.facilityMeters()]);
   readonly meterData = computed(() => [...this.workspace.facilityMeterData()]);
   readonly meterGroups = computed(() => [...this.workspace.facilityMeterGroups()]);
+  readonly meterCards = computed(() => buildMeterCards(
+    this.meters(),
+    this.meterData(),
+    this.meterGroups()
+  ));
   readonly groupSections = computed(() => buildMeterGroupSections(
     this.meters(),
     this.meterData(),

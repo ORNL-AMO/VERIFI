@@ -1,0 +1,28 @@
+<div class="v1-modal-layer">
+  <button type="button" class="v1-modal-backdrop" aria-label="Cancel delete group" [disabled]="saving" (click)="cancelled.emit()"></button>
+  <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-meter-group-title">
+    <header class="v1-modal__header">
+      <h2 id="v1-delete-meter-group-title">Delete {{ group.name }}?</h2>
+      <button type="button" class="v1-icon-btn" aria-label="Cancel delete group" [disabled]="saving" (click)="cancelled.emit()">
+        <span class="fa fa-xmark" aria-hidden="true"></span>
+      </button>
+    </header>
+    <div class="v1-modal__body">
+      <p>
+        This group will be removed. {{ assignedMeterCount }}
+        {{ assignedMeterCount === 1 ? 'meter' : 'meters' }} will move to Ungrouped.
+      </p>
+    </div>
+    <footer class="v1-modal__footer">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving" (click)="confirmed.emit()">
+        @if (saving) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+        } @else {
+          <span class="fa fa-trash" aria-hidden="true"></span>
+        }
+        Delete group
+      </button>
+    </footer>
+  </section>
+</div>

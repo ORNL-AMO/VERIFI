@@ -79,6 +79,7 @@ describe('CreateFacilityDrawerComponent', () => {
     expect(form).toBeTruthy();
     expect(description?.textContent).toContain('Start with a facility name');
     expect(form?.getAttribute('aria-describedby')).toBe('v1-create-facility-description');
+    expect((fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement).classList.contains('v1-btn--action')).toBe(true);
     expect(fixture.nativeElement.querySelector('form.v1-settings-panel')).toBeNull();
   });
 

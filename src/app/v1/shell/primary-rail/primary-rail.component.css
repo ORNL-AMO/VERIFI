@@ -36,9 +36,9 @@
 }
 
 .v1-rail button.active {
-  border-color: color-mix(in srgb, var(--v1-primary) 45%, var(--v1-border));
-  background: color-mix(in srgb, var(--v1-primary) 10%, var(--v1-surface));
-  color: var(--v1-primary);
+  border-color: color-mix(in srgb, var(--v1-content-control) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 10%, var(--v1-surface));
+  color: var(--v1-text);
 }
 
 .v1-rail button:disabled {

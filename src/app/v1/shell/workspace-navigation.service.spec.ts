@@ -313,6 +313,21 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeDetail()).toBe('meters');
   });
 
+  it('moves meter dashboard grouping guidance into the support panel help content', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/data/meters',
+      '/v1/workspace/facility/facility-a/data/meters'
+    ));
+
+    expect(service.panelContent().help).toContain(
+      'Use Meters view to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.'
+    );
+    expect(service.panelContent().help).toContain(
+      'Switch to Grouping view to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.'
+    );
+  });
+
   it('opens settings from the active workspace context', () => {
     service.openSection('settings');
 

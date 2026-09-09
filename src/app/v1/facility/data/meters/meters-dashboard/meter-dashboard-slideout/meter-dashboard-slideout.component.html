@@ -1,0 +1,19 @@
+<div class="v1-meter-slideout-layer">
+  <button type="button" class="v1-meter-slideout-backdrop" aria-label="Close panel" (click)="closed.emit()"></button>
+  <aside class="v1-meter-slideout" role="dialog" aria-modal="true" [attr.aria-labelledby]="'v1-meter-slideout-title'">
+    <header class="v1-meter-slideout__header">
+      <div>
+        <h2 id="v1-meter-slideout-title">{{ title }}</h2>
+        @if (description) {
+          <p>{{ description }}</p>
+        }
+      </div>
+      <button type="button" class="v1-icon-btn" aria-label="Close panel" [disabled]="saving" (click)="closed.emit()">
+        <span class="fa fa-xmark" aria-hidden="true"></span>
+      </button>
+    </header>
+    <div class="v1-meter-slideout__body">
+      <ng-content></ng-content>
+    </div>
+  </aside>
+</div>

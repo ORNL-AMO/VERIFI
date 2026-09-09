@@ -134,6 +134,8 @@ describe('AccountPortfolioComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
     expect(selectorLabels()).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
     expect(selectorText()).not.toContain('Needs setup');
+    expect(buttonByText('Add facility').classList.contains('v1-btn--action')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.v1-portfolio-selector--active')).not.toBeNull();
     expect(firstCardText()).toContain('Energy Uses');
     expect(firstCardText()).toContain('Reports');
     expect(firstCardText()).toContain('Last modified');

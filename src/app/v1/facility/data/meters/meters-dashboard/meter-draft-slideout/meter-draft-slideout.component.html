@@ -1,0 +1,52 @@
+<app-meter-dashboard-slideout
+  title="Add meter"
+  description="Create the meter, then continue setup in its workbench."
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
+    <label>
+      <span>Meter name</span>
+      <input type="text" [value]="draft().name" [disabled]="saving" required (input)="setName($event)">
+    </label>
+
+    <label>
+      <span>Source</span>
+      <select [value]="draft().source" [disabled]="saving" required (change)="setSource($event)">
+        @for (source of sources; track source) {
+          <option [value]="source">{{ source }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Group</span>
+      <select [value]="draft().groupId || ''" [disabled]="saving" (change)="setGroup($event)">
+        <option value="">Ungrouped</option>
+        @for (group of groups; track group.guid) {
+          <option [value]="group.guid" [disabled]="!isGroupAllowed(group)">
+            {{ group.name }} ({{ group.groupType }})
+          </option>
+        }
+      </select>
+    </label>
+
+    @if (!isValid() && draft().name.trim().length > 0) {
+      <div class="v1-alert v1-alert--warning" role="alert">
+        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <span>This source cannot be assigned to the selected group type.</span>
+      </div>
+    }
+
+    <footer class="v1-meter-slideout-form__footer">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
+        @if (saving) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+        } @else {
+          <span class="fa fa-plus" aria-hidden="true"></span>
+        }
+        Add meter
+      </button>
+    </footer>
+  </form>
+</app-meter-dashboard-slideout>

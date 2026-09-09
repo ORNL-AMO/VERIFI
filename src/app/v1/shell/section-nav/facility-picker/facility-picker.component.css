@@ -39,7 +39,7 @@
 
 .v1-facility-picker__toggle:hover,
 .v1-facility-picker__wrap.open .v1-facility-picker__toggle {
-  border-color: var(--v1-facility);
+  border-color: var(--v1-content-control);
 }
 
 .v1-facility-picker__toggle:focus-visible {
@@ -107,7 +107,7 @@
 }
 
 .v1-facility-picker__search-input:focus {
-  border-color: var(--v1-facility);
+  border-color: var(--v1-content-control);
   background: var(--v1-surface);
 }
 
@@ -139,9 +139,10 @@
 }
 
 .v1-facility-picker__item.active {
-  color: var(--v1-facility);
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
+  color: var(--v1-text);
   font-weight: 700;
-  box-shadow: inset 3px 0 0 currentColor;
+  box-shadow: inset 3px 0 0 var(--v1-content-control);
 }
 
 .v1-facility-picker__item-text small {
@@ -153,7 +154,7 @@
 .v1-facility-picker__check {
   flex-shrink: 0;
   margin-top: .15rem;
-  color: var(--v1-facility);
+  color: var(--v1-content-control);
   font-size: .8rem;
   opacity: 0;
 }

@@ -94,6 +94,7 @@ If the workflow needs current-state detail, add a short current-state note using
 - Do not add v0/v1 conditionals to legacy components.
 - Rebuild v1 UI components from scratch using the new architecture and P1 learnings.
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.
+- In v1, use the themed content-control color (`--v1-content-control`, orange in the default theme) as the active fill, border, or indicator for tabs, segmented toggles, selectors, nav-panel active indicators, and other content navigation controls. Keep active labels on neutral text unless contrast requires otherwise. Use the themed action color (`--v1-action`, blue in the default theme) for additive page actions such as adding a facility, meter, or group. Prefer the semantic tokens and button classes over hard-coded colors.
 - Keep current public v0 URLs stable while v0 remains the default experience.
 - Keep `/p1` prototype routes and `/v1` production routes out of `develop`; on `unified-ux`, root routing lazy-loads `/p1`, `/v1`, and the default v0 route tree.
 - Treat `/p1` as non-production reference material. It may temporarily import `@v0/shared/*` while production v1 must not import from `@v0/*`.

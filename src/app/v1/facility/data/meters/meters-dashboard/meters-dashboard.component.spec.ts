@@ -1,85 +1,78 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
-import { buildMeterGroupSections } from '../facility-meters.models';
+import { buildMeterCards, buildMeterGroupSections } from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { group, meter, reading } from '../facility-meters.testing';
+import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters-dashboard.component';
 
 describe('MetersDashboardComponent', () => {
-  it('renders facility meters by group with ungrouped meters', () => {
-    const fixture = setup({
-      meters: [
-        meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' }),
-        meter({ guid: 'meter-water', name: 'City Water', groupId: undefined, source: 'Water Intake' })
-      ],
-      meterData: [
-        reading({ guid: 'reading-a', meterId: 'meter-electric' }),
-        reading({ guid: 'reading-b', meterId: 'meter-electric' })
-      ],
-      groups: [
-        group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })
-      ]
-    });
+  it('defaults to Meters mode and renders the browse view toggle as active', () => {
+    const fixture = setup();
 
     fixture.detectChanges();
 
-    const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Purchased Electricity');
-    expect(text).toContain('Electric Main');
-    expect(text).toContain('2');
-    expect(text).toContain('Ungrouped');
-    expect(text).toContain('City Water');
-    expect(text).toContain('Coming soon');
+    expect(fixture.componentInstance.activeMode()).toBe('meters');
+    expect(fixture.nativeElement.textContent).toContain('Meters');
+    expect(fixture.nativeElement.textContent).toContain('Grouping');
+    expect(fixture.nativeElement.querySelector('.v1-facility-meters__header .v1-meter-dashboard-mode-toggle')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-facility-meters__header .v1-btn')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-meters-browse-view .v1-meter-dashboard-action-bar')).not.toBeNull();
+    expect(findButton(fixture, 'Meters')?.getAttribute('aria-pressed')).toBe('true');
+    expect(fixture.nativeElement.querySelector('app-meters-browse-view')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-meters-grouping-view')).toBeNull();
+    expect(findButton(fixture, 'Add group')).toBeUndefined();
   });
 
-  it('opens a meter workbench from the meter card action', () => {
-    const fixture = setup({
-      meters: [
-        meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' })
-      ],
-      groups: [
-        group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })
-      ]
-    });
+  it('switches dashboard modes through the mode query parameter', () => {
+    const fixture = setup();
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
 
     fixture.detectChanges();
-    fixture.nativeElement.querySelector('[aria-label="Open meter"]').click();
+    clickButton(fixture, 'Grouping');
+    fixture.detectChanges();
 
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters',
-      'meter-electric',
-      'settings'
-    ]);
+    expect(fixture.componentInstance.activeMode()).toBe('grouping');
+    expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+      queryParams: { mode: 'grouping' },
+      queryParamsHandling: 'merge'
+    }));
+    expect(fixture.nativeElement.querySelector('app-meters-grouping-view')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar .v1-btn--action')?.textContent).toContain('Add group');
+    expect(findButton(fixture, 'Add meter')).toBeUndefined();
   });
 
-  it('renders the no-meter empty state', () => {
-    const fixture = setup({ meters: [], meterData: [], groups: [] });
+  it('uses the content-control style for the view toggle', () => {
+    const fixture = setup();
 
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('No meters yet');
-    expect(fixture.nativeElement.textContent).toContain('Meter cards will appear here');
+    expect(findButton(fixture, 'Meters')?.classList.contains('v1-meter-dashboard-mode-toggle__item--active')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-mode-toggle .v1-btn--action')).toBeNull();
   });
 
-  it('shows grouping WIP controls and pending or read-only messaging', () => {
+  it('falls back to Meters mode for invalid mode query parameters', () => {
+    const fixture = setup({ mode: 'invalid-mode' });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.activeMode()).toBe('meters');
+    expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+      queryParams: { mode: 'meters' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    }));
+  });
+
+  it('renders shared read-only and pending messaging', () => {
     const readOnlyFixture = setup({ canWrite: false });
     readOnlyFixture.detectChanges();
-    expect(readOnlyFixture.nativeElement.textContent).toContain('Meter grouping');
-    expect(readOnlyFixture.nativeElement.textContent).toContain('Add group WIP');
     expect(readOnlyFixture.nativeElement.textContent).toContain('Meter actions are unavailable');
-    const wipButtons = Array.from(readOnlyFixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-    expect(wipButtons.find(button => button.textContent?.includes('Add group WIP'))?.disabled).toBe(true);
-    expect(wipButtons.find(button => button.textContent?.includes('Reassign meters WIP'))?.disabled).toBe(true);
 
     TestBed.resetTestingModule();
 
@@ -95,23 +88,42 @@ function setup(options: {
   groups?: ReturnType<typeof group>[];
   canWrite?: boolean;
   hasPending?: boolean;
+  mode?: string;
 } = {}): ComponentFixture<MetersDashboardComponent> {
-  const meters = signal(options.meters ?? []);
-  const meterData = signal(options.meterData ?? []);
-  const groups = signal(options.groups ?? []);
+  const meters = signal(options.meters ?? [
+    meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' })
+  ]);
+  const meterData = signal(options.meterData ?? [
+    reading({ guid: 'reading-a', meterId: 'meter-electric' })
+  ]);
+  const groups = signal(options.groups ?? [
+    group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })
+  ]);
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
+  const meterCards = signal(buildMeterCards(meters(), meterData(), groups()));
   const groupSections = signal(buildMeterGroupSections(meters(), meterData(), groups()));
+  const queryParamMap = new BehaviorSubject(convertToParamMap(options.mode ? { mode: options.mode } : {}));
+  const route = { queryParamMap: queryParamMap.asObservable() };
+  const actions = {
+    canAssignMeterToTarget: vi.fn(() => true),
+    createMeter: vi.fn().mockResolvedValue(meter({ guid: 'meter-created' })),
+    createGroup: vi.fn().mockResolvedValue(group({ guid: 'group-created' })),
+    updateGroup: vi.fn().mockResolvedValue(undefined),
+    deleteGroup: vi.fn().mockResolvedValue(undefined),
+    reassignMeter: vi.fn().mockResolvedValue(undefined)
+  };
 
   TestBed.configureTestingModule({
-    declarations: [MetersDashboardComponent],
-    imports: [CommonModule],
+    imports: [MetersDashboardComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
+          meterGroups: groups,
           meters,
+          meterCards,
           groupSections,
           canWrite,
           hasPending
@@ -132,9 +144,24 @@ function setup(options: {
           ]
         }
       },
+      { provide: ActivatedRoute, useValue: route },
       { provide: Router, useValue: { navigate: vi.fn() } }
     ]
   });
+  TestBed.overrideComponent(MetersDashboardComponent, {
+    set: {
+      providers: [{ provide: MetersDashboardActionsService, useValue: actions }]
+    }
+  });
 
   return TestBed.createComponent(MetersDashboardComponent);
+}
+
+function clickButton(fixture: ComponentFixture<MetersDashboardComponent>, label: string): void {
+  findButton(fixture, label)?.click();
+}
+
+function findButton(fixture: ComponentFixture<MetersDashboardComponent>, label: string): HTMLButtonElement | undefined {
+  const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+  return buttons.find(button => button.textContent?.includes(label) || button.getAttribute('aria-label')?.includes(label));
 }

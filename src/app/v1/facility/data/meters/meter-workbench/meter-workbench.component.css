@@ -76,8 +76,8 @@
 }
 
 .v1-facility-meters__tab--active {
-  border-color: var(--v1-facility);
-  background: var(--v1-surface);
-  color: var(--v1-facility);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1-facility) 18%, transparent);
+  border-color: color-mix(in srgb, var(--v1-content-control) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
+  color: var(--v1-text);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1-content-control) 18%, transparent);
 }

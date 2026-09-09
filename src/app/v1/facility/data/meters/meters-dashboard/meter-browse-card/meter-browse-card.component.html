@@ -1,0 +1,25 @@
+<article class="v1-meter-browse-card" role="listitem">
+  <div class="v1-meter-browse-card__body">
+    <span class="v1-chip">{{ card.meter.source }}</span>
+    <h3>
+      <span class="fa fa-gauge-high" aria-hidden="true"></span>
+      {{ card.meter.name }}
+    </h3>
+    <p>Coming soon</p>
+  </div>
+
+  <button type="button" class="v1-icon-btn" title="Open meter" aria-label="Open meter" (click)="opened.emit(card)">
+    <span class="fa fa-arrow-right" aria-hidden="true"></span>
+  </button>
+
+  <footer class="v1-meter-browse-card__footer">
+    <span class="v1-meter-browse-card__reading-count">
+      <strong>{{ card.readingCount }}</strong>
+      {{ card.readingCount === 1 ? 'reading' : 'readings' }}
+    </span>
+    <span class="v1-meter-browse-card__group-tag">
+      <span class="fa fa-layer-group" aria-hidden="true"></span>
+      {{ card.group?.name || 'Ungrouped' }}
+    </span>
+  </footer>
+</article>

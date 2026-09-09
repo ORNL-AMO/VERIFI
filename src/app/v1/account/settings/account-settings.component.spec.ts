@@ -358,6 +358,7 @@ describe('Account settings routed components', () => {
     expect(buttonByText(fixture, 'Add facility').disabled).toBe(true);
     expect(buttonByText(fixture, 'Apply account settings').disabled).toBe(true);
     expect(buttonByText(fixture, 'Delete selected').disabled).toBe(true);
+    expect(buttonByText(fixture, 'Add facility').classList.contains('v1-btn--action')).toBe(true);
 
     canWrite.set(true);
     hasPending.set(true);

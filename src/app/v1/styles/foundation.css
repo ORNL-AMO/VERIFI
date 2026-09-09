@@ -27,6 +27,8 @@
   --v1-warning: #9a6212;
   --v1-danger: #a53f36;
   --v1-info: #2c386b;
+  --v1-content-control: var(--v1-primary);
+  --v1-action: var(--v1-facility);
   --v1-neutral: #6b746f;
   --v1-link: var(--v1-facility);
   --v1-focus: #246bfe;
@@ -372,6 +374,7 @@
 
 /* Button color semantics:
    primary = one main recommended/commit action in the local area;
+   action = additive page-level actions such as adding a facility, meter, or group;
    secondary/blue = navigation, workspace movement, or structural context changes;
    success = completed/success/account-context continuation;
    danger = destructive action;
@@ -382,10 +385,11 @@
   color: #fff;
 }
 
+.v1-btn--action,
 .v1-btn--secondary,
 .v1-btn--blue {
-  border-color: var(--v1-facility);
-  background: var(--v1-facility);
+  border-color: var(--v1-action);
+  background: var(--v1-action);
   color: #fff;
 }
 
@@ -868,8 +872,8 @@
 .v1-segmented__btn[aria-pressed="true"],
 .v1-tab.active,
 .v1-tab[aria-selected="true"] {
-  background: var(--v1-surface);
-  color: var(--v1-facility);
+  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
+  color: var(--v1-text);
 }
 
 .v1-field {

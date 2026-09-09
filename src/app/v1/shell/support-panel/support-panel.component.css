@@ -64,9 +64,9 @@
 }
 
 .v1-panel__tabs button.active {
-  border-color: color-mix(in srgb, var(--v1-primary) 40%, var(--v1-border));
-  background: color-mix(in srgb, var(--v1-primary) 8%, var(--v1-surface));
-  color: var(--v1-primary);
+  border-color: color-mix(in srgb, var(--v1-content-control) 40%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
+  color: var(--v1-text);
 }
 
 .v1-panel__content {

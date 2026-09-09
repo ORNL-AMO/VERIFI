@@ -164,7 +164,7 @@
 
         <div class="v1-drawer__actions">
           <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
-          <button type="submit" class="v1-btn v1-btn--primary" [disabled]="!canCreateFacility">
+          <button type="submit" class="v1-btn v1-btn--action" [disabled]="!canCreateFacility">
             @if (isCreating) {
               <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
               Creating

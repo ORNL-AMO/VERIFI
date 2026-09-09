@@ -1,0 +1,37 @@
+<app-meter-dashboard-slideout
+  title="Move meter"
+  [description]="'Choose a group for ' + card.meter.name + '.'"
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
+    <label>
+      <span>Group</span>
+      <select [value]="selectedTargetId()" [disabled]="saving" required (change)="setTarget($event)">
+        @for (target of targets; track target.id) {
+          <option [value]="target.id" [disabled]="!isTargetAllowed(target)">
+            {{ target.label }}{{ target.group ? ' (' + target.group.groupType + ')' : '' }}
+          </option>
+        }
+      </select>
+    </label>
+
+    @if (selectedTarget() && !isTargetAllowed(selectedTarget())) {
+      <div class="v1-alert v1-alert--warning" role="alert">
+        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <span>{{ card.meter.source }} meters cannot be assigned to this group type.</span>
+      </div>
+    }
+
+    <footer class="v1-meter-slideout-form__footer">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--primary" [disabled]="saving || !isValid()">
+        @if (saving) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+        } @else {
+          <span class="fa fa-arrow-right-arrow-left" aria-hidden="true"></span>
+        }
+        Move meter
+      </button>
+    </footer>
+  </form>
+</app-meter-dashboard-slideout>

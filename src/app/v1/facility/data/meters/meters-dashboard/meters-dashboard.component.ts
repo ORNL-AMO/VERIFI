@@ -1,25 +1,65 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import {
+  METER_DASHBOARD_MODES,
+  MetersDashboardMode
+} from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
+import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
+import { MetersBrowseViewComponent } from './meters-browse-view/meters-browse-view.component';
+import { MetersGroupingViewComponent } from './meters-grouping-view/meters-grouping-view.component';
 
 @Component({
   selector: 'app-meters-dashboard',
   templateUrl: './meters-dashboard.component.html',
   styleUrls: ['./meters-dashboard.component.css'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MetersBrowseViewComponent,
+    MetersGroupingViewComponent
+  ],
+  providers: [MetersDashboardActionsService]
 })
 export class MetersDashboardComponent {
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
-  readonly navigation = inject(WorkspaceNavigationService);
+  readonly dashboardModes = signal(METER_DASHBOARD_MODES);
+  readonly activeMode = signal<MetersDashboardMode>('meters');
 
-  openMeter(meter: IdbUtilityMeter): void {
-    const facility = this.workspace.facility();
-    if (facility) {
-      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'settings'));
+  constructor() {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => this.syncModeFromRoute(params));
+  }
+
+  setMode(mode: MetersDashboardMode): void {
+    this.activeMode.set(mode);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { mode },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  private syncModeFromRoute(params: ParamMap): void {
+    const requestedMode = params.get('mode');
+    const mode = coerceDashboardMode(requestedMode);
+    this.activeMode.set(mode);
+    if (requestedMode && requestedMode !== mode) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { mode },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
     }
   }
+}
+
+function coerceDashboardMode(value: string | null): MetersDashboardMode {
+  return value === 'grouping' ? 'grouping' : 'meters';
 }

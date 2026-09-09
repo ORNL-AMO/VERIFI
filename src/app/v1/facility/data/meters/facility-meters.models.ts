@@ -1,9 +1,31 @@
+import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 
 export type MeterWorkbenchTabId = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
+export type MetersDashboardMode = 'meters' | 'grouping';
 export type MeterGroupSectionTone = 'energy' | 'water' | 'other' | 'ungrouped';
+export type MeterGroupDropTargetId = string | 'ungrouped';
+export type MeterGroupType = IdbUtilityMeterGroup['groupType'];
+export type MetersDashboardSlideout =
+  | { readonly kind: 'add-meter' }
+  | { readonly kind: 'add-group' }
+  | { readonly kind: 'edit-group'; readonly group: IdbUtilityMeterGroup; readonly assignedMeterCount: number }
+  | { readonly kind: 'move-meter'; readonly card: MeterCardView };
+export type MetersGroupingSlideout = Exclude<MetersDashboardSlideout, { readonly kind: 'add-meter' }>;
+
+export const UNGROUPED_DROP_TARGET_ID = 'ungrouped';
+export const METER_SOURCES: ReadonlyArray<MeterSource> = AllSources;
+export const METER_GROUP_TYPES: ReadonlyArray<MeterGroupType> = ['Energy', 'Water', 'Other'];
+export const METER_DASHBOARD_MODES: ReadonlyArray<{
+  readonly id: MetersDashboardMode;
+  readonly label: string;
+  readonly icon: string;
+}> = [
+  { id: 'meters', label: 'Meters', icon: 'fa-gauge-high' },
+  { id: 'grouping', label: 'Grouping', icon: 'fa-layer-group' }
+];
 
 export interface MeterWorkbenchTab {
   readonly id: MeterWorkbenchTabId;
@@ -24,6 +46,29 @@ export interface MeterGroupSectionView {
   readonly tone: MeterGroupSectionTone;
   readonly group?: IdbUtilityMeterGroup;
   readonly meters: readonly MeterCardView[];
+}
+
+export interface MeterDraft {
+  readonly name: string;
+  readonly source: MeterSource;
+  readonly groupId?: string;
+}
+
+export interface MeterGroupDraft {
+  readonly name: string;
+  readonly groupType: MeterGroupType;
+  readonly description?: string;
+}
+
+export interface MeterGroupDropTarget {
+  readonly id: MeterGroupDropTargetId;
+  readonly label: string;
+  readonly group?: IdbUtilityMeterGroup;
+}
+
+export interface MeterDropEvent {
+  readonly card: MeterCardView;
+  readonly target: MeterGroupDropTarget;
 }
 
 export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
@@ -64,21 +109,53 @@ export function buildMeterGroupSections(
       meters: cards.filter(card => card.meter.groupId === group.guid)
     }));
   const ungroupedMeters = cards.filter(card => !card.meter.groupId);
-  return ungroupedMeters.length === 0
-    ? groupedSections
-    : [
-      ...groupedSections,
-      {
-        id: 'ungrouped',
-        label: 'Ungrouped',
-        tone: 'ungrouped',
-        meters: ungroupedMeters
-      }
-    ];
+  if (meters.length === 0 && groups.length === 0) {
+    return [];
+  }
+  return [
+    ...groupedSections,
+    {
+      id: UNGROUPED_DROP_TARGET_ID,
+      label: 'Ungrouped',
+      tone: 'ungrouped',
+      meters: ungroupedMeters
+    }
+  ];
 }
 
 export function meterTabLabel(tabId: MeterWorkbenchTabId): string {
   return METER_WORKBENCH_TABS.find(tab => tab.id === tabId)?.label ?? 'Settings';
+}
+
+export function meterGroupDropListId(sectionId: string): string {
+  return `v1-meter-group-drop-${sectionId}`;
+}
+
+export function meterGroupTargetFromSection(section: MeterGroupSectionView): MeterGroupDropTarget {
+  return {
+    id: section.group?.guid ?? UNGROUPED_DROP_TARGET_ID,
+    label: section.label,
+    group: section.group
+  };
+}
+
+export function canAssignMeterToGroup(meter: IdbUtilityMeter, group?: IdbUtilityMeterGroup): boolean {
+  return canAssignSourceToGroup(meter.source, group);
+}
+
+export function canAssignSourceToGroup(source: MeterSource, group?: IdbUtilityMeterGroup): boolean {
+  if (!group) {
+    return true;
+  }
+  switch (group.groupType) {
+    case 'Energy':
+      return EnergySources.includes(source);
+    case 'Water':
+      return WaterSources.includes(source);
+    case 'Other':
+    default:
+      return true;
+  }
 }
 
 function sortGroupsForDisplay(first: IdbUtilityMeterGroup, second: IdbUtilityMeterGroup): number {

@@ -1,6 +1,27 @@
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+
+export function account(options: Partial<IdbAccount> = {}): IdbAccount {
+  return {
+    guid: options.guid ?? 'account-a',
+    name: options.name ?? 'Account A',
+    ...options
+  } as IdbAccount;
+}
+
+export function facility(options: Partial<IdbFacility> = {}): IdbFacility {
+  return {
+    guid: options.guid ?? 'facility-a',
+    accountId: options.accountId ?? 'account-a',
+    name: options.name ?? 'Facility A',
+    energyUnit: options.energyUnit ?? 'kWh',
+    electricityUnit: options.electricityUnit ?? 'kWh',
+    ...options
+  } as IdbFacility;
+}
 
 export function meter(options: Partial<IdbUtilityMeter>): IdbUtilityMeter {
   return {
