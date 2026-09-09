@@ -4,8 +4,8 @@ import {
   METER_GROUP_TYPES,
   MeterGroupDraft,
   MeterGroupType
-} from '../../facility-meters.models';
-import { MeterDashboardSlideoutComponent } from '../meter-dashboard-slideout/meter-dashboard-slideout.component';
+} from '../../../facility-meters.models';
+import { MeterDashboardSlideoutComponent } from '../meter-dashboard-slideout.component';
 
 @Component({
   selector: 'app-meter-group-draft-slideout',

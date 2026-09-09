@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MeterGroupDropTarget } from '../../facility-meters.models';
-import { group, meter } from '../../facility-meters.testing';
+import { MeterGroupDropTarget } from '../../../facility-meters.models';
+import { group, meter } from '../../../facility-meters.testing';
 import { MoveMeterSlideoutComponent } from './move-meter-slideout.component';
 
 describe('MoveMeterSlideoutComponent', () => {

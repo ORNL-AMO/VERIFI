@@ -5,6 +5,7 @@ import { WorkspaceNavigationService } from '../../../../shell/workspace-navigati
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import {
   METER_WORKBENCH_TABS,
+  MeterWorkbenchTab,
   MeterWorkbenchTabId,
   meterTabLabel
 } from '../facility-meters.models';
@@ -22,14 +23,13 @@ export class MeterWorkbenchComponent {
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly tabs = METER_WORKBENCH_TABS;
   readonly activeTab = computed<MeterWorkbenchTabId>(() => {
     const tabId = this.routeData()?.['meterTab'];
     return isMeterWorkbenchTab(tabId) ? tabId : 'settings';
   });
   readonly activeTabLabel = computed(() => meterTabLabel(this.activeTab()));
   readonly activeTabSummary = computed(() =>
-    this.tabs.find(tab => tab.id === this.activeTab())?.summary ?? this.tabs[0].summary
+    METER_WORKBENCH_TABS.find(tab => tab.id === this.activeTab())?.summary ?? METER_WORKBENCH_TABS[0].summary
   );
 
   openMeters(): void {
@@ -37,6 +37,10 @@ export class MeterWorkbenchComponent {
     if (facility) {
       void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'meters'));
     }
+  }
+
+  get tabs(): ReadonlyArray<MeterWorkbenchTab> {
+    return METER_WORKBENCH_TABS;
   }
 
   openMeter(tab: MeterWorkbenchTabId): void {

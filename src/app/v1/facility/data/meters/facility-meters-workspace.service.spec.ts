@@ -1,8 +1,9 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { group, meter, reading } from './facility-meters.testing';
 import { FacilityMetersWorkspaceService } from './facility-meters-workspace.service';
 
@@ -41,6 +42,12 @@ describe('FacilityMetersWorkspaceService', () => {
             facilityMeters: meters,
             facilityMeterData: meterData,
             facilityMeterGroups: meterGroups
+          }
+        },
+        {
+          provide: AccountStatusCheckService,
+          useValue: {
+            selectedFacilityStatusCheck$: of({ metersStatusChecks: [] })
           }
         }
       ]

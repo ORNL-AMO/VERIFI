@@ -2,12 +2,17 @@ import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/mode
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { ScopeOptions } from '@data/models/scopeOption';
+import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { StatusCheckAction } from '@domain/calculations/status-check-calculations/statusCheckModels';
+import { UtilityColors } from '@shared/utilityColors';
 
 export type MeterWorkbenchTabId = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
 export type MetersDashboardMode = 'meters' | 'grouping';
 export type MeterGroupSectionTone = 'energy' | 'water' | 'other' | 'ungrouped';
 export type MeterGroupDropTargetId = string | 'ungrouped';
 export type MeterGroupType = IdbUtilityMeterGroup['groupType'];
+export type MeterCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
 export type MetersDashboardSlideout =
   | { readonly kind: 'add-meter' }
   | { readonly kind: 'add-group' }
@@ -38,6 +43,17 @@ export interface MeterCardView {
   readonly meter: IdbUtilityMeter;
   readonly group?: IdbUtilityMeterGroup;
   readonly readingCount: number;
+  readonly meterStatusCheck?: MeterStatusCheck;
+  readonly sourceColor?: string;
+  readonly statusLabel?: string;
+  readonly statusTone?: MeterCardStatusTone;
+  readonly statusIcon?: string;
+  readonly firstReadingLabel?: string;
+  readonly latestReadingLabel?: string;
+  readonly scopeLabel?: string;
+  readonly fuelLabel?: string;
+  readonly statusIssueLabels?: readonly string[];
+  readonly statusActionSummaries?: readonly string[];
 }
 
 export interface MeterGroupSectionView {
@@ -82,23 +98,40 @@ export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
 export function buildMeterCards(
   meters: readonly IdbUtilityMeter[],
   meterData: readonly IdbUtilityMeterData[],
-  groups: readonly IdbUtilityMeterGroup[]
+  groups: readonly IdbUtilityMeterGroup[],
+  meterStatusChecks: readonly MeterStatusCheck[] = []
 ): MeterCardView[] {
   return [...meters]
     .sort(sortMetersByName)
-    .map(meter => ({
-      meter,
-      group: groups.find(group => group.guid === meter.groupId),
-      readingCount: meterData.filter(reading => reading.meterId === meter.guid).length
-    }));
+    .map(meter => {
+      const readings = meterData.filter(reading => reading.meterId === meter.guid);
+      const meterStatusCheck = meterStatusChecks.find(statusCheck => statusCheck.meterId === meter.guid);
+      return {
+        meter,
+        group: groups.find(group => group.guid === meter.groupId),
+        readingCount: readings.length,
+        meterStatusCheck,
+        sourceColor: meterSourceColor(meter.source),
+        statusLabel: meterStatusLabel(meterStatusCheck),
+        statusTone: meterStatusTone(meterStatusCheck),
+        statusIcon: meterStatusIcon(meterStatusCheck),
+        firstReadingLabel: firstReadingLabel(readings),
+        latestReadingLabel: latestReadingLabel(meterStatusCheck, readings),
+        scopeLabel: scopeLabel(meter.scope),
+        fuelLabel: fuelLabel(meter),
+        statusIssueLabels: meterStatusIssueLabels(meterStatusCheck),
+        statusActionSummaries: meterStatusActionSummaries(meterStatusCheck)
+      };
+    });
 }
 
 export function buildMeterGroupSections(
   meters: readonly IdbUtilityMeter[],
   meterData: readonly IdbUtilityMeterData[],
-  groups: readonly IdbUtilityMeterGroup[]
+  groups: readonly IdbUtilityMeterGroup[],
+  meterStatusChecks: readonly MeterStatusCheck[] = []
 ): MeterGroupSectionView[] {
-  const cards = buildMeterCards(meters, meterData, groups);
+  const cards = buildMeterCards(meters, meterData, groups, meterStatusChecks);
   const groupedSections = [...groups]
     .sort(sortGroupsForDisplay)
     .map(group => ({
@@ -187,4 +220,132 @@ function groupTone(group: IdbUtilityMeterGroup): MeterGroupSectionTone {
 
 function sortMetersByName(first: IdbUtilityMeter, second: IdbUtilityMeter): number {
   return first.name.localeCompare(second.name);
+}
+
+function meterSourceColor(source: MeterSource): string {
+  return UtilityColors[source]?.color ?? '';
+}
+
+function meterStatusLabel(statusCheck: MeterStatusCheck | undefined): string {
+  switch (statusCheck?.status) {
+    case 'good':
+      return 'Valid';
+    case 'warning':
+      return 'Needs review';
+    case 'error':
+      return 'Action needed';
+    case 'outdated':
+      return 'Outdated';
+    default:
+      return 'Checking';
+  }
+}
+
+function meterStatusTone(statusCheck: MeterStatusCheck | undefined): MeterCardStatusTone {
+  switch (statusCheck?.status) {
+    case 'good':
+      return 'success';
+    case 'warning':
+      return 'warning';
+    case 'error':
+      return 'danger';
+    case 'outdated':
+    default:
+      return statusCheck ? 'warning' : 'info';
+  }
+}
+
+function meterStatusIcon(statusCheck: MeterStatusCheck | undefined): string {
+  switch (statusCheck?.status) {
+    case 'good':
+      return 'fa-circle-check';
+    case 'warning':
+      return 'fa-triangle-exclamation';
+    case 'error':
+      return 'fa-circle-xmark';
+    case 'outdated':
+      return 'fa-clock';
+    default:
+      return 'fa-circle-notch';
+  }
+}
+
+function latestReadingLabel(statusCheck: MeterStatusCheck | undefined, readings: readonly IdbUtilityMeterData[]): string {
+  if (statusCheck?.lastDateEntry && !statusCheck.hasNoData) {
+    return formatMonthYear(statusCheck.lastDateEntry);
+  }
+  const latestReading = readings.reduce<IdbUtilityMeterData | undefined>((latest, reading) => {
+    if (!latest) {
+      return reading;
+    }
+    return readingDateValue(reading) > readingDateValue(latest) ? reading : latest;
+  }, undefined);
+  return latestReading ? formatMonthYear(new Date(latestReading.year, latestReading.month - 1, 1)) : 'No data';
+}
+
+function firstReadingLabel(readings: readonly IdbUtilityMeterData[]): string {
+  const firstReading = readings.reduce<IdbUtilityMeterData | undefined>((earliest, reading) => {
+    if (!earliest) {
+      return reading;
+    }
+    return readingDateValue(reading) < readingDateValue(earliest) ? reading : earliest;
+  }, undefined);
+  return firstReading ? formatMonthYear(new Date(firstReading.year, firstReading.month - 1, 1)) : 'No data';
+}
+
+function readingDateValue(reading: IdbUtilityMeterData): number {
+  return reading.year * 12 + reading.month;
+}
+
+function formatMonthYear(date: Date): string {
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function scopeLabel(scope: number): string {
+  return ScopeOptions.find(option => option.value === scope)?.optionLabel ?? 'Not set';
+}
+
+function fuelLabel(meter: IdbUtilityMeter): string | undefined {
+  if (meter.source !== 'Other Fuels' && meter.source !== 'Other Energy') {
+    return undefined;
+  }
+  return meter.scope === 2 ? meter.vehicleFuel : meter.fuel;
+}
+
+function meterStatusIssueLabels(statusCheck: MeterStatusCheck | undefined): string[] {
+  if (!statusCheck || statusCheck.status === 'good') {
+    return [];
+  }
+  const labels: string[] = [];
+  if (statusCheck.hasNoData) {
+    labels.push('No data');
+  }
+  if (!statusCheck.isMeterValid) {
+    labels.push('Invalid setup');
+  }
+  if (statusCheck.hasDuplicateEntries) {
+    labels.push('Duplicates');
+  }
+  if (statusCheck.hasNegativeReadings) {
+    labels.push('Negative readings');
+  }
+  if (statusCheck.isMissingData) {
+    labels.push('Missing data');
+  }
+  if (statusCheck.hasNoCalendarizationMethod) {
+    labels.push('No calendarization');
+  }
+  if (statusCheck.status === 'outdated') {
+    labels.push('Outdated');
+  } else if (!statusCheck.isDataCurrent && !statusCheck.hasNoData) {
+    labels.push('Not current');
+  }
+  return labels;
+}
+
+function meterStatusActionSummaries(statusCheck: MeterStatusCheck | undefined): string[] {
+  return statusCheck?.actions
+    ?.filter((action: StatusCheckAction) => action.status !== 'good')
+    .map(action => action.description)
+    .slice(0, 2) ?? [];
 }

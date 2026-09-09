@@ -6,7 +6,7 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
-import { account, facility, group, meter } from '../facility-meters.testing';
+import { account, facility, group, meter, reading } from '../facility-meters.testing';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 
 describe('MetersDashboardActionsService', () => {
@@ -90,6 +90,63 @@ describe('MetersDashboardActionsService', () => {
     expect(ungroupedMeter.groupId).toBeUndefined();
   });
 
+  it('copies a meter without reusing meter or charge identities', async () => {
+    const sourceMeter = meter({
+      guid: 'meter-electric',
+      name: 'Main',
+      id: 7,
+      charges: [
+        {
+          guid: 'charge-a',
+          name: 'Demand',
+          chargeType: 'demand',
+          displayUsageInTable: true,
+          displayChargeInTable: true
+        }
+      ]
+    });
+    const { service, meterHandler } = setup({ meters: [sourceMeter] });
+
+    const copied = await service.copyMeter(sourceMeter);
+
+    expect(copied.name).toBe('Main (copy)');
+    expect(copied.guid).not.toBe(sourceMeter.guid);
+    expect(copied.id).toBe(10);
+    expect(copied.charges?.[0].guid).not.toBe('charge-a');
+    expect(sourceMeter.name).toBe('Main');
+    expect(sourceMeter.charges?.[0].guid).toBe('charge-a');
+    const persistedCopy = meterHandler.addMeter.mock.calls[0][0];
+    expect(persistedCopy.name).toBe('Main (copy)');
+    expect(persistedCopy.id).toBeUndefined();
+    expect(meterHandler.addMeter).toHaveBeenCalledWith(persistedCopy, 'account-a');
+  });
+
+  it('deletes a meter and its readings through one command', async () => {
+    const sourceMeter = meter({ guid: 'meter-electric', name: 'Main', id: 7 });
+    const meterData = [
+      reading({ guid: 'reading-a', meterId: sourceMeter.guid, id: 11 }),
+      reading({ guid: 'reading-b', meterId: sourceMeter.guid, id: 12 }),
+      reading({ guid: 'reading-other', meterId: 'meter-other', id: 13 })
+    ];
+    const { service, commandBoundary, meterHandler } = setup({
+      meters: [sourceMeter],
+      meterData
+    });
+
+    await service.deleteMeter(sourceMeter);
+
+    expect(commandBoundary.execute).toHaveBeenCalledWith(expect.objectContaining({
+      entityKind: 'meter',
+      changeKind: 'delete',
+      entityGuid: sourceMeter.guid,
+      publication: { mode: 'reload' }
+    }), expect.any(Function));
+    expect(meterHandler.deleteMeter).toHaveBeenCalledWith(sourceMeter, 'account-a');
+    expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(11);
+    expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(12);
+    expect(meterHandler.deleteMeterData).not.toHaveBeenCalledWith(13);
+  });
+
   it('blocks invalid source to group assignments before persistence', async () => {
     const waterGroup = group({ guid: 'group-water', name: 'Water', groupType: 'Water' });
     const electricMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: undefined, source: 'Electricity' });
@@ -110,11 +167,14 @@ describe('MetersDashboardActionsService', () => {
 
 function setup(options: {
   meters?: ReturnType<typeof meter>[];
+  meterData?: ReturnType<typeof reading>[];
   groups?: ReturnType<typeof group>[];
 } = {}) {
   const meterHandler = {
     addMeter: vi.fn().mockImplementation(async item => ({ ...item, id: 10 })),
     updateMeter: vi.fn().mockImplementation(async item => item),
+    deleteMeter: vi.fn().mockResolvedValue(1),
+    deleteMeterData: vi.fn().mockResolvedValue(1),
     addMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),
     updateMeterGroup: vi.fn().mockImplementation(async item => item),
     deleteMeterGroup: vi.fn().mockResolvedValue(1)
@@ -136,6 +196,7 @@ function setup(options: {
     canWrite: signal(true),
     hasPending: signal(false),
     facilityMeters: signal(options.meters ?? []),
+    facilityMeterData: signal(options.meterData ?? []),
     facilityMeterGroups: signal(options.groups ?? [])
   };
 

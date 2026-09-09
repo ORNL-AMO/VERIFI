@@ -14,10 +14,10 @@ import {
 } from '../../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { ConfirmDeleteGroupModalComponent } from '../confirm-delete-group-modal/confirm-delete-group-modal.component';
-import { MeterGroupDraftSlideoutComponent } from '../meter-group-draft-slideout/meter-group-draft-slideout.component';
+import { MeterGroupDraftSlideoutComponent } from '../meter-dashboard-slideout/meter-group-draft-slideout/meter-group-draft-slideout.component';
 import { MeterGroupLaneComponent } from '../meter-group-lane/meter-group-lane.component';
 import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
-import { MoveMeterSlideoutComponent } from '../move-meter-slideout/move-meter-slideout.component';
+import { MoveMeterSlideoutComponent } from '../meter-dashboard-slideout/move-meter-slideout/move-meter-slideout.component';
 
 @Component({
   selector: 'app-meters-grouping-view',

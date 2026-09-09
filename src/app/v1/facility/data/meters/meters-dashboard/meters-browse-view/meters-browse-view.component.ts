@@ -1,10 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { MeterCardView, MeterDraft } from '../../facility-meters.models';
+import { MeterDraft } from '../../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MeterBrowseCardComponent } from '../meter-browse-card/meter-browse-card.component';
-import { MeterDraftSlideoutComponent } from '../meter-draft-slideout/meter-draft-slideout.component';
+import { MeterBrowseCardComponent } from './meter-browse-card/meter-browse-card.component';
+import { MeterDraftSlideoutComponent } from '../meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
 import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
 
 @Component({
@@ -25,13 +25,6 @@ export class MetersBrowseViewComponent {
   readonly actionError = signal<string | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
 
-  openMeterCard(card: MeterCardView): void {
-    const facility = this.workspace.facility();
-    if (facility) {
-      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, card.meter.guid, 'settings'));
-    }
-  }
-
   openAddMeter(): void {
     if (this.canAct()) {
       this.addMeterOpen.set(true);
@@ -50,8 +43,15 @@ export class MetersBrowseViewComponent {
     await this.runAction(async () => {
       const meter = await this.actions.createMeter(draft);
       this.addMeterOpen.set(false);
-      this.openMeterCard({ meter, group: undefined, readingCount: 0 });
+      this.openCreatedMeter(meter.guid);
     });
+  }
+
+  private openCreatedMeter(meterGuid: string): void {
+    const facility = this.workspace.facility();
+    if (facility) {
+      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, 'settings'));
+    }
   }
 
   private async runAction(action: () => Promise<void>): Promise<void> {

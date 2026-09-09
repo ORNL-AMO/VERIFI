@@ -28,8 +28,8 @@
 
 .v1-meters-browse__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 22rem));
-  gap: var(--v1-space-3);
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 25rem));
+  gap: var(--v1-space-4);
   align-items: stretch;
 }
 

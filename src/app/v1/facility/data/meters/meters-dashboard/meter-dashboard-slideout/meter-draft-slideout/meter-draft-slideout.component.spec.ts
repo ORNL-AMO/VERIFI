@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { group } from '../../facility-meters.testing';
-import { MeterDraft } from '../../facility-meters.models';
+import { group } from '../../../facility-meters.testing';
+import { MeterDraft } from '../../../facility-meters.models';
 import { MeterDraftSlideoutComponent } from './meter-draft-slideout.component';
 
 describe('MeterDraftSlideoutComponent', () => {

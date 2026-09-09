@@ -1,9 +1,10 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { buildMeterCards, buildMeterGroupSections } from './facility-meters.models';
 
 @Injectable()
@@ -11,7 +12,9 @@ export class FacilityMetersWorkspaceService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly statusCheckService = inject(AccountStatusCheckService);
   private readonly currentUrl = signal(this.router.url);
+  private readonly facilityStatusCheck = toSignal(this.statusCheckService.selectedFacilityStatusCheck$, { initialValue: undefined });
 
   readonly account = this.workspace.account;
   readonly facility = this.workspace.selectedFacility;
@@ -20,15 +23,18 @@ export class FacilityMetersWorkspaceService {
   readonly meters = computed(() => [...this.workspace.facilityMeters()]);
   readonly meterData = computed(() => [...this.workspace.facilityMeterData()]);
   readonly meterGroups = computed(() => [...this.workspace.facilityMeterGroups()]);
+  readonly meterStatusChecks = computed(() => this.facilityStatusCheck()?.metersStatusChecks ?? []);
   readonly meterCards = computed(() => buildMeterCards(
     this.meters(),
     this.meterData(),
-    this.meterGroups()
+    this.meterGroups(),
+    this.meterStatusChecks()
   ));
   readonly groupSections = computed(() => buildMeterGroupSections(
     this.meters(),
     this.meterData(),
-    this.meterGroups()
+    this.meterGroups(),
+    this.meterStatusChecks()
   ));
   readonly selectedMeterGuid = computed(() => parseSelectedMeterGuid(this.currentUrl()));
   readonly selectedMeter = computed(() => {

@@ -8,7 +8,9 @@ import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { getGUID } from '@shared/sharedHelperFunctions';
 import {
   MeterDraft,
   MeterGroupDraft,
@@ -62,6 +64,69 @@ export class MetersDashboardActionsService {
       () => this.meterHandler.addMeter(meter, account.guid)
     );
     return result.value;
+  }
+
+  async copyMeter(meter: IdbUtilityMeter): Promise<IdbUtilityMeter> {
+    const account = this.requireAccount();
+    const current = this.requireWorkspaceMeter(meter.guid);
+    const copy = structuredClone(current);
+    delete copy.id;
+    copy.guid = getGUID();
+    copy.name = `${copy.name} (copy)`;
+    copy.charges = copy.charges?.map(charge => ({
+      ...charge,
+      guid: getGUID()
+    })) ?? [];
+
+    const result = await this.commandBoundary.execute(
+      {
+        entityKind: 'meter',
+        changeKind: 'add',
+        entityGuid: copy.guid,
+        label: 'Copying meter',
+        notification: {
+          successTitle: 'Meter copied',
+          successMessage: copy.name
+        },
+        publication: {
+          mode: 'patch',
+          buildPatch: value => upsertWorkspaceRecords('meters', [value])
+        }
+      },
+      () => this.meterHandler.addMeter(copy, account.guid)
+    );
+    return result.value;
+  }
+
+  async deleteMeter(meter: IdbUtilityMeter): Promise<void> {
+    const account = this.requireAccount();
+    const current = this.requireWorkspaceMeter(meter.guid);
+    if (current.id === undefined) {
+      throw new WorkspaceWriteError('validation-failed', 'Meter is missing its IndexedDB id.');
+    }
+    const meterData = this.workspace.facilityMeterData()
+      .filter(data => data.meterId === current.guid);
+    this.requireMeterDataIds(meterData);
+
+    await this.commandBoundary.execute(
+      {
+        entityKind: 'meter',
+        changeKind: 'delete',
+        entityGuid: current.guid,
+        label: 'Deleting meter and readings',
+        notification: {
+          successTitle: 'Meter deleted',
+          successMessage: current.name
+        },
+        publication: { mode: 'reload' }
+      },
+      async () => {
+        await this.meterHandler.deleteMeter(current, account.guid);
+        for (const data of meterData) {
+          await this.meterHandler.deleteMeterData(data.id);
+        }
+      }
+    );
   }
 
   async createGroup(draft: MeterGroupDraft): Promise<IdbUtilityMeterGroup> {
@@ -224,6 +289,14 @@ export class MetersDashboardActionsService {
       throw new WorkspaceWriteError('validation-failed', 'The meter is not part of the selected facility.');
     }
     return meter;
+  }
+
+  private requireMeterDataIds(meterData: readonly IdbUtilityMeterData[]): asserts meterData is readonly (IdbUtilityMeterData & { id: number })[] {
+    for (const data of meterData) {
+      if (data.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'Meter reading is missing its IndexedDB id.');
+      }
+    }
   }
 
   private requireWorkspaceGroup(groupGuid: string): IdbUtilityMeterGroup {

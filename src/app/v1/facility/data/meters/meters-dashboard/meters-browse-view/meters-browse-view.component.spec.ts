@@ -17,8 +17,8 @@ describe('MetersBrowseViewComponent', () => {
         meter({ guid: 'meter-water', name: 'City Water', groupId: undefined, source: 'Water Intake' })
       ],
       meterData: [
-        reading({ guid: 'reading-a', meterId: 'meter-electric' }),
-        reading({ guid: 'reading-b', meterId: 'meter-electric' })
+        reading({ guid: 'reading-a', meterId: 'meter-electric', month: 12, year: 2025 }),
+        reading({ guid: 'reading-b', meterId: 'meter-electric', month: 1, year: 2026 })
       ],
       groups: [
         group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })
@@ -32,36 +32,20 @@ describe('MetersBrowseViewComponent', () => {
     expect(text).toContain('Purchased Electricity');
     expect(text).toContain('City Water');
     expect(text).toContain('Ungrouped');
-    expect(text).toContain('2');
-    expect(text).toContain('Coming soon');
+    expect(text).toContain('First reading');
+    expect(text).toContain('Dec 2025');
+    expect(text).toContain('Latest');
+    expect(text).toContain('Scope');
     expect(text).toContain('Add meter');
     expect(fixture.nativeElement.querySelectorAll('app-meter-browse-card').length).toBe(2);
+    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__source-chip')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).not.toBeNull();
     expect(findButton(fixture, 'Add meter')?.classList.contains('v1-btn--action')).toBe(true);
     expect(fixture.nativeElement.querySelector('.v1-meter-lane')).toBeNull();
     expect(text).not.toContain('Move meter');
     expect(text).not.toContain('Add group');
-  });
-
-  it('opens the selected meter workbench', () => {
-    const fixture = setup({
-      meters: [meter({ guid: 'meter-electric', name: 'Electric Main' })]
-    });
-    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
-
-    fixture.detectChanges();
-    (fixture.nativeElement.querySelector('[aria-label="Open meter"]') as HTMLButtonElement).click();
-
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters',
-      'meter-electric',
-      'settings'
-    ]);
+    expect(text).not.toContain('Coming soon');
+    expect(text).not.toContain('Units');
   });
 
   it('renders the no-meter empty state', () => {
@@ -125,14 +109,18 @@ function setup(options: {
   hasPending?: boolean;
   createdMeter?: ReturnType<typeof meter>;
 } = {}): ComponentFixture<MetersBrowseViewComponent> {
-  const meters = signal(options.meters ?? []);
+  const meters = signal(options.meters ?? [
+    meter({ guid: 'meter-electric', name: 'Electric Main', source: 'Electricity' })
+  ]);
   const meterData = signal(options.meterData ?? []);
   const groups = signal(options.groups ?? []);
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
   const meterCards = signal(buildMeterCards(meters(), meterData(), groups()));
   const actions = {
-    createMeter: vi.fn().mockResolvedValue(options.createdMeter ?? meter({ guid: 'meter-created' }))
+    createMeter: vi.fn().mockResolvedValue(options.createdMeter ?? meter({ guid: 'meter-created' })),
+    copyMeter: vi.fn().mockResolvedValue(meter({ guid: 'meter-copy' })),
+    deleteMeter: vi.fn().mockResolvedValue(undefined)
   };
 
   TestBed.configureTestingModule({

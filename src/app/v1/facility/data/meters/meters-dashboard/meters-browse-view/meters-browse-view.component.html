@@ -24,7 +24,7 @@
   } @else {
     <div class="v1-meters-browse__grid" role="list">
       @for (card of workspace.meterCards(); track card.meter.guid) {
-        <app-meter-browse-card [card]="card" (opened)="openMeterCard($event)"></app-meter-browse-card>
+        <app-meter-browse-card [card]="card"></app-meter-browse-card>
       }
     </div>
   }
