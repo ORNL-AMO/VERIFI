@@ -1,7 +1,7 @@
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, Input, inject, computed, Injector } from '@angular/core';
+import { Component, Input, inject, computed, Injector, Signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -21,6 +21,9 @@ import { WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 import { Month, Months } from '@shared/form-data/months';
 import { hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
+import { PredictorStatusCheck } from '@app/domain/calculations/status-check-calculations/predictorStatusCheck';
+import { FacilityStatusCheck } from '@app/domain/calculations/status-check-calculations/facilityStatusCheck';
+import { AccountStatusCheckService } from '@app/shared/helper-services/account-status-check.service';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -31,8 +34,19 @@ import { hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations'
 export class CalculatedPredictorDataUpdateComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
+
   @Input()
   predictor: IdbPredictor;
+
+  predictorStatusCheck(): PredictorStatusCheck | undefined {
+    const facilityStatusCheck = this.facilityStatusCheck();
+    if (!this.predictor || !facilityStatusCheck) {
+      return undefined;
+    }
+    return facilityStatusCheck.predictorsStatusChecks.find(check => check.predictorId === this.predictor.guid);
+  }
 
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
@@ -82,8 +96,7 @@ export class CalculatedPredictorDataUpdateComponent {
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
     private injector: Injector
-  ) {
-  }
+  ) { }
 
   ngOnInit() {
     this.setLastMeterReading();
@@ -150,6 +163,12 @@ export class CalculatedPredictorDataUpdateComponent {
     this.calculatingData = true;
     let predictorStart: number = 0;
 
+    const predictorStatusCheck = this.predictorStatusCheck();
+    const monthKeys = new Set(this.predictorData.map(data => `${data.year}-${data.month}`));
+    const missingMonths = predictorStatusCheck?.missingEntryMonths?.filter(({ month, year }) => {
+      return !monthKeys.has(`${year}-${month}`);
+    }) ?? [];
+
     let existingPredictorIndex: Array<number> = this.predictorData.map((p, idx) => {
       if (p.id && p.updatedAmount == undefined) {
         return idx
@@ -180,8 +199,45 @@ export class CalculatedPredictorDataUpdateComponent {
         }
       }
     }
+    await this.addMissingMonths(missingMonths);
+    this.predictorData = _.orderBy(this.predictorData, (data: CalculatedPredictorTableItem) =>
+      getDateFromPredictorData(data).getTime()
+    );
     this.setDataSummary();
     this.calculatingData = false;
+  }
+
+  async addMissingMonths(missingMonths: Array<{ month: number, year: number }>) {
+    for (const missingMonth of missingMonths) {
+      if (this.destroyed) {
+        break;
+      }
+      const entryDate: Date = new Date(missingMonth.year, missingMonth.month - 1, 1);
+      this.calculationDate = new Date(entryDate);
+      const degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(
+        entryDate,
+        this.predictor.weatherStationId,
+        this.predictor.weatherStationName,
+        this.predictor.heatingBaseTemperature,
+        this.predictor.coolingBaseTemperature
+      );
+      if (degreeDays == 'error') {
+        this.toastNotificationService.weatherDataErrorToast();
+        continue;
+      }
+      const newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
+      newPredictorData.year = missingMonth.year;
+      newPredictorData.month = missingMonth.month;
+      newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+      newPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
+      this.predictorData.push({
+        ...newPredictorData,
+        updatedAmount: newPredictorData.amount,
+        changeAmount: 0,
+        deleted: false,
+        added: true
+      });
+    }
   }
 
 
@@ -313,6 +369,7 @@ export class CalculatedPredictorDataUpdateComponent {
       () => this.predictorHandler.reconcilePredictorData(this.predictor.guid, changes, accountGuid)
     );
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
+    this.loadingService.setLoadingStatus(false);
     this.cancel();
   }
 
