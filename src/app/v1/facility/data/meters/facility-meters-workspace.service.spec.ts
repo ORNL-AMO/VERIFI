@@ -57,6 +57,8 @@ describe('FacilityMetersWorkspaceService', () => {
 
     expect(service.selectedMeterGuid()).toBe('meter-a');
     expect(service.selectedMeter()?.name).toBe('Electric Main');
+    expect(service.selectedMeterCard()?.meter.guid).toBe('meter-a');
+    expect(service.selectedMeterCard()?.firstReadingLabel).toBe('Jan 2026');
     expect(service.selectedMeterGroup()?.name).toBe('Purchased Electricity');
     expect(service.selectedMeterReadingCount()).toBe(2);
 
@@ -68,6 +70,17 @@ describe('FacilityMetersWorkspaceService', () => {
 
     expect(service.selectedMeterGuid()).toBe('meter-b');
     expect(service.selectedMeter()?.name).toBe('Water Main');
+    expect(service.selectedMeterCard()?.meter.guid).toBe('meter-b');
     expect(service.selectedMeterReadingCount()).toBe(0);
+
+    events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-a/data/meters/meter-missing/settings',
+      '/v1/workspace/facility/facility-a/data/meters/meter-missing/settings'
+    ));
+
+    expect(service.selectedMeterGuid()).toBe('meter-missing');
+    expect(service.selectedMeter()).toBeUndefined();
+    expect(service.selectedMeterCard()).toBeUndefined();
   });
 });

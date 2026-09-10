@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -13,6 +13,7 @@ import {
 @Component({
   selector: 'app-meter-workbench',
   templateUrl: './meter-workbench.component.html',
+  styleUrls: ['./meter-workbench.component.css'],
   standalone: false
 })
 export class MeterWorkbenchComponent {
@@ -20,10 +21,14 @@ export class MeterWorkbenchComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly activeTabState = signal<MeterWorkbenchTabId>('settings');
+  private readonly meterSwitcherOpenState = signal(false);
+
+  @ViewChild('meterSwitcherToggle') private readonly meterSwitcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly activeTab = this.activeTabState.asReadonly();
+  readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
 
   constructor() {
     this.syncActiveTabFromRoute();
@@ -52,6 +57,31 @@ export class MeterWorkbenchComponent {
     if (facility && meter) {
       void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, tab));
     }
+  }
+
+  toggleMeterSwitcher(): void {
+    this.meterSwitcherOpenState.update(open => !open);
+  }
+
+  closeMeterSwitcher(): void {
+    this.meterSwitcherOpenState.set(false);
+  }
+
+  onMeterSwitcherEscape(): void {
+    if (!this.meterSwitcherOpen()) {
+      return;
+    }
+    this.closeMeterSwitcher();
+    this.meterSwitcherToggle?.nativeElement.focus();
+  }
+
+  switchMeter(meterGuid: string): void {
+    const facility = this.workspace.facility();
+    if (!facility) {
+      return;
+    }
+    this.closeMeterSwitcher();
+    void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, this.activeTab()));
   }
 
   private syncActiveTabFromRoute(): void {
