@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
 import { ModalPortalService } from '../../../../../shell/modal-portal.service';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';

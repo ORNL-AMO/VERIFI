@@ -88,7 +88,7 @@ export class SectionNavComponent {
       : ACCOUNT_CUSTOM_DATA_ITEMS.filter(item => item.id === 'custom-fuels');
   });
   readonly facilityDataItems = computed(() => FACILITY_DATA_ITEMS);
-  readonly facilityMeterItems = computed(() => {
+  readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
     return [...this.workspace.facilityMeters()]
       .map(meter => ({
         guid: meter.guid,

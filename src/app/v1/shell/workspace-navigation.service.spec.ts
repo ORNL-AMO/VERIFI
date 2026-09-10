@@ -324,6 +324,18 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeMeterGuid()).toBeUndefined();
   });
 
+  it('keeps route parsing resilient when an active meter route has malformed URL encoding', () => {
+    expect(() => router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/data/meters/meter-%/settings',
+      '/v1/workspace/facility/facility-a/data/meters/meter-%/settings'
+    ))).not.toThrow();
+
+    expect(service.activeSection()).toBe('data');
+    expect(service.activeDetail()).toBe('meters');
+    expect(service.activeMeterGuid()).toBe('meter-%');
+  });
+
   it('moves meter dashboard grouping guidance into the support panel help content', () => {
     router.events.next(new NavigationEnd(
       1,
