@@ -1,0 +1,25 @@
+<section class="meter-settings-section" [formGroup]="form">
+  <h3>Other information</h3>
+  <div class="v1-settings-grid">
+    <label class="meter-settings-field">
+      <span>Meter Number</span>
+      <input class="form-control" type="text" formControlName="meterNumber" maxlength="35" (input)="textChange.emit()">
+    </label>
+    <label class="meter-settings-field">
+      <span>Account Number</span>
+      <input class="form-control" type="text" formControlName="accountNumber" maxlength="20" (input)="textChange.emit()">
+    </label>
+    <label class="meter-settings-field">
+      <span>Building / Location</span>
+      <input class="form-control" type="text" formControlName="location" maxlength="42" (input)="textChange.emit()">
+    </label>
+    <label class="meter-settings-field">
+      <span>Utility Supplier</span>
+      <input class="form-control" type="text" formControlName="supplier" maxlength="20" (input)="textChange.emit()">
+    </label>
+    <label class="meter-settings-field">
+      <span>Notes</span>
+      <textarea class="form-control" formControlName="notes" (input)="textChange.emit()"></textarea>
+    </label>
+  </div>
+</section>

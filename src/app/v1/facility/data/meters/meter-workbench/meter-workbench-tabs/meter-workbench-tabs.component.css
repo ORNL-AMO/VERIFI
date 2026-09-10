@@ -1,0 +1,32 @@
+.v1-facility-meters__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  padding: var(--v1-space-2);
+  border: 1px solid var(--v1-border);
+  border-radius: 0;
+  background: var(--v1-panel);
+}
+
+.v1-facility-meters__tab {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--v1-control-height);
+  padding: .45rem .75rem;
+  border: 1px solid transparent;
+  border-radius: var(--v1-radius-sm);
+  background: transparent;
+  color: var(--v1-muted);
+  cursor: pointer;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.v1-facility-meters__tab--active {
+  border-color: color-mix(in srgb, var(--v1-content-control) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
+  color: var(--v1-text);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1-content-control) 18%, transparent);
+}

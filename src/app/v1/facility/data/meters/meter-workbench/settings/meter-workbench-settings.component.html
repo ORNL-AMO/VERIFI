@@ -1,0 +1,132 @@
+@let form = formSignal();
+@let vm = viewModel();
+
+@if (form && vm) {
+  <form class="v1-settings-panel meter-settings" [formGroup]="form" aria-label="Meter settings">
+    @if (showReadOnlyNotice()) {
+      <div class="v1-alert v1-alert--info">
+        <span class="fa fa-lock" aria-hidden="true"></span>
+        <span>This workspace is read-only. Meter settings can be reviewed but not changed.</span>
+      </div>
+    }
+
+    @if (meterDataExists() && !changingSetupValues()) {
+      <div class="v1-alert v1-alert--warning meter-settings__lock-alert">
+        <span class="fa fa-triangle-exclamation meter-settings__lock-alert-icon" aria-hidden="true"></span>
+        <span class="meter-settings__lock-alert-message">
+          <strong>Readings exist for this meter.</strong>
+          Setup values are locked because calculations use these settings.
+        </span>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canEditForm()" (click)="enableSetupChanges()">
+          Change values if necessary
+        </button>
+      </div>
+    } @else if (meterDataExists() && changingSetupValues()) {
+      <div class="v1-alert v1-alert--warning meter-settings__lock-alert">
+        <span class="fa fa-triangle-exclamation meter-settings__lock-alert-icon" aria-hidden="true"></span>
+        <span class="meter-settings__lock-alert-message">
+          <strong>Setup values are unlocked.</strong>
+          Changing collection values does not alter amounts already entered in meter readings.
+        </span>
+      </div>
+    }
+
+    <div class="meter-settings__layout">
+      <div class="meter-settings__main">
+        <app-meter-settings-core-form
+          [form]="form"
+          [viewModel]="vm"
+          [saveState]="saveState()"
+          [saveMessage]="saveMessage()"
+          (ruleChange)="onRuleChange($event)"
+          (textChange)="onTextChange()"
+          (immediateChange)="onImmediateChange($event)">
+        </app-meter-settings-core-form>
+
+        @if (vm.displayVehicle) {
+          <app-meter-settings-vehicle-form
+            [form]="form"
+            [viewModel]="vm"
+            (ruleChange)="onRuleChange($event)"
+            (textChange)="onTextChange()"
+            (immediateChange)="onImmediateChange($event)">
+          </app-meter-settings-vehicle-form>
+        }
+
+        @if (vm.selectedFuelTypeOption || vm.selectedVehicleFuelOption) {
+          <app-meter-settings-emissions-details
+            [form]="form"
+            [viewModel]="vm">
+          </app-meter-settings-emissions-details>
+        }
+
+        @if (form.controls.source.value === 'Electricity') {
+          <app-meter-settings-electricity-form
+            [form]="form"
+            [viewModel]="vm"
+            (ruleChange)="onRuleChange($event)"
+            (textChange)="onTextChange()"
+            (immediateChange)="onImmediateChange($event)">
+          </app-meter-settings-electricity-form>
+        }
+
+        <app-meter-settings-other-info
+          [form]="form"
+          (textChange)="onTextChange()">
+        </app-meter-settings-other-info>
+
+        <app-meter-settings-status-form
+          [form]="form"
+          [viewModel]="vm"
+          (textChange)="onTextChange()"
+          (immediateChange)="onImmediateChange($event)">
+        </app-meter-settings-status-form>
+      </div>
+
+      <aside class="meter-settings__aside">
+        <app-meter-settings-charges-form
+          [form]="form"
+          [viewModel]="vm"
+          (textChange)="onTextChange()"
+          (immediateChange)="onImmediateChange($event)">
+        </app-meter-settings-charges-form>
+      </aside>
+    </div>
+
+    <footer class="meter-settings__footer">
+      <button
+        type="button"
+        class="v1-btn v1-btn--danger"
+        [disabled]="!canDeleteMeter()"
+        (click)="requestDeleteMeter()">
+        <span class="fa fa-trash" aria-hidden="true"></span>
+        Delete meter
+      </button>
+    </footer>
+  </form>
+} @else {
+  <section class="v1-settings-panel meter-settings">
+    <div class="v1-settings-panel__heading">
+      <div>
+        <p>Settings</p>
+        <h2>Meter setup</h2>
+      </div>
+    </div>
+    <div class="v1-alert v1-alert--info">
+      <span class="fa fa-circle-info" aria-hidden="true"></span>
+      <span>Select a meter to edit its settings.</span>
+    </div>
+  </section>
+}
+
+<ng-template #deleteMeterConfirmModal>
+  @if (selectedMeterCard(); as cardToDelete) {
+    <app-confirm-delete-meter-modal
+      [card]="cardToDelete"
+      [saving]="deleting()"
+      [error]="deleteError()"
+      (confirmed)="confirmDeleteMeter()"
+      (cancelled)="cancelDeleteMeter()">
+    </app-confirm-delete-meter-modal>
+  }
+</ng-template>

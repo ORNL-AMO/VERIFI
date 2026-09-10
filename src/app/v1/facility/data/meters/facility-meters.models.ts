@@ -157,7 +157,15 @@ export function buildMeterGroupSections(
 }
 
 export function meterTabLabel(tabId: MeterWorkbenchTabId): string {
-  return METER_WORKBENCH_TABS.find(tab => tab.id === tabId)?.label ?? 'Settings';
+  return meterWorkbenchTab(tabId).label;
+}
+
+export function meterTabSummary(tabId: MeterWorkbenchTabId): string {
+  return meterWorkbenchTab(tabId).summary;
+}
+
+export function meterWorkbenchTab(tabId: MeterWorkbenchTabId): MeterWorkbenchTab {
+  return METER_WORKBENCH_TABS.find(tab => tab.id === tabId) ?? METER_WORKBENCH_TABS[0];
 }
 
 export function meterGroupDropListId(sectionId: string): string {

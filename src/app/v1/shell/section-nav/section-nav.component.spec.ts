@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { FacilityPickerComponent } from './facility-picker/facility-picker.component';
 import { SectionNavComponent } from './section-nav.component';
@@ -17,6 +18,8 @@ describe('SectionNavComponent', () => {
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
   let activeDetail: ReturnType<typeof signal<string>>;
+  let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
+  let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let setFacility: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -29,6 +32,8 @@ describe('SectionNavComponent', () => {
     hasSingleSiteRecovery = signal(false);
     singleSiteWorkspaceState = signal('portfolio');
     activeDetail = signal('profile');
+    activeMeterGuid = signal<string | undefined>(undefined);
+    facilityMeters = signal([]);
     setFacility = vi.fn();
     TestBed.configureTestingModule({
       declarations: [SectionNavComponent, FacilityPickerComponent],
@@ -46,15 +51,23 @@ describe('SectionNavComponent', () => {
             singleSiteWorkspaceState,
             activeSection,
             activeDetail,
+            activeMeterGuid,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
             facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
+            facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
             setContext: () => undefined,
             setFacility
+          }
+        },
+        {
+          provide: AccountWorkspaceStore,
+          useValue: {
+            facilityMeters
           }
         }
       ]
@@ -125,6 +138,112 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Energy Uses');
     expect(fixture.nativeElement.textContent).not.toContain('Custom Database Items');
     expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Predictors']);
+  });
+
+  it('shows sorted meter links under an expanded meters parent on meter routes', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    facilityMeters.set([
+      { guid: 'meter-gas', name: 'Gas Backup' },
+      { guid: 'meter-electric', name: 'Electric Main' }
+    ]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    const toggle = element.querySelector<HTMLButtonElement>('.v1-nav__child-toggle');
+    const childLinks = meterChildLinks(element);
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(childLinks.map(link => link.querySelector('span')?.textContent?.trim())).toEqual(['Electric Main', 'Gas Backup']);
+    expect(childLinks[0].getAttribute('href')).toContain('/v1/workspace/facility/facility-a/data/meters/meter-electric/settings');
+    expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meters']);
+  });
+
+  it('collapses and re-expands meter links on meter routes', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    facilityMeters.set([{ guid: 'meter-electric', name: 'Electric Main' }]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    const toggle = element.querySelector<HTMLButtonElement>('.v1-nav__child-toggle');
+    expect(meterChildLinks(element)).toHaveLength(1);
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(meterChildLinks(element)).toHaveLength(0);
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(meterChildLinks(element)).toHaveLength(1);
+  });
+
+  it('can manually expand meter links from another facility data route', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('predictors');
+    facilityMeters.set([{ guid: 'meter-electric', name: 'Electric Main' }]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(meterChildLinks(element)).toHaveLength(0);
+
+    element.querySelector<HTMLButtonElement>('.v1-nav__child-toggle')?.click();
+    fixture.detectChanges();
+
+    expect(meterChildLinks(element)).toHaveLength(1);
+    expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Predictors']);
+
+    selectedFacility.set({ guid: 'facility-b', name: 'Facility B' });
+    fixture.detectChanges();
+
+    expect(meterChildLinks(element)).toHaveLength(0);
+  });
+
+  it('marks an individual meter link active on meter workbench routes', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    activeMeterGuid.set('meter-gas');
+    facilityMeters.set([
+      { guid: 'meter-electric', name: 'Electric Main' },
+      { guid: 'meter-gas', name: 'Gas Backup' }
+    ]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    const currentLinks = Array.from<HTMLAnchorElement>(element.querySelectorAll('[aria-current="page"]'));
+
+    expect(currentLinks).toHaveLength(1);
+    expect(currentLinks[0].textContent).toContain('Gas Backup');
+    expect(currentLinks[0].classList.contains('v1-nav__child')).toBe(true);
+  });
+
+  it('does not show a meter child toggle when there are no meters', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector('.v1-nav__child-toggle')).toBeNull();
+    expect(meterChildLinks(element)).toHaveLength(0);
   });
 
   it('shows facility settings navigation in facility context', () => {
@@ -229,5 +348,9 @@ describe('SectionNavComponent', () => {
 
   function activeLinks(element: HTMLElement): HTMLAnchorElement[] {
     return Array.from<HTMLAnchorElement>(element.querySelectorAll('.v1-nav__group a.active'));
+  }
+
+  function meterChildLinks(element: HTMLElement): HTMLAnchorElement[] {
+    return Array.from<HTMLAnchorElement>(element.querySelectorAll('.v1-nav__child'));
   }
 });

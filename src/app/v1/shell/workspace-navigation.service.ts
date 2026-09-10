@@ -50,6 +50,7 @@ interface RouteState {
   readonly contextMode: ContextMode;
   readonly accountGuid?: string;
   readonly facilityGuid?: string;
+  readonly meterGuid?: string;
   readonly section: SectionId;
   readonly detail: string;
 }
@@ -116,6 +117,7 @@ export class WorkspaceNavigationService {
   readonly contextMode = computed(() => this.routeState().contextMode);
   readonly activeSection = computed(() => this.routeState().section);
   readonly activeDetail = computed(() => this.routeState().detail);
+  readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
@@ -428,12 +430,16 @@ export function parseWorkspaceRoute(url: string): RouteState {
   }
   if (routeParts[1] === 'facility') {
     const section = normalizeSection(routeParts[3]);
+    const detail = routeParts[4] || DEFAULT_FACILITY_DETAILS[section];
     return {
       view: 'workspace',
       contextMode: 'facility',
       facilityGuid: routeParts[2],
       section,
-      detail: routeParts[4] || DEFAULT_FACILITY_DETAILS[section]
+      detail,
+      meterGuid: section === 'data' && detail === 'meters' && routeParts[5]
+        ? safeDecodeRoutePart(routeParts[5])
+        : undefined
     };
   }
   const section = normalizeSection(routeParts[3]);
@@ -448,6 +454,14 @@ export function parseWorkspaceRoute(url: string): RouteState {
 
 function normalizeSection(section: string | undefined): SectionId {
   return VALID_SECTION_IDS.includes(section as SectionId) ? section as SectionId : 'home';
+}
+
+function safeDecodeRoutePart(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 function accountDescriptor(account: IdbAccount): string {

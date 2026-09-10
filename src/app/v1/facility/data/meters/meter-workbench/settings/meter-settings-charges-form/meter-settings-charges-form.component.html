@@ -1,0 +1,36 @@
+<section class="meter-settings-section" [formGroup]="form">
+  <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+    <h3 class="mb-0">Meter charges</h3>
+    <button type="button" class="v1-btn v1-btn--action v1-btn--small" [disabled]="form.disabled" (click)="addCharge()">
+      <span class="fa fa-plus" aria-hidden="true"></span>
+      Add charge
+    </button>
+  </div>
+
+  <div formArrayName="chargesArray" class="meter-settings-charge-list">
+    @if (chargesArray.length) {
+      @for (chargeGroup of chargesArray.controls; track chargeGroup; let index = $index) {
+        <div class="meter-settings-charge" [formGroupName]="index">
+          <label class="meter-settings-field">
+            <span>Name</span>
+            <input class="form-control" formControlName="name" placeholder="Charge name" (input)="textChange.emit()">
+          </label>
+          <label class="meter-settings-field">
+            <span>Charge Type</span>
+            <select class="form-select" formControlName="chargeType" (change)="immediateChange.emit('chargeType')">
+              @for (type of viewModel.chargeTypes; track type.value) {
+                <option [ngValue]="type.value">{{ type.label }}</option>
+              }
+            </select>
+          </label>
+          <button type="button" class="v1-icon-btn" [disabled]="form.disabled" [attr.aria-label]="'Remove charge ' + (index + 1)"
+            (click)="removeCharge(index)">
+            <span class="fa fa-trash" aria-hidden="true"></span>
+          </button>
+        </div>
+      }
+    } @else {
+      <p class="meter-settings-help mb-0">No charges have been added for this meter.</p>
+    }
+  </div>
+</section>

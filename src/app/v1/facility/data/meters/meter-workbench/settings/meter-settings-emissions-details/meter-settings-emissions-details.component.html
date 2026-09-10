@@ -1,0 +1,43 @@
+<section class="meter-settings-section">
+  <h3>Fuel emissions</h3>
+  @if (selectedFuelType) {
+    <div class="meter-settings-emissions">
+      <div class="meter-settings-emission-item">
+        <span>CO2 Factor</span>
+        <strong>
+          @if (selectedFuelType.CO2) {
+            {{ emissionsDisplay('CO2') }} kg CO<sub>2</sub>/{{ denominator('CO2') }}
+          } @else {
+            -
+          }
+        </strong>
+      </div>
+      <div class="meter-settings-emission-item">
+        <span>CH4 Factor</span>
+        <strong>
+          @if (selectedFuelType.CH4) {
+            {{ emissionsDisplay('CH4') }} g CH<sub>4</sub>/{{ denominator('CH4') }}
+          } @else {
+            -
+          }
+        </strong>
+      </div>
+      <div class="meter-settings-emission-item">
+        <span>N2O Factor</span>
+        <strong>
+          @if (selectedFuelType.N2O) {
+            {{ emissionsDisplay('N2O') }} g N<sub>2</sub>O/{{ denominator('N2O') }}
+          } @else {
+            -
+          }
+        </strong>
+      </div>
+      @if (selectedFuelType.emissionsOutputRate) {
+        <div class="meter-settings-emission-item">
+          <span>Emissions Rate</span>
+          <strong>{{ selectedFuelType.emissionsOutputRate }} kg CO<sub>2</sub>e</strong>
+        </div>
+      }
+    </div>
+  }
+</section>

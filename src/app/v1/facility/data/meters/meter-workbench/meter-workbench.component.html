@@ -18,66 +18,145 @@
     </button>
   </article>
 } @else if (currentMeter) {
-  <header class="v1-section-header v1-facility-meters__header">
-    <div>
-      <p class="v1-eyebrow">Facility Data</p>
-      <h1 id="v1-facility-meters-title">{{ currentMeter.name }}</h1>
-      <p class="v1-section-header__summary">
-        {{ currentMeter.source }} meter - {{ workspace.selectedMeterReadingCount() }} readings -
-        {{ workspace.selectedMeterGroup()?.name || 'Ungrouped' }}
-      </p>
+  @let currentCard = workspace.selectedMeterCard();
+  <header class="v1-meter-workbench-header">
+    <nav class="v1-meter-workbench-header__breadcrumb" aria-label="Meter breadcrumb">
+      <ol>
+        <li>
+          <button type="button" (click)="openMeters()">
+            <span class="fa fa-arrow-left" aria-hidden="true"></span>
+            Meters
+          </button>
+        </li>
+        <li aria-hidden="true">/</li>
+        <li
+          class="v1-meter-workbench-header__meter-switcher"
+          [class.open]="meterSwitcherOpen()"
+          aria-current="page"
+          (keydown.escape)="onMeterSwitcherEscape()">
+          @if (workspace.meterCards().length > 1) {
+            <button
+              #meterSwitcherToggle
+              type="button"
+              class="v1-meter-workbench-header__meter-toggle"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="meterSwitcherOpen()"
+              [attr.aria-label]="'Switch meter, current meter ' + currentMeter.name"
+              (click)="toggleMeterSwitcher()">
+              <span class="v1-meter-workbench-header__meter-toggle-label">{{ currentMeter.name }}</span>
+              <span class="fa fa-chevron-down v1-meter-workbench-header__meter-toggle-icon" aria-hidden="true"></span>
+            </button>
+
+            @if (meterSwitcherOpen()) {
+              <div class="v1-meter-workbench-header__meter-backdrop" (click)="closeMeterSwitcher()" aria-hidden="true"></div>
+              <div class="v1-meter-workbench-header__meter-menu" role="menu" aria-label="Switch meter">
+                @for (meterCard of workspace.meterCards(); track meterCard.meter.guid) {
+                  <button
+                    type="button"
+                    class="v1-meter-workbench-header__meter-item"
+                    role="menuitemradio"
+                    [class.active]="meterCard.meter.guid === currentMeter.guid"
+                    [attr.aria-checked]="meterCard.meter.guid === currentMeter.guid"
+                    (click)="switchMeter(meterCard.meter.guid)">
+                    <span class="v1-meter-workbench-header__meter-item-text">
+                      {{ meterCard.meter.name }}
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+          } @else {
+            {{ currentMeter.name }}
+          }
+        </li>
+      </ol>
+    </nav>
+
+    <div class="v1-meter-workbench-header__title-row">
+      <div class="v1-meter-workbench-header__title">
+        <p class="v1-eyebrow">{{ currentFacility.name }} Meter</p>
+        <h1 id="v1-facility-meters-title">{{ currentMeter.name }}</h1>
+      </div>
+      <div class="v1-meter-workbench-header__chips" aria-label="Meter summary">
+        <span class="v1-meter-workbench-header__source-chip" [style.--v1-meter-source-color]="currentCard?.sourceColor || null">
+          {{ currentCard?.meter?.source || currentMeter.source }}
+        </span>
+        <span class="v1-chip v1-chip--{{ currentCard?.statusTone || 'info' }} v1-meter-workbench-header__status">
+          <span class="fa {{ currentCard?.statusIcon || 'fa-circle-notch' }}" aria-hidden="true"></span>
+          {{ currentCard?.statusLabel || 'Checking' }}
+        </span>
+      </div>
     </div>
-    <button type="button" class="v1-btn v1-btn--quiet" (click)="openMeters()">
-      <span class="fa fa-arrow-left" aria-hidden="true"></span>
-      Meters
-    </button>
+
+    <dl class="v1-meter-workbench-header__facts">
+      <div>
+        <dt>First reading</dt>
+        <dd>{{ currentCard?.firstReadingLabel || 'No data' }}</dd>
+      </div>
+      <div>
+        <dt>Latest</dt>
+        <dd>{{ currentCard?.latestReadingLabel || 'No data' }}</dd>
+      </div>
+      <div>
+        <dt>Scope</dt>
+        <dd>{{ currentCard?.scopeLabel || 'Not set' }}</dd>
+      </div>
+      @if (currentCard?.fuelLabel) {
+        <div>
+          <dt>Fuel</dt>
+          <dd>{{ currentCard?.fuelLabel }}</dd>
+        </div>
+      }
+      <div>
+        <dt>Group</dt>
+        <dd class="v1-meter-workbench-header__group-value">
+          <span class="fa fa-layer-group" aria-hidden="true"></span>
+          {{ currentCard?.group?.name || workspace.selectedMeterGroup()?.name || 'Ungrouped' }}
+        </dd>
+      </div>
+    </dl>
+
+    @if (currentCard?.statusIssueLabels; as statusIssueLabels) {
+      @if (statusIssueLabels.length > 0) {
+        <div class="v1-meter-workbench-header__issues" aria-label="Meter status issues">
+          @for (issue of statusIssueLabels; track issue) {
+            <span class="v1-badge v1-badge--{{ currentCard?.statusTone || 'info' }}">{{ issue }}</span>
+          }
+        </div>
+      }
+    }
+
+    @if (currentCard?.statusActionSummaries; as statusActionSummaries) {
+      @if (statusActionSummaries.length > 0) {
+        <ul class="v1-meter-workbench-header__status-notes">
+          @for (summary of statusActionSummaries; track summary) {
+            <li>
+              <span class="fa {{ currentCard?.statusIcon || 'fa-circle-notch' }}" aria-hidden="true"></span>
+              {{ summary }}
+            </li>
+          }
+        </ul>
+      }
+    }
   </header>
 
-  @if (!workspace.canWrite()) {
+  @if (showWorkspaceUnavailable()) {
     <div class="v1-alert v1-alert--warning" role="status">
       <span class="fa fa-lock" aria-hidden="true"></span>
       <span>Meter actions are unavailable while the workspace is loading or switching.</span>
     </div>
-  } @else if (workspace.hasPending()) {
+  } @else if (showWorkspacePending()) {
     <div class="v1-alert v1-alert--info" role="status">
       <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
       <span>Another workspace update is still finishing.</span>
     </div>
   }
 
-  <nav class="v1-facility-meters__tabs" aria-label="Meter workbench sections">
-    @for (tab of tabs; track tab.id) {
-      <button
-        type="button"
-        class="v1-facility-meters__tab"
-        [class.v1-facility-meters__tab--active]="activeTab() === tab.id"
-        (click)="openMeter(tab.id)"
-        [attr.aria-current]="activeTab() === tab.id ? 'page' : null">
-        <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
-        {{ tab.label }}
-      </button>
-    }
-  </nav>
+  <app-meter-workbench-tabs
+    [tabs]="tabs"
+    [activeTab]="activeTab()"
+    (tabSelected)="openMeter($event)">
+  </app-meter-workbench-tabs>
 
-  <section class="v1-meter-workbench-panel" [attr.aria-label]="activeTabLabel()">
-    <div>
-      <span class="v1-chip v1-chip--info">WIP</span>
-      <h2>{{ activeTabLabel() }}</h2>
-      <p>{{ activeTabSummary() }}</p>
-    </div>
-    <dl class="v1-meter-workbench-panel__facts">
-      <div>
-        <dt>Meter source</dt>
-        <dd>{{ currentMeter.source }}</dd>
-      </div>
-      <div>
-        <dt>Group</dt>
-        <dd>{{ workspace.selectedMeterGroup()?.name || 'Ungrouped' }}</dd>
-      </div>
-      <div>
-        <dt>Readings</dt>
-        <dd>{{ workspace.selectedMeterReadingCount() }}</dd>
-      </div>
-    </dl>
-  </section>
+  <router-outlet></router-outlet>
 }
