@@ -9,10 +9,10 @@ import { ToastNotificationsService } from '@shared/notifications/toast-notificat
 // import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-annual-station-data',
-    templateUrl: './annual-station-data.component.html',
-    styleUrls: ['./annual-station-data.component.css'],
-    standalone: false
+  selector: 'app-annual-station-data',
+  templateUrl: './annual-station-data.component.html',
+  styleUrls: ['./annual-station-data.component.css'],
+  standalone: false
 })
 export class AnnualStationDataComponent {
 
@@ -69,7 +69,7 @@ export class AnnualStationDataComponent {
         this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
         // this.detailedDegreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
         this.setYearSummaryData();
-      }else{
+      } else {
         this.yearSummaryData = [];
         this.toastNotificationService.weatherDataErrorToast();
       }
@@ -90,6 +90,15 @@ export class AnnualStationDataComponent {
         let monthData: Array<DetailDegreeDay> = this.detailedDegreeDays.filter(day => {
           return day.time.getMonth() == startDate.getMonth();
         });
+        const daysInMonth: number = new Date(this.selectedYear, startDate.getMonth() + 1, 0).getDate();
+        const hoursInMonth: number = daysInMonth * 24;
+        const hoursWithData: Set<string> = new Set<string>();
+        monthData.forEach(degreeDay => {
+          const time: Date = new Date(degreeDay.time);
+          hoursWithData.add(`${time.getDate()}-${time.getHours()}`);
+        });
+        const hourlyCoverage: number = (hoursWithData.size / hoursInMonth) * 100;
+
         let totalHeatingDegreeDays: number = getDegreeDayAmount(monthData, 'HDD');
         let totalCoolingDegreeDays: number = getDegreeDayAmount(monthData, 'CDD');
         let relativeHumidity: number = getDegreeDayAmount(monthData, 'relativeHumidity');
@@ -112,7 +121,8 @@ export class AnnualStationDataComponent {
           dryBulbTemp: dryBulbTemp,
           wetBulbTemp: wetBulbTemp,
           dewPointTemp: dewPointTemp,
-          precipitation: precipitation
+          precipitation: precipitation,
+          hourlyCoverage: hourlyCoverage
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }
@@ -149,4 +159,4 @@ export class AnnualStationDataComponent {
 }
 
 
-export interface AnnualStationDataSummary { date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean, relativeHumidity: number, dryBulbTemp: number, wetBulbTemp: number, dewPointTemp: number, precipitation: number }
+export interface AnnualStationDataSummary { date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean, relativeHumidity: number, dryBulbTemp: number, wetBulbTemp: number, dewPointTemp: number, precipitation: number, hourlyCoverage: number }
