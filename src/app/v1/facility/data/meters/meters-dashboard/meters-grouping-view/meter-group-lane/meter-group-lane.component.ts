@@ -39,7 +39,7 @@ export class MeterGroupLaneComponent {
   }
 
   onDrop(event: CdkDragDrop<readonly MeterCardView[]>): void {
-    if (!this.canWrite || !this.canDrop(event.item.data, this.target)) {
+    if (event.previousContainer === event.container || !this.canWrite || !this.canDrop(event.item.data, this.target)) {
       return;
     }
     this.meterDropped.emit({ card: event.item.data, target: this.target });

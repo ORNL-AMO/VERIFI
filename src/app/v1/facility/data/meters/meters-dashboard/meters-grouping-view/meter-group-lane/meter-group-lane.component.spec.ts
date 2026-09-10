@@ -15,7 +15,7 @@ describe('MeterGroupLaneComponent', () => {
     fixture.componentInstance.meterDropped.subscribe(event => drops.push(event));
 
     fixture.detectChanges();
-    fixture.componentInstance.onDrop({ item: { data: section.meters[0] } } as CdkDragDrop<readonly MeterCardView[]>);
+    fixture.componentInstance.onDrop(dropEvent(section.meters[0]));
 
     expect(fixture.nativeElement.textContent).toContain('Electricity');
     expect(fixture.nativeElement.querySelector('.v1-meter-lane')).not.toBeNull();
@@ -74,7 +74,20 @@ describe('MeterGroupLaneComponent', () => {
     fixture.componentInstance.canDrop = () => false;
     fixture.componentInstance.meterDropped.subscribe(event => drops.push(event));
 
-    fixture.componentInstance.onDrop({ item: { data: section.meters[0] } } as CdkDragDrop<readonly MeterCardView[]>);
+    fixture.componentInstance.onDrop(dropEvent(section.meters[0]));
+
+    expect(drops).toEqual([]);
+  });
+
+  it('does not emit same-lane drops because they do not reassign a meter', () => {
+    const energyGroup = group({ guid: 'group-energy', name: 'Electricity' });
+    const cardMeter = meter({ guid: 'meter-electric', name: 'Electric Main', groupId: energyGroup.guid });
+    const section = buildMeterGroupSections([cardMeter], [], [energyGroup])[0];
+    const fixture = setup(section);
+    const drops: unknown[] = [];
+    fixture.componentInstance.meterDropped.subscribe(event => drops.push(event));
+
+    fixture.componentInstance.onDrop(dropEvent(section.meters[0], true));
 
     expect(drops).toEqual([]);
   });
@@ -93,4 +106,13 @@ function setup(section: ReturnType<typeof buildMeterGroupSections>[number]): Com
 function clickButton(fixture: ComponentFixture<MeterGroupLaneComponent>, label: string): void {
   const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
   buttons.find(button => button.textContent?.includes(label) || button.getAttribute('aria-label')?.includes(label))?.click();
+}
+
+function dropEvent(card: MeterCardView, sameContainer = false): CdkDragDrop<readonly MeterCardView[]> {
+  const sourceContainer = {};
+  return {
+    item: { data: card },
+    previousContainer: sourceContainer,
+    container: sameContainer ? sourceContainer : {}
+  } as CdkDragDrop<readonly MeterCardView[]>;
 }
