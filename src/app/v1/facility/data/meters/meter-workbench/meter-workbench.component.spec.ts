@@ -74,6 +74,16 @@ describe('MeterWorkbenchComponent', () => {
     expect(yearlyButton?.getAttribute('aria-current')).toBe('page');
   });
 
+  it('defaults to settings while the child tab route is not ready', () => {
+    const fixture = setup({ childRoute: {} });
+
+    expect(() => fixture.detectChanges()).not.toThrow();
+
+    const settingsButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.includes('Settings'));
+    expect(settingsButton?.getAttribute('aria-current')).toBe('page');
+  });
+
   it('renders a not-found state for a missing or foreign meter route', () => {
     const fixture = setup({ selectedMeter: undefined, hasMeterRoute: true });
 
@@ -105,6 +115,7 @@ class RouterOutletStubDirective { }
 
 function setup(options: {
   tab?: MeterWorkbenchTabId;
+  childRoute?: { snapshot?: { data?: { meterTab?: MeterWorkbenchTabId } } };
   selectedMeter?: ReturnType<typeof meter>;
   hasMeterRoute?: boolean;
   canWrite?: boolean;
@@ -168,7 +179,7 @@ function setup(options: {
       {
         provide: ActivatedRoute,
         useValue: {
-          firstChild: options.tab ? { snapshot: { data: { meterTab: options.tab } } } : undefined
+          firstChild: options.childRoute ?? (options.tab ? { snapshot: { data: { meterTab: options.tab } } } : undefined)
         }
       }
     ]

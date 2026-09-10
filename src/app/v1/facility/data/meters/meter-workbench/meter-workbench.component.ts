@@ -55,7 +55,7 @@ export class MeterWorkbenchComponent {
   }
 
   private syncActiveTabFromRoute(): void {
-    const tabId = this.route.firstChild?.snapshot.data['meterTab'];
+    const tabId = this.route.firstChild?.snapshot?.data?.['meterTab'];
     this.activeTabState.set(isMeterWorkbenchTab(tabId) ? tabId : 'settings');
   }
 }

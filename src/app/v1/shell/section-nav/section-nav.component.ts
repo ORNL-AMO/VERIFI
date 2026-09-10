@@ -1,4 +1,5 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 type SettingsNavItem = {
@@ -12,6 +13,17 @@ type DataNavItem = {
   readonly id: string;
   readonly label: string;
   readonly icon: string;
+};
+
+type MeterNavItem = {
+  readonly guid: string;
+  readonly label: string;
+};
+
+type MeterChildrenState = {
+  readonly facilityGuid?: string;
+  readonly collapsed: boolean;
+  readonly expanded: boolean;
 };
 
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
@@ -60,6 +72,12 @@ const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Po
 })
 export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
+  private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly meterChildrenState = signal<MeterChildrenState>({
+    collapsed: false,
+    expanded: false
+  });
+
   readonly isSingleSiteWorkspace = this.navigation.isSingleSiteWorkspace;
   readonly hasSingleSiteRecovery = this.navigation.hasSingleSiteRecovery;
   readonly dataItems = computed(() => ACCOUNT_DATA_ITEMS);
@@ -70,6 +88,31 @@ export class SectionNavComponent {
       : ACCOUNT_CUSTOM_DATA_ITEMS.filter(item => item.id === 'custom-fuels');
   });
   readonly facilityDataItems = computed(() => FACILITY_DATA_ITEMS);
+  readonly facilityMeterItems = computed(() => {
+    return [...this.workspace.facilityMeters()]
+      .map(meter => ({
+        guid: meter.guid,
+        label: meter.name || 'Untitled meter'
+      }))
+      .sort((first, second) => first.label.localeCompare(second.label));
+  });
+  readonly isFacilityMetersRoute = computed(() =>
+    this.navigation.contextMode() === 'facility'
+    && this.navigation.activeSection() === 'data'
+    && this.navigation.activeDetail() === 'meters'
+  );
+  readonly isMeterChildrenOpen = computed(() => {
+    const facilityGuid = this.navigation.facility()?.guid;
+    const state = this.meterChildrenState();
+    const stateApplies = !!facilityGuid && state.facilityGuid === facilityGuid;
+    if (this.facilityMeterItems().length === 0) {
+      return false;
+    }
+    if (this.isFacilityMetersRoute()) {
+      return !stateApplies || !state.collapsed;
+    }
+    return stateApplies && state.expanded;
+  });
   readonly settingsItems = computed(() => {
     if (this.navigation.contextMode() !== 'facility') {
       return ACCOUNT_SETTINGS_ITEMS;
@@ -104,4 +147,32 @@ export class SectionNavComponent {
       ? 'This account is marked as single-facility, but no facility is available yet.'
       : 'This account is marked as single-facility, but it has more than one facility.'
   );
+
+  isFacilityDataItemActive(item: DataNavItem): boolean {
+    if (item.id !== 'meters') {
+      return this.navigation.activeDetail() === item.id;
+    }
+    return this.isFacilityMetersRoute() && !this.navigation.activeMeterGuid();
+  }
+
+  isMeterChildActive(meterGuid: string): boolean {
+    return this.navigation.activeMeterGuid() === meterGuid;
+  }
+
+  meterChildrenId(): string {
+    return `v1-meter-nav-items-${this.navigation.facility()?.guid || 'none'}`;
+  }
+
+  toggleMeterChildren(): void {
+    const facilityGuid = this.navigation.facility()?.guid;
+    if (!facilityGuid || this.facilityMeterItems().length === 0) {
+      return;
+    }
+    const isOpen = this.isMeterChildrenOpen();
+    this.meterChildrenState.set({
+      facilityGuid,
+      collapsed: this.isFacilityMetersRoute() ? isOpen : false,
+      expanded: this.isFacilityMetersRoute() ? false : !isOpen
+    });
+  }
 }

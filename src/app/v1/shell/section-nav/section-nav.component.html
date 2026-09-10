@@ -82,14 +82,59 @@
         <section class="v1-nav__group" aria-labelledby="v1-data-nav-title">
           <span id="v1-data-nav-title" class="v1-nav__label">{{ dataTitle() }}</span>
           @if (contextMode === 'facility' && selectedFacility) {
+            @let meterItems = facilityMeterItems();
             @for (item of facilityDataItems(); track item.id) {
-              <a
-                [class.active]="navigation.activeDetail() === item.id"
-                [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
-                [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
-                <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
-                {{ item.label }}
-              </a>
+              @if (item.id === 'meters') {
+                <div
+                  class="v1-nav__item"
+                  [class.v1-nav__item--open]="isMeterChildrenOpen()">
+                  <div class="v1-nav__item-row">
+                    <a
+                      [class.active]="isFacilityDataItemActive(item)"
+                      [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
+                      [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
+                      <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                      {{ item.label }}
+                    </a>
+                    @if (meterItems.length > 0) {
+                      <button
+                        type="button"
+                        class="v1-nav__child-toggle"
+                        [attr.aria-expanded]="isMeterChildrenOpen()"
+                        [attr.aria-controls]="meterChildrenId()"
+                        [attr.aria-label]="(isMeterChildrenOpen() ? 'Hide' : 'Show') + ' meter links'"
+                        (click)="toggleMeterChildren()">
+                        <span class="fa fa-chevron-right" aria-hidden="true"></span>
+                      </button>
+                    }
+                  </div>
+
+                  @if (isMeterChildrenOpen()) {
+                    <div
+                      class="v1-nav__children"
+                      [id]="meterChildrenId()"
+                      aria-label="Meter links">
+                      @for (meter of meterItems; track meter.guid) {
+                        <a
+                          class="v1-nav__child"
+                          [class.active]="isMeterChildActive(meter.guid)"
+                          [routerLink]="navigation.facilityMeterRoute(selectedFacility.guid, meter.guid, 'settings')"
+                          [attr.aria-current]="isMeterChildActive(meter.guid) ? 'page' : null">
+                          <span>{{ meter.label }}</span>
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <a
+                  [class.active]="isFacilityDataItemActive(item)"
+                  [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
+                  [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
+                  <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                  {{ item.label }}
+                </a>
+              }
             }
           } @else {
             @for (item of dataItems(); track item.id) {
