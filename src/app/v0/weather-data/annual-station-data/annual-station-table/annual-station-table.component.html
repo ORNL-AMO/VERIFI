@@ -4,95 +4,101 @@
     <tr>
       <th>Month</th>
       @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
-        <th>Heating Degree Days</th>
+      <th>Heating Degree Days</th>
       }
       @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
-        <th>Cooling Degree Days</th>
+      <th>Cooling Degree Days</th>
       }
       @if (weatherDataSelection == 'relativeHumidity') {
-        <th>Relative Humidity</th>
+      <th>Relative Humidity</th>
       }
       @if (weatherDataSelection == 'dryBulbTemp') {
-        <th>Dry Bulb Temp.</th>
+      <th>Dry Bulb Temp.</th>
       }
       @if (weatherDataSelection == 'wetBulbTemp') {
-        <th>Wet Bulb Temp.</th>
+      <th>Wet Bulb Temp.</th>
       }
       @if (weatherDataSelection == 'dewPointTemp') {
-        <th>Dew Point Temp.</th>
+      <th>Dew Point Temp.</th>
       }
       @if (weatherDataSelection == 'precipitation') {
-        <th>Precipitation</th>
+      <th>Precipitation</th>
       }
+      <th>% Hourly Coverage</th>
     </tr>
   </thead>
   <tbody class="table-group-divider">
     @for (degreeDay of yearSummaryData; track degreeDay) {
-      <tr>
-        <td>
-          @if (degreeDay.hasErrors) {
-            <span class="fa fa-exclamation-circle"></span>
-          }
-          <a class="click-link" (click)="gotToMonthSummary(degreeDay.date)">
-            {{degreeDay.date | date:'MMM. y'}}
-          </a>
-        </td>
-        @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
-          <td>
-            {{degreeDay.heatingDegreeDays | number}}
-          </td>
+    <tr>
+      <td>
+        @if (degreeDay.hasErrors) {
+        <span class="fa fa-exclamation-circle"></span>
         }
-        @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
-          <td>
-            {{degreeDay.coolingDegreeDays | number}}
-          </td>
-        }
-        @if (weatherDataSelection == 'relativeHumidity') {
-          <td>
-            {{degreeDay.relativeHumidity | number:'1.0-1'}} &percnt;
-          </td>
-        }
-        @if (weatherDataSelection == 'dryBulbTemp') {
-          <td>
-            {{degreeDay.dryBulbTemp | number:'1.0-1'}} &#8457;
-          </td>
-        }
-        @if (weatherDataSelection == 'wetBulbTemp') {
-          <td>
-            {{degreeDay.wetBulbTemp | number:'1.0-1'}} &#8457;
-          </td>
-        }
-        @if (weatherDataSelection == 'dewPointTemp') {
-          <td>
-            {{degreeDay.dewPointTemp | number:'1.0-1'}} &#8457;
-          </td>
-        }
-        @if (weatherDataSelection == 'precipitation') {
-          <td>
-            {{degreeDay.precipitation | number:'1.0-2'}} in
-          </td>
-        }
-      </tr>
+        <a class="click-link" (click)="gotToMonthSummary(degreeDay.date)">
+          {{degreeDay.date | date:'MMM. y'}}
+        </a>
+      </td>
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+      <td>
+        {{degreeDay.heatingDegreeDays | number}}
+      </td>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+      <td>
+        {{degreeDay.coolingDegreeDays | number}}
+      </td>
+      }
+      @if (weatherDataSelection == 'relativeHumidity') {
+      <td>
+        {{degreeDay.relativeHumidity | number:'1.0-1'}} &percnt;
+      </td>
+      }
+      @if (weatherDataSelection == 'dryBulbTemp') {
+      <td>
+        {{degreeDay.dryBulbTemp | number:'1.0-1'}} &#8457;
+      </td>
+      }
+      @if (weatherDataSelection == 'wetBulbTemp') {
+      <td>
+        {{degreeDay.wetBulbTemp | number:'1.0-1'}} &#8457;
+      </td>
+      }
+      @if (weatherDataSelection == 'dewPointTemp') {
+      <td>
+        {{degreeDay.dewPointTemp | number:'1.0-1'}} &#8457;
+      </td>
+      }
+      @if (weatherDataSelection == 'precipitation') {
+      <td>
+        {{degreeDay.precipitation | number:'1.0-2'}} in
+      </td>
+      }
+      <td>
+        {{degreeDay.hourlyCoverage | number:'1.0-1'}} &percnt;
+      </td>
+    </tr>
     }
   </tbody>
-  @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'dryBulbTemp' && weatherDataSelection != 'wetBulbTemp' && weatherDataSelection != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
-    <tfoot>
-      <tr>
-        <th>
-          Total
-        </th>
-        @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
-          <th>
-            {{yearSummaryData | total: 'heatingDegreeDays' | number}}
-          </th>
-        }
-        @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
-          <th>
-            {{yearSummaryData | total: 'coolingDegreeDays' | number}}
-          </th>
-        }
-      </tr>
-    </tfoot>
+  @if (weatherDataSelection != 'relativeHumidity' && weatherDataSelection != 'dryBulbTemp' && weatherDataSelection !=
+  'wetBulbTemp' && weatherDataSelection != 'dewPointTemp' && weatherDataSelection != 'precipitation') {
+  <tfoot>
+    <tr>
+      <th>
+        Total
+      </th>
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD') {
+      <th>
+        {{yearSummaryData | total: 'heatingDegreeDays' | number}}
+      </th>
+      }
+      @if (weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD') {
+      <th>
+        {{yearSummaryData | total: 'coolingDegreeDays' | number}}
+      </th>
+      }
+      <th></th>
+    </tr>
+  </tfoot>
   }
 </table>
 
