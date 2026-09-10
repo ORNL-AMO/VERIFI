@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PortalModule } from '@angular/cdk/portal';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AccountDataModule } from './account/data/account-data.module';
 import { AccountHomeComponent } from './account/home/account-home.component';
@@ -39,6 +40,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
     FormsModule,
     NotificationsModule,
     PortalModule,
+    ScrollingModule,
     AccountDataModule,
     AccountPortfolioModule,
     FacilityDataModule,

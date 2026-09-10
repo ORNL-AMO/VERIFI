@@ -80,11 +80,21 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 route helper, single-site redirect, and section navigation specs; validation planner decides parent checks.
 
+### Facility Meters Workspace Navigation Workflow
+
+- **Workflow:** v1 Facility Data > Meters workspace, issues #2644 and #2645.
+- **Existing v0 entry point:** Facility meter setup, meter readings, monthly data, meter grouping, and data quality are split across Data Management and Facility utility routes.
+- **Decision:** Rebuild the production v1 workflow as one Facility Data > Meters workspace with grouped meter cards and deep-linked selected-meter workbench tabs.
+- **Parity:** This first slice establishes navigation, grouped meter visibility, meter selection, workbench tabs, empty states, pending/read-only messaging, and WIP placeholders for detailed content.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
+- **Tests:** Focused v1 route/navigation specs and Facility Data Meters component specs; validation planner decides parent checks.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.
 - Rebuild v1 UI components from scratch using the new architecture and P1 learnings.
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.
+- In v1, use the themed content-control color (`--v1-content-control`, orange in the default theme) as the active fill, border, or indicator for tabs, segmented toggles, selectors, nav-panel active indicators, and other content navigation controls. Keep active labels on neutral text unless contrast requires otherwise. Use the themed action color (`--v1-action`, blue in the default theme) for additive page actions such as adding a facility, meter, or group. Prefer the semantic tokens and button classes over hard-coded colors.
 - Keep current public v0 URLs stable while v0 remains the default experience.
 - Keep `/p1` prototype routes and `/v1` production routes out of `develop`; on `unified-ux`, root routing lazy-loads `/p1`, `/v1`, and the default v0 route tree.
 - Treat `/p1` as non-production reference material. It may temporarily import `@v0/shared/*` while production v1 must not import from `@v0/*`.

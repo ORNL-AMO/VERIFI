@@ -1,0 +1,94 @@
+:host {
+  display: block;
+}
+
+.v1-facility-meters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--v1-space-4);
+}
+
+.v1-facility-meters__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  justify-content: flex-end;
+}
+
+.v1-meter-dashboard-workspace {
+  position: relative;
+  display: grid;
+  gap: var(--v1-space-4);
+  min-height: 32rem;
+  padding-top: var(--v1-space-3);
+}
+
+.v1-meter-dashboard-mode-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(7rem, 1fr));
+  justify-self: start;
+  overflow: hidden;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-meter-dashboard-mode-toggle__item {
+  display: inline-flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0 var(--v1-space-3);
+  border: 0;
+  border-right: 1px solid var(--v1-border);
+  background: transparent;
+  color: var(--v1-muted);
+  font-weight: 800;
+}
+
+.v1-meter-dashboard-mode-toggle__item:last-child {
+  border-right: 0;
+}
+
+.v1-meter-dashboard-mode-toggle__item:hover,
+.v1-meter-dashboard-mode-toggle__item:focus-visible {
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-panel));
+  color: var(--v1-content-control);
+}
+
+.v1-meter-dashboard-mode-toggle__item--active {
+  background: color-mix(in srgb, var(--v1-content-control) 11%, var(--v1-panel));
+  color: var(--v1-text);
+}
+
+@media (max-width: 680px) {
+  .v1-facility-meters__header {
+    display: grid;
+    align-items: stretch;
+  }
+
+  .v1-facility-meters__header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .v1-facility-meters__header-actions > * {
+    width: 100%;
+  }
+
+  .v1-meter-dashboard-mode-toggle {
+    grid-template-columns: 1fr;
+    justify-self: stretch;
+  }
+
+  .v1-meter-dashboard-mode-toggle__item {
+    border-right: 0;
+    border-bottom: 1px solid var(--v1-border);
+  }
+
+  .v1-meter-dashboard-mode-toggle__item:last-child {
+    border-bottom: 0;
+  }
+}

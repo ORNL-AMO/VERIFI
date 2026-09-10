@@ -1,0 +1,43 @@
+.v1-meter-slideout-form {
+  display: grid;
+  gap: var(--v1-space-4);
+}
+
+.v1-meter-slideout-form label {
+  display: grid;
+  gap: var(--v1-space-2);
+  font-weight: 800;
+}
+
+.v1-meter-slideout-form input,
+.v1-meter-slideout-form select,
+.v1-meter-slideout-form textarea {
+  min-height: var(--v1-control-height);
+  width: 100%;
+  padding: .55rem .7rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-surface);
+  color: var(--v1-text);
+}
+
+.v1-meter-slideout-form textarea {
+  resize: vertical;
+}
+
+.v1-meter-slideout-form small {
+  color: var(--v1-muted);
+  font-weight: 600;
+}
+
+.v1-meter-slideout-form__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  justify-content: flex-end;
+  padding-top: var(--v1-space-2);
+}
+
+.v1-meter-slideout-form__footer .v1-btn--danger {
+  margin-right: auto;
+}

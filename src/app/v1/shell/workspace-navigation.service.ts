@@ -11,6 +11,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
+export type FacilityMeterRouteTab = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -268,6 +269,10 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
   }
 
+  facilityMeterRoute(facilityGuid: string, meterGuid: string, tab: FacilityMeterRouteTab = 'settings'): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab];
+  }
+
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
@@ -363,12 +368,19 @@ export class WorkspaceNavigationService {
     const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
     const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
     const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
-
-    return {
-      help: [
+    const help = isFacility && this.activeSection() === 'data' && this.activeDetail() === 'meters'
+      ? [
+        'Use Meters view to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.',
+        'Switch to Grouping view to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.',
+        'Open a meter card to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
+      ]
+      : [
         `This v1 Home page is the production shell starter for ${name || 'the selected workspace'}.`,
         'Use the rail and context controls to confirm account and facility navigation before workflow pages are migrated.'
-      ],
+      ];
+
+    return {
+      help,
       todos: [
         isFacility ? 'Review facility setup and migrated workflow readiness.' : this.activeSection() === 'settings' ? 'Confirm account settings before detailed workflows use them.' : 'Review account setup and portfolio readiness.',
         'Data, analysis, reports, and import workflows remain in current VERIFI until their v1 slices are built.'

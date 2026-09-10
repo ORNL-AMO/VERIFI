@@ -1,0 +1,47 @@
+<section class="v1-meter-lane v1-meter-lane--{{ section.tone }}" [attr.aria-labelledby]="'v1-meter-group-' + section.id">
+  <header class="v1-meter-lane__header">
+    <div>
+      <h2 [id]="'v1-meter-group-' + section.id">
+        <span class="v1-meter-lane__group-icon fa fa-layer-group" aria-hidden="true"></span>
+        {{ section.label }}
+      </h2>
+      <p>
+        {{ section.group?.groupType || 'No group assigned' }} - {{ section.meters.length }}
+        {{ section.meters.length === 1 ? 'meter' : 'meters' }}
+      </p>
+    </div>
+    @if (section.group) {
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canWrite" (click)="editGroup.emit(section)">
+        <span class="fa fa-pen" aria-hidden="true"></span>
+        Edit group
+      </button>
+    }
+  </header>
+
+  <div
+    class="v1-meter-lane__dropzone"
+    cdkDropList
+    [id]="dropListId"
+    [cdkDropListData]="section.meters"
+    [cdkDropListConnectedTo]="connectedDropListIds"
+    [cdkDropListDisabled]="!canWrite"
+    [cdkDropListEnterPredicate]="enterPredicate"
+    [cdkDropListAutoScrollDisabled]="false"
+    [cdkDropListAutoScrollStep]="24"
+    (cdkDropListDropped)="onDrop($event)"
+    role="list"
+    [attr.aria-label]="section.label + ' meters'">
+    @if (section.meters.length === 0) {
+      <p class="v1-meter-lane__empty">Drop meters here or use Move meter to assign them.</p>
+    } @else {
+      @for (card of section.meters; track card.meter.guid) {
+        <app-meter-group-card
+          [card]="card"
+          [canMove]="canWrite"
+          (opened)="openMeter.emit($event)"
+          (moveRequested)="moveMeter.emit($event)">
+        </app-meter-group-card>
+      }
+    }
+  </div>
+</section>

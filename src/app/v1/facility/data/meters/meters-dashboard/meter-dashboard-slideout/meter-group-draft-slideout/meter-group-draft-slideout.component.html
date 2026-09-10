@@ -1,0 +1,54 @@
+<app-meter-dashboard-slideout
+  [title]="group ? 'Edit group' : 'Add group'"
+  [description]="group ? 'Update this meter group.' : 'Create a group for organizing meter cards.'"
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
+    <label>
+      <span>Group name</span>
+      <input type="text" [value]="draft().name" [disabled]="saving" required (input)="setName($event)">
+    </label>
+
+    <label>
+      <span>Group type</span>
+      <select
+        [value]="draft().groupType"
+        [disabled]="saving || assignedMeterCount > 0"
+        required
+        (change)="setGroupType($event)">
+        @for (type of groupTypes; track type) {
+          <option [value]="type">{{ type }}</option>
+        }
+      </select>
+      @if (assignedMeterCount > 0) {
+        <small>Move meters out of this group before changing its type.</small>
+      }
+    </label>
+
+    <label>
+      <span>Description</span>
+      <textarea rows="4" [value]="draft().description || ''" [disabled]="saving" (input)="setDescription($event)"></textarea>
+    </label>
+
+    <footer class="v1-meter-slideout-form__footer">
+      @if (group) {
+        <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving" (click)="requestDelete()">
+          <span class="fa fa-trash" aria-hidden="true"></span>
+          Delete group
+        </button>
+      }
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button
+        type="submit"
+        class="v1-btn v1-btn--action"
+        [disabled]="saving || !isValid()">
+        @if (saving) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+        } @else {
+          <span class="fa fa-check" aria-hidden="true"></span>
+        }
+        {{ group ? 'Save group' : 'Add group' }}
+      </button>
+    </footer>
+  </form>
+</app-meter-dashboard-slideout>

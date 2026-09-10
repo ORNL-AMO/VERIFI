@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { ScrollingModule, CdkScrollable } from '@angular/cdk/scrolling';
 import { NgModule } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
@@ -14,7 +16,7 @@ import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } fr
 import { WorkspaceShellComponent } from './workspace-shell.component';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NotificationsModule, RouterModule.forRoot([])],
+  imports: [CommonModule, FormsModule, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,
@@ -85,6 +87,12 @@ describe('WorkspaceShellComponent', () => {
     const region = fixture.nativeElement.querySelector('.v1-workspace__notifications');
 
     expect(region.querySelector('app-notification-toast-host')).not.toBeNull();
+  });
+
+  it('registers the main workspace pane as the CDK scroll container for drag auto-scroll', () => {
+    const scrollable = fixture.debugElement.query(By.directive(CdkScrollable));
+
+    expect(scrollable.nativeElement.classList.contains('v1-workspace__main')).toBe(true);
   });
 
   it('applies motion classes from the current v1 route transition', () => {

@@ -1,0 +1,119 @@
+<article
+  class="v1-meter-browse-card"
+  role="listitem"
+  [class.v1-meter-browse-card--status-info]="card.statusTone === 'info'"
+  [class.v1-meter-browse-card--status-warning]="card.statusTone === 'warning'"
+  [class.v1-meter-browse-card--status-danger]="card.statusTone === 'danger'">
+  <header class="v1-meter-browse-card__header">
+    <button type="button" class="v1-meter-browse-card__title" [attr.aria-label]="'Open ' + card.meter.name + ' settings'" (click)="openSettings()">
+      <span class="fa fa-gauge-high" aria-hidden="true"></span>
+      <span class="v1-meter-browse-card__title-text">{{ card.meter.name }}</span>
+      <span class="fa fa-chevron-right v1-meter-browse-card__title-chevron" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  <div class="v1-meter-browse-card__body">
+    @if (actionError()) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <span>{{ actionError() }}</span>
+      </div>
+    }
+
+    <div class="v1-meter-browse-card__chips">
+      <span class="v1-meter-browse-card__source-chip" [style.--v1-meter-source-color]="card.sourceColor || null">
+        {{ card.meter.source }}
+      </span>
+      <span class="v1-chip v1-chip--{{ card.statusTone || 'info' }} v1-meter-browse-card__status">
+        <span class="fa {{ card.statusIcon || 'fa-circle-notch' }}" aria-hidden="true"></span>
+        {{ card.statusLabel || 'Checking' }}
+      </span>
+    </div>
+
+    <dl class="v1-meter-browse-card__facts">
+      <div>
+        <dt>First reading</dt>
+        <dd>{{ card.firstReadingLabel || 'No data' }}</dd>
+      </div>
+      <div>
+        <dt>Latest</dt>
+        <dd>{{ card.latestReadingLabel || 'No data' }}</dd>
+      </div>
+      <div>
+        <dt>Scope</dt>
+        <dd>{{ card.scopeLabel || 'Not set' }}</dd>
+      </div>
+      @if (card.fuelLabel) {
+        <div>
+          <dt>Fuel</dt>
+          <dd>{{ card.fuelLabel }}</dd>
+        </div>
+      }
+    </dl>
+
+    @if (card.statusIssueLabels && card.statusIssueLabels.length > 0) {
+      <div class="v1-meter-browse-card__issues" aria-label="Meter status issues">
+        @for (issue of card.statusIssueLabels; track issue) {
+          <span class="v1-badge v1-badge--{{ card.statusTone || 'info' }}">{{ issue }}</span>
+        }
+      </div>
+    }
+
+    @if (card.statusActionSummaries && card.statusActionSummaries.length > 0) {
+      <ul class="v1-meter-browse-card__status-notes">
+        @for (summary of card.statusActionSummaries; track summary) {
+          <li>
+            <span class="fa {{ card.statusIcon || 'fa-circle-notch' }}" aria-hidden="true"></span>
+            {{ summary }}
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <footer class="v1-meter-browse-card__footer">
+    <span class="v1-meter-browse-card__group-tag">
+      <span class="fa fa-layer-group" aria-hidden="true"></span>
+      {{ card.group?.name || 'Ungrouped' }}
+    </span>
+    <div class="v1-meter-browse-card__actions" aria-label="Meter actions">
+      <button type="button" class="v1-icon-btn" title="Open readings" aria-label="Open readings" (click)="openReadings()">
+        <span class="fa fa-table-list" aria-hidden="true"></span>
+      </button>
+      <button type="button" class="v1-icon-btn" title="Copy meter" aria-label="Copy meter" [disabled]="!canAct()" (click)="requestCopyMeter()">
+        @if (saving()) {
+          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+        } @else {
+          <span class="fa fa-copy" aria-hidden="true"></span>
+        }
+      </button>
+      <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete meter" aria-label="Delete meter" [disabled]="!canAct()" (click)="requestDeleteMeter()">
+        <span class="fa fa-trash" aria-hidden="true"></span>
+      </button>
+    </div>
+  </footer>
+</article>
+
+<ng-template #copyMeterConfirmModal>
+  @if (meterToCopy(); as cardToCopy) {
+    <app-confirm-copy-meter-modal
+      [card]="cardToCopy"
+      [saving]="saving()"
+      [error]="actionError()"
+      (confirmed)="confirmCopyMeter()"
+      (cancelled)="cancelCopyMeter()">
+    </app-confirm-copy-meter-modal>
+  }
+</ng-template>
+
+<ng-template #deleteMeterConfirmModal>
+  @if (meterToDelete(); as cardToDelete) {
+    <app-confirm-delete-meter-modal
+      [card]="cardToDelete"
+      [saving]="saving()"
+      [error]="actionError()"
+      (confirmed)="confirmDeleteMeter()"
+      (cancelled)="cancelDeleteMeter()">
+    </app-confirm-delete-meter-modal>
+  }
+</ng-template>

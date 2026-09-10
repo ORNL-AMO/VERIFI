@@ -1,0 +1,54 @@
+@let currentFacility = workspace.facility();
+
+@if (!currentFacility) {
+  <article class="v1-empty-state" role="status">
+    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility before managing meters and meter data.</p>
+  </article>
+} @else {
+  <header class="v1-section-header v1-facility-meters__header">
+    <div>
+      <p class="v1-eyebrow">Facility Data</p>
+      <h1 id="v1-facility-meters-title">Meters</h1>
+    </div>
+    <div class="v1-facility-meters__header-actions" aria-label="Meter dashboard view">
+      <div class="v1-meter-dashboard-mode-toggle" role="group" aria-label="Meter dashboard view">
+        @for (mode of dashboardModes(); track mode.id) {
+          <button
+            type="button"
+            class="v1-meter-dashboard-mode-toggle__item"
+            [class.v1-meter-dashboard-mode-toggle__item--active]="activeMode() === mode.id"
+            [attr.aria-pressed]="activeMode() === mode.id"
+            (click)="setMode(mode.id)">
+            <span class="fa {{ mode.icon }}" aria-hidden="true"></span>
+            {{ mode.label }}
+          </button>
+        }
+      </div>
+    </div>
+  </header>
+
+  @if (!workspace.canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <span class="fa fa-lock" aria-hidden="true"></span>
+      <span>Meter actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  } @else if (workspace.hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <span>Another workspace update is still finishing.</span>
+    </div>
+  }
+
+  <div class="v1-meter-dashboard-workspace">
+    @switch (activeMode()) {
+      @case ('grouping') {
+        <app-meters-grouping-view></app-meters-grouping-view>
+      }
+      @default {
+        <app-meters-browse-view></app-meters-browse-view>
+      }
+    }
+  </div>
+}

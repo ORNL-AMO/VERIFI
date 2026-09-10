@@ -1,0 +1,8 @@
+.v1-modal__body {
+  display: grid;
+  gap: var(--v1-space-2);
+}
+
+.v1-modal__body p {
+  margin: 0;
+}

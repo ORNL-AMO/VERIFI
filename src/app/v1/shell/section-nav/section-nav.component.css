@@ -54,16 +54,11 @@
   cursor: pointer;
 }
 
-.v1-nav__context button.active:first-child {
-  background: var(--v1-surface);
-  color: var(--v1-account);
-  box-shadow: inset 0 0 0 1px currentColor;
-}
-
+.v1-nav__context button.active:first-child,
 .v1-nav__context button.active:last-child {
-  background: var(--v1-surface);
-  color: var(--v1-facility);
-  box-shadow: inset 0 0 0 1px currentColor;
+  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
+  color: var(--v1-text);
+  box-shadow: inset 0 0 0 1px var(--v1-content-control);
 }
 
 .v1-nav__context button:disabled {
@@ -142,20 +137,10 @@
 }
 
 .v1-nav__group a.active {
-  border-color: color-mix(in srgb, var(--v1-facility) 30%, var(--v1-border));
-  background: var(--v1-surface);
+  border-color: color-mix(in srgb, var(--v1-content-control) 30%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
   color: var(--v1-text);
-  box-shadow: inset 3px 0 0 var(--v1-facility);
-}
-
-:host-context(.v1-workspace--account) .v1-nav__group a.active {
-  border-color: color-mix(in srgb, var(--v1-account) 30%, var(--v1-border));
-  box-shadow: inset 3px 0 0 var(--v1-account);
-}
-
-:host-context(.v1-workspace--facility) .v1-nav__group a.active {
-  border-color: color-mix(in srgb, var(--v1-facility) 30%, var(--v1-border));
-  box-shadow: inset 3px 0 0 var(--v1-facility);
+  box-shadow: inset 3px 0 0 var(--v1-content-control);
 }
 
 .v1-nav__group a.v1-nav__item--danger {
@@ -163,9 +148,10 @@
 }
 
 .v1-nav__group a.v1-nav__item--danger.active {
-  border-color: color-mix(in srgb, var(--v1-danger) 38%, var(--v1-border));
-  background: color-mix(in srgb, var(--v1-danger) 8%, var(--v1-surface));
-  box-shadow: inset 3px 0 0 var(--v1-danger);
+  border-color: color-mix(in srgb, var(--v1-content-control) 30%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
+  color: var(--v1-danger);
+  box-shadow: inset 3px 0 0 var(--v1-content-control);
 }
 
 .v1-nav__group button:disabled {

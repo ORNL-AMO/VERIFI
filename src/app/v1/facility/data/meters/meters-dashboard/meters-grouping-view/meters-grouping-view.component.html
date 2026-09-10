@@ -1,0 +1,81 @@
+<section class="v1-meters-grouping" aria-label="Meter grouping">
+  <div class="v1-meter-dashboard-action-bar" aria-label="Meter grouping actions">
+    <div class="v1-meter-dashboard-action-bar__primary">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddGroup()">
+        <span class="fa fa-layer-group" aria-hidden="true"></span>
+        Add group
+      </button>
+    </div>
+  </div>
+
+  @if (actionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>{{ actionError() }}</span>
+    </div>
+  }
+
+  @if (workspace.groupSections().length === 0) {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-layer-group" aria-hidden="true"></span>
+      <h2>No groups or meters yet</h2>
+      <p>Add a group or add a meter to start organizing this facility.</p>
+    </article>
+  } @else {
+    <div class="v1-facility-meters__groups" aria-label="Facility meters by group">
+      @for (section of workspace.groupSections(); track section.id) {
+        <app-meter-group-lane
+          [section]="section"
+          [connectedDropListIds]="dropListIds()"
+          [canWrite]="canAct()"
+          [canDrop]="canDrop"
+          (editGroup)="openEditGroup($event)"
+          (meterDropped)="onMeterDropped($event)"
+          (openMeter)="openMeterCard($event)"
+          (moveMeter)="openMoveMeter($event)">
+        </app-meter-group-lane>
+      }
+    </div>
+  }
+
+  @if (slideout(); as activeSlideout) {
+    @switch (activeSlideout.kind) {
+      @case ('add-group') {
+        <app-meter-group-draft-slideout
+          [saving]="saving()"
+          (submitted)="saveGroupDraft($event)"
+          (cancelled)="closeSlideout()">
+        </app-meter-group-draft-slideout>
+      }
+      @case ('edit-group') {
+        <app-meter-group-draft-slideout
+          [group]="activeSlideout.group"
+          [assignedMeterCount]="activeSlideout.assignedMeterCount"
+          [saving]="saving()"
+          (submitted)="saveGroupDraft($event)"
+          (deleteRequested)="requestDeleteGroup($event)"
+          (cancelled)="closeSlideout()">
+        </app-meter-group-draft-slideout>
+      }
+      @case ('move-meter') {
+        <app-move-meter-slideout
+          [card]="activeSlideout.card"
+          [targets]="moveTargets()"
+          [saving]="saving()"
+          (submitted)="moveMeter(activeSlideout.card, $event)"
+          (cancelled)="closeSlideout()">
+        </app-move-meter-slideout>
+      }
+    }
+  }
+
+  @if (groupToDelete(); as group) {
+    <app-confirm-delete-group-modal
+      [group]="group"
+      [assignedMeterCount]="groupToDeleteAssignedMeterCount()"
+      [saving]="saving()"
+      (confirmed)="confirmDeleteGroup()"
+      (cancelled)="cancelDeleteGroup()">
+    </app-confirm-delete-group-modal>
+  }
+</section>
