@@ -9,6 +9,8 @@
   padding: var(--v1-space-4);
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius);
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
   background: var(--v1-surface);
 }
 

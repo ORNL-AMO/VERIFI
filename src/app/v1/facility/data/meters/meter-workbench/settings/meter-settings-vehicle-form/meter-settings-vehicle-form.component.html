@@ -1,0 +1,85 @@
+<section class="meter-settings-section" [formGroup]="form">
+  <h3>Vehicle setup</h3>
+  <div class="v1-settings-grid v1-settings-grid--2">
+    <label class="meter-settings-field">
+      <span>Vehicle Category <span class="meter-settings-required">*</span></span>
+      <select class="form-select" formControlName="vehicleCategory" (change)="ruleChange.emit('vehicleCategory')">
+        @for (category of viewModel.vehicleCategories; track category.value) {
+          <option [ngValue]="category.value">{{ category.label }}</option>
+        }
+      </select>
+    </label>
+
+    @if (form.controls.vehicleCategory.value !== 1) {
+      <label class="meter-settings-field">
+        <span>Vehicle Type <span class="meter-settings-required">*</span></span>
+        <select class="form-select" formControlName="vehicleType" (change)="ruleChange.emit('vehicleType')">
+          @for (vehicleType of viewModel.vehicleTypes; track vehicleType.value) {
+            <option [ngValue]="vehicleType.value">{{ vehicleType.label }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    @if (form.controls.vehicleCategory.value === 2) {
+      <label class="meter-settings-field">
+        <span>Collection Method <span class="meter-settings-required">*</span></span>
+        <select class="form-select" formControlName="vehicleCollectionType" (change)="immediateChange.emit()">
+          @for (collectionType of viewModel.vehicleCollectionTypes; track collectionType.value) {
+            <option [ngValue]="collectionType.value">{{ collectionType.label }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <label class="meter-settings-field">
+      <span>Collection Unit <span class="meter-settings-required">*</span></span>
+      <select class="form-select" formControlName="vehicleCollectionUnit" (change)="immediateChange.emit('vehicleCollectionUnit')">
+        @for (unit of viewModel.vehicleCollectionUnitOptions; track unit.value) {
+          <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
+        }
+      </select>
+    </label>
+
+    @if (form.controls.vehicleCategory.value === 2) {
+      <label class="meter-settings-field">
+        <span>Distance Unit <span class="meter-settings-required">*</span></span>
+        <select class="form-select" formControlName="vehicleDistanceUnit" (change)="immediateChange.emit()">
+          <option [ngValue]="'mi'">Miles (mi)</option>
+          <option [ngValue]="'km'">Kilometers (km)</option>
+        </select>
+      </label>
+    }
+
+    <label class="meter-settings-field">
+      <span>Energy Unit <span class="meter-settings-required">*</span></span>
+      <select class="form-select" formControlName="energyUnit" (change)="immediateChange.emit('energyUnit')">
+        @for (unit of viewModel.energyUnitOptions; track unit.value) {
+          <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
+        }
+      </select>
+      @if (viewModel.hasDifferentEnergyUnits) {
+        <small class="meter-settings-warning">Units differ from the facility settings.</small>
+      }
+    </label>
+
+    <label class="meter-settings-field">
+      <span>Fuel <span class="meter-settings-required">*</span></span>
+      <select class="form-select" formControlName="vehicleFuel" (change)="immediateChange.emit('vehicleFuel')">
+        @for (fuel of viewModel.vehicleFuelOptions; track fuel.value) {
+          <option [ngValue]="fuel.value">{{ fuel.value }}</option>
+        }
+      </select>
+    </label>
+
+    @if (form.controls.vehicleCategory.value === 2) {
+      <label class="meter-settings-field">
+        <span>Average Fuel Efficiency <span class="meter-settings-required">*</span></span>
+        <div class="input-group">
+          <input class="form-control" type="number" formControlName="vehicleFuelEfficiency" (input)="textChange.emit()">
+          <span class="input-group-text">{{ form.controls.vehicleDistanceUnit.value }}/{{ form.controls.vehicleCollectionUnit.value }}</span>
+        </div>
+      </label>
+    }
+  </div>
+</section>

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, ViewChild, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -29,6 +29,8 @@ export class MeterWorkbenchComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly activeTab = this.activeTabState.asReadonly();
   readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
+  readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
+  readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
 
   constructor() {
     this.syncActiveTabFromRoute();

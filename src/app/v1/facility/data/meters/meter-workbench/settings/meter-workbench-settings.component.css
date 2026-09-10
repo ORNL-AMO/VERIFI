@@ -1,0 +1,242 @@
+.meter-settings {
+  display: block;
+  padding-top: 1rem;
+  border-left: 1px solid var(--v1-border);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.meter-settings__heading {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.meter-settings__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.42fr);
+  gap: 1.75rem;
+}
+
+.meter-settings__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
+}
+
+.meter-settings__main,
+.meter-settings__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.meter-settings__main > app-meter-settings-vehicle-form,
+.meter-settings__main > app-meter-settings-emissions-details,
+.meter-settings__main > app-meter-settings-electricity-form,
+.meter-settings__main > app-meter-settings-other-info,
+.meter-settings__main > app-meter-settings-status-form {
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
+}
+
+.meter-settings-section {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.meter-settings-section h3 {
+  margin: 0;
+  color: var(--v1-ink);
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.meter-settings-section__heading {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.meter-settings-save-status {
+  flex: 0 0 auto;
+}
+
+.meter-settings__lock-alert {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.meter-settings__lock-alert-icon {
+  align-self: start;
+  margin-top: 0.2rem;
+}
+
+.meter-settings__lock-alert-message {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.meter-settings__lock-alert-message strong {
+  color: inherit;
+}
+
+.meter-settings__lock-alert .v1-btn {
+  justify-self: end;
+}
+
+.meter-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.meter-settings-field > span,
+.meter-settings-field > label,
+.meter-settings-label {
+  color: var(--v1-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.meter-settings-field input,
+.meter-settings-field select,
+.meter-settings-field textarea {
+  width: 100%;
+}
+
+.meter-settings-field textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.meter-settings-required {
+  color: var(--v1-danger);
+}
+
+.meter-settings-help {
+  color: var(--v1-muted);
+  font-size: 0.82rem;
+}
+
+.meter-settings-error {
+  color: var(--v1-danger);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.meter-settings-warning {
+  color: var(--v1-warning);
+  font-size: 0.82rem;
+}
+
+.meter-settings-checks {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.meter-settings-check {
+  align-items: center;
+  display: flex;
+  gap: 0.65rem;
+}
+
+.meter-settings-check input {
+  flex: 0 0 auto;
+}
+
+.meter-settings-check input[type="checkbox"] {
+  width: 1rem;
+  min-width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  max-height: 1rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 0.2rem;
+  box-shadow: none;
+  accent-color: var(--v1-action);
+}
+
+.meter-settings-check span {
+  min-width: 0;
+  color: var(--v1-ink);
+  font-weight: 700;
+  line-height: 1.25;
+  text-transform: none;
+}
+
+.meter-settings-charge-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.meter-settings-charge {
+  align-items: end;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10rem, 0.6fr) auto;
+  gap: 0.65rem;
+}
+
+.meter-settings-emissions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.meter-settings-emission-item {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--v1-muted) 6%, transparent);
+}
+
+.meter-settings-emission-item span {
+  color: var(--v1-muted);
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.meter-settings-emission-item strong {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 992px) {
+  .meter-settings__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .meter-settings-charge,
+  .meter-settings-emissions {
+    grid-template-columns: 1fr;
+  }
+
+  .meter-settings__lock-alert {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .meter-settings__lock-alert .v1-btn {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

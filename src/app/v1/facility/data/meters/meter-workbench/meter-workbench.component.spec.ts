@@ -185,16 +185,32 @@ describe('MeterWorkbenchComponent', () => {
     expect(text).toContain('This meter is not available in Facility A.');
   });
 
-  it('shows read-only and pending state messaging', () => {
+  it('suppresses workspace availability messaging for settings autosave', () => {
     const readOnlyFixture = setup({ canWrite: false });
     readOnlyFixture.detectChanges();
-    expect(readOnlyFixture.nativeElement.textContent).toContain('Meter actions are unavailable');
+    expect(readOnlyFixture.nativeElement.textContent).not.toContain('Meter actions are unavailable');
 
     TestBed.resetTestingModule();
 
     const pendingFixture = setup({ hasPending: true });
     pendingFixture.detectChanges();
-    expect(pendingFixture.nativeElement.textContent).toContain('Another workspace update is still finishing');
+    expect(pendingFixture.nativeElement.textContent).not.toContain('Another workspace update is still finishing');
+  });
+
+  it('shows pending messaging for non-settings workbench tabs', () => {
+    const fixture = setup({ hasPending: true, tab: 'readings' });
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Another workspace update is still finishing');
+  });
+
+  it('shows workspace unavailable messaging for non-settings workbench tabs', () => {
+    const fixture = setup({ canWrite: false, tab: 'readings' });
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Meter actions are unavailable');
   });
 });
 

@@ -1,0 +1,179 @@
+<section class="meter-settings-section" [formGroup]="form">
+  <div class="meter-settings-section__heading">
+    <h3>Meter information</h3>
+    <span class="v1-settings-panel__status meter-settings-save-status"
+      [class.v1-settings-panel__status--error]="saveState === 'error' || saveState === 'invalid'"
+      aria-live="polite">
+      @if (saveState === 'saving') {
+        <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      } @else if (saveState === 'saved') {
+        <span class="fa fa-check" aria-hidden="true"></span>
+      } @else if (saveState === 'error' || saveState === 'invalid') {
+        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      }
+      {{ saveMessage }}
+    </span>
+  </div>
+  <div class="v1-settings-grid v1-settings-grid--2">
+    <label class="meter-settings-field">
+      <span>Name <span class="meter-settings-required">*</span></span>
+      <input class="form-control" type="text" formControlName="name" maxlength="100" (input)="textChange.emit()">
+      @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+        <small class="meter-settings-error">Meter name is required.</small>
+      }
+    </label>
+
+    <label class="meter-settings-field">
+      <span>Source <span class="meter-settings-required">*</span></span>
+      <select class="form-select" formControlName="source" (change)="ruleChange.emit('source')">
+        @for (source of viewModel.sourceOptions; track source) {
+          <option [ngValue]="source">{{ source }}</option>
+        }
+      </select>
+    </label>
+
+    @if (viewModel.displayScope) {
+      <label class="meter-settings-field">
+        <span>Scope</span>
+        <select class="form-select" formControlName="scope" (change)="immediateChange.emit('scope')">
+          @for (scope of viewModel.scopeOptions; track scope.value) {
+            <option [ngValue]="scope.value">{{ scope.optionLabel }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    @if (form.controls.scope.value !== 2) {
+      <label class="meter-settings-field">
+        <span>Collection Unit <span class="meter-settings-required">*</span></span>
+        <select class="form-select" formControlName="startingUnit" (change)="immediateChange.emit('collectionUnit')">
+          @for (unit of viewModel.startingUnitOptions; track unit.value) {
+            <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
+          }
+        </select>
+        @if (viewModel.hasDifferentCollectionUnits || (viewModel.hasDifferentEnergyUnits && viewModel.collectionUnitIsEnergy)) {
+          <small class="meter-settings-warning">Units differ from the facility settings.</small>
+        }
+      </label>
+
+      @if (viewModel.displayEnergyUnit) {
+        <label class="meter-settings-field">
+          <span>Energy Unit <span class="meter-settings-required">*</span></span>
+          <select class="form-select" formControlName="energyUnit" (change)="immediateChange.emit('energyUnit')">
+            @for (unit of viewModel.energyUnitOptions; track unit.value) {
+              <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
+            }
+          </select>
+          @if (viewModel.hasDifferentEnergyUnits) {
+            <small class="meter-settings-warning">Units differ from the facility settings.</small>
+          }
+        </label>
+      }
+
+      @if (viewModel.displayDemandUnit) {
+        <label class="meter-settings-field">
+          <span>Demand Unit</span>
+          <select class="form-select" formControlName="demandUnit" (change)="immediateChange.emit('collectionUnit')">
+            @for (unit of viewModel.demandUnitOptions; track unit.value) {
+              <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (viewModel.displaySiteToSource) {
+        <label class="meter-settings-field">
+          <span>Site to Source <span class="meter-settings-required">*</span></span>
+          <input class="form-control" type="number" formControlName="siteToSource" min="0" (input)="textChange.emit()">
+          @if (form.controls.siteToSource.hasError('required')) {
+            <small class="meter-settings-error">Site to source is required.</small>
+          }
+          @if (form.controls.siteToSource.value === 0) {
+            <small class="meter-settings-warning">Site to source should be greater than 0.</small>
+          }
+        </label>
+      }
+
+      @if (viewModel.displayPhase) {
+        <label class="meter-settings-field">
+          <span>Phase <span class="meter-settings-required">*</span></span>
+          <select class="form-select" formControlName="phase" (change)="immediateChange.emit('phase')">
+            @for (phase of viewModel.phaseOptions; track phase) {
+              <option [ngValue]="phase">{{ phase }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (viewModel.displayFuel) {
+        <label class="meter-settings-field">
+          <span>{{ viewModel.energySourceLabel }} <span class="meter-settings-required">*</span></span>
+          <select class="form-select" formControlName="fuel" (change)="immediateChange.emit('fuel')">
+            @for (fuel of viewModel.fuelTypeOptions; track fuel.value) {
+              <option [ngValue]="fuel.value">{{ fuel.value }}</option>
+            }
+          </select>
+          @if (form.controls.fuel.hasError('required')) {
+            <small class="meter-settings-error">{{ viewModel.energySourceLabel }} is required.</small>
+          }
+        </label>
+      }
+
+      @if (viewModel.displayWaterIntakeTypes) {
+        <label class="meter-settings-field">
+          <span>Water Intake Type <span class="meter-settings-required">*</span></span>
+          <select class="form-select" formControlName="waterIntakeType" (change)="immediateChange.emit()">
+            @for (waterType of viewModel.waterIntakeTypes; track waterType) {
+              <option [ngValue]="waterType">{{ waterType }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (viewModel.displayWaterDischargeTypes) {
+        <label class="meter-settings-field">
+          <span>Water Discharge Type <span class="meter-settings-required">*</span></span>
+          <select class="form-select" formControlName="waterDischargeType" (change)="immediateChange.emit()">
+            @for (waterType of viewModel.waterDischargeTypes; track waterType) {
+              <option [ngValue]="waterType">{{ waterType }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (viewModel.displayHeatCapacity) {
+        <label class="meter-settings-field">
+          <span>Heat Capacity <span class="meter-settings-required">*</span></span>
+          <div class="input-group">
+            <input class="form-control" type="number" formControlName="heatCapacity" min="0" (input)="textChange.emit()">
+            <span class="input-group-text" [innerHTML]="heatCapacityUnits"></span>
+          </div>
+          @if (form.controls.heatCapacity.hasError('required')) {
+            <small class="meter-settings-error">Heat capacity is required.</small>
+          }
+          @if (form.controls.heatCapacity.hasError('min')) {
+            <small class="meter-settings-error">Value cannot be less than 0.</small>
+          }
+          @if (form.controls.heatCapacity.value === 0) {
+            <small class="meter-settings-warning">Heat capacity should be greater than 0.</small>
+          }
+        </label>
+      }
+
+      @if (viewModel.displayGlobalWarmingPotential) {
+        <label class="meter-settings-field">
+          <span>{{ form.controls.scope.value === 5 ? 'Refrigeration Charge' : 'Process Emissions' }} <span class="meter-settings-required">*</span></span>
+          <select class="form-select" formControlName="globalWarmingPotentialOption" (change)="immediateChange.emit()">
+            @for (gwp of viewModel.globalWarmingPotentials; track gwp.value) {
+              <option [ngValue]="gwp.value" [innerHTML]="gwp.display"></option>
+            }
+          </select>
+        </label>
+        <div class="meter-settings-field">
+          <span>Global Warming Potential</span>
+          <strong>{{ viewModel.globalWarmingPotentialValue | number:'1.0-4' }} kg/{{ form.controls.startingUnit.value }}</strong>
+        </div>
+      }
+    }
+  </div>
+</section>

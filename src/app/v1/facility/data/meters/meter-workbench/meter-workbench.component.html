@@ -140,12 +140,12 @@
     }
   </header>
 
-  @if (!workspace.canWrite()) {
+  @if (showWorkspaceUnavailable()) {
     <div class="v1-alert v1-alert--warning" role="status">
       <span class="fa fa-lock" aria-hidden="true"></span>
       <span>Meter actions are unavailable while the workspace is loading or switching.</span>
     </div>
-  } @else if (workspace.hasPending()) {
+  } @else if (showWorkspacePending()) {
     <div class="v1-alert v1-alert--info" role="status">
       <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
       <span>Another workspace update is still finishing.</span>

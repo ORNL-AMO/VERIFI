@@ -41,6 +41,10 @@ export class FacilityMetersWorkspaceService {
     const selectedGuid = this.selectedMeterGuid();
     return selectedGuid ? this.meters().find(meter => meter.guid === selectedGuid) : undefined;
   });
+  readonly selectedMeterData = computed(() => {
+    const selectedGuid = this.selectedMeterGuid();
+    return selectedGuid ? this.meterData().filter(reading => reading.meterId === selectedGuid) : [];
+  });
   readonly selectedMeterCard = computed(() => {
     const selectedGuid = this.selectedMeterGuid();
     return selectedGuid ? this.meterCards().find(card => card.meter.guid === selectedGuid) : undefined;
@@ -52,7 +56,7 @@ export class FacilityMetersWorkspaceService {
   });
   readonly selectedMeterReadingCount = computed(() => {
     const meter = this.selectedMeter();
-    return meter ? this.countReadings(meter) : 0;
+    return meter ? this.selectedMeterData().length : 0;
   });
 
   constructor() {
