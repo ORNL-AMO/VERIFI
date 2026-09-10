@@ -1,0 +1,23 @@
+.v1-meter-workbench-panel {
+  display: grid;
+  gap: var(--v1-space-3);
+  padding: var(--v1-space-4);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+  box-shadow: 0 10px 24px var(--v1-shadow-soft);
+}
+
+.v1-meter-workbench-panel h2,
+.v1-meter-workbench-panel p {
+  margin: 0;
+}
+
+.v1-meter-workbench-panel h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.v1-meter-workbench-panel p {
+  color: var(--v1-muted);
+}

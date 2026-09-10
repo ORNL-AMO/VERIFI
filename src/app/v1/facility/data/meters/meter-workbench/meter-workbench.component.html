@@ -45,39 +45,11 @@
     </div>
   }
 
-  <nav class="v1-facility-meters__tabs" aria-label="Meter workbench sections">
-    @for (tab of tabs; track tab.id) {
-      <button
-        type="button"
-        class="v1-facility-meters__tab"
-        [class.v1-facility-meters__tab--active]="activeTab() === tab.id"
-        (click)="openMeter(tab.id)"
-        [attr.aria-current]="activeTab() === tab.id ? 'page' : null">
-        <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
-        {{ tab.label }}
-      </button>
-    }
-  </nav>
+  <app-meter-workbench-tabs
+    [tabs]="tabs"
+    [activeTab]="activeTab()"
+    (tabSelected)="openMeter($event)">
+  </app-meter-workbench-tabs>
 
-  <section class="v1-meter-workbench-panel" [attr.aria-label]="activeTabLabel()">
-    <div>
-      <span class="v1-chip v1-chip--info">WIP</span>
-      <h2>{{ activeTabLabel() }}</h2>
-      <p>{{ activeTabSummary() }}</p>
-    </div>
-    <dl class="v1-meter-workbench-panel__facts">
-      <div>
-        <dt>Meter source</dt>
-        <dd>{{ currentMeter.source }}</dd>
-      </div>
-      <div>
-        <dt>Group</dt>
-        <dd>{{ workspace.selectedMeterGroup()?.name || 'Ungrouped' }}</dd>
-      </div>
-      <div>
-        <dt>Readings</dt>
-        <dd>{{ workspace.selectedMeterReadingCount() }}</dd>
-      </div>
-    </dl>
-  </section>
+  <router-outlet></router-outlet>
 }

@@ -1,36 +1,39 @@
-import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import {
   METER_WORKBENCH_TABS,
   MeterWorkbenchTab,
-  MeterWorkbenchTabId,
-  meterTabLabel
+  MeterWorkbenchTabId
 } from '../facility-meters.models';
 
 @Component({
   selector: 'app-meter-workbench',
   templateUrl: './meter-workbench.component.html',
-  styleUrls: ['./meter-workbench.component.css'],
   standalone: false
 })
 export class MeterWorkbenchComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly routeData = toSignal(this.route.data);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly activeTabState = signal<MeterWorkbenchTabId>('settings');
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly activeTab = computed<MeterWorkbenchTabId>(() => {
-    const tabId = this.routeData()?.['meterTab'];
-    return isMeterWorkbenchTab(tabId) ? tabId : 'settings';
-  });
-  readonly activeTabLabel = computed(() => meterTabLabel(this.activeTab()));
-  readonly activeTabSummary = computed(() =>
-    METER_WORKBENCH_TABS.find(tab => tab.id === this.activeTab())?.summary ?? METER_WORKBENCH_TABS[0].summary
-  );
+  readonly activeTab = this.activeTabState.asReadonly();
+
+  constructor() {
+    this.syncActiveTabFromRoute();
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.syncActiveTabFromRoute());
+  }
 
   openMeters(): void {
     const facility = this.workspace.facility();
@@ -49,6 +52,11 @@ export class MeterWorkbenchComponent {
     if (facility && meter) {
       void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, tab));
     }
+  }
+
+  private syncActiveTabFromRoute(): void {
+    const tabId = this.route.firstChild?.snapshot.data['meterTab'];
+    this.activeTabState.set(isMeterWorkbenchTab(tabId) ? tabId : 'settings');
   }
 }
 

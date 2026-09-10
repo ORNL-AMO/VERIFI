@@ -1,17 +1,18 @@
-import { signal } from '@angular/core';
+import { Directive, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
 import { MeterWorkbenchTabId } from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { group, meter } from '../facility-meters.testing';
+import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meter-workbench.component';
 
 describe('MeterWorkbenchComponent', () => {
-  it('renders the selected meter workbench tab from the route', () => {
+  it('renders the selected meter header and active workbench tab from the child route', () => {
     const fixture = setup({ tab: 'monthly' });
 
     fixture.detectChanges();
@@ -19,8 +20,10 @@ describe('MeterWorkbenchComponent', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Electric Main');
     expect(text).toContain('Monthly Data');
-    expect(text).toContain('Monthly calendarized data review is WIP.');
     expect(text).toContain('Purchased Electricity');
+    const monthlyButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.includes('Monthly Data'));
+    expect(monthlyButton?.getAttribute('aria-current')).toBe('page');
   });
 
   it('navigates back to meters and between workbench tabs', () => {
@@ -52,6 +55,25 @@ describe('MeterWorkbenchComponent', () => {
     ]);
   });
 
+  it('updates the active tab when child route data changes', () => {
+    const fixture = setup({ tab: 'settings' });
+    const route = TestBed.inject(ActivatedRoute) as unknown as {
+      firstChild?: { snapshot: { data: { meterTab?: MeterWorkbenchTabId } } };
+    };
+    const router = TestBed.inject(Router) as unknown as {
+      events: Subject<NavigationEnd>;
+    };
+
+    fixture.detectChanges();
+    route.firstChild = { snapshot: { data: { meterTab: 'yearly' } } };
+    router.events.next(new NavigationEnd(1, '/yearly', '/yearly'));
+    fixture.detectChanges();
+
+    const yearlyButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.includes('Yearly Data'));
+    expect(yearlyButton?.getAttribute('aria-current')).toBe('page');
+  });
+
   it('renders a not-found state for a missing or foreign meter route', () => {
     const fixture = setup({ selectedMeter: undefined, hasMeterRoute: true });
 
@@ -75,6 +97,12 @@ describe('MeterWorkbenchComponent', () => {
   });
 });
 
+@Directive({
+  selector: 'router-outlet',
+  standalone: false
+})
+class RouterOutletStubDirective { }
+
 function setup(options: {
   tab?: MeterWorkbenchTabId;
   selectedMeter?: ReturnType<typeof meter>;
@@ -91,9 +119,14 @@ function setup(options: {
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
   const hasMeterRoute = signal(options.hasMeterRoute ?? true);
+  const routerEvents = new Subject<NavigationEnd>();
 
   TestBed.configureTestingModule({
-    declarations: [MeterWorkbenchComponent],
+    declarations: [
+      MeterWorkbenchComponent,
+      MeterWorkbenchTabsComponent,
+      RouterOutletStubDirective
+    ],
     imports: [CommonModule],
     providers: [
       {
@@ -131,8 +164,13 @@ function setup(options: {
           ]
         }
       },
-      { provide: Router, useValue: { navigate: vi.fn() } },
-      { provide: ActivatedRoute, useValue: { data: of(options.tab ? { meterTab: options.tab } : {}) } }
+      { provide: Router, useValue: { navigate: vi.fn(), events: routerEvents } },
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          firstChild: options.tab ? { snapshot: { data: { meterTab: options.tab } } } : undefined
+        }
+      }
     ]
   });
 

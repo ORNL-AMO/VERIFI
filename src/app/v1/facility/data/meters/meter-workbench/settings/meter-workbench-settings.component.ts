@@ -1,0 +1,12 @@
+import { Component } from '@angular/core';
+import { meterWorkbenchTab } from '../../facility-meters.models';
+
+@Component({
+  selector: 'app-meter-workbench-settings',
+  templateUrl: '../meter-workbench-tab-placeholder.component.html',
+  styleUrls: ['../meter-workbench-tab-placeholder.component.css'],
+  standalone: false
+})
+export class MeterWorkbenchSettingsComponent {
+  readonly tab = meterWorkbenchTab('settings');
+}

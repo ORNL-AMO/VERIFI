@@ -1,0 +1,13 @@
+<nav class="v1-facility-meters__tabs" aria-label="Meter workbench sections">
+  @for (tab of tabs; track tab.id) {
+    <button
+      type="button"
+      class="v1-facility-meters__tab"
+      [class.v1-facility-meters__tab--active]="activeTab === tab.id"
+      (click)="selectTab(tab.id)"
+      [attr.aria-current]="activeTab === tab.id ? 'page' : null">
+      <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
+      {{ tab.label }}
+    </button>
+  }
+</nav>
