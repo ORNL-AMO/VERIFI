@@ -72,7 +72,7 @@
   @if (groupToDelete(); as group) {
     <app-confirm-delete-group-modal
       [group]="group"
-      [assignedMeterCount]="assignedMeterCount(group)"
+      [assignedMeterCount]="groupToDeleteAssignedMeterCount()"
       [saving]="saving()"
       (confirmed)="confirmDeleteGroup()"
       (cancelled)="cancelDeleteGroup()">

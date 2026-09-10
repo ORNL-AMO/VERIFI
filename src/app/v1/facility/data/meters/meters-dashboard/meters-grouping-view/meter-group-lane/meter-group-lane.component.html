@@ -35,12 +35,12 @@
       <p class="v1-meter-lane__empty">Drop meters here or use Move meter to assign them.</p>
     } @else {
       @for (card of section.meters; track card.meter.guid) {
-        <app-meter-card
+        <app-meter-group-card
           [card]="card"
           [canMove]="canWrite"
           (opened)="openMeter.emit($event)"
           (moveRequested)="moveMeter.emit($event)">
-        </app-meter-card>
+        </app-meter-group-card>
       }
     }
   </div>

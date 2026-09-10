@@ -40,9 +40,7 @@
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
       <button
         type="submit"
-        class="v1-btn"
-        [class.v1-btn--primary]="group"
-        [class.v1-btn--action]="!group"
+        class="v1-btn v1-btn--action"
         [disabled]="saving || !isValid()">
         @if (saving) {
           <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>

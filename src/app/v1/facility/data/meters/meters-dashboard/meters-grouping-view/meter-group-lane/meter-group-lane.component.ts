@@ -7,15 +7,15 @@ import {
   MeterGroupSectionView,
   meterGroupDropListId,
   meterGroupTargetFromSection
-} from '../../facility-meters.models';
-import { MeterCardComponent } from '../meter-card/meter-card.component';
+} from '../../../facility-meters.models';
+import { MeterGroupCardComponent } from '../meter-group-card/meter-group-card.component';
 
 @Component({
   selector: 'app-meter-group-lane',
   templateUrl: './meter-group-lane.component.html',
   styleUrls: ['./meter-group-lane.component.css'],
   standalone: true,
-  imports: [DragDropModule, MeterCardComponent]
+  imports: [DragDropModule, MeterGroupCardComponent]
 })
 export class MeterGroupLaneComponent {
   @Input({ required: true }) section!: MeterGroupSectionView;

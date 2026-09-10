@@ -1,7 +1,9 @@
 .v1-meter-lane {
   display: grid;
+  align-content: start;
   gap: var(--v1-space-3);
-  padding: var(--v1-space-4);
+  min-width: 0;
+  padding: var(--v1-space-3);
   border: 1px solid var(--v1-border);
   border-left: 4px solid var(--v1-neutral);
   border-radius: var(--v1-radius);
@@ -11,9 +13,10 @@
 
 .v1-meter-lane__header {
   display: flex;
-  gap: var(--v1-space-3);
+  gap: var(--v1-space-2);
   align-items: flex-start;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .v1-meter-lane__header h2,
@@ -24,49 +27,24 @@
 
 .v1-meter-lane__header h2 {
   display: inline-flex;
-  gap: var(--v1-space-2);
+  gap: var(--v1-space-1);
   align-items: center;
-  font-size: 1.1rem;
-  font-weight: 800;
+  overflow-wrap: anywhere;
+  font-size: 1.32rem;
+  font-weight: 900;
+  line-height: 1.16;
 }
 
 .v1-meter-lane__group-icon {
   display: inline-grid;
   flex: 0 0 auto;
-  width: 1.65rem;
-  height: 1.65rem;
+  width: 1.9rem;
+  height: 1.9rem;
   place-items: center;
   border-radius: var(--v1-radius-sm);
   background: color-mix(in srgb, var(--v1-neutral) 13%, var(--v1-panel));
   color: var(--v1-neutral);
-  font-size: .88rem;
-}
-
-.v1-meter-lane--energy .v1-meter-lane__group-icon {
-  background: color-mix(in srgb, var(--v1-success) 13%, var(--v1-panel));
-  color: var(--v1-success);
-}
-
-.v1-meter-lane--energy {
-  border-left-color: var(--v1-success);
-}
-
-.v1-meter-lane--water .v1-meter-lane__group-icon {
-  background: color-mix(in srgb, var(--v1-info) 13%, var(--v1-panel));
-  color: var(--v1-info);
-}
-
-.v1-meter-lane--water {
-  border-left-color: var(--v1-info);
-}
-
-.v1-meter-lane--other .v1-meter-lane__group-icon {
-  background: color-mix(in srgb, var(--v1-primary) 12%, var(--v1-panel));
-  color: var(--v1-primary);
-}
-
-.v1-meter-lane--other {
-  border-left-color: var(--v1-primary);
+  font-size: 1rem;
 }
 
 .v1-meter-lane__header p,
@@ -76,10 +54,11 @@
 
 .v1-meter-lane__dropzone {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 22rem));
-  gap: var(--v1-space-3);
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 16rem));
+  align-content: start;
+  gap: var(--v1-space-2);
   min-height: 5.5rem;
-  padding: var(--v1-space-3);
+  padding: var(--v1-space-2);
   border: 1px dashed color-mix(in srgb, var(--v1-border) 78%, var(--v1-primary));
   border-radius: var(--v1-radius);
   background: color-mix(in srgb, var(--v1-content-block) 72%, transparent);
@@ -92,7 +71,7 @@
 
 .v1-meter-lane__empty {
   grid-column: 1 / -1;
-  padding: var(--v1-space-3);
+  padding: var(--v1-space-2);
 }
 
 @media (max-width: 680px) {

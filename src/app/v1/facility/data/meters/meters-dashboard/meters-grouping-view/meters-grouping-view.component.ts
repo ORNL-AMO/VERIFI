@@ -15,7 +15,7 @@ import {
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { ConfirmDeleteGroupModalComponent } from '../confirm-delete-group-modal/confirm-delete-group-modal.component';
 import { MeterGroupDraftSlideoutComponent } from '../meter-dashboard-slideout/meter-group-draft-slideout/meter-group-draft-slideout.component';
-import { MeterGroupLaneComponent } from '../meter-group-lane/meter-group-lane.component';
+import { MeterGroupLaneComponent } from './meter-group-lane/meter-group-lane.component';
 import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
 import { MoveMeterSlideoutComponent } from '../meter-dashboard-slideout/move-meter-slideout/move-meter-slideout.component';
 
@@ -44,6 +44,19 @@ export class MetersGroupingViewComponent {
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly dropListIds = computed(() => this.workspace.groupSections().map(section => meterGroupDropListId(section.id)));
   readonly moveTargets = computed(() => this.workspace.groupSections().map(section => meterGroupTargetFromSection(section)));
+  readonly assignedMeterCounts = computed(() => {
+    const counts = new Map<string, number>();
+    for (const section of this.workspace.groupSections()) {
+      if (section.group) {
+        counts.set(section.group.guid, section.meters.length);
+      }
+    }
+    return counts;
+  });
+  readonly groupToDeleteAssignedMeterCount = computed(() => {
+    const group = this.groupToDelete();
+    return group ? this.assignedMeterCount(group) : 0;
+  });
   readonly canDrop = (card: MeterCardView, target: MeterGroupDropTarget): boolean =>
     this.canAct() && this.actions.canAssignMeterToTarget(card.meter, target);
 
@@ -132,7 +145,7 @@ export class MetersGroupingViewComponent {
   }
 
   assignedMeterCount(group: IdbUtilityMeterGroup): number {
-    return this.workspace.meters().filter(meter => meter.groupId === group.guid).length;
+    return this.assignedMeterCounts().get(group.guid) ?? 0;
   }
 
   private openSlideout(slideout: MetersGroupingSlideout): void {

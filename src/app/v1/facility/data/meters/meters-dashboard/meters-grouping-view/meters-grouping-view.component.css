@@ -28,7 +28,9 @@
 
 .v1-facility-meters__groups {
   display: grid;
-  gap: var(--v1-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  align-items: start;
+  gap: var(--v1-space-3);
 }
 
 @media (max-width: 680px) {

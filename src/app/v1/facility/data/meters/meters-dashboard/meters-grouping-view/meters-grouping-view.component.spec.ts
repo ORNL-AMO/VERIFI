@@ -36,20 +36,22 @@ describe('MetersGroupingViewComponent', () => {
     expect(text).toContain('Ungrouped');
     expect(text).toContain('City Water');
     expect(fixture.nativeElement.querySelectorAll('.v1-meter-lane').length).toBe(2);
-    expect(fixture.nativeElement.querySelectorAll('app-meter-card').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('app-meter-group-card').length).toBe(2);
+    expect(fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Open meter"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('app-meter-browse-card')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).not.toBeNull();
     expect(findButton(fixture, 'Add group')?.classList.contains('v1-btn--action')).toBe(true);
   });
 
-  it('opens the selected meter workbench', () => {
+  it('opens the selected meter workbench from the compact card name', () => {
     const fixture = setup({
       meters: [meter({ guid: 'meter-electric', name: 'Electric Main' })]
     });
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
 
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('[aria-label="Open meter"]') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]') as HTMLButtonElement).click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -61,6 +63,19 @@ describe('MetersGroupingViewComponent', () => {
       'meter-electric',
       'settings'
     ]);
+  });
+
+  it('opens the move slideout from a compact group card', () => {
+    const fixture = setup({
+      meters: [meter({ guid: 'meter-electric', name: 'Electric Main' })]
+    });
+
+    fixture.detectChanges();
+    clickButton(fixture, 'Move meter');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Choose a group for Electric Main.');
+    expect(fixture.nativeElement.querySelector('app-move-meter-slideout')).not.toBeNull();
   });
 
   it('supports group save, move, and delete workflows through the action service', async () => {
@@ -93,7 +108,13 @@ describe('MetersGroupingViewComponent', () => {
 
   it('renders grouping slideouts and confirmation modal from grouping actions', () => {
     const energyGroup = group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy', id: 7 });
-    const fixture = setup({ groups: [energyGroup] });
+    const fixture = setup({
+      meters: [
+        meter({ guid: 'meter-electric-a', name: 'Electric Main', groupId: energyGroup.guid }),
+        meter({ guid: 'meter-electric-b', name: 'Electric Backup', groupId: energyGroup.guid })
+      ],
+      groups: [energyGroup]
+    });
 
     fixture.detectChanges();
     clickButton(fixture, 'Add group');
@@ -108,6 +129,7 @@ describe('MetersGroupingViewComponent', () => {
     fixture.componentInstance.requestDeleteGroup(energyGroup);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Delete group');
+    expect(fixture.nativeElement.textContent).toContain('2 meters will move to Ungrouped.');
   });
 
   it('disables grouping actions while read-only or pending', () => {

@@ -1,0 +1,48 @@
+<article
+  class="v1-meter-group-card"
+  role="listitem"
+  cdkDrag
+  cdkDragPreviewContainer="parent"
+  [cdkDragData]="card"
+  [cdkDragDisabled]="!canMove">
+  <header class="v1-meter-group-card__header">
+    <h3>
+      <button type="button" class="v1-meter-group-card__title" [attr.aria-label]="'Open ' + card.meter.name + ' settings'" (click)="opened.emit(card)">
+        <span class="fa fa-gauge-high" aria-hidden="true"></span>
+        <span>{{ card.meter.name }}</span>
+        <span class="fa fa-chevron-right v1-meter-group-card__title-chevron" aria-hidden="true"></span>
+      </button>
+    </h3>
+  </header>
+
+  <dl class="v1-meter-group-card__facts">
+    <div>
+      <dt>Source</dt>
+      <dd>
+        <span class="v1-meter-group-card__source" [style.--v1-meter-source-color]="card.sourceColor || null">
+          {{ card.meter.source }}
+        </span>
+      </dd>
+    </div>
+    <div>
+      <dt>Scope</dt>
+      <dd>{{ card.scopeLabel || 'Not set' }}</dd>
+    </div>
+    @if (card.fuelLabel) {
+      <div>
+        <dt>Fuel</dt>
+        <dd>{{ card.fuelLabel }}</dd>
+      </div>
+    }
+  </dl>
+
+  <footer class="v1-meter-group-card__actions" aria-label="Meter organization actions">
+    <button type="button" class="v1-icon-btn v1-meter-group-card__drag" title="Drag meter" aria-label="Drag meter" cdkDragHandle [disabled]="!canMove">
+      <span class="fa fa-grip-vertical" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet v1-meter-group-card__move" [disabled]="!canMove" (click)="moveRequested.emit(card)">
+      <span class="fa fa-arrow-right-arrow-left" aria-hidden="true"></span>
+      Move meter
+    </button>
+  </footer>
+</article>

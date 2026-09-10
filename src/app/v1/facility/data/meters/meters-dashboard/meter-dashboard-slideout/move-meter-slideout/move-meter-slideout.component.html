@@ -24,7 +24,7 @@
 
     <footer class="v1-meter-slideout-form__footer">
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
-      <button type="submit" class="v1-btn v1-btn--primary" [disabled]="saving || !isValid()">
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
         @if (saving) {
           <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
         } @else {

@@ -5,8 +5,6 @@ import { RouterModule } from '@angular/router';
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
 import { ConfirmDeleteGroupModalComponent } from './meters/meters-dashboard/confirm-delete-group-modal/confirm-delete-group-modal.component';
-import { MeterCardComponent } from './meters/meters-dashboard/meter-card/meter-card.component';
-import { MeterGroupLaneComponent } from './meters/meters-dashboard/meter-group-lane/meter-group-lane.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MetersBrowseViewComponent } from './meters/meters-dashboard/meters-browse-view/meters-browse-view.component';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
@@ -24,8 +22,6 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     MetersDashboardComponent,
     MetersBrowseViewComponent,
     MetersGroupingViewComponent,
-    MeterGroupLaneComponent,
-    MeterCardComponent,
     ConfirmDeleteGroupModalComponent
   ],
   exports: [
@@ -35,8 +31,6 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     MetersBrowseViewComponent,
     MetersGroupingViewComponent,
     MeterWorkbenchComponent,
-    MeterGroupLaneComponent,
-    MeterCardComponent,
     ConfirmDeleteGroupModalComponent
   ]
 })
