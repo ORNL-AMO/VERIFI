@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
-import { ConfirmDeleteGroupModalComponent } from './meters/meters-dashboard/confirm-delete-group-modal/confirm-delete-group-modal.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MetersBrowseViewComponent } from './meters/meters-dashboard/meters-browse-view/meters-browse-view.component';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
@@ -21,8 +20,7 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     FacilityMetersComponent,
     MetersDashboardComponent,
     MetersBrowseViewComponent,
-    MetersGroupingViewComponent,
-    ConfirmDeleteGroupModalComponent
+    MetersGroupingViewComponent
   ],
   exports: [
     FacilityDataPlaceholderComponent,
@@ -30,8 +28,7 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     MetersDashboardComponent,
     MetersBrowseViewComponent,
     MetersGroupingViewComponent,
-    MeterWorkbenchComponent,
-    ConfirmDeleteGroupModalComponent
+    MeterWorkbenchComponent
   ]
 })
 export class FacilityDataModule { }

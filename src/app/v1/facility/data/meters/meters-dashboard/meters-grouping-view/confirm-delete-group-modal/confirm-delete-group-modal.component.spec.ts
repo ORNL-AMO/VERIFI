@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { group } from '../../facility-meters.testing';
+import { group } from '../../../facility-meters.testing';
 import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal.component';
 
 describe('ConfirmDeleteGroupModalComponent', () => {
