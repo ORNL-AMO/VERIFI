@@ -385,11 +385,16 @@
   color: #fff;
 }
 
-.v1-btn--action,
-.v1-btn--secondary,
-.v1-btn--blue {
+.v1-btn--action {
   border-color: var(--v1-action);
   background: var(--v1-action);
+  color: #fff;
+}
+
+.v1-btn--secondary,
+.v1-btn--blue {
+  border-color: var(--v1-content-control);
+  background: var(--v1-content-control);
   color: #fff;
 }
 
