@@ -351,7 +351,7 @@ export class WeatherPredictorManagementService {
         let endDate: Date = new Date(facilityList[i].endDate);
         //fetch weather data from predictor station
 
-        while (startDate < endDate) {
+        while (startDate <= endDate) {
           let entryDate: Date = new Date(startDate);
           let monthPredictorEntry: IdbPredictorData = predictorData.find(data => {
             return checkSameMonthPredictorData(data, entryDate);
