@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-list-subscribe.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-email-list-signup',
   templateUrl: './email-list-signup.component.html',
   styleUrls: ['./email-list-signup.component.css'],
-  imports: [FormsModule],
+  imports: [FormsModule, IconComponent],
   standalone: true
 })
 export class EmailListSignupComponent {

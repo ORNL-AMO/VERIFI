@@ -8,14 +8,14 @@
             class="v1-meter-lane__title"
             [attr.aria-label]="'Open ' + section.label + ' results'"
             (click)="openGroup.emit(section)">
-            <span class="v1-meter-lane__group-icon fa fa-layer-group" aria-hidden="true"></span>
+            <app-ui-icon name="meterGroupItem" class="v1-meter-lane__group-icon"></app-ui-icon>
             <span>{{ section.label }}</span>
-            <span class="fa fa-chevron-right v1-meter-lane__title-chevron" aria-hidden="true"></span>
+            <app-ui-icon name="chevronRight" class="v1-meter-lane__title-chevron"></app-ui-icon>
           </button>
         </h2>
       } @else {
         <h2 [id]="'v1-meter-group-' + section.id">
-          <span class="v1-meter-lane__group-icon fa fa-layer-group" aria-hidden="true"></span>
+          <app-ui-icon name="meterGroup" class="v1-meter-lane__group-icon"></app-ui-icon>
           {{ section.label }}
         </h2>
       }
@@ -27,7 +27,7 @@
     @if (section.group) {
       <div class="v1-meter-lane__header-actions" aria-label="Meter group actions">
         <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canWrite" (click)="editGroup.emit(section)">
-          <span class="fa fa-pen" aria-hidden="true"></span>
+          <app-ui-icon name="edit"></app-ui-icon>
           Edit group
         </button>
       </div>

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { IconsModule } from '@app/v1/shared/icons/icons.module';
 
 import { AccountCustomDataPlaceholderComponent } from './account-custom-data-placeholder.component';
 
@@ -8,7 +9,8 @@ import { AccountCustomDataPlaceholderComponent } from './account-custom-data-pla
     AccountCustomDataPlaceholderComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    IconsModule
   ],
   exports: [
     AccountCustomDataPlaceholderComponent

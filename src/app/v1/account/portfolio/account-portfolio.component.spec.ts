@@ -133,6 +133,7 @@ describe('AccountPortfolioComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Alpha Plant');
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
     expect(selectorLabels()).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
+    expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.id === 'meters')?.icon).toBe('meter');
     expect(selectorText()).not.toContain('Needs setup');
     expect(buttonByText('Add facility').classList.contains('v1-btn--action')).toBe(true);
     expect(fixture.nativeElement.querySelector('.v1-portfolio-selector--active')).not.toBeNull();
@@ -273,7 +274,7 @@ describe('AccountPortfolioComponent', () => {
 
   function selectorLabels(): string[] {
     return Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('.v1-portfolio-selector'))
-      .map(button => button.querySelector('span:not(.fa)')!.textContent!.trim());
+      .map(button => button.querySelector('span')!.textContent!.trim());
   }
 
   function selectorText(): string {

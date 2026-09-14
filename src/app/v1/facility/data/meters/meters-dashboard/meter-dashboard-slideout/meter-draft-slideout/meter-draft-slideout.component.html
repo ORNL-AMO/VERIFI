@@ -32,7 +32,7 @@
 
     @if (!isValid() && draft().name.trim().length > 0) {
       <div class="v1-alert v1-alert--warning" role="alert">
-        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
         <span>This source cannot be assigned to the selected group type.</span>
       </div>
     }
@@ -41,9 +41,9 @@
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
       <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
         @if (saving) {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
         } @else {
-          <span class="fa fa-plus" aria-hidden="true"></span>
+          <app-ui-icon name="add"></app-ui-icon>
         }
         Add meter
       </button>

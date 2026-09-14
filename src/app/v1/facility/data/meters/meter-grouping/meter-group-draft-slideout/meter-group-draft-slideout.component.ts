@@ -6,13 +6,14 @@ import {
   MeterGroupType
 } from '@app/v1/facility/data/meters/facility-meters.models';
 import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-meter-group-draft-slideout',
   templateUrl: './meter-group-draft-slideout.component.html',
   styleUrls: ['./meter-group-draft-slideout.component.css'],
   standalone: true,
-  imports: [MeterSlideoutComponent]
+  imports: [MeterSlideoutComponent, IconComponent]
 })
 export class MeterGroupDraftSlideoutComponent implements OnChanges {
   @Input() group?: IdbUtilityMeterGroup;

@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -29,6 +30,7 @@ describe('MeterGroupingComponent', () => {
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Meter Grouping');
+    expect(fixture.debugElement.query(By.css('.v1-facility-meters__title app-ui-icon')).componentInstance.name).toBe('meterGroup');
     expect(text).not.toContain('Drag meters between groups');
     expect(text).toContain('Add group');
     expect(text).not.toContain('Add meter');

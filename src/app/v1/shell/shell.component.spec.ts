@@ -6,12 +6,13 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AppearanceService } from '../appearance/appearance.service';
+import { IconComponent } from '../shared/icons/icon.component';
 import { ShellHeaderComponent } from './header/shell-header.component';
 import { ShellComponent } from './shell.component';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 
 @NgModule({
-  imports: [CommonModule, NoopAnimationsModule, PortalModule, RouterModule.forRoot([])],
+  imports: [CommonModule, IconComponent, NoopAnimationsModule, PortalModule, RouterModule.forRoot([])],
   declarations: [ShellComponent, ShellHeaderComponent]
 })
 class ShellTestModule { }

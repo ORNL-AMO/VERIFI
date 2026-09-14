@@ -33,7 +33,7 @@
     <footer class="v1-meter-slideout-form__footer">
       @if (group) {
         <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving" (click)="requestDelete()">
-          <span class="fa fa-trash" aria-hidden="true"></span>
+          <app-ui-icon name="delete"></app-ui-icon>
           Delete group
         </button>
       }
@@ -43,9 +43,9 @@
         class="v1-btn v1-btn--action"
         [disabled]="saving || !isValid()">
         @if (saving) {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
         } @else {
-          <span class="fa fa-check" aria-hidden="true"></span>
+          <app-ui-icon name="check"></app-ui-icon>
         }
         {{ group ? 'Save group' : 'Add group' }}
       </button>

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { ImportFacilityBackupComponent } from './backup/import-facility-backup.component';
 import { FacilitySettingsBackupComponent } from './backup/facility-settings-backup.component';
 import { FacilitySettingsComponent } from './facility-settings.component';
@@ -27,6 +28,7 @@ import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.
   ],
   imports: [
     CommonModule,
+    IconsModule,
     ReactiveFormsModule,
     RouterModule,
     ImportFacilityBackupComponent

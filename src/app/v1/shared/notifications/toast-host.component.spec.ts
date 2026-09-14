@@ -30,7 +30,7 @@ describe('ToastHostComponent', () => {
     notifications.success('Saved', { durationMs: 0 });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.v1-toast--success .fa-circle-check')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.v1-toast--success app-ui-icon.v1-toast__icon')).toBeTruthy();
 
     notifications.dismissAll();
     notifications.danger('Save failed', { durationMs: 0 });
@@ -38,9 +38,9 @@ describe('ToastHostComponent', () => {
     notifications.info('Import running', { durationMs: 0 });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.v1-toast--danger .fa-circle-xmark')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.v1-toast--warning .fa-triangle-exclamation')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.v1-toast--info .fa-circle-info')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.v1-toast--danger app-ui-icon.v1-toast__icon')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.v1-toast--warning app-ui-icon.v1-toast__icon')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.v1-toast--info app-ui-icon.v1-toast__icon')).toBeTruthy();
     expect(fixture.nativeElement.querySelectorAll('.v1-toast')).toHaveLength(3);
   });
 

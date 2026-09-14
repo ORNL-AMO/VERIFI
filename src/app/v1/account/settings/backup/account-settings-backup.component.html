@@ -9,13 +9,13 @@
       </div>
       <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
         @if (saveState === 'saving' || isBackingUp || automaticBackupSaving()) {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
           Working
         } @else if (saveState === 'saved') {
-          <span class="fa fa-check" aria-hidden="true"></span>
+          <app-ui-icon name="check"></app-ui-icon>
           Saved
         } @else if (saveState === 'error') {
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           Not saved
         }
       </span>
@@ -23,32 +23,32 @@
 
     <div class="v1-settings-grid v1-settings-grid--2">
       <article class="v1-settings-card">
-        <span class="fa fa-file-arrow-down" aria-hidden="true"></span>
+        <app-ui-icon name="fileDownload"></app-ui-icon>
         <h3>Manual account backup</h3>
         <p>Download a JSON backup for this account.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="openBackupConfirm()">
             Backup account
-            <span class="fa fa-download" aria-hidden="true"></span>
+            <app-ui-icon name="download"></app-ui-icon>
           </button>
         </div>
       </article>
 
       <article class="v1-settings-card">
-        <span class="fa fa-file-import" aria-hidden="true"></span>
+        <app-ui-icon name="fileImport"></app-ui-icon>
         <h3>Import backup file</h3>
         <p>Open the v1 account backup import panel.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--secondary" (click)="openImportPanel()">
             Import backup
-            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            <app-ui-icon name="arrowRight"></app-ui-icon>
           </button>
         </div>
       </article>
     </div>
 
     <article class="v1-settings-card">
-      <span class="fa fa-rotate" aria-hidden="true"></span>
+      <app-ui-icon name="refresh"></app-ui-icon>
       <h3>Automatic account backup</h3>
       <p>{{ automaticBackupLabel }}</p>
       @if (currentAccount.dataBackupFilePath) {
@@ -111,7 +111,7 @@
         <h2 id="v1-backup-confirm-title">Backup {{ account()?.name }}</h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel account backup" [disabled]="isBackingUp"
           (click)="cancelBackupConfirm()">
-          <span class="fa fa-xmark" aria-hidden="true"></span>
+          <app-ui-icon name="close"></app-ui-icon>
         </button>
       </header>
       <div class="v1-modal__body">
@@ -121,11 +121,11 @@
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
         <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="confirmBackupDownload()">
           @if (isBackingUp) {
-            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            <app-ui-icon name="loading" spin></app-ui-icon>
             Preparing
           } @else {
             Download JSON backup
-            <span class="fa fa-download" aria-hidden="true"></span>
+            <app-ui-icon name="download"></app-ui-icon>
           }
         </button>
       </footer>

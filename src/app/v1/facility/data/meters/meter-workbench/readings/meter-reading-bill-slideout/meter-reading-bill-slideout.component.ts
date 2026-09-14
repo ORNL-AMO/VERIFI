@@ -5,6 +5,7 @@ import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMete
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
 import { MeterReadingFormContext, MeterReadingFormService } from '../meter-reading-form.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 export interface MeterReadingBillSave {
   readonly reading: IdbUtilityMeterData;
@@ -23,7 +24,7 @@ interface MeterReadingBillChargeView {
   templateUrl: './meter-reading-bill-slideout.component.html',
   styleUrls: ['./meter-reading-bill-slideout.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MeterSlideoutComponent]
+  imports: [CommonModule, ReactiveFormsModule, MeterSlideoutComponent, IconComponent]
 })
 export class MeterReadingBillSlideoutComponent implements OnChanges {
   private readonly formService = inject(MeterReadingFormService);

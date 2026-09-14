@@ -7,13 +7,14 @@ import {
   canAssignSourceToGroup
 } from '../../../facility-meters.models';
 import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-meter-draft-slideout',
   templateUrl: './meter-draft-slideout.component.html',
   styleUrls: ['./meter-draft-slideout.component.css'],
   standalone: true,
-  imports: [MeterSlideoutComponent]
+  imports: [MeterSlideoutComponent, IconComponent]
 })
 export class MeterDraftSlideoutComponent {
   @Input() groups: readonly IdbUtilityMeterGroup[] = [];

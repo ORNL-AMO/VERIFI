@@ -1,23 +1,32 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { meterSourceIcon } from '../../facility/data/meters/facility-meters.models';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 type SettingsNavItem = {
   readonly id: string;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
   readonly tone?: 'danger';
 };
 
 type DataNavItem = {
   readonly id: string;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
 };
 
 type MeterNavItem = {
   readonly guid: string;
   readonly label: string;
+  readonly icon: IconName;
+};
+
+type MeterGroupNavItem = {
+  readonly guid: string;
+  readonly label: string;
+  readonly icon: IconName;
 };
 
 type ChildLinksState = {
@@ -26,43 +35,43 @@ type ChildLinksState = {
 };
 
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
-  { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' }
+  { id: 'portfolio', label: 'Portfolio', icon: 'portfolio' }
 ];
 
 const ACCOUNT_CUSTOM_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
-  { id: 'custom-grid-factors', label: 'Grid Factors', icon: 'fa-table-list' },
-  { id: 'custom-fuels', label: 'Fuels', icon: 'fa-fire-flame-simple' },
-  { id: 'custom-gwps', label: 'Global Warming Potentials', icon: 'fa-earth-americas' }
+  { id: 'custom-grid-factors', label: 'Grid Factors', icon: 'table' },
+  { id: 'custom-fuels', label: 'Fuels', icon: 'fuel' },
+  { id: 'custom-gwps', label: 'Global Warming Potentials', icon: 'earth' }
 ];
 
 const FACILITY_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
-  { id: 'meters', label: 'Meters', icon: 'fa-gauge-high' },
-  { id: 'meter-grouping', label: 'Meter Grouping', icon: 'fa-layer-group' },
-  { id: 'predictors', label: 'Predictors', icon: 'fa-chart-line' },
-  { id: 'energy-uses', label: 'Energy Uses', icon: 'fa-screwdriver-wrench' }
+  { id: 'meters', label: 'Meters', icon: 'meter' },
+  { id: 'meter-grouping', label: 'Meter Grouping', icon: 'meterGroup' },
+  { id: 'predictors', label: 'Predictors', icon: 'chartLine' },
+  { id: 'energy-uses', label: 'Energy Uses', icon: 'tools' }
 ];
 
 const ACCOUNT_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
-  { id: 'profile', label: 'Profile', icon: 'fa-building' },
-  { id: 'units', label: 'Units', icon: 'fa-ruler-combined' },
-  { id: 'goals', label: 'Goals', icon: 'fa-bullseye' },
-  { id: 'financial', label: 'Financial', icon: 'fa-calendar-days' },
-  { id: 'staleness', label: 'Staleness', icon: 'fa-clock' },
-  { id: 'backup', label: 'Backup', icon: 'fa-file-arrow-down' },
-  { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' },
-  { id: 'delete', label: 'Delete account', icon: 'fa-trash', tone: 'danger' }
+  { id: 'profile', label: 'Profile', icon: 'account' },
+  { id: 'units', label: 'Units', icon: 'ruler' },
+  { id: 'goals', label: 'Goals', icon: 'target' },
+  { id: 'financial', label: 'Financial', icon: 'calendar' },
+  { id: 'staleness', label: 'Staleness', icon: 'clock' },
+  { id: 'backup', label: 'Backup', icon: 'fileDownload' },
+  { id: 'portfolio', label: 'Portfolio', icon: 'portfolio' },
+  { id: 'delete', label: 'Delete account', icon: 'delete', tone: 'danger' }
 ];
 
 const FACILITY_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
-  { id: 'profile', label: 'Profile', icon: 'fa-industry' },
-  { id: 'units', label: 'Units', icon: 'fa-ruler-combined' },
-  { id: 'goals', label: 'Goals', icon: 'fa-bullseye' },
-  { id: 'financial', label: 'Financial', icon: 'fa-calendar-days' },
-  { id: 'staleness', label: 'Staleness', icon: 'fa-clock' },
-  { id: 'backup', label: 'Backup', icon: 'fa-file-arrow-down' }
+  { id: 'profile', label: 'Profile', icon: 'facility' },
+  { id: 'units', label: 'Units', icon: 'ruler' },
+  { id: 'goals', label: 'Goals', icon: 'target' },
+  { id: 'financial', label: 'Financial', icon: 'calendar' },
+  { id: 'staleness', label: 'Staleness', icon: 'clock' },
+  { id: 'backup', label: 'Backup', icon: 'fileDownload' }
 ];
 
-const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Portfolio', icon: 'fa-layer-group' };
+const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Portfolio', icon: 'portfolio' };
 
 @Component({
   selector: 'app-section-nav',
@@ -94,15 +103,17 @@ export class SectionNavComponent {
     return [...this.workspace.facilityMeters()]
       .map(meter => ({
         guid: meter.guid,
-        label: meter.name || 'Untitled meter'
+        label: meter.name || 'Untitled meter',
+        icon: meterSourceIcon(meter.source)
       }))
       .sort((first, second) => first.label.localeCompare(second.label));
   });
-  readonly facilityMeterGroupItems = computed<ReadonlyArray<MeterNavItem>>(() => {
+  readonly facilityMeterGroupItems = computed<ReadonlyArray<MeterGroupNavItem>>(() => {
     return [...this.workspace.facilityMeterGroups()]
       .map(group => ({
         guid: group.guid,
-        label: group.name || 'Untitled group'
+        label: group.name || 'Untitled group',
+        icon: 'meterGroupItem' as const
       }))
       .sort((first, second) => first.label.localeCompare(second.label));
   });
@@ -140,7 +151,7 @@ export class SectionNavComponent {
     }
     return false;
   });
-  readonly settingsItems = computed(() => {
+  readonly settingsItems = computed<ReadonlyArray<SettingsNavItem>>(() => {
     if (this.navigation.contextMode() !== 'facility') {
       return ACCOUNT_SETTINGS_ITEMS;
     }
@@ -150,9 +161,15 @@ export class SectionNavComponent {
     const facilityItems = isSingleFacilityAccount
       ? [...FACILITY_SETTINGS_ITEMS, PORTFOLIO_TRANSITION_ITEM]
       : FACILITY_SETTINGS_ITEMS;
+    const deleteItem: SettingsNavItem = {
+      id: 'delete',
+      label: deleteLabel,
+      icon: 'delete',
+      tone: 'danger'
+    };
     return [
       ...facilityItems,
-      { id: 'delete', label: deleteLabel, icon: 'fa-trash', tone: 'danger' as const }
+      deleteItem
     ];
   });
   readonly settingsTitle = computed(() => {

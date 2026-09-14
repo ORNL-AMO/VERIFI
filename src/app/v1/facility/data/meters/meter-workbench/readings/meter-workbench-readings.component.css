@@ -24,7 +24,7 @@
   text-align: center;
 }
 
-.meter-readings__empty > .fa {
+.meter-readings__empty > .v1-icon {
   color: var(--v1-content-control);
   font-size: 1.8rem;
 }

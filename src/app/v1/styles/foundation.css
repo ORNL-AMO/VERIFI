@@ -105,8 +105,31 @@
   outline-offset: 2px;
 }
 
-.v1-root button .fa,
-.v1-root a .fa {
+.v1-root .v1-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  line-height: 0;
+}
+
+.v1-root .v1-icon svg {
+  display: block;
+}
+
+.v1-root .v1-icon--spin {
+  animation: v1-icon-spin .8s linear infinite;
+}
+
+@keyframes v1-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v1-root button .v1-icon,
+.v1-root a .v1-icon {
   color: inherit;
 }
 
@@ -185,16 +208,30 @@
   list-style: none;
 }
 
+.v1-root .v1-data-workbench-breadcrumb > ol > li {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  line-height: 1.2;
+}
+
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button {
   display: inline-flex;
   gap: var(--v1-space-1);
   align-items: center;
+  min-height: 1.2rem;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--v1-link);
   font: inherit;
+  line-height: 1.2;
   cursor: pointer;
+}
+
+.v1-root .v1-data-workbench-breadcrumb .v1-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button:hover,
@@ -1204,7 +1241,7 @@
   background: color-mix(in srgb, var(--v1-danger) 7%, var(--v1-content-block));
 }
 
-.v1-settings-card--danger > .fa {
+.v1-settings-card--danger > .v1-icon {
   color: var(--v1-danger);
 }
 

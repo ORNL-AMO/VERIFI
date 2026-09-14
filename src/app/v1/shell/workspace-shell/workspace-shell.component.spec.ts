@@ -6,6 +6,7 @@ import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
+import { IconComponent } from '../../shared/icons/icon.component';
 import { CommandNotificationBridgeService } from '../../shared/notifications/command-notification-bridge.service';
 import { NotificationsModule } from '../../shared/notifications/notifications.module';
 import { FacilityPickerComponent } from '../section-nav/facility-picker/facility-picker.component';
@@ -16,7 +17,7 @@ import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } fr
 import { WorkspaceShellComponent } from './workspace-shell.component';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
+  imports: [CommonModule, FormsModule, IconComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,

@@ -9,13 +9,14 @@ import {
   meterGroupTargetFromSection
 } from '@app/v1/facility/data/meters/facility-meters.models';
 import { MeterGroupCardComponent } from '../meter-group-card/meter-group-card.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-meter-group-lane',
   templateUrl: './meter-group-lane.component.html',
   styleUrls: ['./meter-group-lane.component.css'],
   standalone: true,
-  imports: [DragDropModule, MeterGroupCardComponent]
+  imports: [DragDropModule, MeterGroupCardComponent, IconComponent]
 })
 export class MeterGroupLaneComponent {
   @Input({ required: true }) section!: MeterGroupSectionView;

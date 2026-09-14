@@ -8,7 +8,7 @@
 
   @if (actionError()) {
     <div class="v1-alert v1-alert--danger" role="alert">
-      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="warning"></app-ui-icon>
       <span>{{ actionError() }}</span>
     </div>
   }
@@ -24,11 +24,11 @@
   } @else {
     @if (_table.rows.length === 0) {
       <div class="meter-readings__empty">
-        <span class="fa fa-table-list" aria-hidden="true"></span>
+        <app-ui-icon name="table"></app-ui-icon>
         <h3>No bills found for {{ _meter?.name }}.</h3>
         <p>Add a bill to begin tracking readings for this meter.</p>
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!_canAct" (click)="openAddBill()">
-          <span class="fa fa-plus" aria-hidden="true"></span>
+          <app-ui-icon name="add"></app-ui-icon>
           Add New Bill
         </button>
       </div>
@@ -92,7 +92,7 @@
           }
         </h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel readings action" [disabled]="saving()" (click)="cancelDelete()">
-          <span class="fa fa-xmark" aria-hidden="true"></span>
+          <app-ui-icon name="close"></app-ui-icon>
         </button>
       </header>
       <div class="v1-modal__body">

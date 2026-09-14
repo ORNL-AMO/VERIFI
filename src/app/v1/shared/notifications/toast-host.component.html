@@ -13,7 +13,7 @@
         [class.v1-toast--info]="notification.tone === 'info'"
         [attr.role]="metadata.role"
         [attr.aria-live]="metadata.live">
-        <span class="v1-toast__icon fa {{ metadata.iconClass }}" aria-hidden="true"></span>
+        <app-ui-icon class="v1-toast__icon" [name]="metadata.icon"></app-ui-icon>
         <div class="v1-toast__content">
           <strong>{{ notification.title }}</strong>
           @if (notification.message) {
@@ -27,7 +27,7 @@
             title="Dismiss notification"
             [attr.aria-label]="'Dismiss notification: ' + notification.title"
             (click)="dismiss(notification.id)">
-            <span class="fa fa-xmark" aria-hidden="true"></span>
+            <app-ui-icon name="close"></app-ui-icon>
           </button>
         }
       </article>

@@ -19,7 +19,8 @@ describe('MeterGroupLaneComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Electricity');
     expect(fixture.nativeElement.querySelector('.v1-meter-lane')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-lane__group-icon.fa-layer-group')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-ui-icon.v1-meter-lane__group-icon')).not.toBeNull();
+    expect(fixture.debugElement.query(By.css('.v1-meter-lane__title app-ui-icon.v1-meter-lane__group-icon')).componentInstance.name).toBe('meterGroupItem');
     expect(fixture.nativeElement.querySelector('app-meter-group-card')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-group')).toBeNull();
     expect(drops[0]).toEqual({ card: section.meters[0], target: { id: energyGroup.guid, label: 'Electricity', group: energyGroup } });

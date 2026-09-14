@@ -17,7 +17,7 @@
 
     @if (selectedTarget() && !isTargetAllowed(selectedTarget())) {
       <div class="v1-alert v1-alert--warning" role="alert">
-        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
         <span>{{ card.meter.source }} meters cannot be assigned to this group type.</span>
       </div>
     }
@@ -26,9 +26,9 @@
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
       <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
         @if (saving) {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
         } @else {
-          <span class="fa fa-arrow-right-arrow-left" aria-hidden="true"></span>
+          <app-ui-icon name="transfer"></app-ui-icon>
         }
         Move meter
       </button>

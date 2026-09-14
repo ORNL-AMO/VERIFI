@@ -23,9 +23,9 @@
           (click)="toggleAccountMenu()"
           aria-haspopup="true"
           [attr.aria-expanded]="accountMenuOpen">
-          <span class="fa fa-building" aria-hidden="true"></span>
+          <app-ui-icon name="account"></app-ui-icon>
           <span class="v1-account-switcher__name">{{ account.name }}</span>
-          <span class="fa fa-chevron-down v1-account-switcher__chevron" aria-hidden="true"></span>
+          <app-ui-icon name="chevronDown" class="v1-account-switcher__chevron"></app-ui-icon>
         </button>
 
         @if (accountMenuOpen) {
@@ -39,7 +39,7 @@
                   role="menuitem"
                   [class.active]="option.active"
                   (click)="selectAccount(option.guid)">
-                  <span class="fa fa-check v1-account-switcher__check" aria-hidden="true"></span>
+                  <app-ui-icon name="check" class="v1-account-switcher__check"></app-ui-icon>
                   <span>
                     {{ option.name }}
                     <small>{{ option.descriptor }}</small>
@@ -52,15 +52,15 @@
 
             <div class="v1-account-switcher__section">
               <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
-                <span class="fa fa-plus" aria-hidden="true"></span>
+                <app-ui-icon name="add"></app-ui-icon>
                 Add new account
               </button>
               <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
-                <span class="fa fa-upload" aria-hidden="true"></span>
+                <app-ui-icon name="upload"></app-ui-icon>
                 Import backup
               </button>
               <button type="button" class="v1-account-switcher__item" role="menuitem" disabled>
-                <span class="fa fa-gears" aria-hidden="true"></span>
+                <app-ui-icon name="gears"></app-ui-icon>
                 Manage accounts
               </button>
             </div>
@@ -82,7 +82,7 @@
         [attr.aria-expanded]="isSettingsOpen"
         aria-haspopup="true"
         aria-label="Appearance settings">
-        <span class="fa fa-gear" aria-hidden="true"></span>
+        <app-ui-icon name="gear"></app-ui-icon>
       </button>
 
       @if (isSettingsOpen) {
@@ -149,7 +149,7 @@
                 [class.active]="settings.cornerStyle === option.id"
                 (click)="appearance.setCornerStyle(option.id)"
                 [attr.aria-pressed]="settings.cornerStyle === option.id">
-                <span [class]="'fa ' + option.icon" aria-hidden="true"></span>
+                <app-ui-icon [name]="option.icon"></app-ui-icon>
                 {{ option.label }}
               </button>
             }
@@ -167,7 +167,7 @@
         (click)="navigation.toggleSupportPanel()"
         [attr.aria-pressed]="isSupportPanelOpen"
         aria-label="Toggle support panel">
-        <span [class]="'fa ' + (isSupportPanelOpen ? 'fa-chevron-right' : 'fa-chevron-left')" aria-hidden="true"></span>
+        <app-ui-icon [name]="isSupportPanelOpen ? 'chevronRight' : 'chevronLeft'"></app-ui-icon>
       </button>
     }
   </div>

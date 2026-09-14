@@ -6,11 +6,32 @@ import {
   buildMeterUsageFacts,
   buildMeterUsageFactsFromCalendarizedMeters,
   formatMeterGroupPeriodLabel,
-  MeterGroupResultRow
+  MeterGroupResultRow,
+  meterSourceIcon
 } from './facility-meters.models';
 import { facility, group, meter, reading } from './facility-meters.testing';
 
 describe('facility meter view models', () => {
+  it('maps meter sources to semantic v1 icons', () => {
+    expect([
+      meterSourceIcon('Electricity'),
+      meterSourceIcon('Natural Gas'),
+      meterSourceIcon('Other Fuels'),
+      meterSourceIcon('Other Energy'),
+      meterSourceIcon('Water Intake'),
+      meterSourceIcon('Water Discharge'),
+      meterSourceIcon('Other')
+    ]).toEqual([
+      'electricity',
+      'naturalGas',
+      'otherFuel',
+      'otherEnergy',
+      'waterIntake',
+      'waterDischarge',
+      'meter'
+    ]);
+  });
+
   it('labels good meter status as valid for browse cards', () => {
     const cards = buildMeterCards(
       [meter({ guid: 'meter-electric', name: 'Electric Main' })],
@@ -29,6 +50,7 @@ describe('facility meter view models', () => {
 
     expect(cards[0].statusLabel).toBe('Valid');
     expect(cards[0].statusTone).toBe('success');
+    expect(cards[0].sourceIcon).toBe('electricity');
     expect(cards[0].firstReadingLabel).toBe('Jan 2026');
     expect(cards[0].latestReadingLabel).toBe('Jan 2026');
   });

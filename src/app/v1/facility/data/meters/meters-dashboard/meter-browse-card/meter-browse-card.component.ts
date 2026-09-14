@@ -8,13 +8,14 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { ConfirmCopyMeterModalComponent } from './confirm-copy-meter-modal/confirm-copy-meter-modal.component';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-meter-browse-card',
   templateUrl: './meter-browse-card.component.html',
   styleUrls: ['./meter-browse-card.component.css'],
   standalone: true,
-  imports: [ConfirmCopyMeterModalComponent, ConfirmDeleteMeterModalComponent]
+  imports: [ConfirmCopyMeterModalComponent, ConfirmDeleteMeterModalComponent, IconComponent]
 })
 export class MeterBrowseCardComponent implements OnDestroy {
   private readonly router = inject(Router);

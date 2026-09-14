@@ -4,17 +4,17 @@
 
 @if (!currentFacility) {
   <article class="v1-empty-state" role="status">
-    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <app-ui-icon name="accountIssue"></app-ui-icon>
     <h1>No facility selected</h1>
     <p>Select a facility before reviewing meter group results.</p>
   </article>
 } @else if (workspace.hasMeterGroupRoute() && !currentGroup) {
   <article class="v1-empty-state" role="status">
-    <span class="fa fa-layer-group" aria-hidden="true"></span>
+    <app-ui-icon name="meterGroup"></app-ui-icon>
     <h1>Meter group not found</h1>
     <p>This meter group is not available in {{ currentFacility.name }}.</p>
     <button type="button" class="v1-btn v1-btn--secondary" (click)="openGrouping()">
-      <span class="fa fa-arrow-left" aria-hidden="true"></span>
+      <app-ui-icon name="arrowLeft"></app-ui-icon>
       Back to meter grouping
     </button>
   </article>
@@ -24,7 +24,7 @@
       <ol>
         <li>
           <button type="button" (click)="openGrouping()">
-            <span class="fa fa-arrow-left" aria-hidden="true"></span>
+            <app-ui-icon name="arrowLeft"></app-ui-icon>
             Meter Grouping
           </button>
         </li>
@@ -44,7 +44,7 @@
               [attr.aria-label]="'Switch meter group, current group ' + currentGroup.name"
               (click)="toggleGroupSwitcher()">
               <span class="v1-data-workbench-switcher-label v1-meter-group-workbench-header__group-toggle-label">{{ currentGroup.name }}</span>
-              <span class="fa fa-chevron-down v1-data-workbench-switcher-icon v1-meter-group-workbench-header__group-toggle-icon" aria-hidden="true"></span>
+              <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon v1-meter-group-workbench-header__group-toggle-icon"></app-ui-icon>
             </button>
 
             @if (groupSwitcherOpen()) {
@@ -66,7 +66,9 @@
               </div>
             }
           } @else {
-            {{ currentGroup.name }}
+            <span class="v1-meter-group-workbench-header__group-crumb">
+              <span>{{ currentGroup.name }}</span>
+            </span>
           }
         </li>
       </ol>
@@ -75,27 +77,25 @@
     <div class="v1-data-workbench-title-row v1-meter-group-workbench-header__title-row">
       <div class="v1-data-workbench-title v1-meter-group-workbench-header__title">
         <p class="v1-eyebrow">{{ currentFacility.name }} Meter Group</p>
-        <h1 id="v1-facility-meters-title">{{ currentGroup.name }}</h1>
+        <h1 id="v1-facility-meters-title" class="v1-meter-group-workbench-header__group-title">
+          <app-ui-icon name="meterGroupItem"></app-ui-icon>
+          <span>{{ currentGroup.name }}</span>
+        </h1>
       </div>
       <div class="v1-data-workbench-actions v1-meter-group-workbench-header__chips" aria-label="Meter group summary">
         <span class="v1-meter-group-workbench-header__type-chip">
-          <span class="fa fa-layer-group" aria-hidden="true"></span>
+          <app-ui-icon name="meterGroupItem"></app-ui-icon>
           {{ currentGroup.groupType }}
         </span>
         @if (isLoading()) {
           <span class="v1-chip v1-chip--info">
-            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            <app-ui-icon name="loading" spin></app-ui-icon>
             Calculating
           </span>
         } @else if (hasError()) {
           <span class="v1-chip v1-chip--danger">
-            <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+            <app-ui-icon name="warning"></app-ui-icon>
             Results unavailable
-          </span>
-        } @else {
-          <span class="v1-chip v1-chip--success">
-            <span class="fa fa-circle-check" aria-hidden="true"></span>
-            Results ready
           </span>
         }
       </div>
@@ -186,26 +186,26 @@
 
   @if (actionError()) {
     <div class="v1-alert v1-alert--danger" role="alert">
-      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="warning"></app-ui-icon>
       <span>{{ actionError() }}</span>
     </div>
   }
 
   @if (showWorkspaceUnavailable()) {
     <div class="v1-alert v1-alert--warning" role="status">
-      <span class="fa fa-lock" aria-hidden="true"></span>
+      <app-ui-icon name="lock"></app-ui-icon>
       <span>Meter group result actions are unavailable while the workspace is loading or switching.</span>
     </div>
   } @else if (showWorkspacePending()) {
     <div class="v1-alert v1-alert--info" role="status">
-      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <app-ui-icon name="loading" spin></app-ui-icon>
       <span>Another workspace update is still finishing.</span>
     </div>
   }
 
   @if (hasNoGroupData()) {
     <div class="v1-alert v1-alert--info" role="status">
-      <span class="fa fa-circle-info" aria-hidden="true"></span>
+      <app-ui-icon name="info"></app-ui-icon>
       <span>No meter data is available for this group yet.</span>
     </div>
   }
@@ -218,7 +218,7 @@
         [class.v1-data-tabs__tab--active]="activeTab() === tab.id"
         (click)="openGroupTab(tab.id)"
         [attr.aria-current]="activeTab() === tab.id ? 'page' : null">
-        <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
+        <app-ui-icon [name]="tab.icon"></app-ui-icon>
         {{ tab.label }}
       </button>
     }

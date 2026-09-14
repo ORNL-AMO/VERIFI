@@ -335,7 +335,7 @@
   border-top: 1px solid var(--v1-divider);
 }
 
-.v1-empty-state > .fa {
+.v1-empty-state > .v1-icon {
   grid-row: 1 / span 2;
   color: var(--v1-primary);
   font-size: 1.5rem;

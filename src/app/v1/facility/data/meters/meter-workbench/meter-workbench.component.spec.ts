@@ -1,10 +1,12 @@
 import { Directive, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
+import { By } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
+import { IconComponent } from '../../../../shared/icons/icon.component';
 import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { group, meter } from '../facility-meters.testing';
@@ -37,7 +39,7 @@ describe('MeterWorkbenchComponent', () => {
         sourceColor: '#a59a04',
         statusLabel: 'Needs review',
         statusTone: 'warning',
-        statusIcon: 'fa-triangle-exclamation',
+        statusIcon: 'warning',
         firstReadingLabel: 'Dec 2025',
         latestReadingLabel: 'Jan 2026',
         scopeLabel: 'Stationary combustion',
@@ -70,8 +72,8 @@ describe('MeterWorkbenchComponent', () => {
     expect(element.querySelector('.v1-meter-workbench-header__issues')).toBeNull();
     expect(text).not.toContain('8 readings');
     expect(element.querySelector('.v1-meter-workbench-header__source-chip')?.getAttribute('style')).toContain('#a59a04');
-    expect(element.querySelector('.v1-meter-workbench-header__status .fa-triangle-exclamation')).not.toBeNull();
-    expect(element.querySelector('.v1-meter-workbench-header__group-value .fa-layer-group')).not.toBeNull();
+    expect(element.querySelector('.v1-meter-workbench-header__status app-ui-icon')).not.toBeNull();
+    expect(fixture.debugElement.query(By.css('.v1-meter-workbench-header__group-value app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
   });
 
   it('renders calendarized usage facts in the selected meter header', () => {
@@ -140,7 +142,7 @@ describe('MeterWorkbenchComponent', () => {
       sourceColor: '#d16a22',
       statusLabel: 'Valid',
       statusTone: 'success',
-      statusIcon: 'fa-circle-check',
+      statusIcon: 'success',
       firstReadingLabel: 'Jan 2026',
       latestReadingLabel: 'Feb 2026',
       scopeLabel: 'Stationary combustion',
@@ -160,7 +162,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(menu).not.toBeNull();
     expect(meterItems.map(item => item.textContent?.trim())).toEqual(['Electric Main', 'Gas Backup']);
     expect(meterItems[0].getAttribute('aria-checked')).toBe('true');
-    expect(menu?.querySelector('.fa-check')).toBeNull();
+    expect(menu?.querySelector('app-ui-icon')).toBeNull();
 
     meterItems[1].click();
 
@@ -284,7 +286,7 @@ function setup(options: {
       MeterWorkbenchTabsComponent,
       RouterOutletStubDirective
     ],
-    imports: [CommonModule],
+    imports: [CommonModule, IconComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
@@ -359,7 +361,7 @@ function defaultMeterCard(cardMeter = meter({ guid: 'meter-electric', name: 'Ele
     sourceColor: '#4f83cc',
     statusLabel: 'Valid',
     statusTone: 'success',
-    statusIcon: 'fa-circle-check',
+    statusIcon: 'success',
     firstReadingLabel: 'Jan 2026',
     latestReadingLabel: 'Jan 2026',
     scopeLabel: 'Purchased Electricity',

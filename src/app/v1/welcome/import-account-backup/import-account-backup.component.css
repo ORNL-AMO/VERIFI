@@ -81,7 +81,7 @@
   cursor: pointer;
 }
 
-.v1-file-picker > .fa {
+.v1-file-picker > .v1-icon {
   color: var(--v1-primary);
   font-size: 1.35rem;
 }
@@ -107,7 +107,7 @@
   background: var(--v1-panel);
 }
 
-.v1-import-summary > .fa {
+.v1-import-summary > .v1-icon {
   display: inline-grid;
   width: 2.25rem;
   height: 2.25rem;

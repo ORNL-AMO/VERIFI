@@ -4,12 +4,13 @@ import { FutureBackupVersionError, PreparedBackupFile } from '@data/backup/backu
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { DrawerFocusTrapDirective } from '../../../welcome/shared/drawer-focus-trap.directive';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-import-facility-backup-panel',
   templateUrl: './import-facility-backup.component.html',
   styleUrls: ['../../../welcome/import-account-backup/import-account-backup.component.css'],
-  imports: [DrawerFocusTrapDirective],
+  imports: [DrawerFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class ImportFacilityBackupComponent {

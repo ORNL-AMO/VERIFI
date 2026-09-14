@@ -7,6 +7,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
@@ -20,14 +21,14 @@ export interface SectionDefinition {
   readonly id: SectionId;
   readonly label: string;
   readonly shortLabel: string;
-  readonly icon: string;
+  readonly icon: IconName;
   readonly enabled: boolean;
 }
 
 export interface PanelTab {
   readonly id: PanelTabId;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
 }
 
 export interface PanelContent {
@@ -58,20 +59,20 @@ interface RouteState {
 }
 
 export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
-  { id: 'home', label: 'Home', shortLabel: 'Home', icon: 'fa-house', enabled: true },
-  { id: 'data', label: 'Data', shortLabel: 'Data', icon: 'fa-database', enabled: false },
-  { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'fa-chart-line', enabled: false },
-  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'fa-chart-simple', enabled: false },
-  { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'fa-file-lines', enabled: false },
-  { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'fa-sliders', enabled: true },
-  { id: 'imports', label: 'Imports & Backup', shortLabel: 'Imports', icon: 'fa-file-import', enabled: false }
+  { id: 'home', label: 'Home', shortLabel: 'Home', icon: 'home', enabled: true },
+  { id: 'data', label: 'Data', shortLabel: 'Data', icon: 'database', enabled: false },
+  { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'chartLine', enabled: false },
+  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'barChart', enabled: false },
+  { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
+  { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
+  { id: 'imports', label: 'Imports & Backup', shortLabel: 'Imports', icon: 'fileImport', enabled: false }
 ];
 
 export const SUPPORT_PANEL_TABS: ReadonlyArray<PanelTab> = [
-  { id: 'help', label: 'Help', icon: 'fa-circle-question' },
-  { id: 'todos', label: 'Todos', icon: 'fa-list-check' },
-  { id: 'results', label: 'Results', icon: 'fa-gauge-high' },
-  { id: 'details', label: 'Details', icon: 'fa-table-list' }
+  { id: 'help', label: 'Help', icon: 'help' },
+  { id: 'todos', label: 'Todos', icon: 'checklist' },
+  { id: 'results', label: 'Results', icon: 'meter' },
+  { id: 'details', label: 'Details', icon: 'table' }
 ];
 
 const DEFAULT_PANEL_TAB: PanelTabId = 'help';

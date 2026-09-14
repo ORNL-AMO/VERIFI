@@ -8,12 +8,12 @@
   <header class="v1-meter-group-card__header">
     <h3>
       <span class="v1-meter-group-card__title">
-        <span class="fa fa-gauge-high" aria-hidden="true"></span>
+        <app-ui-icon [name]="card.sourceIcon || 'meter'"></app-ui-icon>
         <span>{{ card.meter.name }}</span>
       </span>
     </h3>
     <button type="button" class="v1-icon-btn" [attr.aria-label]="'Edit ' + card.meter.name + ' settings'" (click)="opened.emit(card)">
-      <span class="fa fa-pen" aria-hidden="true"></span>
+      <app-ui-icon name="edit"></app-ui-icon>
     </button>
   </header>
 
@@ -22,6 +22,7 @@
       <dt>Source</dt>
       <dd>
         <span class="v1-meter-group-card__source" [style.--v1-meter-source-color]="card.sourceColor || null">
+          <app-ui-icon [name]="card.sourceIcon || 'meter'"></app-ui-icon>
           {{ card.meter.source }}
         </span>
       </dd>
@@ -40,10 +41,10 @@
 
   <footer class="v1-meter-group-card__actions" aria-label="Meter organization actions">
     <button type="button" class="v1-icon-btn v1-meter-group-card__drag" title="Drag meter" aria-label="Drag meter" cdkDragHandle [disabled]="!canMove">
-      <span class="fa fa-grip-vertical" aria-hidden="true"></span>
+      <app-ui-icon name="drag"></app-ui-icon>
     </button>
     <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet v1-meter-group-card__move" [disabled]="!canMove" (click)="moveRequested.emit(card)">
-      <span class="fa fa-arrow-right-arrow-left" aria-hidden="true"></span>
+      <app-ui-icon name="transfer"></app-ui-icon>
       Move meter
     </button>
   </footer>

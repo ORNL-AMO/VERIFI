@@ -3,6 +3,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
   MeterReadingColumn,
   MeterReadingFilterOption,
@@ -36,7 +37,7 @@ interface MeterReadingDisplayColumn {
   templateUrl: './meter-readings-table.component.html',
   styleUrls: ['./meter-readings-table.component.css'],
   standalone: true,
-  imports: [CommonModule, NgbPaginationModule]
+  imports: [CommonModule, NgbPaginationModule, IconComponent]
 })
 export class MeterReadingsTableComponent {
   private static readonly emptyView: MeterReadingTableView = {

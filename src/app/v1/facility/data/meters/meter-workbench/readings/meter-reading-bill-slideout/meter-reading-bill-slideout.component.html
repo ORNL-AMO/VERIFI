@@ -133,7 +133,7 @@
 
       @if (form.invalid && form.touched) {
         <div class="v1-alert v1-alert--danger" role="alert">
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           <span>Resolve the highlighted fields before saving this bill.</span>
         </div>
       }
@@ -147,9 +147,9 @@
         }
         <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || form.invalid">
           @if (saving) {
-            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            <app-ui-icon name="loading" spin></app-ui-icon>
           } @else {
-            <span class="fa fa-check" aria-hidden="true"></span>
+            <app-ui-icon name="check"></app-ui-icon>
           }
           {{ mode === 'add' ? 'Save' : 'Save Changes' }}
         </button>

@@ -21,6 +21,17 @@
   justify-content: flex-end;
 }
 
+.v1-facility-meters__title {
+  display: inline-flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+}
+
+.v1-facility-meters__title .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-facility);
+}
+
 .v1-facility-meters__groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));

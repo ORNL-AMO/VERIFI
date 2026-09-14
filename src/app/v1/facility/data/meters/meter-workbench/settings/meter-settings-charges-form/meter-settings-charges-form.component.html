@@ -2,7 +2,7 @@
   <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
     <h3 class="mb-0">Meter charges</h3>
     <button type="button" class="v1-btn v1-btn--action v1-btn--small" [disabled]="form.disabled" (click)="addCharge()">
-      <span class="fa fa-plus" aria-hidden="true"></span>
+      <app-ui-icon name="add"></app-ui-icon>
       Add charge
     </button>
   </div>
@@ -25,7 +25,7 @@
           </label>
           <button type="button" class="v1-icon-btn" [disabled]="form.disabled" [attr.aria-label]="'Remove charge ' + (index + 1)"
             (click)="removeCharge(index)">
-            <span class="fa fa-trash" aria-hidden="true"></span>
+            <app-ui-icon name="delete"></app-ui-icon>
           </button>
         </div>
       }

@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { vi } from 'vitest';
+import { IconComponent } from '../../../../../shared/icons/icon.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { MeterGroupResultRow, MeterGroupResultsView } from '../../facility-meters.models';
@@ -76,7 +77,7 @@ function setup(options: {
 } = {}): ComponentFixture<MeterGroupWorkbenchTableComponent> {
   TestBed.configureTestingModule({
     declarations: [MeterGroupWorkbenchTableComponent],
-    imports: [CommonModule, NgbPaginationModule],
+    imports: [CommonModule, IconComponent, NgbPaginationModule],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

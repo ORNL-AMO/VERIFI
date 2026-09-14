@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { reading } from '../../../facility-meters.testing';
 import { MeterReadingColumn, MeterReadingTableRow, MeterReadingTableView } from '../meter-workbench-readings.models';
@@ -25,6 +26,14 @@ describe('MeterReadingsTableComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.meter-readings-table__group-start').length).toBe(6);
     expect(fixture.nativeElement.querySelectorAll('.meter-readings-table__group-end').length).toBe(6);
     expect(fixture.nativeElement.textContent).not.toContain('Actions');
+  });
+
+  it('uses a settings slider icon for choosing visible columns', () => {
+    const fixture = setup(tableView());
+    const chooseColumnsButton = fixture.debugElement.queryAll(By.css('button'))
+      .find(button => (button.nativeElement as HTMLButtonElement).textContent?.includes('Choose Columns'));
+
+    expect(chooseColumnsButton?.query(By.css('app-ui-icon')).componentInstance.name).toBe('settingsSliders');
   });
 
   it('sorts rows by date descending by default and toggles column sort direction', () => {

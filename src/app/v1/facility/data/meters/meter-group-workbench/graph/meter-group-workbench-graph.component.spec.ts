@@ -3,6 +3,7 @@ import { Directive, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
+import { IconComponent } from '../../../../../shared/icons/icon.component';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { MeterGroupResultRow, MeterGroupResultsView } from '../../facility-meters.models';
 import { group } from '../../facility-meters.testing';
@@ -64,7 +65,7 @@ function setup(options: {
 } = {}): ComponentFixture<MeterGroupWorkbenchGraphComponent> {
   TestBed.configureTestingModule({
     declarations: [MeterGroupWorkbenchGraphComponent],
-    imports: [CommonModule, EChartsStubDirective],
+    imports: [CommonModule, EChartsStubDirective, IconComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
