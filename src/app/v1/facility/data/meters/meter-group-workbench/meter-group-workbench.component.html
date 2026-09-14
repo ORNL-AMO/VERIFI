@@ -19,8 +19,8 @@
     </button>
   </article>
 } @else if (currentGroup) {
-  <header class="v1-meter-group-workbench-header">
-    <nav class="v1-meter-group-workbench-header__breadcrumb" aria-label="Meter group breadcrumb">
+  <header class="v1-data-workbench-header v1-meter-group-workbench-header">
+    <nav class="v1-data-workbench-breadcrumb v1-meter-group-workbench-header__breadcrumb" aria-label="Meter group breadcrumb">
       <ol>
         <li>
           <button type="button" (click)="openGrouping()">
@@ -30,7 +30,7 @@
         </li>
         <li aria-hidden="true">/</li>
         <li
-          class="v1-meter-group-workbench-header__group-switcher"
+          class="v1-data-workbench-switcher v1-meter-group-workbench-header__group-switcher"
           [class.open]="groupSwitcherOpen()"
           aria-current="page"
           (keydown.escape)="onGroupSwitcherEscape()">
@@ -38,27 +38,27 @@
             <button
               #groupSwitcherToggle
               type="button"
-              class="v1-meter-group-workbench-header__group-toggle"
+              class="v1-data-workbench-switcher-toggle v1-meter-group-workbench-header__group-toggle"
               aria-haspopup="menu"
               [attr.aria-expanded]="groupSwitcherOpen()"
               [attr.aria-label]="'Switch meter group, current group ' + currentGroup.name"
               (click)="toggleGroupSwitcher()">
-              <span class="v1-meter-group-workbench-header__group-toggle-label">{{ currentGroup.name }}</span>
-              <span class="fa fa-chevron-down v1-meter-group-workbench-header__group-toggle-icon" aria-hidden="true"></span>
+              <span class="v1-data-workbench-switcher-label v1-meter-group-workbench-header__group-toggle-label">{{ currentGroup.name }}</span>
+              <span class="fa fa-chevron-down v1-data-workbench-switcher-icon v1-meter-group-workbench-header__group-toggle-icon" aria-hidden="true"></span>
             </button>
 
             @if (groupSwitcherOpen()) {
-              <div class="v1-meter-group-workbench-header__group-backdrop" (click)="closeGroupSwitcher()" aria-hidden="true"></div>
-              <div class="v1-meter-group-workbench-header__group-menu" role="menu" aria-label="Switch meter group">
+              <div class="v1-data-workbench-switcher-backdrop v1-meter-group-workbench-header__group-backdrop" (click)="closeGroupSwitcher()" aria-hidden="true"></div>
+              <div class="v1-data-workbench-switcher-menu v1-meter-group-workbench-header__group-menu" role="menu" aria-label="Switch meter group">
                 @for (group of groupOptions(); track group.guid) {
                   <button
                     type="button"
-                    class="v1-meter-group-workbench-header__group-item"
+                    class="v1-data-workbench-switcher-item v1-meter-group-workbench-header__group-item"
                     role="menuitemradio"
                     [class.active]="group.guid === currentGroup.guid"
                     [attr.aria-checked]="group.guid === currentGroup.guid"
                     (click)="switchGroup(group.guid)">
-                    <span class="v1-meter-group-workbench-header__group-item-text">
+                    <span class="v1-data-workbench-switcher-item-text v1-meter-group-workbench-header__group-item-text">
                       {{ group.name || 'Untitled group' }}
                     </span>
                   </button>
@@ -72,12 +72,12 @@
       </ol>
     </nav>
 
-    <div class="v1-meter-group-workbench-header__title-row">
-      <div class="v1-meter-group-workbench-header__title">
+    <div class="v1-data-workbench-title-row v1-meter-group-workbench-header__title-row">
+      <div class="v1-data-workbench-title v1-meter-group-workbench-header__title">
         <p class="v1-eyebrow">{{ currentFacility.name }} Meter Group</p>
         <h1 id="v1-facility-meters-title">{{ currentGroup.name }}</h1>
       </div>
-      <div class="v1-meter-group-workbench-header__chips" aria-label="Meter group summary">
+      <div class="v1-data-workbench-actions v1-meter-group-workbench-header__chips" aria-label="Meter group summary">
         <span class="v1-meter-group-workbench-header__type-chip">
           <span class="fa fa-layer-group" aria-hidden="true"></span>
           {{ currentGroup.groupType }}
@@ -101,7 +101,7 @@
       </div>
     </div>
 
-    <dl class="v1-meter-group-workbench-header__facts">
+    <dl class="v1-data-workbench-facts v1-meter-group-workbench-header__facts">
       <div>
         <dt>Assigned meters</dt>
         <dd>{{ currentResults.summary.assignedMeterCount }}</dd>
@@ -130,7 +130,7 @@
     </dl>
 
     @if (currentGroup.groupType === 'Energy') {
-      <div class="v1-meter-group-workbench-header__energy-toggle" aria-label="Energy basis">
+      <div class="v1-data-workbench-actions v1-meter-group-workbench-header__energy-toggle" aria-label="Energy basis">
         <button
           type="button"
           class="v1-btn v1-btn--sm"
@@ -179,12 +179,12 @@
     </div>
   }
 
-  <nav class="v1-facility-meters__tabs" aria-label="Meter group workbench sections">
+  <nav class="v1-data-tabs v1-data-tabs--connected" aria-label="Meter group workbench sections">
     @for (tab of tabs; track tab.id) {
       <button
         type="button"
-        class="v1-facility-meters__tab"
-        [class.v1-facility-meters__tab--active]="activeTab() === tab.id"
+        class="v1-data-tabs__tab"
+        [class.v1-data-tabs__tab--active]="activeTab() === tab.id"
         (click)="openGroupTab(tab.id)"
         [attr.aria-current]="activeTab() === tab.id ? 'page' : null">
         <span class="fa {{ tab.icon }}" aria-hidden="true"></span>

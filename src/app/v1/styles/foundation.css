@@ -110,6 +110,285 @@
   color: inherit;
 }
 
+.v1-root .v1-data-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  padding: var(--v1-space-2);
+  border: 1px solid var(--v1-border);
+  border-radius: 0;
+  background: var(--v1-panel);
+}
+
+.v1-root .v1-data-tabs__tab {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--v1-control-height);
+  padding: .45rem .75rem;
+  border: 1px solid transparent;
+  border-radius: var(--v1-radius-sm);
+  background: transparent;
+  color: var(--v1-muted);
+  cursor: pointer;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.v1-root .v1-data-tabs__tab:hover,
+.v1-root .v1-data-tabs__tab:focus-visible {
+  color: var(--v1-text);
+}
+
+.v1-root .v1-data-tabs__tab--active {
+  border-color: color-mix(in srgb, var(--v1-content-control) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
+  color: var(--v1-text);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1-content-control) 18%, transparent);
+}
+
+.v1-root .v1-data-tabs--connected {
+  border-top: 0;
+}
+
+@media (max-width: 760px) {
+  .v1-root .v1-data-tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+.v1-root .v1-data-workbench-header {
+  display: grid;
+  gap: var(--v1-space-4);
+  min-width: 0;
+  padding: var(--v1-space-4);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  background: var(--v1-surface);
+}
+
+.v1-root .v1-data-workbench-breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-1);
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--v1-muted);
+  font-size: .82rem;
+  font-weight: 800;
+  list-style: none;
+}
+
+.v1-root .v1-data-workbench-breadcrumb > ol > li > button {
+  display: inline-flex;
+  gap: var(--v1-space-1);
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--v1-link);
+  font: inherit;
+  cursor: pointer;
+}
+
+.v1-root .v1-data-workbench-breadcrumb > ol > li > button:hover,
+.v1-root .v1-data-workbench-breadcrumb > ol > li > button:focus-visible {
+  color: var(--v1-link);
+  text-decoration: underline;
+  text-decoration-thickness: .1rem;
+  text-underline-offset: .18rem;
+}
+
+.v1-root .v1-data-workbench-breadcrumb > ol > li > button:focus-visible {
+  border-radius: var(--v1-radius-sm);
+  outline-offset: 3px;
+}
+
+.v1-root .v1-data-workbench-switcher {
+  position: relative;
+  min-width: 0;
+}
+
+.v1-root .v1-data-workbench-switcher-toggle {
+  max-width: min(24rem, 60vw);
+}
+
+.v1-root .v1-data-workbench-switcher-label,
+.v1-root .v1-data-workbench-switcher-item-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v1-root .v1-data-workbench-switcher-icon {
+  flex: 0 0 auto;
+  font-size: .65rem;
+  opacity: .68;
+  transition: transform .16s ease;
+}
+
+.v1-root .v1-data-workbench-switcher.open .v1-data-workbench-switcher-icon {
+  transform: rotate(180deg);
+}
+
+.v1-root .v1-data-workbench-switcher-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.v1-root .v1-data-workbench-switcher-menu {
+  position: absolute;
+  top: calc(100% + .35rem);
+  left: 0;
+  z-index: 100;
+  display: grid;
+  gap: .1rem;
+  width: min(22rem, 82vw);
+  max-height: 18rem;
+  padding: .4rem;
+  overflow-y: auto;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-surface);
+  box-shadow: 0 .75rem 2rem var(--v1-shadow-soft);
+}
+
+.v1-root .v1-data-workbench-switcher-item {
+  display: block;
+  width: 100%;
+  padding: .45rem .55rem;
+  border: 0;
+  border-radius: var(--v1-radius-sm);
+  background: transparent;
+  color: var(--v1-text);
+  font-size: .85rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.v1-root .v1-data-workbench-switcher-item:hover,
+.v1-root .v1-data-workbench-switcher-item:focus-visible {
+  background: var(--v1-surface-muted);
+  color: var(--v1-text);
+  text-decoration: none;
+}
+
+.v1-root .v1-data-workbench-switcher-item:focus-visible {
+  outline-offset: 1px;
+}
+
+.v1-root .v1-data-workbench-switcher-item.active {
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
+  box-shadow: inset 3px 0 0 var(--v1-content-control);
+}
+
+.v1-root .v1-data-workbench-switcher-item-text {
+  display: block;
+}
+
+.v1-root .v1-data-workbench-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--v1-space-3);
+  align-items: start;
+}
+
+.v1-root .v1-data-workbench-title {
+  min-width: 0;
+}
+
+.v1-root .v1-data-workbench-header h1,
+.v1-root .v1-data-workbench-header p {
+  margin: 0;
+}
+
+.v1-root .v1-data-workbench-header h1 {
+  color: var(--v1-text);
+  font-size: 2rem;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.v1-root .v1-data-workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-1);
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.v1-root .v1-data-workbench-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--v1-space-2);
+  margin: 0;
+}
+
+.v1-root .v1-data-workbench-facts div {
+  min-width: 0;
+  padding: var(--v1-space-3);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-content-block);
+}
+
+.v1-root .v1-data-workbench-facts dt {
+  color: var(--v1-muted);
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.v1-root .v1-data-workbench-facts dd {
+  margin: .12rem 0 0;
+  overflow: hidden;
+  color: var(--v1-text);
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v1-root .v1-data-workbench-facts dd span {
+  color: var(--v1-muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .v1-root .v1-data-workbench-title-row {
+    grid-template-columns: 1fr;
+  }
+
+  .v1-root .v1-data-workbench-actions {
+    justify-content: flex-start;
+  }
+
+  .v1-root .v1-data-workbench-header h1 {
+    font-size: 1.72rem;
+  }
+
+  .v1-root .v1-data-workbench-switcher-toggle {
+    max-width: 72vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v1-root .v1-data-workbench-switcher-icon {
+    transition: none;
+  }
+}
+
 .v1-palette-steel {
   --v1-bg: #eef1f2;
   --v1-surface: #fbfcfc;
