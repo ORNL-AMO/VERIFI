@@ -39,7 +39,7 @@ describe('MeterGroupLaneComponent', () => {
     expect(moved[0]).toBe(section.meters[0]);
   });
 
-  it('emits open requests from compact meter group card titles', () => {
+  it('emits open requests from compact meter group card edit buttons', () => {
     const energyGroup = group({ guid: 'group-energy', name: 'Electricity' });
     const cardMeter = meter({ guid: 'meter-electric', name: 'Electric Main', groupId: energyGroup.guid });
     const section = buildMeterGroupSections([cardMeter], [], [energyGroup])[0];
@@ -48,9 +48,24 @@ describe('MeterGroupLaneComponent', () => {
     fixture.componentInstance.openMeter.subscribe(card => opened.push(card));
 
     fixture.detectChanges();
-    clickButton(fixture, 'Open Electric Main settings');
+    clickButton(fixture, 'Edit Electric Main settings');
 
     expect(opened[0]).toBe(section.meters[0]);
+  });
+
+  it('opens group results from the group title link pattern', () => {
+    const energyGroup = group({ guid: 'group-energy', name: 'Electricity' });
+    const cardMeter = meter({ guid: 'meter-electric', name: 'Electric Main', groupId: energyGroup.guid });
+    const section = buildMeterGroupSections([cardMeter], [], [energyGroup])[0];
+    const fixture = setup(section);
+    const opened: unknown[] = [];
+    fixture.componentInstance.openGroup.subscribe(groupSection => opened.push(groupSection));
+
+    fixture.detectChanges();
+    clickButton(fixture, 'Open Electricity results');
+
+    expect(opened[0]).toBe(section);
+    expect(fixture.nativeElement.textContent).not.toContain('Open results');
   });
 
   it('keeps CDK auto-scroll enabled for long grouped meter dashboards', () => {
