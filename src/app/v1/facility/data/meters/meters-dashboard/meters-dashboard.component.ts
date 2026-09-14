@@ -6,6 +6,7 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { MeterDraftSlideoutComponent } from './meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
 import { MeterBrowseCardComponent } from './meter-browse-card/meter-browse-card.component';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-meters-dashboard',
@@ -13,6 +14,7 @@ import { MetersDashboardActionsService } from './meters-dashboard-actions.servic
   styleUrls: ['./meters-dashboard.component.css'],
   standalone: true,
   imports: [
+    IconComponent,
     MeterBrowseCardComponent,
     MeterDraftSlideoutComponent
   ],

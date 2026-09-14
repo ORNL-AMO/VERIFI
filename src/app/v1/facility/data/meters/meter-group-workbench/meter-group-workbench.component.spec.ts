@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Directive, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
+import { IconComponent } from '../../../../shared/icons/icon.component';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { MeterGroupResultsView, MeterUsageFactsView } from '../facility-meters.models';
 import { facility, group, meter } from '../facility-meters.testing';
@@ -21,6 +23,9 @@ describe('MeterGroupWorkbenchComponent', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Facility A Meter Group');
     expect(text).toContain('Energy Group');
+    expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__group-crumb app-ui-icon'))).toBeNull();
+    expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__group-title app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
+    expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__type-chip app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
     expect(text).toContain('Meters');
     expect(text).toContain('Electric Main');
     expect(text).toContain('Gas Backup');
@@ -49,6 +54,25 @@ describe('MeterGroupWorkbenchComponent', () => {
     expect(element.querySelectorAll('.placeholder-glow .placeholder').length).toBeGreaterThan(0);
     expect(element.textContent).not.toContain('110 MMBtu');
   });
+
+  it('shows group switcher menu items as names only', () => {
+    const fixture = setup({
+      extraGroups: [
+        group({ guid: 'group-water', name: 'Water Group', groupType: 'Water' })
+      ]
+    });
+
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    element.querySelector<HTMLButtonElement>('.v1-meter-group-workbench-header__group-toggle')?.click();
+    fixture.detectChanges();
+
+    const menu = element.querySelector<HTMLElement>('.v1-meter-group-workbench-header__group-menu');
+    const menuItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-group-workbench-header__group-item'));
+    expect(menu).not.toBeNull();
+    expect(menu?.querySelector('app-ui-icon')).toBeNull();
+    expect(menuItems.map(item => item.textContent?.trim())).toEqual(['Energy Group', 'Water Group']);
+  });
 });
 
 @Directive({
@@ -60,6 +84,7 @@ class RouterOutletStubDirective { }
 function setup(options: {
   results?: MeterGroupResultsView;
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
+  extraGroups?: ReturnType<typeof group>[];
 } = {}): ComponentFixture<MeterGroupWorkbenchComponent> {
   const selectedGroup = group({ guid: 'group-energy', name: 'Energy Group', groupType: 'Energy' });
   const routerEvents = new Subject<NavigationEnd>();
@@ -69,7 +94,7 @@ function setup(options: {
       MeterGroupWorkbenchComponent,
       RouterOutletStubDirective
     ],
-    imports: [CommonModule],
+    imports: [CommonModule, IconComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
@@ -77,7 +102,7 @@ function setup(options: {
           account: signal({ guid: 'account-a' }),
           facility: signal(facility({ guid: 'facility-a', name: 'Facility A', energyIsSource: false })),
           selectedMeterGroupForWorkbench: signal(selectedGroup),
-          meterGroups: signal([selectedGroup]),
+          meterGroups: signal([selectedGroup, ...(options.extraGroups ?? [])]),
           selectedMeterGroupResults: signal(options.results ?? resultsView()),
           calendarizationState: signal(options.calendarizationState ?? 'ready'),
           canWrite: signal(true),

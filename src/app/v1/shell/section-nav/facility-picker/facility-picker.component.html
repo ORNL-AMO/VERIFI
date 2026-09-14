@@ -1,7 +1,7 @@
 <div class="v1-facility-picker" (keydown.escape)="onEscape()">
   @if (facilities.length <= 1) {
     <div class="v1-facility-picker__single">
-      <span class="fa fa-industry" aria-hidden="true"></span>
+      <app-ui-icon name="facility"></app-ui-icon>
       <span>{{ facilities[0]?.name ?? 'Select facility' }}</span>
     </div>
   } @else {
@@ -13,9 +13,9 @@
         (click)="toggle()"
         [attr.aria-expanded]="open"
         aria-haspopup="true">
-        <span class="fa fa-industry" aria-hidden="true"></span>
+        <app-ui-icon name="facility"></app-ui-icon>
         <span class="v1-facility-picker__label">{{ selectedFacility?.name ?? 'Select facility' }}</span>
-        <span class="fa fa-chevron-down v1-facility-picker__chevron" aria-hidden="true"></span>
+        <app-ui-icon name="chevronDown" class="v1-facility-picker__chevron"></app-ui-icon>
       </button>
 
       @if (open) {
@@ -23,7 +23,7 @@
         <div class="v1-facility-picker__menu" role="menu" aria-label="Switch facility">
           @if (showSearch) {
             <div class="v1-facility-picker__search">
-              <span class="fa fa-search v1-facility-picker__search-icon" aria-hidden="true"></span>
+              <app-ui-icon name="search" class="v1-facility-picker__search-icon"></app-ui-icon>
               <input
                 class="v1-facility-picker__search-input"
                 type="search"
@@ -41,7 +41,7 @@
                 role="menuitem"
                 [class.active]="facility.guid === selectedFacility?.guid"
                 (click)="select(facility.guid)">
-                <span class="fa fa-check v1-facility-picker__check" aria-hidden="true"></span>
+                <app-ui-icon name="check" class="v1-facility-picker__check"></app-ui-icon>
                 <span class="v1-facility-picker__item-text">
                   {{ facility.name }}
                   @if (facilityLocation(facility)) {

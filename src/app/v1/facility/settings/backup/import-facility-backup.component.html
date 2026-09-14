@@ -19,7 +19,7 @@
       aria-label="Close facility backup panel"
       [disabled]="isImporting"
       (click)="close()">
-      <span class="fa fa-xmark" aria-hidden="true"></span>
+      <app-ui-icon name="close"></app-ui-icon>
     </button>
   </header>
 
@@ -29,7 +29,7 @@
     </p>
 
     <label class="v1-file-picker" for="v1-facility-backup-file">
-      <span class="fa fa-file-arrow-up" aria-hidden="true"></span>
+      <app-ui-icon name="fileUpload"></app-ui-icon>
       <strong>{{ selectedFileName || 'Choose facility backup file' }}</strong>
       <small>JSON facility backup exported from VERIFI</small>
       <input
@@ -43,14 +43,14 @@
 
     @if (backupFileError) {
       <div class="v1-alert v1-alert--danger" role="alert">
-        <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
         <span>{{ backupFileError }}</span>
       </div>
     }
 
     @if (backupFile && !backupFileError) {
       <article class="v1-import-summary" aria-label="Selected facility backup">
-        <span class="fa fa-industry" aria-hidden="true"></span>
+        <app-ui-icon name="facility"></app-ui-icon>
         <div>
           <strong>{{ backupName }}</strong>
           <small>{{ meterCount }} meters / {{ predictorCount }} predictors</small>
@@ -73,7 +73,7 @@
 
       @if (importMode === 'replace') {
         <div class="v1-alert v1-alert--warning">
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           <span>Replacing a facility removes its current meters, predictors, analyses, reports, and related data before importing the backup.</span>
         </div>
       }
@@ -83,11 +83,11 @@
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isImporting" (click)="close()">Cancel</button>
       <button type="button" class="v1-btn v1-btn--primary" [disabled]="!backupFile || !!backupFileError || isImporting" (click)="importBackupFile()">
         @if (isImporting) {
-          <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
           Importing
         } @else {
           Import backup
-          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          <app-ui-icon name="arrowRight"></app-ui-icon>
         }
       </button>
     </div>

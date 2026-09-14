@@ -9,7 +9,7 @@
     <div class="meter-readings-table__table-controls">
       @if (isDataOutdated) {
         <span class="meter-readings-table__badge">
-          <span class="fa fa-clock" aria-hidden="true"></span>
+          <app-ui-icon name="clock"></app-ui-icon>
           Outdated
         </span>
       }
@@ -33,15 +33,15 @@
     </div>
     <div class="meter-readings-table__actions-bar">
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct" (click)="chooseColumnsRequested.emit()">
-        <span class="fa fa-table-columns" aria-hidden="true"></span>
+        <app-ui-icon name="settingsSliders"></app-ui-icon>
         Choose Columns
       </button>
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct" (click)="addBillRequested.emit()">
-        <span class="fa fa-plus" aria-hidden="true"></span>
+        <app-ui-icon name="add"></app-ui-icon>
         Add New Bill
       </button>
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct || selectedCount() === 0" (click)="requestBulkDelete()">
-        <span class="fa fa-trash" aria-hidden="true"></span>
+        <app-ui-icon name="delete"></app-ui-icon>
         Delete Selected
       </button>
     </div>
@@ -103,12 +103,10 @@
                 [class.active]="sortColumnId() === column.column.id"
                 (click)="requestSort(column.column.id)">
                 <span>{{ column.column.label }}</span>
-                <span
-                  class="meter-readings-table__sort-icon fa"
-                  [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'"
-                  [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'"
-                  aria-hidden="true">
-                </span>
+                <app-ui-icon
+                  class="meter-readings-table__sort-icon"
+                  [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'">
+                </app-ui-icon>
               </button>
             </th>
           }
@@ -145,10 +143,10 @@
                 (focusout)="setColumnHover(undefined)">
                 <span class="meter-readings-table__value">
                   @if (row.reading.isEstimated && column.showsEstimatedMarker) {
-                    <span class="meter-readings-table__estimated fa fa-asterisk" title="Estimated reading" aria-label="Estimated reading"></span>
+                    <app-ui-icon name="estimated" class="meter-readings-table__estimated" title="Estimated reading" [decorative]="false" label="Estimated reading"></app-ui-icon>
                   }
                   @if (row.negativeColumnIds[column.column.id]) {
-                    <span class="meter-readings-table__negative fa fa-triangle-exclamation" title="Negative reading" aria-label="Negative reading"></span>
+                    <app-ui-icon name="warning" class="meter-readings-table__negative" title="Negative reading" [decorative]="false" label="Negative reading"></app-ui-icon>
                   }
                   <span>{{ row.values[column.column.id] }}</span>
                 </span>
@@ -157,15 +155,15 @@
             @if (!copyingTable()) {
               <td class="meter-readings-table__actions">
                 <button type="button" class="v1-icon-btn" title="Edit reading" aria-label="Edit reading" [disabled]="!canAct" (click)="editRequested.emit(row.reading)">
-                  <span class="fa fa-pen" aria-hidden="true"></span>
+                  <app-ui-icon name="edit"></app-ui-icon>
                 </button>
                 @if (isElectron && row.reading.isBillConnected) {
                   <button type="button" class="v1-icon-btn" title="Open connected bill" aria-label="Open connected bill" (click)="viewBillRequested.emit(row.reading)">
-                    <span class="fa fa-paperclip" aria-hidden="true"></span>
+                    <app-ui-icon name="attachment"></app-ui-icon>
                   </button>
                 }
                 <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete reading" aria-label="Delete reading" [disabled]="!canAct" (click)="deleteRequested.emit(row.reading)">
-                  <span class="fa fa-trash" aria-hidden="true"></span>
+                  <app-ui-icon name="delete"></app-ui-icon>
                 </button>
               </td>
             }
@@ -178,12 +176,12 @@
   <footer class="meter-readings-table__footer">
     <div class="meter-readings-table__footer-start">
       <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="_rows.length === 0" (click)="copyTable()">
-        <span class="fa fa-copy" aria-hidden="true"></span>
+        <app-ui-icon name="copy"></app-ui-icon>
         Copy Table
       </button>
       @if (hasEstimatedRows()) {
         <span class="meter-readings-table__estimated-note">
-          <span class="meter-readings-table__estimated fa fa-asterisk" aria-hidden="true"></span>
+          <app-ui-icon name="estimated" class="meter-readings-table__estimated"></app-ui-icon>
           Indicates Estimated Reading
         </span>
       }

@@ -8,6 +8,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { vi } from 'vitest';
 import { ModalPortalService } from '../../../../../shell/modal-portal.service';
+import { IconComponent } from '../../../../../shared/icons/icon.component';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
 import { account, facility, meter, reading } from '../../facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
@@ -272,7 +273,7 @@ function setup(options: {
       MeterSettingsStatusFormComponent,
       MeterSettingsEmissionsDetailsComponent
     ],
-    imports: [CommonModule, ReactiveFormsModule, ConfirmDeleteMeterModalComponent],
+    imports: [CommonModule, ReactiveFormsModule, IconComponent, ConfirmDeleteMeterModalComponent],
     providers: [
       MeterSettingsFormService,
       {

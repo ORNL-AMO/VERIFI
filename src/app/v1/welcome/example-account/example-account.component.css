@@ -143,7 +143,7 @@
   color: var(--v1-example-accent);
 }
 
-.v1-example__header > .fa {
+.v1-example__header > .v1-icon {
   color: var(--v1-example-accent);
 }
 

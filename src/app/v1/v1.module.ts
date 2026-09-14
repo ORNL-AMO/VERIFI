@@ -17,6 +17,7 @@ import { PrimaryRailComponent } from './shell/primary-rail/primary-rail.componen
 import { FacilityPickerComponent } from './shell/section-nav/facility-picker/facility-picker.component';
 import { SectionNavComponent } from './shell/section-nav/section-nav.component';
 import { NotificationsModule } from './shared/notifications/notifications.module';
+import { IconsModule } from './shared/icons/icons.module';
 import { ShellComponent } from './shell/shell.component';
 import { SupportPanelComponent } from './shell/support-panel/support-panel.component';
 import { WorkspaceShellComponent } from './shell/workspace-shell/workspace-shell.component';
@@ -38,6 +39,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
   imports: [
     CommonModule,
     FormsModule,
+    IconsModule,
     NotificationsModule,
     PortalModule,
     ScrollingModule,

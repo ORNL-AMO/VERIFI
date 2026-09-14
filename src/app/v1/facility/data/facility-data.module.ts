@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
+import { IconsModule } from '@app/v1/shared/icons/icons.module';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
@@ -56,6 +57,7 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
   ],
   imports: [
     CommonModule,
+    IconsModule,
     NgbPaginationModule,
     ReactiveFormsModule,
     RouterModule,

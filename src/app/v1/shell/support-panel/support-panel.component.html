@@ -8,7 +8,7 @@
       <strong>Home</strong>
     </div>
     <button type="button" class="v1-icon-btn" (click)="navigation.hideSupportPanel()" aria-label="Hide support panel">
-      <span class="fa fa-xmark" aria-hidden="true"></span>
+      <app-ui-icon name="close"></app-ui-icon>
     </button>
   </header>
 
@@ -20,7 +20,7 @@
         [attr.aria-selected]="activeTab === tab.id"
         [class.active]="activeTab === tab.id"
         (click)="navigation.setPanelTab(tab.id)">
-        <span [class]="'fa ' + tab.icon" aria-hidden="true"></span>
+        <app-ui-icon [name]="tab.icon"></app-ui-icon>
         {{ tab.label }}
       </button>
     }

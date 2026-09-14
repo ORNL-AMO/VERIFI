@@ -18,6 +18,7 @@ import { MeterGroupLaneComponent } from './meter-group-lane/meter-group-lane.com
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
 import { MoveMeterSlideoutComponent } from './move-meter-slideout/move-meter-slideout.component';
 import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal/confirm-delete-group-modal.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -25,6 +26,7 @@ import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal/c
   styleUrls: ['./meter-grouping.component.css'],
   standalone: true,
   imports: [
+    IconComponent,
     MeterGroupLaneComponent,
     MeterGroupDraftSlideoutComponent,
     MoveMeterSlideoutComponent,

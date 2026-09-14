@@ -5,11 +5,11 @@
       [class.v1-settings-panel__status--error]="saveState === 'error' || saveState === 'invalid'"
       aria-live="polite">
       @if (saveState === 'saving') {
-        <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+        <app-ui-icon name="loading" spin></app-ui-icon>
       } @else if (saveState === 'saved') {
-        <span class="fa fa-check" aria-hidden="true"></span>
+        <app-ui-icon name="check"></app-ui-icon>
       } @else if (saveState === 'error' || saveState === 'invalid') {
-        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
       }
       {{ saveMessage }}
     </span>

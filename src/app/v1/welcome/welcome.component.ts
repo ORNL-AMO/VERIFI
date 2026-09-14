@@ -10,12 +10,14 @@ import { EmailListSignupComponent } from './email-list-signup/email-list-signup.
 import { ExampleAccountComponent } from './example-account/example-account.component';
 import { ImportAccountBackupComponent } from './import-account-backup/import-account-backup.component';
 import { CreateAccountResult, WELCOME_ACTIONS } from './welcome.models';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.css'],
   imports: [
+    IconComponent,
     RouterModule,
     CreateAccountComponent,
     ImportAccountBackupComponent,

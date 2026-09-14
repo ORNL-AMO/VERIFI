@@ -5,6 +5,7 @@ import {
   CornerStyle,
   Palette
 } from '../../appearance/appearance.service';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 interface PaletteOption {
@@ -16,7 +17,7 @@ interface PaletteOption {
 interface SegmentOption<T> {
   readonly id: T;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
 }
 
 interface PatternOption {
@@ -44,8 +45,8 @@ export class ShellHeaderComponent {
   ];
 
   readonly cornerOptions: Array<SegmentOption<CornerStyle>> = [
-    { id: 'soft', label: 'Soft', icon: 'fa-square' },
-    { id: 'square', label: 'Square', icon: 'fa-vector-square' }
+    { id: 'soft', label: 'Soft', icon: 'square' },
+    { id: 'square', label: 'Square', icon: 'vectorSquare' }
   ];
 
   readonly patternOptions: Array<PatternOption> = [

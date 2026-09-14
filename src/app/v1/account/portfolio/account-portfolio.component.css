@@ -63,7 +63,7 @@
   text-align: left;
 }
 
-.v1-portfolio-selector .fa {
+.v1-portfolio-selector .v1-icon {
   color: var(--v1-muted);
 }
 
@@ -74,7 +74,7 @@
   box-shadow: inset 0 -3px 0 var(--v1-content-control), 0 1rem 2rem var(--v1-shadow-soft);
 }
 
-.v1-portfolio-selector--active .fa,
+.v1-portfolio-selector--active .v1-icon,
 .v1-portfolio-selector--active span {
   color: var(--v1-text);
 }
@@ -116,7 +116,7 @@
   padding: 1.25rem;
 }
 
-.v1-empty-state > .fa {
+.v1-empty-state > .v1-icon {
   color: var(--v1-account);
   font-size: 1.5rem;
 }

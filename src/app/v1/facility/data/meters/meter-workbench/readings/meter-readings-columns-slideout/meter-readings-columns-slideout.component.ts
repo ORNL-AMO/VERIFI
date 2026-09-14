@@ -5,6 +5,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
 import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
   MeterReadingColumnDraft,
   buildColumnDraft,
@@ -18,7 +19,7 @@ import {
   templateUrl: './meter-readings-columns-slideout.component.html',
   styleUrls: ['./meter-readings-columns-slideout.component.css'],
   standalone: true,
-  imports: [CommonModule, MeterSlideoutComponent]
+  imports: [CommonModule, MeterSlideoutComponent, IconComponent]
 })
 export class MeterReadingsColumnsSlideoutComponent implements OnChanges {
   @Input() account?: IdbAccount;

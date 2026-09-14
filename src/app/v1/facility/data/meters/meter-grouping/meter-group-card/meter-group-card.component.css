@@ -42,7 +42,7 @@
   overflow-wrap: anywhere;
 }
 
-.v1-meter-group-card__title .fa {
+.v1-meter-group-card__title .v1-icon {
   flex: 0 0 auto;
   color: var(--v1-facility);
   font-size: 1rem;
@@ -80,6 +80,8 @@
 
 .v1-meter-group-card__source {
   display: inline-flex;
+  gap: .24rem;
+  align-items: center;
   max-width: 100%;
   padding: .16rem .36rem;
   border: 1px solid color-mix(in srgb, var(--v1-meter-source-color, var(--v1-info)) 52%, var(--v1-border));
@@ -89,6 +91,10 @@
   font-size: .7rem;
   line-height: 1;
   overflow-wrap: anywhere;
+}
+
+.v1-meter-group-card__source .v1-icon {
+  flex: 0 0 auto;
 }
 
 .v1-meter-group-card__actions {

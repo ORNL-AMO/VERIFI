@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { ImportAccountBackupComponent } from '../../welcome/import-account-backup/import-account-backup.component';
 import { AccountSettingsComponent } from './account-settings.component';
 import { AccountSettingsBackupComponent } from './backup/account-settings-backup.component';
@@ -28,6 +29,7 @@ import { AccountPortfolioModule } from '../portfolio/account-portfolio.module';
   ],
   imports: [
     CommonModule,
+    IconsModule,
     ReactiveFormsModule,
     RouterModule,
     AccountPortfolioModule,

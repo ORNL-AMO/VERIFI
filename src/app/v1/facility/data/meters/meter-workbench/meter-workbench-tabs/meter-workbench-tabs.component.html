@@ -6,7 +6,7 @@
       [class.v1-data-tabs__tab--active]="activeTab === tab.id"
       (click)="selectTab(tab.id)"
       [attr.aria-current]="activeTab === tab.id ? 'page' : null">
-      <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
+      <app-ui-icon [name]="tab.icon"></app-ui-icon>
       {{ tab.label }}
     </button>
   }

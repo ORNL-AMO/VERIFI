@@ -11,13 +11,13 @@
       </div>
       <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
         @if (isConverting || saveState === 'saving') {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
           Converting
         } @else if (saveState === 'saved' || portfolioModeReady()) {
-          <span class="fa fa-check" aria-hidden="true"></span>
+          <app-ui-icon name="check"></app-ui-icon>
           Portfolio mode
         } @else if (saveState === 'error') {
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           Not converted
         }
       </span>
@@ -25,46 +25,46 @@
 
     @if (saveError) {
       <div class="v1-alert v1-alert--danger" role="alert">
-        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
         <span>{{ saveError }}</span>
       </div>
     }
 
     @if (portfolioModeReady()) {
       <article class="v1-settings-card">
-        <span class="fa fa-layer-group" aria-hidden="true"></span>
+        <app-ui-icon name="meterGroup"></app-ui-icon>
         <h3>Portfolio mode is on</h3>
         <p>{{ currentAccount.name }} now supports account and facility workspace navigation.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--primary" (click)="openAccountWorkspace()">
             Open account workspace
-            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            <app-ui-icon name="arrowRight"></app-ui-icon>
           </button>
           @if (completedFacility) {
             <button type="button" class="v1-btn v1-btn--secondary" (click)="openCompletedFacility()">
               Open {{ completedFacility.name }}
-              <span class="fa fa-industry" aria-hidden="true"></span>
+              <app-ui-icon name="facility"></app-ui-icon>
             </button>
           }
         </div>
       </article>
     } @else if (hasMultipleFacilityRecovery()) {
       <article class="v1-settings-card">
-        <span class="fa fa-layer-group" aria-hidden="true"></span>
+        <app-ui-icon name="meterGroup"></app-ui-icon>
         <h3>Finish portfolio conversion</h3>
         <p>This account already has {{ facilitiesCount }} facilities. Finish the transition to show account and facility workspace navigation.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--primary" [disabled]="!canWrite() || isConverting"
             (click)="openConversionConfirm()">
             Finish conversion
-            <span class="fa fa-check" aria-hidden="true"></span>
+            <app-ui-icon name="check"></app-ui-icon>
           </button>
         </div>
       </article>
     } @else {
       <form class="v1-settings-grid v1-settings-grid--1" [formGroup]="form" aria-label="Convert to portfolio">
         <article class="v1-settings-card">
-          <span class="fa fa-plus" aria-hidden="true"></span>
+          <app-ui-icon name="add"></app-ui-icon>
           <h3>Add another facility</h3>
           <p>Adding a second facility converts {{ currentAccount.name }} from single-facility presentation to portfolio presentation.</p>
           <label>
@@ -80,7 +80,7 @@
             <button type="button" class="v1-btn v1-btn--primary" [disabled]="!canWrite() || isConverting"
               (click)="openConversionConfirm()">
               Add facility and convert
-              <span class="fa fa-layer-group" aria-hidden="true"></span>
+              <app-ui-icon name="meterGroup"></app-ui-icon>
             </button>
           </div>
         </article>
@@ -104,7 +104,7 @@
         </h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel portfolio conversion" [disabled]="isConverting"
           (click)="cancelConversionConfirm()">
-          <span class="fa fa-xmark" aria-hidden="true"></span>
+          <app-ui-icon name="close"></app-ui-icon>
         </button>
       </header>
       <div class="v1-modal__body">
@@ -120,14 +120,14 @@
         <button type="button" class="v1-btn v1-btn--primary" [disabled]="!canWrite() || isConverting"
           (click)="confirmConversion()">
           @if (isConverting) {
-            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            <app-ui-icon name="loading" spin></app-ui-icon>
             Converting
           } @else if (shouldAddFacility()) {
             Add facility and convert
-            <span class="fa fa-layer-group" aria-hidden="true"></span>
+            <app-ui-icon name="meterGroup"></app-ui-icon>
           } @else {
             Finish conversion
-            <span class="fa fa-check" aria-hidden="true"></span>
+            <app-ui-icon name="check"></app-ui-icon>
           }
         </button>
       </footer>

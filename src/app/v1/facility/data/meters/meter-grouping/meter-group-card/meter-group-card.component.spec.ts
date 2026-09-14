@@ -10,6 +10,7 @@ describe('MeterGroupCardComponent', () => {
   it('renders compact grouping content and emits edit and move actions', () => {
     const fixture = setup({
       sourceColor: '#a59a04',
+      sourceIcon: 'electricity',
       scopeLabel: 'Purchased Electricity'
     });
     const opened: MeterCardView[] = [];
@@ -31,9 +32,11 @@ describe('MeterGroupCardComponent', () => {
     expect(text).not.toContain('Coming soon');
     expect(text).not.toContain('Readings');
     expect(text).not.toContain('Group');
-    expect(fixture.nativeElement.querySelector('.v1-meter-group-card h3 .fa-gauge-high')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-group-card__title .fa-chevron-right')).toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-label="Edit Electric Main settings"] .fa-pen')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-meter-group-card h3 app-ui-icon')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-meter-group-card__title app-ui-icon')).not.toBeNull();
+    expect(fixture.debugElement.query(By.css('.v1-meter-group-card__title app-ui-icon')).componentInstance.name).toBe('electricity');
+    expect(fixture.debugElement.query(By.css('.v1-meter-group-card__source app-ui-icon')).componentInstance.name).toBe('electricity');
+    expect(fixture.nativeElement.querySelector('[aria-label="Edit Electric Main settings"] app-ui-icon')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open meter"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-group-card__actions [aria-label="Drag meter"]')).not.toBeNull();

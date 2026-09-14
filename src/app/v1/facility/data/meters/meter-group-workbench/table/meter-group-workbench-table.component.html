@@ -6,13 +6,13 @@
 <section class="v1-meter-group-results-table" aria-label="Meter group results table">
   @if (state === 'loading') {
     <article class="v1-empty-state" role="status">
-      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <app-ui-icon name="loading" spin></app-ui-icon>
       <h2>Calculating group results</h2>
       <p>VERIFI is preparing calendarized meter data for this group.</p>
     </article>
   } @else if (state === 'error') {
     <article class="v1-empty-state" role="alert">
-      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="warning"></app-ui-icon>
       <h2>Results could not be calculated</h2>
       <p>Check the meter data for this group and try again.</p>
     </article>
@@ -39,7 +39,7 @@
                 [class.active]="sortColumn() === 'period'"
                 (click)="requestSort('period')">
                 <span>{{ period() === 'yearly' ? 'Fiscal Year' : 'Month' }}</span>
-                <span class="fa" [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'" [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'" aria-hidden="true"></span>
+                <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
               </button>
             </th>
             @if (currentResults.showEnergyUse || currentResults.showConsumption) {
@@ -50,7 +50,7 @@
                   [class.active]="sortColumn() === 'utility'"
                   (click)="requestSort('utility')">
                   <span>{{ currentResults.utilityLabel }} @if (currentResults.utilityUnit) { ({{ currentResults.utilityUnit }}) }</span>
-                  <span class="fa" [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'" [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'" aria-hidden="true"></span>
+                  <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
                 </button>
               </th>
             }
@@ -62,7 +62,7 @@
                   [class.active]="sortColumn() === 'cost'"
                   (click)="requestSort('cost')">
                   <span>Total Cost</span>
-                  <span class="fa" [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'" [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'" aria-hidden="true"></span>
+                  <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
                 </button>
               </th>
             }
@@ -92,7 +92,7 @@
 
     <footer class="v1-meter-group-results-table__footer">
       <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="currentRows.length === 0" (click)="copyTable()">
-        <span class="fa fa-copy" aria-hidden="true"></span>
+        <app-ui-icon name="copy"></app-ui-icon>
         Copy Table
       </button>
       @if (currentRows.length > pageSize()) {

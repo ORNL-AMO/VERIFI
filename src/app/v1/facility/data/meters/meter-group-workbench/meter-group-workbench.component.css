@@ -18,6 +18,29 @@
   line-height: 1;
 }
 
+.v1-meter-group-workbench-header__group-title {
+  display: inline-flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+  max-width: 100%;
+}
+
+.v1-meter-group-workbench-header__group-title .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-facility);
+}
+
+.v1-meter-group-workbench-header__group-title span {
+  min-width: 0;
+}
+
+.v1-meter-group-workbench-header__group-crumb {
+  display: inline-flex;
+  gap: var(--v1-space-1);
+  align-items: center;
+  min-width: 0;
+}
+
 .v1-meter-group-workbench-header__meter-list {
   display: flex;
   flex-wrap: wrap;

@@ -10,14 +10,14 @@
 
   @if (!currentAccount) {
     <article class="v1-empty-state" role="status">
-      <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="accountIssue"></app-ui-icon>
       <h2>No account loaded</h2>
       <p>Open an account workspace to edit account settings.</p>
     </article>
   } @else {
     @if (!canWrite()) {
       <div class="v1-alert v1-alert--warning" role="status">
-        <span class="fa fa-lock" aria-hidden="true"></span>
+        <app-ui-icon name="lock"></app-ui-icon>
         <span>Settings are unavailable while the workspace is loading or switching.</span>
       </div>
     }

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import type { MeterSource } from '@data/models/constantsAndTypes';
+import { IconComponent } from '../../shared/icons/icon.component';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { FacilityPickerComponent } from './facility-picker/facility-picker.component';
 import { SectionNavComponent } from './section-nav.component';
@@ -20,7 +22,7 @@ describe('SectionNavComponent', () => {
   let activeDetail: ReturnType<typeof signal<string>>;
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
-  let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
+  let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let setFacility: ReturnType<typeof vi.fn>;
 
@@ -41,7 +43,7 @@ describe('SectionNavComponent', () => {
     setFacility = vi.fn();
     TestBed.configureTestingModule({
       declarations: [SectionNavComponent, FacilityPickerComponent],
-      imports: [RouterModule.forRoot([]), FormsModule],
+      imports: [RouterModule.forRoot([]), FormsModule, IconComponent],
       providers: [
         {
           provide: WorkspaceNavigationService,
@@ -111,6 +113,7 @@ describe('SectionNavComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Account Data');
     expect(fixture.nativeElement.textContent).toContain('Portfolio');
+    expect(fixture.componentInstance.dataItems()).toEqual([{ id: 'portfolio', label: 'Portfolio', icon: 'portfolio' }]);
     expect(fixture.nativeElement.textContent).toContain('Custom Database Items');
     expect(fixture.nativeElement.textContent).toContain('Fuels');
     expect(fixture.nativeElement.textContent).not.toContain('Grid Factors');
@@ -179,6 +182,7 @@ describe('SectionNavComponent', () => {
 
     expect(toggle?.getAttribute('aria-expanded')).toBe('true');
     expect(childLinks.map(link => link.querySelector('span')?.textContent?.trim())).toEqual(['Electric Group', 'Water Group']);
+    expect(fixture.componentInstance.facilityMeterGroupItems().map(group => group.icon)).toEqual(['meterGroupItem', 'meterGroupItem']);
     expect(childLinks[0].getAttribute('href')).toContain('/v1/workspace/facility/facility-a/data/meter-grouping/group-electric/monthly-table');
     expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meter Grouping']);
   });
@@ -210,8 +214,8 @@ describe('SectionNavComponent', () => {
     activeSection.set('data');
     activeDetail.set('meters');
     facilityMeters.set([
-      { guid: 'meter-gas', name: 'Gas Backup' },
-      { guid: 'meter-electric', name: 'Electric Main' }
+      meterNav('meter-gas', 'Gas Backup', 'Natural Gas'),
+      meterNav('meter-electric', 'Electric Main', 'Electricity')
     ]);
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
@@ -222,6 +226,7 @@ describe('SectionNavComponent', () => {
 
     expect(toggle?.getAttribute('aria-expanded')).toBe('true');
     expect(childLinks.map(link => link.querySelector('span')?.textContent?.trim())).toEqual(['Electric Main', 'Gas Backup']);
+    expect(fixture.componentInstance.facilityMeterItems().map(meter => meter.icon)).toEqual(['electricity', 'naturalGas']);
     expect(childLinks[0].getAttribute('href')).toContain('/v1/workspace/facility/facility-a/data/meters/meter-electric/settings');
     expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meters']);
   });
@@ -231,7 +236,7 @@ describe('SectionNavComponent', () => {
     selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
     activeSection.set('data');
     activeDetail.set('meters');
-    facilityMeters.set([{ guid: 'meter-electric', name: 'Electric Main' }]);
+    facilityMeters.set([meterNav('meter-electric', 'Electric Main')]);
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
@@ -257,7 +262,7 @@ describe('SectionNavComponent', () => {
     selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
     activeSection.set('data');
     activeDetail.set('meter-grouping');
-    facilityMeters.set([{ guid: 'meter-electric', name: 'Electric Main' }]);
+    facilityMeters.set([meterNav('meter-electric', 'Electric Main')]);
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
@@ -279,8 +284,8 @@ describe('SectionNavComponent', () => {
     activeDetail.set('meters');
     activeMeterGuid.set('meter-gas');
     facilityMeters.set([
-      { guid: 'meter-electric', name: 'Electric Main' },
-      { guid: 'meter-gas', name: 'Gas Backup' }
+      meterNav('meter-electric', 'Electric Main'),
+      meterNav('meter-gas', 'Gas Backup', 'Natural Gas')
     ]);
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
@@ -416,5 +421,9 @@ describe('SectionNavComponent', () => {
 
   function groupChildLinks(element: HTMLElement): HTMLAnchorElement[] {
     return Array.from<HTMLAnchorElement>(element.querySelectorAll('[aria-label="Meter group links"] .v1-nav__child'));
+  }
+
+  function meterNav(guid: string, name: string, source: MeterSource = 'Electricity'): { guid: string; name: string; source: MeterSource } {
+    return { guid, name, source };
   }
 });

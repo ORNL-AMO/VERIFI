@@ -11,13 +11,13 @@
       </div>
       <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
         @if (isApplying || isDeleting || saveState === 'saving') {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
           Working
         } @else if (saveState === 'saved') {
-          <span class="fa fa-check" aria-hidden="true"></span>
+          <app-ui-icon name="check"></app-ui-icon>
           Saved
         } @else if (saveState === 'error') {
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           Not saved
         }
       </span>
@@ -25,36 +25,36 @@
 
     @if (saveError) {
       <div class="v1-alert v1-alert--danger" role="alert">
-        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
         <span>{{ saveError }}</span>
       </div>
     }
 
     @if (!canWrite() || hasPending()) {
       <div class="v1-alert v1-alert--warning" role="status">
-        <span class="fa fa-lock" aria-hidden="true"></span>
+        <app-ui-icon name="lock"></app-ui-icon>
         <span>Portfolio actions are unavailable while the workspace is loading, switching, or saving.</span>
       </div>
     }
 
     <div class="v1-portfolio-settings__toolbar">
       <button type="button" class="v1-btn v1-btn--action" [disabled]="actionsDisabled" (click)="openCreateFacilityDrawer()">
-        <span class="fa fa-plus" aria-hidden="true"></span>
+        <app-ui-icon name="add"></app-ui-icon>
         Add facility
       </button>
       <button type="button" class="v1-btn v1-btn--secondary" [disabled]="actionsDisabled || selected.length === 0" (click)="openApplyConfirm()">
         Apply account settings
-        <span class="fa fa-check" aria-hidden="true"></span>
+        <app-ui-icon name="check"></app-ui-icon>
       </button>
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="actionsDisabled || selected.length === 0" (click)="openDeleteConfirm()">
         Delete selected
-        <span class="fa fa-trash" aria-hidden="true"></span>
+        <app-ui-icon name="delete"></app-ui-icon>
       </button>
     </div>
 
     @if (facilitiesList.length === 0) {
       <article class="v1-settings-card v1-portfolio-settings__empty" role="status">
-        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="accountIssue"></app-ui-icon>
         <h3>No facilities yet</h3>
         <p>Add a facility to start managing this portfolio.</p>
       </article>
@@ -105,7 +105,7 @@
         </h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel portfolio action" [disabled]="isApplying || isDeleting"
           (click)="cancelConfirm()">
-          <span class="fa fa-xmark" aria-hidden="true"></span>
+          <app-ui-icon name="close"></app-ui-icon>
         </button>
       </header>
       <div class="v1-modal__body">
@@ -121,12 +121,12 @@
         @if (pendingAction === 'apply') {
           <button type="button" class="v1-btn v1-btn--primary" [disabled]="actionsDisabled" (click)="confirmApplyAccountSettings()">
             Apply settings
-            <span class="fa fa-check" aria-hidden="true"></span>
+            <app-ui-icon name="check"></app-ui-icon>
           </button>
         } @else {
           <button type="button" class="v1-btn v1-btn--danger" [disabled]="actionsDisabled" (click)="confirmDeleteFacilities()">
             Delete selected
-            <span class="fa fa-trash" aria-hidden="true"></span>
+            <app-ui-icon name="delete"></app-ui-icon>
           </button>
         }
       </footer>

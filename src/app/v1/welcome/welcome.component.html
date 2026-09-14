@@ -20,7 +20,7 @@
         <button type="button" class="v1-btn v1-btn--primary" [disabled]="!!loadingAccountGuid()"
           (click)="openRecentAccount()">
           Return to recent account
-          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          <app-ui-icon name="arrowRight"></app-ui-icon>
         </button>
         }
       </div>
@@ -69,13 +69,13 @@
         [disabled]="!!loadingAccountGuid()" [attr.aria-label]="action.cta + '. ' + action.summary"
         (click)="openPanel(action.action)">
         <span class="v1-welcome__action-icon" aria-hidden="true">
-          <span class="fa {{ action.icon }}" aria-hidden="true"></span>
+          <app-ui-icon [name]="action.icon"></app-ui-icon>
         </span>
         <span class="v1-welcome__action-copy">
           <strong>{{ action.tileLabel }}</strong>
           <small>{{ action.tileHint }}</small>
         </span>
-        <span class="v1-welcome__action-arrow fa fa-arrow-right" aria-hidden="true"></span>
+        <app-ui-icon name="arrowRight" class="v1-welcome__action-arrow"></app-ui-icon>
       </button>
       }
     </div>
@@ -83,7 +83,7 @@
 
   @if (errorMessage(); as message) {
   <section class="v1-alert v1-alert--danger v1-welcome__motion-card" role="alert">
-    <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+    <app-ui-icon name="warning"></app-ui-icon>
     <span>{{ message }}</span>
   </section>
   }
@@ -102,7 +102,7 @@
     @if (accountList.length === 0) {
     <div class="v1-account-list" role="status" aria-live="polite">
       <article class="v1-empty-state">
-        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="accountIssue"></app-ui-icon>
         <h3>No accounts are available</h3>
         <p>Use the get started options above to create, import, or load an account.</p>
       </article>
@@ -112,7 +112,7 @@
       @for (account of accountList; track account.guid) {
       <button type="button" class="v1-account-row" [disabled]="!!loadingGuid" (click)="openAccount(account)"
         [attr.aria-label]="'Open ' + account.name + ' in v1 workspace'">
-        <span class="v1-account-row__icon fa fa-building" aria-hidden="true"></span>
+        <app-ui-icon name="account" class="v1-account-row__icon"></app-ui-icon>
         <span class="v1-account-row__summary">
           <strong>{{ account.name }}</strong>
           <small>{{ formatModifiedDate(account) }}</small>
@@ -122,11 +122,11 @@
         </span>
         <span class="v1-account-row__action">
           @if (loadingGuid === account.guid) {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
           <span>Opening</span>
           } @else {
           <span>Open</span>
-          <span class="fa fa-arrow-right" aria-hidden="true"></span>
+          <app-ui-icon name="arrowRight"></app-ui-icon>
           }
         </span>
       </button>
@@ -144,8 +144,7 @@
           Resources</a>.
       </p>
       <p>
-        Dynamic help is available throughout VERIFI through the <span class="fa fa-question-circle"
-          aria-hidden="true"></span> help icon.
+        Dynamic help is available throughout VERIFI through the <app-ui-icon name="help"></app-ui-icon> help icon.
       </p>
     </article>
     <article>

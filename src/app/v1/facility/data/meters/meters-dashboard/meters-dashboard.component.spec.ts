@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -29,6 +30,7 @@ describe('MetersDashboardComponent', () => {
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Meters');
+    expect(fixture.debugElement.query(By.css('.v1-facility-meters__title app-ui-icon')).componentInstance.name).toBe('meter');
     expect(text).toContain('Electric Main');
     expect(text).toContain('Purchased Electricity');
     expect(text).toContain('City Water');

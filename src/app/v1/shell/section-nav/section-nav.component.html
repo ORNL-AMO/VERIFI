@@ -10,7 +10,7 @@
         type="button"
         [class.active]="contextMode === 'account'"
         (click)="navigation.setContext('account')">
-        <span class="fa fa-building" aria-hidden="true"></span>
+        <app-ui-icon name="account"></app-ui-icon>
         Account
       </button>
       <button
@@ -18,7 +18,7 @@
         [class.active]="contextMode === 'facility'"
         [disabled]="facilities.length === 0"
         (click)="navigation.setContext('facility')">
-        <span class="fa fa-industry" aria-hidden="true"></span>
+        <app-ui-icon name="facility"></app-ui-icon>
         Facility
       </button>
     </div>
@@ -34,7 +34,7 @@
 
   @if (hasSingleSiteRecovery() && account) {
     <section class="v1-nav__recovery" aria-labelledby="v1-single-site-recovery-title">
-      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="warning"></app-ui-icon>
       <div>
         <strong id="v1-single-site-recovery-title">{{ recoveryTitle() }}</strong>
         <p>{{ recoveryMessage() }}</p>
@@ -53,7 +53,7 @@
             ? navigation.facilityRoute(selectedFacility.guid)
             : navigation.accountRoute(account!.guid)"
           aria-current="page">
-          <span class="fa fa-chart-pie" aria-hidden="true"></span>
+          <app-ui-icon name="overview"></app-ui-icon>
           Overview
         </a>
       </section>
@@ -70,7 +70,7 @@
                 ? navigation.facilitySettingsRoute(selectedFacility.guid, item.id)
                 : navigation.accountSettingsRoute(account.guid, item.id)"
               [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
-              <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+              <app-ui-icon [name]="item.icon"></app-ui-icon>
               {{ item.label }}
             </a>
           }
@@ -94,7 +94,7 @@
                       [class.active]="isFacilityDataItemActive(item)"
                       [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
                       [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
-                      <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                      <app-ui-icon [name]="item.icon"></app-ui-icon>
                       {{ item.label }}
                     </a>
                     @if (meterItems.length > 0 && isFacilityMetersRoute()) {
@@ -105,7 +105,7 @@
                         [attr.aria-controls]="meterChildrenId()"
                         [attr.aria-label]="(isMeterChildrenOpen() ? 'Hide' : 'Show') + ' meter links'"
                         (click)="toggleMeterChildren()">
-                        <span class="fa fa-chevron-right" aria-hidden="true"></span>
+                        <app-ui-icon name="chevronRight"></app-ui-icon>
                       </button>
                     }
                   </div>
@@ -121,6 +121,7 @@
                           [class.active]="isMeterChildActive(meter.guid)"
                           [routerLink]="navigation.facilityMeterRoute(selectedFacility.guid, meter.guid, 'settings')"
                           [attr.aria-current]="isMeterChildActive(meter.guid) ? 'page' : null">
+                          <app-ui-icon [name]="meter.icon"></app-ui-icon>
                           <span>{{ meter.label }}</span>
                         </a>
                       }
@@ -136,7 +137,7 @@
                       [class.active]="isFacilityDataItemActive(item)"
                       [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
                       [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
-                      <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                      <app-ui-icon [name]="item.icon"></app-ui-icon>
                       {{ item.label }}
                     </a>
                     @if (groupItems.length > 0 && isFacilityMeterGroupingRoute()) {
@@ -147,7 +148,7 @@
                         [attr.aria-controls]="groupChildrenId()"
                         [attr.aria-label]="(isGroupChildrenOpen() ? 'Hide' : 'Show') + ' meter group links'"
                         (click)="toggleGroupChildren()">
-                        <span class="fa fa-chevron-right" aria-hidden="true"></span>
+                        <app-ui-icon name="chevronRight"></app-ui-icon>
                       </button>
                     }
                   </div>
@@ -163,6 +164,7 @@
                           [class.active]="isGroupChildActive(group.guid)"
                           [routerLink]="navigation.facilityMeterGroupRoute(selectedFacility.guid, group.guid, 'monthly-table')"
                           [attr.aria-current]="isGroupChildActive(group.guid) ? 'page' : null">
+                          <app-ui-icon [name]="group.icon"></app-ui-icon>
                           <span>{{ group.label }}</span>
                         </a>
                       }
@@ -174,7 +176,7 @@
                   [class.active]="isFacilityDataItemActive(item)"
                   [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
                   [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
-                  <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                  <app-ui-icon [name]="item.icon"></app-ui-icon>
                   {{ item.label }}
                 </a>
               }
@@ -185,7 +187,7 @@
                 [class.active]="navigation.activeDetail() === item.id"
                 [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
                 [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
-                <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                <app-ui-icon [name]="item.icon"></app-ui-icon>
                 {{ item.label }}
               </a>
             }
@@ -197,7 +199,7 @@
                   [class.active]="navigation.activeDetail() === item.id"
                   [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
                   [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
-                  <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
+                  <app-ui-icon [name]="item.icon"></app-ui-icon>
                   {{ item.label }}
                 </a>
               }

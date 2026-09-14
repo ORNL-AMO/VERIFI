@@ -7,6 +7,7 @@ import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { ScopeOptions } from '@data/models/scopeOption';
 import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
 import { StatusCheckAction } from '@domain/calculations/status-check-calculations/statusCheckModels';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { UtilityColors } from '@shared/utilityColors';
 
 export type MeterWorkbenchTabId = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
@@ -32,14 +33,14 @@ export const METER_GROUP_TYPES: ReadonlyArray<MeterGroupType> = ['Energy', 'Wate
 export interface MeterWorkbenchTab {
   readonly id: MeterWorkbenchTabId;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
   readonly summary: string;
 }
 
 export interface MeterGroupWorkbenchTab {
   readonly id: MeterGroupWorkbenchTabId;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
 }
 
 export interface MeterCardView {
@@ -48,9 +49,10 @@ export interface MeterCardView {
   readonly readingCount: number;
   readonly meterStatusCheck?: MeterStatusCheck;
   readonly sourceColor?: string;
+  readonly sourceIcon?: IconName;
   readonly statusLabel?: string;
   readonly statusTone?: MeterCardStatusTone;
-  readonly statusIcon?: string;
+  readonly statusIcon?: IconName;
   readonly firstReadingLabel?: string;
   readonly latestReadingLabel?: string;
   readonly scopeLabel?: string;
@@ -142,18 +144,18 @@ export interface MeterGroupResultsView {
 }
 
 export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
-  { id: 'settings', label: 'Settings', icon: 'fa-sliders', summary: 'Meter settings and assignment content is WIP.' },
-  { id: 'readings', label: 'Readings', icon: 'fa-table-list', summary: 'Meter reading and utility bill tables are WIP.' },
-  { id: 'monthly', label: 'Monthly Data', icon: 'fa-calendar-days', summary: 'Monthly calendarized data review is WIP.' },
-  { id: 'yearly', label: 'Yearly Data', icon: 'fa-chart-column', summary: 'Yearly meter rollups are WIP.' },
-  { id: 'quality', label: 'Quality Report', icon: 'fa-triangle-exclamation', summary: 'Meter data quality report content is WIP.' }
+  { id: 'settings', label: 'Settings', icon: 'settings', summary: 'Meter settings and assignment content is WIP.' },
+  { id: 'readings', label: 'Readings', icon: 'table', summary: 'Meter reading and utility bill tables are WIP.' },
+  { id: 'monthly', label: 'Monthly Data', icon: 'calendar', summary: 'Monthly calendarized data review is WIP.' },
+  { id: 'yearly', label: 'Yearly Data', icon: 'barChart', summary: 'Yearly meter rollups are WIP.' },
+  { id: 'quality', label: 'Quality Report', icon: 'warning', summary: 'Meter data quality report content is WIP.' }
 ];
 
 export const METER_GROUP_WORKBENCH_TABS: ReadonlyArray<MeterGroupWorkbenchTab> = [
-  { id: 'monthly-table', label: 'Monthly Table', icon: 'fa-table-list' },
-  { id: 'monthly-graph', label: 'Monthly Graph', icon: 'fa-chart-line' },
-  { id: 'yearly-table', label: 'Yearly Table', icon: 'fa-calendar-days' },
-  { id: 'yearly-graph', label: 'Yearly Graph', icon: 'fa-chart-column' }
+  { id: 'monthly-table', label: 'Monthly Table', icon: 'table' },
+  { id: 'monthly-graph', label: 'Monthly Graph', icon: 'chartLine' },
+  { id: 'yearly-table', label: 'Yearly Table', icon: 'calendar' },
+  { id: 'yearly-graph', label: 'Yearly Graph', icon: 'barChart' }
 ];
 
 export function buildMeterCards(
@@ -176,6 +178,7 @@ export function buildMeterCards(
         readingCount: readings.length,
         meterStatusCheck,
         sourceColor: meterSourceColor(meter.source),
+        sourceIcon: meterSourceIcon(meter.source),
         statusLabel: meterStatusLabel(meterStatusCheck),
         statusTone: meterStatusTone(meterStatusCheck),
         statusIcon: meterStatusIcon(meterStatusCheck),
@@ -271,6 +274,25 @@ export function canAssignSourceToGroup(source: MeterSource, group?: IdbUtilityMe
     case 'Other':
     default:
       return true;
+  }
+}
+
+export function meterSourceIcon(source: MeterSource): IconName {
+  switch (source) {
+    case 'Electricity':
+      return 'electricity';
+    case 'Natural Gas':
+      return 'naturalGas';
+    case 'Other Fuels':
+      return 'otherFuel';
+    case 'Other Energy':
+      return 'otherEnergy';
+    case 'Water Intake':
+      return 'waterIntake';
+    case 'Water Discharge':
+      return 'waterDischarge';
+    default:
+      return 'meter';
   }
 }
 
@@ -704,18 +726,18 @@ function meterStatusTone(statusCheck: MeterStatusCheck | undefined): MeterCardSt
   }
 }
 
-function meterStatusIcon(statusCheck: MeterStatusCheck | undefined): string {
+function meterStatusIcon(statusCheck: MeterStatusCheck | undefined): IconName {
   switch (statusCheck?.status) {
     case 'good':
-      return 'fa-circle-check';
+      return 'success';
     case 'warning':
-      return 'fa-triangle-exclamation';
+      return 'warning';
     case 'error':
-      return 'fa-circle-xmark';
+      return 'danger';
     case 'outdated':
-      return 'fa-clock';
+      return 'clock';
     default:
-      return 'fa-circle-notch';
+      return 'loading';
   }
 }
 

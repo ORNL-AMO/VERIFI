@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Route } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { AccountDataModule } from './account/data/account-data.module';
 import { FacilityDataModule } from './facility/data/facility-data.module';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
 import { MeterWorkbenchMonthlyDataComponent } from './facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
@@ -20,6 +21,7 @@ describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        AccountDataModule,
         RouterModule.forRoot([]),
         FacilityDataModule
       ]

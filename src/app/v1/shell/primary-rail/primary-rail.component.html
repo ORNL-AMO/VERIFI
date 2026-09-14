@@ -8,12 +8,12 @@
         [class.active]="activeSection === section.id"
         [attr.aria-current]="activeSection === section.id ? 'page' : null"
         (click)="navigation.openSection(section.id)">
-        <span [class]="'fa ' + section.icon" aria-hidden="true"></span>
+        <app-ui-icon [name]="section.icon"></app-ui-icon>
         <span>{{ section.shortLabel }}</span>
       </button>
     } @else {
       <button type="button" disabled [title]="section.label + ' will be added in a later v1 workflow'">
-        <span [class]="'fa ' + section.icon" aria-hidden="true"></span>
+        <app-ui-icon [name]="section.icon"></app-ui-icon>
         <span>{{ section.shortLabel }}</span>
       </button>
     }

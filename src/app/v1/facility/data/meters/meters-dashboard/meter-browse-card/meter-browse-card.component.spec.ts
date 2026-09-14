@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -17,9 +18,10 @@ describe('MeterBrowseCardComponent', () => {
       group: group({ name: 'Purchased Electricity' }),
       readingCount: 4,
       sourceColor: '#a59a04',
+      sourceIcon: 'electricity',
       statusLabel: 'Needs review',
       statusTone: 'warning',
-      statusIcon: 'fa-triangle-exclamation',
+      statusIcon: 'warning',
       firstReadingLabel: 'Dec 2025',
       latestReadingLabel: 'Jan 2026',
       scopeLabel: 'Purchased Electricity',
@@ -44,9 +46,12 @@ describe('MeterBrowseCardComponent', () => {
     expect(element.querySelector('.v1-meter-browse-card__issues')).toBeNull();
     expect(text).toContain('Purchased Electricity');
     expect(element.querySelector('.v1-meter-browse-card__source-chip')?.getAttribute('style')).toContain('#a59a04');
-    expect(element.querySelector('.v1-meter-browse-card__status .fa-triangle-exclamation')).not.toBeNull();
+    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__title app-ui-icon')).componentInstance.name).toBe('electricity');
+    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__source-chip app-ui-icon')).componentInstance.name).toBe('electricity');
+    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__group-tag app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
+    expect(element.querySelector('.v1-meter-browse-card__status app-ui-icon')).not.toBeNull();
     expect(element.querySelector('.v1-meter-browse-card')?.classList.contains('v1-meter-browse-card--status-warning')).toBe(true);
-    expect(element.querySelector('.v1-meter-browse-card__title .fa-chevron-right')).not.toBeNull();
+    expect(element.querySelector('.v1-meter-browse-card__title .v1-meter-browse-card__title-chevron')).not.toBeNull();
     expect(element.querySelector('[cdkdrag]')).toBeNull();
     expect(text).not.toContain('Move meter');
     expect(text).not.toContain('Coming soon');
@@ -59,13 +64,13 @@ describe('MeterBrowseCardComponent', () => {
       readingCount: 1,
       statusLabel: 'Valid',
       statusTone: 'success',
-      statusIcon: 'fa-circle-check'
+      statusIcon: 'success'
     });
 
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Valid');
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__status .fa-circle-check')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__status app-ui-icon')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-browse-card')?.className).not.toContain('v1-meter-browse-card--status');
   });
 

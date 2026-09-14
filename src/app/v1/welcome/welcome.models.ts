@@ -1,12 +1,13 @@
 import type { IdbAccount } from '@data/models/idbModels/account';
 import type { IdbFacility } from '@data/models/idbModels/facility';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export interface WelcomeAction {
   readonly title: string;
   readonly tileLabel: string;
   readonly tileHint: string;
   readonly summary: string;
-  readonly icon: string;
+  readonly icon: IconName;
   readonly tone: 'primary' | 'secondary' | 'success';
   readonly cta: string;
   readonly action: 'create' | 'import' | 'example';
@@ -31,7 +32,7 @@ export interface CreateAccountChoice {
   readonly label: string;
   readonly eyebrow: string;
   readonly summary: string;
-  readonly icon: string;
+  readonly icon: IconName;
   readonly tone: 'facility' | 'portfolio';
 }
 
@@ -47,7 +48,7 @@ export const CREATE_ACCOUNT_CHOICES: ReadonlyArray<CreateAccountChoice> = [
     label: 'One facility',
     eyebrow: 'One site',
     summary: 'Create one site workspace for meters, readings, analysis, and reports.',
-    icon: 'fa-industry',
+    icon: 'facility',
     tone: 'facility'
   },
   {
@@ -55,7 +56,7 @@ export const CREATE_ACCOUNT_CHOICES: ReadonlyArray<CreateAccountChoice> = [
     label: 'Multiple facilities',
     eyebrow: 'Portfolio',
     summary: 'Create an account workspace for several facilities and portfolio-level setup.',
-    icon: 'fa-building',
+    icon: 'account',
     tone: 'portfolio'
   }
 ];
@@ -66,7 +67,7 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
     tileLabel: 'Create New',
     tileHint: 'Start blank',
     summary: 'Start setup for an account, facilities, meters, predictors, analyses, reports, and backup preferences.',
-    icon: 'fa-plus',
+    icon: 'add',
     tone: 'primary',
     cta: 'Create account',
     action: 'create'
@@ -76,7 +77,7 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
     tileLabel: 'Import Backup',
     tileHint: 'Use backup .json file',
     summary: 'Restore or share an existing VERIFI account backup file from another system.',
-    icon: 'fa-upload',
+    icon: 'upload',
     tone: 'secondary',
     cta: 'Upload backup',
     action: 'import'
@@ -86,7 +87,7 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
     tileLabel: 'Try Example',
     tileHint: 'Try demo account',
     summary: 'Open a representative manufacturing account and explore the full workspace concept.',
-    icon: 'fa-file-circle-plus',
+    icon: 'fileAdd',
     tone: 'secondary',
     cta: 'Load example',
     action: 'example'

@@ -11,6 +11,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { ModalPortalService } from '../../shell/modal-portal.service';
 import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
 import { PortfolioFacilityService } from './portfolio-facility.service';
@@ -28,12 +29,12 @@ interface PortfolioMetric {
 interface PortfolioSelectorSummary {
   readonly id: PortfolioContentView;
   readonly label: string;
-  readonly icon: string;
+  readonly icon: IconName;
   readonly total: number;
 }
 
 interface PortfolioDetail {
-  readonly icon: string;
+  readonly icon: IconName;
   readonly label: string;
 }
 
@@ -96,12 +97,12 @@ interface PortfolioTotals {
 }
 
 const PORTFOLIO_SELECTORS: ReadonlyArray<Omit<PortfolioSelectorSummary, 'total'>> = [
-  { id: 'facilities', label: 'Facilities', icon: 'fa-building' },
-  { id: 'meters', label: 'Meters', icon: 'fa-database' },
-  { id: 'predictors', label: 'Predictors', icon: 'fa-chart-line' },
-  { id: 'energyUses', label: 'Energy Uses', icon: 'fa-screwdriver-wrench' },
-  { id: 'analyses', label: 'Analyses', icon: 'fa-chart-simple' },
-  { id: 'reports', label: 'Reports', icon: 'fa-file-lines' }
+  { id: 'facilities', label: 'Facilities', icon: 'account' },
+  { id: 'meters', label: 'Meters', icon: 'meter' },
+  { id: 'predictors', label: 'Predictors', icon: 'chartLine' },
+  { id: 'energyUses', label: 'Energy Uses', icon: 'tools' },
+  { id: 'analyses', label: 'Analyses', icon: 'barChart' },
+  { id: 'reports', label: 'Reports', icon: 'reports' }
 ];
 
 @Component({
@@ -437,8 +438,8 @@ export class AccountPortfolioComponent implements OnDestroy {
             { label: 'Readings', value: String(summary.readingCount) }
           ],
           details: [
-            { icon: 'fa-bolt', label: summary.meterSourceSummary },
-            { icon: 'fa-calendar-days', label: `Latest meter activity ${summary.latestMeterActivityLabel}` }
+            { icon: 'energy', label: summary.meterSourceSummary },
+            { icon: 'calendar', label: `Latest meter activity ${summary.latestMeterActivityLabel}` }
           ],
           emptyMessage: summary.meterCount === 0 ? 'Add meters to begin utility data tracking for this facility.' : undefined
         };
@@ -449,7 +450,7 @@ export class AccountPortfolioComponent implements OnDestroy {
             { label: 'Weather', value: String(summary.weatherPredictorCount) },
             { label: 'Production', value: String(summary.productionPredictorCount) }
           ],
-          details: [{ icon: 'fa-tags', label: summary.predictorTypeSummary }],
+          details: [{ icon: 'tags', label: summary.predictorTypeSummary }],
           emptyMessage: summary.predictorCount === 0 ? 'Add predictors when this facility needs normalization variables.' : undefined
         };
       case 'energyUses':
@@ -460,7 +461,7 @@ export class AccountPortfolioComponent implements OnDestroy {
             { label: 'Inactive', value: String(summary.inactiveEquipmentCount) },
             { label: 'Meter Links', value: String(summary.equipmentMeterLinkCount) }
           ],
-          details: [{ icon: 'fa-tags', label: summary.equipmentTypeSummary }],
+          details: [{ icon: 'tags', label: summary.equipmentTypeSummary }],
           emptyMessage: summary.equipmentCount === 0 ? 'Add energy uses to describe equipment and end-use activity.' : undefined
         };
       case 'analyses':
@@ -472,7 +473,7 @@ export class AccountPortfolioComponent implements OnDestroy {
             { label: 'Checked', value: String(summary.checkedAnalysisCount) },
             { label: 'Visited', value: String(summary.visitedAnalysisCount) }
           ],
-          details: [{ icon: 'fa-calendar-check', label: `Baselines ${summary.analysisBaselineSummary}` }],
+          details: [{ icon: 'calendarCheck', label: `Baselines ${summary.analysisBaselineSummary}` }],
           emptyMessage: summary.analysisCount === 0 ? 'Create analyses once utility data and predictors are ready.' : undefined
         };
       case 'reports':
@@ -481,7 +482,7 @@ export class AccountPortfolioComponent implements OnDestroy {
             { label: 'Reports', value: String(summary.reportCount) },
             { label: 'Checked', value: String(summary.checkedReportCount) }
           ],
-          details: [{ icon: 'fa-tags', label: summary.reportTypeSummary }],
+          details: [{ icon: 'tags', label: summary.reportTypeSummary }],
           emptyMessage: summary.reportCount === 0 ? 'Build reports after facility data and analyses are available.' : undefined
         };
       default:

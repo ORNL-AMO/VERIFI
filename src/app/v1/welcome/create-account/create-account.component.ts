@@ -8,12 +8,13 @@ import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
 import { DrawerFocusTrapDirective } from '../shared/drawer-focus-trap.directive';
 import { CREATE_ACCOUNT_CHOICES, CreateAccountPath, CreateAccountResult } from '../welcome.models';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-create-account-panel',
   templateUrl: './create-account.component.html',
   styleUrls: ['./create-account.component.css'],
-  imports: [FormsModule, DrawerFocusTrapDirective],
+  imports: [FormsModule, DrawerFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class CreateAccountComponent {

@@ -14,7 +14,7 @@
         class="v1-btn v1-btn--action"
         [disabled]="!canWrite() || hasPending()"
         (click)="openCreateFacilityDrawer()">
-        <span class="fa fa-plus" aria-hidden="true"></span>
+        <app-ui-icon name="add"></app-ui-icon>
         Add facility
       </button>
     </header>
@@ -27,7 +27,7 @@
           [class.v1-portfolio-selector--active]="selectedView() === selector.id"
           [attr.aria-pressed]="selectedView() === selector.id"
           (click)="selectContentView(selector.id)">
-          <span class="fa" [ngClass]="selector.icon" aria-hidden="true"></span>
+          <app-ui-icon [name]="selector.icon"></app-ui-icon>
           <span>{{ selector.label }}</span>
           <strong>{{ selector.total }}</strong>
         </button>
@@ -36,7 +36,7 @@
 
     @if (!canWrite()) {
       <div class="v1-alert v1-alert--warning" role="status">
-        <span class="fa fa-lock" aria-hidden="true"></span>
+        <app-ui-icon name="lock"></app-ui-icon>
         <span>Portfolio actions are unavailable while the workspace is loading or switching.</span>
       </div>
     }
@@ -49,7 +49,7 @@
 
     @if (totals().facilities === 0) {
       <article class="v1-empty-state" role="status">
-        <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="accountIssue"></app-ui-icon>
         <h2>No facilities yet</h2>
         <p>Add the first facility to start portfolio setup. You will continue with profile, units, goals, financial reporting, and staleness in facility settings.</p>
         <button
@@ -57,7 +57,7 @@
           class="v1-btn v1-btn--action"
           [disabled]="!canWrite() || hasPending()"
           (click)="openCreateFacilityDrawer()">
-          <span class="fa fa-plus" aria-hidden="true"></span>
+          <app-ui-icon name="add"></app-ui-icon>
           Add facility
         </button>
       </article>
@@ -65,7 +65,7 @@
       <form class="v1-account-portfolio__toolbar" aria-label="Facility filters">
         <div class="v1-account-portfolio__search">
           <span class="input-group-text">
-            <span class="fa fa-search" aria-hidden="true"></span>
+            <app-ui-icon name="search"></app-ui-icon>
           </span>
           <input
             id="v1-portfolio-search"
@@ -99,7 +99,7 @@
 
       @if (cards.length === 0) {
         <article class="v1-empty-state" role="status">
-          <span class="fa fa-filter-circle-xmark" aria-hidden="true"></span>
+          <app-ui-icon name="clearFilter"></app-ui-icon>
           <h2>No facilities match these filters</h2>
           <p>Adjust the search or filter controls to return to the full portfolio.</p>
         </article>
@@ -114,11 +114,11 @@
                   {{ summary.facility.name }}
                 </button>
                 <span class="v1-facility-card__location">
-                  <span class="fa fa-location-dot" aria-hidden="true"></span>
+                  <app-ui-icon name="location"></app-ui-icon>
                   {{ summary.location }}
                 </span>
                 <span class="v1-facility-card__modified">
-                  <span class="fa fa-calendar-days" aria-hidden="true"></span>
+                  <app-ui-icon name="calendar"></app-ui-icon>
                   Last modified {{ summary.latestActivityLabel }}
                 </span>
               </div>
@@ -140,7 +140,7 @@
                 <div class="v1-facility-card__details">
                   @for (detail of content.details; track detail.label) {
                     <span>
-                      <span class="fa" [ngClass]="detail.icon" aria-hidden="true"></span>
+                      <app-ui-icon [name]="detail.icon"></app-ui-icon>
                       {{ detail.label }}
                     </span>
                   }
@@ -149,10 +149,10 @@
 
               <div class="v1-facility-card__actions">
                 <button type="button" class="v1-icon-btn" title="Open facility" aria-label="Open facility" (click)="openFacility(summary.facility)">
-                  <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                  <app-ui-icon name="arrowRight"></app-ui-icon>
                 </button>
                 <button type="button" class="v1-icon-btn" title="Open facility settings" aria-label="Open facility settings" (click)="openFacilitySettings(summary.facility)">
-                  <span class="fa fa-sliders" aria-hidden="true"></span>
+                  <app-ui-icon name="settings"></app-ui-icon>
                 </button>
                 <button
                   type="button"
@@ -161,7 +161,7 @@
                   aria-label="Delete facility"
                   [disabled]="!canWrite() || hasPending()"
                   (click)="openDeleteFacility(summary.facility)">
-                  <span class="fa fa-trash" aria-hidden="true"></span>
+                  <app-ui-icon name="delete"></app-ui-icon>
                 </button>
               </div>
             </article>
@@ -187,7 +187,7 @@
         <header class="v1-modal__header">
           <h2 id="v1-delete-facility-title">Delete {{ pendingDelete.name }}?</h2>
           <button type="button" class="v1-icon-btn" aria-label="Cancel facility deletion" [disabled]="isDeleting" (click)="cancelDeleteFacility()">
-            <span class="fa fa-xmark" aria-hidden="true"></span>
+            <app-ui-icon name="close"></app-ui-icon>
           </button>
         </header>
         <div class="v1-modal__body">
@@ -197,11 +197,11 @@
           <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting" (click)="cancelDeleteFacility()">Cancel</button>
           <button type="button" class="v1-btn v1-btn--danger" [disabled]="isDeleting" (click)="confirmDeleteFacility()">
             @if (isDeleting) {
-              <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+              <app-ui-icon name="loading" spin></app-ui-icon>
               Deleting
             } @else {
               Delete facility
-              <span class="fa fa-trash" aria-hidden="true"></span>
+              <app-ui-icon name="delete"></app-ui-icon>
             }
           </button>
         </footer>

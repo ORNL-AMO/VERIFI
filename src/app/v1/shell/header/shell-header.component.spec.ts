@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AppearanceService } from '../../appearance/appearance.service';
+import { IconComponent } from '../../shared/icons/icon.component';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { ShellHeaderComponent } from './shell-header.component';
 
@@ -120,7 +121,7 @@ function setup(isWorkspaceRoute: boolean): {
   };
 
   TestBed.configureTestingModule({
-    imports: [CommonModule],
+    imports: [CommonModule, IconComponent],
     declarations: [ShellHeaderComponent],
     providers: [
       { provide: AppearanceService, useValue: appearance },

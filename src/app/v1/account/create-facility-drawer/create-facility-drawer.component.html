@@ -21,14 +21,14 @@
         aria-label="Close create facility panel"
         [disabled]="isCreating"
         (click)="close()">
-        <span class="fa fa-xmark" aria-hidden="true"></span>
+        <app-ui-icon name="close"></app-ui-icon>
       </button>
     </header>
 
     <div class="v1-drawer__body">
       @if (createError) {
         <div class="v1-alert v1-alert--danger" role="alert">
-          <span class="fa fa-circle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           <span>{{ createError }}</span>
         </div>
       }
@@ -157,7 +157,7 @@
             class="v1-portfolio-disclosure"
             [attr.aria-expanded]="showProfileDetails"
             (click)="toggleProfileDetails()">
-            <span class="fa" [class.fa-chevron-down]="!showProfileDetails" [class.fa-chevron-up]="showProfileDetails" aria-hidden="true"></span>
+            <app-ui-icon [name]="showProfileDetails ? 'chevronUp' : 'chevronDown'"></app-ui-icon>
             Additional profile details
           </button>
         </section>
@@ -166,11 +166,11 @@
           <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isCreating" (click)="close()">Cancel</button>
           <button type="submit" class="v1-btn v1-btn--action" [disabled]="!canCreateFacility">
             @if (isCreating) {
-              <span class="fa fa-spinner fa-spin" aria-hidden="true"></span>
+              <app-ui-icon name="loading" spin></app-ui-icon>
               Creating
             } @else {
               Create facility
-              <span class="fa fa-arrow-right" aria-hidden="true"></span>
+              <app-ui-icon name="arrowRight"></app-ui-icon>
             }
           </button>
         </div>

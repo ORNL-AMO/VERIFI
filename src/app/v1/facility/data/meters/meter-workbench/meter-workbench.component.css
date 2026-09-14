@@ -26,6 +26,22 @@
   overflow-wrap: anywhere;
 }
 
+.v1-meter-workbench-header__meter-title {
+  display: inline-flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+  max-width: 100%;
+}
+
+.v1-meter-workbench-header__meter-title .v1-icon {
+  flex: 0 0 auto;
+  color: color-mix(in srgb, var(--v1-meter-source-color, var(--v1-facility)) 76%, var(--v1-text));
+}
+
+.v1-meter-workbench-header__meter-title span {
+  min-width: 0;
+}
+
 .v1-meter-workbench-header__status {
   gap: var(--v1-space-1);
   min-height: 1.65rem;
@@ -39,7 +55,7 @@
   max-width: 100%;
 }
 
-.v1-meter-workbench-header__group-value .fa {
+.v1-meter-workbench-header__group-value .v1-icon {
   flex: 0 0 auto;
   color: var(--v1-muted);
   font-size: .86rem;
@@ -63,7 +79,7 @@
   min-width: 0;
 }
 
-.v1-meter-workbench-header__status-notes .fa {
+.v1-meter-workbench-header__status-notes .v1-icon {
   flex: 0 0 auto;
   margin-top: .14rem;
   color: inherit;

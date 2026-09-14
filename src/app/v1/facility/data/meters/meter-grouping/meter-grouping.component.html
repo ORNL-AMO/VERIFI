@@ -2,11 +2,14 @@
   <header class="v1-section-header v1-facility-meters__header">
     <div>
       <p class="v1-eyebrow">Facility Data</p>
-      <h1 id="v1-facility-meters-title">Meter Grouping</h1>
+      <h1 id="v1-facility-meters-title" class="v1-facility-meters__title">
+        <app-ui-icon name="meterGroup"></app-ui-icon>
+        <span>Meter Grouping</span>
+      </h1>
     </div>
     <div class="v1-facility-meters__header-actions" aria-label="Meter grouping actions">
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddGroup()">
-        <span class="fa fa-layer-group" aria-hidden="true"></span>
+        <app-ui-icon name="meterGroup"></app-ui-icon>
         Add group
       </button>
     </div>
@@ -14,14 +17,14 @@
 
   @if (actionError()) {
     <div class="v1-alert v1-alert--danger" role="alert">
-      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="warning"></app-ui-icon>
       <span>{{ actionError() }}</span>
     </div>
   }
 
   @if (workspace.groupSections().length === 0) {
     <article class="v1-empty-state" role="status">
-      <span class="fa fa-layer-group" aria-hidden="true"></span>
+      <app-ui-icon name="meterGroup"></app-ui-icon>
       <h2>No groups or meters yet</h2>
       <p>Add a group or add a meter to start organizing this facility.</p>
     </article>

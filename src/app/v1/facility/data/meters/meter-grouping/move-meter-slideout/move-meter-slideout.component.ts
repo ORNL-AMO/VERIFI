@@ -6,13 +6,14 @@ import {
   canAssignMeterToGroup
 } from '@app/v1/facility/data/meters/facility-meters.models';
 import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-move-meter-slideout',
   templateUrl: './move-meter-slideout.component.html',
   styleUrls: ['./move-meter-slideout.component.css'],
   standalone: true,
-  imports: [MeterSlideoutComponent]
+  imports: [MeterSlideoutComponent, IconComponent]
 })
 export class MoveMeterSlideoutComponent implements OnChanges {
   @Input({ required: true }) card!: MeterCardView;

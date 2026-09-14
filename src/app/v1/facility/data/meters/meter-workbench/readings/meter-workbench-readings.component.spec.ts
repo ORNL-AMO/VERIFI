@@ -11,6 +11,7 @@ import { ElectronService } from '@platform/electron/electron.service';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
+import { IconComponent } from '../../../../../shared/icons/icon.component';
 import { ModalPortalService } from '../../../../../shell/modal-portal.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { account, facility, meter, reading } from '../../facility-meters.testing';
@@ -314,6 +315,7 @@ function setupHarness(options: SetupOptions = {}) {
     declarations: [MeterWorkbenchReadingsComponent],
     imports: [
       CommonModule,
+      IconComponent,
       MeterReadingBillSlideoutComponent,
       MeterReadingsColumnsSlideoutComponent,
       MeterReadingsStatusComponent,

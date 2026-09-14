@@ -79,7 +79,7 @@
   outline-offset: 3px;
 }
 
-.v1-meter-browse-card__title .fa {
+.v1-meter-browse-card__title .v1-icon {
   flex: 0 0 auto;
   color: var(--v1-facility);
   font-size: 1rem;
@@ -111,6 +111,7 @@
 
 .v1-meter-browse-card__source-chip {
   display: inline-flex;
+  gap: .28rem;
   align-items: center;
   min-height: 1.5rem;
   max-width: 100%;
@@ -123,6 +124,10 @@
   font-weight: 900;
   line-height: 1;
   overflow-wrap: anywhere;
+}
+
+.v1-meter-browse-card__source-chip .v1-icon {
+  flex: 0 0 auto;
 }
 
 .v1-meter-browse-card__status {
@@ -179,7 +184,7 @@
   min-width: 0;
 }
 
-.v1-meter-browse-card__status-notes .fa {
+.v1-meter-browse-card__status-notes .v1-icon {
   flex: 0 0 auto;
   margin-top: .15rem;
 }

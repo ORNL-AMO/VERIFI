@@ -2,7 +2,7 @@
 
 @if (!currentFacility) {
   <article class="v1-empty-state" role="status">
-    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <app-ui-icon name="accountIssue"></app-ui-icon>
     <h1>No facility selected</h1>
     <p>Select a facility before managing meters and meter data.</p>
   </article>
@@ -10,11 +10,14 @@
   <header class="v1-section-header v1-facility-meters__header">
     <div>
       <p class="v1-eyebrow">Facility Data</p>
-      <h1 id="v1-facility-meters-title">Meters</h1>
+      <h1 id="v1-facility-meters-title" class="v1-facility-meters__title">
+        <app-ui-icon name="meter"></app-ui-icon>
+        <span>Meters</span>
+      </h1>
     </div>
     <div class="v1-facility-meters__header-actions" aria-label="Meter actions">
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
-        <span class="fa fa-plus" aria-hidden="true"></span>
+        <app-ui-icon name="add"></app-ui-icon>
         Add meter
       </button>
     </div>
@@ -22,12 +25,12 @@
 
   @if (!workspace.canWrite()) {
     <div class="v1-alert v1-alert--warning" role="status">
-      <span class="fa fa-lock" aria-hidden="true"></span>
+      <app-ui-icon name="lock"></app-ui-icon>
       <span>Meter actions are unavailable while the workspace is loading or switching.</span>
     </div>
   } @else if (workspace.hasPending()) {
     <div class="v1-alert v1-alert--info" role="status">
-      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <app-ui-icon name="loading" spin></app-ui-icon>
       <span>Another workspace update is still finishing.</span>
     </div>
   }
@@ -36,14 +39,14 @@
     <div class="v1-meters-browse" aria-label="Facility meters">
       @if (actionError()) {
         <div class="v1-alert v1-alert--danger" role="alert">
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           <span>{{ actionError() }}</span>
         </div>
       }
 
       @if (workspace.meterCards().length === 0) {
         <article class="v1-empty-state" role="status">
-          <span class="fa fa-gauge-high" aria-hidden="true"></span>
+          <app-ui-icon name="meter"></app-ui-icon>
           <h2>No meters yet</h2>
           <p>Meter cards will appear here after utility meters are added or imported for this facility.</p>
         </article>

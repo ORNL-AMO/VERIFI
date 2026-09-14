@@ -10,10 +10,10 @@
       </div>
       <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
         @if (isDeleting || saveState === 'saving') {
-          <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          <app-ui-icon name="loading" spin></app-ui-icon>
           Deleting
         } @else if (saveState === 'error') {
-          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <app-ui-icon name="warning"></app-ui-icon>
           Not deleted
         }
       </span>
@@ -21,13 +21,13 @@
 
     @if (saveError) {
       <div class="v1-alert v1-alert--danger" role="alert">
-        <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+        <app-ui-icon name="warning"></app-ui-icon>
         <span>{{ saveError }}</span>
       </div>
     }
 
     <article class="v1-settings-card v1-settings-card--danger">
-      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <app-ui-icon name="warning"></app-ui-icon>
       @if (isSingleFacilityAccount()) {
         <h3>Permanent account removal</h3>
         <p>Deleting this account removes the account, facility, meters, predictors, analyses, reports, and settings.</p>
@@ -40,7 +40,7 @@
         <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canWrite() || isDeleting"
           (click)="openDeleteConfirm()">
           {{ isSingleFacilityAccount() ? 'Delete account' : 'Delete facility' }}
-          <span class="fa fa-trash" aria-hidden="true"></span>
+          <app-ui-icon name="delete"></app-ui-icon>
         </button>
       </div>
     </article>
@@ -56,7 +56,7 @@
         <h2 id="v1-delete-facility-title">{{ isSingleFacilityAccount() ? 'Delete ' + account()?.name : 'Delete ' + facility()?.name }}</h2>
         <button type="button" class="v1-icon-btn" aria-label="Cancel deletion" [disabled]="isDeleting"
           (click)="cancelDeleteConfirm()">
-          <span class="fa fa-xmark" aria-hidden="true"></span>
+          <app-ui-icon name="close"></app-ui-icon>
         </button>
       </header>
       <div class="v1-modal__body">
@@ -73,11 +73,11 @@
         <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canWrite() || isDeleting"
           (click)="confirmDelete()">
           @if (isDeleting) {
-            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            <app-ui-icon name="loading" spin></app-ui-icon>
             Deleting
           } @else {
             {{ isSingleFacilityAccount() ? 'Delete account' : 'Delete facility' }}
-            <span class="fa fa-trash" aria-hidden="true"></span>
+            <app-ui-icon name="delete"></app-ui-icon>
           }
         </button>
       </footer>
