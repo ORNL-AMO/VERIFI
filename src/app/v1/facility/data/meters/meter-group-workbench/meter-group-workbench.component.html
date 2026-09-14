@@ -1,0 +1,197 @@
+@let currentFacility = workspace.facility();
+@let currentGroup = selectedGroup();
+@let currentResults = results();
+
+@if (!currentFacility) {
+  <article class="v1-empty-state" role="status">
+    <span class="fa fa-building-circle-exclamation" aria-hidden="true"></span>
+    <h1>No facility selected</h1>
+    <p>Select a facility before reviewing meter group results.</p>
+  </article>
+} @else if (workspace.hasMeterGroupRoute() && !currentGroup) {
+  <article class="v1-empty-state" role="status">
+    <span class="fa fa-layer-group" aria-hidden="true"></span>
+    <h1>Meter group not found</h1>
+    <p>This meter group is not available in {{ currentFacility.name }}.</p>
+    <button type="button" class="v1-btn v1-btn--secondary" (click)="openGrouping()">
+      <span class="fa fa-arrow-left" aria-hidden="true"></span>
+      Back to meter grouping
+    </button>
+  </article>
+} @else if (currentGroup) {
+  <header class="v1-meter-group-workbench-header">
+    <nav class="v1-meter-group-workbench-header__breadcrumb" aria-label="Meter group breadcrumb">
+      <ol>
+        <li>
+          <button type="button" (click)="openGrouping()">
+            <span class="fa fa-arrow-left" aria-hidden="true"></span>
+            Meter Grouping
+          </button>
+        </li>
+        <li aria-hidden="true">/</li>
+        <li
+          class="v1-meter-group-workbench-header__group-switcher"
+          [class.open]="groupSwitcherOpen()"
+          aria-current="page"
+          (keydown.escape)="onGroupSwitcherEscape()">
+          @if (groupOptions().length > 1) {
+            <button
+              #groupSwitcherToggle
+              type="button"
+              class="v1-meter-group-workbench-header__group-toggle"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="groupSwitcherOpen()"
+              [attr.aria-label]="'Switch meter group, current group ' + currentGroup.name"
+              (click)="toggleGroupSwitcher()">
+              <span class="v1-meter-group-workbench-header__group-toggle-label">{{ currentGroup.name }}</span>
+              <span class="fa fa-chevron-down v1-meter-group-workbench-header__group-toggle-icon" aria-hidden="true"></span>
+            </button>
+
+            @if (groupSwitcherOpen()) {
+              <div class="v1-meter-group-workbench-header__group-backdrop" (click)="closeGroupSwitcher()" aria-hidden="true"></div>
+              <div class="v1-meter-group-workbench-header__group-menu" role="menu" aria-label="Switch meter group">
+                @for (group of groupOptions(); track group.guid) {
+                  <button
+                    type="button"
+                    class="v1-meter-group-workbench-header__group-item"
+                    role="menuitemradio"
+                    [class.active]="group.guid === currentGroup.guid"
+                    [attr.aria-checked]="group.guid === currentGroup.guid"
+                    (click)="switchGroup(group.guid)">
+                    <span class="v1-meter-group-workbench-header__group-item-text">
+                      {{ group.name || 'Untitled group' }}
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+          } @else {
+            {{ currentGroup.name }}
+          }
+        </li>
+      </ol>
+    </nav>
+
+    <div class="v1-meter-group-workbench-header__title-row">
+      <div class="v1-meter-group-workbench-header__title">
+        <p class="v1-eyebrow">{{ currentFacility.name }} Meter Group</p>
+        <h1 id="v1-facility-meters-title">{{ currentGroup.name }}</h1>
+      </div>
+      <div class="v1-meter-group-workbench-header__chips" aria-label="Meter group summary">
+        <span class="v1-meter-group-workbench-header__type-chip">
+          <span class="fa fa-layer-group" aria-hidden="true"></span>
+          {{ currentGroup.groupType }}
+        </span>
+        @if (isLoading()) {
+          <span class="v1-chip v1-chip--info">
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+            Calculating
+          </span>
+        } @else if (hasError()) {
+          <span class="v1-chip v1-chip--danger">
+            <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+            Results unavailable
+          </span>
+        } @else {
+          <span class="v1-chip v1-chip--success">
+            <span class="fa fa-circle-check" aria-hidden="true"></span>
+            Results ready
+          </span>
+        }
+      </div>
+    </div>
+
+    <dl class="v1-meter-group-workbench-header__facts">
+      <div>
+        <dt>Assigned meters</dt>
+        <dd>{{ currentResults.summary.assignedMeterCount }}</dd>
+      </div>
+      <div>
+        <dt>First data</dt>
+        <dd>{{ currentResults.summary.firstDataLabel }}</dd>
+      </div>
+      <div>
+        <dt>Latest data</dt>
+        <dd>{{ currentResults.summary.latestDataLabel }}</dd>
+      </div>
+      <div>
+        <dt>{{ currentResults.utilityLabel }}</dt>
+        <dd>
+          {{ currentResults.summary.utilityTotalLabel }}
+          @if (currentResults.utilityUnit) {
+            <span>{{ currentResults.utilityUnit }}</span>
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Total cost</dt>
+        <dd>{{ currentResults.summary.costTotalLabel }}</dd>
+      </div>
+    </dl>
+
+    @if (currentGroup.groupType === 'Energy') {
+      <div class="v1-meter-group-workbench-header__energy-toggle" aria-label="Energy basis">
+        <button
+          type="button"
+          class="v1-btn v1-btn--sm"
+          [class.v1-btn--action]="currentFacility.energyIsSource === true"
+          [class.v1-btn--quiet]="currentFacility.energyIsSource !== true"
+          [disabled]="!canSetEnergySource() || currentFacility.energyIsSource === true"
+          (click)="setFacilityEnergyIsSource(true)">
+          Source Energy
+        </button>
+        <button
+          type="button"
+          class="v1-btn v1-btn--sm"
+          [class.v1-btn--action]="currentFacility.energyIsSource === false"
+          [class.v1-btn--quiet]="currentFacility.energyIsSource !== false"
+          [disabled]="!canSetEnergySource() || currentFacility.energyIsSource === false"
+          (click)="setFacilityEnergyIsSource(false)">
+          Site Energy
+        </button>
+      </div>
+    }
+  </header>
+
+  @if (actionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>{{ actionError() }}</span>
+    </div>
+  }
+
+  @if (showWorkspaceUnavailable()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <span class="fa fa-lock" aria-hidden="true"></span>
+      <span>Meter group result actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  } @else if (showWorkspacePending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <span>Another workspace update is still finishing.</span>
+    </div>
+  }
+
+  @if (hasNoGroupData()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span class="fa fa-circle-info" aria-hidden="true"></span>
+      <span>No meter data is available for this group yet.</span>
+    </div>
+  }
+
+  <nav class="v1-facility-meters__tabs" aria-label="Meter group workbench sections">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="v1-facility-meters__tab"
+        [class.v1-facility-meters__tab--active]="activeTab() === tab.id"
+        (click)="openGroupTab(tab.id)"
+        [attr.aria-current]="activeTab() === tab.id ? 'page' : null">
+        <span class="fa {{ tab.icon }}" aria-hidden="true"></span>
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  <router-outlet></router-outlet>
+}

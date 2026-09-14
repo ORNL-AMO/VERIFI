@@ -12,6 +12,7 @@ export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
 export type FacilityMeterRouteTab = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
+export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-graph' | 'yearly-table' | 'yearly-graph';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -51,6 +52,7 @@ interface RouteState {
   readonly accountGuid?: string;
   readonly facilityGuid?: string;
   readonly meterGuid?: string;
+  readonly meterGroupGuid?: string;
   readonly section: SectionId;
   readonly detail: string;
 }
@@ -118,6 +120,7 @@ export class WorkspaceNavigationService {
   readonly activeSection = computed(() => this.routeState().section);
   readonly activeDetail = computed(() => this.routeState().detail);
   readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
+  readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
@@ -275,6 +278,14 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab];
   }
 
+  facilityMeterGroupRoute(
+    facilityGuid: string,
+    groupGuid: string,
+    tab: FacilityMeterGroupRouteTab = 'monthly-table'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab];
+  }
+
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
@@ -420,8 +431,8 @@ export class WorkspaceNavigationService {
     }
     if (this.activeDetail() === 'meter-grouping') {
       return [
-        'Use Meter Grouping to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.',
-        'Open a meter card from a group to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
+      'Use Meter Grouping to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.',
+        'Open a group to review monthly and yearly result tables or charts. Open a meter card from a group to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
       ];
     }
     return [
@@ -453,6 +464,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
       section,
       detail,
       meterGuid: section === 'data' && detail === 'meters' && routeParts[5]
+        ? safeDecodeRoutePart(routeParts[5])
+        : undefined,
+      meterGroupGuid: section === 'data' && detail === 'meter-grouping' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined
     };

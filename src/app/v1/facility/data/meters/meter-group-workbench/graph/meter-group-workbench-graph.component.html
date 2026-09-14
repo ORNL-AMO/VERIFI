@@ -1,0 +1,66 @@
+@let currentResults = results();
+@let currentRows = rows();
+@let state = workspace.calendarizationState();
+
+<section class="v1-meter-group-results-graph" aria-label="Meter group results graph">
+  @if (state === 'loading') {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <h2>Calculating group results</h2>
+      <p>VERIFI is preparing calendarized meter data for this group.</p>
+    </article>
+  } @else if (state === 'error') {
+    <article class="v1-empty-state" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <h2>Results could not be calculated</h2>
+      <p>Check the meter data for this group and try again.</p>
+    </article>
+  } @else {
+    <div class="v1-meter-group-results-graph__controls" aria-label="Chart controls">
+      @if (currentResults.showEnergyUse || currentResults.showConsumption) {
+        <div class="v1-meter-group-results-graph__control-group" role="group" aria-label="Utility series display">
+          <span>Utility</span>
+          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'off'" title="Hide utility" aria-label="Hide utility" (click)="setUtilityDisplay('off')">
+            <span class="fa fa-eye-slash" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'bar'" title="Show utility as bars" aria-label="Show utility as bars" (click)="setUtilityDisplay('bar')">
+            <span class="fa fa-chart-simple" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'line'" title="Show utility as line" aria-label="Show utility as line" (click)="setUtilityDisplay('line')">
+            <span class="fa fa-chart-line" aria-hidden="true"></span>
+          </button>
+        </div>
+      }
+      @if (currentResults.showCost) {
+        <div class="v1-meter-group-results-graph__control-group" role="group" aria-label="Cost series display">
+          <span>Cost</span>
+          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'off'" title="Hide cost" aria-label="Hide cost" (click)="setCostDisplay('off')">
+            <span class="fa fa-eye-slash" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'bar'" title="Show cost as bars" aria-label="Show cost as bars" (click)="setCostDisplay('bar')">
+            <span class="fa fa-chart-simple" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'line'" title="Show cost as line" aria-label="Show cost as line" (click)="setCostDisplay('line')">
+            <span class="fa fa-chart-line" aria-hidden="true"></span>
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (currentRows.length === 0) {
+      <article class="v1-empty-state" role="status">
+        <span class="fa fa-chart-line" aria-hidden="true"></span>
+        <h2>No {{ period() }} results to chart</h2>
+        <p>Add meter data to this group to see charted results.</p>
+      </article>
+    } @else if (!hasChartSeries()) {
+      <article class="v1-empty-state" role="status">
+        <span class="fa fa-eye-slash" aria-hidden="true"></span>
+        <h2>No visible series</h2>
+        <p>Turn on utility or cost to show the chart.</p>
+      </article>
+    } @else {
+      <div class="v1-meter-group-results-graph__chart" [appV1ECharts]="chartOption()" role="img" [attr.aria-label]="period() + ' meter group results chart'"></div>
+    }
+  }
+</section>
