@@ -23,6 +23,7 @@ export class MeterGroupLaneComponent {
   @Input() canWrite = true;
   @Input() canDrop: (card: MeterCardView, target: MeterGroupDropTarget) => boolean = () => true;
   @Output() editGroup = new EventEmitter<MeterGroupSectionView>();
+  @Output() openGroup = new EventEmitter<MeterGroupSectionView>();
   @Output() meterDropped = new EventEmitter<MeterDropEvent>();
   @Output() openMeter = new EventEmitter<MeterCardView>();
   @Output() moveMeter = new EventEmitter<MeterCardView>();

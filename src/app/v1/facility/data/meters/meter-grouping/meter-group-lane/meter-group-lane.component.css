@@ -52,6 +52,14 @@
   color: var(--v1-muted);
 }
 
+.v1-meter-lane__header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--v1-space-2);
+}
+
 .v1-meter-lane__dropzone {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 16rem));
@@ -79,7 +87,8 @@
     display: grid;
   }
 
-  .v1-meter-lane__header > button {
+  .v1-meter-lane__header-actions,
+  .v1-meter-lane__header-actions > button {
     width: 100%;
   }
 

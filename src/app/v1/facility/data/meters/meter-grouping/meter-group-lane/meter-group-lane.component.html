@@ -11,10 +11,16 @@
       </p>
     </div>
     @if (section.group) {
-      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canWrite" (click)="editGroup.emit(section)">
-        <span class="fa fa-pen" aria-hidden="true"></span>
-        Edit group
-      </button>
+      <div class="v1-meter-lane__header-actions" aria-label="Meter group actions">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--secondary" (click)="openGroup.emit(section)">
+          <span class="fa fa-chart-line" aria-hidden="true"></span>
+          Open results
+        </button>
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="!canWrite" (click)="editGroup.emit(section)">
+          <span class="fa fa-pen" aria-hidden="true"></span>
+          Edit group
+        </button>
+      </div>
     }
   </header>
 
