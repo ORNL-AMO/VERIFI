@@ -8,6 +8,9 @@
       <label class="v1-field">
         <span>Read date</span>
         <input class="v1-input" type="date" formControlName="readDate" [disabled]="saving">
+        @if (form.controls['readDate'].hasError('duplicateReadingDate') && form.controls['readDate'].touched) {
+          <span class="meter-bill-form__field-error">A reading already exists for this date.</span>
+        }
       </label>
 
       @if (meter.source === 'Electricity') {
@@ -104,15 +107,17 @@
               @let charge = chargeViews[index];
               <div class="meter-bill-form__charge" [formGroupName]="index">
                 <span class="meter-bill-form__charge-name">{{ charge?.name || 'Charge' }}</span>
-                <label class="v1-field">
-                  <span>Usage</span>
-                  <div class="input-group meter-bill-form__input-group">
-                    <input class="v1-input" type="number" formControlName="chargeUsage" [disabled]="saving">
-                    @if (charge?.usageUnit) {
-                      <span class="input-group-text">{{ charge.usageUnit }}</span>
-                    }
-                  </div>
-                </label>
+                @if (charge?.canShowUsage) {
+                  <label class="v1-field">
+                    <span>Usage</span>
+                    <div class="input-group meter-bill-form__input-group">
+                      <input class="v1-input" type="number" formControlName="chargeUsage" [disabled]="saving">
+                      @if (charge?.usageUnit) {
+                        <span class="input-group-text">{{ charge.usageUnit }}</span>
+                      }
+                    </div>
+                  </label>
+                }
                 <label class="v1-field">
                   <span>Amount</span>
                   <div class="input-group meter-bill-form__input-group">

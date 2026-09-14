@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { maxDateValidator, minDateValidator } from '@shared/customFormValidators';
@@ -17,11 +17,11 @@ export interface MeterReadingFormContext {
 export class MeterReadingFormService {
   constructor(private readonly formBuilder: FormBuilder) { }
 
-  buildForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData): FormGroup {
+  buildForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, existingReadings: readonly IdbUtilityMeterData[] = []): FormGroup {
     if (meter.source === 'Electricity') {
-      return this.buildElectricityForm(meterData);
+      return this.buildElectricityForm(meter, meterData, existingReadings);
     }
-    return this.buildGeneralForm(meter, meterData, this.contextForMeter(meter));
+    return this.buildGeneralForm(meter, meterData, this.contextForMeter(meter), existingReadings);
   }
 
   contextForMeter(meter: IdbUtilityMeter): MeterReadingFormContext {
@@ -65,9 +65,9 @@ export class MeterReadingFormService {
     return draft;
   }
 
-  private buildElectricityForm(meterData: IdbUtilityMeterData): FormGroup {
+  private buildElectricityForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, existingReadings: readonly IdbUtilityMeterData[]): FormGroup {
     return this.formBuilder.group({
-      readDate: [getMeterDataDateString(meterData), [Validators.required, maxDateValidator(), minDateValidator()]],
+      readDate: [getMeterDataDateString(meterData), [Validators.required, maxDateValidator(), minDateValidator(), duplicateReadingDateValidator(meter, meterData, existingReadings)]],
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required]],
       totalCost: [meterData.totalCost, [Validators.min(0)]],
       totalRealDemand: [meterData.totalRealDemand, [Validators.min(0)]],
@@ -78,7 +78,7 @@ export class MeterReadingFormService {
     });
   }
 
-  private buildGeneralForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, context: MeterReadingFormContext): FormGroup {
+  private buildGeneralForm(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, context: MeterReadingFormContext, existingReadings: readonly IdbUtilityMeterData[]): FormGroup {
     const totalVolumeValidators: ValidatorFn[] = context.displayVolumeInput ? [Validators.required, Validators.min(0)] : [];
     const totalEnergyUseValidators: ValidatorFn[] = context.displayEnergyUse
       ? [Validators.required, ...((meter.source === 'Natural Gas' || meter.source === 'Other Energy' || meter.source === 'Other Fuels') ? [] : [Validators.min(0)])]
@@ -86,7 +86,7 @@ export class MeterReadingFormService {
     const heatCapacityValidators: ValidatorFn[] = context.displayHeatCapacity ? [Validators.required, Validators.min(0)] : [];
     const fuelEfficiencyValidators: ValidatorFn[] = context.displayVehicleFuelEfficiency ? [Validators.required, Validators.min(0)] : [];
     const form = this.formBuilder.group({
-      readDate: [getMeterDataDateString(meterData), [Validators.required, maxDateValidator(), minDateValidator()]],
+      readDate: [getMeterDataDateString(meterData), [Validators.required, maxDateValidator(), minDateValidator(), duplicateReadingDateValidator(meter, meterData, existingReadings)]],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
       totalCost: [meterData.totalCost],
@@ -118,4 +118,47 @@ export class MeterReadingFormService {
 
 function enabledControlValue(form: FormGroup, controlName: string): any {
   return form.getRawValue()[controlName];
+}
+
+function duplicateReadingDateValidator(
+  meter: IdbUtilityMeter,
+  currentReading: IdbUtilityMeterData,
+  existingReadings: readonly IdbUtilityMeterData[]
+): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const dateParts = parseDateParts(control.value);
+    if (!dateParts) {
+      return null;
+    }
+    const duplicate = existingReadings.find(reading => {
+      return reading.meterId === meter.guid
+        && reading.guid !== currentReading.guid
+        && reading.year === dateParts.year
+        && reading.month === dateParts.month
+        && reading.day === dateParts.day;
+    });
+    return duplicate ? { duplicateReadingDate: true } : null;
+  };
+}
+
+function parseDateParts(value: unknown): { year: number; month: number; day: number } | undefined {
+  if (value instanceof Date) {
+    return {
+      year: value.getFullYear(),
+      month: value.getMonth() + 1,
+      day: value.getDate()
+    };
+  }
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const parts = value.split('-').map(part => Number(part));
+  if (parts.length !== 3 || parts.some(part => !Number.isFinite(part))) {
+    return undefined;
+  }
+  return {
+    year: parts[0],
+    month: parts[1],
+    day: parts[2]
+  };
 }

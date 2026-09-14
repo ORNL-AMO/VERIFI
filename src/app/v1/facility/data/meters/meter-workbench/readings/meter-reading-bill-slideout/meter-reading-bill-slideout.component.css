@@ -64,6 +64,12 @@
   border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0;
 }
 
+.meter-bill-form__field-error {
+  color: var(--v1-danger);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
 .meter-bill-form__charges {
   display: grid;
   gap: var(--v1-space-3);

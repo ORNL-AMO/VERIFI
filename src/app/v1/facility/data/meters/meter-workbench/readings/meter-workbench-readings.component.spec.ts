@@ -134,6 +134,48 @@ describe('MeterWorkbenchReadingsComponent', () => {
     expect(component.billPanel()).toBeUndefined();
   });
 
+  it('blocks adding a bill on an existing reading date', async () => {
+    const existingReading = reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 1 });
+    const { fixture, meterHandler, commandBoundary } = setupHarness({ readings: [existingReading] });
+    const component = fixture.componentInstance;
+
+    component.openAddBill();
+    await component.saveBill({
+      reading: reading({ guid: 'reading-new', meterId: 'meter-a', month: 1, day: 1 }),
+      addAnother: false
+    });
+
+    expect(component.actionError()).toBe('A reading already exists for this date.');
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(meterHandler.addMeterData).not.toHaveBeenCalled();
+  });
+
+  it('blocks editing a bill onto another reading date while allowing the current reading date', async () => {
+    const firstReading = reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 1 });
+    const secondReading = reading({ guid: 'reading-b', meterId: 'meter-a', month: 2, day: 1 });
+    const { fixture, meterHandler, commandBoundary } = setupHarness({ readings: [firstReading, secondReading] });
+    const component = fixture.componentInstance;
+
+    component.openEditBill(firstReading);
+    await component.saveBill({
+      reading: reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 1, totalEnergyUse: 15 }),
+      addAnother: false
+    });
+    expect(meterHandler.updateMeterData).toHaveBeenCalledWith(expect.objectContaining({ totalEnergyUse: 15 }), 'account-a');
+
+    commandBoundary.execute.mockClear();
+    meterHandler.updateMeterData.mockClear();
+    component.openEditBill(firstReading);
+    await component.saveBill({
+      reading: reading({ guid: 'reading-a', meterId: 'meter-a', month: 2, day: 1 }),
+      addAnother: false
+    });
+
+    expect(component.actionError()).toBe('A reading already exists for this date.');
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect(meterHandler.updateMeterData).not.toHaveBeenCalled();
+  });
+
   it('deletes a reading through a patch action', async () => {
     const deletedReading = reading({ guid: 'reading-a', id: 3, meterId: 'meter-a' });
     const { fixture, meterHandler, modalPortal } = setupHarness({ readings: [deletedReading] });

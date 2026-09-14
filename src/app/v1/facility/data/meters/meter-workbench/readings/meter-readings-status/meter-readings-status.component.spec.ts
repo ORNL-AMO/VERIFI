@@ -43,7 +43,7 @@ describe('MeterReadingsStatusComponent', () => {
     fixture.componentInstance.fillMissingRequested.subscribe(() => fillRequests += 1);
 
     const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('Negative energy use entered for one or more readings. To allow negative readings');
+    expect(root.textContent).toContain('Negative values entered for one or more readings. To allow negative readings');
     expect(root.textContent).toContain('Allow Negative Readings');
     expect(root.textContent).toContain('Two or more readings have been entered for the same day');
     expect(root.textContent).toContain('Missing meter data found for 1 month');

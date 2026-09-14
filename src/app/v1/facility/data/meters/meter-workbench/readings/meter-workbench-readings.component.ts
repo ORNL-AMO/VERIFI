@@ -203,6 +203,11 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     if (!account || !meter || !panel) {
       return;
     }
+    if (this.hasDuplicateReadingDate(save.reading)) {
+      this.actionError.set('A reading already exists for this date.');
+      this.toastNotifications.showToast('Meter Reading Update Failed', 'A reading already exists for this date.', undefined, false, 'alert-danger');
+      return;
+    }
     await this.runAction('Reading could not be saved.', async () => {
       if (panel.mode === 'edit') {
         await this.commandBoundary.execute(
@@ -374,6 +379,20 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private hasDuplicateReadingDate(reading: IdbUtilityMeterData): boolean {
+    const meter = this.meter();
+    if (!meter) {
+      return false;
+    }
+    return this.selectedMeterData().some(existingReading => {
+      return existingReading.meterId === meter.guid
+        && existingReading.guid !== reading.guid
+        && existingReading.year === reading.year
+        && existingReading.month === reading.month
+        && existingReading.day === reading.day;
+    });
   }
 
   private showConfirmModal(): void {

@@ -208,7 +208,7 @@ export class MeterReadingsTableService {
     const recs = isElectricityRecsMeter(meter);
     const columns: MeterReadingColumn[] = [dateColumn()];
     if (!recs) {
-      columns.push(numberColumn('totalEnergyUse', `Energy Use (${meter.energyUnit})`, 'General Information', reading => reading.totalEnergyUse));
+      columns.push(numberColumn('totalEnergyUse', `Energy Use (${meter.energyUnit})`, 'General Information', reading => meter.includeInEnergy ? reading.totalEnergyUse : 0));
       if (general?.totalCost) columns.push(currencyColumn('totalCost', 'Total Cost', 'General Information', reading => reading.totalCost));
       if (general?.realDemand) columns.push(numberColumn('totalRealDemand', `Real Demand (${meter.demandUnit ?? 'kW'})`, 'General Information', reading => reading.totalRealDemand));
       if (general?.billedDemand) columns.push(numberColumn('totalBilledDemand', `Billed Demand (${meter.demandUnit ?? 'kW'})`, 'General Information', reading => reading.totalBilledDemand));
@@ -314,7 +314,7 @@ function negativeReadingColumnIds(
   if (meter.canBeNegative) {
     return {};
   }
-  const negativeColumns = new Set(negativeReadingColumns(reading, type));
+  const negativeColumns = new Set(negativeReadingColumns(reading, meter, type));
   return columns.reduce<Record<string, true>>((result, column) => {
     if (negativeColumns.has(column.id)) {
       result[column.id] = true;
@@ -328,12 +328,12 @@ function hasHiddenNegativeReading(
   meter: IdbUtilityMeter,
   type: MeterReadingTableView['type']
 ): boolean {
-  return !meter.canBeNegative && negativeReadingColumns(reading, type).length > 0;
+  return !meter.canBeNegative && negativeReadingColumns(reading, meter, type).length > 0;
 }
 
-function negativeReadingColumns(reading: IdbUtilityMeterData, type: MeterReadingTableView['type']): string[] {
+function negativeReadingColumns(reading: IdbUtilityMeterData, meter: IdbUtilityMeter, type: MeterReadingTableView['type']): string[] {
   if (type === 'electricity') {
-    return reading.totalEnergyUse < 0 ? ['totalEnergyUse'] : [];
+    return meter.includeInEnergy && reading.totalEnergyUse < 0 ? ['totalEnergyUse'] : [];
   }
   if (type === 'vehicle' || type === 'other') {
     return reading.totalVolume < 0 ? ['totalVolume'] : [];
@@ -351,11 +351,18 @@ function chargeColumns(meter: IdbUtilityMeter, type: 'electricity' | 'general' |
       ? charge.chargeType === 'consumption' || charge.chargeType === 'demand'
       : type === 'general' && charge.chargeType === 'sewer';
     if (canShowUsage && charge.displayUsageInTable) {
-      columns.push(numberColumn(`${charge.guid}:usage`, `${charge.name} (${meter.startingUnit})`, 'Detailed Charges', reading => getMeterChargeValue(reading.charges, charge.guid, 'usage')));
+      columns.push(numberColumn(`${charge.guid}:usage`, `${charge.name} (${chargeUsageUnit(meter, charge.chargeType, type)})`, 'Detailed Charges', reading => getMeterChargeValue(reading.charges, charge.guid, 'usage')));
     }
     if (charge.displayChargeInTable) {
       columns.push(currencyColumn(`${charge.guid}:amount`, `${charge.name} ($)`, 'Detailed Charges', reading => getMeterChargeValue(reading.charges, charge.guid, 'amount')));
     }
     return columns;
   });
+}
+
+function chargeUsageUnit(meter: IdbUtilityMeter, chargeType: string, type: 'electricity' | 'general' | 'vehicle' | 'other'): string {
+  if (type === 'electricity' && chargeType === 'demand') {
+    return meter.demandUnit || 'kW';
+  }
+  return meter.startingUnit;
 }

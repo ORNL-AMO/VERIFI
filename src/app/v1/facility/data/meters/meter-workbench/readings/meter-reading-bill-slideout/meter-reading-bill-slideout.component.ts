@@ -15,6 +15,7 @@ interface MeterReadingBillChargeView {
   readonly guid: string;
   readonly name: string;
   readonly usageUnit?: string;
+  readonly canShowUsage: boolean;
 }
 
 @Component({
@@ -30,6 +31,7 @@ export class MeterReadingBillSlideoutComponent implements OnChanges {
   @Input({ required: true }) meter!: IdbUtilityMeter;
   @Input({ required: true }) reading!: IdbUtilityMeterData;
   @Input({ required: true }) mode!: 'add' | 'edit';
+  @Input() existingReadings: readonly IdbUtilityMeterData[] = [];
   @Input() saving = false;
   @Output() saved = new EventEmitter<MeterReadingBillSave>();
   @Output() cancelled = new EventEmitter<void>();
@@ -43,9 +45,9 @@ export class MeterReadingBillSlideoutComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if ((changes['meter'] || changes['reading']) && this.meter && this.reading) {
+    if ((changes['meter'] || changes['reading'] || changes['existingReadings']) && this.meter && this.reading) {
       this.context = this.formService.contextForMeter(this.meter);
-      this.form = this.formService.buildForm(this.meter, this.reading);
+      this.form = this.formService.buildForm(this.meter, this.reading, this.existingReadings);
       this.chargeViews = this.buildChargeViews();
     }
   }
@@ -73,7 +75,8 @@ export class MeterReadingBillSlideoutComponent implements OnChanges {
       return {
         guid: chargeReading.chargeGuid,
         name: formatChargeName(charge?.name),
-        usageUnit: getChargeUsageUnit(charge, this.meter)
+        usageUnit: getChargeUsageUnit(charge, this.meter),
+        canShowUsage: canShowChargeUsage(charge, this.meter)
       };
     });
   }
@@ -93,11 +96,21 @@ function getChargeUsageUnit(charge: MeterCharge | undefined, meter: IdbUtilityMe
   if (!charge) {
     return undefined;
   }
-  if (charge.chargeType === 'demand' || charge.chargeType === 'demandMDQ') {
+  if (meter.source === 'Electricity' && charge.chargeType === 'demand') {
     return meter.demandUnit || 'kW';
   }
-  if (charge.chargeType === 'consumption' || charge.chargeType === 'usage' || charge.chargeType === 'sewer') {
+  if (charge.chargeType === 'consumption' || charge.chargeType === 'sewer') {
     return meter.startingUnit;
   }
   return undefined;
+}
+
+function canShowChargeUsage(charge: MeterCharge | undefined, meter: IdbUtilityMeter): boolean {
+  if (!charge) {
+    return false;
+  }
+  if (meter.source === 'Electricity') {
+    return charge.chargeType === 'consumption' || charge.chargeType === 'demand';
+  }
+  return charge.chargeType === 'sewer';
 }

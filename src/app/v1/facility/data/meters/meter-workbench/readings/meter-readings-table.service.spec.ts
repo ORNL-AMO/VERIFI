@@ -104,6 +104,52 @@ describe('MeterReadingsTableService', () => {
     expect(view.rows[0].values['charge-a:amount']).toBe('$12');
   });
 
+  it('uses demand units for demand charge usage columns', () => {
+    const view = service.buildTableView({
+      account: account({ displayEmissions: false }),
+      facility: facility(),
+      meter: meter({
+        guid: 'meter-a',
+        source: 'Electricity',
+        startingUnit: 'kWh',
+        demandUnit: 'kW',
+        charges: [{
+          guid: 'charge-a',
+          name: 'Real Demand',
+          chargeType: 'demand',
+          displayUsageInTable: true,
+          displayChargeInTable: false
+        }]
+      }),
+      readings: [reading({ charges: [{ chargeGuid: 'charge-a', chargeAmount: 12, chargeUsage: 34 }] })],
+      customFuels: [],
+      customGWPs: []
+    });
+
+    expect(view.columns.find(column => column.id === 'charge-a:usage')?.label).toBe('Real Demand (kW)');
+  });
+
+  it('displays and sorts electricity energy use as zero when the meter is excluded from energy totals', () => {
+    const view = service.buildTableView({
+      account: account({ displayEmissions: false }),
+      facility: facility(),
+      meter: meter({
+        guid: 'meter-a',
+        source: 'Electricity',
+        includeInEnergy: false,
+        canBeNegative: false
+      }),
+      readings: [reading({ guid: 'negative-electricity', meterId: 'meter-a', totalEnergyUse: -10 })],
+      customFuels: [],
+      customGWPs: []
+    });
+
+    expect(view.rows[0].values['totalEnergyUse']).toBe('0');
+    expect(view.rows[0].sortValues['totalEnergyUse']).toBe(0);
+    expect(view.rows[0].hasNegativeReading).toBe(false);
+    expect(view.rows[0].negativeColumnIds).toEqual({});
+  });
+
   it('tags negative reading rows and value columns when the meter does not allow negatives', () => {
     const view = service.buildTableView({
       account: account({ displayEmissions: false }),

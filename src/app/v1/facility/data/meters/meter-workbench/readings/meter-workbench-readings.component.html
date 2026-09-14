@@ -72,6 +72,7 @@
     [meter]="_meter"
     [reading]="_billPanel.reading"
     [mode]="_billPanel.mode"
+    [existingReadings]="selectedMeterData()"
     [saving]="saving()"
     (saved)="saveBill($event)"
     (cancelled)="closeBillPanel()">
