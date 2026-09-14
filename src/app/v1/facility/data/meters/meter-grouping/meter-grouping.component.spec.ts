@@ -2,15 +2,15 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { buildMeterGroupSections } from '../../facility-meters.models';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { group, meter, reading } from '../../facility-meters.testing';
-import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
-import { MetersGroupingViewComponent } from './meters-grouping-view.component';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { buildMeterGroupSections } from '@app/v1/facility/data/meters/facility-meters.models';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MeterGroupingComponent } from './meter-grouping.component';
 
-describe('MetersGroupingViewComponent', () => {
-  it('renders group lanes without a local grouping header', () => {
+describe('MeterGroupingComponent', () => {
+  it('renders group lanes with grouping actions', () => {
     const fixture = setup({
       meters: [
         meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' }),
@@ -28,6 +28,7 @@ describe('MetersGroupingViewComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Meter Grouping');
     expect(text).not.toContain('Drag meters between groups');
     expect(text).toContain('Add group');
     expect(text).not.toContain('Add meter');
@@ -40,7 +41,8 @@ describe('MetersGroupingViewComponent', () => {
     expect(fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open meter"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('app-meter-browse-card')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-facility-meters__header .v1-btn--action')?.textContent).toContain('Add group');
     expect(findButton(fixture, 'Add group')?.classList.contains('v1-btn--action')).toBe(true);
   });
 
@@ -152,7 +154,7 @@ function setup(options: {
   groups?: ReturnType<typeof group>[];
   canWrite?: boolean;
   hasPending?: boolean;
-} = {}): ComponentFixture<MetersGroupingViewComponent> {
+} = {}): ComponentFixture<MeterGroupingComponent> {
   const meters = signal(options.meters ?? [
     meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' })
   ]);
@@ -172,7 +174,7 @@ function setup(options: {
   };
 
   TestBed.configureTestingModule({
-    imports: [MetersGroupingViewComponent],
+    imports: [MeterGroupingComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
@@ -204,14 +206,14 @@ function setup(options: {
     ]
   });
 
-  return TestBed.createComponent(MetersGroupingViewComponent);
+  return TestBed.createComponent(MeterGroupingComponent);
 }
 
-function clickButton(fixture: ComponentFixture<MetersGroupingViewComponent>, label: string): void {
+function clickButton(fixture: ComponentFixture<MeterGroupingComponent>, label: string): void {
   findButton(fixture, label)?.click();
 }
 
-function findButton(fixture: ComponentFixture<MetersGroupingViewComponent>, label: string): HTMLButtonElement | undefined {
+function findButton(fixture: ComponentFixture<MeterGroupingComponent>, label: string): HTMLButtonElement | undefined {
   const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
   return buttons.find(button => button.textContent?.includes(label) || button.getAttribute('aria-label')?.includes(label));
 }

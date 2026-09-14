@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MeterCardView } from '../../../../facility-meters.models';
+import { MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
 
 @Component({
   selector: 'app-confirm-delete-meter-modal',

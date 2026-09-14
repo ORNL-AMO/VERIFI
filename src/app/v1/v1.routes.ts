@@ -20,6 +20,7 @@ import { MeterWorkbenchReadingsComponent } from './facility/data/meters/meter-wo
 import { MeterWorkbenchSettingsComponent } from './facility/data/meters/meter-workbench/settings/meter-workbench-settings.component';
 import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupingComponent } from './facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
 import { FacilitySettingsComponent } from './facility/settings/facility-settings.component';
@@ -119,6 +120,13 @@ export const V1Routes: Routes = [
                       { path: '**', redirectTo: 'settings' }
                     ]
                   }
+                ]
+              },
+              {
+                path: 'meter-grouping',
+                component: FacilityMetersComponent,
+                children: [
+                  { path: '', pathMatch: 'full', component: MeterGroupingComponent }
                 ]
               },
               { path: 'predictors', component: FacilityDataPlaceholderComponent, data: { title: 'Predictors' } },

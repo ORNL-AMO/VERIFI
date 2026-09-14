@@ -23,7 +23,6 @@ type MeterNavItem = {
 type MeterChildrenState = {
   readonly facilityGuid?: string;
   readonly collapsed: boolean;
-  readonly expanded: boolean;
 };
 
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
@@ -38,6 +37,7 @@ const ACCOUNT_CUSTOM_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
 
 const FACILITY_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
   { id: 'meters', label: 'Meters', icon: 'fa-gauge-high' },
+  { id: 'meter-grouping', label: 'Meter Grouping', icon: 'fa-layer-group' },
   { id: 'predictors', label: 'Predictors', icon: 'fa-chart-line' },
   { id: 'energy-uses', label: 'Energy Uses', icon: 'fa-screwdriver-wrench' }
 ];
@@ -74,8 +74,7 @@ export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly meterChildrenState = signal<MeterChildrenState>({
-    collapsed: false,
-    expanded: false
+    collapsed: false
   });
 
   readonly isSingleSiteWorkspace = this.navigation.isSingleSiteWorkspace;
@@ -111,7 +110,7 @@ export class SectionNavComponent {
     if (this.isFacilityMetersRoute()) {
       return !stateApplies || !state.collapsed;
     }
-    return stateApplies && state.expanded;
+    return false;
   });
   readonly settingsItems = computed(() => {
     if (this.navigation.contextMode() !== 'facility') {
@@ -165,14 +164,13 @@ export class SectionNavComponent {
 
   toggleMeterChildren(): void {
     const facilityGuid = this.navigation.facility()?.guid;
-    if (!facilityGuid || this.facilityMeterItems().length === 0) {
+    if (!facilityGuid || this.facilityMeterItems().length === 0 || !this.isFacilityMetersRoute()) {
       return;
     }
     const isOpen = this.isMeterChildrenOpen();
     this.meterChildrenState.set({
       facilityGuid,
-      collapsed: this.isFacilityMetersRoute() ? isOpen : false,
-      expanded: this.isFacilityMetersRoute() ? false : !isOpen
+      collapsed: isOpen
     });
   }
 }

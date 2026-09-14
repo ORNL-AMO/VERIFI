@@ -2,12 +2,12 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
-import { ModalPortalService } from '../../../../../../shell/modal-portal.service';
-import { WorkspaceNavigationService } from '../../../../../../shell/workspace-navigation.service';
-import { MeterCardView } from '../../../facility-meters.models';
-import { FacilityMetersWorkspaceService } from '../../../facility-meters-workspace.service';
-import { group, meter } from '../../../facility-meters.testing';
-import { MetersDashboardActionsService } from '../../meters-dashboard-actions.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
 import { MeterBrowseCardComponent } from './meter-browse-card.component';
 
 describe('MeterBrowseCardComponent', () => {

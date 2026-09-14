@@ -8,29 +8,18 @@ import { StatusCheckAction } from '@domain/calculations/status-check-calculation
 import { UtilityColors } from '@shared/utilityColors';
 
 export type MeterWorkbenchTabId = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
-export type MetersDashboardMode = 'meters' | 'grouping';
 export type MeterGroupSectionTone = 'energy' | 'water' | 'other' | 'ungrouped';
 export type MeterGroupDropTargetId = string | 'ungrouped';
 export type MeterGroupType = IdbUtilityMeterGroup['groupType'];
 export type MeterCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
-export type MetersDashboardSlideout =
-  | { readonly kind: 'add-meter' }
+export type MetersGroupingSlideout =
   | { readonly kind: 'add-group' }
   | { readonly kind: 'edit-group'; readonly group: IdbUtilityMeterGroup; readonly assignedMeterCount: number }
   | { readonly kind: 'move-meter'; readonly card: MeterCardView };
-export type MetersGroupingSlideout = Exclude<MetersDashboardSlideout, { readonly kind: 'add-meter' }>;
 
 export const UNGROUPED_DROP_TARGET_ID = 'ungrouped';
 export const METER_SOURCES: ReadonlyArray<MeterSource> = AllSources;
 export const METER_GROUP_TYPES: ReadonlyArray<MeterGroupType> = ['Energy', 'Water', 'Other'];
-export const METER_DASHBOARD_MODES: ReadonlyArray<{
-  readonly id: MetersDashboardMode;
-  readonly label: string;
-  readonly icon: string;
-}> = [
-  { id: 'meters', label: 'Meters', icon: 'fa-gauge-high' },
-  { id: 'grouping', label: 'Grouping', icon: 'fa-layer-group' }
-];
 
 export interface MeterWorkbenchTab {
   readonly id: MeterWorkbenchTabId;

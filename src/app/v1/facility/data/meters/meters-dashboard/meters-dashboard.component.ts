@@ -1,14 +1,11 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import {
-  METER_DASHBOARD_MODES,
-  MetersDashboardMode
-} from '../facility-meters.models';
-import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { MeterDraft } from '@app/v1/facility/data/meters/facility-meters.models';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { MeterDraftSlideoutComponent } from './meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
+import { MeterBrowseCardComponent } from './meter-browse-card/meter-browse-card.component';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
-import { MetersBrowseViewComponent } from './meters-browse-view/meters-browse-view.component';
-import { MetersGroupingViewComponent } from './meters-grouping-view/meters-grouping-view.component';
 
 @Component({
   selector: 'app-meters-dashboard',
@@ -16,50 +13,63 @@ import { MetersGroupingViewComponent } from './meters-grouping-view/meters-group
   styleUrls: ['./meters-dashboard.component.css'],
   standalone: true,
   imports: [
-    MetersBrowseViewComponent,
-    MetersGroupingViewComponent
+    MeterBrowseCardComponent,
+    MeterDraftSlideoutComponent
   ],
   providers: [MetersDashboardActionsService]
 })
 export class MetersDashboardComponent {
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly actions = inject(MetersDashboardActionsService);
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
-  readonly dashboardModes = signal(METER_DASHBOARD_MODES);
-  readonly activeMode = signal<MetersDashboardMode>('meters');
+  readonly navigation = inject(WorkspaceNavigationService);
+  readonly addMeterOpen = signal(false);
+  readonly saving = signal(false);
+  readonly actionError = signal<string | undefined>(undefined);
+  readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
 
-  constructor() {
-    this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(params => this.syncModeFromRoute(params));
+  openAddMeter(): void {
+    if (this.canAct()) {
+      this.addMeterOpen.set(true);
+      this.actionError.set(undefined);
+    }
   }
 
-  setMode(mode: MetersDashboardMode): void {
-    this.activeMode.set(mode);
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { mode },
-      queryParamsHandling: 'merge'
+  closeAddMeter(): void {
+    if (!this.saving()) {
+      this.addMeterOpen.set(false);
+      this.actionError.set(undefined);
+    }
+  }
+
+  async saveMeterDraft(draft: MeterDraft): Promise<void> {
+    await this.runAction(async () => {
+      const meter = await this.actions.createMeter(draft);
+      this.addMeterOpen.set(false);
+      this.openCreatedMeter(meter.guid);
     });
   }
 
-  private syncModeFromRoute(params: ParamMap): void {
-    const requestedMode = params.get('mode');
-    const mode = coerceDashboardMode(requestedMode);
-    this.activeMode.set(mode);
-    if (requestedMode && requestedMode !== mode) {
-      void this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { mode },
-        queryParamsHandling: 'merge',
-        replaceUrl: true
-      });
+  private openCreatedMeter(meterGuid: string): void {
+    const facility = this.workspace.facility();
+    if (facility) {
+      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, 'settings'));
     }
   }
-}
 
-function coerceDashboardMode(value: string | null): MetersDashboardMode {
-  return value === 'grouping' ? 'grouping' : 'meters';
+  private async runAction(action: () => Promise<void>): Promise<void> {
+    if (!this.canAct()) {
+      return;
+    }
+    this.saving.set(true);
+    this.actionError.set(undefined);
+    try {
+      await action();
+    } catch (error) {
+      this.actionError.set(error instanceof Error ? error.message : 'The meter change could not be saved.');
+    } finally {
+      this.saving.set(false);
+    }
+  }
 }

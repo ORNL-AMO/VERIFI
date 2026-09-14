@@ -2,8 +2,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDrag } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { MeterCardView } from '../../../facility-meters.models';
-import { group, meter } from '../../../facility-meters.testing';
+import { MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupCardComponent } from './meter-group-card.component';
 
 describe('MeterGroupCardComponent', () => {

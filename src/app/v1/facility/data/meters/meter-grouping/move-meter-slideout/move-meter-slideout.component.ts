@@ -4,8 +4,8 @@ import {
   MeterGroupDropTarget,
   UNGROUPED_DROP_TARGET_ID,
   canAssignMeterToGroup
-} from '../../../facility-meters.models';
-import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
+} from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
 
 @Component({
   selector: 'app-move-meter-slideout',
