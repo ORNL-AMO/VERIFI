@@ -9,6 +9,7 @@ import { MeterWorkbenchReadingsComponent } from './facility/data/meters/meter-wo
 import { MeterWorkbenchSettingsComponent } from './facility/data/meters/meter-workbench/settings/meter-workbench-settings.component';
 import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupingComponent } from './facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { V1Routes } from './v1.routes';
 
@@ -55,6 +56,21 @@ describe('V1Routes facility data meters routes', () => {
     expect(tabRoute('monthly')).toMatchObject({ component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } });
     expect(tabRoute('yearly')).toMatchObject({ component: MeterWorkbenchYearlyDataComponent, data: { meterTab: 'yearly' } });
     expect(tabRoute('quality')).toMatchObject({ component: MeterWorkbenchQualityReportComponent, data: { meterTab: 'quality' } });
+  });
+
+  it('routes Meter Grouping as a separate Facility Data section', () => {
+    const groupingRoute = facilityDataRoute().children?.find(child => child.path === 'meter-grouping');
+    const groupingLandingRoute = groupingRoute?.children?.find(child => child.path === '');
+
+    expect(groupingRoute).toMatchObject({
+      path: 'meter-grouping',
+      component: FacilityMetersComponent
+    });
+    expect(groupingLandingRoute).toMatchObject({
+      path: '',
+      pathMatch: 'full',
+      component: MeterGroupingComponent
+    });
   });
 
   it('redirects invalid meter workbench tabs to Settings', () => {

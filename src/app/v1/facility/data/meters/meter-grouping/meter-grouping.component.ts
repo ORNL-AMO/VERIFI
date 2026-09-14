@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import {
   MeterCardView,
   MeterDropEvent,
@@ -11,18 +11,18 @@ import {
   MetersGroupingSlideout,
   meterGroupDropListId,
   meterGroupTargetFromSection
-} from '../../facility-meters.models';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MeterGroupDraftSlideoutComponent } from '../meter-dashboard-slideout/meter-group-draft-slideout/meter-group-draft-slideout.component';
+} from '@app/v1/facility/data/meters/facility-meters.models';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { MeterGroupDraftSlideoutComponent } from './meter-group-draft-slideout/meter-group-draft-slideout.component';
 import { MeterGroupLaneComponent } from './meter-group-lane/meter-group-lane.component';
-import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
-import { MoveMeterSlideoutComponent } from '../meter-dashboard-slideout/move-meter-slideout/move-meter-slideout.component';
+import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { MoveMeterSlideoutComponent } from './move-meter-slideout/move-meter-slideout.component';
 import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal/confirm-delete-group-modal.component';
 
 @Component({
-  selector: 'app-meters-grouping-view',
-  templateUrl: './meters-grouping-view.component.html',
-  styleUrls: ['./meters-grouping-view.component.css'],
+  selector: 'app-meter-grouping',
+  templateUrl: './meter-grouping.component.html',
+  styleUrls: ['./meter-grouping.component.css'],
   standalone: true,
   imports: [
     MeterGroupLaneComponent,
@@ -31,7 +31,7 @@ import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal/c
     ConfirmDeleteGroupModalComponent
   ]
 })
-export class MetersGroupingViewComponent {
+export class MeterGroupingComponent {
   private readonly router = inject(Router);
   private readonly actions = inject(MetersDashboardActionsService);
 

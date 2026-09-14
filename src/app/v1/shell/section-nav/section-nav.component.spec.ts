@@ -134,10 +134,24 @@ describe('SectionNavComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Facility Data');
     expect(fixture.nativeElement.textContent).toContain('Meters');
+    expect(fixture.nativeElement.textContent).toContain('Meter Grouping');
     expect(fixture.nativeElement.textContent).toContain('Predictors');
     expect(fixture.nativeElement.textContent).toContain('Energy Uses');
     expect(fixture.nativeElement.textContent).not.toContain('Custom Database Items');
     expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Predictors']);
+  });
+
+  it('marks Meter Grouping active as its own facility data item', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meter-grouping');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meter Grouping']);
+    expect(activeLinks(element)[0].getAttribute('href')).toContain('/v1/workspace/facility/facility-a/data/meter-grouping');
   });
 
   it('shows sorted meter links under an expanded meters parent on meter routes', () => {
@@ -188,23 +202,19 @@ describe('SectionNavComponent', () => {
     expect(meterChildLinks(element)).toHaveLength(1);
   });
 
-  it('can manually expand meter links from another facility data route', () => {
+  it('keeps meter child links collapsed outside Meters routes', () => {
     contextMode.set('facility');
     selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
     activeSection.set('data');
-    activeDetail.set('predictors');
+    activeDetail.set('meter-grouping');
     facilityMeters.set([{ guid: 'meter-electric', name: 'Electric Main' }]);
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
 
+    expect(element.querySelector<HTMLButtonElement>('.v1-nav__child-toggle')).toBeNull();
     expect(meterChildLinks(element)).toHaveLength(0);
-
-    element.querySelector<HTMLButtonElement>('.v1-nav__child-toggle')?.click();
-    fixture.detectChanges();
-
-    expect(meterChildLinks(element)).toHaveLength(1);
-    expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Predictors']);
+    expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meter Grouping']);
 
     selectedFacility.set({ guid: 'facility-b', name: 'Facility B' });
     fixture.detectChanges();

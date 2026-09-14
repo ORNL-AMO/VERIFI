@@ -88,7 +88,7 @@ const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
   data: 'meters'
 };
 const ACCOUNT_DATA_DETAILS = new Set(['portfolio', 'custom-grid-factors', 'custom-fuels', 'custom-gwps']);
-const FACILITY_DATA_DETAILS = new Set(['meters', 'predictors', 'energy-uses']);
+const FACILITY_DATA_DETAILS = new Set(['meters', 'meter-grouping', 'predictors', 'energy-uses']);
 const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete']);
 const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete']);
 
@@ -370,12 +370,8 @@ export class WorkspaceNavigationService {
     const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
     const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
     const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
-    const help = isFacility && this.activeSection() === 'data' && this.activeDetail() === 'meters'
-      ? [
-        'Use Meters view to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.',
-        'Switch to Grouping view to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.',
-        'Open a meter card to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
-      ]
+    const help = isFacility && this.activeSection() === 'data'
+      ? this.buildFacilityDataHelp()
       : [
         `This v1 Home page is the production shell starter for ${name || 'the selected workspace'}.`,
         'Use the rail and context controls to confirm account and facility navigation before workflow pages are migrated.'
@@ -413,6 +409,25 @@ export class WorkspaceNavigationService {
       return current.contextMode === 'facility' ? 'facility-drill-in' : 'account-drill-out';
     }
     return 'none';
+  }
+
+  private buildFacilityDataHelp(): ReadonlyArray<string> {
+    if (this.activeDetail() === 'meters') {
+      return [
+        'Use Meters to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.',
+        'Open a meter card to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
+      ];
+    }
+    if (this.activeDetail() === 'meter-grouping') {
+      return [
+        'Use Meter Grouping to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.',
+        'Open a meter card from a group to continue setup, readings, monthly data, yearly data, and quality review in the meter workbench.'
+      ];
+    }
+    return [
+      'Facility Data pages organize setup records used by meter analysis, visualization, and reporting workflows.',
+      'Use the sidebar to move between meters, meter grouping, predictors, and energy-use setup.'
+    ];
   }
 }
 

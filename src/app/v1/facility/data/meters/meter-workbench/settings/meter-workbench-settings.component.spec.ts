@@ -12,7 +12,7 @@ import { WorkspaceNavigationService } from '../../../../../shell/workspace-navig
 import { account, facility, meter, reading } from '../../facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { MetersDashboardActionsService } from '../../meters-dashboard/meters-dashboard-actions.service';
-import { ConfirmDeleteMeterModalComponent } from '../../meters-dashboard/meters-browse-view/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
+import { ConfirmDeleteMeterModalComponent } from '../../meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MeterSettingsChargesFormComponent } from './meter-settings-charges-form/meter-settings-charges-form.component';
 import { MeterSettingsCoreFormComponent } from './meter-settings-core-form/meter-settings-core-form.component';
 import { MeterSettingsElectricityFormComponent } from './meter-settings-electricity-form/meter-settings-electricity-form.component';

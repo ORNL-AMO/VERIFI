@@ -111,6 +111,14 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'predictors'
     ]);
+    expect(service.facilityDataRoute('facility-a', 'meter-grouping')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meter-grouping'
+    ]);
     expect(service.facilityMeterRoute('facility-a', 'meter-a', 'readings')).toEqual([
       '/v1',
       'workspace',
@@ -322,9 +330,19 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeSection()).toBe('data');
     expect(service.activeDetail()).toBe('meters');
     expect(service.activeMeterGuid()).toBeUndefined();
+
+    router.events.next(new NavigationEnd(
+      5,
+      '/v1/workspace/facility/facility-a/data/meter-grouping',
+      '/v1/workspace/facility/facility-a/data/meter-grouping'
+    ));
+
+    expect(service.activeSection()).toBe('data');
+    expect(service.activeDetail()).toBe('meter-grouping');
+    expect(service.activeMeterGuid()).toBeUndefined();
   });
 
-  it('moves meter dashboard grouping guidance into the support panel help content', () => {
+  it('shows separate support panel help for Meters and Meter Grouping', () => {
     router.events.next(new NavigationEnd(
       1,
       '/v1/workspace/facility/facility-a/data/meters',
@@ -332,10 +350,18 @@ describe('WorkspaceNavigationService', () => {
     ));
 
     expect(service.panelContent().help).toContain(
-      'Use Meters view to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.'
+      'Use Meters to review facility meters and open a meter workbench. Each card shows its assigned group in the footer.'
     );
+    expect(service.panelContent().help.join(' ')).not.toContain('Switch to Grouping view');
+
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-a/data/meter-grouping',
+      '/v1/workspace/facility/facility-a/data/meter-grouping'
+    ));
+
     expect(service.panelContent().help).toContain(
-      'Switch to Grouping view to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.'
+      'Use Meter Grouping to manage groups, drag meter cards between group sections, or use Move meter for keyboard-friendly reassignment.'
     );
   });
 
@@ -478,6 +504,24 @@ describe('WorkspaceNavigationService', () => {
     router.navigate.mockClear();
     router.events.next(new NavigationEnd(
       2,
+      '/v1/workspace/facility/facility-b/data/meter-grouping',
+      '/v1/workspace/facility/facility-b/data/meter-grouping'
+    ));
+
+    service.setFacility('facility-a');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meter-grouping'
+    ]);
+
+    router.navigate.mockClear();
+    router.events.next(new NavigationEnd(
+      3,
       '/v1/workspace/facility/facility-b/settings/staleness',
       '/v1/workspace/facility/facility-b/settings/staleness'
     ));

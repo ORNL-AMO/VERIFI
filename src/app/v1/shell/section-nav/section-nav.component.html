@@ -96,7 +96,7 @@
                       <span [class]="'fa ' + item.icon" aria-hidden="true"></span>
                       {{ item.label }}
                     </a>
-                    @if (meterItems.length > 0) {
+                    @if (meterItems.length > 0 && isFacilityMetersRoute()) {
                       <button
                         type="button"
                         class="v1-nav__child-toggle"

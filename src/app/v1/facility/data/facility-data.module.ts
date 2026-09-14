@@ -23,11 +23,10 @@ import { MeterSettingsVehicleFormComponent } from './meters/meter-workbench/sett
 import { MeterWorkbenchTabsComponent } from './meters/meter-workbench/meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
-import { ConfirmDeleteMeterModalComponent } from './meters/meters-dashboard/meters-browse-view/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
-import { MetersBrowseViewComponent } from './meters/meters-dashboard/meters-browse-view/meters-browse-view.component';
+import { ConfirmDeleteMeterModalComponent } from './meters/meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
-import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-grouping-view/meters-grouping-view.component';
+import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.component';
 
 @NgModule({
   declarations: [
@@ -54,8 +53,7 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     FacilityMetersComponent,
     ConfirmDeleteMeterModalComponent,
     MetersDashboardComponent,
-    MetersBrowseViewComponent,
-    MetersGroupingViewComponent,
+    MeterGroupingComponent,
     MeterReadingBillSlideoutComponent,
     MeterReadingsColumnsSlideoutComponent,
     MeterReadingsStatusComponent,
@@ -65,8 +63,7 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     FacilityDataPlaceholderComponent,
     FacilityMetersComponent,
     MetersDashboardComponent,
-    MetersBrowseViewComponent,
-    MetersGroupingViewComponent,
+    MeterGroupingComponent,
     MeterWorkbenchComponent
   ],
   providers: [MetersDashboardActionsService]

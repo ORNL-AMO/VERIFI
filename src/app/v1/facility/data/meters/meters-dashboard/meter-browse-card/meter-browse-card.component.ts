@@ -1,13 +1,13 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ModalPortalService } from '../../../../../../shell/modal-portal.service';
-import { WorkspaceNavigationService } from '../../../../../../shell/workspace-navigation.service';
-import { MeterCardView, MeterWorkbenchTabId } from '../../../facility-meters.models';
-import { FacilityMetersWorkspaceService } from '../../../facility-meters-workspace.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { MeterCardView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { ConfirmCopyMeterModalComponent } from './confirm-copy-meter-modal/confirm-copy-meter-modal.component';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
-import { MetersDashboardActionsService } from '../../meters-dashboard-actions.service';
+import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
 
 @Component({
   selector: 'app-meter-browse-card',

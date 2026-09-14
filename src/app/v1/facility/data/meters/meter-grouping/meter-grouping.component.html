@@ -1,12 +1,16 @@
 <section class="v1-meters-grouping" aria-label="Meter grouping">
-  <div class="v1-meter-dashboard-action-bar" aria-label="Meter grouping actions">
-    <div class="v1-meter-dashboard-action-bar__primary">
+  <header class="v1-section-header v1-facility-meters__header">
+    <div>
+      <p class="v1-eyebrow">Facility Data</p>
+      <h1 id="v1-facility-meters-title">Meter Grouping</h1>
+    </div>
+    <div class="v1-facility-meters__header-actions" aria-label="Meter grouping actions">
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddGroup()">
         <span class="fa fa-layer-group" aria-hidden="true"></span>
         Add group
       </button>
     </div>
-  </div>
+  </header>
 
   @if (actionError()) {
     <div class="v1-alert v1-alert--danger" role="alert">
