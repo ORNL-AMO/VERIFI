@@ -1,4 +1,6 @@
 import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -8,10 +10,14 @@ import { StatusCheckAction } from '@domain/calculations/status-check-calculation
 import { UtilityColors } from '@shared/utilityColors';
 
 export type MeterWorkbenchTabId = 'settings' | 'readings' | 'monthly' | 'yearly' | 'quality';
+export type MeterGroupWorkbenchTabId = 'monthly-table' | 'monthly-graph' | 'yearly-table' | 'yearly-graph';
 export type MeterGroupSectionTone = 'energy' | 'water' | 'other' | 'ungrouped';
 export type MeterGroupDropTargetId = string | 'ungrouped';
 export type MeterGroupType = IdbUtilityMeterGroup['groupType'];
 export type MeterCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
+export type MeterGroupResultsState = 'idle' | 'loading' | 'ready' | 'error';
+export type MeterGroupResultsPeriod = 'monthly' | 'yearly';
+export type MeterGroupChartSeriesDisplay = 'off' | 'bar' | 'line';
 export type MetersGroupingSlideout =
   | { readonly kind: 'add-group' }
   | { readonly kind: 'edit-group'; readonly group: IdbUtilityMeterGroup; readonly assignedMeterCount: number }
@@ -26,6 +32,12 @@ export interface MeterWorkbenchTab {
   readonly label: string;
   readonly icon: string;
   readonly summary: string;
+}
+
+export interface MeterGroupWorkbenchTab {
+  readonly id: MeterGroupWorkbenchTabId;
+  readonly label: string;
+  readonly icon: string;
 }
 
 export interface MeterCardView {
@@ -76,12 +88,53 @@ export interface MeterDropEvent {
   readonly target: MeterGroupDropTarget;
 }
 
+export interface MeterGroupResultRow {
+  readonly periodKey: string;
+  readonly periodLabel: string;
+  readonly sortValue: number;
+  readonly fiscalYear?: number;
+  readonly energyUse: number;
+  readonly energyConsumption: number;
+  readonly energyCost: number;
+}
+
+export interface MeterGroupResultSummary {
+  readonly assignedMeterCount: number;
+  readonly firstDataLabel: string;
+  readonly latestDataLabel: string;
+  readonly utilityTotalLabel: string;
+  readonly utilityTotalValue: number;
+  readonly costTotalLabel: string;
+  readonly costTotalValue: number;
+}
+
+export interface MeterGroupResultsView {
+  readonly group?: IdbUtilityMeterGroup;
+  readonly assignedMeters: readonly MeterCardView[];
+  readonly calendarizedMeters: readonly CalanderizedMeter[];
+  readonly monthlyRows: readonly MeterGroupResultRow[];
+  readonly yearlyRows: readonly MeterGroupResultRow[];
+  readonly showEnergyUse: boolean;
+  readonly showConsumption: boolean;
+  readonly showCost: boolean;
+  readonly utilityLabel: string;
+  readonly utilityUnit: string;
+  readonly summary: MeterGroupResultSummary;
+}
+
 export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
   { id: 'settings', label: 'Settings', icon: 'fa-sliders', summary: 'Meter settings and assignment content is WIP.' },
   { id: 'readings', label: 'Readings', icon: 'fa-table-list', summary: 'Meter reading and utility bill tables are WIP.' },
   { id: 'monthly', label: 'Monthly Data', icon: 'fa-calendar-days', summary: 'Monthly calendarized data review is WIP.' },
   { id: 'yearly', label: 'Yearly Data', icon: 'fa-chart-column', summary: 'Yearly meter rollups are WIP.' },
   { id: 'quality', label: 'Quality Report', icon: 'fa-triangle-exclamation', summary: 'Meter data quality report content is WIP.' }
+];
+
+export const METER_GROUP_WORKBENCH_TABS: ReadonlyArray<MeterGroupWorkbenchTab> = [
+  { id: 'monthly-table', label: 'Monthly Table', icon: 'fa-table-list' },
+  { id: 'monthly-graph', label: 'Monthly Graph', icon: 'fa-chart-line' },
+  { id: 'yearly-table', label: 'Yearly Table', icon: 'fa-calendar-days' },
+  { id: 'yearly-graph', label: 'Yearly Graph', icon: 'fa-chart-column' }
 ];
 
 export function buildMeterCards(
@@ -157,6 +210,14 @@ export function meterWorkbenchTab(tabId: MeterWorkbenchTabId): MeterWorkbenchTab
   return METER_WORKBENCH_TABS.find(tab => tab.id === tabId) ?? METER_WORKBENCH_TABS[0];
 }
 
+export function meterGroupWorkbenchTab(tabId: MeterGroupWorkbenchTabId): MeterGroupWorkbenchTab {
+  return METER_GROUP_WORKBENCH_TABS.find(tab => tab.id === tabId) ?? METER_GROUP_WORKBENCH_TABS[0];
+}
+
+export function meterGroupWorkbenchTabPeriod(tabId: MeterGroupWorkbenchTabId): MeterGroupResultsPeriod {
+  return tabId === 'yearly-table' || tabId === 'yearly-graph' ? 'yearly' : 'monthly';
+}
+
 export function meterGroupDropListId(sectionId: string): string {
   return `v1-meter-group-drop-${sectionId}`;
 }
@@ -186,6 +247,158 @@ export function canAssignSourceToGroup(source: MeterSource, group?: IdbUtilityMe
     default:
       return true;
   }
+}
+
+export function buildMeterGroupResultsView(
+  group: IdbUtilityMeterGroup | undefined,
+  facility: IdbFacility | undefined,
+  groupSections: readonly MeterGroupSectionView[],
+  calendarizedMeters: readonly CalanderizedMeter[]
+): MeterGroupResultsView {
+  const assignedMeters = group
+    ? groupSections.find(section => section.group?.guid === group.guid)?.meters ?? []
+    : [];
+  const groupCalendarizedMeters = group
+    ? calendarizedMeters.filter(calendarizedMeter => calendarizedMeter.meter.groupId === group.guid)
+    : [];
+  const monthlyRows = aggregateMeterGroupMonthlyRows(groupCalendarizedMeters);
+  const yearlyRows = aggregateMeterGroupYearlyRows(monthlyRows);
+  const showEnergyUse = group?.groupType === 'Energy' && monthlyRows.some(row => row.energyUse > 0);
+  const showConsumption = group?.groupType === 'Water' && monthlyRows.some(row => row.energyConsumption > 0);
+  const showCost = monthlyRows.some(row => row.energyCost > 0);
+  const utilityLabel = showConsumption ? 'Total Consumption' : 'Total Energy';
+  const utilityUnit = showConsumption
+    ? facility?.volumeLiquidUnit ?? ''
+    : facility?.energyUnit ?? '';
+  const utilityTotalValue = sumRows(monthlyRows, showConsumption ? 'energyConsumption' : 'energyUse');
+  const costTotalValue = sumRows(monthlyRows, 'energyCost');
+
+  return {
+    group,
+    assignedMeters,
+    calendarizedMeters: groupCalendarizedMeters,
+    monthlyRows,
+    yearlyRows,
+    showEnergyUse,
+    showConsumption,
+    showCost,
+    utilityLabel,
+    utilityUnit,
+    summary: {
+      assignedMeterCount: assignedMeters.length,
+      firstDataLabel: firstResultPeriodLabel(monthlyRows),
+      latestDataLabel: latestResultPeriodLabel(monthlyRows),
+      utilityTotalLabel: formatMeterGroupNumber(utilityTotalValue),
+      utilityTotalValue,
+      costTotalLabel: formatMeterGroupNumber(costTotalValue, true),
+      costTotalValue
+    }
+  };
+}
+
+export function meterGroupResultRowsForPeriod(
+  results: MeterGroupResultsView,
+  period: MeterGroupResultsPeriod
+): readonly MeterGroupResultRow[] {
+  return period === 'yearly' ? results.yearlyRows : results.monthlyRows;
+}
+
+export function meterGroupResultUtilityValue(results: MeterGroupResultsView, row: MeterGroupResultRow): number {
+  return results.showConsumption ? row.energyConsumption : row.energyUse;
+}
+
+export function formatMeterGroupNumber(value: number, currency = false): string {
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: currency ? 2 : 1,
+    minimumFractionDigits: currency ? 2 : 0,
+    style: currency ? 'currency' : 'decimal',
+    currency: currency ? 'USD' : undefined
+  }).format(value || 0);
+}
+
+export function formatMeterGroupPeriodLabel(row: MeterGroupResultRow, period: MeterGroupResultsPeriod): string {
+  return period === 'yearly' ? `FY ${row.periodLabel}` : row.periodLabel;
+}
+
+export function isMeterGroupWorkbenchTab(value: unknown): value is MeterGroupWorkbenchTabId {
+  return value === 'monthly-table'
+    || value === 'monthly-graph'
+    || value === 'yearly-table'
+    || value === 'yearly-graph';
+}
+
+function aggregateMeterGroupMonthlyRows(calendarizedMeters: readonly CalanderizedMeter[]): MeterGroupResultRow[] {
+  const rowsByMonth = new Map<string, MeterGroupResultRow>();
+  for (const monthlyData of calendarizedMeters.flatMap(calendarizedMeter => calendarizedMeter.monthlyData)) {
+    const key = `${monthlyData.year}-${monthlyData.monthNumValue}`;
+    const existing = rowsByMonth.get(key);
+    if (existing) {
+      rowsByMonth.set(key, addMonthlyDataToRow(existing, monthlyData));
+    } else {
+      rowsByMonth.set(key, monthlyDataToResultRow(monthlyData));
+    }
+  }
+  return [...rowsByMonth.values()].sort((first, second) => first.sortValue - second.sortValue);
+}
+
+function aggregateMeterGroupYearlyRows(monthlyRows: readonly MeterGroupResultRow[]): MeterGroupResultRow[] {
+  const rowsByYear = new Map<number, MeterGroupResultRow>();
+  for (const monthlyRow of monthlyRows) {
+    const fiscalYear = monthlyRow.fiscalYear ?? new Date(monthlyRow.sortValue).getFullYear();
+    const existing = rowsByYear.get(fiscalYear);
+    if (existing) {
+      rowsByYear.set(fiscalYear, {
+        ...existing,
+        energyUse: existing.energyUse + monthlyRow.energyUse,
+        energyConsumption: existing.energyConsumption + monthlyRow.energyConsumption,
+        energyCost: existing.energyCost + monthlyRow.energyCost
+      });
+    } else {
+      rowsByYear.set(fiscalYear, {
+        periodKey: String(fiscalYear),
+        periodLabel: String(fiscalYear),
+        sortValue: fiscalYear,
+        fiscalYear,
+        energyUse: monthlyRow.energyUse,
+        energyConsumption: monthlyRow.energyConsumption,
+        energyCost: monthlyRow.energyCost
+      });
+    }
+  }
+  return [...rowsByYear.values()].sort((first, second) => first.sortValue - second.sortValue);
+}
+
+function monthlyDataToResultRow(monthlyData: MonthlyData): MeterGroupResultRow {
+  return {
+    periodKey: `${monthlyData.year}-${monthlyData.monthNumValue}`,
+    periodLabel: monthlyData.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    sortValue: monthlyData.date.getTime(),
+    fiscalYear: monthlyData.fiscalYear,
+    energyUse: monthlyData.energyUse,
+    energyConsumption: monthlyData.energyConsumption,
+    energyCost: monthlyData.energyCost
+  };
+}
+
+function addMonthlyDataToRow(row: MeterGroupResultRow, monthlyData: MonthlyData): MeterGroupResultRow {
+  return {
+    ...row,
+    energyUse: row.energyUse + monthlyData.energyUse,
+    energyConsumption: row.energyConsumption + monthlyData.energyConsumption,
+    energyCost: row.energyCost + monthlyData.energyCost
+  };
+}
+
+function firstResultPeriodLabel(rows: readonly MeterGroupResultRow[]): string {
+  return rows[0]?.periodLabel ?? 'No data';
+}
+
+function latestResultPeriodLabel(rows: readonly MeterGroupResultRow[]): string {
+  return rows[rows.length - 1]?.periodLabel ?? 'No data';
+}
+
+function sumRows(rows: readonly MeterGroupResultRow[], field: 'energyUse' | 'energyConsumption' | 'energyCost'): number {
+  return rows.reduce((total, row) => total + row[field], 0);
 }
 
 function sortGroupsForDisplay(first: IdbUtilityMeterGroup, second: IdbUtilityMeterGroup): number {
