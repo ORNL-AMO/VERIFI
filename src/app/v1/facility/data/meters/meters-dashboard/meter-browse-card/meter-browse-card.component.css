@@ -184,6 +184,85 @@
   margin-top: .15rem;
 }
 
+.v1-meter-browse-card__usage {
+  display: grid;
+  gap: var(--v1-space-1);
+  min-width: 0;
+}
+
+.v1-meter-browse-card__usage-note {
+  margin: 0;
+  color: var(--v1-muted);
+  font-size: .74rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.v1-meter-browse-card__usage-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--v1-space-2);
+  margin: 0;
+}
+
+.v1-meter-browse-card__usage-facts div {
+  min-width: 0;
+  padding: var(--v1-space-2);
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--v1-content-block) 82%, var(--v1-surface));
+}
+
+.v1-meter-browse-card__usage-facts dt {
+  color: var(--v1-muted);
+  font-size: .68rem;
+  font-weight: 850;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.v1-meter-browse-card__usage-value {
+  display: grid;
+  gap: .12rem;
+  margin: .18rem 0 0;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.v1-meter-browse-card__usage-value-primary {
+  overflow: hidden;
+  color: var(--v1-text);
+  font-size: .95rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v1-meter-browse-card__usage-value--unavailable .v1-meter-browse-card__usage-value-primary,
+.v1-meter-browse-card__usage-change--unavailable {
+  color: var(--v1-muted);
+}
+
+.v1-meter-browse-card__usage-change {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--v1-muted);
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.v1-meter-browse-card__usage-change--increase {
+  color: color-mix(in srgb, var(--v1-danger) 78%, var(--v1-text));
+}
+
+.v1-meter-browse-card__usage-change--decrease {
+  color: color-mix(in srgb, var(--v1-success) 78%, var(--v1-text));
+}
+
+.v1-meter-browse-card__usage-change--neutral {
+  color: var(--v1-muted);
+}
+
 .v1-meter-browse-card__footer {
   display: flex;
   flex-wrap: wrap;
@@ -220,7 +299,8 @@
 }
 
 @media (max-width: 680px) {
-  .v1-meter-browse-card__facts {
+  .v1-meter-browse-card__facts,
+  .v1-meter-browse-card__usage-facts {
     grid-template-columns: 1fr;
   }
 

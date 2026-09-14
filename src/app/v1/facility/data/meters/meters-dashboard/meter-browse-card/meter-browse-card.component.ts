@@ -3,7 +3,7 @@ import { Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, 
 import { Router } from '@angular/router';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { MeterCardView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { ConfirmCopyMeterModalComponent } from './confirm-copy-meter-modal/confirm-copy-meter-modal.component';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
@@ -30,10 +30,23 @@ export class MeterBrowseCardComponent implements OnDestroy {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
+  readonly placeholderUsageFacts: MeterUsageFactsView = {
+    facts: [
+      { id: 'latest-month', label: 'Latest month', valueLabel: 'Not available', unavailable: true },
+      { id: 'previous-year-month', label: 'Same month last year', valueLabel: 'Not available', unavailable: true },
+      { id: 'latest-twelve-month-average', label: 'Latest 12-mo avg', valueLabel: 'Not available', unavailable: true },
+      { id: 'previous-twelve-month-average', label: 'Previous 12-mo avg', valueLabel: 'Not available', unavailable: true }
+    ]
+  };
 
   @ViewChild('copyMeterConfirmModal') private readonly copyMeterConfirmModal!: TemplateRef<unknown>;
   @ViewChild('deleteMeterConfirmModal') private readonly deleteMeterConfirmModal!: TemplateRef<unknown>;
   @Input({ required: true }) card!: MeterCardView;
+  @Input() usageFactsLoading = false;
+
+  get displayUsageFacts(): MeterUsageFactsView | undefined {
+    return this.card?.usageFacts ?? (this.usageFactsLoading ? this.placeholderUsageFacts : undefined);
+  }
 
   ngOnDestroy(): void {
     this.hideActiveModal();

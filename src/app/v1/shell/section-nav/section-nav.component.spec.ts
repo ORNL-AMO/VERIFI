@@ -19,7 +19,9 @@ describe('SectionNavComponent', () => {
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
   let activeDetail: ReturnType<typeof signal<string>>;
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
+  let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
+  let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let setFacility: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -33,7 +35,9 @@ describe('SectionNavComponent', () => {
     singleSiteWorkspaceState = signal('portfolio');
     activeDetail = signal('profile');
     activeMeterGuid = signal<string | undefined>(undefined);
+    activeMeterGroupGuid = signal<string | undefined>(undefined);
     facilityMeters = signal([]);
+    facilityMeterGroups = signal([]);
     setFacility = vi.fn();
     TestBed.configureTestingModule({
       declarations: [SectionNavComponent, FacilityPickerComponent],
@@ -52,11 +56,13 @@ describe('SectionNavComponent', () => {
             activeSection,
             activeDetail,
             activeMeterGuid,
+            activeMeterGroupGuid,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
             facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
+            facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -67,7 +73,8 @@ describe('SectionNavComponent', () => {
         {
           provide: AccountWorkspaceStore,
           useValue: {
-            facilityMeters
+            facilityMeters,
+            facilityMeterGroups
           }
         }
       ]
@@ -152,6 +159,49 @@ describe('SectionNavComponent', () => {
 
     expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meter Grouping']);
     expect(activeLinks(element)[0].getAttribute('href')).toContain('/v1/workspace/facility/facility-a/data/meter-grouping');
+  });
+
+  it('shows sorted meter group links under Meter Grouping on group routes', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meter-grouping');
+    facilityMeterGroups.set([
+      { guid: 'group-water', name: 'Water Group' },
+      { guid: 'group-electric', name: 'Electric Group' }
+    ]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    const toggle = element.querySelector<HTMLButtonElement>('.v1-nav__child-toggle');
+    const childLinks = groupChildLinks(element);
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(childLinks.map(link => link.querySelector('span')?.textContent?.trim())).toEqual(['Electric Group', 'Water Group']);
+    expect(childLinks[0].getAttribute('href')).toContain('/v1/workspace/facility/facility-a/data/meter-grouping/group-electric/monthly-table');
+    expect(activeLinks(element).map(link => link.textContent?.trim())).toEqual(['Meter Grouping']);
+  });
+
+  it('marks an individual meter group link active on group workbench routes', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meter-grouping');
+    activeMeterGroupGuid.set('group-water');
+    facilityMeterGroups.set([
+      { guid: 'group-electric', name: 'Electric Group' },
+      { guid: 'group-water', name: 'Water Group' }
+    ]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    const currentLinks = Array.from<HTMLAnchorElement>(element.querySelectorAll('[aria-current="page"]'));
+
+    expect(currentLinks).toHaveLength(1);
+    expect(currentLinks[0].textContent).toContain('Water Group');
+    expect(currentLinks[0].classList.contains('v1-nav__child')).toBe(true);
   });
 
   it('shows sorted meter links under an expanded meters parent on meter routes', () => {
@@ -362,5 +412,9 @@ describe('SectionNavComponent', () => {
 
   function meterChildLinks(element: HTMLElement): HTMLAnchorElement[] {
     return Array.from<HTMLAnchorElement>(element.querySelectorAll('.v1-nav__child'));
+  }
+
+  function groupChildLinks(element: HTMLElement): HTMLAnchorElement[] {
+    return Array.from<HTMLAnchorElement>(element.querySelectorAll('[aria-label="Meter group links"] .v1-nav__child'));
   }
 });

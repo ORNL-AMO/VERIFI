@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+.v1-meter-group-workbench-header__type-chip {
+  display: inline-flex;
+  gap: var(--v1-space-1);
+  align-items: center;
+  min-height: 1.65rem;
+  max-width: 100%;
+  padding: .24rem .55rem;
+  border: 1px solid color-mix(in srgb, var(--v1-content-control) 38%, var(--v1-border));
+  border-radius: var(--v1-radius-pill);
+  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
+  color: var(--v1-text);
+  font-size: .78rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.v1-meter-group-workbench-header__meter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem;
+  overflow: visible;
+  white-space: normal;
+}
+
+.v1-meter-group-workbench-header__meter-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--v1-text);
+  font-size: .86rem;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.v1-meter-group-workbench-header__meter-list span + span::before {
+  content: "|";
+  color: var(--v1-muted);
+  font-size: .72rem;
+  line-height: 1;
+}

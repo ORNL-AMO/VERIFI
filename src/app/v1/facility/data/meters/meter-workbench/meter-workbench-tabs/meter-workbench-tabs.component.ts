@@ -4,7 +4,6 @@ import { MeterWorkbenchTab, MeterWorkbenchTabId } from '../../facility-meters.mo
 @Component({
   selector: 'app-meter-workbench-tabs',
   templateUrl: './meter-workbench-tabs.component.html',
-  styleUrls: ['./meter-workbench-tabs.component.css'],
   standalone: false
 })
 export class MeterWorkbenchTabsComponent {

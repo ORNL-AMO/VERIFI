@@ -89,6 +89,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 route/navigation specs and Facility Data Meters component specs; validation planner decides parent checks.
 
+### Facility Meter Group Results Workflow
+
+- **Workflow:** v1 Facility Data > Meter Grouping selected-group workbench.
+- **Existing v0 entry point:** Meter grouping results table and graph under the current shared meter grouping routes.
+- **Decision:** Rebuild in v1 as a selected meter-group workbench with header facts, side-nav group links, and monthly/yearly table and graph tabs. Use Apache ECharts for v1 charting through a v1-owned wrapper while leaving v0 Plotly surfaces in place.
+- **Parity:** Monthly group totals match v0 energy, water consumption, and cost aggregation. Yearly totals aggregate by facility fiscal year for the new v1 yearly tabs.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
+- **Tests:** Focused v1 route/navigation specs, group result aggregation specs, workbench table/graph specs, and browser coverage for native chart rendering where practical; omit `build-prod` from Codex validation for this workflow.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.

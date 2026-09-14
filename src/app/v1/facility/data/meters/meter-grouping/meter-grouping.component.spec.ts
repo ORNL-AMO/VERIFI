@@ -38,7 +38,7 @@ describe('MeterGroupingComponent', () => {
     expect(text).toContain('City Water');
     expect(fixture.nativeElement.querySelectorAll('.v1-meter-lane').length).toBe(2);
     expect(fixture.nativeElement.querySelectorAll('app-meter-group-card').length).toBe(2);
-    expect(fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Edit Electric Main settings"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open meter"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('app-meter-browse-card')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).toBeNull();
@@ -46,14 +46,14 @@ describe('MeterGroupingComponent', () => {
     expect(findButton(fixture, 'Add group')?.classList.contains('v1-btn--action')).toBe(true);
   });
 
-  it('opens the selected meter workbench from the compact card name', () => {
+  it('opens the selected meter workbench from the compact card edit action', () => {
     const fixture = setup({
       meters: [meter({ guid: 'meter-electric', name: 'Electric Main' })]
     });
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
 
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('[aria-label="Edit Electric Main settings"]') as HTMLButtonElement).click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',

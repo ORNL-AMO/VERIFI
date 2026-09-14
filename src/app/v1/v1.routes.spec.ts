@@ -9,6 +9,9 @@ import { MeterWorkbenchReadingsComponent } from './facility/data/meters/meter-wo
 import { MeterWorkbenchSettingsComponent } from './facility/data/meters/meter-workbench/settings/meter-workbench-settings.component';
 import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupWorkbenchGraphComponent } from './facility/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
+import { MeterGroupWorkbenchTableComponent } from './facility/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchComponent } from './facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from './facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { V1Routes } from './v1.routes';
@@ -61,6 +64,8 @@ describe('V1Routes facility data meters routes', () => {
   it('routes Meter Grouping as a separate Facility Data section', () => {
     const groupingRoute = facilityDataRoute().children?.find(child => child.path === 'meter-grouping');
     const groupingLandingRoute = groupingRoute?.children?.find(child => child.path === '');
+    const groupRoute = groupingRoute?.children?.find(child => child.path === ':groupGuid');
+    const groupChildren = groupRoute?.children ?? [];
 
     expect(groupingRoute).toMatchObject({
       path: 'meter-grouping',
@@ -70,6 +75,28 @@ describe('V1Routes facility data meters routes', () => {
       path: '',
       pathMatch: 'full',
       component: MeterGroupingComponent
+    });
+    expect(groupRoute?.component).toBe(MeterGroupWorkbenchComponent);
+    expect(groupChildren.find(route => route.path === '')).toMatchObject({
+      path: '',
+      pathMatch: 'full',
+      redirectTo: 'monthly-table'
+    });
+    expect(groupChildren.find(route => route.path === 'monthly-table')).toMatchObject({
+      component: MeterGroupWorkbenchTableComponent,
+      data: { meterGroupTab: 'monthly-table', meterGroupPeriod: 'monthly' }
+    });
+    expect(groupChildren.find(route => route.path === 'monthly-graph')).toMatchObject({
+      component: MeterGroupWorkbenchGraphComponent,
+      data: { meterGroupTab: 'monthly-graph', meterGroupPeriod: 'monthly' }
+    });
+    expect(groupChildren.find(route => route.path === 'yearly-table')).toMatchObject({
+      component: MeterGroupWorkbenchTableComponent,
+      data: { meterGroupTab: 'yearly-table', meterGroupPeriod: 'yearly' }
+    });
+    expect(groupChildren.find(route => route.path === 'yearly-graph')).toMatchObject({
+      component: MeterGroupWorkbenchGraphComponent,
+      data: { meterGroupTab: 'yearly-graph', meterGroupPeriod: 'yearly' }
     });
   });
 

@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
@@ -23,6 +25,9 @@ import { MeterSettingsVehicleFormComponent } from './meters/meter-workbench/sett
 import { MeterWorkbenchTabsComponent } from './meters/meter-workbench/meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupWorkbenchGraphComponent } from './meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
+import { MeterGroupWorkbenchTableComponent } from './meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchComponent } from './meters/meter-group-workbench/meter-group-workbench.component';
 import { ConfirmDeleteMeterModalComponent } from './meters/meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
@@ -44,12 +49,17 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
     MeterWorkbenchReadingsComponent,
     MeterWorkbenchMonthlyDataComponent,
     MeterWorkbenchYearlyDataComponent,
-    MeterWorkbenchQualityReportComponent
+    MeterWorkbenchQualityReportComponent,
+    MeterGroupWorkbenchComponent,
+    MeterGroupWorkbenchTableComponent,
+    MeterGroupWorkbenchGraphComponent
   ],
   imports: [
     CommonModule,
+    NgbPaginationModule,
     ReactiveFormsModule,
     RouterModule,
+    EChartsChartDirective,
     FacilityMetersComponent,
     ConfirmDeleteMeterModalComponent,
     MetersDashboardComponent,
@@ -64,6 +74,7 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
     FacilityMetersComponent,
     MetersDashboardComponent,
     MeterGroupingComponent,
+    MeterGroupWorkbenchComponent,
     MeterWorkbenchComponent
   ],
   providers: [MetersDashboardActionsService]

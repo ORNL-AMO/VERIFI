@@ -71,6 +71,13 @@ export class MeterGroupingComponent {
     this.openMeter(card.meter);
   }
 
+  openGroup(section: { readonly group?: IdbUtilityMeterGroup }): void {
+    const facility = this.workspace.facility();
+    if (facility && section.group) {
+      void this.router.navigate(this.navigation.facilityMeterGroupRoute(facility.guid, section.group.guid, 'monthly-table'));
+    }
+  }
+
   openAddGroup(): void {
     this.openSlideout({ kind: 'add-group' });
   }

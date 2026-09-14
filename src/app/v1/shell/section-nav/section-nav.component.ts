@@ -20,7 +20,7 @@ type MeterNavItem = {
   readonly label: string;
 };
 
-type MeterChildrenState = {
+type ChildLinksState = {
   readonly facilityGuid?: string;
   readonly collapsed: boolean;
 };
@@ -73,7 +73,10 @@ const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Po
 export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
-  private readonly meterChildrenState = signal<MeterChildrenState>({
+  private readonly meterChildrenState = signal<ChildLinksState>({
+    collapsed: false
+  });
+  private readonly groupChildrenState = signal<ChildLinksState>({
     collapsed: false
   });
 
@@ -95,10 +98,23 @@ export class SectionNavComponent {
       }))
       .sort((first, second) => first.label.localeCompare(second.label));
   });
+  readonly facilityMeterGroupItems = computed<ReadonlyArray<MeterNavItem>>(() => {
+    return [...this.workspace.facilityMeterGroups()]
+      .map(group => ({
+        guid: group.guid,
+        label: group.name || 'Untitled group'
+      }))
+      .sort((first, second) => first.label.localeCompare(second.label));
+  });
   readonly isFacilityMetersRoute = computed(() =>
     this.navigation.contextMode() === 'facility'
     && this.navigation.activeSection() === 'data'
     && this.navigation.activeDetail() === 'meters'
+  );
+  readonly isFacilityMeterGroupingRoute = computed(() =>
+    this.navigation.contextMode() === 'facility'
+    && this.navigation.activeSection() === 'data'
+    && this.navigation.activeDetail() === 'meter-grouping'
   );
   readonly isMeterChildrenOpen = computed(() => {
     const facilityGuid = this.navigation.facility()?.guid;
@@ -108,6 +124,18 @@ export class SectionNavComponent {
       return false;
     }
     if (this.isFacilityMetersRoute()) {
+      return !stateApplies || !state.collapsed;
+    }
+    return false;
+  });
+  readonly isGroupChildrenOpen = computed(() => {
+    const facilityGuid = this.navigation.facility()?.guid;
+    const state = this.groupChildrenState();
+    const stateApplies = !!facilityGuid && state.facilityGuid === facilityGuid;
+    if (this.facilityMeterGroupItems().length === 0) {
+      return false;
+    }
+    if (this.isFacilityMeterGroupingRoute()) {
       return !stateApplies || !state.collapsed;
     }
     return false;
@@ -148,6 +176,9 @@ export class SectionNavComponent {
   );
 
   isFacilityDataItemActive(item: DataNavItem): boolean {
+    if (item.id === 'meter-grouping') {
+      return this.isFacilityMeterGroupingRoute() && !this.navigation.activeMeterGroupGuid();
+    }
     if (item.id !== 'meters') {
       return this.navigation.activeDetail() === item.id;
     }
@@ -158,8 +189,16 @@ export class SectionNavComponent {
     return this.navigation.activeMeterGuid() === meterGuid;
   }
 
+  isGroupChildActive(groupGuid: string): boolean {
+    return this.navigation.activeMeterGroupGuid() === groupGuid;
+  }
+
   meterChildrenId(): string {
     return `v1-meter-nav-items-${this.navigation.facility()?.guid || 'none'}`;
+  }
+
+  groupChildrenId(): string {
+    return `v1-meter-group-nav-items-${this.navigation.facility()?.guid || 'none'}`;
   }
 
   toggleMeterChildren(): void {
@@ -169,6 +208,18 @@ export class SectionNavComponent {
     }
     const isOpen = this.isMeterChildrenOpen();
     this.meterChildrenState.set({
+      facilityGuid,
+      collapsed: isOpen
+    });
+  }
+
+  toggleGroupChildren(): void {
+    const facilityGuid = this.navigation.facility()?.guid;
+    if (!facilityGuid || this.facilityMeterGroupItems().length === 0 || !this.isFacilityMeterGroupingRoute()) {
+      return;
+    }
+    const isOpen = this.isGroupChildrenOpen();
+    this.groupChildrenState.set({
       facilityGuid,
       collapsed: isOpen
     });

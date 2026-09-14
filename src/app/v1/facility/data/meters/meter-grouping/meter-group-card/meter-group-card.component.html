@@ -7,12 +7,14 @@
   [cdkDragDisabled]="!canMove">
   <header class="v1-meter-group-card__header">
     <h3>
-      <button type="button" class="v1-meter-group-card__title" [attr.aria-label]="'Open ' + card.meter.name + ' settings'" (click)="opened.emit(card)">
+      <span class="v1-meter-group-card__title">
         <span class="fa fa-gauge-high" aria-hidden="true"></span>
         <span>{{ card.meter.name }}</span>
-        <span class="fa fa-chevron-right v1-meter-group-card__title-chevron" aria-hidden="true"></span>
-      </button>
+      </span>
     </h3>
+    <button type="button" class="v1-icon-btn" [attr.aria-label]="'Edit ' + card.meter.name + ' settings'" (click)="opened.emit(card)">
+      <span class="fa fa-pen" aria-hidden="true"></span>
+    </button>
   </header>
 
   <dl class="v1-meter-group-card__facts">

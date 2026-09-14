@@ -7,7 +7,7 @@ import { group, meter } from '@app/v1/facility/data/meters/facility-meters.testi
 import { MeterGroupCardComponent } from './meter-group-card.component';
 
 describe('MeterGroupCardComponent', () => {
-  it('renders compact grouping content and emits title and move actions', () => {
+  it('renders compact grouping content and emits edit and move actions', () => {
     const fixture = setup({
       sourceColor: '#a59a04',
       scopeLabel: 'Purchased Electricity'
@@ -18,7 +18,7 @@ describe('MeterGroupCardComponent', () => {
     fixture.componentInstance.moveRequested.subscribe(card => moved.push(card));
 
     fixture.detectChanges();
-    clickButton(fixture, 'Open Electric Main settings');
+    clickButton(fixture, 'Edit Electric Main settings');
     clickButton(fixture, 'Move meter');
 
     const text = fixture.nativeElement.textContent;
@@ -32,8 +32,9 @@ describe('MeterGroupCardComponent', () => {
     expect(text).not.toContain('Readings');
     expect(text).not.toContain('Group');
     expect(fixture.nativeElement.querySelector('.v1-meter-group-card h3 .fa-gauge-high')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-group-card__title .fa-chevron-right')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-meter-group-card__title .fa-chevron-right')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Edit Electric Main settings"] .fa-pen')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Open Electric Main settings"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open meter"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-group-card__actions [aria-label="Drag meter"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-group-card__header [aria-label="Drag meter"]')).toBeNull();

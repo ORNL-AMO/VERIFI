@@ -34,6 +34,7 @@
           [canWrite]="canAct()"
           [canDrop]="canDrop"
           (editGroup)="openEditGroup($event)"
+          (openGroup)="openGroup($event)"
           (meterDropped)="onMeterDropped($event)"
           (openMeter)="openMeterCard($event)"
           (moveMeter)="openMoveMeter($event)">

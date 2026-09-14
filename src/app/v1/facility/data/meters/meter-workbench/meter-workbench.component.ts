@@ -29,6 +29,7 @@ export class MeterWorkbenchComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly activeTab = this.activeTabState.asReadonly();
   readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
+  readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
 

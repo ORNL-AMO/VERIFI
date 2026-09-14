@@ -1,0 +1,110 @@
+@let currentResults = results();
+@let currentRows = sortedRows();
+@let visibleRows = displayedRows();
+@let state = workspace.calendarizationState();
+
+<section class="v1-meter-group-results-table" aria-label="Meter group results table">
+  @if (state === 'loading') {
+    <article class="v1-empty-state" role="status">
+      <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+      <h2>Calculating group results</h2>
+      <p>VERIFI is preparing calendarized meter data for this group.</p>
+    </article>
+  } @else if (state === 'error') {
+    <article class="v1-empty-state" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <h2>Results could not be calculated</h2>
+      <p>Check the meter data for this group and try again.</p>
+    </article>
+  } @else {
+    <div class="v1-meter-group-results-table__controls" aria-label="Results table controls">
+      <label class="v1-meter-group-results-table__control">
+        <span>Rows</span>
+        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="v1-meter-group-results-table__scroller">
+      <table #groupResultsTable class="v1-meter-group-results-table__table" [class.copying-table]="copyingTable()">
+        <thead>
+          <tr>
+            <th>
+              <button
+                type="button"
+                class="v1-meter-group-results-table__sort"
+                [class.active]="sortColumn() === 'period'"
+                (click)="requestSort('period')">
+                <span>{{ period() === 'yearly' ? 'Fiscal Year' : 'Month' }}</span>
+                <span class="fa" [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'" [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'" aria-hidden="true"></span>
+              </button>
+            </th>
+            @if (currentResults.showEnergyUse || currentResults.showConsumption) {
+              <th class="v1-meter-group-results-table__number">
+                <button
+                  type="button"
+                  class="v1-meter-group-results-table__sort"
+                  [class.active]="sortColumn() === 'utility'"
+                  (click)="requestSort('utility')">
+                  <span>{{ currentResults.utilityLabel }} @if (currentResults.utilityUnit) { ({{ currentResults.utilityUnit }}) }</span>
+                  <span class="fa" [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'" [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'" aria-hidden="true"></span>
+                </button>
+              </th>
+            }
+            @if (currentResults.showCost) {
+              <th class="v1-meter-group-results-table__number">
+                <button
+                  type="button"
+                  class="v1-meter-group-results-table__sort"
+                  [class.active]="sortColumn() === 'cost'"
+                  (click)="requestSort('cost')">
+                  <span>Total Cost</span>
+                  <span class="fa" [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'" [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'" aria-hidden="true"></span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visibleRows; track row.periodKey) {
+            <tr>
+              <td>{{ periodLabel(row) }}</td>
+              @if (currentResults.showEnergyUse || currentResults.showConsumption) {
+                <td class="v1-meter-group-results-table__number">{{ utilityValue(row) }}</td>
+              }
+              @if (currentResults.showCost) {
+                <td class="v1-meter-group-results-table__number">{{ costValue(row) }}</td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="1 + ((currentResults.showEnergyUse || currentResults.showConsumption) ? 1 : 0) + (currentResults.showCost ? 1 : 0)">
+                No {{ period() }} results are available for this group.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="v1-meter-group-results-table__footer">
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="currentRows.length === 0" (click)="copyTable()">
+        <span class="fa fa-copy" aria-hidden="true"></span>
+        Copy Table
+      </button>
+      @if (currentRows.length > pageSize()) {
+        <ngb-pagination
+          [collectionSize]="currentRows.length"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          [ellipses]="false"
+          [page]="currentPage()"
+          (pageChange)="currentPage.set($event)">
+        </ngb-pagination>
+      }
+    </footer>
+  }
+</section>

@@ -19,8 +19,9 @@
   </article>
 } @else if (currentMeter) {
   @let currentCard = workspace.selectedMeterCard();
-  <header class="v1-meter-workbench-header">
-    <nav class="v1-meter-workbench-header__breadcrumb" aria-label="Meter breadcrumb">
+  @let usageFacts = workspace.selectedMeterUsageFacts();
+  <header class="v1-data-workbench-header v1-meter-workbench-header">
+    <nav class="v1-data-workbench-breadcrumb v1-meter-workbench-header__breadcrumb" aria-label="Meter breadcrumb">
       <ol>
         <li>
           <button type="button" (click)="openMeters()">
@@ -30,7 +31,7 @@
         </li>
         <li aria-hidden="true">/</li>
         <li
-          class="v1-meter-workbench-header__meter-switcher"
+          class="v1-data-workbench-switcher v1-meter-workbench-header__meter-switcher"
           [class.open]="meterSwitcherOpen()"
           aria-current="page"
           (keydown.escape)="onMeterSwitcherEscape()">
@@ -38,27 +39,27 @@
             <button
               #meterSwitcherToggle
               type="button"
-              class="v1-meter-workbench-header__meter-toggle"
+              class="v1-data-workbench-switcher-toggle v1-meter-workbench-header__meter-toggle"
               aria-haspopup="menu"
               [attr.aria-expanded]="meterSwitcherOpen()"
               [attr.aria-label]="'Switch meter, current meter ' + currentMeter.name"
               (click)="toggleMeterSwitcher()">
-              <span class="v1-meter-workbench-header__meter-toggle-label">{{ currentMeter.name }}</span>
-              <span class="fa fa-chevron-down v1-meter-workbench-header__meter-toggle-icon" aria-hidden="true"></span>
+              <span class="v1-data-workbench-switcher-label v1-meter-workbench-header__meter-toggle-label">{{ currentMeter.name }}</span>
+              <span class="fa fa-chevron-down v1-data-workbench-switcher-icon v1-meter-workbench-header__meter-toggle-icon" aria-hidden="true"></span>
             </button>
 
             @if (meterSwitcherOpen()) {
-              <div class="v1-meter-workbench-header__meter-backdrop" (click)="closeMeterSwitcher()" aria-hidden="true"></div>
-              <div class="v1-meter-workbench-header__meter-menu" role="menu" aria-label="Switch meter">
+              <div class="v1-data-workbench-switcher-backdrop v1-meter-workbench-header__meter-backdrop" (click)="closeMeterSwitcher()" aria-hidden="true"></div>
+              <div class="v1-data-workbench-switcher-menu v1-meter-workbench-header__meter-menu" role="menu" aria-label="Switch meter">
                 @for (meterCard of workspace.meterCards(); track meterCard.meter.guid) {
                   <button
                     type="button"
-                    class="v1-meter-workbench-header__meter-item"
+                    class="v1-data-workbench-switcher-item v1-meter-workbench-header__meter-item"
                     role="menuitemradio"
                     [class.active]="meterCard.meter.guid === currentMeter.guid"
                     [attr.aria-checked]="meterCard.meter.guid === currentMeter.guid"
                     (click)="switchMeter(meterCard.meter.guid)">
-                    <span class="v1-meter-workbench-header__meter-item-text">
+                    <span class="v1-data-workbench-switcher-item-text v1-meter-workbench-header__meter-item-text">
                       {{ meterCard.meter.name }}
                     </span>
                   </button>
@@ -72,12 +73,12 @@
       </ol>
     </nav>
 
-    <div class="v1-meter-workbench-header__title-row">
-      <div class="v1-meter-workbench-header__title">
+    <div class="v1-data-workbench-title-row v1-meter-workbench-header__title-row">
+      <div class="v1-data-workbench-title v1-meter-workbench-header__title">
         <p class="v1-eyebrow">{{ currentFacility.name }} Meter</p>
         <h1 id="v1-facility-meters-title">{{ currentMeter.name }}</h1>
       </div>
-      <div class="v1-meter-workbench-header__chips" aria-label="Meter summary">
+      <div class="v1-data-workbench-actions v1-meter-workbench-header__chips" aria-label="Meter summary">
         <span class="v1-meter-workbench-header__source-chip" [style.--v1-meter-source-color]="currentCard?.sourceColor || null">
           {{ currentCard?.meter?.source || currentMeter.source }}
         </span>
@@ -88,7 +89,7 @@
       </div>
     </div>
 
-    <dl class="v1-meter-workbench-header__facts">
+    <dl class="v1-data-workbench-facts v1-meter-workbench-header__facts">
       <div>
         <dt>First reading</dt>
         <dd>{{ currentCard?.firstReadingLabel || 'No data' }}</dd>
@@ -116,15 +117,39 @@
       </div>
     </dl>
 
-    @if (currentCard?.statusIssueLabels; as statusIssueLabels) {
-      @if (statusIssueLabels.length > 0) {
-        <div class="v1-meter-workbench-header__issues" aria-label="Meter status issues">
-          @for (issue of statusIssueLabels; track issue) {
-            <span class="v1-badge v1-badge--{{ currentCard?.statusTone || 'info' }}">{{ issue }}</span>
-          }
+    @if (usageFacts.unitLabel) {
+      <p class="v1-data-workbench-facts-note">Usage values shown in {{ usageFacts.unitLabel }}/month</p>
+    }
+
+    <dl class="v1-data-workbench-facts v1-data-workbench-facts--usage v1-meter-workbench-header__facts" aria-label="Meter usage facts">
+      @for (fact of usageFacts.facts; track fact.id) {
+        <div>
+          <dt>{{ fact.label }}</dt>
+          <dd
+            class="v1-data-workbench-fact-value"
+            [class.v1-data-workbench-fact-value--unavailable]="fact.unavailable">
+            @if (isLoading()) {
+              <span class="placeholder-glow w-100" aria-hidden="true">
+                <span class="placeholder col-9"></span>
+                <span class="placeholder col-6"></span>
+              </span>
+              <span class="visually-hidden">Calculating {{ fact.label }}</span>
+            } @else {
+              <span class="v1-data-workbench-fact-value__primary">{{ fact.valueLabel }}</span>
+              @if (fact.periodLabel) {
+                <span class="v1-data-workbench-fact-value__meta">{{ fact.periodLabel }}</span>
+              }
+              @if (fact.changeLabel) {
+                <span
+                  class="v1-data-workbench-fact-value__change v1-data-workbench-fact-value__change--{{ fact.changeTone || 'unavailable' }}">
+                  {{ fact.changeLabel }}
+                </span>
+              }
+            }
+          </dd>
         </div>
       }
-    }
+    </dl>
 
     @if (currentCard?.statusActionSummaries; as statusActionSummaries) {
       @if (statusActionSummaries.length > 0) {

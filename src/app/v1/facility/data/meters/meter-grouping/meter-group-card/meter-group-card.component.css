@@ -12,6 +12,10 @@
 }
 
 .v1-meter-group-card__header {
+  display: flex;
+  gap: var(--v1-space-2);
+  align-items: flex-start;
+  justify-content: space-between;
   min-width: 0;
 }
 
@@ -29,52 +33,19 @@
   align-items: center;
   max-width: 100%;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--v1-link);
+  color: var(--v1-text);
   font: inherit;
   font-size: 1.24rem;
   font-weight: 950;
   line-height: 1.25;
   text-align: left;
   overflow-wrap: anywhere;
-  cursor: pointer;
-}
-
-.v1-meter-group-card__title:hover,
-.v1-meter-group-card__title:focus-visible {
-  color: var(--v1-link);
-}
-
-.v1-meter-group-card__title:hover span:last-child,
-.v1-meter-group-card__title:focus-visible span:last-child {
-  text-decoration: underline;
-  text-decoration-thickness: .1rem;
-  text-underline-offset: .18rem;
-}
-
-.v1-meter-group-card__title:focus-visible {
-  border-radius: var(--v1-radius-sm);
-  outline: 3px solid var(--v1-focus);
-  outline-offset: 3px;
 }
 
 .v1-meter-group-card__title .fa {
   flex: 0 0 auto;
   color: var(--v1-facility);
   font-size: 1rem;
-}
-
-.v1-meter-group-card__title-chevron {
-  opacity: .75;
-  transition: transform 120ms ease, opacity 120ms ease;
-}
-
-.v1-meter-group-card__title:hover .v1-meter-group-card__title-chevron,
-.v1-meter-group-card__title:focus-visible .v1-meter-group-card__title-chevron {
-  opacity: 1;
-  transform: translateX(.12rem);
 }
 
 .v1-meter-group-card__facts {

@@ -20,6 +20,9 @@ import { MeterWorkbenchReadingsComponent } from './facility/data/meters/meter-wo
 import { MeterWorkbenchSettingsComponent } from './facility/data/meters/meter-workbench/settings/meter-workbench-settings.component';
 import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
+import { MeterGroupWorkbenchGraphComponent } from './facility/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
+import { MeterGroupWorkbenchTableComponent } from './facility/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchComponent } from './facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from './facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityHomeComponent } from './facility/home/facility-home.component';
@@ -126,7 +129,19 @@ export const V1Routes: Routes = [
                 path: 'meter-grouping',
                 component: FacilityMetersComponent,
                 children: [
-                  { path: '', pathMatch: 'full', component: MeterGroupingComponent }
+                  { path: '', pathMatch: 'full', component: MeterGroupingComponent },
+                  {
+                    path: ':groupGuid',
+                    component: MeterGroupWorkbenchComponent,
+                    children: [
+                      { path: '', pathMatch: 'full', redirectTo: 'monthly-table' },
+                      { path: 'monthly-table', component: MeterGroupWorkbenchTableComponent, data: { meterGroupTab: 'monthly-table', meterGroupPeriod: 'monthly' } },
+                      { path: 'monthly-graph', component: MeterGroupWorkbenchGraphComponent, data: { meterGroupTab: 'monthly-graph', meterGroupPeriod: 'monthly' } },
+                      { path: 'yearly-table', component: MeterGroupWorkbenchTableComponent, data: { meterGroupTab: 'yearly-table', meterGroupPeriod: 'yearly' } },
+                      { path: 'yearly-graph', component: MeterGroupWorkbenchGraphComponent, data: { meterGroupTab: 'yearly-graph', meterGroupPeriod: 'yearly' } },
+                      { path: '**', redirectTo: 'monthly-table' }
+                    ]
+                  }
                 ]
               },
               { path: 'predictors', component: FacilityDataPlaceholderComponent, data: { title: 'Predictors' } },

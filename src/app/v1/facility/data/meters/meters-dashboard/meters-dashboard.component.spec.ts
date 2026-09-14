@@ -131,6 +131,7 @@ function setup(options: {
   const groups = signal(options.groups ?? []);
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
+  const calendarizationState = signal<'idle' | 'loading' | 'ready' | 'error'>('ready');
   const meterCards = signal(buildMeterCards(meters(), meterData(), groups()));
   const actions = {
     createMeter: vi.fn().mockResolvedValue(options.createdMeter ?? meter({ guid: 'meter-created' })),
@@ -147,6 +148,7 @@ function setup(options: {
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
           meterGroups: groups,
           meterCards,
+          calendarizationState,
           canWrite,
           hasPending
         }

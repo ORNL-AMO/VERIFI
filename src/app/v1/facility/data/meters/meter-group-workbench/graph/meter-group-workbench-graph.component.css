@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+.v1-meter-group-results-graph {
+  display: grid;
+  gap: var(--v1-space-3);
+  padding: var(--v1-space-4);
+  border: 1px solid var(--v1-border);
+  border-top: 0;
+  border-radius: 0 0 var(--v1-radius) var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-meter-group-results-graph__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-3);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.v1-meter-group-results-graph__control-group {
+  display: inline-flex;
+  gap: var(--v1-space-1);
+  align-items: center;
+}
+
+.v1-meter-group-results-graph__control-group > span {
+  color: var(--v1-muted);
+  font-size: .82rem;
+  font-weight: 900;
+}
+
+.v1-meter-group-results-graph__control-group .v1-icon-btn.active {
+  border-color: var(--v1-content-control);
+  background: color-mix(in srgb, var(--v1-content-control) 12%, var(--v1-surface));
+  color: var(--v1-content-control);
+}
+
+.v1-meter-group-results-graph__chart {
+  width: 100%;
+  min-height: 24rem;
+  background: var(--v1-surface);
+}
+
+@media (max-width: 680px) {
+  .v1-meter-group-results-graph__controls {
+    justify-content: flex-start;
+  }
+
+  .v1-meter-group-results-graph__chart {
+    min-height: 20rem;
+  }
+}

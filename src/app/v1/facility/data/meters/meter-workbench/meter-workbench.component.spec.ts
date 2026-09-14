@@ -5,7 +5,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
-import { MeterCardView, MeterWorkbenchTabId } from '../facility-meters.models';
+import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { group, meter } from '../facility-meters.testing';
 import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';
@@ -66,12 +66,42 @@ describe('MeterWorkbenchComponent', () => {
     expect(text).toContain('Biomass');
     expect(text).toContain('Group');
     expect(text).toContain('Purchased Electricity');
-    expect(text).toContain('No calendarization');
     expect(text).toContain('A calendarization method is required.');
+    expect(element.querySelector('.v1-meter-workbench-header__issues')).toBeNull();
     expect(text).not.toContain('8 readings');
     expect(element.querySelector('.v1-meter-workbench-header__source-chip')?.getAttribute('style')).toContain('#a59a04');
     expect(element.querySelector('.v1-meter-workbench-header__status .fa-triangle-exclamation')).not.toBeNull();
     expect(element.querySelector('.v1-meter-workbench-header__group-value .fa-layer-group')).not.toBeNull();
+  });
+
+  it('renders calendarized usage facts in the selected meter header', () => {
+    const fixture = setup();
+
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Usage values shown in MMBtu/month');
+    expect(text).toContain('Dec 2026');
+    expect(text).toContain('110');
+    expect(text).toContain('+10% vs same month last year');
+    expect(text).toContain('Dec 2025');
+    expect(text).toContain('100');
+    expect(text).toContain('AVG. Jan 2026 - Dec 2026');
+    expect(text).toContain('+10% vs previous 12 mo');
+    expect(text).toContain('AVG. Jan 2025 - Dec 2025');
+    expect(text).not.toContain('110 MMBtu');
+  });
+
+  it('renders usage fact placeholders while calendarized meter values are loading', () => {
+    const fixture = setup({ calendarizationState: 'loading' });
+
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.textContent).toContain('Dec 2026');
+    expect(element.textContent).toContain('Calculating Dec 2026');
+    expect(element.querySelectorAll('.placeholder-glow .placeholder').length).toBeGreaterThan(0);
+    expect(element.textContent).not.toContain('110 MMBtu');
   });
 
   it('navigates back to meters and between workbench tabs', () => {
@@ -229,6 +259,8 @@ function setup(options: {
   hasMeterRoute?: boolean;
   canWrite?: boolean;
   hasPending?: boolean;
+  calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
+  selectedMeterUsageFacts?: MeterUsageFactsView;
 } = {}): ComponentFixture<MeterWorkbenchComponent> {
   const selectedMeter = signal(options.selectedMeter === undefined && options.hasMeterRoute
     ? undefined
@@ -242,6 +274,8 @@ function setup(options: {
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
   const hasMeterRoute = signal(options.hasMeterRoute ?? true);
+  const calendarizationState = signal(options.calendarizationState ?? 'ready');
+  const selectedMeterUsageFacts = signal(options.selectedMeterUsageFacts ?? usageFactsView());
   const routerEvents = new Subject<NavigationEnd>();
 
   TestBed.configureTestingModule({
@@ -261,6 +295,8 @@ function setup(options: {
           meterCards,
           selectedMeterGroup,
           selectedMeterReadingCount,
+          selectedMeterUsageFacts,
+          calendarizationState,
           canWrite,
           hasPending,
           hasMeterRoute
@@ -300,6 +336,19 @@ function setup(options: {
   });
 
   return TestBed.createComponent(MeterWorkbenchComponent);
+}
+
+function usageFactsView(options: Partial<MeterUsageFactsView> = {}): MeterUsageFactsView {
+  return {
+    facts: [
+      { id: 'latest-month', label: 'Dec 2026', valueLabel: '110', unavailable: false, changeLabel: '+10% vs same month last year', changeTone: 'increase' },
+      { id: 'previous-year-month', label: 'Dec 2025', valueLabel: '100', unavailable: false },
+      { id: 'latest-twelve-month-average', label: 'AVG. Jan 2026 - Dec 2026', valueLabel: '110', unavailable: false, changeLabel: '+10% vs previous 12 mo', changeTone: 'increase' },
+      { id: 'previous-twelve-month-average', label: 'AVG. Jan 2025 - Dec 2025', valueLabel: '100', unavailable: false }
+    ],
+    unitLabel: 'MMBtu',
+    ...options
+  };
 }
 
 function defaultMeterCard(cardMeter = meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy' })): MeterCardView {
