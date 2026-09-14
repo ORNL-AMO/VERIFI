@@ -75,7 +75,7 @@ export class MeterGroupWorkbenchGraphComponent {
     const alignedYAxis = alignDualYAxis(yAxis);
 
     return {
-      tooltip: { trigger: 'axis' },
+      tooltip: { trigger: 'axis', formatter: formatChartTooltip },
       legend: { top: 0, left: 'center', right: 112 },
       grid: { top: 72, right: alignedYAxis.length > 1 ? 56 : 18, bottom: 36, left: 54, containLabel: true },
       xAxis: { type: 'category', data: xData },
@@ -103,4 +103,65 @@ function alignDualYAxis(yAxis: Array<Record<string, unknown>>): Array<Record<str
     splitNumber: 4,
     splitLine: { show: index === 0 }
   }));
+}
+
+function formatChartTooltipValue(value: unknown): string {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue)
+    ? Math.round(numericValue).toLocaleString()
+    : String(value ?? '');
+}
+
+function formatChartTooltipCostValue(value: unknown): string {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue)
+    ? `$${Math.round(numericValue).toLocaleString()}`
+    : String(value ?? '');
+}
+
+function formatChartTooltip(params: unknown): string {
+  const tooltipParams = Array.isArray(params) ? params : [params];
+  const firstParam = tooltipParams.find(isTooltipParam);
+  const header = firstParam ? `<div>${escapeHtml(firstParam.axisValueLabel ?? firstParam.name ?? '')}</div>` : '';
+  const rows = tooltipParams
+    .filter(isTooltipParam)
+    .map(param => {
+      const value = param.seriesName === 'Total Cost'
+        ? formatChartTooltipCostValue(param.value)
+        : formatChartTooltipValue(param.value);
+      return `<div>${param.marker ?? ''}${escapeHtml(param.seriesName ?? '')}: ${escapeHtml(value)}</div>`;
+    })
+    .join('');
+  return `${header}${rows}`;
+}
+
+interface ChartTooltipParam {
+  axisValueLabel?: string;
+  marker?: string;
+  name?: string;
+  seriesName?: string;
+  value?: unknown;
+}
+
+function isTooltipParam(value: unknown): value is ChartTooltipParam {
+  return typeof value === 'object' && value !== null;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, character => {
+    switch (character) {
+      case '&':
+        return '&amp;';
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case "'":
+        return '&#39;';
+      default:
+        return character;
+    }
+  });
 }
