@@ -5,16 +5,25 @@ import { ReportDocument, ReportMetaData } from "@v0/shared/pdf-report/models/rep
 import { BaseSection, ChartSection, HeadingSection, StyledText, StyledTextSection, TableSection } from "@v0/shared/pdf-report/models/report-section.model";
 import { getUnitFromMeter } from "@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics";
 import { CustomNumberPipe } from "@v0/shared/helper-pipes/custom-number.pipe";
+import { SettingsLabelPipe } from "@app/v0/shared/helper-pipes/settings-label.pipe";
+import { IdbAccount } from "@app/data/models/idbModels/account";
+import { AccountWorkspaceStore } from "@app/data/account-workspace/account-workspace.store";
+import { EmissionsResults } from "@app/data/models/eGridEmissions";
+import { MonthlyData } from "@app/data/models/calanderization";
 
 @Injectable({ providedIn: 'root' })
 export class FacilityDataQualityReportAdapter {
 
     private customNumberPipe: CustomNumberPipe = inject(CustomNumberPipe);
+    private settingsLabelPipe: SettingsLabelPipe = inject(SettingsLabelPipe);
+    private accountWorkspaceStore: AccountWorkspaceStore = inject(AccountWorkspaceStore);
     report: IdbFacilityReport;
+    account: IdbAccount;
 
     buildDocument(input: DataQualityReportData): ReportDocument {
         const sections: BaseSection[] = [];
         this.report = input.facilityReport;
+        this.account = this.accountWorkspaceStore.account();
 
         let metadata: ReportMetaData = {
             title: `${this.report.name}`,
@@ -39,7 +48,8 @@ export class FacilityDataQualityReportAdapter {
                     this.report.dataQualityReportSettings.includeMeterConsumptionTimeseriesGraph ||
                     this.report.dataQualityReportSettings.includeMeterCostTimeseriesGraph ||
                     this.report.dataQualityReportSettings.includeMeterConsumptionHistogram ||
-                    this.report.dataQualityReportSettings.includeMeterCostHistogram
+                    this.report.dataQualityReportSettings.includeMeterCostHistogram ||
+                    this.report.dataQualityReportSettings.includeAnnualTotalsTable
                 ) {
                     let meterTitle = stats.meter.name;
                     let titleSection: StyledTextSection = {
@@ -108,6 +118,16 @@ export class FacilityDataQualityReportAdapter {
                         chartSection.bookmarkLevel = 1;
                         chartSection.pageBreakAfter = true;
                         sections.push(chartSection);
+                    }
+                }
+                if (this.report.dataQualityReportSettings.includeAnnualTotalsTable) {
+                    let tableSection = this.createAnnualTotalTableSection(stats);
+                    if (tableSection) {
+                        tableSection.tocInclude = true;
+                        tableSection.tocLabel = 'Annual Totals';
+                        tableSection.bookmarkLevel = 1;
+                        tableSection.pageBreakAfter = true;
+                        sections.push(tableSection);
                     }
                 }
             });
@@ -219,6 +239,154 @@ export class FacilityDataQualityReportAdapter {
         return tableSection;
     }
 
+    private createAnnualTotalTableSection(meterStats: MeterDataStats) {
+        let headers: Array<string> = ['Year'];
+        let rows: string[][] = [];
+
+        if (meterStats.calanderizedMeter.showConsumption && !meterStats.isRECs) {
+            headers.push(`Total ${meterStats.consumptionLabel} (${this.settingsLabelPipe.transform(meterStats.calanderizedMeter.consumptionUnit)})`);
+        }
+        if (meterStats.calanderizedMeter.showEnergyUse && !meterStats.isRECs) {
+            headers.push(`Total Energy (${this.settingsLabelPipe.transform(meterStats.calanderizedMeter.energyUnit)})`);
+        }
+        if (this.account.displayEmissions) {
+            if (meterStats.calanderizedMeter.showElectricalEmissions) {
+                if (!meterStats.isRECs) {
+                    headers.push(`Total Market-Based Emissions (tonne CO2e)`);
+                    headers.push(`Total Location-Based Emissions (tonne CO2e)`);
+                }
+            }
+            if (meterStats.isRECs) {
+                headers.push(`RECs (MWh)`);
+                headers.push(`Excess RECs (MWh)`);
+            }
+            if (this.account.displayEmissions) {
+                if (meterStats.isRECs) {
+                    headers.push(`Excess RECs (tonne CO2e)`);
+                }
+            }
+            if (meterStats.calanderizedMeter.showStationaryEmissions) {
+                headers.push(`Total Biogenic Emissions (tonne CO2e)`);
+                headers.push(`Total Carbon Emissions (tonne CO2e)`);
+                headers.push(`Total Other Emissions (tonne CO2e)`);
+                headers.push(`Total Emissions (tonne CO2e)`);
+            }
+            if (meterStats.calanderizedMeter.showOtherScope2Emissions) {
+                headers.push(`Total Emissions (tonne CO2e)`);
+            }
+            if (meterStats.calanderizedMeter.showMobileEmissions) {
+                headers.push(`Mobile Biogenic Emissions (tonne CO2e)`);
+                headers.push(`Mobile Carbon Emissions (tonne CO2e)`);
+                headers.push(`Mobile Other Emissions (tonne CO2e)`);
+                headers.push(`Mobile Total Emissions (tonne CO2e)`);
+            }
+            if (meterStats.calanderizedMeter.showFugitiveEmissions) {
+                headers.push(`Fugitive Emissions (tonne CO2e)`);
+            }
+            if (meterStats.calanderizedMeter.showProcessEmissions) {
+                headers.push(`Process Emissions (tonne CO2e)`);
+            }
+        }
+        headers.push('Total Cost');
+
+        let annualTotals: Array<AnnualMeterTotal> = this.getAnnualTotals(meterStats.calanderizedMeter.monthlyData);
+        for (let totals of annualTotals) {
+            let row: Array<string> = [];
+
+            row.push(totals.year.toString());
+            if (meterStats.calanderizedMeter.showConsumption && !meterStats.isRECs) {
+                row.push(this.checkNumber(totals.energyConsumption));
+            }
+            if (meterStats.calanderizedMeter.showEnergyUse && !meterStats.isRECs) {
+                row.push(this.checkNumber(totals.energyUse));
+            }
+            if (this.account.displayEmissions) {
+                if (meterStats.calanderizedMeter.showElectricalEmissions) {
+                    if (!meterStats.isRECs) {
+                        row.push(this.checkNumber(totals.totalWithMarketEmissions));
+                        row.push(this.checkNumber(totals.totalWithLocationEmissions));
+                    }
+                }
+                if (meterStats.isRECs) {
+                    row.push(this.checkNumber(totals.RECs));
+                    row.push(this.checkNumber(totals.excessRECs));
+                    row.push(this.checkNumber(totals.excessRECsEmissions));
+                }
+                if (meterStats.calanderizedMeter.showStationaryEmissions) {
+                    row.push(this.checkNumber(totals.stationaryBiogenicEmmissions));
+                    row.push(this.checkNumber(totals.stationaryCarbonEmissions));
+                    row.push(this.checkNumber(totals.stationaryOtherEmissions));
+                    row.push(this.checkNumber(totals.stationaryEmissions));
+                }
+                if (meterStats.calanderizedMeter.showOtherScope2Emissions) {
+                    row.push(this.checkNumber(totals.otherScope2Emissions));
+                }
+                if (meterStats.calanderizedMeter.showMobileEmissions) {
+                    row.push(this.checkNumber(totals.mobileBiogenicEmissions));
+                    row.push(this.checkNumber(totals.mobileCarbonEmissions));
+                    row.push(this.checkNumber(totals.mobileOtherEmissions));
+                    row.push(this.checkNumber(totals.mobileTotalEmissions));
+                }
+                if (meterStats.calanderizedMeter.showFugitiveEmissions) {
+                    row.push(this.checkNumber(totals.fugitiveEmissions));
+                }
+                if (meterStats.calanderizedMeter.showProcessEmissions) {
+                    row.push(this.checkNumber(totals.processEmissions));
+                }
+            }
+            row.push(this.checkNumber(totals.energyCost, true));
+            rows.push(row);
+        }
+
+        const tableSection: TableSection = {
+            type: 'table',
+            title: 'Annual Totals',
+            headers: headers,
+            rows: rows
+        };
+
+        return tableSection;
+    }
+
+    getAnnualTotals(monthlyData: Array<MonthlyData>): Array<AnnualMeterTotal> {
+        const years = [...new Set(monthlyData.map(data => data.year))].sort((a, b) => a - b);
+        return years.map(year => {
+            const yearData = monthlyData.filter(data => data.year === year);
+            return {
+                year: year,
+                energyConsumption: this.addData(yearData, 'energyConsumption'),
+                energyUse: this.addData(yearData, 'energyUse'),
+                energyCost: this.addData(yearData, 'energyCost'),
+                totalWithMarketEmissions: this.addData(yearData, 'totalWithMarketEmissions'),
+                totalWithLocationEmissions: this.addData(yearData, 'totalWithLocationEmissions'),
+                RECs: this.addData(yearData, 'RECs'),
+                excessRECs: this.addData(yearData, 'excessRECs'),
+                excessRECsEmissions: this.addData(yearData, 'excessRECsEmissions'),
+                stationaryBiogenicEmmissions: this.addData(yearData, 'stationaryBiogenicEmmissions'),
+                stationaryCarbonEmissions: this.addData(yearData, 'stationaryCarbonEmissions'),
+                stationaryOtherEmissions: this.addData(yearData, 'stationaryOtherEmissions'),
+                stationaryEmissions: this.addData(yearData, 'stationaryEmissions'),
+                fugitiveEmissions: this.addData(yearData, 'fugitiveEmissions'),
+                processEmissions: this.addData(yearData, 'processEmissions'),
+                mobileCarbonEmissions: this.addData(yearData, 'mobileCarbonEmissions'),
+                mobileBiogenicEmissions: this.addData(yearData, 'mobileBiogenicEmissions'),
+                mobileOtherEmissions: this.addData(yearData, 'mobileOtherEmissions'),
+                mobileTotalEmissions: this.addData(yearData, 'mobileTotalEmissions'),
+                locationElectricityEmissions: this.addData(yearData, 'locationElectricityEmissions'),
+                marketElectricityEmissions: this.addData(yearData, 'marketElectricityEmissions'),
+                otherScope2Emissions: this.addData(yearData, 'otherScope2Emissions'),
+                scope2LocationEmissions: this.addData(yearData, 'scope2LocationEmissions'),
+                scope2MarketEmissions: this.addData(yearData, 'scope2MarketEmissions'),
+                totalScope1Emissions: this.addData(yearData, 'totalScope1Emissions'),
+                totalBiogenicEmissions: this.addData(yearData, 'totalBiogenicEmissions')
+            }
+        })
+    }
+
+    private addData(data: Array<MonthlyData>, field: keyof MonthlyData): number {
+        return data.reduce((total, entry) => total + (Number(entry[field]) || 0), 0);
+    }
+
     private createPredictorTableSection(predictorStats: PredictorDataStats, title: string) {
         let headers: Array<string> = ['', 'Minimum', 'Maximum', 'Average', 'Median', 'Median Absolute Deviation (MAD)', `Median - 5 MAD`, `Median + 5 MAD`, 'Number of Outliers'];
         let rows: string[][] = [];
@@ -275,11 +443,11 @@ export class FacilityDataQualityReportAdapter {
         return chartSection;
     }
 
-    checkNumber(value: number): string {
+    checkNumber(value: number, isCurrency: boolean = false): string {
         if (isNaN(value) || value === null || value === undefined) {
             return '-';
         }
-        return this.customNumberPipe.transform(value);
+        return this.customNumberPipe.transform(value, isCurrency);
     }
 }
 
@@ -295,4 +463,11 @@ export interface DataQualityReportData {
         predictorTimeseries?: Record<string, () => Promise<string>>;
         predictorHistogram?: Record<string, () => Promise<string>>;
     }
+}
+
+export interface AnnualMeterTotal extends EmissionsResults {
+    year: number;
+    energyConsumption: number;
+    energyUse: number;
+    energyCost: number;
 }

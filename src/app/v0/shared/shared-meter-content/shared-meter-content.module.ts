@@ -46,6 +46,7 @@ import { ManageMeterGroupingComponent } from '@v0/shared/shared-meter-content/se
 import { MeterGroupingResultsTableComponent } from '@v0/shared/shared-meter-content/set-meter-grouping/meter-grouping-results-table/meter-grouping-results-table.component';
 import { MeterGroupingResultsGraphComponent } from '@v0/shared/shared-meter-content/set-meter-grouping/meter-grouping-results-graph/meter-grouping-results-graph.component';
 import { CalculatingSpinnerModule } from '@v0/shared/calculating-spinner/calculating-spinner.module';
+import { MeterAnnualTotalTableModule } from './shared-meter-calendarization/meter-annual-total-table/meter-annual-total-table.module';
 
 
 
@@ -101,7 +102,8 @@ import { CalculatingSpinnerModule } from '@v0/shared/calculating-spinner/calcula
     LabelWithTooltipModule,
     NgbDatepickerModule,
     SharedDataQualityReportMetersModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule, 
+    MeterAnnualTotalTableModule
   ],
   exports: [
     EditMeterFormComponent,

@@ -11,3 +11,8 @@
 .btn-label{
     font-size: 16px;
 }
+
+.popup.annual-total {
+    width: min(800px, calc(100vw - 2rem));
+    left: max(1rem, calc(50% - 400px));
+}

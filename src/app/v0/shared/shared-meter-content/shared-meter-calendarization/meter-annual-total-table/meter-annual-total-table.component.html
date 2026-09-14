@@ -1,0 +1,168 @@
+<div class="table-responsive">
+    <table class="table table-bordered rounded">
+        <thead class="sortable">
+            <tr class="header">
+                <th (click)="setOrderDataField('year')" [ngClass]="{'active': orderDataField == 'year'}">Year</th>
+                @if (calanderizedMeter.showConsumption && !isRECs) {
+                <th (click)="setOrderDataField('energyConsumption')"
+                    [ngClass]="{'active': orderDataField == 'energyConsumption'}">
+                    Total {{consumptionLabel}}<br> (<span
+                        [innerHTML]="calanderizedMeter.consumptionUnit | settingsLabel"></span>)
+                </th>
+                }
+                @if (calanderizedMeter.showEnergyUse && !isRECs) {
+                <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                    Total Energy<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
+                </th>
+                }
+
+                @if(account.displayEmissions){
+                <!--electricity-->
+                @if (calanderizedMeter.showElectricalEmissions) {
+                @if (!isRECs) {
+                <th (click)="setOrderDataField('totalWithMarketEmissions')"
+                    [ngClass]="{'active': orderDataField == 'totalWithMarketEmissions'}">
+                    Total <br>Market-Based<br>Emissions (tonne
+                    CO<sub>2</sub>e)</th>
+                }
+                @if (!isRECs) {
+                <th (click)="setOrderDataField('totalWithLocationEmissions')" 
+                    [ngClass]="{'active': orderDataField == 'totalWithLocationEmissions'}">
+                    Total <br>Location-Based<br>Emissions (tonne
+                    CO<sub>2</sub>e)</th>
+                }
+                }
+                @if (isRECs) {
+                <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">
+                    RECs<br> (MWh)</th>
+                }
+                @if (isRECs) {
+                <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">
+                    Excess
+                    RECs<br> (MWh)</th>
+                }
+                @if(account.displayEmissions){
+                @if (isRECs) {
+                <th (click)="setOrderDataField('excessRECsEmissions')"
+                    [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">
+                    Excess
+                    RECs <br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                }
+                }
+                <!--stationary other fuels-->
+                @if (calanderizedMeter.showStationaryEmissions) {
+                <th (click)="setOrderDataField('stationaryBiogenicEmmissions')"
+                    [ngClass]="{'active': orderDataField == 'stationaryBiogenicEmmissions'}">Total Biogenic
+                    <br>Emissions
+                    (tonne
+                    CO<sub>2</sub>e)
+                </th>
+                <th (click)="setOrderDataField('stationaryCarbonEmissions')"
+                    [ngClass]="{'active': orderDataField == 'stationaryCarbonEmissions'}">Total Carbon <br>Emissions
+                    (tonne
+                    CO<sub>2</sub>e)</th>
+                <th (click)="setOrderDataField('stationaryOtherEmissions')"
+                    [ngClass]="{'active': orderDataField == 'stationaryOtherEmissions'}">Total Other <br>Emissions
+                    (tonne
+                    CO<sub>2</sub>e)</th>
+                <th (click)="setOrderDataField('stationaryEmissions')"
+                    [ngClass]="{'active': orderDataField == 'stationaryEmissions'}">Total <br>Emissions (tonne
+                    CO<sub>2</sub>e)</th>
+                }
+                <!--scope 2 other-->
+                @if (calanderizedMeter.showOtherScope2Emissions) {
+                <th (click)="setOrderDataField('otherScope2Emissions')"
+                    [ngClass]="{'active': orderDataField == 'otherScope2Emissions'}">Total
+                    <br>Emissions
+                    (tonne
+                    CO<sub>2</sub>e)
+                </th>
+                }
+                <!--mobile-->
+                @if (calanderizedMeter.showMobileEmissions) {
+                <th (click)="setOrderDataField('mobileBiogenicEmissions')"
+                    [ngClass]="{'active': orderDataField == 'mobileBiogenicEmissions'}">
+                    Mobile Biogenic<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                <th (click)="setOrderDataField('mobileCarbonEmissions')"
+                    [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}">
+                    Mobile Carbon<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                <th (click)="setOrderDataField('mobileOtherEmissions')"
+                    [ngClass]="{'active': orderDataField == 'mobileOtherEmissions'}">
+                    Mobile Other<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                <th (click)="setOrderDataField('mobileTotalEmissions')"
+                    [ngClass]="{'active': orderDataField == 'mobileTotalEmissions'}">
+                    Mobile Total<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                }
+                <!--fugitive-->
+                @if (calanderizedMeter.showFugitiveEmissions) {
+                <th (click)="setOrderDataField('fugitiveEmissions')"
+                    [ngClass]="{'active': orderDataField == 'fugitiveEmissions'}">
+                    Fugitive<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                }
+                <!--process-->
+                @if (calanderizedMeter.showProcessEmissions) {
+                <th (click)="setOrderDataField('processEmissions')"
+                    [ngClass]="{'active': orderDataField == 'processEmissions'}">
+                    Process<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+                }
+                }
+                <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">
+                    Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (total of annualTotals | orderBy: orderDataField: orderByDirection; track total.year) {
+            <tr class="align-middle">
+                <td>{{total.year}}</td>
+                @if (calanderizedMeter.showConsumption && !isRECs) {
+                <td>{{total.energyConsumption | customNumber}}</td>
+                }
+                @if (calanderizedMeter.showEnergyUse && !isRECs) {
+                <td>{{total.energyUse | customNumber}}</td>
+                }
+                @if(account.displayEmissions){
+                @if (calanderizedMeter.showElectricalEmissions) {
+                @if (!isRECs) {
+                <td>{{total.totalWithMarketEmissions | customNumber}}</td>
+                }
+                @if (!isRECs) {
+                <td>{{total.totalWithLocationEmissions | customNumber}}</td>
+                }
+                }
+                @if (isRECs) {
+                <td>{{total.RECs | customNumber}}</td>
+                }
+                @if (isRECs) {
+                <td>{{total.excessRECs | customNumber}}</td>
+                }
+                @if (isRECs) {
+                <td>{{total.excessRECsEmissions | customNumber}}</td>
+                }
+                @if (calanderizedMeter.showStationaryEmissions) {
+                <td>{{total.stationaryBiogenicEmmissions | customNumber}}</td>
+                <td>{{total.stationaryCarbonEmissions | customNumber}}</td>
+                <td>{{total.stationaryOtherEmissions | customNumber}}</td>
+                <td>{{total.stationaryEmissions | customNumber}}</td>
+                }
+                @if (calanderizedMeter.showOtherScope2Emissions) {
+                <td>{{total.otherScope2Emissions | customNumber}}</td>
+                }
+                @if (calanderizedMeter.showMobileEmissions) {
+                <td>{{total.mobileBiogenicEmissions | customNumber}}</td>
+                <td>{{total.mobileCarbonEmissions | customNumber}}</td>
+                <td>{{total.mobileOtherEmissions | customNumber}}</td>
+                <td>{{total.mobileTotalEmissions | customNumber}}</td>
+                }
+                @if (calanderizedMeter.showFugitiveEmissions) {
+                <td>{{total.fugitiveEmissions | customNumber}}</td>
+                }
+                @if (calanderizedMeter.showProcessEmissions) {
+                <td>{{total.processEmissions | customNumber}}</td>
+                }
+                }
+                <td>{{total.energyCost | customNumber:true}}</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

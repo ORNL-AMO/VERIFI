@@ -3,7 +3,8 @@ facilityReport.dataQualityReportSettings.includeMeterStatisticsTable ||
 facilityReport.dataQualityReportSettings.includeMeterConsumptionTimeseriesGraph ||
 facilityReport.dataQualityReportSettings.includeMeterCostTimeseriesGraph ||
 facilityReport.dataQualityReportSettings.includeMeterConsumptionHistogram ||
-facilityReport.dataQualityReportSettings.includeMeterCostHistogram
+facilityReport.dataQualityReportSettings.includeMeterCostHistogram ||
+facilityReport.dataQualityReportSettings.includeAnnualTotalsTable
 )) {
 @for(meterData of meterDataStatsList; track meterData.meter.id; let i = $index) {
 <div class="report">
@@ -37,8 +38,8 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Total Consumption
         </h4>
-        <app-meter-energy-timeseries-graph #meterConsumption [meterData]="meterData.data" [selectedMeter]="meterData.meter"
-            [energyStats]="meterData.energyStats"></app-meter-energy-timeseries-graph>
+        <app-meter-energy-timeseries-graph #meterConsumption [meterData]="meterData.data"
+            [selectedMeter]="meterData.meter" [energyStats]="meterData.energyStats"></app-meter-energy-timeseries-graph>
     </div>
     }
     @if (facilityReport.dataQualityReportSettings.includeMeterCostTimeseriesGraph) {
@@ -85,8 +86,8 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
         <h4>
             Total Consumption
         </h4>
-        <app-meter-energy-timeseries-graph #meterConsumption [meterData]="meterData.data" [selectedMeter]="meterData.meter"
-            [energyStats]="meterData.energyStats"></app-meter-energy-timeseries-graph>
+        <app-meter-energy-timeseries-graph #meterConsumption [meterData]="meterData.data"
+            [selectedMeter]="meterData.meter" [energyStats]="meterData.energyStats"></app-meter-energy-timeseries-graph>
     </div>
     }
     @let includeConsumption = !(meterData.meter.source == 'Electricity' && !meterData.meter.includeInEnergy);
@@ -101,6 +102,15 @@ facilityReport.dataQualityReportSettings.includeMeterCostHistogram
     </div>
     }
     }
+    }
+    @if (facilityReport.dataQualityReportSettings.includeAnnualTotalsTable) {
+    <div class="mt-4">
+        <h4>
+            Annual Totals
+        </h4>
+        <app-meter-annual-total-table [calanderizedMeter]="meterData.calanderizedMeter" [consumptionLabel]="meterData.consumptionLabel"
+            [isRECs]="meterData.isRECs"></app-meter-annual-total-table>
+    </div>
     }
 </div>
 }

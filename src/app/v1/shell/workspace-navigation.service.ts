@@ -453,7 +453,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       section,
       detail,
       meterGuid: section === 'data' && detail === 'meters' && routeParts[5]
-        ? decodeURIComponent(routeParts[5])
+        ? safeDecodeRoutePart(routeParts[5])
         : undefined
     };
   }
@@ -469,6 +469,14 @@ export function parseWorkspaceRoute(url: string): RouteState {
 
 function normalizeSection(section: string | undefined): SectionId {
   return VALID_SECTION_IDS.includes(section as SectionId) ? section as SectionId : 'home';
+}
+
+function safeDecodeRoutePart(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 function accountDescriptor(account: IdbAccount): string {

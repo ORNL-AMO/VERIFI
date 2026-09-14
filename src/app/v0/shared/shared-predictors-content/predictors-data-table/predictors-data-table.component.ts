@@ -127,6 +127,7 @@ export class PredictorsDataTableComponent {
   allChecked: boolean = false;
   showBulkDelete: boolean = false;
   showIgnoreWarningModal: boolean = false;
+  showFillMissingDataModal: boolean = false;
 
   ngOnInit() {
     this.inDataManagement = this.router.url.includes('data-management');
@@ -388,6 +389,86 @@ export class PredictorsDataTableComponent {
       this.router.navigateByUrl('data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + predictor.facilityId + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
+    }
+  }
+
+  openFillMissingDataModal() {
+    if (!this.predictorStatusCheck()?.missingEntryMonths?.length) {
+      return;
+    }
+    this.sharedDataService.modalOpen.next(true);
+    this.showFillMissingDataModal = true;
+  }
+
+  closeFillMissingDataModal() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showFillMissingDataModal = false;
+  }
+
+  async fillMissingDataWithZeros() {
+    const selectedPredictor = this.predictor();
+    const predictorStatusCheck = this.predictorStatusCheck();
+    if (!selectedPredictor || !predictorStatusCheck?.missingEntryMonths?.length) {
+      this.closeFillMissingDataModal();
+      return;
+    }
+
+    const monthKeys = new Set(this.predictorData().map(data => `${data.year}-${data.month}`));
+    const missingMonths = predictorStatusCheck.missingEntryMonths.filter(({ month, year }) =>
+      !monthKeys.has(`${year}-${month}`)
+    );
+    if (missingMonths.length === 0) {
+      this.closeFillMissingDataModal();
+      return;
+    }
+
+    this.loadingService.setLoadingMessage("Filling Missing Predictor Data...");
+    this.loadingService.setLoadingStatus(true);
+    this.closeFillMissingDataModal();
+
+    try {
+      const accountPredictorData = [...this.accountWorkspaceStore.predictorData()];
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData',
+          changeKind: 'bulk',
+          label: 'Fill Missing Predictor Data',
+          publication: {
+            mode: 'patch',
+            buildPatch: value => upsertWorkspaceRecords('predictorData', value)
+          }
+        },
+        async () => {
+          const addedPredictorData: IdbPredictorData[] = [];
+          for (const missingMonth of missingMonths) {
+            const newEntry = getNewIdbPredictorData(selectedPredictor, accountPredictorData);
+            delete newEntry.id;
+            newEntry.month = missingMonth.month;
+            newEntry.year = missingMonth.year;
+            newEntry.amount = 0;
+            const added = await this.predictorHandler.addPredictorData(newEntry, this.accountWorkspaceStore.account()?.guid);
+            addedPredictorData.push(added);
+          }
+          return addedPredictorData;
+        }
+      );
+      this.toastNotificationService.showToast(
+        `${missingMonths.length} Missing Month${missingMonths.length > 1 ? 's' : ''} Filled!`,
+        undefined,
+        undefined,
+        false,
+        "alert-success"
+      );
+    } catch {
+      this.toastNotificationService.showToast(
+        'Unable to Fill Missing Predictor Data.',
+        'Some missing months may not have been added. Review the list and try again',
+        undefined,
+        false,
+        "alert-danger"
+      );
+    } finally {
+      this.loadingService.setLoadingStatus(false);
     }
   }
 }

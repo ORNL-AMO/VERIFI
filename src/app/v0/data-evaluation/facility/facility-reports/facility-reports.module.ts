@@ -48,6 +48,8 @@ import { RegressionNumberPipe } from '@v0/shared/helper-pipes/regression-number.
 import { UserDefineModelDateRangePipe } from '@v0/shared/shared-analysis/data-check/regression-model-details-table/user-define-model-date-range.pipe';
 import { AnnualActualVsAdjustedCostsComponent } from './report-results/facility-cost-savings-report-results/annual-actual-vs-adjusted-costs/annual-actual-vs-adjusted-costs.component';
 import { AnnualActualVsAdjustedCostsGraphComponent } from './report-results/facility-cost-savings-report-results/annual-actual-vs-adjusted-costs-graph/annual-actual-vs-adjusted-costs-graph.component';
+import { MeterAnnualTotalTableModule } from '@v0/shared/shared-meter-content/shared-meter-calendarization/meter-annual-total-table/meter-annual-total-table.module';
+import { SettingsLabelPipe } from '@app/v0/shared/helper-pipes/settings-label.pipe';
 
 
 
@@ -101,7 +103,8 @@ import { AnnualActualVsAdjustedCostsGraphComponent } from './report-results/faci
     SharedAnalysisModule,
     AccountReportsModule,
     SharedDataQualityReportMetersModule,
-    SharedDataQualityReportPredictorsModule
+    SharedDataQualityReportPredictorsModule,
+    MeterAnnualTotalTableModule
 ], 
 providers: [
     FacilityReportTypePipe,
@@ -109,7 +112,8 @@ providers: [
     SharedAnalysisModule,
     CustomNumberPipe,
     RegressionNumberPipe,
-    UserDefineModelDateRangePipe
+    UserDefineModelDateRangePipe,
+    SettingsLabelPipe
   ]
 })
 export class FacilityReportsModule { }
