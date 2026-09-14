@@ -107,11 +107,12 @@ export class FacilityMetersWorkspaceService {
       toObservable(this.account),
       toObservable(this.facility),
       toObservable(this.meters),
-      toObservable(this.meterData)
+      toObservable(this.meterData),
+      toObservable(this.currentUrl)
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([account, facility, meters, meterData]) => {
-        this.refreshCalendarizedMeters(account, facility, meters, meterData);
+      .subscribe(([account, facility, meters, meterData, url]) => {
+        this.refreshCalendarizedMeters(account, facility, meters, meterData, url);
       });
   }
 
@@ -123,10 +124,16 @@ export class FacilityMetersWorkspaceService {
     account: IdbAccount | undefined,
     facility: IdbFacility | undefined,
     meters: readonly IdbUtilityMeter[],
-    meterData: readonly IdbUtilityMeterData[]
+    meterData: readonly IdbUtilityMeterData[],
+    url: string
   ): void {
     this.calendarizationSubscription?.unsubscribe();
     const requestId = ++this.calendarizationRequestId;
+    if (!shouldCalendarizeForUrl(url)) {
+      this.calendarizedMeters.set([]);
+      this.calendarizationState.set('idle');
+      return;
+    }
     if (!account || !facility) {
       this.calendarizedMeters.set([]);
       this.calendarizationState.set('idle');
@@ -138,9 +145,10 @@ export class FacilityMetersWorkspaceService {
       return;
     }
 
+    const allMeterData = cloneMeterData(meterData);
     const payload = {
       meters: [...meters],
-      allMeterData: [...meterData],
+      allMeterData,
       accountOrFacility: facility,
       monthDisplayShort: false,
       calanderizationOptions: undefined,
@@ -156,7 +164,7 @@ export class FacilityMetersWorkspaceService {
       try {
         this.calendarizedMeters.set(getCalanderizedMeterData(
           [...meters],
-          [...meterData],
+          cloneMeterData(meterData),
           facility,
           false,
           undefined,
@@ -212,4 +220,21 @@ function parseSelectedMeterGroupGuid(url: string): string | undefined {
   const groupingIndex = parts.findIndex((part, index) => part === 'meter-grouping' && parts[index - 1] === 'data');
   const groupGuid = groupingIndex >= 0 ? parts[groupingIndex + 1] : undefined;
   return groupGuid ? decodeURIComponent(groupGuid) : undefined;
+}
+
+function shouldCalendarizeForUrl(url: string): boolean {
+  const parts = url.split(/[?#]/, 1)[0].split('/').filter(Boolean);
+  const dataIndex = parts.indexOf('data');
+  if (dataIndex < 0) {
+    return false;
+  }
+  const dataChild = parts[dataIndex + 1];
+  if (dataChild === 'meters') {
+    return true;
+  }
+  return dataChild === 'meter-grouping' && !!parts[dataIndex + 2];
+}
+
+function cloneMeterData(meterData: readonly IdbUtilityMeterData[]): IdbUtilityMeterData[] {
+  return meterData.map(reading => ({ ...reading }));
 }

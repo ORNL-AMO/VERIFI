@@ -60,8 +60,8 @@ describe('facility meter view models', () => {
       facility({ energyUnit: 'MMBtu' }),
       [
         calendarizedMeter(electricMeter, [
-          monthlyData({ year: 2025, monthNumValue: 12, energyUse: 100 }),
-          monthlyData({ year: 2026, monthNumValue: 12, energyUse: 110 })
+          monthlyData({ year: 2025, monthNumValue: 11, energyUse: 100 }),
+          monthlyData({ year: 2026, monthNumValue: 11, energyUse: 110 })
         ], { energyUnit: 'MMBtu' })
       ]
     );
@@ -96,11 +96,11 @@ describe('facility meter view models', () => {
       }],
       [
         calendarizedMeter(electricMeter, [
-          monthlyData({ year: 2025, monthNumValue: 12, fiscalYear: 2026, energyUse: 10, energyCost: 20 }),
-          monthlyData({ year: 2026, monthNumValue: 1, fiscalYear: 2026, energyUse: 30, energyCost: 40 })
+          monthlyData({ year: 2025, monthNumValue: 11, fiscalYear: 2026, energyUse: 10, energyCost: 20 }),
+          monthlyData({ year: 2026, monthNumValue: 0, fiscalYear: 2026, energyUse: 30, energyCost: 40 })
         ]),
         calendarizedMeter(electricMeter, [
-          monthlyData({ year: 2026, monthNumValue: 1, fiscalYear: 2026, energyUse: 5, energyCost: 7 })
+          monthlyData({ year: 2026, monthNumValue: 0, fiscalYear: 2026, energyUse: 5, energyCost: 7 })
         ])
       ]
     );
@@ -273,7 +273,7 @@ function usageRows(startYear: number, startMonth: number, count: number, energyU
 function resultRow(year: number, month: number, energyUse: number, energyConsumption = 0): MeterGroupResultRow {
   const date = new Date(year, month - 1, 1);
   return {
-    periodKey: `${year}-${month}`,
+    periodKey: `${year}-${month - 1}`,
     periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     sortValue: date.getTime(),
     fiscalYear: year,
@@ -285,7 +285,7 @@ function resultRow(year: number, month: number, energyUse: number, energyConsump
 
 function monthlyData(options: Partial<MonthlyData> = {}): MonthlyData {
   const year = options.year ?? 2026;
-  const monthNumValue = options.monthNumValue ?? 1;
+  const monthNumValue = options.monthNumValue ?? 0;
   return {
     month: options.month ?? 'January',
     monthNumValue,
@@ -294,7 +294,7 @@ function monthlyData(options: Partial<MonthlyData> = {}): MonthlyData {
     energyConsumption: options.energyConsumption ?? 0,
     energyUse: options.energyUse ?? 0,
     energyCost: options.energyCost ?? 0,
-    date: options.date ?? new Date(year, monthNumValue - 1, 1),
+    date: options.date ?? new Date(year, monthNumValue, 1),
     readingType: options.readingType ?? 'metered',
     ...options
   } as MonthlyData;

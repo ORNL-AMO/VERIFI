@@ -594,7 +594,7 @@ function averageWindow(
 function monthIndexFromRow(row: MeterGroupResultRow): number {
   const [year, month] = row.periodKey.split('-').map(value => Number(value));
   if (Number.isFinite(year) && Number.isFinite(month)) {
-    return year * 12 + month;
+    return year * 12 + month + 1;
   }
   const date = new Date(row.sortValue);
   return date.getFullYear() * 12 + date.getMonth() + 1;

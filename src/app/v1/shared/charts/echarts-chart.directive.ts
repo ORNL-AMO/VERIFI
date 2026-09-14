@@ -111,7 +111,10 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
 
     const isInitialRender = !this.hasRenderedOption;
     const option = this.withThemeDefaults(this.option, isInitialRender);
-    this.chart.setOption(option, { notMerge: !isInitialRender, lazyUpdate: false });
+    this.chart.setOption(option, {
+      lazyUpdate: false,
+      replaceMerge: isInitialRender ? undefined : ['series', 'yAxis']
+    });
     this.hasRenderedOption = true;
   }
 
@@ -239,40 +242,9 @@ function themeAxisItem(axis: unknown, theme: V1ChartTheme): Record<string, unkno
 
 function defaultToolbox(theme: V1ChartTheme): Record<string, unknown> {
   return {
-    show: true,
-    top: 0,
-    right: 0,
-    itemSize: 15,
-    itemGap: 8,
-    showTitle: true,
+    show: false,
     iconStyle: {
-      borderColor: theme.muted,
-      color: 'transparent'
-    },
-    emphasis: {
-      iconStyle: {
-        borderColor: theme.text
-      }
-    },
-    feature: {
-      dataZoom: {
-        yAxisIndex: 'none',
-        title: {
-          zoom: 'Zoom',
-          back: 'Back'
-        }
-      },
-      restore: {
-        title: 'Reset zoom'
-      },
-      saveAsImage: {
-        type: 'png',
-        name: 'verifi-chart',
-        title: 'Download PNG',
-        backgroundColor: theme.surface,
-        pixelRatio: 2,
-        excludeComponents: ['toolbox']
-      }
+      borderColor: theme.muted
     }
   };
 }

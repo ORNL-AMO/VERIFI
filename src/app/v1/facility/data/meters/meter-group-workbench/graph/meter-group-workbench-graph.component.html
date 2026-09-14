@@ -20,13 +20,13 @@
       @if (currentResults.showEnergyUse || currentResults.showConsumption) {
         <div class="v1-meter-group-results-graph__control-group" role="group" aria-label="Utility series display">
           <span>Utility</span>
-          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'off'" title="Hide utility" aria-label="Hide utility" (click)="setUtilityDisplay('off')">
+          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'off'" [attr.aria-pressed]="utilityDisplay() === 'off'" title="Hide utility" aria-label="Hide utility" (click)="setUtilityDisplay('off')">
             <span class="fa fa-eye-slash" aria-hidden="true"></span>
           </button>
-          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'bar'" title="Show utility as bars" aria-label="Show utility as bars" (click)="setUtilityDisplay('bar')">
+          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'bar'" [attr.aria-pressed]="utilityDisplay() === 'bar'" title="Show utility as bars" aria-label="Show utility as bars" (click)="setUtilityDisplay('bar')">
             <span class="fa fa-chart-simple" aria-hidden="true"></span>
           </button>
-          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'line'" title="Show utility as line" aria-label="Show utility as line" (click)="setUtilityDisplay('line')">
+          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'line'" [attr.aria-pressed]="utilityDisplay() === 'line'" title="Show utility as line" aria-label="Show utility as line" (click)="setUtilityDisplay('line')">
             <span class="fa fa-chart-line" aria-hidden="true"></span>
           </button>
         </div>
@@ -34,13 +34,13 @@
       @if (currentResults.showCost) {
         <div class="v1-meter-group-results-graph__control-group" role="group" aria-label="Cost series display">
           <span>Cost</span>
-          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'off'" title="Hide cost" aria-label="Hide cost" (click)="setCostDisplay('off')">
+          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'off'" [attr.aria-pressed]="costDisplay() === 'off'" title="Hide cost" aria-label="Hide cost" (click)="setCostDisplay('off')">
             <span class="fa fa-eye-slash" aria-hidden="true"></span>
           </button>
-          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'bar'" title="Show cost as bars" aria-label="Show cost as bars" (click)="setCostDisplay('bar')">
+          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'bar'" [attr.aria-pressed]="costDisplay() === 'bar'" title="Show cost as bars" aria-label="Show cost as bars" (click)="setCostDisplay('bar')">
             <span class="fa fa-chart-simple" aria-hidden="true"></span>
           </button>
-          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'line'" title="Show cost as line" aria-label="Show cost as line" (click)="setCostDisplay('line')">
+          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'line'" [attr.aria-pressed]="costDisplay() === 'line'" title="Show cost as line" aria-label="Show cost as line" (click)="setCostDisplay('line')">
             <span class="fa fa-chart-line" aria-hidden="true"></span>
           </button>
         </div>

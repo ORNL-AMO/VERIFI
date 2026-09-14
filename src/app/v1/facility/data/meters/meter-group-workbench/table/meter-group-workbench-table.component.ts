@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
@@ -38,9 +38,16 @@ export class MeterGroupWorkbenchTableComponent {
     const result = compareRows(first, second, this.sortColumn(), this.results());
     return this.sortDirection() === 'asc' ? result : -result;
   }));
+  readonly maxPage = computed(() => Math.max(1, Math.ceil(this.sortedRows().length / this.pageSize())));
   readonly displayedRows = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
+    const start = (Math.min(this.currentPage(), this.maxPage()) - 1) * this.pageSize();
     return this.sortedRows().slice(start, start + this.pageSize());
+  });
+  private readonly clampCurrentPage = effect(() => {
+    const maxPage = this.maxPage();
+    if (this.currentPage() > maxPage) {
+      this.currentPage.set(maxPage);
+    }
   });
 
   @ViewChild('groupResultsTable', { static: false }) groupResultsTable?: ElementRef<HTMLTableElement>;

@@ -129,7 +129,7 @@ function resultsView(options: Partial<MeterGroupResultsView> = {}): MeterGroupRe
       { meter: gasMeter, group: selectedGroup, readingCount: 24 }
     ],
     calendarizedMeters: [],
-    monthlyRows: [{ periodKey: '2026-12', periodLabel: 'Dec 2026', sortValue: new Date(2026, 11, 1).getTime(), fiscalYear: 2026, energyUse: 110, energyConsumption: 0, energyCost: 0 }],
+    monthlyRows: [{ periodKey: '2026-11', periodLabel: 'Dec 2026', sortValue: new Date(2026, 11, 1).getTime(), fiscalYear: 2026, energyUse: 110, energyConsumption: 0, energyCost: 0 }],
     yearlyRows: [],
     showEnergyUse: true,
     showConsumption: false,
