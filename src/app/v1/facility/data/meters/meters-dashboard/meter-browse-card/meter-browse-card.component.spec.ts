@@ -29,7 +29,8 @@ describe('MeterBrowseCardComponent', () => {
 
     fixture.detectChanges();
 
-    const text = fixture.nativeElement.textContent;
+    const element: HTMLElement = fixture.nativeElement;
+    const text = element.textContent;
     expect(text).toContain('Main Electric');
     expect(text).toContain('Electricity');
     expect(text).toContain('Needs review');
@@ -39,14 +40,14 @@ describe('MeterBrowseCardComponent', () => {
     expect(text).toContain('Jan 2026');
     expect(text).toContain('Scope');
     expect(text).toContain('Purchased Electricity');
-    expect(text).toContain('No calendarization');
     expect(text).toContain('A calendarization method is required');
+    expect(element.querySelector('.v1-meter-browse-card__issues')).toBeNull();
     expect(text).toContain('Purchased Electricity');
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__source-chip')?.getAttribute('style')).toContain('#a59a04');
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__status .fa-triangle-exclamation')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card')?.classList.contains('v1-meter-browse-card--status-warning')).toBe(true);
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__title .fa-chevron-right')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[cdkdrag]')).toBeNull();
+    expect(element.querySelector('.v1-meter-browse-card__source-chip')?.getAttribute('style')).toContain('#a59a04');
+    expect(element.querySelector('.v1-meter-browse-card__status .fa-triangle-exclamation')).not.toBeNull();
+    expect(element.querySelector('.v1-meter-browse-card')?.classList.contains('v1-meter-browse-card--status-warning')).toBe(true);
+    expect(element.querySelector('.v1-meter-browse-card__title .fa-chevron-right')).not.toBeNull();
+    expect(element.querySelector('[cdkdrag]')).toBeNull();
     expect(text).not.toContain('Move meter');
     expect(text).not.toContain('Coming soon');
     expect(text).not.toContain('Units');
@@ -66,6 +67,42 @@ describe('MeterBrowseCardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Valid');
     expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__status .fa-circle-check')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-browse-card')?.className).not.toContain('v1-meter-browse-card--status');
+  });
+
+  it('renders compact calendarized usage facts without repeating the unit on each value', () => {
+    const fixture = setup({
+      meter: meter({ name: 'Main Electric' }),
+      readingCount: 2,
+      usageFacts: usageFactsView()
+    });
+
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    const text = element.textContent;
+    expect(text).toContain('Usage values shown in MMBtu/month');
+    expect(text).toContain('Dec 2026');
+    expect(text).toContain('110');
+    expect(text).toContain('+10% vs same month last year');
+    expect(text).toContain('AVG. Jan 2026 - Dec 2026');
+    expect(text).toContain('+10% vs previous 12 mo');
+    expect(text).not.toContain('110 MMBtu');
+    expect(element.querySelector('.v1-meter-browse-card__usage-facts')).not.toBeNull();
+  });
+
+  it('renders usage fact placeholders while calendarized meter values are loading', () => {
+    const fixture = setup({
+      meter: meter({ name: 'Main Electric' }),
+      readingCount: 2,
+      usageFacts: usageFactsView()
+    });
+    fixture.componentInstance.usageFactsLoading = true;
+
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelectorAll('.v1-meter-browse-card__usage-facts .placeholder').length).toBeGreaterThan(0);
+    expect(element.textContent).toContain('Calculating Dec 2026');
   });
 
   it('opens the selected meter settings from the card header', () => {
@@ -280,4 +317,40 @@ function setup(card: MeterCardView, options: {
   const fixture = TestBed.createComponent(MeterBrowseCardComponent);
   fixture.componentInstance.card = card;
   return fixture;
+}
+
+function usageFactsView(): MeterCardView['usageFacts'] {
+  return {
+    unitLabel: 'MMBtu',
+    facts: [
+      {
+        id: 'latest-month',
+        label: 'Dec 2026',
+        valueLabel: '110',
+        unavailable: false,
+        changeLabel: '+10% vs same month last year',
+        changeTone: 'increase'
+      },
+      {
+        id: 'previous-year-month',
+        label: 'Dec 2025',
+        valueLabel: '100',
+        unavailable: false
+      },
+      {
+        id: 'latest-twelve-month-average',
+        label: 'AVG. Jan 2026 - Dec 2026',
+        valueLabel: '110',
+        unavailable: false,
+        changeLabel: '+10% vs previous 12 mo',
+        changeTone: 'increase'
+      },
+      {
+        id: 'previous-twelve-month-average',
+        label: 'AVG. Jan 2025 - Dec 2025',
+        valueLabel: '100',
+        unavailable: false
+      }
+    ]
+  };
 }

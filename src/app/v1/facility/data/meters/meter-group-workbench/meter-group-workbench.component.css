@@ -17,3 +17,31 @@
   font-weight: 900;
   line-height: 1;
 }
+
+.v1-meter-group-workbench-header__meter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem;
+  overflow: visible;
+  white-space: normal;
+}
+
+.v1-meter-group-workbench-header__meter-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--v1-text);
+  font-size: .86rem;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.v1-meter-group-workbench-header__meter-list span + span::before {
+  content: "|";
+  color: var(--v1-muted);
+  font-size: .72rem;
+  line-height: 1;
+}

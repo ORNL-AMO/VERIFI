@@ -11,7 +11,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { runWorker } from '@platform/web-workers/run-worker';
-import { buildMeterCards, buildMeterGroupResultsView, buildMeterGroupSections } from './facility-meters.models';
+import { buildMeterCards, buildMeterGroupResultsView, buildMeterGroupSections, buildMeterUsageFactsFromCalendarizedMeters } from './facility-meters.models';
 
 interface CalendarizationWorkerResponse {
   readonly calanderizedMeters?: CalanderizedMeter[];
@@ -43,7 +43,9 @@ export class FacilityMetersWorkspaceService {
     this.meters(),
     this.meterData(),
     this.meterGroups(),
-    this.meterStatusChecks()
+    this.meterStatusChecks(),
+    this.facility(),
+    this.calendarizedMeters()
   ));
   readonly groupSections = computed(() => buildMeterGroupSections(
     this.meters(),
@@ -81,6 +83,13 @@ export class FacilityMetersWorkspaceService {
     this.groupSections(),
     this.calendarizedMeters()
   ));
+  readonly selectedMeterUsageFacts = computed(() => {
+    const selectedGuid = this.selectedMeterGuid();
+    const selectedCalendarizedMeters = selectedGuid
+      ? this.calendarizedMeters().filter(calendarizedMeter => calendarizedMeter.meter.guid === selectedGuid)
+      : [];
+    return buildMeterUsageFactsFromCalendarizedMeters(selectedCalendarizedMeters, this.facility());
+  });
   readonly selectedMeterReadingCount = computed(() => {
     const meter = this.selectedMeter();
     return meter ? this.selectedMeterData().length : 0;

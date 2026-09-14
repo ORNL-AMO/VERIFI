@@ -51,12 +51,38 @@
       }
     </dl>
 
-    @if (card.statusIssueLabels && card.statusIssueLabels.length > 0) {
-      <div class="v1-meter-browse-card__issues" aria-label="Meter status issues">
-        @for (issue of card.statusIssueLabels; track issue) {
-          <span class="v1-badge v1-badge--{{ card.statusTone || 'info' }}">{{ issue }}</span>
+    @if (displayUsageFacts; as usageFacts) {
+      <section class="v1-meter-browse-card__usage" aria-label="Meter usage facts">
+        @if (usageFacts.unitLabel) {
+          <p class="v1-meter-browse-card__usage-note">Usage values shown in {{ usageFacts.unitLabel }}/month</p>
         }
-      </div>
+        <dl class="v1-meter-browse-card__usage-facts">
+          @for (fact of usageFacts.facts; track fact.id) {
+            <div>
+              <dt>{{ fact.label }}</dt>
+              <dd
+                class="v1-meter-browse-card__usage-value"
+                [class.v1-meter-browse-card__usage-value--unavailable]="fact.unavailable">
+                @if (usageFactsLoading) {
+                  <span class="placeholder-glow w-100" aria-hidden="true">
+                    <span class="placeholder col-9"></span>
+                    <span class="placeholder col-6"></span>
+                  </span>
+                  <span class="visually-hidden">Calculating {{ fact.label }}</span>
+                } @else {
+                  <span class="v1-meter-browse-card__usage-value-primary">{{ fact.valueLabel }}</span>
+                  @if (fact.changeLabel) {
+                    <span
+                      class="v1-meter-browse-card__usage-change v1-meter-browse-card__usage-change--{{ fact.changeTone || 'unavailable' }}">
+                      {{ fact.changeLabel }}
+                    </span>
+                  }
+                }
+              </dd>
+            </div>
+          }
+        </dl>
+      </section>
     }
 
     @if (card.statusActionSummaries && card.statusActionSummaries.length > 0) {

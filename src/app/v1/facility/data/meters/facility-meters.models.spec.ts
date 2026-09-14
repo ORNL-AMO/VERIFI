@@ -1,6 +1,13 @@
 import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
-import { buildMeterCards, buildMeterGroupResultsView, formatMeterGroupPeriodLabel } from './facility-meters.models';
+import {
+  buildMeterCards,
+  buildMeterGroupResultsView,
+  buildMeterUsageFacts,
+  buildMeterUsageFactsFromCalendarizedMeters,
+  formatMeterGroupPeriodLabel,
+  MeterGroupResultRow
+} from './facility-meters.models';
 import { facility, group, meter, reading } from './facility-meters.testing';
 
 describe('facility meter view models', () => {
@@ -39,6 +46,35 @@ describe('facility meter view models', () => {
 
     expect(cards[0].firstReadingLabel).toBe('Dec 2025');
     expect(cards[0].latestReadingLabel).toBe('Mar 2026');
+  });
+
+  it('adds calendarized usage facts to matching meter browse cards', () => {
+    const electricMeter = meter({ guid: 'meter-electric', name: 'Electric Main' });
+    const waterMeter = meter({ guid: 'meter-water', name: 'City Water', source: 'Water Intake' });
+
+    const cards = buildMeterCards(
+      [electricMeter, waterMeter],
+      [],
+      [],
+      [],
+      facility({ energyUnit: 'MMBtu' }),
+      [
+        calendarizedMeter(electricMeter, [
+          monthlyData({ year: 2025, monthNumValue: 12, energyUse: 100 }),
+          monthlyData({ year: 2026, monthNumValue: 12, energyUse: 110 })
+        ], { energyUnit: 'MMBtu' })
+      ]
+    );
+
+    const electricFacts = cards.find(card => card.meter.guid === 'meter-electric')?.usageFacts;
+    expect(electricFacts?.unitLabel).toBe('MMBtu');
+    expect(electricFacts?.facts[0]).toMatchObject({
+      id: 'latest-month',
+      label: 'Dec 2026',
+      valueLabel: '110',
+      changeLabel: '+10% vs same month last year'
+    });
+    expect(cards.find(card => card.meter.guid === 'meter-water')?.usageFacts).toBeUndefined();
   });
 
   it('aggregates meter group monthly and fiscal-year result rows', () => {
@@ -80,6 +116,8 @@ describe('facility meter view models', () => {
     expect(view.summary.assignedMeterCount).toBe(1);
     expect(view.summary.firstDataLabel).toBe('Dec 2025');
     expect(view.summary.latestDataLabel).toBe('Jan 2026');
+    expect(view.usageFacts.unitLabel).toBe('MMBtu');
+    expect(view.usageFacts.facts[0].valueLabel).toBe('35');
   });
 
   it('uses consumption as the utility value for water groups', () => {
@@ -108,24 +146,140 @@ describe('facility meter view models', () => {
     expect(view.utilityLabel).toBe('Total Consumption');
     expect(view.utilityUnit).toBe('kgal');
     expect(view.summary.utilityTotalValue).toBe(14);
+    expect(view.usageFacts.unitLabel).toBe('kgal');
+    expect(view.usageFacts.facts[0].valueLabel).toBe('14');
+  });
+
+  it('calculates rolling usage facts and percent change for a complete latest and previous 12-month window', () => {
+    const rows = [
+      ...usageRows(2025, 1, 12, 100),
+      ...usageRows(2026, 1, 12, 110)
+    ];
+
+    const facts = buildMeterUsageFacts(rows, { useConsumption: false, unit: 'MMBtu' });
+
+    expect(facts.unitLabel).toBe('MMBtu');
+    expect(facts.facts).toEqual([
+      expect.objectContaining({ id: 'latest-month', label: 'Dec 2026', valueLabel: '110', unavailable: false, changeLabel: '+10% vs same month last year', changeTone: 'increase' }),
+      expect.objectContaining({ id: 'previous-year-month', label: 'Dec 2025', valueLabel: '100', unavailable: false }),
+      expect.objectContaining({ id: 'latest-twelve-month-average', label: 'AVG. Jan 2026 - Dec 2026', valueLabel: '110', unavailable: false, changeLabel: '+10% vs previous 12 mo', changeTone: 'increase' }),
+      expect.objectContaining({ id: 'previous-twelve-month-average', label: 'AVG. Jan 2025 - Dec 2025', valueLabel: '100', unavailable: false })
+    ]);
+  });
+
+  it('keeps rolling comparison facts unavailable when the previous 12-month window is incomplete', () => {
+    const rows = usageRows(2025, 1, 13, 100);
+
+    const facts = buildMeterUsageFacts(rows, { useConsumption: false, unit: 'kWh' });
+
+    expect(facts.facts.find(fact => fact.id === 'latest-twelve-month-average')).toMatchObject({
+      label: 'AVG. Feb 2025 - Jan 2026',
+      valueLabel: '100',
+      unavailable: false,
+      changeLabel: 'Change not available',
+      changeTone: 'unavailable'
+    });
+    expect(facts.facts.find(fact => fact.id === 'previous-twelve-month-average')).toMatchObject({
+      valueLabel: 'Not available',
+      unavailable: true
+    });
+  });
+
+  it('keeps the same-month previous-year fact unavailable when that month is missing', () => {
+    const rows = usageRows(2025, 2, 12, 100);
+
+    const facts = buildMeterUsageFacts(rows, { useConsumption: false, unit: 'kWh' });
+
+    expect(facts.facts.find(fact => fact.id === 'latest-month')).toMatchObject({
+      label: 'Jan 2026',
+      valueLabel: '100',
+      unavailable: false,
+      changeLabel: 'Change not available',
+      changeTone: 'unavailable'
+    });
+    expect(facts.facts.find(fact => fact.id === 'previous-year-month')).toMatchObject({
+      valueLabel: 'Not available',
+      unavailable: true
+    });
+  });
+
+  it('keeps percent change unavailable when the previous 12-month average is zero', () => {
+    const rows = [
+      ...usageRows(2025, 1, 12, 0),
+      ...usageRows(2026, 1, 12, 10)
+    ];
+
+    const facts = buildMeterUsageFacts(rows, { useConsumption: false, unit: 'kWh' });
+
+    expect(facts.facts.find(fact => fact.id === 'previous-twelve-month-average')).toMatchObject({
+      valueLabel: '0',
+      unavailable: false
+    });
+    expect(facts.facts.find(fact => fact.id === 'latest-twelve-month-average')).toMatchObject({
+      changeLabel: 'Change not available',
+      changeTone: 'unavailable'
+    });
+  });
+
+  it('uses calendarized consumption and consumption units for non-energy meter facts', () => {
+    const waterMeter = meter({ guid: 'meter-water', source: 'Water Intake' });
+
+    const facts = buildMeterUsageFactsFromCalendarizedMeters([
+      calendarizedMeter(waterMeter, [
+        monthlyData({ energyUse: 999, energyConsumption: 14 })
+      ], { showEnergyUse: false, consumptionUnit: 'kgal' })
+    ], facility({ energyUnit: 'MMBtu' }));
+
+    expect(facts.unitLabel).toBe('kgal');
+    expect(facts.facts[0]).toMatchObject({
+      valueLabel: '14',
+      unavailable: false
+    });
   });
 });
 
-function calendarizedMeter(meterValue: ReturnType<typeof meter>, monthlyDataValue: MonthlyData[]): CalanderizedMeter {
+function calendarizedMeter(
+  meterValue: ReturnType<typeof meter>,
+  monthlyDataValue: MonthlyData[],
+  options: Partial<CalanderizedMeter> = {}
+): CalanderizedMeter {
   return {
     meter: meterValue,
-    consumptionUnit: 'kgal',
+    consumptionUnit: options.consumptionUnit ?? 'kgal',
     monthlyData: monthlyDataValue,
-    showConsumption: true,
-    showEnergyUse: true,
+    showConsumption: options.showConsumption ?? true,
+    showEnergyUse: options.showEnergyUse ?? true,
     showElectricalEmissions: false,
     showOtherScope2Emissions: false,
     showStationaryEmissions: false,
     showFugitiveEmissions: false,
     showProcessEmissions: false,
     showMobileEmissions: false,
-    energyUnit: 'MMBtu',
-    energyIsSource: false
+    energyUnit: options.energyUnit ?? 'MMBtu',
+    energyIsSource: false,
+    ...options
+  };
+}
+
+function usageRows(startYear: number, startMonth: number, count: number, energyUse: number): MeterGroupResultRow[] {
+  return Array.from({ length: count }, (_, index) => {
+    const monthIndex = startYear * 12 + startMonth + index;
+    const year = Math.floor((monthIndex - 1) / 12);
+    const month = ((monthIndex - 1) % 12) + 1;
+    return resultRow(year, month, energyUse);
+  });
+}
+
+function resultRow(year: number, month: number, energyUse: number, energyConsumption = 0): MeterGroupResultRow {
+  const date = new Date(year, month - 1, 1);
+  return {
+    periodKey: `${year}-${month}`,
+    periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    sortValue: date.getTime(),
+    fiscalYear: year,
+    energyUse,
+    energyConsumption,
+    energyCost: 0
   };
 }
 

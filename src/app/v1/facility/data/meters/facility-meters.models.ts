@@ -18,6 +18,8 @@ export type MeterCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
 export type MeterGroupResultsState = 'idle' | 'loading' | 'ready' | 'error';
 export type MeterGroupResultsPeriod = 'monthly' | 'yearly';
 export type MeterGroupChartSeriesDisplay = 'off' | 'bar' | 'line';
+export type MeterUsageFactId = 'latest-month' | 'previous-year-month' | 'latest-twelve-month-average' | 'previous-twelve-month-average';
+export type MeterUsagePercentChangeTone = 'increase' | 'decrease' | 'neutral' | 'unavailable';
 export type MetersGroupingSlideout =
   | { readonly kind: 'add-group' }
   | { readonly kind: 'edit-group'; readonly group: IdbUtilityMeterGroup; readonly assignedMeterCount: number }
@@ -55,6 +57,7 @@ export interface MeterCardView {
   readonly fuelLabel?: string;
   readonly statusIssueLabels?: readonly string[];
   readonly statusActionSummaries?: readonly string[];
+  readonly usageFacts?: MeterUsageFactsView;
 }
 
 export interface MeterGroupSectionView {
@@ -108,6 +111,21 @@ export interface MeterGroupResultSummary {
   readonly costTotalValue: number;
 }
 
+export interface MeterUsageFactView {
+  readonly id: MeterUsageFactId;
+  readonly label: string;
+  readonly valueLabel: string;
+  readonly periodLabel?: string;
+  readonly unavailable: boolean;
+  readonly changeLabel?: string;
+  readonly changeTone?: MeterUsagePercentChangeTone;
+}
+
+export interface MeterUsageFactsView {
+  readonly facts: readonly MeterUsageFactView[];
+  readonly unitLabel?: string;
+}
+
 export interface MeterGroupResultsView {
   readonly group?: IdbUtilityMeterGroup;
   readonly assignedMeters: readonly MeterCardView[];
@@ -120,6 +138,7 @@ export interface MeterGroupResultsView {
   readonly utilityLabel: string;
   readonly utilityUnit: string;
   readonly summary: MeterGroupResultSummary;
+  readonly usageFacts: MeterUsageFactsView;
 }
 
 export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
@@ -141,13 +160,16 @@ export function buildMeterCards(
   meters: readonly IdbUtilityMeter[],
   meterData: readonly IdbUtilityMeterData[],
   groups: readonly IdbUtilityMeterGroup[],
-  meterStatusChecks: readonly MeterStatusCheck[] = []
+  meterStatusChecks: readonly MeterStatusCheck[] = [],
+  facility?: IdbFacility,
+  calendarizedMeters: readonly CalanderizedMeter[] = []
 ): MeterCardView[] {
   return [...meters]
     .sort(sortMetersByName)
     .map(meter => {
       const readings = meterData.filter(reading => reading.meterId === meter.guid);
       const meterStatusCheck = meterStatusChecks.find(statusCheck => statusCheck.meterId === meter.guid);
+      const meterCalendarizedMeters = calendarizedMeters.filter(calendarizedMeter => calendarizedMeter.meter.guid === meter.guid);
       return {
         meter,
         group: groups.find(group => group.guid === meter.groupId),
@@ -162,7 +184,10 @@ export function buildMeterCards(
         scopeLabel: scopeLabel(meter.scope),
         fuelLabel: fuelLabel(meter),
         statusIssueLabels: meterStatusIssueLabels(meterStatusCheck),
-        statusActionSummaries: meterStatusActionSummaries(meterStatusCheck)
+        statusActionSummaries: meterStatusActionSummaries(meterStatusCheck),
+        usageFacts: meterCalendarizedMeters.length > 0
+          ? buildMeterUsageFactsFromCalendarizedMeters(meterCalendarizedMeters, facility)
+          : undefined
       };
     });
 }
@@ -272,6 +297,10 @@ export function buildMeterGroupResultsView(
     : facility?.energyUnit ?? '';
   const utilityTotalValue = sumRows(monthlyRows, showConsumption ? 'energyConsumption' : 'energyUse');
   const costTotalValue = sumRows(monthlyRows, 'energyCost');
+  const usageFacts = buildMeterUsageFacts(monthlyRows, {
+    useConsumption: showConsumption,
+    unit: utilityUnit
+  });
 
   return {
     group,
@@ -284,6 +313,7 @@ export function buildMeterGroupResultsView(
     showCost,
     utilityLabel,
     utilityUnit,
+    usageFacts,
     summary: {
       assignedMeterCount: assignedMeters.length,
       firstDataLabel: firstResultPeriodLabel(monthlyRows),
@@ -294,6 +324,90 @@ export function buildMeterGroupResultsView(
       costTotalValue
     }
   };
+}
+
+export function buildMeterUsageFacts(
+  rows: readonly MeterGroupResultRow[],
+  options: { readonly useConsumption: boolean; readonly unit?: string }
+): MeterUsageFactsView {
+  const sortedRows = [...rows].sort((first, second) => first.sortValue - second.sortValue);
+  const valuesByMonth = new Map<number, MeterGroupResultRow>();
+  for (const row of sortedRows) {
+    valuesByMonth.set(monthIndexFromRow(row), row);
+  }
+  const latestRow = sortedRows[sortedRows.length - 1];
+  const latestMonthIndex = latestRow ? monthIndexFromRow(latestRow) : undefined;
+  const previousYearRow = latestMonthIndex !== undefined ? valuesByMonth.get(latestMonthIndex - 12) : undefined;
+  const latestAverage = latestMonthIndex !== undefined
+    ? averageWindow(valuesByMonth, latestMonthIndex - 11, latestMonthIndex, options.useConsumption)
+    : undefined;
+  const previousAverage = latestMonthIndex !== undefined
+    ? averageWindow(valuesByMonth, latestMonthIndex - 23, latestMonthIndex - 12, options.useConsumption)
+    : undefined;
+  const latestMonthPercentChange = latestRow && previousYearRow
+    ? calculatePercentChange(meterGroupResultRowUtilityValue(latestRow, options.useConsumption), meterGroupResultRowUtilityValue(previousYearRow, options.useConsumption))
+    : undefined;
+  const averagePercentChange = previousAverage !== undefined && latestAverage !== undefined
+    ? calculatePercentChange(latestAverage, previousAverage)
+    : undefined;
+  const latestAverageRangeLabel = latestMonthIndex !== undefined && latestAverage !== undefined
+    ? formatMonthRange(latestMonthIndex - 11, latestMonthIndex)
+    : undefined;
+  const previousAverageRangeLabel = latestMonthIndex !== undefined && previousAverage !== undefined
+    ? formatMonthRange(latestMonthIndex - 23, latestMonthIndex - 12)
+    : undefined;
+  const latestAverageChangeLabel = averagePercentChange === undefined
+    ? 'Change not available'
+    : formatPercentChange(averagePercentChange, 'vs previous 12 mo');
+  const latestMonthChangeLabel = latestMonthPercentChange === undefined
+    ? 'Change not available'
+    : formatPercentChange(latestMonthPercentChange, 'vs same month last year');
+
+  return {
+    unitLabel: options.unit,
+    facts: [
+      usageFact(
+        'latest-month',
+        latestRow?.periodLabel ?? 'Latest month',
+        latestRow,
+        options,
+        latestMonthChangeLabel,
+        percentChangeTone(latestMonthPercentChange)
+      ),
+      usageFact('previous-year-month', previousYearRow?.periodLabel ?? 'Same month last year', previousYearRow, options),
+      averageUsageFact(
+        'latest-twelve-month-average',
+        latestAverageRangeLabel ?? 'Latest 12-mo avg',
+        latestAverage,
+        latestAverageChangeLabel,
+        percentChangeTone(averagePercentChange)
+      ),
+      averageUsageFact(
+        'previous-twelve-month-average',
+        previousAverageRangeLabel ?? 'Previous 12-mo avg',
+        previousAverage
+      )
+    ]
+  };
+}
+
+function calculatePercentChange(latestValue: number, previousValue: number): number | undefined {
+  return previousValue !== 0
+    ? ((latestValue - previousValue) / previousValue) * 100
+    : undefined;
+}
+
+export function buildMeterUsageFactsFromCalendarizedMeters(
+  calendarizedMeters: readonly CalanderizedMeter[],
+  facility: IdbFacility | undefined
+): MeterUsageFactsView {
+  const rows = aggregateMeterGroupMonthlyRows(calendarizedMeters);
+  const useConsumption = calendarizedMeters.some(calendarizedMeter => calendarizedMeter.showConsumption)
+    && !calendarizedMeters.some(calendarizedMeter => calendarizedMeter.showEnergyUse);
+  const unit = useConsumption
+    ? firstDefined(calendarizedMeters.map(calendarizedMeter => calendarizedMeter.consumptionUnit))
+    : firstDefined(calendarizedMeters.map(calendarizedMeter => calendarizedMeter.energyUnit)) ?? facility?.energyUnit;
+  return buildMeterUsageFacts(rows, { useConsumption, unit });
 }
 
 export function meterGroupResultRowsForPeriod(
@@ -399,6 +513,131 @@ function latestResultPeriodLabel(rows: readonly MeterGroupResultRow[]): string {
 
 function sumRows(rows: readonly MeterGroupResultRow[], field: 'energyUse' | 'energyConsumption' | 'energyCost'): number {
   return rows.reduce((total, row) => total + row[field], 0);
+}
+
+function usageFact(
+  id: MeterUsageFactId,
+  label: string,
+  row: MeterGroupResultRow | undefined,
+  options: { readonly useConsumption: boolean },
+  changeLabel?: string,
+  changeTone?: MeterUsagePercentChangeTone
+): MeterUsageFactView {
+  if (!row) {
+    return unavailableUsageFact(id, label, changeLabel, changeTone);
+  }
+  return {
+    id,
+    label,
+    valueLabel: formatUsageValue(meterGroupResultRowUtilityValue(row, options.useConsumption)),
+    unavailable: false,
+    changeLabel,
+    changeTone
+  };
+}
+
+function averageUsageFact(
+  id: MeterUsageFactId,
+  label: string,
+  value: number | undefined,
+  changeLabel?: string,
+  changeTone?: MeterUsagePercentChangeTone
+): MeterUsageFactView {
+  if (value === undefined) {
+    return unavailableUsageFact(id, label, changeLabel, changeTone);
+  }
+  return {
+    id,
+    label,
+    valueLabel: formatUsageValue(value),
+    unavailable: false,
+    changeLabel,
+    changeTone
+  };
+}
+
+function unavailableUsageFact(
+  id: MeterUsageFactId,
+  label: string,
+  changeLabel?: string,
+  changeTone?: MeterUsagePercentChangeTone
+): MeterUsageFactView {
+  return {
+    id,
+    label,
+    valueLabel: 'Not available',
+    unavailable: true,
+    changeLabel,
+    changeTone
+  };
+}
+
+function averageWindow(
+  rowsByMonth: ReadonlyMap<number, MeterGroupResultRow>,
+  startMonthIndex: number,
+  endMonthIndex: number,
+  useConsumption: boolean
+): number | undefined {
+  let total = 0;
+  let count = 0;
+  for (let monthIndex = startMonthIndex; monthIndex <= endMonthIndex; monthIndex++) {
+    const row = rowsByMonth.get(monthIndex);
+    if (!row) {
+      return undefined;
+    }
+    total += meterGroupResultRowUtilityValue(row, useConsumption);
+    count++;
+  }
+  return count === 12 ? total / 12 : undefined;
+}
+
+function monthIndexFromRow(row: MeterGroupResultRow): number {
+  const [year, month] = row.periodKey.split('-').map(value => Number(value));
+  if (Number.isFinite(year) && Number.isFinite(month)) {
+    return year * 12 + month;
+  }
+  const date = new Date(row.sortValue);
+  return date.getFullYear() * 12 + date.getMonth() + 1;
+}
+
+function meterGroupResultRowUtilityValue(row: MeterGroupResultRow, useConsumption: boolean): number {
+  return useConsumption ? row.energyConsumption : row.energyUse;
+}
+
+function formatUsageValue(value: number): string {
+  return formatMeterGroupNumber(value);
+}
+
+function formatPercentChange(value: number, suffix: string): string {
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${formatMeterGroupNumber(value)}% ${suffix}`;
+}
+
+function percentChangeTone(value: number | undefined): MeterUsagePercentChangeTone {
+  if (value === undefined) {
+    return 'unavailable';
+  }
+  if (value > 0) {
+    return 'increase';
+  }
+  if (value < 0) {
+    return 'decrease';
+  }
+  return 'neutral';
+}
+
+function firstDefined(values: readonly (string | undefined)[]): string | undefined {
+  return values.find(value => value !== undefined && value !== '');
+}
+
+function formatMonthRange(startMonthIndex: number, endMonthIndex: number): string {
+  return `AVG. ${formatMonthIndex(startMonthIndex)} - ${formatMonthIndex(endMonthIndex)}`;
+}
+
+function formatMonthIndex(monthIndex: number): string {
+  const year = Math.floor((monthIndex - 1) / 12);
+  const month = ((monthIndex - 1) % 12);
+  return new Date(year, month, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
 function sortGroupsForDisplay(first: IdbUtilityMeterGroup, second: IdbUtilityMeterGroup): number {
