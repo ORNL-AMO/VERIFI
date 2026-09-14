@@ -25,6 +25,7 @@ describe('EChartsChartDirective in Chromium', () => {
     fixture.nativeElement.querySelector('.chart-host').style.height = '240px';
     fixture.detectChanges();
     await fixture.whenStable();
+    await nextAnimationFrame();
 
     expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
 
@@ -35,7 +36,12 @@ describe('EChartsChartDirective in Chromium', () => {
     } as V1EChartsOption);
     fixture.detectChanges();
     await fixture.whenStable();
+    await nextAnimationFrame();
 
     expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
   });
 });
+
+function nextAnimationFrame(): Promise<void> {
+  return new Promise(resolve => requestAnimationFrame(() => resolve()));
+}

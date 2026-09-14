@@ -41,8 +41,6 @@
 .v1-meter-group-results-graph__chart {
   width: 100%;
   min-height: 24rem;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius-sm);
   background: var(--v1-surface);
 }
 

@@ -22,7 +22,7 @@ export class MeterGroupWorkbenchGraphComponent {
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly period = signal<MeterGroupResultsPeriod>(this.route.snapshot.data['meterGroupPeriod'] ?? 'monthly');
   readonly utilityDisplay = signal<MeterGroupChartSeriesDisplay>('bar');
-  readonly costDisplay = signal<MeterGroupChartSeriesDisplay>('bar');
+  readonly costDisplay = signal<MeterGroupChartSeriesDisplay>('line');
   readonly results = this.workspace.selectedMeterGroupResults;
   readonly rows = computed(() => meterGroupResultRowsForPeriod(this.results(), this.period()));
   readonly hasChartSeries = computed(() => {
@@ -49,8 +49,8 @@ export class MeterGroupWorkbenchGraphComponent {
         yAxisIndex: 0,
         data: rows.map(row => meterGroupResultUtilityValue(results, row)),
         smooth: this.utilityDisplay() === 'line',
-        itemStyle: { color: '#ff6000' },
-        lineStyle: { color: '#ff6000', width: 3 }
+        itemStyle: { color: 'var(--v1-chart-series-1)' },
+        lineStyle: { color: 'var(--v1-chart-series-1)', width: 3 }
       });
     }
 
@@ -67,18 +67,19 @@ export class MeterGroupWorkbenchGraphComponent {
         yAxisIndex: yAxis.length - 1,
         data: rows.map(row => row.energyCost),
         smooth: this.costDisplay() === 'line',
-        itemStyle: { color: '#2c386b' },
-        lineStyle: { color: '#2c386b', width: 3 }
+        itemStyle: { color: 'var(--v1-chart-series-3)' },
+        lineStyle: { color: 'var(--v1-chart-series-3)', width: 3 }
       });
     }
 
+    const alignedYAxis = alignDualYAxis(yAxis);
+
     return {
-      color: ['#ff6000', '#2c386b'],
       tooltip: { trigger: 'axis' },
-      legend: { top: 0 },
-      grid: { top: 48, right: yAxis.length > 1 ? 56 : 18, bottom: 36, left: 54, containLabel: true },
+      legend: { top: 0, left: 'center', right: 112 },
+      grid: { top: 72, right: alignedYAxis.length > 1 ? 56 : 18, bottom: 36, left: 54, containLabel: true },
       xAxis: { type: 'category', data: xData },
-      yAxis: yAxis.length > 0 ? yAxis : [{ type: 'value', min: 0 }],
+      yAxis: alignedYAxis.length > 0 ? alignedYAxis : [{ type: 'value', min: 0 }],
       series
     } as V1EChartsOption;
   });
@@ -90,4 +91,16 @@ export class MeterGroupWorkbenchGraphComponent {
   setCostDisplay(display: MeterGroupChartSeriesDisplay): void {
     this.costDisplay.set(display);
   }
+}
+
+function alignDualYAxis(yAxis: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+  if (yAxis.length < 2) {
+    return yAxis;
+  }
+  return yAxis.map((axis, index) => ({
+    ...axis,
+    alignTicks: true,
+    splitNumber: 4,
+    splitLine: { show: index === 0 }
+  }));
 }
