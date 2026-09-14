@@ -1,0 +1,202 @@
+@let _view = viewModel();
+@let _rows = sortedRows();
+@let _displayedRows = displayedRows();
+@let _columns = displayColumns();
+@let _sectionSpans = columnSectionSpans();
+
+<div class="meter-readings-table">
+  <div class="meter-readings-table__action-row" aria-label="Readings table controls">
+    <div class="meter-readings-table__table-controls">
+      @if (isDataOutdated) {
+        <span class="meter-readings-table__badge">
+          <span class="fa fa-clock" aria-hidden="true"></span>
+          Outdated
+        </span>
+      }
+      <label class="meter-readings-table__control">
+        <span>Rows</span>
+        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </label>
+      @if (_view.hasEstimatedReadings) {
+        <label class="meter-readings-table__control">
+          <span>Filter</span>
+          <select class="v1-select" [value]="filterOption()" (change)="setFilterOption($event)">
+            <option value="all">All</option>
+            <option value="estimated">Estimated Readings</option>
+          </select>
+        </label>
+      }
+    </div>
+    <div class="meter-readings-table__actions-bar">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canAct" (click)="chooseColumnsRequested.emit()">
+        <span class="fa fa-table-columns" aria-hidden="true"></span>
+        Choose Columns
+      </button>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct" (click)="addBillRequested.emit()">
+        <span class="fa fa-plus" aria-hidden="true"></span>
+        Add New Bill
+      </button>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct || selectedCount() === 0" (click)="requestBulkDelete()">
+        <span class="fa fa-trash" aria-hidden="true"></span>
+        Delete Selected
+      </button>
+    </div>
+  </div>
+
+  <div class="meter-readings-table__status">
+    <ng-content></ng-content>
+  </div>
+
+  <div class="meter-readings-table__scroller">
+    <table #meterTable class="meter-readings-table__table">
+      <thead>
+        <tr class="meter-readings-table__section-row">
+          @if (!copyingTable()) {
+            <th class="meter-readings-table__select" aria-hidden="true"></th>
+          }
+          @for (section of _sectionSpans; track section.section) {
+            <th
+              class="meter-readings-table__section-heading"
+              [class.meter-readings-table__section-heading--general]="section.tone === 'general'"
+              [class.meter-readings-table__section-heading--emissions]="section.tone === 'emissions'"
+              [class.meter-readings-table__section-heading--charges]="section.tone === 'charges'"
+              [class.meter-readings-table__column-hover]="section.isHovered"
+              [attr.colspan]="section.colspan">
+              {{ section.label }}
+            </th>
+          }
+          @if (!copyingTable()) {
+            <th class="meter-readings-table__actions" aria-hidden="true"></th>
+          }
+        </tr>
+        <tr>
+          @if (!copyingTable()) {
+            <th class="meter-readings-table__select">
+              <input
+                type="checkbox"
+                aria-label="Select visible readings"
+                [checked]="allVisibleChecked()"
+                [disabled]="!canAct || _displayedRows.length === 0"
+                (change)="toggleVisible($event)">
+            </th>
+          }
+          @for (column of _columns; track column.column.id) {
+            <th
+              [class.meter-readings-table__number]="column.column.align === 'number'"
+              [class.meter-readings-table__group-start]="column.startsSection"
+              [class.meter-readings-table__group-end]="column.endsSection"
+              [class.meter-readings-table__group-general]="column.tone === 'general'"
+              [class.meter-readings-table__group-emissions]="column.tone === 'emissions'"
+              [class.meter-readings-table__group-charges]="column.tone === 'charges'"
+              [class.meter-readings-table__column-hover]="column.isHovered"
+              (mouseenter)="setColumnHover(column.column.id)"
+              (mouseleave)="setColumnHover(undefined)"
+              (focusin)="setColumnHover(column.column.id)"
+              (focusout)="setColumnHover(undefined)">
+              <button
+                type="button"
+                class="meter-readings-table__sort"
+                [class.active]="sortColumnId() === column.column.id"
+                (click)="requestSort(column.column.id)">
+                <span>{{ column.column.label }}</span>
+                <span
+                  class="meter-readings-table__sort-icon fa"
+                  [class.fa-arrow-down-wide-short]="sortDirection() === 'desc'"
+                  [class.fa-arrow-up-wide-short]="sortDirection() === 'asc'"
+                  aria-hidden="true">
+                </span>
+              </button>
+            </th>
+          }
+          @if (!copyingTable()) {
+            <th class="meter-readings-table__actions" aria-label="Reading actions"></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of _displayedRows; track row.reading.guid) {
+          <tr [class.meter-readings-table__row--negative]="row.hasNegativeReading">
+            @if (!copyingTable()) {
+              <td class="meter-readings-table__select">
+                <input
+                  type="checkbox"
+                  [attr.aria-label]="'Select reading ' + row.values['readDate']"
+                  [checked]="isChecked(row.reading.guid)"
+                  [disabled]="!canAct"
+                  (change)="toggleRow(row.reading.guid)">
+              </td>
+            }
+            @for (column of _columns; track column.column.id) {
+              <td
+                [class.meter-readings-table__number]="column.column.align === 'number'"
+                [class.meter-readings-table__group-start]="column.startsSection"
+                [class.meter-readings-table__group-end]="column.endsSection"
+                [class.meter-readings-table__group-general]="column.tone === 'general'"
+                [class.meter-readings-table__group-emissions]="column.tone === 'emissions'"
+                [class.meter-readings-table__group-charges]="column.tone === 'charges'"
+                [class.meter-readings-table__column-hover]="column.isHovered"
+                (mouseenter)="setColumnHover(column.column.id)"
+                (mouseleave)="setColumnHover(undefined)"
+                (focusin)="setColumnHover(column.column.id)"
+                (focusout)="setColumnHover(undefined)">
+                <span class="meter-readings-table__value">
+                  @if (row.reading.isEstimated && column.showsEstimatedMarker) {
+                    <span class="meter-readings-table__estimated fa fa-asterisk" title="Estimated reading" aria-label="Estimated reading"></span>
+                  }
+                  @if (row.negativeColumnIds[column.column.id]) {
+                    <span class="meter-readings-table__negative fa fa-triangle-exclamation" title="Negative reading" aria-label="Negative reading"></span>
+                  }
+                  <span>{{ row.values[column.column.id] }}</span>
+                </span>
+              </td>
+            }
+            @if (!copyingTable()) {
+              <td class="meter-readings-table__actions">
+                <button type="button" class="v1-icon-btn" title="Edit reading" aria-label="Edit reading" [disabled]="!canAct" (click)="editRequested.emit(row.reading)">
+                  <span class="fa fa-pen" aria-hidden="true"></span>
+                </button>
+                @if (isElectron && row.reading.isBillConnected) {
+                  <button type="button" class="v1-icon-btn" title="Open connected bill" aria-label="Open connected bill" (click)="viewBillRequested.emit(row.reading)">
+                    <span class="fa fa-paperclip" aria-hidden="true"></span>
+                  </button>
+                }
+                <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete reading" aria-label="Delete reading" [disabled]="!canAct" (click)="deleteRequested.emit(row.reading)">
+                  <span class="fa fa-trash" aria-hidden="true"></span>
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="meter-readings-table__footer">
+    <div class="meter-readings-table__footer-start">
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="_rows.length === 0" (click)="copyTable()">
+        <span class="fa fa-copy" aria-hidden="true"></span>
+        Copy Table
+      </button>
+      @if (hasEstimatedRows()) {
+        <span class="meter-readings-table__estimated-note">
+          <span class="meter-readings-table__estimated fa fa-asterisk" aria-hidden="true"></span>
+          Indicates Estimated Reading
+        </span>
+      }
+    </div>
+    @if (_rows.length > activePageSize()) {
+      <ngb-pagination
+        [collectionSize]="_rows.length"
+        [pageSize]="activePageSize()"
+        [maxSize]="5"
+        [ellipses]="false"
+        [page]="currentPage()"
+        (pageChange)="currentPage.set($event)">
+      </ngb-pagination>
+    }
+  </footer>
+</div>

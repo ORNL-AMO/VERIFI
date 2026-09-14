@@ -1,0 +1,154 @@
+<app-meter-slideout
+  [title]="mode === 'add' ? 'Add new bill' : 'Edit bill'"
+  [description]="'Record readings for ' + meter.name + '.'"
+  [saving]="saving"
+  (closed)="requestClose()">
+  @if (form && context) {
+    <form class="meter-bill-form" [formGroup]="form" (submit)="$event.preventDefault(); save(false)">
+      <label class="v1-field">
+        <span>Read date</span>
+        <input class="v1-input" type="date" formControlName="readDate" [disabled]="saving">
+      </label>
+
+      @if (meter.source === 'Electricity') {
+        <label class="v1-field">
+          <span>Energy Use</span>
+          <div class="input-group meter-bill-form__input-group">
+            <input class="v1-input" type="number" formControlName="totalEnergyUse" [disabled]="saving">
+            <span class="input-group-text">{{ meter.energyUnit }}</span>
+          </div>
+        </label>
+        <label class="v1-field">
+          <span>Total Cost</span>
+          <div class="input-group meter-bill-form__input-group">
+            <span class="input-group-text">$</span>
+            <input class="v1-input" type="number" formControlName="totalCost" [disabled]="saving">
+          </div>
+        </label>
+        <div class="meter-bill-form__grid">
+          <label class="v1-field">
+            <span>Real Demand</span>
+            <div class="input-group meter-bill-form__input-group">
+              <input class="v1-input" type="number" formControlName="totalRealDemand" [disabled]="saving">
+              <span class="input-group-text">{{ meter.demandUnit || 'kW' }}</span>
+            </div>
+          </label>
+          <label class="v1-field">
+            <span>Billed Demand</span>
+            <div class="input-group meter-bill-form__input-group">
+              <input class="v1-input" type="number" formControlName="totalBilledDemand" [disabled]="saving">
+              <span class="input-group-text">{{ meter.demandUnit || 'kW' }}</span>
+            </div>
+          </label>
+        </div>
+        <label class="v1-field">
+          <span>Power Factor</span>
+          <input class="v1-input" type="number" min="0" max="1" step="0.01" formControlName="powerFactor" [disabled]="saving">
+        </label>
+      } @else {
+        @if (context.displayVolumeInput) {
+          <label class="v1-field">
+            <span>Total Volume</span>
+            <div class="input-group meter-bill-form__input-group">
+              <input class="v1-input" type="number" formControlName="totalVolume" [disabled]="saving">
+              <span class="input-group-text">{{ meter.startingUnit }}</span>
+            </div>
+          </label>
+        }
+        @if (context.displayEnergyUse) {
+          <label class="v1-field">
+            <span>Energy Use</span>
+            <div class="input-group meter-bill-form__input-group">
+              <input class="v1-input" type="number" formControlName="totalEnergyUse" [disabled]="saving || context.displayVolumeInput">
+              <span class="input-group-text">{{ meter.energyUnit }}</span>
+            </div>
+          </label>
+        }
+        <label class="v1-field">
+          <span>Total Cost</span>
+          <div class="input-group meter-bill-form__input-group">
+            <span class="input-group-text">$</span>
+            <input class="v1-input" type="number" formControlName="totalCost" [disabled]="saving">
+          </div>
+        </label>
+        @if (context.displayHeatCapacity) {
+          <label class="v1-field">
+            <span>Heat Capacity</span>
+            <div class="input-group meter-bill-form__input-group">
+              <input class="v1-input" type="number" formControlName="heatCapacity">
+              <span class="input-group-text">{{ meter.energyUnit }}/{{ meter.startingUnit }}</span>
+            </div>
+          </label>
+        }
+        @if (context.displayVehicleFuelEfficiency) {
+          <label class="v1-field">
+            <span>Fuel Efficiency</span>
+            <div class="input-group meter-bill-form__input-group">
+              <input class="v1-input" type="number" formControlName="vehicleFuelEfficiency">
+              <span class="input-group-text">{{ meter.vehicleDistanceUnit || 'mi' }}/{{ meter.vehicleCollectionUnit || meter.startingUnit }}</span>
+            </div>
+          </label>
+        }
+      }
+
+      <label class="meter-bill-form__check">
+        <input type="checkbox" formControlName="isEstimated" [disabled]="saving">
+        <span>Estimated reading</span>
+      </label>
+
+      @if (chargesArray.length > 0) {
+        <section class="meter-bill-form__charges" aria-labelledby="meter-bill-charges-title">
+          <h3 id="meter-bill-charges-title">Detailed Charges</h3>
+          <div formArrayName="chargesArray" class="meter-bill-form__charge-list">
+            @for (chargeGroup of chargesArray.controls; track chargeGroup.get('chargeGuid')?.value; let index = $index) {
+              @let charge = chargeViews[index];
+              <div class="meter-bill-form__charge" [formGroupName]="index">
+                <span class="meter-bill-form__charge-name">{{ charge?.name || 'Charge' }}</span>
+                <label class="v1-field">
+                  <span>Usage</span>
+                  <div class="input-group meter-bill-form__input-group">
+                    <input class="v1-input" type="number" formControlName="chargeUsage" [disabled]="saving">
+                    @if (charge?.usageUnit) {
+                      <span class="input-group-text">{{ charge.usageUnit }}</span>
+                    }
+                  </div>
+                </label>
+                <label class="v1-field">
+                  <span>Amount</span>
+                  <div class="input-group meter-bill-form__input-group">
+                    <span class="input-group-text">$</span>
+                    <input class="v1-input" type="number" formControlName="chargeAmount" [disabled]="saving">
+                  </div>
+                </label>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (form.invalid && form.touched) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+          <span>Resolve the highlighted fields before saving this bill.</span>
+        </div>
+      }
+
+      <footer class="meter-bill-form__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="requestClose()">Cancel</button>
+        @if (mode === 'add') {
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="saving || form.invalid" (click)="save(true)">
+            Save + Add Another
+          </button>
+        }
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || form.invalid">
+          @if (saving) {
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          } @else {
+            <span class="fa fa-check" aria-hidden="true"></span>
+          }
+          {{ mode === 'add' ? 'Save' : 'Save Changes' }}
+        </button>
+      </footer>
+    </form>
+  }
+</app-meter-slideout>

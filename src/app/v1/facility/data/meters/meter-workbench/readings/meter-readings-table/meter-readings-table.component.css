@@ -1,0 +1,322 @@
+:host {
+  display: block;
+}
+
+.meter-readings-table {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.meter-readings-table__action-row {
+  display: flex;
+  gap: var(--v1-space-3);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  min-width: 0;
+  padding: var(--v1-space-2) var(--v1-space-3);
+  border: 1px solid var(--v1-border);
+  border-radius: 0;
+  background: var(--v1-surface);
+}
+
+.meter-readings-table__actions-bar,
+.meter-readings-table__table-controls {
+  display: flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.meter-readings-table__actions-bar {
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.meter-readings-table__table-controls {
+  flex: 1 1 auto;
+}
+
+.meter-readings-table__control {
+  display: flex;
+  gap: .45rem;
+  align-items: center;
+  color: var(--v1-muted);
+  font-size: .85rem;
+  font-weight: 800;
+}
+
+.meter-readings-table__control .v1-select {
+  width: auto;
+  min-width: 6rem;
+}
+
+.meter-readings-table__badge {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+  min-height: var(--v1-control-height-sm);
+  padding: .25rem .5rem;
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--v1-warning) 16%, var(--v1-surface));
+  color: var(--v1-text);
+  font-size: .8rem;
+  font-weight: 900;
+}
+
+.meter-readings-table__scroller {
+  overflow: auto;
+  border: 1px solid var(--v1-border);
+  border-radius: 0;
+  background: var(--v1-surface);
+}
+
+.meter-readings-table__status {
+  display: grid;
+  gap: 0;
+  margin-top: -1px;
+}
+
+.meter-readings-table__status + .meter-readings-table__scroller {
+  margin-top: -1px;
+}
+
+.meter-readings-table__table {
+  width: 100%;
+  min-width: 48rem;
+  border-collapse: collapse;
+  font-size: .88rem;
+}
+
+.meter-readings-table__table th,
+.meter-readings-table__table td {
+  padding: .55rem .65rem;
+  border-bottom: 1px solid var(--v1-divider);
+  vertical-align: middle;
+}
+
+.meter-readings-table__table th {
+  background: var(--v1-panel);
+  color: var(--v1-muted);
+  font-size: .76rem;
+  font-weight: 900;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.meter-readings-table__section-row th {
+  padding-top: .45rem;
+  padding-bottom: .45rem;
+  background: var(--v1-surface);
+  border-bottom-color: var(--v1-border);
+}
+
+.meter-readings-table__section-row .meter-readings-table__section-heading {
+  --meter-readings-section-accent: var(--v1-content-control);
+
+  border-right: 1px solid color-mix(in srgb, var(--meter-readings-section-accent) 45%, var(--v1-border));
+  border-left: 1px solid color-mix(in srgb, var(--meter-readings-section-accent) 45%, var(--v1-border));
+  background: color-mix(in srgb, var(--meter-readings-section-accent) 14%, var(--v1-surface));
+  color: var(--v1-text);
+  font-size: .72rem;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.meter-readings-table__section-row .meter-readings-table__section-heading--emissions {
+  --meter-readings-section-accent: var(--v1-success);
+}
+
+.meter-readings-table__section-row .meter-readings-table__section-heading--charges {
+  --meter-readings-section-accent: var(--v1-action);
+}
+
+.meter-readings-table__section-row .meter-readings-table__section-heading.meter-readings-table__column-hover {
+  background: color-mix(in srgb, var(--meter-readings-section-accent) 24%, var(--v1-surface));
+}
+
+.meter-readings-table__section-row .meter-readings-table__select,
+.meter-readings-table__section-row .meter-readings-table__actions {
+  background: var(--v1-surface);
+}
+
+.meter-readings-table__group-general {
+  --meter-readings-section-accent: var(--v1-content-control);
+}
+
+.meter-readings-table__group-emissions {
+  --meter-readings-section-accent: var(--v1-success);
+}
+
+.meter-readings-table__group-charges {
+  --meter-readings-section-accent: var(--v1-action);
+}
+
+.meter-readings-table__group-start {
+  border-left: 1px solid color-mix(in srgb, var(--meter-readings-section-accent) 45%, var(--v1-border));
+}
+
+.meter-readings-table__group-end {
+  border-right: 1px solid color-mix(in srgb, var(--meter-readings-section-accent) 45%, var(--v1-border));
+}
+
+.meter-readings-table__table tbody tr:hover > td {
+  background: color-mix(in srgb, var(--v1-content-control) 5%, var(--v1-surface));
+}
+
+.meter-readings-table__table tbody tr.meter-readings-table__row--negative > td {
+  background: color-mix(in srgb, var(--v1-danger) 8%, var(--v1-surface));
+}
+
+.meter-readings-table__table tbody tr.meter-readings-table__row--negative:hover > td {
+  background: color-mix(in srgb, var(--v1-danger) 12%, var(--v1-surface));
+}
+
+.meter-readings-table__table th.meter-readings-table__column-hover,
+.meter-readings-table__table td.meter-readings-table__column-hover {
+  background: color-mix(in srgb, var(--meter-readings-section-accent, var(--v1-content-control)) 9%, var(--v1-surface));
+}
+
+.meter-readings-table__table tbody tr:hover > td.meter-readings-table__column-hover {
+  background: color-mix(in srgb, var(--meter-readings-section-accent, var(--v1-content-control)) 16%, var(--v1-surface));
+}
+
+.meter-readings-table__table tbody tr.meter-readings-table__row--negative > td.meter-readings-table__column-hover {
+  background: color-mix(in srgb, var(--v1-danger) 14%, var(--v1-surface));
+}
+
+.meter-readings-table__select {
+  width: 2.6rem;
+  text-align: center;
+}
+
+.meter-readings-table__number {
+  text-align: right;
+}
+
+.meter-readings-table__value {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: baseline;
+  max-width: 100%;
+}
+
+.meter-readings-table__number .meter-readings-table__value {
+  justify-content: flex-end;
+}
+
+.meter-readings-table__estimated {
+  color: var(--v1-content-control);
+  font-size: .65rem;
+  line-height: 1;
+}
+
+.meter-readings-table__negative {
+  color: var(--v1-danger);
+  font-size: .78rem;
+  line-height: 1;
+}
+
+.meter-readings-table__sort {
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.meter-readings-table__number .meter-readings-table__sort {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.meter-readings-table__sort.active {
+  color: var(--v1-content-control);
+}
+
+.meter-readings-table__sort-icon {
+  flex: 0 0 .95rem;
+  width: .95rem;
+  text-align: center;
+  visibility: hidden;
+}
+
+.meter-readings-table__sort.active .meter-readings-table__sort-icon {
+  visibility: visible;
+}
+
+.meter-readings-table__actions {
+  width: 1%;
+  min-width: 5.35rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.meter-readings-table__actions .v1-icon-btn {
+  display: inline-grid;
+  margin-left: .2rem;
+}
+
+.meter-readings-table__footer {
+  display: flex;
+  gap: var(--v1-space-3);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: var(--v1-space-2) var(--v1-space-3);
+  border: 1px solid var(--v1-border);
+  border-top: 0;
+  border-radius: 0;
+  background: var(--v1-surface);
+}
+
+.meter-readings-table__footer-start {
+  display: inline-flex;
+  gap: var(--v1-space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.meter-readings-table__estimated-note {
+  display: inline-flex;
+  gap: .4rem;
+  align-items: center;
+  color: var(--v1-muted);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.meter-readings-table__footer ngb-pagination {
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .meter-readings-table__action-row,
+  .meter-readings-table__actions-bar,
+  .meter-readings-table__table-controls {
+    align-items: stretch;
+  }
+
+  .meter-readings-table__action-row,
+  .meter-readings-table__actions-bar,
+  .meter-readings-table__table-controls,
+  .meter-readings-table__actions-bar .v1-btn,
+  .meter-readings-table__table-controls .v1-btn {
+    width: 100%;
+  }
+
+  .meter-readings-table__action-row,
+  .meter-readings-table__actions-bar,
+  .meter-readings-table__table-controls {
+    flex-wrap: wrap;
+  }
+}

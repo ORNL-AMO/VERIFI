@@ -1,0 +1,63 @@
+@if (!status) {
+  <div class="v1-alert v1-alert--info" role="status">
+    <span class="fa fa-circle-info" aria-hidden="true"></span>
+    <span>Loading meter data and meter status details...</span>
+  </div>
+} @else if (status.isMeterValid !== true) {
+  <div class="v1-alert v1-alert--danger" role="alert">
+    <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+    <span>The meter associated with this data has errors in its configuration.</span>
+    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="settingsRequested.emit()">Manage Settings</button>
+  </div>
+} @else {
+  @if (status.hasNegativeReadings) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>
+        Negative energy use entered for one or more readings. To allow negative readings, edit the meter setup by clicking
+        <button type="button" class="meter-readings-status__link" (click)="settingsRequested.emit()">here</button>
+        and enabling the "Allow Negative Readings" option.
+      </span>
+    </div>
+  }
+  @if (status.hasDuplicateEntries) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>Two or more readings have been entered for the same day.</span>
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="qualityRequested.emit()">View Quality Report</button>
+    </div>
+  }
+  @if (status.missingDataMonths.length > 0) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>Missing meter data found for {{ status.missingDataMonths.length }} month{{ status.missingDataMonths.length === 1 ? '' : 's' }}.</span>
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--danger" [disabled]="!canAct" (click)="fillMissingRequested.emit()">Fill Missing Months with Zeros</button>
+    </div>
+  }
+  @if (status.missingDataYears.length > 0) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>Missing annual meter data for {{ status.missingDataYears.length }} year{{ status.missingDataYears.length === 1 ? '' : 's' }}.</span>
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="qualityRequested.emit()">View Quality Report</button>
+    </div>
+  }
+  @if (status.isDataOutdated) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <span class="fa fa-clock" aria-hidden="true"></span>
+      <span>Meter settings changed after one or more readings were entered.</span>
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="qualityRequested.emit()">View Quality Report</button>
+    </div>
+  }
+  @if (status.isDataCurrent === false && status.lastDateEntry) {
+    <div class="v1-alert" [class.v1-alert--info]="status.isMeterNoLongerInUse" [class.v1-alert--warning]="!status.isMeterNoLongerInUse" role="status">
+      <span class="fa" [class.fa-circle-info]="status.isMeterNoLongerInUse" [class.fa-triangle-exclamation]="!status.isMeterNoLongerInUse" aria-hidden="true"></span>
+      <span>
+        @if (status.isMeterNoLongerInUse) {
+          This meter is no longer in use.
+        } @else {
+          This meter has older data than the rest of the facility.
+        }
+      </span>
+    </div>
+  }
+}

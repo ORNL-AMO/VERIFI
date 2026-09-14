@@ -1,0 +1,37 @@
+:host {
+  display: grid;
+  gap: 0;
+}
+
+.v1-alert {
+  align-items: center;
+  border-radius: 0;
+}
+
+.v1-alert + .v1-alert {
+  margin-top: -1px;
+}
+
+.meter-readings-status__link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--v1-link);
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: .15rem;
+  cursor: pointer;
+}
+
+.meter-readings-status__link:hover,
+.meter-readings-status__link:focus-visible {
+  color: var(--v1-content-control);
+}
+
+.meter-readings-status__link:focus-visible {
+  border-radius: var(--v1-radius-sm);
+  outline: 3px solid var(--v1-focus);
+  outline-offset: 2px;
+}

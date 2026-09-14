@@ -1,7 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
@@ -26,7 +26,7 @@ export type MeterSettingsSaveState = 'idle' | 'saving' | 'saved' | 'error' | 'in
   styleUrls: ['./meter-workbench-settings.component.css'],
   standalone: false
 })
-export class MeterWorkbenchSettingsComponent implements OnDestroy {
+export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly meterWorkspace = inject(FacilityMetersWorkspaceService);
   private readonly formService = inject(MeterSettingsFormService);
@@ -36,6 +36,7 @@ export class MeterWorkbenchSettingsComponent implements OnDestroy {
   private readonly modalPortal = inject(ModalPortalService);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly viewContainerRef = inject(ViewContainerRef);
 
   readonly account = this.meterWorkspace.account;
@@ -70,6 +71,10 @@ export class MeterWorkbenchSettingsComponent implements OnDestroy {
   private deleteModalOpen = false;
 
   @ViewChild('deleteMeterConfirmModal') private readonly deleteMeterConfirmModal?: TemplateRef<unknown>;
+
+  ngAfterViewInit(): void {
+    this.scrollToFragment(this.route.snapshot.fragment);
+  }
 
   private readonly rebuildEffect = effect(() => {
     const meter = this.meter();
@@ -228,6 +233,15 @@ export class MeterWorkbenchSettingsComponent implements OnDestroy {
       this.deleteModalOpen = false;
       this.modalPortal.hide();
     }
+  }
+
+  private scrollToFragment(fragment: string | null): void {
+    if (!fragment) {
+      return;
+    }
+    setTimeout(() => {
+      document.getElementById(fragment)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
   }
 
   private applyRuleChange(kind: MeterSettingsRuleChange, saveUserChange: boolean): void {

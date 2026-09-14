@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -45,6 +45,25 @@ describe('MeterWorkbenchSettingsComponent', () => {
     expect(element.querySelector('.meter-settings__aside app-meter-settings-charges-form')).not.toBeNull();
     expect(element.querySelector('.meter-settings__main app-meter-settings-other-info')).not.toBeNull();
     expect(element.querySelector('.meter-settings__main app-meter-settings-status-form')).not.toBeNull();
+  });
+
+  it('anchors the negative readings setting and scrolls to it when the route fragment is present', async () => {
+    vi.useFakeTimers();
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      const fixture = setup({ fragment: 'meter-settings-status' });
+      fixture.detectChanges();
+
+      await vi.runOnlyPendingTimersAsync();
+
+      const statusSettings = query<HTMLElement>(fixture, '#meter-settings-status');
+      expect(statusSettings.textContent).toContain('Allow Negative Readings');
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' });
+    } finally {
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+    }
   });
 
   it('does not render electricity options for non-electric meters', () => {
@@ -208,6 +227,7 @@ function setup(options: {
   hasPending?: boolean;
   withReading?: boolean;
   source?: 'Electricity' | 'Natural Gas';
+  fragment?: string;
 } = {}): ComponentFixture<MeterWorkbenchSettingsComponent> {
   const selectedMeter = signal(meter({
     id: 1,
@@ -305,6 +325,10 @@ function setup(options: {
             detail
           ]
         }
+      },
+      {
+        provide: ActivatedRoute,
+        useValue: { snapshot: { fragment: options.fragment ?? null } }
       },
       {
         provide: Router,

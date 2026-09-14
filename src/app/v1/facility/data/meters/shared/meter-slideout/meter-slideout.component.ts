@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-meter-dashboard-slideout',
-  templateUrl: './meter-dashboard-slideout.component.html',
-  styleUrls: ['./meter-dashboard-slideout.component.css'],
+  selector: 'app-meter-slideout',
+  templateUrl: './meter-slideout.component.html',
+  styleUrls: ['./meter-slideout.component.css'],
   standalone: true
 })
-export class MeterDashboardSlideoutComponent {
+export class MeterSlideoutComponent {
   @Input({ required: true }) title = '';
   @Input() description = '';
   @Input() saving = false;
