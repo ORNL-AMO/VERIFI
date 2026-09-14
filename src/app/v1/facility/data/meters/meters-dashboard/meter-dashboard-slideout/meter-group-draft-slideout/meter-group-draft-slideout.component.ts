@@ -5,14 +5,14 @@ import {
   MeterGroupDraft,
   MeterGroupType
 } from '../../../facility-meters.models';
-import { MeterDashboardSlideoutComponent } from '../meter-dashboard-slideout.component';
+import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
 
 @Component({
   selector: 'app-meter-group-draft-slideout',
   templateUrl: './meter-group-draft-slideout.component.html',
   styleUrls: ['./meter-group-draft-slideout.component.css'],
   standalone: true,
-  imports: [MeterDashboardSlideoutComponent]
+  imports: [MeterSlideoutComponent]
 })
 export class MeterGroupDraftSlideoutComponent implements OnChanges {
   @Input() group?: IdbUtilityMeterGroup;

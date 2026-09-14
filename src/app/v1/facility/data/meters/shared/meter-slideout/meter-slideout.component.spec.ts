@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MeterDashboardSlideoutComponent } from './meter-dashboard-slideout.component';
+import { MeterSlideoutComponent } from './meter-slideout.component';
 
-describe('MeterDashboardSlideoutComponent', () => {
+describe('MeterSlideoutComponent', () => {
   it('emits close requests from the backdrop and header close button', () => {
     const fixture = setup();
     const closed: void[] = [];
@@ -30,18 +30,18 @@ describe('MeterDashboardSlideoutComponent', () => {
   });
 });
 
-function setup(): ComponentFixture<MeterDashboardSlideoutComponent> {
+function setup(): ComponentFixture<MeterSlideoutComponent> {
   const fixture = TestBed.configureTestingModule({
-    imports: [MeterDashboardSlideoutComponent]
-  }).createComponent(MeterDashboardSlideoutComponent);
+    imports: [MeterSlideoutComponent]
+  }).createComponent(MeterSlideoutComponent);
   fixture.componentInstance.title = 'Add meter';
   return fixture;
 }
 
-function backdropButton(fixture: ComponentFixture<MeterDashboardSlideoutComponent>): HTMLButtonElement {
+function backdropButton(fixture: ComponentFixture<MeterSlideoutComponent>): HTMLButtonElement {
   return fixture.nativeElement.querySelector('.v1-meter-slideout-backdrop') as HTMLButtonElement;
 }
 
-function closeButton(fixture: ComponentFixture<MeterDashboardSlideoutComponent>): HTMLButtonElement {
+function closeButton(fixture: ComponentFixture<MeterSlideoutComponent>): HTMLButtonElement {
   return fixture.nativeElement.querySelector('.v1-meter-slideout__header .v1-icon-btn') as HTMLButtonElement;
 }

@@ -1,0 +1,129 @@
+.meter-bill-form {
+  display: grid;
+  gap: var(--v1-space-3);
+}
+
+.meter-bill-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--v1-space-3);
+}
+
+.meter-bill-form__check {
+  display: flex;
+  gap: .55rem;
+  align-items: center;
+  color: var(--v1-text);
+}
+
+.meter-bill-form__input-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.meter-bill-form__input-group > .v1-input {
+  width: 1%;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.meter-bill-form__input-group > .v1-input:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.meter-bill-form__input-group > .v1-input:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.meter-bill-form__input-group > .input-group-text {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: var(--v1-control-height);
+  padding: .45rem .6rem;
+  border: 1px solid var(--v1-border);
+  background: var(--v1-control-addon-surface);
+  color: var(--v1-muted);
+  font-size: .82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.meter-bill-form__input-group > .input-group-text:first-child {
+  border-right: 0;
+  border-radius: var(--v1-radius-sm) 0 0 var(--v1-radius-sm);
+}
+
+.meter-bill-form__input-group > .input-group-text:last-child {
+  border-left: 0;
+  border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0;
+}
+
+.meter-bill-form__field-error {
+  color: var(--v1-danger);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.meter-bill-form__charges {
+  display: grid;
+  gap: var(--v1-space-3);
+  padding: var(--v1-space-3);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-panel);
+}
+
+.meter-bill-form__charges h3 {
+  margin: 0;
+}
+
+.meter-bill-form__charges h3 {
+  font-size: .98rem;
+  font-weight: 900;
+}
+
+.meter-bill-form__charge-list {
+  display: grid;
+  gap: var(--v1-space-3);
+}
+
+.meter-bill-form__charge {
+  display: grid;
+  grid-template-columns: 1fr 8rem 8rem;
+  gap: var(--v1-space-2);
+  align-items: end;
+}
+
+.meter-bill-form__charge-name {
+  align-self: center;
+  min-width: 0;
+  color: var(--v1-text);
+  font-size: .9rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.meter-bill-form__footer {
+  position: sticky;
+  bottom: calc(var(--v1-space-4) * -1);
+  display: flex;
+  gap: var(--v1-space-2);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: var(--v1-space-3);
+  background: var(--v1-surface);
+}
+
+@media (max-width: 720px) {
+  .meter-bill-form__grid,
+  .meter-bill-form__charge {
+    grid-template-columns: 1fr;
+  }
+}

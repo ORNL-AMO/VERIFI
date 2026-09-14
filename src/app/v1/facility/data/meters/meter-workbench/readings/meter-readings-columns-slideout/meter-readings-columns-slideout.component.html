@@ -1,0 +1,183 @@
+<app-meter-slideout
+  title="Choose columns"
+  [description]="'Track the readings fields shown for ' + meter.name + '.'"
+  [saving]="saving"
+  (closed)="requestClose()">
+  @let _draft = draft();
+  @if (_draft) {
+    <form class="meter-columns" (submit)="$event.preventDefault(); apply()">
+      <div class="meter-columns__quick-actions">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="saving" (click)="showAll()">Show All</button>
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="saving" (click)="hideAll()">Hide All</button>
+      </div>
+
+      @if (tableType() === 'electricity' && _draft.electricityFilters) {
+        <section class="meter-columns__section" aria-labelledby="meter-electric-columns">
+          <h3 id="meter-electric-columns">General Information</h3>
+          <label class="meter-columns__check">
+            <input type="checkbox" [checked]="_draft.electricityFilters.generalInformationFilters.totalCost" [disabled]="saving" (change)="toggleElectricityFilter('general', 'totalCost', $any($event.target).checked)">
+            <span>Total Cost</span>
+          </label>
+          @if (!isRecs()) {
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.electricityFilters.generalInformationFilters.realDemand" [disabled]="saving" (change)="toggleElectricityFilter('general', 'realDemand', $any($event.target).checked)">
+              <span>Real Demand</span>
+            </label>
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.electricityFilters.generalInformationFilters.billedDemand" [disabled]="saving" (change)="toggleElectricityFilter('general', 'billedDemand', $any($event.target).checked)">
+              <span>Billed Demand</span>
+            </label>
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.electricityFilters.generalInformationFilters.powerFactor" [disabled]="saving" (change)="toggleElectricityFilter('general', 'powerFactor', $any($event.target).checked)">
+              <span>Power Factor</span>
+            </label>
+          }
+        </section>
+        @if (account?.displayEmissions) {
+          <section class="meter-columns__section" aria-labelledby="meter-electric-emissions-columns">
+            <h3 id="meter-electric-emissions-columns">Emissions</h3>
+            @if (!isRecs()) {
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.electricityFilters.emissionsFilters.marketEmissions" [disabled]="saving" (change)="toggleElectricityFilter('emissions', 'marketEmissions', $any($event.target).checked)">
+                <span>Market Emissions</span>
+              </label>
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.electricityFilters.emissionsFilters.locationEmissions" [disabled]="saving" (change)="toggleElectricityFilter('emissions', 'locationEmissions', $any($event.target).checked)">
+                <span>Location Emissions</span>
+              </label>
+            } @else {
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.electricityFilters.emissionsFilters.excessRECs" [disabled]="saving" (change)="toggleElectricityFilter('emissions', 'excessRECs', $any($event.target).checked)">
+                <span>Excess RECs</span>
+              </label>
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.electricityFilters.emissionsFilters.excessRECsEmissions" [disabled]="saving" (change)="toggleElectricityFilter('emissions', 'excessRECsEmissions', $any($event.target).checked)">
+                <span>Excess RECs Emissions</span>
+              </label>
+            }
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.electricityFilters.emissionsFilters.recs" [disabled]="saving" (change)="toggleElectricityFilter('emissions', 'recs', $any($event.target).checked)">
+              <span>RECs</span>
+            </label>
+          </section>
+        }
+      }
+
+      @if (tableType() === 'general' && _draft.generalFilters) {
+        <section class="meter-columns__section" aria-labelledby="meter-general-columns">
+          <h3 id="meter-general-columns">General Information</h3>
+          @if (displayVolumeInput()) {
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.generalFilters.totalVolume" [disabled]="saving" (change)="toggleGeneralFilter('totalVolume', $any($event.target).checked)">
+              <span>Total Volume</span>
+            </label>
+          }
+          @if (showHeatCapacity()) {
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.generalFilters.heatCapacity" [disabled]="saving" (change)="toggleGeneralFilter('heatCapacity', $any($event.target).checked)">
+              <span>Heat Capacity</span>
+            </label>
+          }
+          <label class="meter-columns__check">
+            <input type="checkbox" [checked]="_draft.generalFilters.totalCost" [disabled]="saving" (change)="toggleGeneralFilter('totalCost', $any($event.target).checked)">
+            <span>Total Cost</span>
+          </label>
+        </section>
+        @if (showEmissions()) {
+          <section class="meter-columns__section" aria-labelledby="meter-general-emissions-columns">
+            <h3 id="meter-general-emissions-columns">Emissions</h3>
+            @if (meter.source === 'Other Fuels' || meter.source === 'Natural Gas') {
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.generalFilters.stationaryBiogenicEmmissions" [disabled]="saving" (change)="toggleGeneralFilter('stationaryBiogenicEmmissions', $any($event.target).checked)">
+                <span>Biogenic Emissions</span>
+              </label>
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.generalFilters.stationaryCarbonEmissions" [disabled]="saving" (change)="toggleGeneralFilter('stationaryCarbonEmissions', $any($event.target).checked)">
+                <span>Carbon Emissions</span>
+              </label>
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="_draft.generalFilters.stationaryOtherEmissions" [disabled]="saving" (change)="toggleGeneralFilter('stationaryOtherEmissions', $any($event.target).checked)">
+                <span>Other Emissions</span>
+              </label>
+            }
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.generalFilters.totalEmissions" [disabled]="saving" (change)="toggleGeneralFilter('totalEmissions', $any($event.target).checked)">
+              <span>Total Emissions</span>
+            </label>
+          </section>
+        }
+      }
+
+      @if (tableType() === 'vehicle' && _draft.vehicleFilters) {
+        <section class="meter-columns__section" aria-labelledby="meter-vehicle-columns">
+          <h3 id="meter-vehicle-columns">General Information</h3>
+          <label class="meter-columns__check">
+            <input type="checkbox" [checked]="_draft.vehicleFilters.totalEnergy" [disabled]="saving" (change)="toggleVehicleFilter('totalEnergy', $any($event.target).checked)">
+            <span>Total Energy</span>
+          </label>
+          @if (showFuelEfficiency()) {
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.vehicleFilters.fuelEfficiency" [disabled]="saving" (change)="toggleVehicleFilter('fuelEfficiency', $any($event.target).checked)">
+              <span>Fuel Efficiency</span>
+            </label>
+          }
+          <label class="meter-columns__check">
+            <input type="checkbox" [checked]="_draft.vehicleFilters.totalCost" [disabled]="saving" (change)="toggleVehicleFilter('totalCost', $any($event.target).checked)">
+            <span>Total Cost</span>
+          </label>
+        </section>
+        @if (account?.displayEmissions) {
+          <section class="meter-columns__section" aria-labelledby="meter-vehicle-emissions-columns">
+            <h3 id="meter-vehicle-emissions-columns">Emissions</h3>
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.vehicleFilters.mobileBiogenicEmissions" [disabled]="saving" (change)="toggleVehicleFilter('mobileBiogenicEmissions', $any($event.target).checked)">
+              <span>Biogenic Emissions</span>
+            </label>
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.vehicleFilters.mobileCarbonEmissions" [disabled]="saving" (change)="toggleVehicleFilter('mobileCarbonEmissions', $any($event.target).checked)">
+              <span>Carbon Emissions</span>
+            </label>
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.vehicleFilters.mobileOtherEmissions" [disabled]="saving" (change)="toggleVehicleFilter('mobileOtherEmissions', $any($event.target).checked)">
+              <span>Other Emissions</span>
+            </label>
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="_draft.vehicleFilters.mobileTotalEmissions" [disabled]="saving" (change)="toggleVehicleFilter('mobileTotalEmissions', $any($event.target).checked)">
+              <span>Total Emissions</span>
+            </label>
+          </section>
+        }
+      }
+
+      @if (_draft.charges && _draft.charges.length > 0) {
+        <section class="meter-columns__section" aria-labelledby="meter-charge-columns">
+          <h3 id="meter-charge-columns">Detailed Charges</h3>
+          @for (charge of _draft.charges; track charge.guid) {
+            @if (canShowChargeUsage(charge)) {
+              <label class="meter-columns__check">
+                <input type="checkbox" [checked]="charge.displayUsageInTable" [disabled]="saving" (change)="toggleCharge(charge.guid, 'displayUsageInTable', $any($event.target).checked)">
+                <span>{{ charge.name }}</span>
+              </label>
+            }
+            <label class="meter-columns__check">
+              <input type="checkbox" [checked]="charge.displayChargeInTable" [disabled]="saving" (change)="toggleCharge(charge.guid, 'displayChargeInTable', $any($event.target).checked)">
+              <span>{{ charge.name }} ($)</span>
+            </label>
+          }
+        </section>
+      }
+
+      <footer class="meter-columns__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="requestClose()">Cancel</button>
+        <button type="submit" class="v1-btn v1-btn--primary" [disabled]="saving">
+          @if (saving) {
+            <span class="fa fa-circle-notch fa-spin" aria-hidden="true"></span>
+          } @else {
+            <span class="fa fa-check" aria-hidden="true"></span>
+          }
+          Apply
+        </button>
+      </footer>
+    </form>
+  }
+</app-meter-slideout>

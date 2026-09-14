@@ -8,6 +8,10 @@ import { FacilityMetersComponent } from './meters/facility-meters.component';
 import { MeterWorkbenchMonthlyDataComponent } from './meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterWorkbenchReadingsComponent } from './meters/meter-workbench/readings/meter-workbench-readings.component';
+import { MeterReadingBillSlideoutComponent } from './meters/meter-workbench/readings/meter-reading-bill-slideout/meter-reading-bill-slideout.component';
+import { MeterReadingsColumnsSlideoutComponent } from './meters/meter-workbench/readings/meter-readings-columns-slideout/meter-readings-columns-slideout.component';
+import { MeterReadingsStatusComponent } from './meters/meter-workbench/readings/meter-readings-status/meter-readings-status.component';
+import { MeterReadingsTableComponent } from './meters/meter-workbench/readings/meter-readings-table/meter-readings-table.component';
 import { MeterWorkbenchSettingsComponent } from './meters/meter-workbench/settings/meter-workbench-settings.component';
 import { MeterSettingsChargesFormComponent } from './meters/meter-workbench/settings/meter-settings-charges-form/meter-settings-charges-form.component';
 import { MeterSettingsCoreFormComponent } from './meters/meter-workbench/settings/meter-settings-core-form/meter-settings-core-form.component';
@@ -51,7 +55,11 @@ import { MetersGroupingViewComponent } from './meters/meters-dashboard/meters-gr
     ConfirmDeleteMeterModalComponent,
     MetersDashboardComponent,
     MetersBrowseViewComponent,
-    MetersGroupingViewComponent
+    MetersGroupingViewComponent,
+    MeterReadingBillSlideoutComponent,
+    MeterReadingsColumnsSlideoutComponent,
+    MeterReadingsStatusComponent,
+    MeterReadingsTableComponent
   ],
   exports: [
     FacilityDataPlaceholderComponent,

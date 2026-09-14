@@ -1,0 +1,119 @@
+@let _meter = meter();
+@let _status = selectedMeterStatusCheck();
+@let _table = tableView();
+@let _canAct = canAct();
+@let _billPanel = billPanel();
+
+<section class="meter-readings" aria-label="Meter readings">
+
+  @if (actionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <span class="fa fa-triangle-exclamation" aria-hidden="true"></span>
+      <span>{{ actionError() }}</span>
+    </div>
+  }
+
+  @if (!_status || _status.isMeterValid !== true) {
+    <app-meter-readings-status
+      [status]="_status"
+      [canAct]="_canAct"
+      (settingsRequested)="openSettings()"
+      (qualityRequested)="openQuality()"
+      (fillMissingRequested)="requestFillMissing()">
+    </app-meter-readings-status>
+  } @else {
+    @if (_table.rows.length === 0) {
+      <div class="meter-readings__empty">
+        <span class="fa fa-table-list" aria-hidden="true"></span>
+        <h3>No bills found for {{ _meter?.name }}.</h3>
+        <p>Add a bill to begin tracking readings for this meter.</p>
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!_canAct" (click)="openAddBill()">
+          <span class="fa fa-plus" aria-hidden="true"></span>
+          Add New Bill
+        </button>
+      </div>
+    } @else {
+      <app-meter-readings-table
+        [view]="_table"
+        [canAct]="_canAct"
+        [isElectron]="isElectron"
+        [isDataOutdated]="_status.isDataOutdated"
+        (chooseColumnsRequested)="openColumns()"
+        (addBillRequested)="openAddBill()"
+        (editRequested)="openEditBill($event)"
+        (deleteRequested)="requestDelete($event)"
+        (bulkDeleteRequested)="requestBulkDelete($event)"
+        (viewBillRequested)="openConnectedBill($event)">
+        <app-meter-readings-status
+          [status]="_status"
+          [canAct]="_canAct"
+          (settingsRequested)="openSettings()"
+          (qualityRequested)="openQuality()"
+          (fillMissingRequested)="requestFillMissing()">
+        </app-meter-readings-status>
+      </app-meter-readings-table>
+    }
+  }
+</section>
+
+@if (columnsOpen() && _meter) {
+  <app-meter-readings-columns-slideout
+    [account]="account()"
+    [facility]="facility()"
+    [meter]="_meter"
+    [saving]="saving()"
+    (applied)="applyColumns($event)"
+    (cancelled)="closeColumns()">
+  </app-meter-readings-columns-slideout>
+}
+
+@if (_billPanel && _meter) {
+  <app-meter-reading-bill-slideout
+    [meter]="_meter"
+    [reading]="_billPanel.reading"
+    [mode]="_billPanel.mode"
+    [existingReadings]="selectedMeterData()"
+    [saving]="saving()"
+    (saved)="saveBill($event)"
+    (cancelled)="closeBillPanel()">
+  </app-meter-reading-bill-slideout>
+}
+
+<ng-template #readingsConfirmModal>
+  <div class="v1-modal-layer">
+    <button type="button" class="v1-modal-backdrop" aria-label="Cancel readings action" [disabled]="saving()" (click)="cancelDelete()"></button>
+    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="meter-readings-confirm-title">
+      <header class="v1-modal__header">
+        <h2 id="meter-readings-confirm-title">
+          @if (fillMissingOpen()) {
+            Fill Missing Meter Data
+          } @else {
+            Delete Meter Data
+          }
+        </h2>
+        <button type="button" class="v1-icon-btn" aria-label="Cancel readings action" [disabled]="saving()" (click)="cancelDelete()">
+          <span class="fa fa-xmark" aria-hidden="true"></span>
+        </button>
+      </header>
+      <div class="v1-modal__body">
+        @if (fillMissingOpen()) {
+          <p>Zero-valued meter readings will be added for {{ missingDataMonths().length }} missing month{{ missingDataMonths().length === 1 ? '' : 's' }}.</p>
+        } @else if (bulkDeleteOpen()) {
+          <p>Deleting {{ selectedCount() }} selected meter reading{{ selectedCount() === 1 ? '' : 's' }} cannot be undone.</p>
+        } @else {
+          <p>Deleting this meter reading cannot be undone.</p>
+        }
+      </div>
+      <footer class="v1-modal__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelDelete()">Cancel</button>
+        @if (fillMissingOpen()) {
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmFillMissing()">Fill with Zeros</button>
+        } @else if (bulkDeleteOpen()) {
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmBulkDelete()">Delete Selected</button>
+        } @else {
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmDelete()">Delete</button>
+        }
+      </footer>
+    </section>
+  </div>
+</ng-template>
