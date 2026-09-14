@@ -91,6 +91,7 @@
     "bootstrap": "5.3.8",
     "browserslist": "4.26.3",
     "canvas-confetti": "1.9.3",
+    "echarts": "^6.1.0",
     "electron-log": "5.1.2",
     "electron-updater": "6.8.9",
     "fs-jetpack": "5.1.0",
