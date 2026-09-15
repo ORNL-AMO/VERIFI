@@ -11,6 +11,7 @@ import { AccountPortfolioPredictorsTabComponent } from './account/portfolio/acco
 import { AccountPortfolioReportsTabComponent } from './account/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { FacilityDataModule } from './facility/data/facility-data.module';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
+import { MeterWorkbenchMonthlyChartComponent } from './facility/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './facility/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterWorkbenchReadingsComponent } from './facility/data/meters/meter-workbench/readings/meter-workbench-readings.component';
@@ -19,6 +20,7 @@ import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/
 import { MeterWorkbenchYearlyDataComponent } from './facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
 import { MeterGroupWorkbenchGraphComponent } from './facility/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
 import { MeterGroupWorkbenchTableComponent } from './facility/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchYearlyDataComponent } from './facility/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
 import { MeterGroupWorkbenchComponent } from './facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from './facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
@@ -88,6 +90,7 @@ describe('V1Routes facility data meters routes', () => {
     expect(tabRoute('settings')).toMatchObject({ component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } });
     expect(tabRoute('readings')).toMatchObject({ component: MeterWorkbenchReadingsComponent, data: { meterTab: 'readings' } });
     expect(tabRoute('monthly')).toMatchObject({ component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } });
+    expect(tabRoute('monthly-chart')).toMatchObject({ component: MeterWorkbenchMonthlyChartComponent, data: { meterTab: 'monthly-chart' } });
     expect(tabRoute('yearly')).toMatchObject({ component: MeterWorkbenchYearlyDataComponent, data: { meterTab: 'yearly' } });
     expect(tabRoute('quality')).toMatchObject({ component: MeterWorkbenchQualityReportComponent, data: { meterTab: 'quality' } });
   });
@@ -117,17 +120,22 @@ describe('V1Routes facility data meters routes', () => {
       component: MeterGroupWorkbenchTableComponent,
       data: { meterGroupTab: 'monthly-table', meterGroupPeriod: 'monthly' }
     });
-    expect(groupChildren.find(route => route.path === 'monthly-graph')).toMatchObject({
+    expect(groupChildren.find(route => route.path === 'monthly-chart')).toMatchObject({
       component: MeterGroupWorkbenchGraphComponent,
-      data: { meterGroupTab: 'monthly-graph', meterGroupPeriod: 'monthly' }
+      data: { meterGroupTab: 'monthly-chart', meterGroupPeriod: 'monthly' }
+    });
+    expect(groupChildren.find(route => route.path === 'monthly-graph')).toMatchObject({
+      redirectTo: 'monthly-chart'
+    });
+    expect(groupChildren.find(route => route.path === 'yearly')).toMatchObject({
+      component: MeterGroupWorkbenchYearlyDataComponent,
+      data: { meterGroupTab: 'yearly', meterGroupPeriod: 'yearly' }
     });
     expect(groupChildren.find(route => route.path === 'yearly-table')).toMatchObject({
-      component: MeterGroupWorkbenchTableComponent,
-      data: { meterGroupTab: 'yearly-table', meterGroupPeriod: 'yearly' }
+      redirectTo: 'yearly'
     });
     expect(groupChildren.find(route => route.path === 'yearly-graph')).toMatchObject({
-      component: MeterGroupWorkbenchGraphComponent,
-      data: { meterGroupTab: 'yearly-graph', meterGroupPeriod: 'yearly' }
+      redirectTo: 'yearly'
     });
   });
 

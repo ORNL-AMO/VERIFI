@@ -1,0 +1,32 @@
+@let currentMeter = meter();
+
+@if (!currentMeter?.meterReadingDataApplication) {
+  <section class="v1-meter-chart-tab" aria-label="Meter monthly chart">
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="calendar"></app-ui-icon>
+      <h2>Select a calendarization method</h2>
+      <p>Choose how readings should be assigned to reporting months before reviewing the Monthly Chart.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openSettings()">
+        <app-ui-icon name="settings"></app-ui-icon>
+        Open Settings
+      </button>
+    </article>
+  </section>
+} @else {
+  <app-meter-results-chart
+    ariaLabel="Meter monthly data chart"
+    loadingTitle="Preparing monthly chart"
+    loadingDescription="VERIFI is calculating calendarized data for this meter."
+    errorTitle="Monthly chart could not be calculated"
+    errorDescription="Check this meter's readings and settings, then try again."
+    emptyTitle="No monthly data to chart"
+    emptyDescription="Add readings or review the selected calendarization method."
+    downloadFileName="meter-monthly-data-chart"
+    period="monthly"
+    [state]="workspace.calendarizationState()"
+    [chartRows]="chartRows()"
+    [metrics]="metrics()"
+    [defaultLeftMetricId]="defaultLeftMetricId()"
+    [defaultRightMetricId]="defaultRightMetricId()">
+  </app-meter-results-chart>
+}

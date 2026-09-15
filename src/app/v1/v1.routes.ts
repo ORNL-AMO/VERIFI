@@ -20,6 +20,7 @@ import { AccountSettingsStalenessComponent } from './account/settings/staleness/
 import { AccountSettingsUnitsComponent } from './account/settings/units/account-settings-units.component';
 import { FacilityDataPlaceholderComponent } from './facility/data/facility-data-placeholder.component';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
+import { MeterWorkbenchMonthlyChartComponent } from './facility/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './facility/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterWorkbenchReadingsComponent } from './facility/data/meters/meter-workbench/readings/meter-workbench-readings.component';
@@ -28,6 +29,7 @@ import { MeterWorkbenchComponent } from './facility/data/meters/meter-workbench/
 import { MeterWorkbenchYearlyDataComponent } from './facility/data/meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
 import { MeterGroupWorkbenchGraphComponent } from './facility/data/meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
 import { MeterGroupWorkbenchTableComponent } from './facility/data/meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchYearlyDataComponent } from './facility/data/meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
 import { MeterGroupWorkbenchComponent } from './facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from './facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from './facility/data/meters/meters-dashboard/meters-dashboard.component';
@@ -137,6 +139,7 @@ export const V1Routes: Routes = [
                       { path: 'settings', component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } },
                       { path: 'readings', component: MeterWorkbenchReadingsComponent, data: { meterTab: 'readings' } },
                       { path: 'monthly', component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } },
+                      { path: 'monthly-chart', component: MeterWorkbenchMonthlyChartComponent, data: { meterTab: 'monthly-chart' } },
                       { path: 'yearly', component: MeterWorkbenchYearlyDataComponent, data: { meterTab: 'yearly' } },
                       { path: 'quality', component: MeterWorkbenchQualityReportComponent, data: { meterTab: 'quality' } },
                       { path: '**', redirectTo: 'settings' }
@@ -155,9 +158,11 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'monthly-table' },
                       { path: 'monthly-table', component: MeterGroupWorkbenchTableComponent, data: { meterGroupTab: 'monthly-table', meterGroupPeriod: 'monthly' } },
-                      { path: 'monthly-graph', component: MeterGroupWorkbenchGraphComponent, data: { meterGroupTab: 'monthly-graph', meterGroupPeriod: 'monthly' } },
-                      { path: 'yearly-table', component: MeterGroupWorkbenchTableComponent, data: { meterGroupTab: 'yearly-table', meterGroupPeriod: 'yearly' } },
-                      { path: 'yearly-graph', component: MeterGroupWorkbenchGraphComponent, data: { meterGroupTab: 'yearly-graph', meterGroupPeriod: 'yearly' } },
+                      { path: 'monthly-chart', component: MeterGroupWorkbenchGraphComponent, data: { meterGroupTab: 'monthly-chart', meterGroupPeriod: 'monthly' } },
+                      { path: 'monthly-graph', pathMatch: 'full', redirectTo: 'monthly-chart' },
+                      { path: 'yearly', component: MeterGroupWorkbenchYearlyDataComponent, data: { meterGroupTab: 'yearly', meterGroupPeriod: 'yearly' } },
+                      { path: 'yearly-table', pathMatch: 'full', redirectTo: 'yearly' },
+                      { path: 'yearly-graph', pathMatch: 'full', redirectTo: 'yearly' },
                       { path: '**', redirectTo: 'monthly-table' }
                     ]
                   }

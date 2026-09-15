@@ -129,7 +129,7 @@ describe('WorkspaceNavigationService', () => {
       'meter-a',
       'readings'
     ]);
-    expect(service.facilityMeterGroupRoute('facility-a', 'group-a', 'yearly-graph')).toEqual([
+    expect(service.facilityMeterGroupRoute('facility-a', 'group-a', 'yearly')).toEqual([
       '/v1',
       'workspace',
       'facility',
@@ -137,7 +137,7 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'meter-grouping',
       'group-a',
-      'yearly-graph'
+      'yearly'
     ]);
     expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
       '/v1',

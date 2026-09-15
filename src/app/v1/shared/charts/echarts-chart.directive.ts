@@ -58,6 +58,24 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
 
   @Input('appV1ECharts') option: V1EChartsOption | undefined;
 
+  downloadPng(fileName: string): void {
+    if (!this.chart || typeof document === 'undefined') {
+      return;
+    }
+    const imageUrl = this.chart.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+      excludeComponents: ['toolbox', 'dataZoom']
+    });
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = pngFileName(fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   ngAfterViewInit(): void {
     this.zone.runOutsideAngular(() => {
       this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
@@ -113,7 +131,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     const option = this.withThemeDefaults(this.option, isInitialRender);
     this.chart.setOption(option, {
       lazyUpdate: false,
-      replaceMerge: isInitialRender ? undefined : ['series', 'yAxis']
+      replaceMerge: isInitialRender ? undefined : ['series', 'yAxis', 'dataZoom']
     });
     this.hasRenderedOption = true;
   }
@@ -275,4 +293,9 @@ function resolveCssVariableReferences(value: unknown, styles: CSSStyleDeclaratio
   }
 
   return value;
+}
+
+function pngFileName(fileName: string): string {
+  const safeName = fileName.trim().replace(/[^a-z0-9-_]+/gi, '-').replace(/^-+|-+$/g, '') || 'chart';
+  return safeName.toLowerCase().endsWith('.png') ? safeName : `${safeName}.png`;
 }

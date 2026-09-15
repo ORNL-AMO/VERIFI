@@ -9,6 +9,7 @@ import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
+import { MeterWorkbenchMonthlyChartComponent } from './meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterWorkbenchReadingsComponent } from './meters/meter-workbench/readings/meter-workbench-readings.component';
@@ -30,11 +31,13 @@ import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbenc
 import { MeterWorkbenchYearlyDataComponent } from './meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
 import { MeterGroupWorkbenchGraphComponent } from './meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
 import { MeterGroupWorkbenchTableComponent } from './meters/meter-group-workbench/table/meter-group-workbench-table.component';
+import { MeterGroupWorkbenchYearlyDataComponent } from './meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
 import { MeterGroupWorkbenchComponent } from './meters/meter-group-workbench/meter-group-workbench.component';
 import { ConfirmDeleteMeterModalComponent } from './meters/meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
 import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.component';
+import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/meter-results-chart.component';
 
 @NgModule({
   declarations: [
@@ -51,11 +54,13 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
     MeterSettingsEmissionsDetailsComponent,
     MeterWorkbenchReadingsComponent,
     MeterWorkbenchMonthlyDataComponent,
+    MeterWorkbenchMonthlyChartComponent,
     MeterWorkbenchYearlyDataComponent,
     MeterWorkbenchQualityReportComponent,
     MeterGroupWorkbenchComponent,
     MeterGroupWorkbenchTableComponent,
-    MeterGroupWorkbenchGraphComponent
+    MeterGroupWorkbenchGraphComponent,
+    MeterGroupWorkbenchYearlyDataComponent
   ],
   imports: [
     CommonModule,
@@ -64,6 +69,7 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
     ReactiveFormsModule,
     RouterModule,
     EChartsChartDirective,
+    MeterResultsChartComponent,
     FacilityMetersComponent,
     ConfirmDeleteMeterModalComponent,
     MetersDashboardComponent,

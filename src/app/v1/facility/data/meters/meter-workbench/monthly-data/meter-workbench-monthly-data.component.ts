@@ -1,41 +1,19 @@
 import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
-import { IdbAccount } from '@data/models/idbModels/account';
+import { MonthlyData } from '@data/models/calanderization';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { meterCalendarizationMethodLabel, meterWorkbenchTab } from '../../facility-meters.models';
+import {
+  MeterDataColumn,
+  MeterDataColumnId,
+  buildMeterDataColumns,
+  meterCalendarizationMethodLabel,
+  meterDataColumnValue,
+  meterWorkbenchTab
+} from '../../facility-meters.models';
 
 type MonthlyDataSortDirection = 'asc' | 'desc';
-type MonthlyDataColumnId =
-  | 'date'
-  | 'energyConsumption'
-  | 'energyUse'
-  | 'totalWithMarketEmissions'
-  | 'totalWithLocationEmissions'
-  | 'RECs'
-  | 'excessRECs'
-  | 'excessRECsEmissions'
-  | 'stationaryBiogenicEmmissions'
-  | 'stationaryCarbonEmissions'
-  | 'stationaryOtherEmissions'
-  | 'stationaryEmissions'
-  | 'otherScope2Emissions'
-  | 'mobileBiogenicEmissions'
-  | 'mobileCarbonEmissions'
-  | 'mobileOtherEmissions'
-  | 'mobileTotalEmissions'
-  | 'fugitiveEmissions'
-  | 'processEmissions'
-  | 'energyCost';
-
-interface MonthlyDataColumn {
-  readonly id: MonthlyDataColumnId;
-  readonly label: string;
-  readonly unit?: string;
-  readonly currency?: boolean;
-}
 
 @Component({
   selector: 'app-meter-workbench-monthly-data',
@@ -56,7 +34,7 @@ export class MeterWorkbenchMonthlyDataComponent {
   readonly currentPage = signal(1);
   readonly pageSize = signal(10);
   readonly copyingTable = signal(false);
-  readonly sortColumn = signal<MonthlyDataColumnId>('date');
+  readonly sortColumn = signal<MeterDataColumnId>('date');
   readonly sortDirection = signal<MonthlyDataSortDirection>('desc');
   readonly selectedCalendarizedMeter = computed(() => {
     const selectedMeter = this.meter();
@@ -70,12 +48,13 @@ export class MeterWorkbenchMonthlyDataComponent {
   });
   readonly consumptionLabel = computed(() => this.meter()?.scope === 2 ? 'Distance' : 'Consumption');
   readonly calendarizationMethodLabel = computed(() => meterCalendarizationMethodLabel(this.meter()?.meterReadingDataApplication));
-  readonly columns = computed(() => buildMonthlyDataColumns(
+  readonly columns = computed(() => buildMeterDataColumns(
     this.selectedCalendarizedMeter(),
     this.account(),
     this.isRECs(),
-    this.consumptionLabel()
-  ));
+    this.consumptionLabel(),
+    'monthly'
+  ) as Array<MeterDataColumn<MeterDataColumnId>>);
   readonly rows = computed(() => this.selectedCalendarizedMeter()?.monthlyData ?? []);
   readonly sortedRows = computed(() => [...this.rows()].sort((first, second) => {
     const result = compareRows(first, second, this.sortColumn());
@@ -95,7 +74,7 @@ export class MeterWorkbenchMonthlyDataComponent {
 
   @ViewChild('monthlyDataTable', { static: false }) monthlyDataTable?: ElementRef<HTMLTableElement>;
 
-  requestSort(column: MonthlyDataColumnId): void {
+  requestSort(column: MeterDataColumnId): void {
     if (this.sortColumn() === column) {
       this.sortDirection.update(direction => direction === 'desc' ? 'asc' : 'desc');
     } else {
@@ -137,94 +116,14 @@ export class MeterWorkbenchMonthlyDataComponent {
     }, 200);
   }
 
-  columnValue(row: MonthlyData, column: MonthlyDataColumn): string {
-    if (column.id === 'date') {
-      return row.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    }
-    return formatMonthlyNumber(Number(row[column.id]) || 0, column.currency);
+  columnValue(row: MonthlyData, column: MeterDataColumn<MeterDataColumnId>): string {
+    return meterDataColumnValue(row, column);
   }
 }
 
-function buildMonthlyDataColumns(
-  calendarizedMeter: CalanderizedMeter | undefined,
-  account: IdbAccount | undefined,
-  isRECs: boolean,
-  consumptionLabel: 'Consumption' | 'Distance'
-): MonthlyDataColumn[] {
-  const columns: MonthlyDataColumn[] = [{ id: 'date', label: 'Month' }];
-  if (!calendarizedMeter) {
-    return columns;
-  }
-  if (calendarizedMeter.showConsumption && !isRECs) {
-    columns.push({
-      id: 'energyConsumption',
-      label: `Total ${consumptionLabel}`,
-      unit: calendarizedMeter.consumptionUnit
-    });
-  }
-  if (calendarizedMeter.showEnergyUse && !isRECs) {
-    columns.push({
-      id: 'energyUse',
-      label: 'Total Energy',
-      unit: calendarizedMeter.energyUnit
-    });
-  }
-  if (account?.displayEmissions) {
-    if (calendarizedMeter.showElectricalEmissions && !isRECs) {
-      columns.push(
-        { id: 'totalWithMarketEmissions', label: 'Total Market-Based Emissions', unit: 'tonne CO2e' },
-        { id: 'totalWithLocationEmissions', label: 'Total Location-Based Emissions', unit: 'tonne CO2e' }
-      );
-    }
-    if (isRECs) {
-      columns.push(
-        { id: 'RECs', label: 'RECs', unit: 'MWh' },
-        { id: 'excessRECs', label: 'Excess RECs', unit: 'MWh' },
-        { id: 'excessRECsEmissions', label: 'Excess RECs Emissions', unit: 'tonne CO2e' }
-      );
-    }
-    if (calendarizedMeter.showStationaryEmissions) {
-      columns.push(
-        { id: 'stationaryBiogenicEmmissions', label: 'Total Biogenic Emissions', unit: 'tonne CO2e' },
-        { id: 'stationaryCarbonEmissions', label: 'Total Carbon Emissions', unit: 'tonne CO2e' },
-        { id: 'stationaryOtherEmissions', label: 'Total Other Emissions', unit: 'tonne CO2e' },
-        { id: 'stationaryEmissions', label: 'Total Emissions', unit: 'tonne CO2e' }
-      );
-    }
-    if (calendarizedMeter.showOtherScope2Emissions) {
-      columns.push({ id: 'otherScope2Emissions', label: 'Total Emissions', unit: 'tonne CO2e' });
-    }
-    if (calendarizedMeter.showMobileEmissions) {
-      columns.push(
-        { id: 'mobileBiogenicEmissions', label: 'Mobile Biogenic Emissions', unit: 'tonne CO2e' },
-        { id: 'mobileCarbonEmissions', label: 'Mobile Carbon Emissions', unit: 'tonne CO2e' },
-        { id: 'mobileOtherEmissions', label: 'Mobile Other Emissions', unit: 'tonne CO2e' },
-        { id: 'mobileTotalEmissions', label: 'Mobile Total Emissions', unit: 'tonne CO2e' }
-      );
-    }
-    if (calendarizedMeter.showFugitiveEmissions) {
-      columns.push({ id: 'fugitiveEmissions', label: 'Fugitive Emissions', unit: 'tonne CO2e' });
-    }
-    if (calendarizedMeter.showProcessEmissions) {
-      columns.push({ id: 'processEmissions', label: 'Process Emissions', unit: 'tonne CO2e' });
-    }
-  }
-  columns.push({ id: 'energyCost', label: 'Total Cost', currency: true });
-  return columns;
-}
-
-function compareRows(first: MonthlyData, second: MonthlyData, column: MonthlyDataColumnId): number {
+function compareRows(first: MonthlyData, second: MonthlyData, column: MeterDataColumnId): number {
   if (column === 'date') {
     return new Date(first.date).getTime() - new Date(second.date).getTime();
   }
   return (Number(first[column]) || 0) - (Number(second[column]) || 0);
-}
-
-function formatMonthlyNumber(value: number, currency = false): string {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: currency ? 2 : 1,
-    minimumFractionDigits: currency ? 2 : 0,
-    style: currency ? 'currency' : 'decimal',
-    currency: currency ? 'USD' : undefined
-  }).format(value || 0);
 }

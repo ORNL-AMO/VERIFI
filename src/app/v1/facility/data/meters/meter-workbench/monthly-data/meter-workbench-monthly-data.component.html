@@ -22,7 +22,7 @@
     <article class="v1-empty-state" role="status">
       <app-ui-icon name="calendar"></app-ui-icon>
       <h2>Select a calendarization method</h2>
-      <p>Choose how readings should be assigned to reporting months before reviewing Monthly Data.</p>
+      <p>Choose how readings should be assigned to reporting months before reviewing the Monthly Table.</p>
       <button type="button" class="v1-btn v1-btn--secondary" (click)="openSettings()">
         <app-ui-icon name="settings"></app-ui-icon>
         Open Settings
@@ -31,7 +31,7 @@
   } @else if (currentMeter?.meterReadingDataApplication === 'fullMonth') {
     <article class="v1-empty-state" role="status">
       <app-ui-icon name="table"></app-ui-icon>
-      <h2>Monthly Data matches readings</h2>
+      <h2>Monthly Table matches readings</h2>
       <p>{{ calendarizationMethodLabel() }} uses each entered reading month as its reporting month.</p>
       <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
         <app-ui-icon name="table"></app-ui-icon>

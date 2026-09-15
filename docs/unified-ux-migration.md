@@ -93,19 +93,19 @@ If the workflow needs current-state detail, add a short current-state note using
 
 - **Workflow:** v1 Facility Data > Meter Grouping selected-group workbench.
 - **Existing v0 entry point:** Meter grouping results table and graph under the current shared meter grouping routes.
-- **Decision:** Rebuild in v1 as a selected meter-group workbench with header facts, side-nav group links, and monthly/yearly table and graph tabs. Use Apache ECharts for v1 charting through a v1-owned wrapper while leaving v0 Plotly surfaces in place.
+- **Decision:** Rebuild in v1 as a selected meter-group workbench with header facts, side-nav group links, Monthly Table, Monthly Chart, and combined Yearly Data tabs. Use the v1 meter results chart component with Apache ECharts while leaving v0 Plotly surfaces in place.
 - **Parity:** Monthly group totals match v0 energy, water consumption, and cost aggregation. Yearly totals aggregate by facility fiscal year for the new v1 yearly tabs.
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 route/navigation specs, group result aggregation specs, workbench table/graph specs, and browser coverage for native chart rendering where practical; omit `build-prod` from Codex validation for this workflow.
 
-### Facility Meter Monthly Data Workflow
+### Facility Meter Results Workflow
 
-- **Workflow:** v1 selected-meter Settings and Monthly Data tabs.
+- **Workflow:** v1 selected-meter Settings, Monthly Table, Monthly Chart, and Yearly Data tabs.
 - **Existing v0 entry point:** Facility meter monthly data page and calendarization method modal under the current Data Management meter routes.
-- **Decision:** Move the calendarization method selector into the v1 meter Settings form, rebuild the v0 explanatory modal as a dense v1 slideout that also allows method selection, and fill the selected-meter Monthly Data tab with a v1-native table.
-- **Parity:** Monthly Data uses existing calendarized meter results and preserves v0 table columns for consumption, energy, cost, and applicable emissions. The “Do Not Calendarize Meter Data” method hides Monthly Data because it duplicates the Readings tab.
+- **Decision:** Move the calendarization method selector into the v1 meter Settings form, rebuild the v0 explanatory modal as a dense v1 slideout that also allows method selection, and fill the selected-meter results tabs with v1-native monthly table, monthly chart, and yearly chart/table content. Share the v1 meter results chart between selected-meter and selected-group workbenches because both consume prepared period rows and metric metadata; keep table components separate where meter and group columns differ. Until more chart metric options are available, use direct series display toggles with chart zoom and PNG download actions instead of a metric-selection settings panel.
+- **Parity:** Monthly Table uses existing calendarized meter results and preserves v0 table columns for consumption, energy, cost, and applicable emissions. The “Do Not Calendarize Meter Data” method hides only Monthly Table because it duplicates the Readings tab; Monthly Chart and Yearly Data remain visible and show the same no-calendarization settings call-to-action when needed.
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
-- **Tests:** Focused v1 meter settings, workbench tab visibility, monthly data table, and calendarization example helper specs; omit `build-prod` from Codex validation for this workflow.
+- **Tests:** Focused v1 meter settings, workbench tab visibility, monthly table, monthly chart, yearly data, shared chart, and calendarization helper specs; omit `build-prod` from Codex validation for this workflow.
 
 ### Portfolio Resource Card Reuse Decision
 
