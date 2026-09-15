@@ -21,12 +21,13 @@ describe('MeterWorkbenchComponent', () => {
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Electric Main');
-    expect(text).toContain('Monthly Data');
+    expect(text).toContain('Monthly Table');
+    expect(text).toContain('Monthly Chart');
     expect(text).toContain('Purchased Electricity');
     expect(fixture.nativeElement.querySelector('.v1-eyebrow')).toBeNull();
     expect(text).not.toContain('1 readings');
     const monthlyButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
-      .find(button => button.textContent?.includes('Monthly Data'));
+      .find(button => button.textContent?.includes('Monthly Table'));
     expect(monthlyButton?.getAttribute('aria-current')).toBe('page');
   });
 
@@ -194,7 +195,7 @@ describe('MeterWorkbenchComponent', () => {
     ]);
   });
 
-  it('hides Monthly Data and redirects direct monthly routes for meters that are not calendarized', () => {
+  it('hides Monthly Table, keeps Monthly Chart, and redirects direct monthly routes for meters that are not calendarized', () => {
     const fixture = setup({
       tab: 'monthly',
       selectedMeter: meter({
@@ -209,7 +210,8 @@ describe('MeterWorkbenchComponent', () => {
     fixture.detectChanges();
 
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-    expect(buttons.find(button => button.textContent?.includes('Monthly Data'))).toBeUndefined();
+    expect(buttons.find(button => button.textContent?.includes('Monthly Table'))).toBeUndefined();
+    expect(buttons.find(button => button.textContent?.includes('Monthly Chart'))).not.toBeUndefined();
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
       'workspace',
@@ -222,7 +224,7 @@ describe('MeterWorkbenchComponent', () => {
     ], { replaceUrl: true });
   });
 
-  it('switches to readings when the target meter hides Monthly Data', () => {
+  it('switches to readings when the target meter hides Monthly Table', () => {
     const gasCard: MeterCardView = {
       meter: meter({
         guid: 'meter-gas',

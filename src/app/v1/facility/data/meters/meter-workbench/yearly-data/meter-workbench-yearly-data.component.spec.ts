@@ -1,30 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { signal } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { By } from '@angular/platform-browser';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
 import { IconComponent } from '../../../../../shared/icons/icon.component';
+import { MeterResultsChartMetric, MeterResultsChartRow } from '../../facility-meters.models';
 import { account, facility, meter } from '../../facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MeterWorkbenchMonthlyDataComponent } from './meter-workbench-monthly-data.component';
+import { MeterWorkbenchYearlyDataComponent } from './meter-workbench-yearly-data.component';
 
-describe('MeterWorkbenchMonthlyDataComponent', () => {
-  it('renders loading and calculation error states', () => {
-    const loadingFixture = setup({ calendarizationState: 'loading' });
-    loadingFixture.detectChanges();
-    expect(loadingFixture.nativeElement.textContent).toContain('Preparing monthly data');
-
-    TestBed.resetTestingModule();
-
-    const errorFixture = setup({ calendarizationState: 'error' });
-    errorFixture.detectChanges();
-    expect(errorFixture.nativeElement.textContent).toContain('Monthly data could not be calculated');
-  });
-
+describe('MeterWorkbenchYearlyDataComponent', () => {
   it('prompts for settings when the meter has no calendarization method', () => {
     const fixture = setup({
       selectedMeter: meter({ guid: 'meter-a', meterReadingDataApplication: undefined })
@@ -48,30 +37,7 @@ describe('MeterWorkbenchMonthlyDataComponent', () => {
     ], { fragment: 'meter-reading-settings' });
   });
 
-  it('directs do-not-calendarize meters back to readings', () => {
-    const fixture = setup({
-      selectedMeter: meter({ guid: 'meter-a', meterReadingDataApplication: 'fullMonth' })
-    });
-    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
-
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    expect(element.textContent).toContain('Monthly Table matches readings');
-
-    element.querySelector<HTMLButtonElement>('.v1-btn')?.click();
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters',
-      'meter-a',
-      'readings'
-    ]);
-  });
-
-  it('renders v0-parity monthly columns, sorting, pagination, and copy', () => {
+  it('renders yearly chart inputs and fiscal-year table totals', () => {
     vi.useFakeTimers();
     const copyTable = vi.fn();
     try {
@@ -80,85 +46,85 @@ describe('MeterWorkbenchMonthlyDataComponent', () => {
         calendarizedMeters: [
           calendarizedMeter([
             monthlyData({
-              date: new Date(2026, 0, 1),
-              monthNumValue: 0,
+              date: new Date(2025, 11, 1),
+              monthNumValue: 11,
+              year: 2025,
+              fiscalYear: 2026,
               energyConsumption: 10,
               energyUse: 20,
               energyCost: 30,
-              totalWithMarketEmissions: 1.2,
-              totalWithLocationEmissions: 2.3
+              totalWithMarketEmissions: 1
             }),
             monthlyData({
-              date: new Date(2026, 1, 1),
-              monthNumValue: 1,
-              energyConsumption: 14,
-              energyUse: 25,
-              energyCost: 35,
-              totalWithMarketEmissions: 1.4,
-              totalWithLocationEmissions: 2.5
+              date: new Date(2026, 0, 1),
+              monthNumValue: 0,
+              year: 2026,
+              fiscalYear: 2026,
+              energyConsumption: 12,
+              energyUse: 24,
+              energyCost: 36,
+              totalWithMarketEmissions: 2
             })
           ])
         ]
       });
+      const component = fixture.componentInstance;
 
       fixture.detectChanges();
-
       const element = fixture.nativeElement as HTMLElement;
-      expect(element.textContent).toContain('Calendarize Meter Data');
-      expect(element.textContent).toContain('Total Consumption');
-      expect(element.textContent).toContain('Total Energy');
-      expect(element.textContent).toContain('Total Market-Based Emissions');
-      expect(element.textContent).toContain('Total Location-Based Emissions');
-      expect(element.textContent).toContain('Total Cost');
-      expect(element.textContent).toContain('February 2026');
-      expect(element.textContent).toContain('$35.00');
 
-      const costSort = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-monthly-data__sort'))
-        .find(button => button.textContent?.includes('Total Cost'));
-      costSort?.click();
-      costSort?.click();
-      fixture.detectChanges();
+      expect(component.chartRows()).toEqual([
+        expect.objectContaining({
+          periodKey: '2026',
+          periodLabel: 'FY 2026',
+          values: expect.objectContaining({ energyConsumption: 22, energyUse: 44, energyCost: 66 })
+        })
+      ]);
+      expect(element.textContent).toContain('Fiscal Year');
+      expect(element.textContent).toContain('FY 2026');
+      expect(element.textContent).toContain('44');
+      expect(element.textContent).toContain('$66.00');
+      expect(fixture.debugElement.query(By.directive(MeterResultsChartStubComponent)).componentInstance.joinsFollowingSection)
+        .toBe(true);
 
-      expect(element.querySelector('tbody tr td')?.textContent).toContain('January 2026');
-
-      element.querySelector<HTMLButtonElement>('.v1-meter-monthly-data__footer .v1-btn')?.click();
+      element.querySelector<HTMLButtonElement>('.v1-meter-yearly-data__footer .v1-btn')?.click();
       vi.runOnlyPendingTimers();
       expect(copyTable).toHaveBeenCalledOnce();
     } finally {
       vi.useRealTimers();
     }
   });
-
-  it('renders REC-specific emissions columns', () => {
-    const fixture = setup({
-      selectedMeter: meter({ guid: 'meter-a', agreementType: 4, meterReadingDataApplication: 'backward' }),
-      calendarizedMeters: [
-        calendarizedMeter([
-          monthlyData({
-            RECs: 10,
-            excessRECs: 2,
-            excessRECsEmissions: 1
-          })
-        ], { showElectricalEmissions: true })
-      ]
-    });
-
-    fixture.detectChanges();
-
-    const text = fixture.nativeElement.textContent;
-    expect(text).toContain('RECs');
-    expect(text).toContain('Excess RECs');
-    expect(text).toContain('Excess RECs Emissions');
-    expect(text).not.toContain('Total Market-Based Emissions');
-  });
 });
+
+@Component({
+  selector: 'app-meter-results-chart',
+  template: '',
+  standalone: true
+})
+class MeterResultsChartStubComponent {
+  @Input() chartRows: readonly MeterResultsChartRow[] = [];
+  @Input() metrics: readonly MeterResultsChartMetric[] = [];
+  @Input() defaultLeftMetricId?: string;
+  @Input() defaultRightMetricId?: string;
+  @Input() period?: string;
+  @Input() state?: string;
+  @Input() ariaLabel = '';
+  @Input() loadingTitle = '';
+  @Input() loadingDescription = '';
+  @Input() errorTitle = '';
+  @Input() errorDescription = '';
+  @Input() emptyTitle = '';
+  @Input() emptyDescription = '';
+  @Input() downloadFileName = '';
+  @Input() joinsFollowingSection = false;
+}
 
 function setup(options: {
   selectedMeter?: ReturnType<typeof meter>;
   calendarizedMeters?: readonly CalanderizedMeter[];
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
   copyTable?: ReturnType<typeof vi.fn>;
-} = {}): ComponentFixture<MeterWorkbenchMonthlyDataComponent> {
+} = {}): ComponentFixture<MeterWorkbenchYearlyDataComponent> {
   const selectedMeter = options.selectedMeter ?? meter({
     guid: 'meter-a',
     name: 'Electric Main',
@@ -166,8 +132,8 @@ function setup(options: {
   });
 
   TestBed.configureTestingModule({
-    declarations: [MeterWorkbenchMonthlyDataComponent],
-    imports: [CommonModule, IconComponent, NgbPaginationModule],
+    declarations: [MeterWorkbenchYearlyDataComponent],
+    imports: [CommonModule, IconComponent, MeterResultsChartStubComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
@@ -199,13 +165,10 @@ function setup(options: {
     ]
   });
 
-  return TestBed.createComponent(MeterWorkbenchMonthlyDataComponent);
+  return TestBed.createComponent(MeterWorkbenchYearlyDataComponent);
 }
 
-function calendarizedMeter(
-  monthlyRows: MonthlyData[],
-  options: Partial<CalanderizedMeter> = {}
-): CalanderizedMeter {
+function calendarizedMeter(monthlyRows: MonthlyData[]): CalanderizedMeter {
   return {
     meter: meter({ guid: 'meter-a', meterReadingDataApplication: 'backward' }),
     consumptionUnit: 'kWh',
@@ -219,8 +182,7 @@ function calendarizedMeter(
     showStationaryEmissions: false,
     showFugitiveEmissions: false,
     showProcessEmissions: false,
-    showMobileEmissions: false,
-    ...options
+    showMobileEmissions: false
   };
 }
 

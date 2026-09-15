@@ -1,31 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Directive, Input, signal } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
-import { IconComponent } from '../../../../../shared/icons/icon.component';
+import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MeterGroupResultRow, MeterGroupResultsView } from '../../facility-meters.models';
+import { MeterGroupResultRow, MeterGroupResultsView, MeterResultsChartMetric, MeterResultsChartRow } from '../../facility-meters.models';
 import { group } from '../../facility-meters.testing';
 import { MeterGroupWorkbenchGraphComponent } from './meter-group-workbench-graph.component';
 
 describe('MeterGroupWorkbenchGraphComponent', () => {
-  it('exposes selected display modes with aria-pressed', () => {
-    const fixture = setup();
-    const root = fixture.nativeElement as HTMLElement;
-
-    expect(button(root, 'Show utility as bars')?.getAttribute('aria-pressed')).toBe('true');
-    expect(button(root, 'Hide utility')?.getAttribute('aria-pressed')).toBe('false');
-    expect(button(root, 'Show cost as line')?.getAttribute('aria-pressed')).toBe('true');
-
-    button(root, 'Hide utility')?.click();
-    fixture.detectChanges();
-
-    expect(button(root, 'Hide utility')?.getAttribute('aria-pressed')).toBe('true');
-    expect(button(root, 'Show utility as bars')?.getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('removes hidden series, aligns dual axes, and maps yearly labels', () => {
+  it('maps selected group results into shared chart rows and metrics', () => {
     const fixture = setup({
       period: 'yearly',
       results: signal(resultsView({
@@ -36,27 +21,44 @@ describe('MeterGroupWorkbenchGraphComponent', () => {
     });
     const component = fixture.componentInstance;
 
-    let option = component.chartOption() as Record<string, any>;
-    expect(option.xAxis.data).toEqual(['FY 2025']);
-    expect(option.series.map((series: { name: string }) => series.name)).toEqual(['Total Energy', 'Total Cost']);
-    expect(option.yAxis).toHaveLength(2);
-    expect(option.yAxis.every((axis: { alignTicks?: boolean }) => axis.alignTicks)).toBe(true);
-
-    component.setUtilityDisplay('off');
-    option = component.chartOption() as Record<string, any>;
-
-    expect(option.series.map((series: { name: string }) => series.name)).toEqual(['Total Cost']);
-    expect(option.yAxis).toHaveLength(1);
-    expect(option.yAxis[0].name).toBe('Total Cost');
+    expect(component.metrics()).toEqual([
+      { id: 'utility', label: 'Total Energy', unit: 'MMBtu' },
+      { id: 'cost', label: 'Total Cost', currency: true }
+    ]);
+    expect(component.chartRows()).toEqual([
+      {
+        periodKey: '2025',
+        periodLabel: 'FY 2025',
+        sortValue: 2025,
+        values: { utility: 120, cost: 450 }
+      }
+    ]);
+    expect(fixture.debugElement.query(By.directive(MeterResultsChartStubComponent)).componentInstance.joinsFollowingSection)
+      .toBe(true);
   });
 });
 
-@Directive({
-  selector: '[appV1ECharts]',
+@Component({
+  selector: 'app-meter-results-chart',
+  template: '',
   standalone: true
 })
-class EChartsStubDirective {
-  @Input('appV1ECharts') option?: V1EChartsOption;
+class MeterResultsChartStubComponent {
+  @Input() chartRows: readonly MeterResultsChartRow[] = [];
+  @Input() metrics: readonly MeterResultsChartMetric[] = [];
+  @Input() defaultLeftMetricId?: string;
+  @Input() defaultRightMetricId?: string;
+  @Input() period?: string;
+  @Input() state?: string;
+  @Input() ariaLabel = '';
+  @Input() loadingTitle = '';
+  @Input() loadingDescription = '';
+  @Input() errorTitle = '';
+  @Input() errorDescription = '';
+  @Input() emptyTitle = '';
+  @Input() emptyDescription = '';
+  @Input() downloadFileName = '';
+  @Input() joinsFollowingSection = false;
 }
 
 function setup(options: {
@@ -65,7 +67,7 @@ function setup(options: {
 } = {}): ComponentFixture<MeterGroupWorkbenchGraphComponent> {
   TestBed.configureTestingModule({
     declarations: [MeterGroupWorkbenchGraphComponent],
-    imports: [CommonModule, EChartsStubDirective, IconComponent],
+    imports: [CommonModule, MeterResultsChartStubComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
@@ -120,9 +122,4 @@ function row(year: number, monthIndex: number, energyUse: number, energyCost: nu
     energyConsumption: 0,
     energyCost
   };
-}
-
-function button(root: HTMLElement, label: string): HTMLButtonElement | undefined {
-  return Array.from(root.querySelectorAll<HTMLButtonElement>('button'))
-    .find(item => item.textContent?.includes(label) || item.getAttribute('aria-label')?.includes(label));
 }

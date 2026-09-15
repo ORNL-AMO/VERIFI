@@ -15,7 +15,7 @@ describe('MeterWorkbenchTabsComponent', () => {
     fixture.detectChanges();
 
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-    const monthlyButton = buttons.find(button => button.textContent?.includes('Monthly Data'));
+    const monthlyButton = buttons.find(button => button.textContent?.includes('Monthly Table'));
     expect(monthlyButton?.getAttribute('aria-current')).toBe('page');
     expect(METER_WORKBENCH_TABS.find(tab => tab.id === 'readings')?.icon).toBe('table');
 

@@ -70,6 +70,8 @@ import Upload04Icon from '@hugeicons/core-free-icons/Upload04Icon';
 import VectorSquareIcon from '@hugeicons/core-free-icons/VectorSquareIcon';
 import ViewOffSlashIcon from '@hugeicons/core-free-icons/ViewOffSlashIcon';
 import WaterPumpIcon from '@hugeicons/core-free-icons/WaterPumpIcon';
+import ZoomInIcon from '@hugeicons/core-free-icons/ZoomInIcon';
+import ZoomOutIcon from '@hugeicons/core-free-icons/ZoomOutIcon';
 
 export const ICON_REGISTRY = {
   account: Building03Icon,
@@ -146,7 +148,9 @@ export const ICON_REGISTRY = {
   viewHidden: ViewOffSlashIcon,
   warning: Alert02Icon,
   waterDischarge: DropletOffIcon,
-  waterIntake: WaterPumpIcon
+  waterIntake: WaterPumpIcon,
+  zoomIn: ZoomInIcon,
+  zoomOut: ZoomOutIcon
 } satisfies Record<string, IconSvgObject>;
 
 export type IconName = keyof typeof ICON_REGISTRY;

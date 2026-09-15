@@ -2,16 +2,23 @@ import { MeterStatusCheck } from '@domain/calculations/status-check-calculations
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import {
   buildMeterCards,
+  buildMeterDataColumns,
   buildMeterGroupResultsView,
   buildMeterUsageFacts,
   buildMeterUsageFactsFromCalendarizedMeters,
+  buildMeterYearlyDataRows,
   formatMeterGroupPeriodLabel,
+  meterDataChartMetrics,
+  meterMonthlyChartRows,
   MeterGroupResultRow,
   meterCalendarizationMethodLabel,
   meterWorkbenchTabsForMeter,
+  meterYearlyChartRows,
+  preferredMeterCostMetricId,
+  preferredMeterUtilityMetricId,
   meterSourceIcon
 } from './facility-meters.models';
-import { facility, group, meter, reading } from './facility-meters.testing';
+import { account, facility, group, meter, reading } from './facility-meters.testing';
 
 describe('facility meter view models', () => {
   it('maps meter sources to semantic v1 icons', () => {
@@ -39,6 +46,7 @@ describe('facility meter view models', () => {
     expect(meterCalendarizationMethodLabel('fullMonth')).toBe('Do Not Calendarize Meter Data');
 
     expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: 'fullMonth' })).map(tab => tab.id)).not.toContain('monthly');
+    expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: 'fullMonth' })).map(tab => tab.id)).toContain('monthly-chart');
     expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: 'backward' })).map(tab => tab.id)).toContain('monthly');
     expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: undefined })).map(tab => tab.id)).toContain('monthly');
   });
@@ -151,6 +159,80 @@ describe('facility meter view models', () => {
     expect(view.summary.latestDataLabel).toBe('Jan 2026');
     expect(view.usageFacts.unitLabel).toBe('MMBtu');
     expect(view.usageFacts.facts[0].valueLabel).toBe('35');
+  });
+
+  it('builds meter table columns, fiscal-year rows, and chart defaults from calendarized meter data', () => {
+    const electricMeter = meter({ guid: 'meter-electric', name: 'Electric Main' });
+    const calanderizedMeter = calendarizedMeter(electricMeter, [
+      monthlyData({
+        year: 2025,
+        monthNumValue: 11,
+        fiscalYear: 2026,
+        energyConsumption: 10,
+        energyUse: 20,
+        energyCost: 30,
+        totalWithMarketEmissions: 1
+      }),
+      monthlyData({
+        year: 2026,
+        monthNumValue: 0,
+        fiscalYear: 2026,
+        energyConsumption: 12,
+        energyUse: 24,
+        energyCost: 36,
+        totalWithMarketEmissions: 2
+      })
+    ], { showElectricalEmissions: true });
+
+    const columns = buildMeterDataColumns(calanderizedMeter, account({ displayEmissions: true }), false, 'Consumption', 'yearly');
+    const yearlyRows = buildMeterYearlyDataRows(calanderizedMeter.monthlyData);
+    const metrics = meterDataChartMetrics(columns);
+
+    expect(columns.map(column => column.id)).toEqual([
+      'year',
+      'energyConsumption',
+      'energyUse',
+      'totalWithMarketEmissions',
+      'totalWithLocationEmissions',
+      'energyCost'
+    ]);
+    expect(yearlyRows).toEqual([
+      expect.objectContaining({
+        year: 2026,
+        energyConsumption: 22,
+        energyUse: 44,
+        energyCost: 66,
+        totalWithMarketEmissions: 3
+      })
+    ]);
+    expect(meterMonthlyChartRows(calanderizedMeter.monthlyData)[0]).toMatchObject({
+      periodKey: '2025-11',
+      periodLabel: 'Dec 2025',
+      values: expect.objectContaining({ energyConsumption: 10, energyCost: 30 })
+    });
+    expect(meterYearlyChartRows(yearlyRows)[0]).toMatchObject({
+      periodKey: '2026',
+      periodLabel: 'FY 2026',
+      values: expect.objectContaining({ energyUse: 44, energyCost: 66 })
+    });
+    expect(metrics.find(metric => metric.id === 'energyCost')).toMatchObject({ label: 'Total Cost', currency: true });
+    expect(preferredMeterUtilityMetricId(columns)).toBe('energyConsumption');
+    expect(preferredMeterCostMetricId(columns)).toBe('energyCost');
+  });
+
+  it('keeps meter yearly rows split across fiscal-year boundaries', () => {
+    const yearlyRows = buildMeterYearlyDataRows([
+      monthlyData({ year: 2025, monthNumValue: 11, fiscalYear: 2026, energyConsumption: 10, energyUse: 20, energyCost: 30 }),
+      monthlyData({ year: 2026, monthNumValue: 0, fiscalYear: 2026, energyConsumption: 12, energyUse: 24, energyCost: 36 }),
+      monthlyData({ year: 2026, monthNumValue: 6, fiscalYear: 2027, energyConsumption: 14, energyUse: 28, energyCost: 42 }),
+      monthlyData({ year: 2026, monthNumValue: 7, fiscalYear: 2027, energyConsumption: 0, energyUse: 0, energyCost: 0 })
+    ]);
+
+    expect(yearlyRows).toEqual([
+      expect.objectContaining({ year: 2026, energyConsumption: 22, energyUse: 44, energyCost: 66 }),
+      expect.objectContaining({ year: 2027, energyConsumption: 14, energyUse: 28, energyCost: 42 })
+    ]);
+    expect(meterYearlyChartRows(yearlyRows).map(row => row.periodLabel)).toEqual(['FY 2026', 'FY 2027']);
   });
 
   it('uses consumption as the utility value for water groups', () => {

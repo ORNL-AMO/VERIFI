@@ -1,66 +1,17 @@
-@let currentResults = results();
-@let currentRows = rows();
-@let state = workspace.calendarizationState();
-
-<section class="v1-meter-group-results-graph" aria-label="Meter group results graph">
-  @if (state === 'loading') {
-    <article class="v1-empty-state" role="status">
-      <app-ui-icon name="loading" spin></app-ui-icon>
-      <h2>Calculating group results</h2>
-      <p>VERIFI is preparing calendarized meter data for this group.</p>
-    </article>
-  } @else if (state === 'error') {
-    <article class="v1-empty-state" role="alert">
-      <app-ui-icon name="warning"></app-ui-icon>
-      <h2>Results could not be calculated</h2>
-      <p>Check the meter data for this group and try again.</p>
-    </article>
-  } @else {
-    <div class="v1-meter-group-results-graph__controls" aria-label="Chart controls">
-      @if (currentResults.showEnergyUse || currentResults.showConsumption) {
-        <div class="v1-meter-group-results-graph__control-group" role="group" aria-label="Utility series display">
-          <span>Utility</span>
-          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'off'" [attr.aria-pressed]="utilityDisplay() === 'off'" title="Hide utility" aria-label="Hide utility" (click)="setUtilityDisplay('off')">
-            <app-ui-icon name="viewHidden"></app-ui-icon>
-          </button>
-          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'bar'" [attr.aria-pressed]="utilityDisplay() === 'bar'" title="Show utility as bars" aria-label="Show utility as bars" (click)="setUtilityDisplay('bar')">
-            <app-ui-icon name="barChart"></app-ui-icon>
-          </button>
-          <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'line'" [attr.aria-pressed]="utilityDisplay() === 'line'" title="Show utility as line" aria-label="Show utility as line" (click)="setUtilityDisplay('line')">
-            <app-ui-icon name="chartLine"></app-ui-icon>
-          </button>
-        </div>
-      }
-      @if (currentResults.showCost) {
-        <div class="v1-meter-group-results-graph__control-group" role="group" aria-label="Cost series display">
-          <span>Cost</span>
-          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'off'" [attr.aria-pressed]="costDisplay() === 'off'" title="Hide cost" aria-label="Hide cost" (click)="setCostDisplay('off')">
-            <app-ui-icon name="viewHidden"></app-ui-icon>
-          </button>
-          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'bar'" [attr.aria-pressed]="costDisplay() === 'bar'" title="Show cost as bars" aria-label="Show cost as bars" (click)="setCostDisplay('bar')">
-            <app-ui-icon name="barChart"></app-ui-icon>
-          </button>
-          <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'line'" [attr.aria-pressed]="costDisplay() === 'line'" title="Show cost as line" aria-label="Show cost as line" (click)="setCostDisplay('line')">
-            <app-ui-icon name="chartLine"></app-ui-icon>
-          </button>
-        </div>
-      }
-    </div>
-
-    @if (currentRows.length === 0) {
-      <article class="v1-empty-state" role="status">
-        <app-ui-icon name="chartLine"></app-ui-icon>
-        <h2>No {{ period() }} results to chart</h2>
-        <p>Add meter data to this group to see charted results.</p>
-      </article>
-    } @else if (!hasChartSeries()) {
-      <article class="v1-empty-state" role="status">
-        <app-ui-icon name="viewHidden"></app-ui-icon>
-        <h2>No visible series</h2>
-        <p>Turn on utility or cost to show the chart.</p>
-      </article>
-    } @else {
-      <div class="v1-meter-group-results-graph__chart" [appV1ECharts]="chartOption()" role="img" [attr.aria-label]="period() + ' meter group results chart'"></div>
-    }
-  }
-</section>
+<app-meter-results-chart
+  [ariaLabel]="period() + ' meter group results chart'"
+  loadingTitle="Calculating group results"
+  loadingDescription="VERIFI is preparing calendarized meter data for this group."
+  errorTitle="Results could not be calculated"
+  errorDescription="Check the meter data for this group and try again."
+  [emptyTitle]="'No ' + period() + ' results to chart'"
+  emptyDescription="Add meter data to this group to see charted results."
+  [downloadFileName]="period() === 'yearly' ? 'meter-group-yearly-data-chart' : 'meter-group-monthly-data-chart'"
+  [period]="period()"
+  [joinsFollowingSection]="period() === 'yearly'"
+  [state]="workspace.calendarizationState()"
+  [chartRows]="chartRows()"
+  [metrics]="metrics()"
+  defaultLeftMetricId="utility"
+  defaultRightMetricId="cost">
+</app-meter-results-chart>

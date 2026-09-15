@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.v1-meter-group-yearly-data {
+  display: grid;
+}
+
+.v1-meter-group-yearly-data app-meter-group-workbench-table {
+  border-top: 1px solid var(--v1-border);
+}

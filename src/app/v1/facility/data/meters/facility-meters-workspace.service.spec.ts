@@ -158,7 +158,7 @@ describe('FacilityMetersWorkspaceService', () => {
     events.next(new NavigationEnd(
       1,
       '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/monthly-table',
-      '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/yearly-graph'
+      '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/yearly'
     ));
     await settleSignals();
 

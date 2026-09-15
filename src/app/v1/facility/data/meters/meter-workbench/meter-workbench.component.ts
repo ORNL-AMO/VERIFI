@@ -113,6 +113,7 @@ function isMeterWorkbenchTab(value: unknown): value is MeterWorkbenchTabId {
   return value === 'settings'
     || value === 'readings'
     || value === 'monthly'
+    || value === 'monthly-chart'
     || value === 'yearly'
     || value === 'quality';
 }

@@ -1,0 +1,94 @@
+@let currentMeter = meter();
+@let state = workspace.calendarizationState();
+@let tableColumns = columns();
+@let currentRows = sortedRows();
+
+@if (!currentMeter?.meterReadingDataApplication) {
+  <section class="v1-meter-yearly-data" aria-label="Meter yearly data">
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="calendar"></app-ui-icon>
+      <h2>Select a calendarization method</h2>
+      <p>Choose how readings should be assigned to reporting periods before reviewing Yearly Data.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openSettings()">
+        <app-ui-icon name="settings"></app-ui-icon>
+        Open Settings
+      </button>
+    </article>
+  </section>
+} @else {
+  <app-meter-results-chart
+    ariaLabel="Meter yearly data chart"
+    loadingTitle="Preparing yearly chart"
+    loadingDescription="VERIFI is calculating yearly data for this meter."
+    errorTitle="Yearly chart could not be calculated"
+    errorDescription="Check this meter's readings and settings, then try again."
+      emptyTitle="No yearly data to chart"
+      emptyDescription="Add readings or review the selected calendarization method."
+      downloadFileName="meter-yearly-data-chart"
+      period="yearly"
+    [joinsFollowingSection]="state !== 'loading' && state !== 'error'"
+    [state]="state"
+    [chartRows]="chartRows()"
+    [metrics]="metrics()"
+    [defaultLeftMetricId]="defaultLeftMetricId()"
+    [defaultRightMetricId]="defaultRightMetricId()">
+  </app-meter-results-chart>
+
+  @if (state !== 'loading' && state !== 'error') {
+    <section class="v1-meter-yearly-data" aria-label="Meter yearly data table">
+      <div class="v1-meter-yearly-data__controls" aria-label="Yearly data table controls">
+        <p class="v1-meter-yearly-data__method">{{ calendarizationMethodLabel() }}</p>
+      </div>
+
+      <div class="v1-meter-yearly-data__scroller">
+        <table #yearlyDataTable class="v1-meter-yearly-data__table" [class.copying-table]="copyingTable()">
+          <thead>
+            <tr>
+              @for (column of tableColumns; track column.id) {
+                <th [class.v1-meter-yearly-data__number]="column.id !== 'year'">
+                  <button
+                    type="button"
+                    class="v1-meter-yearly-data__sort"
+                    [class.active]="sortColumn() === column.id"
+                    (click)="requestSort(column.id)">
+                    <span>
+                      {{ column.label }}
+                      @if (column.unit) {
+                        <small>({{ column.unit }})</small>
+                      }
+                    </span>
+                    <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
+                  </button>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of currentRows; track row.year) {
+              <tr>
+                @for (column of tableColumns; track column.id) {
+                  <td [class.v1-meter-yearly-data__number]="column.id !== 'year'">
+                    {{ columnValue(row, column) }}
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="tableColumns.length">
+                  No yearly data is available for this meter. Add readings or review the selected calendarization method.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="v1-meter-yearly-data__footer">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="currentRows.length === 0" (click)="copyTable()">
+          <app-ui-icon name="copy"></app-ui-icon>
+          Copy Table
+        </button>
+      </footer>
+    </section>
+  }
+}

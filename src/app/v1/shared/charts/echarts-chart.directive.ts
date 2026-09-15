@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
 import * as echarts from 'echarts/core';
 import { BarChart, BarSeriesOption, LineChart, LineSeriesOption } from 'echarts/charts';
 import {
@@ -43,6 +43,11 @@ export type V1EChartsOption = echarts.ComposeOption<
   | TooltipComponentOption
 >;
 
+export interface V1EChartsDataZoomRange {
+  readonly start: number;
+  readonly end: number;
+}
+
 @Directive({
   selector: '[appV1ECharts]',
   standalone: true
@@ -57,10 +62,30 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
   private hasRenderedOption = false;
 
   @Input('appV1ECharts') option: V1EChartsOption | undefined;
+  @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
+
+  downloadPng(fileName: string): void {
+    if (!this.chart || typeof document === 'undefined') {
+      return;
+    }
+    const imageUrl = this.chart.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+      excludeComponents: ['toolbox', 'dataZoom']
+    });
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = v1ChartPngFileName(fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
 
   ngAfterViewInit(): void {
     this.zone.runOutsideAngular(() => {
       this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
+      this.bindDataZoomEvent();
       this.observeThemeChanges();
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver = new ResizeObserver(() => this.chart?.resize());
@@ -113,7 +138,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     const option = this.withThemeDefaults(this.option, isInitialRender);
     this.chart.setOption(option, {
       lazyUpdate: false,
-      replaceMerge: isInitialRender ? undefined : ['series', 'yAxis']
+      replaceMerge: isInitialRender ? undefined : ['series', 'yAxis', 'dataZoom']
     });
     this.hasRenderedOption = true;
   }
@@ -186,6 +211,15 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
         cssVar(styles, '--v1-chart-series-4', '#b87816')
       ]
     };
+  }
+
+  private bindDataZoomEvent(): void {
+    this.chart?.on('datazoom', event => {
+      const range = dataZoomRangeFromEvent(event);
+      if (range) {
+        this.zone.run(() => this.dataZoomChanged.emit(range));
+      }
+    });
   }
 }
 
@@ -275,4 +309,24 @@ function resolveCssVariableReferences(value: unknown, styles: CSSStyleDeclaratio
   }
 
   return value;
+}
+
+function dataZoomRangeFromEvent(event: unknown): V1EChartsDataZoomRange | undefined {
+  const eventRecord = isPlainRecord(event) ? event : {};
+  const batch = Array.isArray(eventRecord['batch'])
+    ? eventRecord['batch'].find(isPlainRecord)
+    : undefined;
+  const source = batch ?? eventRecord;
+  const start = Number(source['start']);
+  const end = Number(source['end']);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) {
+    return undefined;
+  }
+  return { start, end };
+}
+
+export function v1ChartPngFileName(fileName: string): string {
+  const baseName = fileName.trim().replace(/\.png$/i, '');
+  const safeName = baseName.replace(/[^a-z0-9-_]+/gi, '-').replace(/^-+|-+$/g, '') || 'chart';
+  return `${safeName}.png`;
 }
