@@ -75,16 +75,17 @@
           (textChange)="onTextChange()">
         </app-meter-settings-other-info>
 
-        <app-meter-settings-status-form
-          id="meter-settings-status"
-          [form]="form"
-          [viewModel]="vm"
-          (textChange)="onTextChange()"
-          (immediateChange)="onImmediateChange($event)">
-        </app-meter-settings-status-form>
       </div>
 
       <aside class="meter-settings__aside">
+        <app-meter-settings-reading-form
+          [form]="form"
+          [viewModel]="vm"
+          [meterDataExists]="meterDataExists()"
+          (immediateChange)="onImmediateChange($event)"
+          (calendarizationHelpRequested)="openCalendarizationHelp()">
+        </app-meter-settings-reading-form>
+
         <app-meter-settings-charges-form
           [form]="form"
           [viewModel]="vm"
@@ -97,6 +98,21 @@
     <footer class="meter-settings__footer">
       <button
         type="button"
+        class="v1-btn v1-btn--quiet meter-settings__inactive-toggle"
+        [class.meter-settings__inactive-toggle--active]="form.controls.noLongerInUse.value"
+        [attr.aria-pressed]="form.controls.noLongerInUse.value"
+        [disabled]="!canEditForm()"
+        (click)="toggleNoLongerInUse()">
+        @if (form.controls.noLongerInUse.value) {
+          <app-ui-icon name="refresh"></app-ui-icon>
+          Return meter to use
+        } @else {
+          <app-ui-icon name="viewHidden"></app-ui-icon>
+          Mark no longer in use
+        }
+      </button>
+      <button
+        type="button"
         class="v1-btn v1-btn--danger"
         [disabled]="!canDeleteMeter()"
         (click)="requestDeleteMeter()">
@@ -105,6 +121,16 @@
       </button>
     </footer>
   </form>
+
+  @if (calendarizationHelpOpen() && meter(); as helpMeter) {
+    <app-meter-calendarization-help-slideout
+      [meter]="helpMeter"
+      [readings]="selectedMeterData()"
+      [canChangeMethod]="canEditForm()"
+      (methodChange)="changeCalendarizationMethodFromSlideout($event)"
+      (closed)="closeCalendarizationHelp()">
+    </app-meter-calendarization-help-slideout>
+  }
 } @else {
   <section class="v1-settings-panel meter-settings">
     <div class="v1-settings-panel__heading">

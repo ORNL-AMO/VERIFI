@@ -178,6 +178,74 @@ describe('MeterWorkbenchComponent', () => {
     ]);
   });
 
+  it('hides Monthly Data and redirects direct monthly routes for meters that are not calendarized', () => {
+    const fixture = setup({
+      tab: 'monthly',
+      selectedMeter: meter({
+        guid: 'meter-electric',
+        name: 'Electric Main',
+        groupId: 'group-energy',
+        meterReadingDataApplication: 'fullMonth'
+      })
+    });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    expect(buttons.find(button => button.textContent?.includes('Monthly Data'))).toBeUndefined();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-electric',
+      'readings'
+    ], { replaceUrl: true });
+  });
+
+  it('switches to readings when the target meter hides Monthly Data', () => {
+    const gasCard: MeterCardView = {
+      meter: meter({
+        guid: 'meter-gas',
+        name: 'Gas Backup',
+        source: 'Natural Gas',
+        meterReadingDataApplication: 'fullMonth'
+      }),
+      readingCount: 2,
+      sourceColor: '#d16a22',
+      statusLabel: 'Valid',
+      statusTone: 'success',
+      statusIcon: 'success',
+      firstReadingLabel: 'Jan 2026',
+      latestReadingLabel: 'Feb 2026',
+      scopeLabel: 'Stationary combustion',
+      statusIssueLabels: [],
+      statusActionSummaries: []
+    };
+    const fixture = setup({ tab: 'monthly', meterCards: [defaultMeterCard(), gasCard] });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    fixture.detectChanges();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'))[1].click();
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-gas',
+      'readings'
+    ]);
+  });
+
   it('updates the active tab when child route data changes', () => {
     const fixture = setup({ tab: 'settings' });
     const route = TestBed.inject(ActivatedRoute) as unknown as {
@@ -272,6 +340,7 @@ function setup(options: {
   const selectedMeterValue = selectedMeter();
   const selectedMeterCard = signal<MeterCardView | undefined>(options.selectedMeterCard ?? (selectedMeterValue ? defaultMeterCard(selectedMeterValue) : undefined));
   const meterCards = signal(options.meterCards ?? (selectedMeterCard() ? [selectedMeterCard() as MeterCardView] : []));
+  const meters = signal(meterCards().map(card => card.meter));
   const selectedMeterReadingCount = signal(1);
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
@@ -295,6 +364,7 @@ function setup(options: {
           selectedMeter,
           selectedMeterCard,
           meterCards,
+          meters,
           selectedMeterGroup,
           selectedMeterReadingCount,
           selectedMeterUsageFacts,

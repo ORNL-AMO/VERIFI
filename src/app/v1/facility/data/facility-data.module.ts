@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
+import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
@@ -21,8 +22,9 @@ import { MeterSettingsCoreFormComponent } from './meters/meter-workbench/setting
 import { MeterSettingsElectricityFormComponent } from './meters/meter-workbench/settings/meter-settings-electricity-form/meter-settings-electricity-form.component';
 import { MeterSettingsEmissionsDetailsComponent } from './meters/meter-workbench/settings/meter-settings-emissions-details/meter-settings-emissions-details.component';
 import { MeterSettingsOtherInfoComponent } from './meters/meter-workbench/settings/meter-settings-other-info/meter-settings-other-info.component';
-import { MeterSettingsStatusFormComponent } from './meters/meter-workbench/settings/meter-settings-status-form/meter-settings-status-form.component';
+import { MeterSettingsReadingFormComponent } from './meters/meter-workbench/settings/meter-settings-reading-form/meter-settings-reading-form.component';
 import { MeterSettingsVehicleFormComponent } from './meters/meter-workbench/settings/meter-settings-vehicle-form/meter-settings-vehicle-form.component';
+import { MeterCalendarizationHelpSlideoutComponent } from './meters/meter-workbench/settings/meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
 import { MeterWorkbenchTabsComponent } from './meters/meter-workbench/meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
@@ -45,7 +47,7 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
     MeterSettingsElectricityFormComponent,
     MeterSettingsChargesFormComponent,
     MeterSettingsOtherInfoComponent,
-    MeterSettingsStatusFormComponent,
+    MeterSettingsReadingFormComponent,
     MeterSettingsEmissionsDetailsComponent,
     MeterWorkbenchReadingsComponent,
     MeterWorkbenchMonthlyDataComponent,
@@ -68,6 +70,8 @@ import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.c
     MeterGroupingComponent,
     MeterReadingBillSlideoutComponent,
     MeterReadingsColumnsSlideoutComponent,
+    MeterCalendarizationHelpSlideoutComponent,
+    TooltipComponent,
     MeterReadingsStatusComponent,
     MeterReadingsTableComponent
   ],

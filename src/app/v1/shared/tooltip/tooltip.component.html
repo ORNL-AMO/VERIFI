@@ -1,0 +1,9 @@
+<button
+  type="button"
+  class="v1-tooltip"
+  [class.v1-tooltip--bottom]="placement === 'bottom'"
+  [attr.aria-describedby]="tooltipId"
+  [attr.aria-label]="label">
+  <app-ui-icon name="info" [size]="14"></app-ui-icon>
+  <span [id]="tooltipId" class="v1-tooltip__content" role="tooltip">{{ text }}</span>
+</button>

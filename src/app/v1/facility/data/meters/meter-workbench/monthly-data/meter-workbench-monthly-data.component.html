@@ -1,0 +1,118 @@
+@let state = workspace.calendarizationState();
+@let currentMeter = meter();
+@let calendarizedMeter = selectedCalendarizedMeter();
+@let tableColumns = columns();
+@let currentRows = sortedRows();
+@let visibleRows = displayedRows();
+
+<section class="v1-meter-monthly-data" aria-label="Meter monthly data">
+  @if (state === 'loading') {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="loading" spin></app-ui-icon>
+      <h2>Preparing monthly data</h2>
+      <p>VERIFI is calculating calendarized data for this meter.</p>
+    </article>
+  } @else if (state === 'error') {
+    <article class="v1-empty-state" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <h2>Monthly data could not be calculated</h2>
+      <p>Check this meter’s readings and settings, then try again.</p>
+    </article>
+  } @else if (!currentMeter?.meterReadingDataApplication) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="calendar"></app-ui-icon>
+      <h2>Select a calendarization method</h2>
+      <p>Choose how readings should be assigned to reporting months before reviewing Monthly Data.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openSettings()">
+        <app-ui-icon name="settings"></app-ui-icon>
+        Open Settings
+      </button>
+    </article>
+  } @else if (currentMeter?.meterReadingDataApplication === 'fullMonth') {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="table"></app-ui-icon>
+      <h2>Monthly Data matches readings</h2>
+      <p>{{ calendarizationMethodLabel() }} uses each entered reading month as its reporting month.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
+        <app-ui-icon name="table"></app-ui-icon>
+        Open Readings
+      </button>
+    </article>
+  } @else {
+    <div class="v1-meter-monthly-data__controls" aria-label="Monthly data table controls">
+      <div>
+        @if (calendarizedMeter) {
+          <p class="v1-meter-monthly-data__method">{{ calendarizationMethodLabel() }}</p>
+        }
+      </div>
+      <label class="v1-meter-monthly-data__control">
+        <span>Rows</span>
+        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="v1-meter-monthly-data__scroller">
+      <table #monthlyDataTable class="v1-meter-monthly-data__table" [class.copying-table]="copyingTable()">
+        <thead>
+          <tr>
+            @for (column of tableColumns; track column.id) {
+              <th [class.v1-meter-monthly-data__number]="column.id !== 'date'">
+                <button
+                  type="button"
+                  class="v1-meter-monthly-data__sort"
+                  [class.active]="sortColumn() === column.id"
+                  (click)="requestSort(column.id)">
+                  <span>
+                    {{ column.label }}
+                    @if (column.unit) {
+                      <small>({{ column.unit }})</small>
+                    }
+                  </span>
+                  <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visibleRows; track row.date) {
+            <tr>
+              @for (column of tableColumns; track column.id) {
+                <td [class.v1-meter-monthly-data__number]="column.id !== 'date'">
+                  {{ columnValue(row, column) }}
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="tableColumns.length">
+                No monthly data is available for this meter. Add readings or review the selected calendarization method.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="v1-meter-monthly-data__footer">
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="currentRows.length === 0" (click)="copyTable()">
+        <app-ui-icon name="copy"></app-ui-icon>
+        Copy Table
+      </button>
+      @if (currentRows.length > pageSize()) {
+        <ngb-pagination
+          [collectionSize]="currentRows.length"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          [ellipses]="false"
+          [page]="currentPage()"
+          (pageChange)="currentPage.set($event)">
+        </ngb-pagination>
+      }
+    </footer>
+  }
+</section>
