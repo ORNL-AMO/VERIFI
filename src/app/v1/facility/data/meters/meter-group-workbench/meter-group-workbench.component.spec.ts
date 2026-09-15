@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Directive, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { Subject } from 'rxjs';
@@ -11,7 +11,7 @@ import { WorkspaceNavigationService } from '../../../../shell/workspace-navigati
 import { IconComponent } from '../../../../shared/icons/icon.component';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { MeterGroupResultsView, MeterUsageFactsView } from '../facility-meters.models';
-import { facility, group, meter } from '../facility-meters.testing';
+import { account, facility, group, meter } from '../facility-meters.testing';
 import { MeterGroupWorkbenchComponent } from './meter-group-workbench.component';
 
 describe('MeterGroupWorkbenchComponent', () => {
@@ -21,7 +21,21 @@ describe('MeterGroupWorkbenchComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Facility A Meter Group');
+    const breadcrumb = fixture.nativeElement.querySelector('[aria-label="Meter group breadcrumb"]') as HTMLElement;
+    expect(text).toContain('Account A');
+    expect(breadcrumb.textContent).toContain('Facility A');
+    expect(breadcrumb.textContent).toContain('Meter Grouping');
+    expect(breadcrumb.textContent).not.toContain('Energy Group');
+    expect(fixture.nativeElement.querySelector('.v1-meter-group-workbench-header .v1-eyebrow')).toBeNull();
+    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio',
+      'meters'
+    ]);
     expect(text).toContain('Energy Group');
     expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__group-crumb app-ui-icon'))).toBeNull();
     expect(fixture.debugElement.query(By.css('.v1-meter-group-workbench-header__group-title app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
@@ -94,12 +108,12 @@ function setup(options: {
       MeterGroupWorkbenchComponent,
       RouterOutletStubDirective
     ],
-    imports: [CommonModule, IconComponent],
+    imports: [CommonModule, IconComponent, RouterModule],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
-          account: signal({ guid: 'account-a' }),
+          account: signal(account()),
           facility: signal(facility({ guid: 'facility-a', name: 'Facility A', energyIsSource: false })),
           selectedMeterGroupForWorkbench: signal(selectedGroup),
           meterGroups: signal([selectedGroup, ...(options.extraGroups ?? [])]),
@@ -118,6 +132,14 @@ function setup(options: {
             'workspace',
             'facility',
             facilityGuid,
+            'data',
+            detail
+          ],
+          accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
+            '/v1',
+            'workspace',
+            'account',
+            accountGuid,
             'data',
             detail
           ],

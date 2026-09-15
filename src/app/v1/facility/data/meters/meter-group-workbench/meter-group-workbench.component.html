@@ -1,4 +1,5 @@
 @let currentFacility = workspace.facility();
+@let currentAccount = workspace.account();
 @let currentGroup = selectedGroup();
 @let currentResults = results();
 
@@ -19,68 +20,74 @@
     </button>
   </article>
 } @else if (currentGroup) {
+  @let accountMetersLink = accountMetersRoute();
   <header class="v1-data-workbench-header v1-meter-group-workbench-header">
     <nav class="v1-data-workbench-breadcrumb v1-meter-group-workbench-header__breadcrumb" aria-label="Meter group breadcrumb">
       <ol>
+        @if (currentAccount && accountMetersLink) {
+          <li>
+            <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
+          </li>
+          <li aria-hidden="true">
+            <app-ui-icon name="chevronRight"></app-ui-icon>
+          </li>
+        }
+        <li>{{ currentFacility.name || 'Facility' }}</li>
+        <li aria-hidden="true">
+          <app-ui-icon name="chevronRight"></app-ui-icon>
+        </li>
         <li>
           <button type="button" (click)="openGrouping()">
-            <app-ui-icon name="arrowLeft"></app-ui-icon>
             Meter Grouping
           </button>
-        </li>
-        <li aria-hidden="true">/</li>
-        <li
-          class="v1-data-workbench-switcher v1-meter-group-workbench-header__group-switcher"
-          [class.open]="groupSwitcherOpen()"
-          aria-current="page"
-          (keydown.escape)="onGroupSwitcherEscape()">
-          @if (groupOptions().length > 1) {
-            <button
-              #groupSwitcherToggle
-              type="button"
-              class="v1-data-workbench-switcher-toggle v1-meter-group-workbench-header__group-toggle"
-              aria-haspopup="menu"
-              [attr.aria-expanded]="groupSwitcherOpen()"
-              [attr.aria-label]="'Switch meter group, current group ' + currentGroup.name"
-              (click)="toggleGroupSwitcher()">
-              <span class="v1-data-workbench-switcher-label v1-meter-group-workbench-header__group-toggle-label">{{ currentGroup.name }}</span>
-              <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon v1-meter-group-workbench-header__group-toggle-icon"></app-ui-icon>
-            </button>
-
-            @if (groupSwitcherOpen()) {
-              <div class="v1-data-workbench-switcher-backdrop v1-meter-group-workbench-header__group-backdrop" (click)="closeGroupSwitcher()" aria-hidden="true"></div>
-              <div class="v1-data-workbench-switcher-menu v1-meter-group-workbench-header__group-menu" role="menu" aria-label="Switch meter group">
-                @for (group of groupOptions(); track group.guid) {
-                  <button
-                    type="button"
-                    class="v1-data-workbench-switcher-item v1-meter-group-workbench-header__group-item"
-                    role="menuitemradio"
-                    [class.active]="group.guid === currentGroup.guid"
-                    [attr.aria-checked]="group.guid === currentGroup.guid"
-                    (click)="switchGroup(group.guid)">
-                    <span class="v1-data-workbench-switcher-item-text v1-meter-group-workbench-header__group-item-text">
-                      {{ group.name || 'Untitled group' }}
-                    </span>
-                  </button>
-                }
-              </div>
-            }
-          } @else {
-            <span class="v1-meter-group-workbench-header__group-crumb">
-              <span>{{ currentGroup.name }}</span>
-            </span>
-          }
         </li>
       </ol>
     </nav>
 
     <div class="v1-data-workbench-title-row v1-meter-group-workbench-header__title-row">
       <div class="v1-data-workbench-title v1-meter-group-workbench-header__title">
-        <p class="v1-eyebrow">{{ currentFacility.name }} Meter Group</p>
-        <h1 id="v1-facility-meters-title" class="v1-meter-group-workbench-header__group-title">
-          <app-ui-icon name="meterGroupItem"></app-ui-icon>
-          <span>{{ currentGroup.name }}</span>
-        </h1>
+        <div
+          class="v1-data-workbench-switcher v1-meter-group-workbench-header__group-switcher"
+          [class.open]="groupSwitcherOpen()"
+          (keydown.escape)="onGroupSwitcherEscape()">
+          <h1 id="v1-facility-meters-title" class="v1-meter-group-workbench-header__group-title">
+            <app-ui-icon name="meterGroupItem"></app-ui-icon>
+            @if (groupOptions().length > 1) {
+              <button
+                #groupSwitcherToggle
+                type="button"
+                class="v1-data-workbench-switcher-toggle v1-meter-group-workbench-header__group-toggle"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="groupSwitcherOpen()"
+                [attr.aria-label]="'Switch meter group, current group ' + currentGroup.name"
+                (click)="toggleGroupSwitcher()">
+                <span class="v1-data-workbench-switcher-label v1-meter-group-workbench-header__group-toggle-label">{{ currentGroup.name }}</span>
+                <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon v1-meter-group-workbench-header__group-toggle-icon"></app-ui-icon>
+              </button>
+            } @else {
+              <span class="v1-meter-group-workbench-header__group-crumb">{{ currentGroup.name }}</span>
+            }
+          </h1>
+
+          @if (groupOptions().length > 1 && groupSwitcherOpen()) {
+            <div class="v1-data-workbench-switcher-backdrop v1-meter-group-workbench-header__group-backdrop" (click)="closeGroupSwitcher()" aria-hidden="true"></div>
+            <div class="v1-data-workbench-switcher-menu v1-meter-group-workbench-header__group-menu" role="menu" aria-label="Switch meter group">
+              @for (group of groupOptions(); track group.guid) {
+                <button
+                  type="button"
+                  class="v1-data-workbench-switcher-item v1-meter-group-workbench-header__group-item"
+                  role="menuitemradio"
+                  [class.active]="group.guid === currentGroup.guid"
+                  [attr.aria-checked]="group.guid === currentGroup.guid"
+                  (click)="switchGroup(group.guid)">
+                  <span class="v1-data-workbench-switcher-item-text v1-meter-group-workbench-header__group-item-text">
+                    {{ group.name || 'Untitled group' }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
       </div>
       <div class="v1-data-workbench-actions v1-meter-group-workbench-header__chips" aria-label="Meter group summary">
         <span class="v1-meter-group-workbench-header__type-chip">

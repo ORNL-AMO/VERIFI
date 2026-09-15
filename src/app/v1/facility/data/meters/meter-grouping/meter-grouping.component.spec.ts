@@ -1,12 +1,12 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { buildMeterGroupSections } from '@app/v1/facility/data/meters/facility-meters.models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
 import { MeterGroupingComponent } from './meter-grouping.component';
 
@@ -29,7 +29,23 @@ describe('MeterGroupingComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
+    const breadcrumb = fixture.nativeElement.querySelector('[aria-label="Meter grouping context"]') as HTMLElement;
     expect(text).toContain('Meter Grouping');
+    expect(text).not.toContain('Facility Data');
+    expect(text).toContain('Account A');
+    expect(text).toContain('Facility A');
+    expect(breadcrumb.classList.contains('v1-data-context-breadcrumb')).toBe(true);
+    expect(breadcrumb.textContent).not.toContain('Meter Grouping');
+    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio',
+      'meters'
+    ]);
+    expect((breadcrumb.querySelector('a') as HTMLAnchorElement).textContent?.trim()).toBe('Account A');
     expect(fixture.debugElement.query(By.css('.v1-facility-meters__title app-ui-icon')).componentInstance.name).toBe('meterGroup');
     expect(text).not.toContain('Drag meters between groups');
     expect(text).toContain('Add group');
@@ -52,12 +68,13 @@ describe('MeterGroupingComponent', () => {
     const fixture = setup({
       meters: [meter({ guid: 'meter-electric', name: 'Electric Main' })]
     });
-    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
     fixture.detectChanges();
     (fixture.nativeElement.querySelector('[aria-label="Edit Electric Main settings"]') as HTMLButtonElement).click();
 
-    expect(router.navigate).toHaveBeenCalledWith([
+    expect(navigateSpy).toHaveBeenCalledWith([
       '/v1',
       'workspace',
       'facility',
@@ -176,11 +193,15 @@ function setup(options: {
   };
 
   TestBed.configureTestingModule({
-    imports: [MeterGroupingComponent],
+    imports: [
+      RouterModule.forRoot([]),
+      MeterGroupingComponent
+    ],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
+          account: signal(account()),
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
           meters,
           groupSections,
@@ -191,6 +212,14 @@ function setup(options: {
       {
         provide: WorkspaceNavigationService,
         useValue: {
+          accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
+            '/v1',
+            'workspace',
+            'account',
+            accountGuid,
+            'data',
+            detail
+          ],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [
             '/v1',
             'workspace',
@@ -203,8 +232,7 @@ function setup(options: {
           ]
         }
       },
-      { provide: MetersDashboardActionsService, useValue: actions },
-      { provide: Router, useValue: { navigate: vi.fn() } }
+      { provide: MetersDashboardActionsService, useValue: actions }
     ]
   });
 
