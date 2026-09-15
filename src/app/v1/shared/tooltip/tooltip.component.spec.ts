@@ -28,7 +28,7 @@ describe('TooltipComponent', () => {
 
     expect(button).not.toBeNull();
     expect(content).not.toBeNull();
-    expect(button?.getAttribute('aria-label')).toBe('Result warning: Saved values affect future results.');
+    expect(button?.getAttribute('aria-label')).toBe('Result warning');
     expect(button?.getAttribute('aria-describedby')).toBe(content?.id);
     expect(content?.textContent).toContain('Saved values affect future results.');
   });

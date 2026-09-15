@@ -37,7 +37,7 @@ export class MeterWorkbenchComponent {
     const facility = this.workspace.facility();
     const meter = this.workspace.selectedMeter();
     if (facility && meter && this.activeTabState() === 'monthly' && !shouldShowMeterMonthlyDataTab(meter)) {
-      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'readings'));
+      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'readings'), { replaceUrl: true });
     }
   });
 

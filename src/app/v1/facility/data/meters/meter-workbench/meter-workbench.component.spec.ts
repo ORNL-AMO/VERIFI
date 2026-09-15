@@ -203,7 +203,7 @@ describe('MeterWorkbenchComponent', () => {
       'meters',
       'meter-electric',
       'readings'
-    ]);
+    ], { replaceUrl: true });
   });
 
   it('switches to readings when the target meter hides Monthly Data', () => {

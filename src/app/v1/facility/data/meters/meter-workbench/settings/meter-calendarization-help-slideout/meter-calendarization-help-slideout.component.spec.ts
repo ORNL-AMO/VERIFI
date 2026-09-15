@@ -17,7 +17,7 @@ describe('MeterCalendarizationHelpSlideoutComponent', () => {
     expect(element.textContent).toContain('December 2021');
     expect(element.textContent).toContain('March 2022');
     expect(element.querySelectorAll('.calendarization-help-month--compact')).toHaveLength(4);
-    expect(element.textContent).toContain('Three readings are needed');
+    expect(element.textContent).toContain('Four readings are used here');
   });
 
   it('leaves days after the final reference reading unallocated', () => {
@@ -58,6 +58,22 @@ describe('MeterCalendarizationHelpSlideoutComponent', () => {
     expect(februaryReading.querySelector('.calendarization-help-reading-dot--2')).not.toBeNull();
   });
 
+  it('explains the four-reading minimum for backward live examples', () => {
+    const fixture = setup({
+      readings: [
+        reading({ guid: 'reading-a', month: 1, day: 15, year: 2022, totalEnergyUse: 100 }),
+        reading({ guid: 'reading-b', month: 2, day: 15, year: 2022, totalEnergyUse: 200 }),
+        reading({ guid: 'reading-c', month: 3, day: 15, year: 2022, totalEnergyUse: 300 })
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('At least four readings are needed');
+    expect(element.textContent).not.toContain('Worked allocation');
+  });
+
   it('keeps method options read-only when changes are disabled', () => {
     const fixture = setup({ canChangeMethod: false });
     const emittedMethods: string[] = [];
@@ -74,13 +90,16 @@ describe('MeterCalendarizationHelpSlideoutComponent', () => {
   });
 });
 
-function setup(options: { canChangeMethod?: boolean } = {}): ComponentFixture<MeterCalendarizationHelpSlideoutComponent> {
+function setup(options: {
+  canChangeMethod?: boolean;
+  readings?: IdbUtilityMeterData[];
+} = {}): ComponentFixture<MeterCalendarizationHelpSlideoutComponent> {
   const fixture = TestBed.configureTestingModule({
     imports: [MeterCalendarizationHelpSlideoutComponent]
   }).createComponent(MeterCalendarizationHelpSlideoutComponent);
   fixture.componentInstance.meter = meter();
   fixture.componentInstance.canChangeMethod = options.canChangeMethod ?? true;
-  fixture.componentInstance.readings = [
+  fixture.componentInstance.readings = options.readings ?? [
     reading({ guid: 'reading-a', month: 12, day: 3, year: 2021, totalEnergyUse: 100 }),
     reading({ guid: 'reading-b', month: 1, day: 2, year: 2022, totalEnergyUse: 200 }),
     reading({ guid: 'reading-c', month: 2, day: 4, year: 2022, totalEnergyUse: 300 }),

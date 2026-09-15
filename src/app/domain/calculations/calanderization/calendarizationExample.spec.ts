@@ -28,13 +28,14 @@ describe('calendarization example helpers', () => {
         expect(example.displayMonths[1].days.find(day => day.day === 1)?.allocationIndex).toBe(1);
     });
 
-    it('builds backward allocation summaries from three readings', () => {
+    it('builds backward allocation summaries from four readings', () => {
         const summaries = buildCalendarizationSummaries(
             meter({ meterReadingDataApplication: 'backward' }),
             [
                 reading({ guid: 'jan', month: 1, day: 15, totalEnergyUse: 100 }),
                 reading({ guid: 'feb', month: 2, day: 15, totalEnergyUse: 200 }),
-                reading({ guid: 'mar', month: 3, day: 15, totalEnergyUse: 300 })
+                reading({ guid: 'mar', month: 3, day: 15, totalEnergyUse: 300 }),
+                reading({ guid: 'apr', month: 4, day: 15, totalEnergyUse: 400 })
             ],
             'backward'
         );
@@ -45,6 +46,20 @@ describe('calendarization example helpers', () => {
         expect(summaries[0].monthReadingSummaries[0].readingIndex).toBe(1);
         expect(summaries[0].monthReadingSummaries[1].readingIndex).toBe(2);
         expect(summaries[0].totalEnergyUse).toBeGreaterThan(0);
+    });
+
+    it('requires four readings for backward live examples to match Monthly Data', () => {
+        const example = buildCalendarizationExample(
+            meter({ meterReadingDataApplication: 'backward' }),
+            [
+                reading({ guid: 'jan', month: 1, day: 15, totalEnergyUse: 100 }),
+                reading({ guid: 'feb', month: 2, day: 15, totalEnergyUse: 200 }),
+                reading({ guid: 'mar', month: 3, day: 15, totalEnergyUse: 300 })
+            ]
+        );
+
+        expect(example.canShowLiveExample).toBe(false);
+        expect(example.summaries).toEqual([]);
     });
 
     it('handles annual distribution and missing live-example data without summaries', () => {
@@ -102,6 +117,36 @@ describe('calendarization example helpers', () => {
         expect(example.displayMonths[2].days.find(day => day.day === 4)?.readingIndex).toBe(2);
         expect(example.displayMonths[3].days.find(day => day.day === 4)?.readingIndex).toBe(3);
         expect(example.displayMonths[3].days.find(day => day.day === 5)?.allocationIndex).toBeUndefined();
+    });
+
+    it('uses first-of-month boundaries for late-month readings', () => {
+        const backwardSummaries = buildCalendarizationSummaries(
+            meter({ meterReadingDataApplication: 'backward' }),
+            [
+                reading({ guid: 'jan', month: 1, day: 31, totalEnergyUse: 100 }),
+                reading({ guid: 'feb', month: 2, day: 15, totalEnergyUse: 200 }),
+                reading({ guid: 'mar', month: 3, day: 15, totalEnergyUse: 300 }),
+                reading({ guid: 'apr', month: 4, day: 15, totalEnergyUse: 400 })
+            ],
+            'backward'
+        );
+        const fullMonthExample = buildCalendarizationExample(
+            meter({ meterReadingDataApplication: 'fullMonth' }),
+            [
+                reading({ guid: 'jan', month: 1, day: 31, totalEnergyUse: 100 }),
+                reading({ guid: 'feb', month: 2, day: 15, totalEnergyUse: 200 }),
+                reading({ guid: 'mar', month: 3, day: 15, totalEnergyUse: 300 })
+            ]
+        );
+
+        expect(backwardSummaries.map(summary => summary.calanderizedMonth)).toEqual([
+            new Date(2026, 1, 1),
+            new Date(2026, 2, 1)
+        ]);
+        expect(fullMonthExample.summaries.map(summary => summary.calanderizedMonth)).toEqual([
+            new Date(2026, 1, 1),
+            new Date(2026, 2, 1)
+        ]);
     });
 });
 

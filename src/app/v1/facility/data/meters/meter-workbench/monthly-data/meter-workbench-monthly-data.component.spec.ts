@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
@@ -166,7 +167,7 @@ function setup(options: {
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchMonthlyDataComponent],
-    imports: [CommonModule, IconComponent],
+    imports: [CommonModule, IconComponent, NgbPaginationModule],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

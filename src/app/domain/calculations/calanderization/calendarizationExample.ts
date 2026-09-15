@@ -66,7 +66,7 @@ export function buildCalendarizationExample(
     const orderedReadings = [...meterData]
         .sort((first, second) => getDateFromMeterData(first).getTime() - getDateFromMeterData(second).getTime());
     const method = meter.meterReadingDataApplication;
-    const canShowLiveExample = orderedReadings.length >= 3 && method !== undefined && method !== 'fullYear';
+    const canShowLiveExample = canBuildLiveExample(orderedReadings.length, method);
 
     return {
         method,
@@ -186,17 +186,28 @@ function allocationIndex(
     return index >= 0 ? index : undefined;
 }
 
+function canBuildLiveExample(readingCount: number, method?: MeterReadingDataApplication): boolean {
+    if (method === undefined || method === 'fullYear') {
+        return false;
+    }
+    if (method === 'backward') {
+        return readingCount > 3;
+    }
+    return readingCount >= 3;
+}
+
 function buildBackwardsSummaries(meterData: readonly IdbUtilityMeterData[]): CalendarizationExampleSummaryItem[] {
     const calanderizationSummary: CalendarizationExampleSummaryItem[] = [];
     const orderedMeterData = [...meterData]
         .sort((first, second) => getDateFromMeterData(first).getTime() - getDateFromMeterData(second).getTime());
-    if (orderedMeterData.length <= 2) {
+    if (orderedMeterData.length <= 3) {
         return calanderizationSummary;
     }
 
-    const startDate = getDateFromMeterData(orderedMeterData[0]);
-    startDate.setMonth(startDate.getMonth() + 1);
-    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 2);
+    const firstReadingDate = getDateFromMeterData(orderedMeterData[0]);
+    const finalReadingDate = getDateFromMeterData(orderedMeterData[orderedMeterData.length - 1]);
+    let startDate = firstOfMonth(firstReadingDate.getFullYear(), firstReadingDate.getMonth() + 1);
+    const endDate = firstOfMonth(finalReadingDate.getFullYear(), finalReadingDate.getMonth());
     while (startDate < endDate) {
         const month = startDate.getMonth();
         const year = startDate.getFullYear();
@@ -236,7 +247,14 @@ function buildBackwardsSummaries(meterData: readonly IdbUtilityMeterData[]): Cal
                         nextReading = currentMonthsReadings[readingIndex + 1];
                     }
                     monthReadingSummaries = monthReadingSummaries.concat(
-                        getCalanderizationSummaryItem(previousMonthReading, currentMonthReading, nextReading, year, month, orderedMeterData)
+                        getCalanderizationSummaryItem(
+                            previousMonthReading,
+                            currentMonthReading,
+                            nextReading,
+                            year,
+                            month,
+                            orderedMeterData
+                        )
                             .monthReadingSummaries
                     );
                 }
@@ -269,7 +287,7 @@ function buildBackwardsSummaries(meterData: readonly IdbUtilityMeterData[]): Cal
                 });
             }
         }
-        startDate.setMonth(startDate.getMonth() + 1);
+        startDate = firstOfMonth(startDate.getFullYear(), startDate.getMonth() + 1);
     }
     return calanderizationSummary;
 }
@@ -338,9 +356,9 @@ function buildFullMonthSummaries(
         return calanderizationSummary;
     }
 
-    const startDate = getDateFromMeterData(orderedMeterData[0]);
-    startDate.setMonth(startDate.getMonth() + 1);
-    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 2);
+    const firstReadingDate = getDateFromMeterData(orderedMeterData[0]);
+    let startDate = firstOfMonth(firstReadingDate.getFullYear(), firstReadingDate.getMonth() + 1);
+    const endDate = firstOfMonth(startDate.getFullYear(), startDate.getMonth() + 2);
     while (startDate < endDate) {
         const month = startDate.getMonth();
         const year = startDate.getFullYear();
@@ -376,7 +394,7 @@ function buildFullMonthSummaries(
             monthReadingSummaries,
             totalEnergyUse: sumBy(monthReadingSummaries, summary => summary.totalEnergyFromBill)
         });
-        startDate.setMonth(startDate.getMonth() + 1);
+        startDate = firstOfMonth(startDate.getFullYear(), startDate.getMonth() + 1);
     }
     return calanderizationSummary;
 }
@@ -402,6 +420,10 @@ function uniqueReadingSummaries(summaries: readonly CalendarizationExampleReadin
 
 function sumBy<T>(items: readonly T[], select: (item: T) => number): number {
     return items.reduce((total, item) => total + (select(item) || 0), 0);
+}
+
+function firstOfMonth(year: number, month: number): Date {
+    return new Date(year, month, 1);
 }
 
 function readingIndexForReading(

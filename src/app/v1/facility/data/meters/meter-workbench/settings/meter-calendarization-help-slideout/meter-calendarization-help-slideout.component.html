@@ -54,7 +54,11 @@
     } @else if (!currentExample.canShowLiveExample) {
     <div class="v1-alert v1-alert--info" role="status">
       <app-ui-icon name="info"></app-ui-icon>
+      @if (currentExample.method === 'backward') {
+      <span>At least four readings are needed to show a live worked example for ordinary calendarized billing periods.</span>
+      } @else {
       <span>At least three readings are needed to show a live worked example for this meter.</span>
+      }
     </div>
     }
 
@@ -98,7 +102,7 @@
         </div>
         <p class="calendarization-help-calendar-strip__caption">
           Dark circles are meter reading dates. Matching lighter circles are the days where that bill's per-day
-          average is applied. Three readings are needed to calculate an ordinary calendarized month.
+          average is applied. Four readings are used here so the example matches the Monthly Data calculation gate.
         </p>
       </div>
     </section>

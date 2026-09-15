@@ -161,7 +161,8 @@ describe('MeterWorkbenchSettingsComponent', () => {
     const tooltip = query<HTMLElement>(fixture, 'app-meter-settings-reading-form app-ui-tooltip');
     const button = query<HTMLButtonElement>(fixture, 'app-meter-settings-reading-form app-ui-tooltip .v1-tooltip');
     expect(tooltip.textContent).toContain('Changing this affects calendarized reporting results');
-    expect(button.getAttribute('aria-label')).toContain('does not change original readings');
+    expect(button.getAttribute('aria-label')).toBe('Calendarization change warning');
+    expect(button.getAttribute('aria-describedby')).toBeTruthy();
   });
 
   it('opens and closes the calendarization explanation slideout', () => {
@@ -169,7 +170,8 @@ describe('MeterWorkbenchSettingsComponent', () => {
       readings: [
         reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 15, totalEnergyUse: 100 }),
         reading({ guid: 'reading-b', meterId: 'meter-a', month: 2, day: 15, totalEnergyUse: 200 }),
-        reading({ guid: 'reading-c', meterId: 'meter-a', month: 3, day: 15, totalEnergyUse: 300 })
+        reading({ guid: 'reading-c', meterId: 'meter-a', month: 3, day: 15, totalEnergyUse: 300 }),
+        reading({ guid: 'reading-d', meterId: 'meter-a', month: 4, day: 15, totalEnergyUse: 400 })
       ]
     });
 
