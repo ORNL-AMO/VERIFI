@@ -25,6 +25,11 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(text).toContain('Energy Uses');
     expect(firstCard.textContent).not.toContain('Readings');
     expect(fixture.nativeElement.querySelector('.v1-facility-card__chips')).toBeNull();
+    expect(firstCard.querySelector('.v1-facility-card__header > .v1-facility-card__status')).not.toBeNull();
+    expect(Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-facility-card__status')).map(chip => chip.textContent?.trim())).toEqual([
+      'Needs meters',
+      'Set up'
+    ]);
     expect(fixture.nativeElement.querySelectorAll('.v1-facility-card__title app-ui-icon[name="facility"]').length).toBe(2);
     expect(fixture.nativeElement.querySelectorAll('.v1-facility-card__title-chevron').length).toBe(2);
     expect(fixture.nativeElement.querySelectorAll('.v1-facility-card__footer .v1-facility-card__actions').length).toBe(2);
