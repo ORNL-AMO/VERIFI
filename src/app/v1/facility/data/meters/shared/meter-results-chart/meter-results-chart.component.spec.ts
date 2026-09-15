@@ -1,6 +1,7 @@
-import { Directive, Input, forwardRef } from '@angular/core';
+import { Directive, EventEmitter, Input, Output, forwardRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
+import { vi } from 'vitest';
+import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { MeterResultsChartComponent } from './meter-results-chart.component';
 
 describe('MeterResultsChartComponent', () => {
@@ -88,6 +89,60 @@ describe('MeterResultsChartComponent', () => {
     expect(component.zoomEnd()).toBe(100);
   });
 
+  it('keeps zoom centered within the chart edges', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    component.zoomStart.set(80);
+    component.zoomEnd.set(100);
+
+    component.zoomOut();
+
+    expect(component.zoomStart()).toBeCloseTo(66.666, 2);
+    expect(component.zoomEnd()).toBe(100);
+  });
+
+  it('syncs interactive chart slider zoom before rebuilding options', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const chartDirective = component.chartDirective as unknown as EChartsStubDirective;
+
+    chartDirective.dataZoomChanged.emit({ start: 25, end: 75 });
+    fixture.detectChanges();
+    component.setCostDisplay('off');
+
+    const option = component.chartOption() as Record<string, any>;
+    expect(component.zoomStart()).toBe(25);
+    expect(component.zoomEnd()).toBe(75);
+    expect(option.dataZoom[0]).toMatchObject({ start: 25, end: 75 });
+  });
+
+  it('formats currency tooltips with cents while keeping utility values rounded', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const option = component.chartOption() as Record<string, any>;
+    const tooltip = option.tooltip.formatter([
+      { axisValueLabel: 'Jan 2026', marker: '', seriesName: 'Total Energy', value: 10.4 },
+      { axisValueLabel: 'Jan 2026', marker: '', seriesName: 'Total Cost', value: 30.49 }
+    ]);
+
+    expect(tooltip).toContain('Total Energy: 10');
+    expect(tooltip).toContain('Total Cost: $30.49');
+  });
+
+  it('provides a screen-reader data table for the rendered chart', () => {
+    const fixture = setup();
+
+    const table = fixture.nativeElement.querySelector('.v1-meter-results-chart__accessible-data') as HTMLTableElement;
+    expect(table).not.toBeNull();
+    expect(table.classList).toContain('visually-hidden');
+    expect(table.textContent).toContain('Meter results chart data');
+    expect(table.textContent).toContain('Month');
+    expect(table.textContent).toContain('Total Energy (MMBtu)');
+    expect(table.textContent).toContain('Total Cost (USD)');
+    expect(table.textContent).toContain('Jan 2026');
+    expect(table.textContent).toContain('$20.00');
+  });
+
   it('downloads the rendered chart as a PNG through the ECharts directive', () => {
     const fixture = setup();
     const component = fixture.componentInstance;
@@ -116,6 +171,7 @@ describe('MeterResultsChartComponent', () => {
 })
 class EChartsStubDirective {
   @Input('appV1ECharts') option?: V1EChartsOption;
+  @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
   readonly downloadPng = vi.fn();
 }
 

@@ -80,7 +80,34 @@
         <p>Turn on a chart series to show the chart.</p>
       </article>
     } @else {
-      <div class="v1-meter-results-chart__chart" [appV1ECharts]="chartOption()" role="img" [attr.aria-label]="ariaLabel"></div>
+      <div
+        class="v1-meter-results-chart__chart"
+        [appV1ECharts]="chartOption()"
+        (dataZoomChanged)="syncDataZoom($event)"
+        role="img"
+        [attr.aria-label]="ariaLabel">
+      </div>
+      <table class="visually-hidden v1-meter-results-chart__accessible-data">
+        <caption>{{ ariaLabel }} data</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ accessiblePeriodHeader() }}</th>
+            @for (column of accessibleColumns(); track column.id) {
+              <th scope="col">{{ column.label }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of accessibleRows(); track row.periodKey) {
+            <tr>
+              <th scope="row">{{ row.periodLabel }}</th>
+              @for (cell of row.cells; track cell.metricId) {
+                <td>{{ cell.valueLabel }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   }
 </section>

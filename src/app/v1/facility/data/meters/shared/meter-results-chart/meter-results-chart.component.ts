@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, ViewChild, computed, signal } from '@angular/core';
-import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
+import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { MeterResultsChartMetric, MeterResultsChartRow, MeterResultsPeriod } from '../../facility-meters.models';
 
@@ -8,6 +8,22 @@ type MeterChartState = 'idle' | 'loading' | 'ready' | 'error';
 type MeterChartSeriesDisplay = 'off' | 'bar' | 'line';
 
 let nextChartId = 0;
+
+interface MeterChartAccessibleColumn {
+  readonly id: string;
+  readonly label: string;
+}
+
+interface MeterChartAccessibleCell {
+  readonly metricId: string;
+  readonly valueLabel: string;
+}
+
+interface MeterChartAccessibleRow {
+  readonly periodKey: string;
+  readonly periodLabel: string;
+  readonly cells: readonly MeterChartAccessibleCell[];
+}
 
 @Component({
   selector: 'app-meter-results-chart',
@@ -49,9 +65,39 @@ export class MeterResultsChartComponent implements OnChanges {
   readonly utilityMetric = computed(() => metricById(this.metricOptions(), this.utilityMetricId()));
   readonly costMetric = computed(() => metricById(this.metricOptions(), this.costMetricId()));
   readonly canZoom = computed(() => this.rows().length > 2);
+  readonly visibleMetrics = computed<readonly MeterResultsChartMetric[]>(() => {
+    const metrics: MeterResultsChartMetric[] = [];
+    const utilityMetric = this.utilityMetric();
+    const costMetric = this.costMetric();
+    if (utilityMetric && this.utilityDisplay() !== 'off') {
+      metrics.push(utilityMetric);
+    }
+    if (costMetric && this.costDisplay() !== 'off') {
+      metrics.push(costMetric);
+    }
+    return metrics;
+  });
+  readonly accessibleColumns = computed<readonly MeterChartAccessibleColumn[]>(() => {
+    return this.visibleMetrics().map(metric => ({
+      id: metric.id,
+      label: accessibleMetricLabel(metric)
+    }));
+  });
+  readonly accessibleRows = computed<readonly MeterChartAccessibleRow[]>(() => {
+    const metrics = this.visibleMetrics();
+    return this.rows().map(row => ({
+      periodKey: row.periodKey,
+      periodLabel: row.periodLabel,
+      cells: metrics.map(metric => ({
+        metricId: metric.id,
+        valueLabel: formatChartTooltipValue(chartValue(row, metric.id), !!metric.currency)
+      }))
+    }));
+  });
+  readonly accessiblePeriodHeader = computed(() => this.chartPeriod() === 'yearly' ? 'Fiscal year' : 'Month');
   readonly hasChartSeries = computed(() => {
     return this.rows().length > 0
-      && ((this.utilityDisplay() !== 'off' && !!this.utilityMetric()) || (this.costDisplay() !== 'off' && !!this.costMetric()));
+      && this.visibleMetrics().length > 0;
   });
   readonly chartOption = computed<V1EChartsOption>(() => {
     const rows = this.rows();
@@ -152,6 +198,13 @@ export class MeterResultsChartComponent implements OnChanges {
     this.zoomEnd.set(100);
   }
 
+  syncDataZoom(range: V1EChartsDataZoomRange): void {
+    const start = clampPercent(range.start, this.zoomStart());
+    const end = clampPercent(range.end, this.zoomEnd());
+    this.zoomStart.set(Math.min(start, end));
+    this.zoomEnd.set(Math.max(start, end));
+  }
+
   downloadPng(): void {
     this.chartDirective?.downloadPng(this.downloadFileName);
   }
@@ -166,10 +219,10 @@ export class MeterResultsChartComponent implements OnChanges {
 
   private setZoomRange(range: number): void {
     const center = (this.zoomStart() + this.zoomEnd()) / 2;
-    const start = Math.max(0, center - (range / 2));
-    const end = Math.min(100, start + range);
-    this.zoomStart.set(end - range);
-    this.zoomEnd.set(end);
+    const zoomRange = clamp(range, 10, 100);
+    const start = clamp(center - (zoomRange / 2), 0, 100 - zoomRange);
+    this.zoomStart.set(start);
+    this.zoomEnd.set(start + zoomRange);
   }
 }
 
@@ -197,6 +250,13 @@ function metricAxis(metric: MeterResultsChartMetric): Record<string, unknown> {
     axis['axisLabel'] = { formatter: '${value}' };
   }
   return axis;
+}
+
+function accessibleMetricLabel(metric: MeterResultsChartMetric): string {
+  if (metric.currency) {
+    return `${metric.label} (USD)`;
+  }
+  return metric.unit ? `${metric.label} (${metric.unit})` : metric.label;
 }
 
 function chartValue(row: MeterResultsChartRow, metricId: string): number {
@@ -238,8 +298,23 @@ function formatChartTooltipValue(value: unknown, currency = false): string {
   if (!Number.isFinite(numericValue)) {
     return String(value ?? '');
   }
-  const formatted = Math.round(numericValue).toLocaleString();
-  return currency ? `$${formatted}` : formatted;
+  if (currency) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numericValue);
+  }
+  return Math.round(numericValue).toLocaleString();
+}
+
+function clampPercent(value: number, fallback: number): number {
+  return Number.isFinite(value) ? clamp(value, 0, 100) : fallback;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
 
 interface ChartTooltipParam {
