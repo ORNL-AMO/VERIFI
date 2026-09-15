@@ -52,6 +52,7 @@ describe('MeterBrowseCardComponent', () => {
     expect(element.querySelector('.v1-meter-browse-card__status app-ui-icon')).not.toBeNull();
     expect(element.querySelector('.v1-meter-browse-card')?.classList.contains('v1-meter-browse-card--status-warning')).toBe(true);
     expect(element.querySelector('.v1-meter-browse-card__title .v1-meter-browse-card__title-chevron')).not.toBeNull();
+    expect(element.querySelector('.v1-meter-browse-card__facility-header')).toBeNull();
     expect(element.querySelector('[cdkdrag]')).toBeNull();
     expect(text).not.toContain('Move meter');
     expect(text).not.toContain('Coming soon');
@@ -132,6 +133,35 @@ describe('MeterBrowseCardComponent', () => {
       'data',
       'meters',
       'meter-a',
+      'settings'
+    ]);
+  });
+
+  it('renders a portfolio facility header and uses that facility for navigation', () => {
+    const fixture = setup({
+      meter: meter({ guid: 'meter-b', name: 'Meter B', facilityId: 'facility-b' }),
+      readingCount: 0
+    }, {
+      portfolioFacility: { guid: 'facility-b', name: 'Beta Works' } as any,
+      showFacilityHeader: true
+    });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Beta Works');
+    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__facility-header app-ui-icon')).componentInstance.name).toBe('facility');
+
+    (fixture.nativeElement.querySelector('[aria-label="Open Meter B settings"]') as HTMLButtonElement).click();
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-b',
+      'data',
+      'meters',
+      'meter-b',
       'settings'
     ]);
   });
@@ -274,6 +304,8 @@ function setup(card: MeterCardView, options: {
   canWrite?: boolean;
   hasPending?: boolean;
   copiedMeter?: ReturnType<typeof meter>;
+  portfolioFacility?: { guid: string; name: string };
+  showFacilityHeader?: boolean;
 } = {}): ComponentFixture<MeterBrowseCardComponent> {
   const canWrite = signal(options.canWrite ?? true);
   const hasPending = signal(options.hasPending ?? false);
@@ -321,6 +353,8 @@ function setup(card: MeterCardView, options: {
   });
   const fixture = TestBed.createComponent(MeterBrowseCardComponent);
   fixture.componentInstance.card = card;
+  fixture.componentInstance.portfolioFacility = options.portfolioFacility as any;
+  fixture.componentInstance.showFacilityHeader = options.showFacilityHeader ?? false;
   return fixture;
 }
 

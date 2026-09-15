@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { MeterDraft } from '@app/v1/facility/data/meters/facility-meters.models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
@@ -16,7 +16,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
   imports: [
     IconComponent,
     MeterBrowseCardComponent,
-    MeterDraftSlideoutComponent
+    MeterDraftSlideoutComponent,
+    RouterLink
   ],
   providers: [MetersDashboardActionsService]
 })
@@ -30,6 +31,10 @@ export class MetersDashboardComponent {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
+  readonly accountMetersRoute = computed(() => {
+    const account = this.workspace.account();
+    return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  });
 
   openAddMeter(): void {
     if (this.canAct()) {

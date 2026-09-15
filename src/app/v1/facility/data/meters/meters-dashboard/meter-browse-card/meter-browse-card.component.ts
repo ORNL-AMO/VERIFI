@@ -1,6 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
@@ -43,6 +44,8 @@ export class MeterBrowseCardComponent implements OnDestroy {
   @ViewChild('copyMeterConfirmModal') private readonly copyMeterConfirmModal!: TemplateRef<unknown>;
   @ViewChild('deleteMeterConfirmModal') private readonly deleteMeterConfirmModal!: TemplateRef<unknown>;
   @Input({ required: true }) card!: MeterCardView;
+  @Input() portfolioFacility: IdbFacility | undefined;
+  @Input() showFacilityHeader = false;
   @Input() usageFactsLoading = false;
 
   get displayUsageFacts(): MeterUsageFactsView | undefined {
@@ -117,7 +120,7 @@ export class MeterBrowseCardComponent implements OnDestroy {
   }
 
   private openMeterTab(tab: MeterWorkbenchTabId, meterGuid = this.card.meter.guid): void {
-    const facility = this.workspace.facility();
+    const facility = this.portfolioFacility ?? this.workspace.facility();
     if (facility) {
       void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, tab));
     }

@@ -1,4 +1,5 @@
 @let currentFacility = workspace.facility();
+@let currentAccount = workspace.account();
 @let currentMeter = workspace.selectedMeter();
 
 @if (!currentFacility) {
@@ -20,69 +21,77 @@
 } @else if (currentMeter) {
   @let currentCard = workspace.selectedMeterCard();
   @let usageFacts = workspace.selectedMeterUsageFacts();
+  @let accountMetersLink = accountMetersRoute();
   <header class="v1-data-workbench-header v1-meter-workbench-header">
     <nav class="v1-data-workbench-breadcrumb v1-meter-workbench-header__breadcrumb" aria-label="Meter breadcrumb">
       <ol>
+        @if (currentAccount && accountMetersLink) {
+          <li>
+            <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
+          </li>
+          <li aria-hidden="true">
+            <app-ui-icon name="chevronRight"></app-ui-icon>
+          </li>
+        }
+        <li>{{ currentFacility.name || 'Facility' }}</li>
+        <li aria-hidden="true">
+          <app-ui-icon name="chevronRight"></app-ui-icon>
+        </li>
         <li>
           <button type="button" (click)="openMeters()">
-            <app-ui-icon name="arrowLeft"></app-ui-icon>
             Meters
           </button>
-        </li>
-        <li aria-hidden="true">/</li>
-        <li
-          class="v1-data-workbench-switcher v1-meter-workbench-header__meter-switcher"
-          [class.open]="meterSwitcherOpen()"
-          aria-current="page"
-          (keydown.escape)="onMeterSwitcherEscape()">
-          @if (workspace.meterCards().length > 1) {
-            <button
-              #meterSwitcherToggle
-              type="button"
-              class="v1-data-workbench-switcher-toggle v1-meter-workbench-header__meter-toggle"
-              aria-haspopup="menu"
-              [attr.aria-expanded]="meterSwitcherOpen()"
-              [attr.aria-label]="'Switch meter, current meter ' + currentMeter.name"
-              (click)="toggleMeterSwitcher()">
-              <span class="v1-data-workbench-switcher-label v1-meter-workbench-header__meter-toggle-label">{{ currentMeter.name }}</span>
-              <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon v1-meter-workbench-header__meter-toggle-icon"></app-ui-icon>
-            </button>
-
-            @if (meterSwitcherOpen()) {
-              <div class="v1-data-workbench-switcher-backdrop v1-meter-workbench-header__meter-backdrop" (click)="closeMeterSwitcher()" aria-hidden="true"></div>
-              <div class="v1-data-workbench-switcher-menu v1-meter-workbench-header__meter-menu" role="menu" aria-label="Switch meter">
-                @for (meterCard of workspace.meterCards(); track meterCard.meter.guid) {
-                  <button
-                    type="button"
-                    class="v1-data-workbench-switcher-item v1-meter-workbench-header__meter-item"
-                    role="menuitemradio"
-                    [class.active]="meterCard.meter.guid === currentMeter.guid"
-                    [attr.aria-checked]="meterCard.meter.guid === currentMeter.guid"
-                    (click)="switchMeter(meterCard.meter.guid)">
-                    <span class="v1-data-workbench-switcher-item-text v1-meter-workbench-header__meter-item-text">
-                      {{ meterCard.meter.name }}
-                    </span>
-                  </button>
-                }
-              </div>
-            }
-          } @else {
-            {{ currentMeter.name }}
-          }
         </li>
       </ol>
     </nav>
 
     <div class="v1-data-workbench-title-row v1-meter-workbench-header__title-row">
       <div class="v1-data-workbench-title v1-meter-workbench-header__title">
-        <p class="v1-eyebrow">{{ currentFacility.name }} Meter</p>
-        <h1
-          id="v1-facility-meters-title"
-          class="v1-meter-workbench-header__meter-title"
-          [style.--v1-meter-source-color]="currentCard?.sourceColor || null">
-          <app-ui-icon [name]="currentCard?.sourceIcon || 'meter'"></app-ui-icon>
-          <span>{{ currentMeter.name }}</span>
-        </h1>
+        <div
+          class="v1-data-workbench-switcher v1-meter-workbench-header__meter-switcher"
+          [class.open]="meterSwitcherOpen()"
+          (keydown.escape)="onMeterSwitcherEscape()">
+          <h1
+            id="v1-facility-meters-title"
+            class="v1-meter-workbench-header__meter-title"
+            [style.--v1-meter-source-color]="currentCard?.sourceColor || null">
+            <app-ui-icon [name]="currentCard?.sourceIcon || 'meter'"></app-ui-icon>
+            @if (workspace.meterCards().length > 1) {
+              <button
+                #meterSwitcherToggle
+                type="button"
+                class="v1-data-workbench-switcher-toggle v1-meter-workbench-header__meter-toggle"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="meterSwitcherOpen()"
+                [attr.aria-label]="'Switch meter, current meter ' + currentMeter.name"
+                (click)="toggleMeterSwitcher()">
+                <span class="v1-data-workbench-switcher-label v1-meter-workbench-header__meter-toggle-label">{{ currentMeter.name }}</span>
+                <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon v1-meter-workbench-header__meter-toggle-icon"></app-ui-icon>
+              </button>
+            } @else {
+              <span>{{ currentMeter.name }}</span>
+            }
+          </h1>
+
+          @if (workspace.meterCards().length > 1 && meterSwitcherOpen()) {
+            <div class="v1-data-workbench-switcher-backdrop v1-meter-workbench-header__meter-backdrop" (click)="closeMeterSwitcher()" aria-hidden="true"></div>
+            <div class="v1-data-workbench-switcher-menu v1-meter-workbench-header__meter-menu" role="menu" aria-label="Switch meter">
+              @for (meterCard of workspace.meterCards(); track meterCard.meter.guid) {
+                <button
+                  type="button"
+                  class="v1-data-workbench-switcher-item v1-meter-workbench-header__meter-item"
+                  role="menuitemradio"
+                  [class.active]="meterCard.meter.guid === currentMeter.guid"
+                  [attr.aria-checked]="meterCard.meter.guid === currentMeter.guid"
+                  (click)="switchMeter(meterCard.meter.guid)">
+                  <span class="v1-data-workbench-switcher-item-text v1-meter-workbench-header__meter-item-text">
+                    {{ meterCard.meter.name }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
       </div>
       <div class="v1-data-workbench-actions v1-meter-workbench-header__chips" aria-label="Meter summary">
         <span class="v1-meter-workbench-header__source-chip" [style.--v1-meter-source-color]="currentCard?.sourceColor || null">

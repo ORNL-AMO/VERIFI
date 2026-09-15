@@ -147,6 +147,28 @@ describe('MetersDashboardActionsService', () => {
     expect(meterHandler.deleteMeterData).not.toHaveBeenCalledWith(13);
   });
 
+  it('copies and deletes account meters outside the selected facility', async () => {
+    const selectedFacilityMeter = meter({ guid: 'meter-selected', facilityId: 'facility-a' });
+    const portfolioMeter = meter({ guid: 'meter-portfolio', facilityId: 'facility-b', name: 'Portfolio Meter', id: 21 });
+    const portfolioReading = reading({ guid: 'reading-portfolio', facilityId: 'facility-b', meterId: portfolioMeter.guid, id: 31 });
+    const { service, meterHandler } = setup({
+      meters: [selectedFacilityMeter, portfolioMeter],
+      selectedFacilityMeters: [selectedFacilityMeter],
+      meterData: [portfolioReading],
+      selectedFacilityMeterData: []
+    });
+
+    await service.copyMeter(portfolioMeter);
+    await service.deleteMeter(portfolioMeter);
+
+    expect(meterHandler.addMeter).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Portfolio Meter (copy)',
+      facilityId: 'facility-b'
+    }), 'account-a');
+    expect(meterHandler.deleteMeter).toHaveBeenCalledWith(portfolioMeter, 'account-a');
+    expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(31);
+  });
+
   it('blocks invalid source to group assignments before persistence', async () => {
     const waterGroup = group({ guid: 'group-water', name: 'Water', groupType: 'Water' });
     const electricMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: undefined, source: 'Electricity' });
@@ -168,6 +190,8 @@ describe('MetersDashboardActionsService', () => {
 function setup(options: {
   meters?: ReturnType<typeof meter>[];
   meterData?: ReturnType<typeof reading>[];
+  selectedFacilityMeters?: ReturnType<typeof meter>[];
+  selectedFacilityMeterData?: ReturnType<typeof reading>[];
   groups?: ReturnType<typeof group>[];
 } = {}) {
   const meterHandler = {
@@ -195,8 +219,10 @@ function setup(options: {
     selectedFacility: signal(facility()),
     canWrite: signal(true),
     hasPending: signal(false),
-    facilityMeters: signal(options.meters ?? []),
-    facilityMeterData: signal(options.meterData ?? []),
+    meters: signal(options.meters ?? []),
+    meterData: signal(options.meterData ?? []),
+    facilityMeters: signal(options.selectedFacilityMeters ?? options.meters ?? []),
+    facilityMeterData: signal(options.selectedFacilityMeterData ?? options.meterData ?? []),
     facilityMeterGroups: signal(options.groups ?? [])
   };
 

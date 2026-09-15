@@ -2,6 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { Route } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { AccountDataModule } from './account/data/account-data.module';
+import { AccountPortfolioAnalysesTabComponent } from './account/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
+import { AccountPortfolioComponent } from './account/portfolio/account-portfolio.component';
+import { AccountPortfolioEnergyUsesTabComponent } from './account/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
+import { AccountPortfolioFacilitiesTabComponent } from './account/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
+import { AccountPortfolioMetersTabComponent } from './account/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
+import { AccountPortfolioPredictorsTabComponent } from './account/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
+import { AccountPortfolioReportsTabComponent } from './account/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { FacilityDataModule } from './facility/data/facility-data.module';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
 import { MeterWorkbenchMonthlyDataComponent } from './facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
@@ -36,6 +43,28 @@ describe('V1Routes facility data meters routes', () => {
       path: '',
       pathMatch: 'full',
       redirectTo: 'meters'
+    });
+  });
+
+  it('routes Account Portfolio tabs as child workspaces', () => {
+    const route = accountPortfolioRoute();
+    const children = route.children ?? [];
+
+    expect(route.component).toBe(AccountPortfolioComponent);
+    expect(children.find(child => child.path === '')).toMatchObject({
+      path: '',
+      pathMatch: 'full',
+      redirectTo: 'facilities'
+    });
+    expect(children.find(child => child.path === 'facilities')).toMatchObject({ component: AccountPortfolioFacilitiesTabComponent });
+    expect(children.find(child => child.path === 'meters')).toMatchObject({ component: AccountPortfolioMetersTabComponent });
+    expect(children.find(child => child.path === 'predictors')).toMatchObject({ component: AccountPortfolioPredictorsTabComponent });
+    expect(children.find(child => child.path === 'energy-uses')).toMatchObject({ component: AccountPortfolioEnergyUsesTabComponent });
+    expect(children.find(child => child.path === 'analyses')).toMatchObject({ component: AccountPortfolioAnalysesTabComponent });
+    expect(children.find(child => child.path === 'reports')).toMatchObject({ component: AccountPortfolioReportsTabComponent });
+    expect(children.find(child => child.path === '**')).toMatchObject({
+      path: '**',
+      redirectTo: 'facilities'
     });
   });
 
@@ -111,6 +140,24 @@ describe('V1Routes facility data meters routes', () => {
     });
   });
 });
+
+function accountDataRoute(): Route {
+  const shellRoute = V1Routes[0];
+  const accountRoute = shellRoute.children?.find(route => route.path === 'workspace/account/:accountGuid');
+  const dataRoute = accountRoute?.children?.find(route => route.path === 'data');
+  if (!dataRoute) {
+    throw new Error('Account Data route was not found.');
+  }
+  return dataRoute;
+}
+
+function accountPortfolioRoute(): Route {
+  const route = accountDataRoute().children?.find(child => child.path === 'portfolio');
+  if (!route) {
+    throw new Error('Account Portfolio route was not found.');
+  }
+  return route;
+}
 
 function facilityDataRoute(): Route {
   const shellRoute = V1Routes[0];

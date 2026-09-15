@@ -1,4 +1,6 @@
 @let currentFacility = workspace.facility();
+@let currentAccount = workspace.account();
+@let accountMetersLink = accountMetersRoute();
 
 @if (!currentFacility) {
   <article class="v1-empty-state" role="status">
@@ -9,7 +11,13 @@
 } @else {
   <header class="v1-section-header v1-facility-meters__header">
     <div>
-      <p class="v1-eyebrow">Facility Data</p>
+      <nav class="v1-facility-meters__breadcrumb" aria-label="Meters context">
+        @if (currentAccount && accountMetersLink) {
+          <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
+          <app-ui-icon name="chevronRight"></app-ui-icon>
+        }
+        <span>{{ currentFacility.name || 'Facility' }}</span>
+      </nav>
       <h1 id="v1-facility-meters-title" class="v1-facility-meters__title">
         <app-ui-icon name="meter"></app-ui-icon>
         <span>Meters</span>

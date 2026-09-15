@@ -1,0 +1,32 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.v1-account-portfolio-placeholder {
+  align-items: start;
+  background: var(--v1-surface);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  box-shadow: 0 1rem 2rem var(--v1-shadow-soft);
+  display: grid;
+  gap: .6rem;
+  justify-items: start;
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.v1-account-portfolio-placeholder > .v1-icon {
+  color: var(--v1-account);
+  font-size: 1.5rem;
+}
+
+.v1-account-portfolio-placeholder h2,
+.v1-account-portfolio-placeholder p {
+  margin: 0;
+}
+
+.v1-account-portfolio-placeholder p {
+  color: var(--v1-muted);
+  max-width: 42rem;
+}

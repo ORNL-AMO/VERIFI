@@ -1,12 +1,12 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { buildMeterCards } from '@app/v1/facility/data/meters/facility-meters.models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters-dashboard.component';
 
@@ -29,8 +29,23 @@ describe('MetersDashboardComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
+    const breadcrumb = fixture.nativeElement.querySelector('.v1-facility-meters__breadcrumb') as HTMLElement;
     expect(text).toContain('Meters');
+    expect(text).not.toContain('Facility Data');
+    expect(text).toContain('Account A');
+    expect(text).toContain('Facility A');
+    expect(breadcrumb.textContent).not.toContain('Meters');
     expect(fixture.debugElement.query(By.css('.v1-facility-meters__title app-ui-icon')).componentInstance.name).toBe('meter');
+    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio',
+      'meters'
+    ]);
+    expect((fixture.nativeElement.querySelector('.v1-facility-meters__breadcrumb a') as HTMLAnchorElement).textContent?.trim()).toBe('Account A');
     expect(text).toContain('Electric Main');
     expect(text).toContain('Purchased Electricity');
     expect(text).toContain('City Water');
@@ -54,11 +69,12 @@ describe('MetersDashboardComponent', () => {
 
   it('ignores legacy dashboard mode query parameters and keeps rendering meters', () => {
     const fixture = setup();
-    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
     fixture.detectChanges();
 
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelector('app-meter-browse-card')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-meter-grouping')).toBeNull();
   });
@@ -85,13 +101,14 @@ describe('MetersDashboardComponent', () => {
   it('persists a meter draft and opens the created meter workbench', async () => {
     const created = meter({ guid: 'meter-new', name: 'Boiler Gas', source: 'Natural Gas' });
     const fixture = setup({ createdMeter: created });
-    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate');
 
     await fixture.componentInstance.saveMeterDraft({ name: 'Boiler Gas', source: 'Natural Gas' });
 
     const actions = fixture.componentRef.injector.get(MetersDashboardActionsService) as any;
     expect(actions.createMeter).toHaveBeenCalledWith({ name: 'Boiler Gas', source: 'Natural Gas' });
-    expect(router.navigate).toHaveBeenCalledWith([
+    expect(navigateSpy).toHaveBeenCalledWith([
       '/v1',
       'workspace',
       'facility',
@@ -142,11 +159,15 @@ function setup(options: {
   };
 
   TestBed.configureTestingModule({
-    imports: [MetersDashboardComponent],
+    imports: [
+      RouterModule.forRoot([]),
+      MetersDashboardComponent
+    ],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
+          account: signal(account()),
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
           meterGroups: groups,
           meterCards,
@@ -158,6 +179,14 @@ function setup(options: {
       {
         provide: WorkspaceNavigationService,
         useValue: {
+          accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
+            '/v1',
+            'workspace',
+            'account',
+            accountGuid,
+            'data',
+            detail
+          ],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [
             '/v1',
             'workspace',
@@ -169,8 +198,7 @@ function setup(options: {
             tab
           ]
         }
-      },
-      { provide: Router, useValue: { navigate: vi.fn() } }
+      }
     ]
   });
   TestBed.overrideComponent(MetersDashboardComponent, {
