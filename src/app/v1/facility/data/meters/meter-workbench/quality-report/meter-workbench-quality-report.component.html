@@ -1,0 +1,151 @@
+@let currentMeter = meter();
+@let currentReport = report();
+@let statistics = statisticRows();
+@let issues = issueSummaries();
+@let qualityOption = qualityChartOption();
+
+<section class="v1-meter-quality" aria-label="Meter data quality report">
+  @if (!currentMeter) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="meter"></app-ui-icon>
+      <h2>Select a meter</h2>
+      <p>Open a meter before reviewing data quality.</p>
+    </article>
+  } @else if (!currentReport?.hasData) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="table"></app-ui-icon>
+      <h2>No readings found</h2>
+      <p>Add readings before reviewing the data quality report for {{ currentMeter.name }}.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
+        <app-ui-icon name="table"></app-ui-icon>
+        Open Readings
+      </button>
+    </article>
+  } @else if (currentReport) {
+    @if (currentReport.showAlert) {
+      <div class="v1-alert v1-alert--warning v1-meter-quality__alert" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <div>
+          <strong>Data quality issues found</strong>
+          <ul>
+            @for (issue of issues; track issue) {
+              <li>{{ issue }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+
+    <section class="v1-meter-quality__panel" aria-labelledby="meter-quality-statistics-heading">
+      <div class="v1-meter-quality__panel-heading">
+        <h2 id="meter-quality-statistics-heading">Total Consumption and Cost Statistics</h2>
+      </div>
+
+      <div class="v1-meter-quality__scroller">
+        <table #statisticsTable class="v1-meter-quality__table" [class.copying-table]="copyingStatisticsTable()">
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              @for (column of statistics[0]?.cells ?? []; track column.id) {
+                <th scope="col" class="v1-meter-quality__number">{{ column.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of statistics; track row.id) {
+              <tr>
+                <th scope="row">{{ row.label }}</th>
+                @for (cell of row.cells; track cell.id) {
+                  <td class="v1-meter-quality__number">
+                    @if (cell.tone) {
+                      <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
+                    } @else {
+                      {{ cell.valueLabel }}
+                    }
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="statisticTableColspan">No statistics are available for this meter.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="v1-meter-quality__footer">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="statistics.length === 0" (click)="copyStatisticsTable()">
+          <app-ui-icon name="copy"></app-ui-icon>
+          Copy Table
+        </button>
+      </footer>
+    </section>
+
+    @if (qualityOption) {
+      <section class="v1-meter-quality__panel v1-meter-quality__chart-panel" aria-labelledby="meter-quality-readings-heading">
+        <div class="v1-meter-quality__panel-heading">
+          <h2 id="meter-quality-readings-heading">Readings Over Time</h2>
+          <button type="button" class="v1-icon-btn" title="Download PNG" aria-label="Download readings chart as PNG" (click)="downloadQualityChart()">
+            <app-ui-icon name="download"></app-ui-icon>
+          </button>
+        </div>
+        <div
+          #qualityChart
+          class="v1-meter-quality__chart"
+          [class.v1-meter-quality__chart--stacked]="currentReport.showConsumption && currentReport.includeCosts"
+          [appV1ECharts]="qualityOption"
+          role="img"
+          [attr.aria-label]="'Reading quality chart for ' + currentMeter.name">
+        </div>
+        <table class="visually-hidden">
+          <caption>Reading quality chart data</caption>
+          <thead>
+            <tr>
+              <th scope="col">Reading date</th>
+              @if (currentReport.showConsumption) {
+                <th scope="col">Total Consumption</th>
+                <th scope="col">Consumption Status</th>
+              }
+              @if (currentReport.includeCosts) {
+                <th scope="col">Total Cost</th>
+                <th scope="col">Cost Status</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of currentReport.chartRows; track row.reading.guid) {
+              <tr>
+                <th scope="row">{{ row.dateLabel }}</th>
+                @if (currentReport.showConsumption) {
+                  <td>{{ row.consumptionValue }}</td>
+                  <td>{{ row.consumptionOutlier ? 'Outlier' : 'Expected range' }}</td>
+                }
+                @if (currentReport.includeCosts) {
+                  <td>{{ row.costValue }}</td>
+                  <td>{{ row.costOutlier ? 'Outlier' : 'Expected range' }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
+    @if (currentReport.duplicateMonths.length > 0) {
+      <section class="v1-meter-quality__panel" aria-labelledby="meter-quality-duplicate-heading">
+        <div class="v1-meter-quality__panel-heading">
+          <div>
+            <p>Reading Dates</p>
+            <h2 id="meter-quality-duplicate-heading">Months with Multiple Readings</h2>
+          </div>
+        </div>
+        <div class="v1-meter-quality__chips" aria-label="Duplicate reading months">
+          @for (duplicateMonth of currentReport.duplicateMonths; track duplicateMonth.monthYear) {
+            <span class="v1-chip v1-chip--warning">{{ duplicateMonth.monthYear }}</span>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

@@ -107,6 +107,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 meter settings, workbench tab visibility, monthly table, monthly chart, yearly data, shared chart, and calendarization helper specs; omit `build-prod` from Codex validation for this workflow.
 
+### Facility Meter Data Quality Report Workflow
+
+- **Workflow:** v1 selected-meter Quality Report tab.
+- **Existing v0 entry point:** Facility meter Data Quality Report under the current Data Management meter routes.
+- **Decision:** Rebuild in v1 using version-neutral meter data quality helpers and Apache ECharts. Preserve statistics, outlier warnings, duplicate-month review, and raw-reading consumption and cost time series; intentionally omit v0 histogram/binning charts and annual totals.
+- **Parity:** Statistics use the existing min, max, average, median, MAD, median +/- 5 MAD, and outlier rules. Time-series charts use one shared-x-axis figure with stacked consumption and cost plots, marker-bearing line series, outlier overlays, and the expected MAD range as a shaded band. Cost sections render only when finite non-zero cost data exists.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
+- **Tests:** Focused v1 quality helper and component specs, plus ECharts scatter browser coverage when the directive registration changes. Skip `build-prod` in the Codex sandbox because it does not work reliably there; leave production build validation to CI or a non-sandbox environment.
+
 ### Portfolio Resource Card Reuse Decision
 
 - **Workflow:** v1 account portfolio resource tabs, starting with account-wide Meters and extending next to Predictors, Energy Uses, Analyses, and Reports.
