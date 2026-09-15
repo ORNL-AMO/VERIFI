@@ -16,43 +16,6 @@
   justify-content: flex-end;
 }
 
-.v1-facility-meters__breadcrumb {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .25rem;
-  margin: 0 0 .25rem;
-  color: var(--v1-muted);
-  font-size: .85rem;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.v1-facility-meters__breadcrumb a {
-  color: var(--v1-link);
-  text-decoration: none;
-}
-
-.v1-facility-meters__breadcrumb a:hover,
-.v1-facility-meters__breadcrumb a:focus-visible {
-  text-decoration: underline;
-  text-decoration-thickness: .1rem;
-  text-underline-offset: .18rem;
-}
-
-.v1-facility-meters__breadcrumb a:focus-visible {
-  border-radius: var(--v1-radius-sm);
-  outline: 3px solid var(--v1-focus);
-  outline-offset: 3px;
-}
-
-.v1-facility-meters__breadcrumb .v1-icon {
-  flex: 0 0 auto;
-  color: var(--v1-muted);
-  font-size: .8rem;
-  opacity: .75;
-}
-
 .v1-facility-meters__title {
   display: inline-flex;
   gap: var(--v1-space-2);

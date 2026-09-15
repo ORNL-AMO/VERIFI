@@ -1,7 +1,23 @@
+@let currentFacility = workspace.facility();
+@let currentAccount = workspace.account();
+@let accountMetersLink = accountMetersRoute();
+
 <section class="v1-meters-grouping" aria-label="Meter grouping">
   <header class="v1-section-header v1-facility-meters__header">
     <div>
-      <p class="v1-eyebrow">Facility Data</p>
+      <nav class="v1-data-context-breadcrumb v1-facility-meters__breadcrumb" aria-label="Meter grouping context">
+        <ol>
+          @if (currentAccount && accountMetersLink) {
+            <li>
+              <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
+            </li>
+            <li aria-hidden="true">
+              <app-ui-icon name="chevronRight"></app-ui-icon>
+            </li>
+          }
+          <li>{{ currentFacility?.name || 'Facility' }}</li>
+        </ol>
+      </nav>
       <h1 id="v1-facility-meters-title" class="v1-facility-meters__title">
         <app-ui-icon name="meterGroup"></app-ui-icon>
         <span>Meter Grouping</span>

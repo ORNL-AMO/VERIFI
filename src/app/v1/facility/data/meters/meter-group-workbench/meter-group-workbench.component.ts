@@ -51,6 +51,10 @@ export class MeterGroupWorkbenchComponent {
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite());
   readonly showWorkspacePending = computed(() => this.workspace.hasPending());
   readonly hasNoGroupData = computed(() => !this.isLoading() && !this.hasError() && this.results().monthlyRows.length === 0);
+  readonly accountMetersRoute = computed(() => {
+    const account = this.workspace.account();
+    return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  });
 
   constructor() {
     this.syncActiveTabFromRoute();

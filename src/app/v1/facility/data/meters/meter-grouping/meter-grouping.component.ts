@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -30,7 +30,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
     MeterGroupLaneComponent,
     MeterGroupDraftSlideoutComponent,
     MoveMeterSlideoutComponent,
-    ConfirmDeleteGroupModalComponent
+    ConfirmDeleteGroupModalComponent,
+    RouterLink
   ]
 })
 export class MeterGroupingComponent {
@@ -44,6 +45,10 @@ export class MeterGroupingComponent {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
+  readonly accountMetersRoute = computed(() => {
+    const account = this.workspace.account();
+    return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  });
   readonly dropListIds = computed(() => this.workspace.groupSections().map(section => meterGroupDropListId(section.id)));
   readonly moveTargets = computed(() => this.workspace.groupSections().map(section => meterGroupTargetFromSection(section)));
   readonly assignedMeterCounts = computed(() => {

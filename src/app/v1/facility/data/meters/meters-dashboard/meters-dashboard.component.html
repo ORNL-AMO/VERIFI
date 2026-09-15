@@ -11,12 +11,18 @@
 } @else {
   <header class="v1-section-header v1-facility-meters__header">
     <div>
-      <nav class="v1-facility-meters__breadcrumb" aria-label="Meters context">
-        @if (currentAccount && accountMetersLink) {
-          <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
-          <app-ui-icon name="chevronRight"></app-ui-icon>
-        }
-        <span>{{ currentFacility.name || 'Facility' }}</span>
+      <nav class="v1-data-context-breadcrumb v1-facility-meters__breadcrumb" aria-label="Meters context">
+        <ol>
+          @if (currentAccount && accountMetersLink) {
+            <li>
+              <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
+            </li>
+            <li aria-hidden="true">
+              <app-ui-icon name="chevronRight"></app-ui-icon>
+            </li>
+          }
+          <li>{{ currentFacility.name || 'Facility' }}</li>
+        </ol>
       </nav>
       <h1 id="v1-facility-meters-title" class="v1-facility-meters__title">
         <app-ui-icon name="meter"></app-ui-icon>
