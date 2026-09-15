@@ -168,6 +168,13 @@
   gap: .45rem;
 }
 
+.v1-facility-card__status {
+  flex: 0 1 auto;
+  max-width: 11rem;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
 .v1-facility-card__title {
   align-items: center;
   background: transparent;
