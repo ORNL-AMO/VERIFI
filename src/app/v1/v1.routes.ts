@@ -2,7 +2,13 @@ import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { AccountCustomDataPlaceholderComponent } from './account/data/account-custom-data-placeholder.component';
 import { AccountHomeComponent } from './account/home/account-home.component';
+import { AccountPortfolioAnalysesTabComponent } from './account/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from './account/portfolio/account-portfolio.component';
+import { AccountPortfolioEnergyUsesTabComponent } from './account/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
+import { AccountPortfolioFacilitiesTabComponent } from './account/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
+import { AccountPortfolioMetersTabComponent } from './account/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
+import { AccountPortfolioPredictorsTabComponent } from './account/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
+import { AccountPortfolioReportsTabComponent } from './account/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountSettingsComponent } from './account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from './account/settings/backup/account-settings-backup.component';
 import { AccountSettingsDeleteComponent } from './account/settings/delete/account-settings-delete.component';
@@ -63,7 +69,20 @@ export const V1Routes: Routes = [
             path: 'data',
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'portfolio' },
-              { path: 'portfolio', component: AccountPortfolioComponent },
+              {
+                path: 'portfolio',
+                component: AccountPortfolioComponent,
+                children: [
+                  { path: '', pathMatch: 'full', redirectTo: 'facilities' },
+                  { path: 'facilities', component: AccountPortfolioFacilitiesTabComponent },
+                  { path: 'meters', component: AccountPortfolioMetersTabComponent },
+                  { path: 'predictors', component: AccountPortfolioPredictorsTabComponent },
+                  { path: 'energy-uses', component: AccountPortfolioEnergyUsesTabComponent },
+                  { path: 'analyses', component: AccountPortfolioAnalysesTabComponent },
+                  { path: 'reports', component: AccountPortfolioReportsTabComponent },
+                  { path: '**', redirectTo: 'facilities' }
+                ]
+              },
               { path: 'custom-grid-factors', component: AccountCustomDataPlaceholderComponent, data: { title: 'Grid Factors' } },
               { path: 'custom-fuels', component: AccountCustomDataPlaceholderComponent, data: { title: 'Fuels' } },
               { path: 'custom-gwps', component: AccountCustomDataPlaceholderComponent, data: { title: 'Global Warming Potentials' } },

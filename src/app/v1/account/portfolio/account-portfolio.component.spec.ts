@@ -1,11 +1,16 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { ModalPortalService } from '../../shell/modal-portal.service';
 import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
@@ -20,13 +25,6 @@ describe('AccountPortfolioComponent', () => {
   let canWrite: ReturnType<typeof signal<boolean>>;
   let hasPending: ReturnType<typeof signal<boolean>>;
   let portfolioFacilities: { deleteFacility: ReturnType<typeof vi.fn>; createFacility: ReturnType<typeof vi.fn> };
-  let navigation: {
-    account: ReturnType<typeof signal<IdbAccount | undefined>>;
-    openFacility: ReturnType<typeof vi.fn>;
-    facilitySettingsRoute: ReturnType<typeof vi.fn>;
-  };
-  let workspaceService: { selectFacility: ReturnType<typeof vi.fn> };
-  let router: { navigate: ReturnType<typeof vi.fn> };
   let modalPortal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -39,20 +37,6 @@ describe('AccountPortfolioComponent', () => {
       deleteFacility: vi.fn(async () => undefined),
       createFacility: vi.fn(async () => facilityFixture('facility-new', 'New Facility'))
     };
-    navigation = {
-      account,
-      openFacility: vi.fn(async () => undefined),
-      facilitySettingsRoute: vi.fn((facilityGuid: string, detail = 'profile') => [
-        '/v1',
-        'workspace',
-        'facility',
-        facilityGuid,
-        'settings',
-        detail
-      ])
-    };
-    workspaceService = { selectFacility: vi.fn() };
-    router = { navigate: vi.fn(async () => true) };
     modalPortal = {
       show: vi.fn(),
       hide: vi.fn()
@@ -70,54 +54,37 @@ describe('AccountPortfolioComponent', () => {
           useValue: {
             account,
             facilities,
-            meters: signal([{ guid: 'meter-a', facilityId: 'facility-a', source: 'Electricity', modifiedDate: new Date('2026-02-01') }]),
-            meterData: signal([{ guid: 'reading-a', facilityId: 'facility-a', modifiedDate: new Date('2026-02-02') }]),
+            meters: signal([{ guid: 'meter-a', facilityId: 'facility-a', source: 'Electricity', name: 'Main Electric' }]),
+            meterData: signal([{ guid: 'reading-a', facilityId: 'facility-a', meterId: 'meter-a', month: 1, year: 2026 }]),
+            meterGroups: signal([]),
             predictors: signal([
-              { guid: 'predictor-a', facilityId: 'facility-a', predictorType: 'Standard', production: true },
-              { guid: 'predictor-b', facilityId: 'facility-b', predictorType: 'Weather', production: false },
-              { guid: 'predictor-c', facilityId: 'facility-b', predictorType: 'Standard', productionInAnalysis: true }
+              { guid: 'predictor-a', facilityId: 'facility-a' },
+              { guid: 'predictor-b', facilityId: 'facility-b' }
             ]),
             predictorData: signal([]),
-            facilityAnalyses: signal([
-              { guid: 'analysis-a', facilityId: 'facility-a', analysisCategory: 'energy', baselineYear: 2024, checked: true, isAnalysisVisited: true }
-            ]),
-            facilityReports: signal([
-              { guid: 'report-a', facilityId: 'facility-a', facilityReportType: 'overview', checked: true },
-              { guid: 'report-b', facilityId: 'facility-b', facilityReportType: 'analysis', checked: false },
-              { guid: 'report-c', facilityId: 'facility-b', facilityReportType: 'dataQuality', checked: true }
-            ]),
-            energyUseEquipment: signal([
-              {
-                guid: 'equipment-a',
-                facilityId: 'facility-a',
-                equipmentType: 'Pump',
-                utilityMeterGroupIds: ['meter-group-a'],
-                noLongerInUse: { isNoLongerInUse: false, year: null }
-              },
-              {
-                guid: 'equipment-b',
-                facilityId: 'facility-b',
-                equipmentType: 'HVAC',
-                utilityMeterGroupIds: [],
-                noLongerInUse: { isNoLongerInUse: false, year: null }
-              },
-              {
-                guid: 'equipment-c',
-                facilityId: 'facility-b',
-                equipmentType: 'Lighting',
-                utilityMeterGroupIds: [],
-                noLongerInUse: { isNoLongerInUse: true, year: 2024 }
-              }
-            ]),
+            facilityAnalyses: signal([{ guid: 'analysis-a', facilityId: 'facility-a' }]),
+            facilityReports: signal([{ guid: 'report-a', facilityId: 'facility-a' }]),
+            energyUseEquipment: signal([{ guid: 'equipment-a', facilityId: 'facility-a' }]),
             canWrite,
             hasPending
           }
         },
+        {
+          provide: WorkspaceNavigationService,
+          useValue: {
+            openFacility: vi.fn(async () => undefined),
+            facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
+            facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
+            facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meters', meterGuid, tab]
+          }
+        },
+        { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
         { provide: PortfolioFacilityService, useValue: portfolioFacilities },
-        { provide: WorkspaceNavigationService, useValue: navigation },
-        { provide: AccountWorkspaceService, useValue: workspaceService },
         { provide: ModalPortalService, useValue: modalPortal },
-        { provide: Router, useValue: router }
+        { provide: AccountStatusCheckService, useValue: { accountStatusCheck: of(undefined) } },
+        { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn() } },
+        { provide: MeterCommandHandler, useValue: {} },
+        { provide: MeterGroupCommandHandler, useValue: {} }
       ]
     });
     fixture = TestBed.createComponent(AccountPortfolioComponent);
@@ -128,126 +95,52 @@ describe('AccountPortfolioComponent', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders portfolio selectors and general facility details from workspace data', () => {
+  it('renders the portfolio shell and delegates the default content to the facilities tab', () => {
     expect(fixture.nativeElement.textContent).toContain('Portfolio');
-    expect(fixture.nativeElement.textContent).toContain('Alpha Plant');
-    expect(fixture.nativeElement.textContent).toContain('Beta Works');
     expect(selectorLabels()).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
-    expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.id === 'meters')?.icon).toBe('meter');
-    expect(selectorText()).not.toContain('Needs setup');
+    expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.path === 'meters')?.total).toBe(1);
+    expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.path === 'predictors')?.total).toBe(2);
+    expect(fixture.componentInstance.portfolioSelectors().map(selector => selector.path)).toEqual([
+      'facilities',
+      'meters',
+      'predictors',
+      'energy-uses',
+      'analyses',
+      'reports'
+    ]);
+    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
     expect(buttonByText('Add facility').classList.contains('v1-btn--action')).toBe(true);
-    expect(fixture.nativeElement.querySelector('.v1-portfolio-selector--active')).not.toBeNull();
-    expect(firstCardText()).toContain('Energy Uses');
-    expect(firstCardText()).toContain('Reports');
-    expect(firstCardText()).toContain('Last modified');
-    expect(fixture.nativeElement.textContent).not.toContain('Uses account staleness');
-    expect(fixture.nativeElement.textContent).not.toContain('MMBtu / kWh');
-    expect(fixture.componentInstance.totals()).toEqual({
-      facilities: 2,
-      meters: 1,
-      predictors: 3,
-      energyUses: 3,
-      analyses: 1,
-      reports: 3
-    });
   });
 
-  it('filters facilities by search and setup status', () => {
-    fixture.componentInstance.setSearch('beta');
-    fixture.detectChanges();
+  it('renders selector links for each routed portfolio tab', () => {
+    const links = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a.v1-portfolio-selector'));
 
-    expect(cardTitles()).toEqual(['Beta Works']);
-
-    fixture.componentInstance.setSearch('');
-    fixture.componentInstance.setStatusFilter('noMeters');
-    fixture.detectChanges();
-
-    expect(cardTitles()).toEqual(['Beta Works']);
+    expect(links.length).toBe(6);
+    expect(links[0].querySelector('.v1-portfolio-selector__label')?.textContent?.trim()).toBe('Facilities');
+    expect(links[0].querySelector('.v1-portfolio-selector__count app-ui-icon')).not.toBeNull();
+    expect(links[0].querySelector('.v1-portfolio-selector__count strong')?.textContent?.trim()).toBe('2');
+    expect(fixture.componentInstance.portfolioSelectors().map(selector => selector.path)).toEqual([
+      'facilities',
+      'meters',
+      'predictors',
+      'energy-uses',
+      'analyses',
+      'reports'
+    ]);
   });
 
-  it('shows an empty state with add facility action', () => {
+  it('shows a shell-level empty state when the account has no facilities', () => {
     facilities.set([]);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No facilities yet');
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeNull();
+
     buttonByText('Add facility').click();
     fixture.detectChanges();
 
     expect(modalPortal.show).toHaveBeenCalled();
     expect(fixture.componentInstance.isCreateFacilityDrawerOpen()).toBe(true);
-  });
-
-  it('changes facility card content when a portfolio selector is selected', () => {
-    buttonByText('Meters').click();
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.selectedView()).toBe('meters');
-    expect(fixture.nativeElement.textContent).toContain('Latest meter activity');
-    expect(fixture.nativeElement.textContent).toContain('Add meters to begin utility data tracking');
-
-    buttonByText('Predictors').click();
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Weather');
-    expect(fixture.nativeElement.textContent).toContain('Production');
-
-    buttonByText('Energy Uses').click();
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Meter Links');
-    expect(fixture.nativeElement.textContent).toContain('HVAC, Lighting');
-
-    buttonByText('Analyses').click();
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Baselines 2024');
-    expect(fixture.nativeElement.textContent).toContain('Create analyses once utility data');
-
-    buttonByText('Reports').click();
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Overview');
-    expect(fixture.nativeElement.textContent).toContain('Analysis, Data Quality');
-  });
-
-  it('sorts by the selected portfolio content count', () => {
-    fixture.componentInstance.selectContentView('reports');
-    fixture.componentInstance.setSortBy('selectedContent');
-    fixture.detectChanges();
-
-    expect(cardTitles()).toEqual(['Beta Works', 'Alpha Plant']);
-  });
-
-  it('opens the facility workspace and settings routes', () => {
-    fixture.componentInstance.openFacility(facilities()[0]);
-    fixture.componentInstance.openFacilitySettings(facilities()[1]);
-
-    expect(navigation.openFacility).toHaveBeenCalledWith('facility-a');
-    expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-b');
-    expect(router.navigate).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-b',
-      'settings',
-      'profile'
-    ]);
-  });
-
-  it('confirms before deleting a facility', async () => {
-    const deleteButtons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button[aria-label="Delete facility"]'));
-
-    deleteButtons[0].click();
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.facilityToDelete()).toBe(facilities()[0]);
-    expect(modalPortal.show).toHaveBeenCalled();
-    expect(portfolioFacilities.deleteFacility).not.toHaveBeenCalled();
-
-    await fixture.componentInstance.confirmDeleteFacility();
-
-    expect(portfolioFacilities.deleteFacility).toHaveBeenCalledWith(facilities()[0]);
-    expect(fixture.componentInstance.actionMessage).toBe('Facility deleted');
   });
 
   it('disables write actions while workspace writes are unavailable', () => {
@@ -263,24 +156,9 @@ describe('AccountPortfolioComponent', () => {
       .find(button => button.textContent?.includes(text))!;
   }
 
-  function cardTitles(): string[] {
-    return Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('.v1-facility-card__title'))
-      .map(button => button.textContent!.trim());
-  }
-
-  function firstCardText(): string {
-    return fixture.nativeElement.querySelector('.v1-facility-card')!.textContent;
-  }
-
   function selectorLabels(): string[] {
-    return Array.from<HTMLButtonElement>(fixture.nativeElement.querySelectorAll('.v1-portfolio-selector'))
-      .map(button => button.querySelector('span')!.textContent!.trim());
-  }
-
-  function selectorText(): string {
-    return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-portfolio-selector'))
-      .map(selector => selector.textContent)
-      .join(' ');
+    return Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.v1-portfolio-selector'))
+      .map(link => link.querySelector('span')!.textContent!.trim());
   }
 });
 
@@ -302,35 +180,10 @@ function facilityFixture(guid: string, name: string): IdbFacility {
     country: 'US',
     city: guid === 'facility-a' ? 'Oak Ridge' : 'Knoxville',
     state: 'TN',
-    zip: '37830',
-    address: '1 Main St',
-    size: 10000,
-    naics1: '',
-    naics2: '',
-    naics3: '',
-    notes: '',
-    unitsOfMeasure: 'Imperial',
+    classification: guid === 'facility-a' ? 'Manufacturing' : 'Office',
     energyUnit: 'MMBtu',
     electricityUnit: 'kWh',
-    massUnit: 'lb',
     volumeLiquidUnit: 'gal',
-    volumeGasUnit: 'SCF',
-    sustainabilityQuestions: getNewIdbAccount().sustainabilityQuestions,
-    fiscalYear: 'calendarYear',
-    fiscalYearMonth: 0,
-    fiscalYearCalendarEnd: true,
-    energyIsSource: true,
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
-    color: '#123456',
-    classification: guid === 'facility-a' ? 'Manufacturing' : 'Office',
-    dataStalenessSettings: {
-      enabled: true,
-      thresholdMonths: 3,
-      useAccountSettings: guid === 'facility-a'
-    },
-    createdDate: new Date('2026-01-01'),
     modifiedDate: new Date('2026-01-01')
-  };
+  } as IdbFacility;
 }

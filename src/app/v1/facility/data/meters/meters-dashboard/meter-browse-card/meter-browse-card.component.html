@@ -4,6 +4,13 @@
   [class.v1-meter-browse-card--status-info]="card.statusTone === 'info'"
   [class.v1-meter-browse-card--status-warning]="card.statusTone === 'warning'"
   [class.v1-meter-browse-card--status-danger]="card.statusTone === 'danger'">
+  @if (showFacilityHeader && portfolioFacility) {
+    <div class="v1-meter-browse-card__facility-header">
+      <app-ui-icon name="facility"></app-ui-icon>
+      <span>{{ portfolioFacility.name }}</span>
+    </div>
+  }
+
   <header class="v1-meter-browse-card__header">
     <button type="button" class="v1-meter-browse-card__title" [attr.aria-label]="'Open ' + card.meter.name + ' settings'" (click)="openSettings()">
       <app-ui-icon [name]="card.sourceIcon || 'meter'"></app-ui-icon>

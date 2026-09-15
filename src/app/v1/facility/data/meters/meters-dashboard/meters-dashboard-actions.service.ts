@@ -68,7 +68,7 @@ export class MetersDashboardActionsService {
 
   async copyMeter(meter: IdbUtilityMeter): Promise<IdbUtilityMeter> {
     const account = this.requireAccount();
-    const current = this.requireWorkspaceMeter(meter.guid);
+    const current = this.requireAccountMeter(meter.guid);
     const copy = structuredClone(current);
     delete copy.id;
     copy.guid = getGUID();
@@ -100,11 +100,11 @@ export class MetersDashboardActionsService {
 
   async deleteMeter(meter: IdbUtilityMeter): Promise<void> {
     const account = this.requireAccount();
-    const current = this.requireWorkspaceMeter(meter.guid);
+    const current = this.requireAccountMeter(meter.guid);
     if (current.id === undefined) {
       throw new WorkspaceWriteError('validation-failed', 'Meter is missing its IndexedDB id.');
     }
-    const meterData = this.workspace.facilityMeterData()
+    const meterData = this.workspace.meterData()
       .filter(data => data.meterId === current.guid);
     this.requireMeterDataIds(meterData);
 
@@ -287,6 +287,14 @@ export class MetersDashboardActionsService {
     const meter = this.workspace.facilityMeters().find(item => item.guid === meterGuid);
     if (!meter) {
       throw new WorkspaceWriteError('validation-failed', 'The meter is not part of the selected facility.');
+    }
+    return meter;
+  }
+
+  private requireAccountMeter(meterGuid: string): IdbUtilityMeter {
+    const meter = this.workspace.meters().find(item => item.guid === meterGuid);
+    if (!meter) {
+      throw new WorkspaceWriteError('validation-failed', 'The meter is not part of the active account.');
     }
     return meter;
   }

@@ -37,6 +37,24 @@
   min-width: 0;
 }
 
+.v1-meter-browse-card__facility-header {
+  align-items: center;
+  border-bottom: 1px solid var(--v1-border);
+  color: var(--v1-facility);
+  display: inline-flex;
+  font-size: .84rem;
+  font-weight: 900;
+  gap: var(--v1-space-1);
+  margin: calc(var(--v1-space-2) * -1) 0 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding-bottom: var(--v1-space-2);
+}
+
+.v1-meter-browse-card__facility-header .v1-icon {
+  flex: 0 0 auto;
+}
+
 .v1-meter-browse-card__body {
   display: grid;
   gap: var(--v1-space-3);

@@ -1,0 +1,160 @@
+@let summaries = filteredSummaries();
+
+<section class="v1-account-portfolio-tab" aria-label="Portfolio facilities">
+  <form class="v1-account-portfolio-tab__toolbar" aria-label="Facility filters">
+    <div class="v1-account-portfolio-tab__search">
+      <span class="input-group-text">
+        <app-ui-icon name="search"></app-ui-icon>
+      </span>
+      <input
+        id="v1-portfolio-facility-search"
+        type="search"
+        aria-label="Find facility, location, or type"
+        placeholder="Find facility, location, or type"
+        [value]="search()"
+        (input)="setSearch($any($event.target).value)">
+    </div>
+
+    <label>
+      <span>Status</span>
+      <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+        <option value="all">All</option>
+        <option value="attention">Needs setup</option>
+        <option value="noMeters">No meters</option>
+        <option value="noReadings">No readings</option>
+        <option value="noAnalyses">No analyses</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Sort</span>
+      <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+        <option value="attention">Setup first</option>
+        <option value="facilityName">Facility name</option>
+        <option value="modified">Latest activity</option>
+      </select>
+    </label>
+  </form>
+
+  @if (actionMessage || actionError) {
+    <div class="v1-account-portfolio-tab__notice" [class.v1-account-portfolio-tab__notice--error]="actionError" aria-live="polite">
+      {{ actionError || actionMessage }}
+    </div>
+  }
+
+  @if (summaries.length === 0) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="clearFilter"></app-ui-icon>
+      <h2>No facilities match these filters</h2>
+      <p>Adjust the search or filter controls to return to the full portfolio.</p>
+    </article>
+  } @else {
+    <div class="v1-account-portfolio-tab__cards" role="list" aria-label="Facilities">
+      @for (summary of summaries; track summary.facility.guid) {
+        <article class="v1-facility-card" [ngClass]="'v1-facility-card--' + summary.statusTone" role="listitem">
+          <header class="v1-facility-card__header">
+            <div class="v1-facility-card__identity">
+              <button type="button" class="v1-facility-card__title" (click)="openFacility(summary.facility)">
+                <app-ui-icon name="facility"></app-ui-icon>
+                <span class="v1-facility-card__title-text">{{ summary.facility.name }}</span>
+                <app-ui-icon name="chevronRight" class="v1-facility-card__title-chevron"></app-ui-icon>
+              </button>
+              <span class="v1-facility-card__location">
+                <app-ui-icon name="location"></app-ui-icon>
+                {{ summary.location }}
+              </span>
+            </div>
+          </header>
+
+          <div class="v1-facility-card__facts" aria-label="Facility facts">
+            @for (fact of summary.facts; track fact.label) {
+              @if (fact.detail; as detail) {
+                <button
+                  type="button"
+                  class="v1-facility-card__fact v1-facility-card__fact--clickable"
+                  [attr.aria-label]="'Open ' + summary.facility.name + ' ' + fact.label"
+                  (click)="openFacilityData(summary.facility, detail)">
+                  <span class="v1-facility-card__fact-label">{{ fact.label }}</span>
+                  <span class="v1-facility-card__fact-value">
+                    <app-ui-icon [name]="fact.icon"></app-ui-icon>
+                    <strong>{{ fact.value }}</strong>
+                    <app-ui-icon name="chevronRight" class="v1-facility-card__fact-chevron"></app-ui-icon>
+                  </span>
+                </button>
+              } @else {
+                <div class="v1-facility-card__fact">
+                  <span class="v1-facility-card__fact-label">{{ fact.label }}</span>
+                  <span class="v1-facility-card__fact-value">
+                    <app-ui-icon [name]="fact.icon"></app-ui-icon>
+                    <strong>{{ fact.value }}</strong>
+                  </span>
+                </div>
+              }
+            }
+          </div>
+
+          <footer class="v1-facility-card__footer">
+            <span>
+              <app-ui-icon name="calendar"></app-ui-icon>
+              Last modified {{ summary.latestActivityLabel }}
+            </span>
+            <div class="v1-facility-card__actions" aria-label="Facility actions">
+              <button type="button" class="v1-icon-btn" title="Open facility" aria-label="Open facility" (click)="openFacility(summary.facility)">
+                <app-ui-icon name="arrowRight"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn" title="Open facility settings" aria-label="Open facility settings" (click)="openFacilitySettings(summary.facility)">
+                <app-ui-icon name="settings"></app-ui-icon>
+              </button>
+              <button
+                type="button"
+                class="v1-icon-btn v1-icon-btn--danger"
+                title="Delete facility"
+                aria-label="Delete facility"
+                [disabled]="!canWrite() || hasPending()"
+                (click)="requestDeleteFacility(summary.facility)">
+                <app-ui-icon name="delete"></app-ui-icon>
+              </button>
+            </div>
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<ng-template #deleteFacilityModal>
+  @let pendingDelete = facilityToDelete();
+  @if (pendingDelete) {
+    <div class="v1-modal-layer">
+      <button
+        type="button"
+        class="v1-modal-backdrop"
+        aria-label="Cancel facility deletion"
+        [disabled]="isDeleting"
+        (click)="cancelDeleteFacility()"></button>
+      <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-facility-title">
+        <header class="v1-modal__header">
+          <h2 id="v1-delete-facility-title">Delete {{ pendingDelete.name }}?</h2>
+          <button type="button" class="v1-icon-btn" aria-label="Cancel facility deletion" [disabled]="isDeleting" (click)="cancelDeleteFacility()">
+            <app-ui-icon name="close"></app-ui-icon>
+          </button>
+        </header>
+        <div class="v1-modal__body">
+          <p>Deleting this facility also deletes its meters, predictors, analyses, reports, equipment, and related data.</p>
+        </div>
+        <footer class="v1-modal__footer">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting" (click)="cancelDeleteFacility()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="isDeleting" (click)="confirmDeleteFacility()">
+            @if (isDeleting) {
+              <app-ui-icon name="loading" spin></app-ui-icon>
+              Deleting
+            } @else {
+              Delete facility
+              <app-ui-icon name="delete"></app-ui-icon>
+            }
+          </button>
+        </footer>
+      </section>
+    </div>
+  }
+</ng-template>
