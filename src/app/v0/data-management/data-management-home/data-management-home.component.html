@@ -8,16 +8,20 @@
         </h4>
         <div class="d-flex justify-content-end w-100 align-items-start mb-3 gap-2">
           <!-- <div class="d-flex flex-column align-items-end gap-2"> -->
-            @if (showWeatherButton) {
-            <button class="btn btn-outline" (click)="openWeatherPredictorModal()">
-              <span class="fa fa-temperature-half"></span>
-              Update Weather Predictors
-            </button>
-            }
-            <button class="btn nav-btn" (click)="goToUpload()">
-              <span class="fa fa-upload"></span>
-              Upload Data
-            </button>
+          @if (showWeatherButton) {
+          <button class="btn btn-outline" (click)="openWeatherPredictorsChangeModal()">
+            <span class="fa fa-refresh"></span>
+            Check Weather Predictors Changes
+          </button>
+          <button class="btn btn-outline" (click)="openWeatherPredictorModal()">
+            <span class="fa fa-temperature-half"></span>
+            Update Weather Predictors
+          </button>
+          }
+          <button class="btn nav-btn" (click)="goToUpload()">
+            <span class="fa fa-upload"></span>
+            Upload Data
+          </button>
           <!-- </div> -->
         </div>
         <hr class="my-2">
@@ -118,3 +122,21 @@
 @if (showWeatherPredictorModal) {
 <app-update-weather-predictors-modal (emitClose)="closeWeatherPredictorModal()"></app-update-weather-predictors-modal>
 }
+<div [ngClass]="{'windowOverlay': showWeatherPredictorsChangeModal}"></div>
+<div class="popup" [class.open]="showWeatherPredictorsChangeModal">
+  <div class="popup-header">
+    Check for calculated predictor changes?
+    <button class="item-right" (click)="closeWeatherPredictorsChangeModal()">x</button>
+  </div>
+  <div class="popup-body">
+    <p>
+      Past weather data is sometimes updated by NOAA. Choose to check for updates for the last 6 months or all
+      data entries for the predictors in all facilities.
+    </p>
+  </div>
+  <div class="popup-footer text-end">
+    <button class="btn btn-secondary me-1" (click)="closeWeatherPredictorsChangeModal()">Cancel</button>
+    <button class="btn btn-outline me-1" (click)="setUpdatedAmount(false)">Last 6 Months</button>
+    <button class="btn btn-outline" (click)="setUpdatedAmount(true)">All Entries</button>
+  </div>
+</div>

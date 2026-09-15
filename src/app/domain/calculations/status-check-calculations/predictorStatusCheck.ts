@@ -1,6 +1,6 @@
 
 import { IdbPredictor } from "@data/models/idbModels/predictor";
-import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, computeDataOutdated } from "./statusCheckModels";
+import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, computeDataOutdated, WEATHER_CHANGE_TRACK_SUFFIX } from "./statusCheckModels";
 import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import * as _ from 'lodash';
 
@@ -21,6 +21,7 @@ export class PredictorStatusCheck {
     actions: Array<StatusCheckAction>;
     latestFacilityEntryDate: Date | undefined;
     hasNegativeData: boolean = false;
+    hasWeatherDataChangedWarning: boolean
 
 
     constructor(
@@ -46,6 +47,7 @@ export class PredictorStatusCheck {
         this.isDataOutdated = (stalenessEnabled && !predictor.ignoreDateStatusChecks && !predictor.noLongerInUse) ? this.computeIsDataOutdated(stalenessThresholdMonths) : false;
         this.outdatedMonths = stalenessThresholdMonths;
         this.setHasWeatherDataWarning(predictor, predictorReadings);
+        this.setHasWeatherDataChangedWarning(predictor, predictorReadings);
         this.setStatus(predictor);
         this.setActions(predictor, noLongerInUseFacilityEntry);
     }
@@ -119,7 +121,7 @@ export class PredictorStatusCheck {
         } else if (this.isDataOutdated) {
             // Outdated status takes precedence over warning when data is time-stale
             this.status = 'outdated';
-        } else if ((!predictor.ignoreDateStatusChecks && !predictor.noLongerInUse && !this.isDataCurrent) || this.hasWeatherDataWarning) {
+        } else if ((!predictor.ignoreDateStatusChecks && !predictor.noLongerInUse && !this.isDataCurrent) || this.hasWeatherDataWarning || this.hasWeatherDataChangedWarning) {
             this.status = 'warning';
         } else {
             this.status = 'good';
@@ -199,7 +201,7 @@ export class PredictorStatusCheck {
                 isWeather,
                 trackGuid: predictor.guid + '_weather_warnings'
             });
-        } else if(this.hasNegativeData) {
+        } else if (this.hasNegativeData) {
             this.actions.push({
                 label: 'Review negative data entries for ' + predictor.name,
                 url: baseUrl + '/predictor-data',
@@ -209,6 +211,19 @@ export class PredictorStatusCheck {
                 status: 'error',
                 isWeather,
                 trackGuid: predictor.guid + '_negative_data'
+            });
+        }
+
+        if (this.hasWeatherDataChangedWarning) {
+            this.actions.push({
+                label: 'Predictor data changed for ' + predictor.name,
+                url: baseUrl + '/predictor-data',
+                description: `NOAA has updated one or more data entries for this predictor. Please review and update the data.`,
+                facilityId: predictor.facilityId,
+                type: 'predictor',
+                status: 'warning',
+                isWeather,
+                trackGuid: predictor.guid + WEATHER_CHANGE_TRACK_SUFFIX
             });
         }
     }
@@ -224,6 +239,14 @@ export class PredictorStatusCheck {
             return;
         }
         this.hasWeatherDataWarning = predictorData.some(data => data.weatherDataWarning);
+    }
+
+    private setHasWeatherDataChangedWarning(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {
+        if (predictor.predictorType !== 'Weather') {
+            this.hasWeatherDataChangedWarning = false;
+            return;
+        }
+        this.hasWeatherDataChangedWarning = predictorData.some(data => data.weatherDataChanged);
     }
 
     private setHasNegativeData(predictor: IdbPredictor, predictorData: Array<IdbPredictorData>) {

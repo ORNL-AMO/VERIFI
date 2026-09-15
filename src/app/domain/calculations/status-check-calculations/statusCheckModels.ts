@@ -59,3 +59,14 @@ export function computeDataOutdated(lastDateEntry: Date | undefined, thresholdMo
     const thresholdDate = new Date(now.getFullYear(), now.getMonth() - thresholdMonths, now.getDate());
     return new Date(lastDateEntry) < thresholdDate;
 }
+
+export const WEATHER_CHANGE_TRACK_SUFFIX = '_weather_changed';
+
+export interface PredictorChangeCheckResult {
+    predictorId: string;
+    predictorName: string;
+    facilityId: string;
+    accountId: string;
+    changedEntriesCount: number;
+    checkedAll: boolean;
+}
