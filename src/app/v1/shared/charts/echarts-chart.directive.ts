@@ -1,6 +1,6 @@
 import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
 import * as echarts from 'echarts/core';
-import { BarChart, BarSeriesOption, LineChart, LineSeriesOption } from 'echarts/charts';
+import { BarChart, BarSeriesOption, LineChart, LineSeriesOption, ScatterChart, ScatterSeriesOption } from 'echarts/charts';
 import {
   DataZoomComponent,
   DataZoomComponentOption,
@@ -10,6 +10,8 @@ import {
   GridComponentOption,
   LegendComponent,
   LegendComponentOption,
+  MarkAreaComponent,
+  MarkAreaComponentOption,
   ToolboxComponent,
   ToolboxComponentOption,
   TooltipComponent,
@@ -22,10 +24,12 @@ import type { ECharts } from 'echarts/core';
 echarts.use([
   BarChart,
   LineChart,
+  ScatterChart,
   DataZoomComponent,
   DatasetComponent,
   GridComponent,
   LegendComponent,
+  MarkAreaComponent,
   ToolboxComponent,
   TooltipComponent,
   TransformComponent,
@@ -35,10 +39,12 @@ echarts.use([
 export type V1EChartsOption = echarts.ComposeOption<
   | BarSeriesOption
   | LineSeriesOption
+  | ScatterSeriesOption
   | DataZoomComponentOption
   | DatasetComponentOption
   | GridComponentOption
   | LegendComponentOption
+  | MarkAreaComponentOption
   | ToolboxComponentOption
   | TooltipComponentOption
 >;
@@ -138,7 +144,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     const option = this.withThemeDefaults(this.option, isInitialRender);
     this.chart.setOption(option, {
       lazyUpdate: false,
-      replaceMerge: isInitialRender ? undefined : ['series', 'yAxis', 'dataZoom']
+      replaceMerge: isInitialRender ? undefined : ['series', 'xAxis', 'yAxis', 'grid', 'dataZoom']
     });
     this.hasRenderedOption = true;
   }

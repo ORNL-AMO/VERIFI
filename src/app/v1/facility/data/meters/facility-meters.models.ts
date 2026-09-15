@@ -236,7 +236,7 @@ export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
   { id: 'monthly', label: 'Monthly Table', icon: 'calendar', summary: 'Monthly calendarized data table.' },
   { id: 'monthly-chart', label: 'Monthly Chart', icon: 'chartLine', summary: 'Monthly calendarized data chart.' },
   { id: 'yearly', label: 'Yearly Data', icon: 'barChart', summary: 'Yearly meter table and chart.' },
-  { id: 'quality', label: 'Quality Report', icon: 'warning', summary: 'Meter data quality report content is WIP.' }
+  { id: 'quality', label: 'Quality Report', icon: 'warning', summary: 'Review meter statistics, expected ranges, outliers, duplicate months, and time series.' }
 ];
 
 export const METER_GROUP_WORKBENCH_TABS: ReadonlyArray<MeterGroupWorkbenchTab> = [
