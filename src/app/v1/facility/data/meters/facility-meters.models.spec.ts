@@ -220,6 +220,21 @@ describe('facility meter view models', () => {
     expect(preferredMeterCostMetricId(columns)).toBe('energyCost');
   });
 
+  it('keeps meter yearly rows split across fiscal-year boundaries', () => {
+    const yearlyRows = buildMeterYearlyDataRows([
+      monthlyData({ year: 2025, monthNumValue: 11, fiscalYear: 2026, energyConsumption: 10, energyUse: 20, energyCost: 30 }),
+      monthlyData({ year: 2026, monthNumValue: 0, fiscalYear: 2026, energyConsumption: 12, energyUse: 24, energyCost: 36 }),
+      monthlyData({ year: 2026, monthNumValue: 6, fiscalYear: 2027, energyConsumption: 14, energyUse: 28, energyCost: 42 }),
+      monthlyData({ year: 2026, monthNumValue: 7, fiscalYear: 2027, energyConsumption: 0, energyUse: 0, energyCost: 0 })
+    ]);
+
+    expect(yearlyRows).toEqual([
+      expect.objectContaining({ year: 2026, energyConsumption: 22, energyUse: 44, energyCost: 66 }),
+      expect.objectContaining({ year: 2027, energyConsumption: 14, energyUse: 28, energyCost: 42 })
+    ]);
+    expect(meterYearlyChartRows(yearlyRows).map(row => row.periodLabel)).toEqual(['FY 2026', 'FY 2027']);
+  });
+
   it('uses consumption as the utility value for water groups', () => {
     const waterGroup = group({ guid: 'group-water', groupType: 'Water' });
     const waterMeter = meter({ guid: 'meter-water', source: 'Water Intake', groupId: waterGroup.guid });

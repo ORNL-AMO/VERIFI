@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import * as echarts from 'echarts/core';
-import { EChartsChartDirective, V1EChartsOption } from './echarts-chart.directive';
+import { EChartsChartDirective, V1EChartsOption, v1ChartPngFileName } from './echarts-chart.directive';
 
 @Component({
   template: `<div class="chart-host" [appV1ECharts]="option()"></div>`,
@@ -9,14 +9,22 @@ import { EChartsChartDirective, V1EChartsOption } from './echarts-chart.directiv
   imports: [EChartsChartDirective]
 })
 class EChartsDirectiveHostComponent {
+  readonly zoom = signal<{ readonly start: number; readonly end: number } | undefined>(undefined);
   readonly option = signal<V1EChartsOption>({
-    xAxis: { type: 'category', data: ['Jan', 'Feb'] },
+    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr'] },
     yAxis: { type: 'value' },
-    series: [{ type: 'bar', data: [1, 2] }]
+    dataZoom: [{ type: 'inside', start: 0, end: 100 }],
+    series: [{ type: 'bar', data: [1, 2, 3, 4] }]
   } as V1EChartsOption);
 }
 
 describe('EChartsChartDirective in Chromium', () => {
+  it('preserves existing PNG extensions when sanitizing chart filenames', () => {
+    expect(v1ChartPngFileName('meter-chart.png')).toBe('meter-chart.png');
+    expect(v1ChartPngFileName('meter chart.png')).toBe('meter-chart.png');
+    expect(v1ChartPngFileName('')).toBe('chart.png');
+  });
+
   it('initializes and updates an ECharts canvas', async () => {
     TestBed.configureTestingModule({
       imports: [EChartsDirectiveHostComponent]
@@ -40,6 +48,29 @@ describe('EChartsChartDirective in Chromium', () => {
     await nextAnimationFrame();
 
     expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
+  });
+
+  it('emits ECharts data zoom changes', async () => {
+    TestBed.overrideComponent(EChartsDirectiveHostComponent, {
+      set: {
+        template: `<div class="chart-host" [appV1ECharts]="option()" (dataZoomChanged)="zoom.set($event)"></div>`
+      }
+    });
+    TestBed.configureTestingModule({
+      imports: [EChartsDirectiveHostComponent]
+    });
+    const fixture = TestBed.createComponent(EChartsDirectiveHostComponent);
+    const host = fixture.nativeElement.querySelector('.chart-host') as HTMLElement;
+    host.style.width = '360px';
+    host.style.height = '240px';
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await nextAnimationFrame();
+
+    echarts.getInstanceByDom(host)?.dispatchAction({ type: 'dataZoom', start: 20, end: 60 });
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.zoom()).toEqual({ start: 20, end: 60 });
   });
 
   it('removes stale series and axes when an updated option shrinks them', async () => {
