@@ -244,7 +244,7 @@ describe('MeterWorkbenchReadingsComponent', () => {
     expect(component.fillMissingOpen()).toBe(false);
   });
 
-  it('opens settings with the status settings fragment from status alerts', () => {
+  it('opens settings with the meter reading settings fragment from status alerts', () => {
     const { fixture, router } = setupHarness();
     fixture.detectChanges();
 
@@ -259,7 +259,7 @@ describe('MeterWorkbenchReadingsComponent', () => {
       'meters',
       'meter-a',
       'settings'
-    ], { fragment: 'meter-settings-status' });
+    ], { fragment: 'meter-reading-settings' });
   });
 });
 

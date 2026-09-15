@@ -73,6 +73,23 @@ describe('MeterSettingsFormService', () => {
     expect(form.controls.fuel.hasError('required')).toBe(true);
   });
 
+  it('builds, validates, and serializes the calendarization method', () => {
+    const form = service.buildMeterSettingsForm(meter({
+      meterReadingDataApplication: undefined
+    }));
+
+    expect(form.controls.meterReadingDataApplication.hasError('required')).toBe(true);
+
+    form.controls.meterReadingDataApplication.patchValue('fullYear');
+    const updated = service.updateMeterFromSettingsForm(structuredClone(meter({
+      meterReadingDataApplication: 'backward'
+    })), form);
+
+    expect(form.controls.meterReadingDataApplication.hasError('required')).toBe(false);
+    expect(updated.meterReadingDataApplication).toBe('fullYear');
+  });
+
+
   it('applies electricity agreement side effects and serializes multipliers and green purchase fraction', () => {
     const form = service.buildMeterSettingsForm(meter({
       source: 'Electricity',

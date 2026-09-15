@@ -28,6 +28,16 @@ describe('MeterSlideoutComponent', () => {
     expect(closeButton(fixture).disabled).toBe(true);
     expect(closed).toEqual([]);
   });
+
+  it('supports a large width for dense slideout content', () => {
+    const fixture = setup();
+
+    fixture.componentInstance.size = 'large';
+    fixture.detectChanges();
+
+    const slideout = fixture.nativeElement.querySelector('.v1-meter-slideout') as HTMLElement;
+    expect(slideout.classList.contains('v1-meter-slideout--large')).toBe(true);
+  });
 });
 
 function setup(): ComponentFixture<MeterSlideoutComponent> {

@@ -39,6 +39,7 @@ export function meter(options: Partial<IdbUtilityMeter>): IdbUtilityMeter {
     startingUnit: 'kWh',
     energyUnit: 'kWh',
     demandUnit: 'kW',
+    meterReadingDataApplication: 'backward',
     scope: 3,
     agreementType: 1,
     includeInEnergy: true,

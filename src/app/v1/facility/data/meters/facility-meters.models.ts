@@ -1,7 +1,7 @@
 import { AllSources, EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeter, MeterReadingDataApplication } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { ScopeOptions } from '@data/models/scopeOption';
@@ -29,6 +29,27 @@ export type MetersGroupingSlideout =
 export const UNGROUPED_DROP_TARGET_ID = 'ungrouped';
 export const METER_SOURCES: ReadonlyArray<MeterSource> = AllSources;
 export const METER_GROUP_TYPES: ReadonlyArray<MeterGroupType> = ['Energy', 'Water', 'Other'];
+export const METER_CALENDARIZATION_METHODS: ReadonlyArray<{
+  readonly value: MeterReadingDataApplication;
+  readonly label: string;
+  readonly summary: string;
+}> = [
+  {
+    value: 'fullMonth',
+    label: 'Do Not Calendarize Meter Data',
+    summary: 'Use the reading month as entered.'
+  },
+  {
+    value: 'backward',
+    label: 'Calendarize Meter Data',
+    summary: 'Allocate bill usage across calendar months using daily averages between reading dates.'
+  },
+  {
+    value: 'fullYear',
+    label: 'Evenly Distribute Data Annually',
+    summary: 'Sum each year of readings and distribute the total evenly across all 12 months.'
+  }
+];
 
 export interface MeterWorkbenchTab {
   readonly id: MeterWorkbenchTabId;
@@ -236,6 +257,18 @@ export function meterTabSummary(tabId: MeterWorkbenchTabId): string {
 
 export function meterWorkbenchTab(tabId: MeterWorkbenchTabId): MeterWorkbenchTab {
   return METER_WORKBENCH_TABS.find(tab => tab.id === tabId) ?? METER_WORKBENCH_TABS[0];
+}
+
+export function meterWorkbenchTabsForMeter(meter: IdbUtilityMeter | undefined): readonly MeterWorkbenchTab[] {
+  return METER_WORKBENCH_TABS.filter(tab => tab.id !== 'monthly' || shouldShowMeterMonthlyDataTab(meter));
+}
+
+export function shouldShowMeterMonthlyDataTab(meter: IdbUtilityMeter | undefined): boolean {
+  return meter?.meterReadingDataApplication !== 'fullMonth';
+}
+
+export function meterCalendarizationMethodLabel(method: MeterReadingDataApplication | undefined): string {
+  return METER_CALENDARIZATION_METHODS.find(option => option.value === method)?.label ?? 'Select a calendarization method';
 }
 
 export function meterGroupWorkbenchTab(tabId: MeterGroupWorkbenchTabId): MeterGroupWorkbenchTab {

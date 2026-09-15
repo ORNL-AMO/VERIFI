@@ -1,13 +1,14 @@
-import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import {
-  METER_WORKBENCH_TABS,
   MeterWorkbenchTab,
-  MeterWorkbenchTabId
+  MeterWorkbenchTabId,
+  meterWorkbenchTabsForMeter,
+  shouldShowMeterMonthlyDataTab
 } from '../facility-meters.models';
 
 @Component({
@@ -32,6 +33,13 @@ export class MeterWorkbenchComponent {
   readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
+  private readonly redirectHiddenMonthlyTabEffect = effect(() => {
+    const facility = this.workspace.facility();
+    const meter = this.workspace.selectedMeter();
+    if (facility && meter && this.activeTabState() === 'monthly' && !shouldShowMeterMonthlyDataTab(meter)) {
+      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'readings'));
+    }
+  });
 
   constructor() {
     this.syncActiveTabFromRoute();
@@ -51,7 +59,7 @@ export class MeterWorkbenchComponent {
   }
 
   get tabs(): ReadonlyArray<MeterWorkbenchTab> {
-    return METER_WORKBENCH_TABS;
+    return meterWorkbenchTabsForMeter(this.workspace.selectedMeter());
   }
 
   openMeter(tab: MeterWorkbenchTabId): void {
@@ -83,8 +91,12 @@ export class MeterWorkbenchComponent {
     if (!facility) {
       return;
     }
+    const targetMeter = this.workspace.meters().find(meter => meter.guid === meterGuid);
+    const targetTab = this.activeTab() === 'monthly' && !shouldShowMeterMonthlyDataTab(targetMeter)
+      ? 'readings'
+      : this.activeTab();
     this.closeMeterSwitcher();
-    void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, this.activeTab()));
+    void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, targetTab));
   }
 
   private syncActiveTabFromRoute(): void {

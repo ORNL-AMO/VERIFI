@@ -1,0 +1,166 @@
+<app-meter-slideout title="Calendarization example" size="large"
+  [description]="'How VERIFI assigns ' + meter.name + ' readings to reporting months.'" (closed)="closed.emit()">
+  @if (example; as currentExample) {
+  <section class="calendarization-help" aria-label="Calendarization explanation">
+    <div class="calendarization-help__intro">
+      <h3>What is Calendarization?</h3>
+      <p>
+        Calendarization is the process of allocating data to a consistent and appropriate use period. This is done
+        for reporting purposes so that there can be a fair comparison of utility data for each year and resource.
+        The standard way to calendarize utility data is to divide consumption for each utility by the number of days
+        on the bill. Usage is then allocated to each month based on this daily use ratio and the number of billing
+        days in each month.
+      </p>
+    </div>
+
+    <section class="calendarization-help__methods" aria-label="Calendarization methods">
+      @for (method of methods; track method.value) {
+      <button type="button" class="calendarization-help-choice calendarization-help-choice--{{ method.tone }}"
+        [class.calendarization-help-choice--selected]="method.value === currentExample.method"
+        [disabled]="!canChangeMethod" [attr.aria-pressed]="method.value === currentExample.method"
+        (click)="selectMethod(method.value)">
+        <span class="calendarization-help-choice__icon" aria-hidden="true">
+          <app-ui-icon [name]="method.icon"></app-ui-icon>
+        </span>
+        <span class="calendarization-help-choice__copy">
+          <small>{{ method.eyebrow }}</small>
+          <strong>{{ method.label }}</strong>
+          <span>{{ method.summary }}</span>
+        </span>
+        @if (method.value === currentExample.method) {
+        <span class="calendarization-help-choice__badge">Selected</span>
+        }
+      </button>
+      }
+    </section>
+
+    @if (!currentExample.method) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>Select a calendarization method in Settings to enable calculated monthly reporting data.</span>
+    </div>
+    } @else if (currentExample.method === 'fullYear') {
+    <div class="calendarization-help__annual-note">
+      <app-ui-icon name="calendarCheck"></app-ui-icon>
+      <div>
+        <h4>Annual distribution</h4>
+        <p>
+          VERIFI sums readings by calendar year, divides the annual utility and cost totals by 12, and creates one
+          equal monthly value for every month in that year. This method is useful when readings represent annual
+          totals rather than ordinary billing periods.
+        </p>
+      </div>
+    </div>
+    } @else if (!currentExample.canShowLiveExample) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="info"></app-ui-icon>
+      <span>At least three readings are needed to show a live worked example for this meter.</span>
+    </div>
+    }
+
+    <section class="calendarization-help__calendar-section" aria-label="Four-reading calendar example">
+      <div class="calendarization-help__section-heading">
+        <h4>Calendar example</h4>
+        <p>A fixed four-reading example showing which bill period supplies usage to each calendar day.</p>
+      </div>
+
+      <div class="calendarization-help-calendar-strip">
+        <div class="calendarization-help-calendar-strip__months">
+          @for (month of referenceExample.displayMonths; track month.monthKey) {
+          <article class="calendarization-help-month calendarization-help-month--compact">
+            <h5>{{ month.label }}</h5>
+            <div class="calendarization-help-month__weekdays" aria-hidden="true">
+              @for (weekday of weekdays; track weekday + $index) {
+              <span>{{ weekday }}</span>
+              }
+            </div>
+            <div class="calendarization-help-month__days">
+              @for (blank of month.leadingBlankDays; track blank) {
+              <span class="calendarization-help-day calendarization-help-day--blank" aria-hidden="true"></span>
+              }
+              @for (day of month.days; track day.dateKey) {
+              <span class="calendarization-help-day"
+                [class.calendarization-help-day--allocation-0]="day.allocationIndex === 0"
+                [class.calendarization-help-day--allocation-1]="day.allocationIndex === 1"
+                [class.calendarization-help-day--allocation-2]="day.allocationIndex === 2"
+                [class.calendarization-help-day--allocation-3]="day.allocationIndex === 3"
+                [class.calendarization-help-day--reading]="day.readingIndex !== undefined"
+                [class.calendarization-help-day--reading-0]="day.readingIndex === 0"
+                [class.calendarization-help-day--reading-1]="day.readingIndex === 1"
+                [class.calendarization-help-day--reading-2]="day.readingIndex === 2"
+                [class.calendarization-help-day--reading-3]="day.readingIndex === 3" [attr.aria-label]="day.label">
+                {{ day.day }}
+              </span>
+              }
+            </div>
+          </article>
+          }
+        </div>
+        <p class="calendarization-help-calendar-strip__caption">
+          Dark circles are meter reading dates. Matching lighter circles are the days where that bill's per-day
+          average is applied. Three readings are needed to calculate an ordinary calendarized month.
+        </p>
+      </div>
+    </section>
+
+    @if (currentExample.summaries.length > 0) {
+    <section class="calendarization-help__worked-example" aria-label="Worked allocation example">
+      <div class="calendarization-help__section-heading">
+        <h4>Worked allocation</h4>
+        <p>Each row shows how a bill contributes usage to one reporting month.</p>
+      </div>
+
+      @for (summary of currentExample.summaries; track summary.calanderizedMonth) {
+      <div class="calendarization-help-summary">
+        <h5>{{ summary.calanderizedMonth | date:'MMMM y' }}</h5>
+        <div class="calendarization-help-summary__scroller">
+          <table>
+            <thead>
+              <tr>
+                <th>Reading Date</th>
+                <th>Days in Bill</th>
+                <th>Use per Day</th>
+                <th>Days Applied</th>
+                <th>Total From Bill</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (allocation of summary.monthReadingSummaries; track allocation.readDate) {
+              <tr>
+                <td>
+                  <span class="calendarization-help-reading-date">
+                    @if (allocation.readingIndex !== undefined) {
+                    <span
+                      class="calendarization-help-reading-dot"
+                      [class.calendarization-help-reading-dot--0]="allocation.readingIndex === 0"
+                      [class.calendarization-help-reading-dot--1]="allocation.readingIndex === 1"
+                      [class.calendarization-help-reading-dot--2]="allocation.readingIndex === 2"
+                      [class.calendarization-help-reading-dot--3]="allocation.readingIndex === 3"
+                      aria-hidden="true">
+                    </span>
+                    }
+                    <span>{{ allocation.readDate | date:'MMM d, y' }}</span>
+                  </span>
+                </td>
+                <td>{{ allocation.daysInBill | number:'1.0-0' }}</td>
+                <td>{{ allocation.energyUsePerDay | number:'1.0-0' }}</td>
+                <td>{{ allocation.daysApplied | number:'1.0-2' }}</td>
+                <td>{{ allocation.totalEnergyFromBill | number:'1.0-0' }}</td>
+              </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="4">Calendarized month total</th>
+                <th>{{ summary.totalEnergyUse | number:'1.0-0' }}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      }
+    </section>
+    }
+  </section>
+  }
+</app-meter-slideout>

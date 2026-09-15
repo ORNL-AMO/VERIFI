@@ -98,6 +98,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 route/navigation specs, group result aggregation specs, workbench table/graph specs, and browser coverage for native chart rendering where practical; omit `build-prod` from Codex validation for this workflow.
 
+### Facility Meter Monthly Data Workflow
+
+- **Workflow:** v1 selected-meter Settings and Monthly Data tabs.
+- **Existing v0 entry point:** Facility meter monthly data page and calendarization method modal under the current Data Management meter routes.
+- **Decision:** Move the calendarization method selector into the v1 meter Settings form, rebuild the v0 explanatory modal as a dense explain-only v1 slideout, and fill the selected-meter Monthly Data tab with a v1-native table.
+- **Parity:** Monthly Data uses existing calendarized meter results and preserves v0 table columns for consumption, energy, cost, and applicable emissions. The “Do Not Calendarize Meter Data” method hides Monthly Data because it duplicates the Readings tab.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
+- **Tests:** Focused v1 meter settings, workbench tab visibility, monthly data table, and calendarization example helper specs; omit `build-prod` from Codex validation for this workflow.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.
