@@ -12,5 +12,6 @@ export class MeterSlideoutComponent {
   @Input({ required: true }) title = '';
   @Input() description = '';
   @Input() saving = false;
+  @Input() size: 'default' | 'large' = 'default';
   @Output() closed = new EventEmitter<void>();
 }

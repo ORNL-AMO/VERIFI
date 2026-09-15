@@ -25,6 +25,7 @@ export class FacilityMetersWorkspaceService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly statusCheckService = inject(AccountStatusCheckService);
   private readonly currentUrl = signal(this.router.url);
+  private readonly shouldCalendarize = computed(() => shouldCalendarizeForUrl(this.currentUrl()));
   private readonly facilityStatusCheck = toSignal(this.statusCheckService.selectedFacilityStatusCheck$, { initialValue: undefined });
   private calendarizationSubscription: Subscription | undefined;
   private calendarizationRequestId = 0;
@@ -108,11 +109,11 @@ export class FacilityMetersWorkspaceService {
       toObservable(this.facility),
       toObservable(this.meters),
       toObservable(this.meterData),
-      toObservable(this.currentUrl)
+      toObservable(this.shouldCalendarize)
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([account, facility, meters, meterData, url]) => {
-        this.refreshCalendarizedMeters(account, facility, meters, meterData, url);
+      .subscribe(([account, facility, meters, meterData, shouldCalendarize]) => {
+        this.refreshCalendarizedMeters(account, facility, meters, meterData, shouldCalendarize);
       });
   }
 
@@ -125,11 +126,11 @@ export class FacilityMetersWorkspaceService {
     facility: IdbFacility | undefined,
     meters: readonly IdbUtilityMeter[],
     meterData: readonly IdbUtilityMeterData[],
-    url: string
+    shouldCalendarize: boolean
   ): void {
     this.calendarizationSubscription?.unsubscribe();
     const requestId = ++this.calendarizationRequestId;
-    if (!shouldCalendarizeForUrl(url)) {
+    if (!shouldCalendarize) {
       this.calendarizedMeters.set([]);
       this.calendarizationState.set('idle');
       return;

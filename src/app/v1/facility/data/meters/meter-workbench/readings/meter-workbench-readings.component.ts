@@ -341,7 +341,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   }
 
   openSettings(): void {
-    this.openTab('settings', 'meter-settings-status');
+    this.openTab('settings', 'meter-reading-settings');
   }
 
   openQuality(): void {

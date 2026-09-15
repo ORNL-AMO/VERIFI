@@ -7,6 +7,8 @@ import {
   buildMeterUsageFactsFromCalendarizedMeters,
   formatMeterGroupPeriodLabel,
   MeterGroupResultRow,
+  meterCalendarizationMethodLabel,
+  meterWorkbenchTabsForMeter,
   meterSourceIcon
 } from './facility-meters.models';
 import { facility, group, meter, reading } from './facility-meters.testing';
@@ -30,6 +32,15 @@ describe('facility meter view models', () => {
       'waterDischarge',
       'meter'
     ]);
+  });
+
+  it('labels calendarization methods and hides monthly data only for do-not-calendarize meters', () => {
+    expect(meterCalendarizationMethodLabel(undefined)).toBe('Select a calendarization method');
+    expect(meterCalendarizationMethodLabel('fullMonth')).toBe('Do Not Calendarize Meter Data');
+
+    expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: 'fullMonth' })).map(tab => tab.id)).not.toContain('monthly');
+    expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: 'backward' })).map(tab => tab.id)).toContain('monthly');
+    expect(meterWorkbenchTabsForMeter(meter({ meterReadingDataApplication: undefined })).map(tab => tab.id)).toContain('monthly');
   });
 
   it('labels good meter status as valid for browse cards', () => {

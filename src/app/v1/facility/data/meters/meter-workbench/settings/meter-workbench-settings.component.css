@@ -19,7 +19,9 @@
 
 .meter-settings__footer {
   display: flex;
+  gap: 0.75rem;
   justify-content: flex-end;
+  flex-wrap: wrap;
   margin-top: 2rem;
   padding-top: 1.25rem;
   border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
@@ -36,8 +38,12 @@
 .meter-settings__main > app-meter-settings-vehicle-form,
 .meter-settings__main > app-meter-settings-emissions-details,
 .meter-settings__main > app-meter-settings-electricity-form,
-.meter-settings__main > app-meter-settings-other-info,
-.meter-settings__main > app-meter-settings-status-form {
+.meter-settings__main > app-meter-settings-other-info {
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
+}
+
+.meter-settings__aside > app-meter-settings-charges-form {
   padding-top: 1.25rem;
   border-top: 1px solid color-mix(in srgb, var(--v1-border) 70%, transparent);
 }
@@ -106,12 +112,83 @@
 }
 
 .meter-settings-field > span,
+.meter-settings-label-row label,
 .meter-settings-field > label,
 .meter-settings-label {
   color: var(--v1-muted);
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.meter-settings-label-row {
+  align-items: baseline;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.meter-settings-label-row label {
+  display: inline-flex;
+  gap: 0.18rem;
+  white-space: nowrap;
+}
+
+.meter-settings-label-row__actions {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.meter-settings-label-row__actions app-ui-tooltip {
+  flex: 0 0 auto;
+}
+
+.meter-settings-link-button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--v1-action);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+  white-space: nowrap;
+}
+
+.meter-settings-link-button:hover,
+.meter-settings-link-button:focus-visible {
+  color: var(--v1-primary-strong);
+}
+
+.meter-settings-reading__body {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+.meter-settings-reading__inactive {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.25rem;
+}
+
+.meter-settings__inactive-toggle {
+  border-color: color-mix(in srgb, var(--v1-action) 48%, var(--v1-border));
+  color: var(--v1-action);
+}
+
+.meter-settings__inactive-toggle:hover,
+.meter-settings__inactive-toggle:focus-visible,
+.meter-settings__inactive-toggle[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--v1-action) 9%, var(--v1-surface));
+  border-color: var(--v1-action);
+  color: var(--v1-action);
 }
 
 .meter-settings-field input,

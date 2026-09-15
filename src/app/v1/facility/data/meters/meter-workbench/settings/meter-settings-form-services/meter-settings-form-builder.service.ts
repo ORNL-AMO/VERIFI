@@ -22,6 +22,7 @@ export class MeterSettingsFormBuilderService {
       supplier: [meter.supplier],
       notes: [meter.notes],
       source: [meter.source, Validators.required],
+      meterReadingDataApplication: [meter.meterReadingDataApplication, Validators.required],
       fuel: [meter.fuel, this.validation.getFuelValidation(meter.source, meter.scope)],
       startingUnit: [meter.startingUnit, Validators.required],
       energyUnit: [meter.energyUnit, Validators.required],
@@ -62,6 +63,7 @@ export class MeterSettingsFormBuilderService {
     meter.supplier = form.controls.supplier.value;
     meter.notes = form.controls.notes.value;
     meter.source = form.controls.source.value;
+    meter.meterReadingDataApplication = form.controls.meterReadingDataApplication.value;
     meter.fuel = form.controls.fuel.value;
     meter.startingUnit = form.controls.startingUnit.value;
     meter.energyUnit = form.controls.energyUnit.value;

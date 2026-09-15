@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterReadingDataApplication } from '@data/models/idbModels/utilityMeter';
 import { updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
 import { ModalPortalService } from '../../../../../shell/modal-portal.service';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
@@ -53,6 +54,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   readonly formSignal = signal<FormGroup | undefined>(undefined);
   readonly deleting = signal(false);
   readonly deleteError = signal<string | undefined>(undefined);
+  readonly calendarizationHelpOpen = signal(false);
   readonly meterDataExists = computed(() => this.selectedMeterData().length > 0);
   readonly savingOwnChanges = computed(() => this.saveState() === 'saving');
   readonly canEditForm = computed(() => this.canWrite() || this.savingOwnChanges());
@@ -144,6 +146,35 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     this.deleteError.set(undefined);
     this.deleteModalOpen = true;
     this.modalPortal.show(new TemplatePortal(template, this.viewContainerRef));
+  }
+
+  openCalendarizationHelp(): void {
+    this.calendarizationHelpOpen.set(true);
+  }
+
+  closeCalendarizationHelp(): void {
+    this.calendarizationHelpOpen.set(false);
+  }
+
+  changeCalendarizationMethodFromSlideout(method: MeterReadingDataApplication): void {
+    const form = this.formSignal();
+    if (!form || !this.canEditForm() || form.controls.meterReadingDataApplication.value === method) {
+      return;
+    }
+    form.controls.meterReadingDataApplication.patchValue(method);
+    form.controls.meterReadingDataApplication.markAsTouched();
+    form.markAsDirty();
+    void this.saveNow();
+  }
+
+  toggleNoLongerInUse(): void {
+    const form = this.formSignal();
+    if (!form || !this.canEditForm()) {
+      return;
+    }
+    form.controls.noLongerInUse.patchValue(!form.controls.noLongerInUse.value);
+    form.markAsDirty();
+    void this.saveNow();
   }
 
   cancelDeleteMeter(): void {

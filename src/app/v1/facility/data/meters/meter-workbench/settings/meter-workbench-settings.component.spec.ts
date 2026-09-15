@@ -14,13 +14,15 @@ import { account, facility, meter, reading } from '../../facility-meters.testing
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { MetersDashboardActionsService } from '../../meters-dashboard/meters-dashboard-actions.service';
 import { ConfirmDeleteMeterModalComponent } from '../../meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
+import { TooltipComponent } from '../../../../../shared/tooltip/tooltip.component';
+import { MeterCalendarizationHelpSlideoutComponent } from './meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
 import { MeterSettingsChargesFormComponent } from './meter-settings-charges-form/meter-settings-charges-form.component';
 import { MeterSettingsCoreFormComponent } from './meter-settings-core-form/meter-settings-core-form.component';
 import { MeterSettingsElectricityFormComponent } from './meter-settings-electricity-form/meter-settings-electricity-form.component';
 import { MeterSettingsEmissionsDetailsComponent } from './meter-settings-emissions-details/meter-settings-emissions-details.component';
 import { MeterSettingsFormService } from './meter-settings-form.service';
 import { MeterSettingsOtherInfoComponent } from './meter-settings-other-info/meter-settings-other-info.component';
-import { MeterSettingsStatusFormComponent } from './meter-settings-status-form/meter-settings-status-form.component';
+import { MeterSettingsReadingFormComponent } from './meter-settings-reading-form/meter-settings-reading-form.component';
 import { MeterSettingsVehicleFormComponent } from './meter-settings-vehicle-form/meter-settings-vehicle-form.component';
 import { MeterWorkbenchSettingsComponent } from './meter-workbench-settings.component';
 
@@ -38,14 +40,20 @@ describe('MeterWorkbenchSettingsComponent', () => {
     const text = element.textContent;
     expect(text).not.toContain('Meter setup');
     expect(text).toContain('Meter information');
+    expect(text).toContain('Meter Reading Settings');
+    expect(text).toContain('Calendarization Method');
+    expect(text).toContain('View example');
+    expect(text).toContain('Allow Negative Readings');
+    expect(text).toContain('Ignore Date Related Status Checks');
     expect(element.querySelector('.meter-settings-section__heading')?.textContent).toContain('Changes save automatically');
     expect(text).toContain('Electricity options');
     expect(text).toContain('Meter charges');
     expect(text).toContain('Other information');
-    expect(text).toContain('Status settings');
+    expect(text).toContain('Mark no longer in use');
+    expect(text).not.toContain('Status settings');
+    expect(element.querySelector('.meter-settings__aside app-meter-settings-reading-form')).not.toBeNull();
     expect(element.querySelector('.meter-settings__aside app-meter-settings-charges-form')).not.toBeNull();
     expect(element.querySelector('.meter-settings__main app-meter-settings-other-info')).not.toBeNull();
-    expect(element.querySelector('.meter-settings__main app-meter-settings-status-form')).not.toBeNull();
   });
 
   it('anchors the negative readings setting and scrolls to it when the route fragment is present', async () => {
@@ -54,13 +62,13 @@ describe('MeterWorkbenchSettingsComponent', () => {
     const scrollIntoView = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoView;
     try {
-      const fixture = setup({ fragment: 'meter-settings-status' });
+      const fixture = setup({ fragment: 'meter-reading-settings' });
       fixture.detectChanges();
 
       await vi.runOnlyPendingTimersAsync();
 
-      const statusSettings = query<HTMLElement>(fixture, '#meter-settings-status');
-      expect(statusSettings.textContent).toContain('Allow Negative Readings');
+      const readingSettings = query<HTMLElement>(fixture, '#meter-reading-settings');
+      expect(readingSettings.textContent).toContain('Allow Negative Readings');
       expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' });
     } finally {
       Element.prototype.scrollIntoView = originalScrollIntoView;
@@ -107,6 +115,105 @@ describe('MeterWorkbenchSettingsComponent', () => {
     );
   });
 
+  it('autosaves calendarization method changes through the meter settings path', async () => {
+    const fixture = setup();
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const form = fixture.componentInstance.formSignal();
+    expect(form).toBeDefined();
+    form?.controls.meterReadingDataApplication.patchValue('fullYear');
+    form?.markAsDirty();
+    await fixture.componentInstance.saveNow();
+    await fixture.whenStable();
+
+    expect(meterHandler.updateMeterWithData).toHaveBeenCalledWith(
+      expect.objectContaining({ meterReadingDataApplication: 'fullYear' }),
+      [],
+      'account-a'
+    );
+  });
+
+  it('requires a calendarization method before saving settings', async () => {
+    vi.useFakeTimers();
+    const fixture = setup({ meterReadingDataApplication: undefined });
+    const commandBoundary = TestBed.inject(WorkspaceCommandBoundary) as unknown as { execute: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const nameInput = query<HTMLInputElement>(fixture, 'input[formControlName="name"]');
+    nameInput.value = 'Updated Meter';
+    nameInput.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    await vi.advanceTimersByTimeAsync(700);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Resolve validation issues');
+  });
+
+  it('uses a tooltip for the calendarization change warning when readings exist', () => {
+    const fixture = setup({ withReading: true });
+
+    fixture.detectChanges();
+
+    const tooltip = query<HTMLElement>(fixture, 'app-meter-settings-reading-form app-ui-tooltip');
+    const button = query<HTMLButtonElement>(fixture, 'app-meter-settings-reading-form app-ui-tooltip .v1-tooltip');
+    expect(tooltip.textContent).toContain('Changing this affects calendarized reporting results');
+    expect(button.getAttribute('aria-label')).toBe('Calendarization change warning');
+    expect(button.getAttribute('aria-describedby')).toBeTruthy();
+  });
+
+  it('opens and closes the calendarization explanation slideout', () => {
+    const fixture = setup({
+      readings: [
+        reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 15, totalEnergyUse: 100 }),
+        reading({ guid: 'reading-b', meterId: 'meter-a', month: 2, day: 15, totalEnergyUse: 200 }),
+        reading({ guid: 'reading-c', meterId: 'meter-a', month: 3, day: 15, totalEnergyUse: 300 }),
+        reading({ guid: 'reading-d', meterId: 'meter-a', month: 4, day: 15, totalEnergyUse: 400 })
+      ]
+    });
+
+    fixture.detectChanges();
+    query<HTMLButtonElement>(fixture, '.meter-settings-calendarization__help').click();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Calendarization example');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Worked allocation');
+
+    query<HTMLButtonElement>(fixture, '.v1-meter-slideout__header .v1-icon-btn').click();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Calendarization example');
+  });
+
+  it('saves calendarization method changes made from the slideout', async () => {
+    const fixture = setup({
+      readings: [
+        reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, day: 15, totalEnergyUse: 100 }),
+        reading({ guid: 'reading-b', meterId: 'meter-a', month: 2, day: 15, totalEnergyUse: 200 }),
+        reading({ guid: 'reading-c', meterId: 'meter-a', month: 3, day: 15, totalEnergyUse: 300 })
+      ]
+    });
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    query<HTMLButtonElement>(fixture, '.meter-settings-calendarization__help').click();
+    fixture.detectChanges();
+    optionButton(fixture, 'Evenly Distribute Data Annually').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(meterHandler.updateMeterWithData).toHaveBeenCalledWith(
+      expect.objectContaining({ meterReadingDataApplication: 'fullYear' }),
+      expect.any(Array),
+      'account-a'
+    );
+    expect(fixture.componentInstance.formSignal()?.controls.meterReadingDataApplication.value).toBe('fullYear');
+    expect(query<HTMLElement>(fixture, '.calendarization-help-choice--selected').textContent).toContain('Evenly Distribute Data Annually');
+  });
+
   it('does not save invalid form states', async () => {
     vi.useFakeTimers();
     const fixture = setup();
@@ -143,6 +250,29 @@ describe('MeterWorkbenchSettingsComponent', () => {
         charges: [expect.objectContaining({ chargeGuid: persistedMeter.charges[0].guid })]
       })
     ]);
+  });
+
+  it('uses compact charge controls and only shows charge field labels on the first row', async () => {
+    const fixture = setup();
+
+    fixture.detectChanges();
+    const addButton = query<HTMLButtonElement>(fixture, 'app-meter-settings-charges-form .v1-btn--action');
+    expect(addButton.classList.contains('v1-btn--sm')).toBe(true);
+    expect(addButton.textContent).toContain('Add Charge');
+
+    addButton.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    addButton.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const rows = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.meter-settings-charge');
+    expect(rows.length).toBe(2);
+    expect(rows[0].querySelector('label:first-child span')?.classList.contains('visually-hidden')).toBe(false);
+    expect(rows[0].querySelector('label:nth-child(2) span')?.classList.contains('visually-hidden')).toBe(false);
+    expect(rows[1].querySelector('label:first-child span')?.classList.contains('visually-hidden')).toBe(true);
+    expect(rows[1].querySelector('label:nth-child(2) span')?.classList.contains('visually-hidden')).toBe(true);
   });
 
   it('locks setup fields when readings exist and unlocks them through the warning affordance', () => {
@@ -214,6 +344,29 @@ describe('MeterWorkbenchSettingsComponent', () => {
     ]);
   });
 
+  it('toggles no longer in use from the form footer and saves the meter', async () => {
+    const fixture = setup();
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    query<HTMLButtonElement>(fixture, '.meter-settings__inactive-toggle').click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(meterHandler.updateMeterWithData).toHaveBeenCalledWith(
+      expect.objectContaining({ noLongerInUse: true }),
+      [],
+      'account-a'
+    );
+    const text = (fixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain('Inactive date');
+    expect(text).toContain('Return meter to use');
+    expect(query<HTMLButtonElement>(fixture, '.meter-settings__inactive-toggle').classList.contains('v1-btn--quiet')).toBe(true);
+    expect(text.indexOf('Inactive date')).toBeLessThan(text.indexOf('Allow Negative Readings'));
+    expect(text.indexOf('Allow Negative Readings')).toBeLessThan(text.indexOf('Calendarization Method'));
+    expect(query<HTMLButtonElement>(fixture, '.meter-settings__inactive-toggle').getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('disables meter deletion for read-only workspaces', () => {
     const fixture = setup({ canWrite: false });
 
@@ -227,20 +380,25 @@ function setup(options: {
   canWrite?: boolean;
   hasPending?: boolean;
   withReading?: boolean;
+  readings?: ReturnType<typeof reading>[];
   source?: 'Electricity' | 'Natural Gas';
   fragment?: string;
+  meterReadingDataApplication?: ReturnType<typeof meter>['meterReadingDataApplication'];
 } = {}): ComponentFixture<MeterWorkbenchSettingsComponent> {
   const selectedMeter = signal(meter({
     id: 1,
     guid: 'meter-a',
     name: 'Electric Main',
     source: options.source ?? 'Electricity',
+    ...(Object.prototype.hasOwnProperty.call(options, 'meterReadingDataApplication')
+      ? { meterReadingDataApplication: options.meterReadingDataApplication }
+      : {}),
     charges: []
   }));
-  const selectedMeterData = signal(options.withReading
+  const selectedMeterData = signal(options.readings ?? (options.withReading
     ? [reading({ id: 7, guid: 'reading-a', meterId: 'meter-a', charges: [] })]
     : []
-  );
+  ));
   const selectedMeterCard = signal({
     meter: selectedMeter(),
     readingCount: selectedMeterData().length
@@ -270,10 +428,10 @@ function setup(options: {
       MeterSettingsElectricityFormComponent,
       MeterSettingsChargesFormComponent,
       MeterSettingsOtherInfoComponent,
-      MeterSettingsStatusFormComponent,
+      MeterSettingsReadingFormComponent,
       MeterSettingsEmissionsDetailsComponent
     ],
-    imports: [CommonModule, ReactiveFormsModule, IconComponent, ConfirmDeleteMeterModalComponent],
+    imports: [CommonModule, ReactiveFormsModule, IconComponent, ConfirmDeleteMeterModalComponent, MeterCalendarizationHelpSlideoutComponent, TooltipComponent],
     providers: [
       MeterSettingsFormService,
       {
@@ -345,4 +503,12 @@ function query<T extends Element>(fixture: ComponentFixture<unknown>, selector: 
   const element = (fixture.nativeElement as HTMLElement).querySelector<T>(selector);
   expect(element).not.toBeNull();
   return element as T;
+}
+
+function optionButton(fixture: ComponentFixture<unknown>, label: string): HTMLButtonElement {
+  const button = Array.from(
+    (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.calendarization-help-choice')
+  ).find(option => option.textContent?.includes(label));
+  expect(button).toBeDefined();
+  return button as HTMLButtonElement;
 }

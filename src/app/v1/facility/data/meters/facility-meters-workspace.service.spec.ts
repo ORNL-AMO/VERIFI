@@ -140,6 +140,57 @@ describe('FacilityMetersWorkspaceService', () => {
     expect(service.calendarizedMeters()).toEqual([]);
   });
 
+  it('does not restart calendarization when switching meter group workbench tabs', async () => {
+    useFakeWorker();
+    const events = new Subject<unknown>();
+    const service = setupService({
+      url: '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/monthly-table',
+      events,
+      meterData: [reading({ guid: 'reading-a', meterId: 'meter-a' })]
+    });
+    await settleSignals();
+    const calendarizedMeter = { meter: meter({ guid: 'meter-a', groupId: 'group-a' }), monthlyData: [] } as unknown as CalanderizedMeter;
+
+    expect(FakeWorker.instances).toHaveLength(1);
+    FakeWorker.instances[0].emitMessage({ calanderizedMeters: [calendarizedMeter] });
+    expect(service.calendarizationState()).toBe('ready');
+
+    events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/monthly-table',
+      '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/yearly-graph'
+    ));
+    await settleSignals();
+
+    expect(FakeWorker.instances).toHaveLength(1);
+    expect(service.calendarizationState()).toBe('ready');
+    expect(service.calendarizedMeters()).toEqual([calendarizedMeter]);
+  });
+
+  it('starts calendarization when navigating from grouping organizer into a group workbench', async () => {
+    useFakeWorker();
+    const events = new Subject<unknown>();
+    const service = setupService({
+      url: '/v1/workspace/facility/facility-a/data/meter-grouping',
+      events,
+      meterData: [reading({ guid: 'reading-a', meterId: 'meter-a' })]
+    });
+    await settleSignals();
+
+    expect(FakeWorker.instances).toHaveLength(0);
+    expect(service.calendarizationState()).toBe('idle');
+
+    events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/facility/facility-a/data/meter-grouping',
+      '/v1/workspace/facility/facility-a/data/meter-grouping/group-a/monthly-table'
+    ));
+    await settleSignals();
+
+    expect(FakeWorker.instances).toHaveLength(1);
+    expect(service.calendarizationState()).toBe('loading');
+  });
+
   it('sets calendarized meter results from the worker response without sharing reading objects in the payload', async () => {
     useFakeWorker();
     const meterReading = reading({ guid: 'reading-a', meterId: 'meter-a' });
@@ -211,11 +262,13 @@ describe('FacilityMetersWorkspaceService', () => {
 
 function setupService(options: {
   url: string;
+  events?: Subject<unknown>;
   meterData?: WritableSignal<ReturnType<typeof reading>[]> | ReturnType<typeof reading>[];
 }): FacilityMetersWorkspaceService {
   const meterData = Array.isArray(options.meterData)
     ? signal(options.meterData)
     : options.meterData ?? signal([]);
+  const events = options.events ?? new Subject<unknown>();
   TestBed.configureTestingModule({
     providers: [
       FacilityMetersWorkspaceService,
@@ -223,7 +276,7 @@ function setupService(options: {
         provide: Router,
         useValue: {
           url: options.url,
-          events: new Subject<unknown>()
+          events
         }
       },
       {
