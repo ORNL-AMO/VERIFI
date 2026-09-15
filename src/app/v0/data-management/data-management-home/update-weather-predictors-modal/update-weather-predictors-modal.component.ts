@@ -70,7 +70,7 @@ export class UpdateWeatherPredictorsModalComponent {
   setFacilityList() {
     this.facilityList = new Array();
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    if(this.fileReference){
+    if (this.fileReference) {
       facilities = this.fileReference.importFacilities;
     }
     facilities.forEach(facility => {
@@ -141,9 +141,48 @@ export class UpdateWeatherPredictorsModalComponent {
     }) !== undefined;
   }
 
-  setEndDateToCurrentDate(){
+  setEndDateToCurrentDate() {
+    const currentDate = new Date();
+    const latestMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     this.facilityList.forEach(facilityItem => {
-      facilityItem.endDate = new Date();
+      facilityItem.endDate = new Date(latestMonth);
     });
+    this.setInvalidForm();
+  }
+
+  openCalendar(event: Event, inputElement: HTMLInputElement): void {
+    event.preventDefault();
+    try {
+      if (typeof inputElement.showPicker === 'function') {
+        inputElement.showPicker();
+      } else {
+        inputElement.click();
+      }
+    } catch {
+      inputElement.focus();
+      inputElement.click();
+    }
+  }
+
+  setBulkDates(event: Event, dateType: 'start' | 'end') {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.value) {
+      return;
+    }
+    const [year, month] = input.value.split('-').map(Number);
+    if (!year || !month) {
+      return;
+    }
+
+    const newDate = new Date(year, month - 1, 1);
+    this.facilityList.forEach(facilityItem => {
+      if (dateType === 'start') {
+        facilityItem.startDate = new Date(newDate);
+      } else {
+        facilityItem.endDate = new Date(newDate);
+      }
+    });
+    this.setInvalidForm();
   }
 }
