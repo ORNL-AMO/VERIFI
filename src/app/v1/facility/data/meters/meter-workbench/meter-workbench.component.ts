@@ -33,6 +33,10 @@ export class MeterWorkbenchComponent {
   readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
+  readonly accountMetersRoute = computed(() => {
+    const account = this.workspace.account();
+    return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  });
   private readonly redirectHiddenMonthlyTabEffect = effect(() => {
     const facility = this.workspace.facility();
     const meter = this.workspace.selectedMeter();

@@ -215,6 +215,7 @@
   line-height: 1.2;
 }
 
+.v1-root .v1-data-workbench-breadcrumb > ol > li > a,
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button {
   display: inline-flex;
   gap: var(--v1-space-1);
@@ -226,6 +227,7 @@
   color: var(--v1-link);
   font: inherit;
   line-height: 1.2;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -234,7 +236,9 @@
   height: 1rem;
 }
 
+.v1-root .v1-data-workbench-breadcrumb > ol > li > a:hover,
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button:hover,
+.v1-root .v1-data-workbench-breadcrumb > ol > li > a:focus-visible,
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button:focus-visible {
   color: var(--v1-link);
   text-decoration: underline;
@@ -242,6 +246,7 @@
   text-underline-offset: .18rem;
 }
 
+.v1-root .v1-data-workbench-breadcrumb > ol > li > a:focus-visible,
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button:focus-visible {
   border-radius: var(--v1-radius-sm);
   outline-offset: 3px;

@@ -33,13 +33,50 @@
   max-width: 100%;
 }
 
+.v1-meter-workbench-header__meter-switcher {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.v1-meter-workbench-header__meter-toggle {
+  display: inline-flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+  min-width: 0;
+  max-width: min(36rem, 74vw);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.v1-meter-workbench-header__meter-toggle:hover,
+.v1-meter-workbench-header__meter-toggle:focus-visible {
+  color: var(--v1-link);
+}
+
+.v1-meter-workbench-header__meter-toggle:focus-visible {
+  border-radius: var(--v1-radius-sm);
+  outline-offset: 4px;
+}
+
 .v1-meter-workbench-header__meter-title .v1-icon {
   flex: 0 0 auto;
   color: color-mix(in srgb, var(--v1-meter-source-color, var(--v1-facility)) 76%, var(--v1-text));
 }
 
-.v1-meter-workbench-header__meter-title span {
+.v1-meter-workbench-header__meter-title span,
+.v1-meter-workbench-header__meter-toggle-label {
   min-width: 0;
+}
+
+.v1-meter-workbench-header__meter-toggle-icon {
+  color: var(--v1-muted);
+  font-size: .8rem;
 }
 
 .v1-meter-workbench-header__status {

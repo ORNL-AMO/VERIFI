@@ -107,6 +107,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 meter settings, workbench tab visibility, monthly data table, and calendarization example helper specs; omit `build-prod` from Codex validation for this workflow.
 
+### Portfolio Resource Card Reuse Decision
+
+- **Workflow:** v1 account portfolio resource tabs, starting with account-wide Meters and extending next to Predictors, Energy Uses, Analyses, and Reports.
+- **Existing v0 entry point:** Current portfolio-style browsing is split across Data Management facility resources and Data Evaluation account/facility surfaces.
+- **Decision:** Do not move `MeterBrowseCardComponent` into a shared folder unchanged. It is visually reusable but still owns facility-meter workspace dependencies and card actions. When the next reusable resource card is implemented, extract a v1 shared presentational card pattern under `src/app/v1/shared/` that receives prepared display state and emits user intents, while meter, predictor, energy-use, analysis, and report wrappers keep feature-specific data shaping, routing, status checks, copy/delete behavior, and modal ownership.
+- **Parity:** Facility and account contexts should keep the same visible card affordances where appropriate: clickable title with icon and chevron, optional owning-facility header for portfolio cards, fact tiles, footer actions, loading/error/disabled states, and route-correct navigation. Facility Data resource views should also mirror the account portfolio tabs' search, filter, and sort pattern so users can scan meters, predictors, energy uses, analyses, and reports consistently whether they are working inside one facility or across the account.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes should be introduced by the presentational extraction itself.
+- **Tests:** Cover the shared presentational card behavior separately, then cover each resource wrapper in both facility and account portfolio contexts. Avoid account-portfolio shims for facility-only services once the shared card API exists.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.

@@ -1,4 +1,4 @@
-import { Directive, signal } from '@angular/core';
+import { Directive, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { By } from '@angular/platform-browser';
@@ -9,7 +9,7 @@ import { WorkspaceNavigationService } from '../../../../shell/workspace-navigati
 import { IconComponent } from '../../../../shared/icons/icon.component';
 import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
-import { group, meter } from '../facility-meters.testing';
+import { account, facility, group, meter } from '../facility-meters.testing';
 import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meter-workbench.component';
 
@@ -23,7 +23,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(text).toContain('Electric Main');
     expect(text).toContain('Monthly Data');
     expect(text).toContain('Purchased Electricity');
-    expect(text).toContain('Facility A Meter');
+    expect(fixture.nativeElement.querySelector('.v1-eyebrow')).toBeNull();
     expect(text).not.toContain('1 readings');
     const monthlyButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
       .find(button => button.textContent?.includes('Monthly Data'));
@@ -53,9 +53,23 @@ describe('MeterWorkbenchComponent', () => {
 
     const element: HTMLElement = fixture.nativeElement;
     const text = element.textContent;
-    expect(element.querySelector('[aria-label="Meter breadcrumb"]')?.textContent).toContain('Meters');
-    expect(element.querySelector('[aria-label="Meter breadcrumb"]')?.textContent).toContain('Electric Main');
-    expect(text).toContain('Facility A Meter');
+    const breadcrumb = element.querySelector('[aria-label="Meter breadcrumb"]');
+    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
+      '/v1',
+      'workspace',
+      'account',
+      'account-a',
+      'data',
+      'portfolio',
+      'meters'
+    ]);
+    expect(breadcrumb?.textContent).toContain('Account A');
+    expect(breadcrumb?.textContent).toContain('Facility A');
+    expect(breadcrumb?.textContent).toContain('Meters');
+    expect(breadcrumb?.textContent).not.toContain('Electric Main');
+    expect(breadcrumb?.querySelectorAll('app-ui-icon').length).toBe(2);
+    expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
+    expect(element.querySelector('.v1-eyebrow')).toBeNull();
     expect(text).toContain('Other Fuels');
     expect(text).toContain('Needs review');
     expect(text).toContain('First reading');
@@ -135,7 +149,7 @@ describe('MeterWorkbenchComponent', () => {
     ]);
   });
 
-  it('switches meters from the current breadcrumb and preserves the active tab', () => {
+  it('switches meters from the title dropdown and preserves the active tab', () => {
     const gasCard: MeterCardView = {
       meter: meter({ guid: 'meter-gas', name: 'Gas Backup', source: 'Natural Gas' }),
       readingCount: 2,
@@ -154,6 +168,8 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('[aria-label="Meter breadcrumb"]')?.textContent).not.toContain('Electric Main');
+    expect(element.querySelector('.v1-meter-workbench-header__meter-title .v1-meter-workbench-header__meter-toggle')).not.toBeNull();
     element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
     fixture.detectChanges();
 
@@ -320,6 +336,14 @@ describe('MeterWorkbenchComponent', () => {
 })
 class RouterOutletStubDirective { }
 
+@Directive({
+  selector: '[routerLink]',
+  standalone: false
+})
+class RouterLinkStubDirective {
+  @Input() routerLink?: unknown;
+}
+
 function setup(options: {
   tab?: MeterWorkbenchTabId;
   childRoute?: { snapshot?: { data?: { meterTab?: MeterWorkbenchTabId } } };
@@ -353,14 +377,16 @@ function setup(options: {
     declarations: [
       MeterWorkbenchComponent,
       MeterWorkbenchTabsComponent,
-      RouterOutletStubDirective
+      RouterOutletStubDirective,
+      RouterLinkStubDirective
     ],
     imports: [CommonModule, IconComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
-          facility: signal({ guid: 'facility-a', name: 'Facility A' }),
+          account: signal(account({ guid: 'account-a', name: 'Account A' })),
+          facility: signal(facility({ guid: 'facility-a', accountId: 'account-a', name: 'Facility A' })),
           selectedMeter,
           selectedMeterCard,
           meterCards,
@@ -394,6 +420,14 @@ function setup(options: {
             'meters',
             meterGuid,
             tab
+          ],
+          accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
+            '/v1',
+            'workspace',
+            'account',
+            accountGuid,
+            'data',
+            detail
           ]
         }
       },

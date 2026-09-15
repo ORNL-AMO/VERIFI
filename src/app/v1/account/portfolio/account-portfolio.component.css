@@ -58,9 +58,9 @@
 
 .v1-portfolio-selector__label {
   color: var(--v1-muted);
-  font-size: .78rem;
+  font-size: .92rem;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .v1-portfolio-selector__count {
