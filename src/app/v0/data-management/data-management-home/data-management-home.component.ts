@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, inject, Injector } from '@angular/core';
+import { Component, computed, inject, Injector, Signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -52,6 +52,10 @@ export class DataManagementHomeComponent {
   loadingSub: Subscription;
   showWeatherPredictorsChangeModal: boolean = false;
 
+  hasActiveWeatherPredictors: Signal<boolean> = computed(() =>
+    this.accountWorkspaceStore.predictors().some(p => p.predictorType === 'Weather' && !p.noLongerInUse)
+  );
+
   constructor(
     private accountStatusCheckService: AccountStatusCheckService,
     private weatherPredictorManagementService: WeatherPredictorManagementService,
@@ -61,9 +65,7 @@ export class DataManagementHomeComponent {
     private toastNotificationService: ToastNotificationsService,
     private injector: Injector
 
-  ) {
-
-  }
+  ) { }
 
   ngOnInit() {
     this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
@@ -168,27 +170,39 @@ export class DataManagementHomeComponent {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Checking for weather predictor changes...');
 
-    const results = await this.weatherPredictorManagementService.checkAccountPredictorsForChanges(checkAll);
+    try {
+      const results = await this.weatherPredictorManagementService.checkAccountPredictorsForChanges(checkAll);
 
-    this.loadingService.setLoadingStatus(false);
-
-    if (results.length > 0) {
-      this.toastNotificationService.showToast(
-        "Weather Predictor Changes Found",
-        `${results.length} predictor(s) have changed readings. Review the to-do list for details`, 
-        undefined, 
-        false, 
-        "alert-warning"
-      );
+      if (results.length > 0) {
+        this.toastNotificationService.showToast(
+          "Weather Predictor Changes Found",
+          `${results.length} predictor(s) have changed readings. Review the to-do list for details`,
+          undefined,
+          false,
+          "alert-warning"
+        );
+      }
+      else {
+        this.toastNotificationService.showToast(
+          "No Weather Predictor Changes",
+          "No changes were found in your weather predictors.",
+          undefined,
+          false,
+          "alert-success"
+        );
+      }
     }
-    else {
+    catch {
       this.toastNotificationService.showToast(
-        "No Weather Predictor Changes",
-        "No changes were found in your weather predictors.",
+        "Error Checking Weather Predictor Changes",
+        "An error occurred while checking for weather predictor changes.",
         undefined,
         false,
-        "alert-success"
+        "alert-danger"
       );
+    }
+    finally {
+      this.loadingService.setLoadingStatus(false);
     }
   }
 }

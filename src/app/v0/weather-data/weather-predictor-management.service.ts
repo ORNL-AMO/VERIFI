@@ -426,7 +426,7 @@ export class WeatherPredictorManagementService {
       );
 
       const indexes = predictorData.map((pData, idx) => (pData.weatherOverride ? undefined : idx))
-      .filter((idx): idx is number => idx !== undefined);
+        .filter((idx): idx is number => idx !== undefined);
       const startIndex = (!checkAll && indexes.length > 6) ? indexes.length - 6 : 0;
 
       let changedEntriesCount = 0;
@@ -468,14 +468,10 @@ export class WeatherPredictorManagementService {
       }
     }
     if (updates.length > 0) {
-      const grouped = _.groupBy(updates, update => update.predictorId);
-      for (const predictorId of Object.keys(grouped)) {
-        const changes: PredictorDataBatchChanges = { add: [], update: grouped[predictorId], delete: [] };
-        await this.commandBoundary.execute(
-          { entityKind: 'predictorData', changeKind: 'bulk', label: 'Check Weather Data Changes' },
-          () => this.predictorHandler.reconcilePredictorData(predictorId, changes, account?.guid)
-        );
-      }
+      await this.commandBoundary.execute(
+        { entityKind: 'predictorData', changeKind: 'bulk', label: 'Check Weather Data Changes' },
+        () => this.predictorHandler.updateAccountPredictorData(updates, account?.guid)
+      );
     }
     this.loadingService.setLoadingStatus(false);
     return results;

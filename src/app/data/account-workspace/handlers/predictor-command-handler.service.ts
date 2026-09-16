@@ -106,6 +106,25 @@ export class PredictorCommandHandler {
     });
   }
 
+  /**
+ * Update predictor data spanning multiple predictors in one transaction.
+ * Used by the account-wide weather change check, which must publish once.
+ */
+
+  async updateAccountPredictorData(entries: readonly IdbPredictorData[], activeAccountGuid: string): Promise<void> {
+    entries.forEach(entry => {
+      this.assertOwnership(entry.accountId, activeAccountGuid, 'predictor data');
+      if (entry.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'Predictor data is missing its IndexedDB id.');
+      }
+    });
+    await this.transactions.runTransaction(['predictorData'], 'readwrite', async transaction => {
+      for (const entry of entries) {
+        await transaction.put('predictorData', { ...entry });
+      }
+    });
+  }
+
   async createWeatherPredictors(
     changes: WeatherPredictorCreationChanges,
     activeAccountGuid: string

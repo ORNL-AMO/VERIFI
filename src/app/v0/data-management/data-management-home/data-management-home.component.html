@@ -8,11 +8,13 @@
         </h4>
         <div class="d-flex justify-content-end w-100 align-items-start mb-3 gap-2">
           <!-- <div class="d-flex flex-column align-items-end gap-2"> -->
-          @if (showWeatherButton) {
+          @if (hasActiveWeatherPredictors()) {
           <button class="btn btn-outline" (click)="openWeatherPredictorsChangeModal()">
             <span class="fa fa-refresh"></span>
             Check Weather Predictors Changes
           </button>
+          }
+          @if (showWeatherButton) {
           <button class="btn btn-outline" (click)="openWeatherPredictorModal()">
             <span class="fa fa-temperature-half"></span>
             Update Weather Predictors
