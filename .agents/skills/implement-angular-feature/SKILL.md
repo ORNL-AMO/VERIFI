@@ -10,8 +10,10 @@ description: Implement or modify VERIFI Angular features, routes, components, se
 3. Define the behavior and state transitions before editing. For UI work, cover loading, empty, validation, error, disabled, and success states plus responsive and accessible behavior.
 4. Keep orchestration in components and reusable behavior in services, helpers, pipes, or shared components according to local precedent. Avoid moving domain calculations into templates or presentation components.
 5. Keep templates declarative: use direct signal reads for simple one-off bindings, `@let` aliases for repeated object signal reads in one view, and `computed()` for reusable or non-trivial derived state. Avoid repeated ordinary method calls, allocation, sorting, filtering, or business logic in template bindings.
-6. Reuse Bootstrap, ng-bootstrap, Font Awesome, the appropriate shared layer, and existing style layers. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
-7. Add meaningful behavior tests. Replace or remove creation-only tests that do not verify the changed behavior.
+6. Put each Angular component in its own folder with its `.ts`, template, styles, and spec files colocated. Do not leave multiple child component file sets side by side in a parent workflow folder.
+7. Use configured aliases for cross-boundary imports where appropriate: `@app/*` for app/v1 boundaries, `@shared/*`, `@data/*`, `@domain/*`, and `@platform/*` for version-neutral code, and `@v0/shared/*` for legacy-only shared UI. Keep relative imports for files local to the same feature or component folder.
+8. Reuse Bootstrap, ng-bootstrap, Font Awesome, the appropriate shared layer, and existing style layers. Keep feature-specific styles with the component; add global styles only for a genuinely cross-feature rule.
+9. Add meaningful behavior tests. Replace or remove creation-only tests that do not verify the changed behavior.
 
 ## Validate
 

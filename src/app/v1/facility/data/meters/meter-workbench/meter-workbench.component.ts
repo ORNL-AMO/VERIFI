@@ -8,6 +8,7 @@ import {
   MeterWorkbenchTab,
   MeterWorkbenchTabId,
   meterWorkbenchTabsForMeter,
+  shouldShowMeterBillInspectionTab,
   shouldShowMeterMonthlyDataTab
 } from '../facility-meters.models';
 
@@ -42,6 +43,9 @@ export class MeterWorkbenchComponent {
     const meter = this.workspace.selectedMeter();
     if (facility && meter && this.activeTabState() === 'monthly' && !shouldShowMeterMonthlyDataTab(meter)) {
       void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'readings'), { replaceUrl: true });
+    }
+    if (facility && meter && this.activeTabState() === 'bill-inspection' && !shouldShowMeterBillInspectionTab(meter)) {
+      void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'settings'), { replaceUrl: true, fragment: 'meter-charges' });
     }
   });
 
@@ -96,9 +100,13 @@ export class MeterWorkbenchComponent {
       return;
     }
     const targetMeter = this.workspace.meters().find(meter => meter.guid === meterGuid);
-    const targetTab = this.activeTab() === 'monthly' && !shouldShowMeterMonthlyDataTab(targetMeter)
-      ? 'readings'
-      : this.activeTab();
+    let targetTab = this.activeTab();
+    if (targetTab === 'monthly' && !shouldShowMeterMonthlyDataTab(targetMeter)) {
+      targetTab = 'readings';
+    }
+    if (targetTab === 'bill-inspection' && !shouldShowMeterBillInspectionTab(targetMeter)) {
+      targetTab = 'settings';
+    }
     this.closeMeterSwitcher();
     void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, targetTab));
   }
@@ -112,6 +120,7 @@ export class MeterWorkbenchComponent {
 function isMeterWorkbenchTab(value: unknown): value is MeterWorkbenchTabId {
   return value === 'settings'
     || value === 'readings'
+    || value === 'bill-inspection'
     || value === 'monthly'
     || value === 'monthly-chart'
     || value === 'yearly'

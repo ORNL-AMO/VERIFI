@@ -11,6 +11,7 @@ import { AccountPortfolioPredictorsTabComponent } from './account/portfolio/acco
 import { AccountPortfolioReportsTabComponent } from './account/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { FacilityDataModule } from './facility/data/facility-data.module';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
+import { MeterWorkbenchBillInspectionComponent } from './facility/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
 import { MeterWorkbenchMonthlyChartComponent } from './facility/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './facility/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
@@ -89,6 +90,7 @@ describe('V1Routes facility data meters routes', () => {
     });
     expect(tabRoute('settings')).toMatchObject({ component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } });
     expect(tabRoute('readings')).toMatchObject({ component: MeterWorkbenchReadingsComponent, data: { meterTab: 'readings' } });
+    expect(tabRoute('bill-inspection')).toMatchObject({ component: MeterWorkbenchBillInspectionComponent, data: { meterTab: 'bill-inspection' } });
     expect(tabRoute('monthly')).toMatchObject({ component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } });
     expect(tabRoute('monthly-chart')).toMatchObject({ component: MeterWorkbenchMonthlyChartComponent, data: { meterTab: 'monthly-chart' } });
     expect(tabRoute('yearly')).toMatchObject({ component: MeterWorkbenchYearlyDataComponent, data: { meterTab: 'yearly' } });

@@ -20,6 +20,7 @@ import { AccountSettingsStalenessComponent } from './account/settings/staleness/
 import { AccountSettingsUnitsComponent } from './account/settings/units/account-settings-units.component';
 import { FacilityDataPlaceholderComponent } from './facility/data/facility-data-placeholder.component';
 import { FacilityMetersComponent } from './facility/data/meters/facility-meters.component';
+import { MeterWorkbenchBillInspectionComponent } from './facility/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
 import { MeterWorkbenchMonthlyChartComponent } from './facility/data/meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './facility/data/meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './facility/data/meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
@@ -138,6 +139,7 @@ export const V1Routes: Routes = [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: MeterWorkbenchSettingsComponent, data: { meterTab: 'settings' } },
                       { path: 'readings', component: MeterWorkbenchReadingsComponent, data: { meterTab: 'readings' } },
+                      { path: 'bill-inspection', component: MeterWorkbenchBillInspectionComponent, data: { meterTab: 'bill-inspection' } },
                       { path: 'monthly', component: MeterWorkbenchMonthlyDataComponent, data: { meterTab: 'monthly' } },
                       { path: 'monthly-chart', component: MeterWorkbenchMonthlyChartComponent, data: { meterTab: 'monthly-chart' } },
                       { path: 'yearly', component: MeterWorkbenchYearlyDataComponent, data: { meterTab: 'yearly' } },

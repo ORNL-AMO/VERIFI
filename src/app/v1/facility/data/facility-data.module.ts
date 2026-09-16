@@ -9,6 +9,10 @@ import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
+import { BillInspectionChargeSectionComponent } from './meters/meter-workbench/bill-inspection/charge-section/bill-inspection-charge-section.component';
+import { BillInspectionCorrelationChartComponent } from './meters/meter-workbench/bill-inspection/correlation-chart/bill-inspection-correlation-chart.component';
+import { BillInspectionOverviewChartComponent } from './meters/meter-workbench/bill-inspection/overview-chart/bill-inspection-overview-chart.component';
+import { MeterWorkbenchBillInspectionComponent } from './meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
 import { MeterWorkbenchMonthlyChartComponent } from './meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
@@ -53,6 +57,10 @@ import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/
     MeterSettingsReadingFormComponent,
     MeterSettingsEmissionsDetailsComponent,
     MeterWorkbenchReadingsComponent,
+    MeterWorkbenchBillInspectionComponent,
+    BillInspectionOverviewChartComponent,
+    BillInspectionChargeSectionComponent,
+    BillInspectionCorrelationChartComponent,
     MeterWorkbenchMonthlyDataComponent,
     MeterWorkbenchMonthlyChartComponent,
     MeterWorkbenchYearlyDataComponent,

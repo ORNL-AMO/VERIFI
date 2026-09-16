@@ -1,0 +1,41 @@
+@if (option) {
+  <div class="v1-meter-bill-inspection__panel-heading">
+    <div>
+      <p>Time series</p>
+      <h2 id="bill-inspection-overview-heading">Charges Over Time</h2>
+    </div>
+    <button type="button" class="v1-icon-btn" title="Download PNG" aria-label="Download charges over time chart as PNG" (click)="downloadOverviewChart()">
+      <app-ui-icon name="download"></app-ui-icon>
+    </button>
+  </div>
+  <div
+    #overviewChart
+    class="v1-meter-bill-inspection__overview-chart"
+    [appV1ECharts]="option"
+    role="img"
+    [attr.aria-label]="'Utility bill charges over time for ' + meterName">
+  </div>
+  <table class="visually-hidden">
+    <caption>Utility bill charges over time data</caption>
+    <thead>
+      <tr>
+        <th scope="col">Reading date</th>
+        <th scope="col">Total Cost</th>
+        @for (charge of report.charges; track charge.charge.guid) {
+          <th scope="col">{{ charge.charge.name }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of report.rows; track row.reading.guid) {
+        <tr>
+          <th scope="row">{{ row.dateLabel }}</th>
+          <td>{{ row.totalCostLabel }}</td>
+          @for (charge of report.charges; track charge.charge.guid) {
+            <td>{{ charge.valuesByReading[row.reading.guid].amountLabel }}</td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+}
