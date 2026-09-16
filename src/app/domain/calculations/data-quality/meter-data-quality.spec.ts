@@ -8,7 +8,8 @@ import {
   isMeterDataQualityCostIncluded,
   shouldShowMeterDataQualityConsumption
 } from './meter-data-quality';
-import { meter, reading } from '../../../v1/facility/data/meters/facility-meters.testing';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 
 describe('meter data quality calculations', () => {
   it('calculates v0-parity statistics and outliers with median absolute deviation bounds', () => {
@@ -49,10 +50,22 @@ describe('meter data quality calculations', () => {
     expect(getUnitFromMeter(fuelMeter, rows)).toBe('therm');
   });
 
+  it('falls back to volume values and units when non-electric energy values are not usable', () => {
+    const fuelMeter = meter({ source: 'Natural Gas', startingUnit: 'therm', energyUnit: 'MMBtu', scope: 1 });
+    const rows = [
+      reading({ totalEnergyUse: NaN, totalVolume: 15 }),
+      reading({ guid: 'reading-b', totalEnergyUse: Infinity, totalVolume: 20 })
+    ];
+
+    expect(getConsumptionData(rows, fuelMeter)).toEqual([15, 20]);
+    expect(getUnitFromMeter(fuelMeter, rows)).toBe('therm');
+  });
+
   it('suppresses cost display for zero or missing cost data', () => {
     expect(isMeterDataQualityCostIncluded(calculateStatistics([0, 0]))).toBe(false);
     expect(isMeterDataQualityCostIncluded(calculateStatistics([undefined, NaN]))).toBe(false);
     expect(isMeterDataQualityCostIncluded(calculateStatistics([5, 10]))).toBe(true);
+    expect(isMeterDataQualityCostIncluded(calculateStatistics([5, -5]))).toBe(true);
   });
 
   it('hides consumption quality for electricity meters excluded from energy totals', () => {
@@ -90,3 +103,34 @@ describe('meter data quality calculations', () => {
     expect(report.showAlert).toBe(true);
   });
 });
+
+function meter(options: Partial<IdbUtilityMeter>): IdbUtilityMeter {
+  return {
+    guid: options.guid ?? 'meter-a',
+    accountId: 'account-a',
+    facilityId: 'facility-a',
+    name: options.name ?? 'Meter A',
+    source: options.source ?? 'Electricity',
+    startingUnit: 'kWh',
+    energyUnit: 'kWh',
+    scope: 3,
+    includeInEnergy: true,
+    ...options
+  } as IdbUtilityMeter;
+}
+
+function reading(options: Partial<IdbUtilityMeterData>): IdbUtilityMeterData {
+  return {
+    guid: options.guid ?? 'reading-a',
+    accountId: 'account-a',
+    facilityId: 'facility-a',
+    meterId: options.meterId ?? 'meter-a',
+    day: 1,
+    month: 1,
+    year: 2026,
+    totalEnergyUse: 10,
+    totalCost: 20,
+    checked: false,
+    ...options
+  } as IdbUtilityMeterData;
+}

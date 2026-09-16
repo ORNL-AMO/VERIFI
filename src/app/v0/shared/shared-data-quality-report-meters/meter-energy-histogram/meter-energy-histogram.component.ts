@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getConsumptionData, getUnitFromMeter } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getConsumptionData, getUnitFromMeter, isFiniteQualityNumber } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 
 @Component({
   selector: 'app-meter-energy-histogram',
@@ -46,15 +46,15 @@ export class MeterEnergyHistogramComponent {
   }
 
   getDataAndUnit() {
-    this.meterDataToPlot = getConsumptionData(this.meterData, this.selectedMeter);
+    this.meterDataToPlot = getConsumptionData(this.meterData, this.selectedMeter).filter(isFiniteQualityNumber);
     this.unit = getUnitFromMeter(this.selectedMeter, this.meterData);
   }
 
   drawChart() {
     this.getDataAndUnit();
 
-    const min = Math.min(...this.meterDataToPlot);
-    const max = Math.max(...this.meterDataToPlot);
+    const min = this.meterDataToPlot.length ? Math.min(...this.meterDataToPlot) : 0;
+    const max = this.meterDataToPlot.length ? Math.max(...this.meterDataToPlot) : 0;
     this.binSize = this.numberOfBins && this.numberOfBins > 1 ? (max - min) / (this.numberOfBins) : (max);
     this.binSize = Math.ceil(this.binSize)
     var data = [
@@ -120,4 +120,3 @@ export class MeterEnergyHistogramComponent {
     }
   }
 }
-

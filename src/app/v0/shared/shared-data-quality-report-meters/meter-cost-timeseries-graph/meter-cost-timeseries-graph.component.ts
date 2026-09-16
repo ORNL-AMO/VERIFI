@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { isFiniteQualityNumber, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
@@ -43,7 +43,7 @@ export class MeterCostTimeseriesGraphComponent {
 
   drawChart() {
 
-    this.meterData = this.meterData.filter(data => { return isNaN(data.totalCost) == false }).slice().sort((a, b) => getDateFromMeterData(a).getTime() - getDateFromMeterData(b).getTime());
+    this.meterData = this.meterData.filter(data => isFiniteQualityNumber(data.totalCost)).slice().sort((a, b) => getDateFromMeterData(a).getTime() - getDateFromMeterData(b).getTime());
     let markers: Array<{
       color: string,
       symbol: string,
@@ -141,7 +141,6 @@ export class MeterCostTimeseriesGraphComponent {
     }
   }
 }
-
 
 
 

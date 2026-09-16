@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getConsumptionData, getUnitFromMeter, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getConsumptionData, getUnitFromMeter, isFiniteQualityNumber, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 
 @Component({
@@ -24,7 +24,7 @@ export class MeterEnergyTimeseriesGraphComponent {
 
   @ViewChild('meterEnergyTimeSeriesGraph', { static: false }) meterEnergyTimeSeriesGraph: ElementRef;
   viewInitialized: boolean = false;
-  meterDataToPlot: number[];
+  meterDataToPlot: Array<{ reading: IdbUtilityMeterData, value: number }>;
   unit: string;
 
   constructor(private plotlyService: PlotlyService
@@ -46,7 +46,10 @@ export class MeterEnergyTimeseriesGraphComponent {
   getDataAndUnit() {
     this.meterData = this.meterData.slice().sort((a, b) => getDateFromMeterData(a).getTime() - getDateFromMeterData(b).getTime());
     this.unit = getUnitFromMeter(this.selectedMeter, this.meterData);
-    this.meterDataToPlot = getConsumptionData(this.meterData, this.selectedMeter);
+    const consumptionData = getConsumptionData(this.meterData, this.selectedMeter);
+    this.meterDataToPlot = this.meterData
+      .map((reading, index) => ({ reading, value: consumptionData[index] }))
+      .filter((row): row is { reading: IdbUtilityMeterData, value: number } => isFiniteQualityNumber(row.value));
   }
 
   drawChart() {
@@ -56,7 +59,7 @@ export class MeterEnergyTimeseriesGraphComponent {
       color: string,
       symbol: string,
       size: number
-    }> = this.meterDataToPlot.map(data => { return this.getMarker(data) });
+    }> = this.meterDataToPlot.map(data => { return this.getMarker(data.value) });
 
     let markerSizes: Array<number> = markers.map(marker => marker.size);
     let markerColors: Array<string> = markers.map(marker => marker.color);
@@ -68,8 +71,8 @@ export class MeterEnergyTimeseriesGraphComponent {
         type: "scatter",
         mode: "lines+markers",
         name: 'Meter Data',
-        x: this.meterData.map(data => { return getDateFromMeterData(data) }),
-        y: this.meterDataToPlot,
+        x: this.meterDataToPlot.map(data => { return getDateFromMeterData(data.reading) }),
+        y: this.meterDataToPlot.map(data => data.value),
         line: { color: '#832a75', width: 3 },
         marker: {
           color: markerColors,

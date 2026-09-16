@@ -123,7 +123,7 @@
         </td>
       </tr>
       }
-      @if (costStats.average != 0 && !isValueNaN(costStats.average)) {
+      @if (isCostIncluded()) {
       <tr class="align-middle">
         <td>
           Cost ($)

@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { isFiniteQualityNumber } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 
 @Component({
   selector: 'app-meter-cost-histogram',
@@ -17,6 +18,7 @@ export class MeterCostHistogramComponent {
   viewInitialized: boolean = false;
   numberOfBins: number = 50;
   binSize: number;
+  meterCostToPlot: number[];
 
   constructor(private plotlyService: PlotlyService) { }
 
@@ -40,14 +42,15 @@ export class MeterCostHistogramComponent {
   }
 
   drawChart() {
-    const min = Math.min(...this.meterData.map(data => data.totalCost));
-    const max = Math.max(...this.meterData.map(data => data.totalCost));
+    this.meterCostToPlot = this.meterData.map(data => data.totalCost).filter(isFiniteQualityNumber);
+    const min = this.meterCostToPlot.length ? Math.min(...this.meterCostToPlot) : 0;
+    const max = this.meterCostToPlot.length ? Math.max(...this.meterCostToPlot) : 0;
     this.binSize = this.numberOfBins && this.numberOfBins > 1 ? (max - min) / (this.numberOfBins) : (max);
     this.binSize = Math.ceil(this.binSize)
     var data = [
       {
         type: "histogram",
-        x: this.meterData.map(data => { return data.totalCost }),
+        x: this.meterCostToPlot,
         marker: {
           color: '#833c60',
           line: { color: '#fff', width: 1 }

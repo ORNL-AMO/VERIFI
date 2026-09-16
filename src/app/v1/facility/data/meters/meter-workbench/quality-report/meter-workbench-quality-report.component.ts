@@ -173,14 +173,15 @@ function statisticRow(
   stats: Statistics,
   currency: boolean
 ): QualityStatisticRow {
+  const hasStatistics = hasFiniteStatistics(stats);
   return {
     id,
     label,
     cells: QUALITY_STATISTIC_COLUMNS.map(column => ({
       id: column.id,
       label: column.label,
-      valueLabel: formatQualityNumber(stats[column.id], currency && column.id !== 'outliers'),
-      tone: column.id === 'outliers'
+      valueLabel: hasStatistics ? formatQualityNumber(stats[column.id], currency && column.id !== 'outliers') : '-',
+      tone: column.id === 'outliers' && hasStatistics
         ? stats.outliers > 0 ? 'warning' : 'success'
         : undefined
     }))
@@ -204,14 +205,18 @@ function buildIssueSummaries(report: MeterDataQualityReport): string[] {
 function qualityChartOption(rows: readonly MeterDataQualityChartRow[], plots: readonly QualityChartPlot[]): V1EChartsOption {
   const zoomedXAxisIndexes = plots.map((_, index) => index);
   const hasZoom = rows.length > 2;
+  const dateExtent = chartDateExtent(rows);
 
   return {
     tooltip: { trigger: 'axis', formatter: params => formatChartTooltip(params, plots) },
+    axisPointer: { link: [{ xAxisIndex: 'all' }] },
     legend: { top: 0, left: 'center' },
     grid: buildChartGrids(plots.length, hasZoom),
     xAxis: plots.map((_, index) => ({
       type: 'time',
       gridIndex: index,
+      min: dateExtent?.min,
+      max: dateExtent?.max,
       axisLabel: index === plots.length - 1
         ? { formatter: value => new Date(Number(value)).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) }
         : { show: false },
@@ -238,6 +243,23 @@ function qualityChartOption(rows: readonly MeterDataQualityChartRow[], plots: re
       : [],
     series: plots.flatMap((plot, index) => buildPlotSeries(rows, plot, index))
   } as V1EChartsOption;
+}
+
+function hasFiniteStatistics(stats: Statistics): boolean {
+  return Number.isFinite(stats.min) && Number.isFinite(stats.max);
+}
+
+function chartDateExtent(rows: readonly MeterDataQualityChartRow[]): { min: number; max: number } | undefined {
+  const sortValues = rows
+    .map(row => row.sortValue)
+    .filter(Number.isFinite);
+  if (!sortValues.length) {
+    return undefined;
+  }
+  return {
+    min: Math.min(...sortValues),
+    max: Math.max(...sortValues)
+  };
 }
 
 function buildChartGrids(plotCount: number, hasZoom: boolean): Array<Record<string, unknown>> {
