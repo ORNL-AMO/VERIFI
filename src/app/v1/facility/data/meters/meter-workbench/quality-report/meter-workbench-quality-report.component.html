@@ -118,12 +118,12 @@
               <tr>
                 <th scope="row">{{ row.dateLabel }}</th>
                 @if (currentReport.showConsumption) {
-                  <td>{{ row.consumptionValue }}</td>
-                  <td>{{ row.consumptionOutlier ? 'Outlier' : 'Expected range' }}</td>
+                  <td>{{ row.consumptionValue ?? 'No data' }}</td>
+                  <td>{{ row.consumptionValue === undefined ? 'No data' : row.consumptionOutlier ? 'Outlier' : 'Expected range' }}</td>
                 }
                 @if (currentReport.includeCosts) {
-                  <td>{{ row.costValue }}</td>
-                  <td>{{ row.costOutlier ? 'Outlier' : 'Expected range' }}</td>
+                  <td>{{ row.costValue ?? 'No data' }}</td>
+                  <td>{{ row.costValue === undefined ? 'No data' : row.costOutlier ? 'Outlier' : 'Expected range' }}</td>
                 }
               </tr>
             }

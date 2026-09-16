@@ -129,6 +129,56 @@ describe('MeterWorkbenchQualityReportComponent', () => {
 
     expect(meterDataSeries.markArea.data).toEqual([[{ name: 'Expected range', yAxis: 6 }, { yAxis: 16 }]]);
   });
+
+  it('renders missing chart values as no data in the accessible table', () => {
+    const fixture = setup({
+      meterData: [
+        reading({ guid: 'reading-a', month: 1, year: 2026, totalEnergyUse: 10, totalCost: 10 }),
+        reading({ guid: 'reading-b', month: 2, year: 2026, totalEnergyUse: undefined, totalCost: undefined })
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('No data');
+    expect(element.textContent).not.toContain('undefined');
+  });
+
+  it('keeps stacked chart date axes aligned when each metric is missing different readings', () => {
+    const fixture = setup({
+      meterData: [
+        reading({ guid: 'reading-a', month: 1, year: 2026, totalEnergyUse: 10, totalCost: undefined }),
+        reading({ guid: 'reading-b', month: 2, year: 2026, totalEnergyUse: undefined, totalCost: 50 }),
+        reading({ guid: 'reading-c', month: 3, year: 2026, totalEnergyUse: 12, totalCost: 25 })
+      ]
+    });
+
+    const option = fixture.componentInstance.qualityChartOption() as Record<string, any>;
+    const xAxis = option.xAxis as Array<Record<string, unknown>>;
+
+    expect(option.axisPointer).toEqual({ link: [{ xAxisIndex: 'all' }] });
+    expect(xAxis[0].min).toBe(xAxis[1].min);
+    expect(xAxis[0].max).toBe(xAxis[1].max);
+    expect(option.series.find((series: { name: string }) => series.name === 'Total Consumption').data).toHaveLength(2);
+    expect(option.series.find((series: { name: string }) => series.name === 'Total Cost').data).toHaveLength(2);
+  });
+
+  it('does not render a success badge for unavailable statistics', () => {
+    const fixture = setup({
+      meterData: [
+        reading({ guid: 'reading-a', month: 1, year: 2026, totalEnergyUse: undefined, totalCost: undefined }),
+        reading({ guid: 'reading-b', month: 2, year: 2026, totalEnergyUse: undefined, totalCost: undefined })
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('Total Consumption (kWh)');
+    expect(element.textContent).toContain('-');
+    expect(element.querySelector('.v1-badge--success')).toBeNull();
+  });
 });
 
 @Directive({

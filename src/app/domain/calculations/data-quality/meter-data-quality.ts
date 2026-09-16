@@ -96,11 +96,7 @@ export function getConsumptionData(meterData: Array<IdbUtilityMeterData>, select
   if (selectedMeter.scope === 2) {
     return meterData.map(data => data.totalEnergyUse);
   }
-  const allEnergyInvalid = meterData.every(data =>
-    data.totalEnergyUse === 0
-    || data.totalEnergyUse === undefined
-    || data.totalEnergyUse === null
-  );
+  const allEnergyInvalid = meterData.every(data => !isUsableConsumptionValue(data.totalEnergyUse));
   return allEnergyInvalid
     ? meterData.map(data => data.totalVolume)
     : meterData.map(data => data.totalEnergyUse);
@@ -116,11 +112,7 @@ export function getUnitFromMeter(meter: IdbUtilityMeter, meterData: Array<IdbUti
   if (meter.scope === 2) {
     return meter.energyUnit;
   }
-  const allEnergyInvalid = meterData.every(data =>
-    data.totalEnergyUse === 0
-    || data.totalEnergyUse === undefined
-    || data.totalEnergyUse === null
-  );
+  const allEnergyInvalid = meterData.every(data => !isUsableConsumptionValue(data.totalEnergyUse));
   return allEnergyInvalid ? meter.startingUnit : meter.energyUnit;
 }
 
@@ -155,14 +147,16 @@ export function shouldShowMeterDataQualityConsumption(meter: IdbUtilityMeter): b
 }
 
 export function isMeterDataQualityCostIncluded(costStats: Statistics): boolean {
-  return Number.isFinite(costStats.average) && costStats.average !== 0;
+  return Number.isFinite(costStats.min)
+    && Number.isFinite(costStats.max)
+    && (costStats.min !== 0 || costStats.max !== 0);
 }
 
 export function getDuplicateMeterDataMonths(meterData: readonly IdbUtilityMeterData[]): MeterDataQualityDuplicateMonth[] {
   const monthCounts = new Map<string, { monthYear: string; sortValue: number; count: number }>();
   for (const reading of meterData) {
     const date = getDateFromMeterData(reading);
-    const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    const monthYear = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
     const key = `${date.getFullYear()}-${date.getMonth()}`;
     const existing = monthCounts.get(key);
     monthCounts.set(key, {
@@ -231,6 +225,10 @@ function isOutlier(value: number | undefined | null, stats: Statistics): boolean
     && (value < stats.medianminus2_5MAD || value > stats.medianplus2_5MAD);
 }
 
-function isFiniteQualityNumber(value: number | undefined | null): value is number {
+export function isFiniteQualityNumber(value: number | undefined | null): value is number {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isUsableConsumptionValue(value: number | undefined | null): value is number {
+  return isFiniteQualityNumber(value) && value !== 0;
 }
