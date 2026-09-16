@@ -394,7 +394,8 @@ export class CalculatedPredictorDataUpdateComponent {
         continue;
       }
       if (predictorData.changeAmount) {
-        changes.update.push(this.toPredictorDataRecord(predictorData, predictorData.updatedAmount));
+        const record = this.toPredictorDataRecord(predictorData, predictorData.updatedAmount);
+        changes.update.push({ ...record, weatherDataChanged: false });
       }
     }
 
