@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getUnitFromMeter, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getUnitFromMeter, isMeterDataQualityCostIncluded, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 
 @Component({
@@ -39,6 +39,10 @@ export class MeterStatisticsTableComponent {
 
   isValueNaN(value: any): boolean {
     return isNaN(value);
+  }
+
+  isCostIncluded(): boolean {
+    return isMeterDataQualityCostIncluded(this.costStats);
   }
 
   copyTable() {

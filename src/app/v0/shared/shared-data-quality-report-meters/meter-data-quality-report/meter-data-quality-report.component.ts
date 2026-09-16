@@ -1,7 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { getStatistics, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
+import { getStatistics, isMeterDataQualityCostIncluded, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { Router } from '@angular/router';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
 import { AccountWorkspaceStore } from '@app/data/account-workspace/account-workspace.store';
@@ -58,7 +58,7 @@ export class MeterDataQualityReportComponent {
       const { energyStats, costStats } = getStatistics(this.meterData, this.selectedMeter);
       this.energyStats = energyStats;
       this.costStats = costStats;
-      this.includeCosts = isNaN(this.costStats.average) == false && this.costStats.average != 0;
+      this.includeCosts = isMeterDataQualityCostIncluded(this.costStats);
       this.energyOutlierCount = energyStats.outliers;
       this.costOutlierCount = costStats.outliers;
       this.checkMultipleReadings();

@@ -41,13 +41,26 @@ describe('EChartsChartDirective in Chromium', () => {
     fixture.componentInstance.option.set({
       xAxis: { type: 'category', data: ['Mar', 'Apr'] },
       yAxis: { type: 'value' },
-      series: [{ type: 'line', data: [3, 4] }]
+      series: [
+        {
+          type: 'line',
+          data: [3, 4],
+          markArea: {
+            data: [[{ name: 'Expected range', yAxis: 2 }, { yAxis: 5 }]]
+          }
+        },
+        { type: 'scatter', data: [3, 4] }
+      ]
     } as V1EChartsOption);
     fixture.detectChanges();
     await fixture.whenStable();
     await nextAnimationFrame();
 
     expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
+    expect((echarts.getInstanceByDom(fixture.nativeElement.querySelector('.chart-host'))?.getOption() as Record<string, unknown[]>).series)
+      .toHaveLength(2);
+    expect((echarts.getInstanceByDom(fixture.nativeElement.querySelector('.chart-host'))?.getOption() as Record<string, unknown>).series)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ markArea: expect.any(Object) })]));
   });
 
   it('emits ECharts data zoom changes', async () => {
@@ -82,11 +95,12 @@ describe('EChartsChartDirective in Chromium', () => {
     host.style.width = '360px';
     host.style.height = '240px';
     fixture.componentInstance.option.set({
-      xAxis: { type: 'category', data: ['Jan', 'Feb'] },
+      grid: [{}, {}],
+      xAxis: [{ type: 'category', data: ['Jan', 'Feb'] }, { type: 'category', data: ['Jan', 'Feb'] }],
       yAxis: [{ type: 'value' }, { type: 'value' }],
       series: [
         { name: 'Utility', type: 'bar', data: [1, 2] },
-        { name: 'Cost', type: 'line', yAxisIndex: 1, data: [3, 4] }
+        { name: 'Cost', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: [3, 4] }
       ]
     } as V1EChartsOption);
     fixture.detectChanges();
@@ -94,10 +108,13 @@ describe('EChartsChartDirective in Chromium', () => {
     await nextAnimationFrame();
 
     let chartOption = echarts.getInstanceByDom(host)?.getOption() as Record<string, unknown[]>;
+    expect(chartOption['grid']).toHaveLength(2);
+    expect(chartOption['xAxis']).toHaveLength(2);
     expect(chartOption['series']).toHaveLength(2);
     expect(chartOption['yAxis']).toHaveLength(2);
 
     fixture.componentInstance.option.set({
+      grid: [{}],
       xAxis: { type: 'category', data: ['Jan', 'Feb'] },
       yAxis: [{ type: 'value' }],
       series: [{ name: 'Cost', type: 'line', data: [3, 4] }]
@@ -107,6 +124,8 @@ describe('EChartsChartDirective in Chromium', () => {
     await nextAnimationFrame();
 
     chartOption = echarts.getInstanceByDom(host)?.getOption() as Record<string, unknown[]>;
+    expect(chartOption['grid']).toHaveLength(1);
+    expect(chartOption['xAxis']).toHaveLength(1);
     expect(chartOption['series']).toHaveLength(1);
     expect(chartOption['yAxis']).toHaveLength(1);
     expect(chartOption['toolbox']).toEqual([expect.objectContaining({ show: false })]);
