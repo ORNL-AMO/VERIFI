@@ -54,6 +54,7 @@ import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleI
 import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
 import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
 import LockIcon from '@hugeicons/core-free-icons/LockIcon';
+import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
 import PieChartIcon from '@hugeicons/core-free-icons/PieChartIcon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
@@ -124,6 +125,7 @@ export const ICON_REGISTRY = {
   meter: GaugeIcon,
   meterGroup: CombineIcon,
   meterGroupItem: GroupIcon,
+  monocle: Monocle01Icon,
   overview: PieChartIcon,
   otherEnergy: EnergyIcon,
   otherFuel: Fuel01Icon,

@@ -1,0 +1,25 @@
+.v1-meter-bill-inspection {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.v1-meter-bill-inspection__panel {
+  background: var(--v1-surface, #ffffff);
+  border: 1px solid var(--v1-border, #d7dfda);
+  border-radius: 0;
+  display: block;
+  padding: 1rem;
+}
+
+.v1-meter-bill-inspection__panel + .v1-meter-bill-inspection__panel,
+.v1-meter-bill-inspection__panel + .v1-meter-bill-inspection__charge-list .v1-meter-bill-inspection__panel,
+.v1-meter-bill-inspection__charge-list .v1-meter-bill-inspection__panel + .v1-meter-bill-inspection__panel {
+  border-top: 0;
+}
+
+.v1-meter-bill-inspection__charge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}

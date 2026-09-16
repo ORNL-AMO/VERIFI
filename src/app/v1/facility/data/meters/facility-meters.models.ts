@@ -10,7 +10,7 @@ import { StatusCheckAction } from '@domain/calculations/status-check-calculation
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { UtilityColors } from '@shared/utilityColors';
 
-export type MeterWorkbenchTabId = 'settings' | 'readings' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
+export type MeterWorkbenchTabId = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type MeterGroupWorkbenchTabId = 'monthly-table' | 'monthly-chart' | 'yearly';
 export type MeterGroupSectionTone = 'energy' | 'water' | 'other' | 'ungrouped';
 export type MeterGroupDropTargetId = string | 'ungrouped';
@@ -236,6 +236,7 @@ export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
   { id: 'monthly', label: 'Monthly Table', icon: 'calendar', summary: 'Monthly calendarized data table.' },
   { id: 'monthly-chart', label: 'Monthly Chart', icon: 'chartLine', summary: 'Monthly calendarized data chart.' },
   { id: 'yearly', label: 'Yearly Data', icon: 'barChart', summary: 'Yearly meter table and chart.' },
+  { id: 'bill-inspection', label: 'Bill Inspection', icon: 'monocle', summary: 'Inspect electricity charges against utility bill consumption, cost, and demand.' },
   { id: 'quality', label: 'Quality Report', icon: 'warning', summary: 'Review meter statistics, expected ranges, outliers, duplicate months, and time series.' }
 ];
 
@@ -326,11 +327,23 @@ export function meterWorkbenchTab(tabId: MeterWorkbenchTabId): MeterWorkbenchTab
 }
 
 export function meterWorkbenchTabsForMeter(meter: IdbUtilityMeter | undefined): readonly MeterWorkbenchTab[] {
-  return METER_WORKBENCH_TABS.filter(tab => tab.id !== 'monthly' || shouldShowMeterMonthlyDataTab(meter));
+  return METER_WORKBENCH_TABS.filter(tab => {
+    if (tab.id === 'monthly') {
+      return shouldShowMeterMonthlyDataTab(meter);
+    }
+    if (tab.id === 'bill-inspection') {
+      return shouldShowMeterBillInspectionTab(meter);
+    }
+    return true;
+  });
 }
 
 export function shouldShowMeterMonthlyDataTab(meter: IdbUtilityMeter | undefined): boolean {
   return meter?.meterReadingDataApplication !== 'fullMonth';
+}
+
+export function shouldShowMeterBillInspectionTab(meter: IdbUtilityMeter | undefined): boolean {
+  return meter?.source === 'Electricity' && (meter.charges?.length ?? 0) > 0;
 }
 
 export function meterCalendarizationMethodLabel(method: MeterReadingDataApplication | undefined): string {

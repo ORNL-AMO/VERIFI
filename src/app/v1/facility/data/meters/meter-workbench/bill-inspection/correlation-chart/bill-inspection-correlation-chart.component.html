@@ -1,0 +1,40 @@
+<article class="v1-meter-bill-inspection__correlation" [attr.aria-labelledby]="'bill-inspection-plot-' + chargeView.charge.guid + '-' + plot.id">
+  <div class="v1-meter-bill-inspection__correlation-heading">
+    <h3 [id]="'bill-inspection-plot-' + chargeView.charge.guid + '-' + plot.id">{{ plot.title }}</h3>
+    @if (plot.regression) {
+      <p>Best fit: {{ plot.regression.label }}</p>
+      <p>R<sup>2</sup> {{ plot.regression.rSquared | number:'0.3-3' }}</p>
+    } @else {
+      <p>Best fit needs at least three paired readings with varying comparison values.</p>
+    }
+  </div>
+  @if (option) {
+    <div
+      class="v1-meter-bill-inspection__correlation-chart"
+      [appV1ECharts]="option"
+      role="img"
+      [attr.aria-label]="plot.title + ' for ' + chargeView.charge.name">
+    </div>
+  }
+  <table class="visually-hidden">
+    <caption>{{ plot.title }} data for {{ chargeView.charge.name }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Reading date</th>
+        <th scope="col">{{ plot.xLabel }}</th>
+        <th scope="col">{{ chargeView.charge.name }}</th>
+        <th scope="col">Charge Usage</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (point of plot.points; track point.readingGuid) {
+        <tr>
+          <th scope="row">{{ point.dateLabel }}</th>
+          <td>{{ point.xLabel }}</td>
+          <td>{{ point.yLabel }}</td>
+          <td>{{ point.chargeUsageLabel }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</article>

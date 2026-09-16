@@ -1,0 +1,23 @@
+<div class="v1-meter-bill-inspection__panel-heading">
+  <div>
+    <p>{{ chargeView.chargeTypeLabel }}</p>
+    <h2 [id]="'bill-inspection-charge-' + chargeView.charge.guid">{{ chargeView.charge.name }}</h2>
+  </div>
+  <span class="v1-meter-bill-inspection__charge-total">{{ chargeView.amountTotalLabel }}</span>
+</div>
+
+@if (chargeView.plots.length) {
+  <div class="v1-meter-bill-inspection__correlation-grid">
+    @for (plot of chargeView.plots; track plot.id) {
+      <app-bill-inspection-correlation-chart
+        [chargeView]="chargeView"
+        [plot]="plot">
+      </app-bill-inspection-correlation-chart>
+    }
+  </div>
+} @else {
+  <div class="v1-alert v1-alert--info">
+    <app-ui-icon name="info"></app-ui-icon>
+    <span>No paired readings are available for this charge.</span>
+  </div>
+}

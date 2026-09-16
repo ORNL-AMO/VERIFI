@@ -15,13 +15,14 @@ import { MeterWorkbenchComponent } from './meter-workbench.component';
 
 describe('MeterWorkbenchComponent', () => {
   it('renders the selected meter header and active workbench tab from the child route', () => {
-    const fixture = setup({ tab: 'monthly' });
+    const fixture = setup({ tab: 'monthly', selectedMeter: meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', charges: [charge()] }) });
 
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Electric Main');
     expect(text).toContain('Monthly Table');
+    expect(text).toContain('Bill Inspection');
     expect(text).toContain('Monthly Chart');
     expect(text).toContain('Purchased Electricity');
     expect(fixture.nativeElement.querySelector('.v1-eyebrow')).toBeNull();
@@ -29,6 +30,19 @@ describe('MeterWorkbenchComponent', () => {
     const monthlyButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
       .find(button => button.textContent?.includes('Monthly Table'));
     expect(monthlyButton?.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('renders Bill Inspection as the active tab for eligible electricity meters', () => {
+    const fixture = setup({
+      tab: 'bill-inspection',
+      selectedMeter: meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', charges: [charge()] })
+    });
+
+    fixture.detectChanges();
+
+    const billInspectionButton = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.includes('Bill Inspection'));
+    expect(billInspectionButton?.getAttribute('aria-current')).toBe('page');
   });
 
   it('renders breadcrumb and card-derived meter status summary in the header', () => {
@@ -224,6 +238,35 @@ describe('MeterWorkbenchComponent', () => {
     ], { replaceUrl: true });
   });
 
+  it('hides Bill Inspection and redirects direct bill inspection routes for meters without electricity charges', () => {
+    const fixture = setup({
+      tab: 'bill-inspection',
+      selectedMeter: meter({
+        guid: 'meter-electric',
+        name: 'Electric Main',
+        groupId: 'group-energy',
+        source: 'Electricity',
+        charges: []
+      })
+    });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    expect(buttons.find(button => button.textContent?.includes('Bill Inspection'))).toBeUndefined();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-electric',
+      'settings'
+    ], { replaceUrl: true, fragment: 'meter-charges' });
+  });
+
   it('switches to readings when the target meter hides Monthly Table', () => {
     const gasCard: MeterCardView = {
       meter: meter({
@@ -261,6 +304,50 @@ describe('MeterWorkbenchComponent', () => {
       'meters',
       'meter-gas',
       'readings'
+    ]);
+  });
+
+  it('switches to settings when the target meter hides Bill Inspection', () => {
+    const gasCard: MeterCardView = {
+      meter: meter({
+        guid: 'meter-gas',
+        name: 'Gas Backup',
+        source: 'Natural Gas',
+        charges: [charge()]
+      }),
+      readingCount: 2,
+      sourceColor: '#d16a22',
+      statusLabel: 'Valid',
+      statusTone: 'success',
+      statusIcon: 'success',
+      firstReadingLabel: 'Jan 2026',
+      latestReadingLabel: 'Feb 2026',
+      scopeLabel: 'Stationary combustion',
+      statusIssueLabels: [],
+      statusActionSummaries: []
+    };
+    const fixture = setup({
+      tab: 'bill-inspection',
+      selectedMeter: meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', charges: [charge()] }),
+      meterCards: [defaultMeterCard(meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', charges: [charge()] })), gasCard]
+    });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    fixture.detectChanges();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'))[1].click();
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-gas',
+      'settings'
     ]);
   });
 
@@ -473,5 +560,15 @@ function defaultMeterCard(cardMeter = meter({ guid: 'meter-electric', name: 'Ele
     scopeLabel: 'Purchased Electricity',
     statusIssueLabels: [],
     statusActionSummaries: []
+  };
+}
+
+function charge() {
+  return {
+    guid: 'charge-a',
+    name: 'Demand Charge',
+    chargeType: 'demand' as const,
+    displayUsageInTable: true,
+    displayChargeInTable: true
   };
 }

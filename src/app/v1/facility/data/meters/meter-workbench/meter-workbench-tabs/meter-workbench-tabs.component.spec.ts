@@ -18,6 +18,10 @@ describe('MeterWorkbenchTabsComponent', () => {
     const monthlyButton = buttons.find(button => button.textContent?.includes('Monthly Table'));
     expect(monthlyButton?.getAttribute('aria-current')).toBe('page');
     expect(METER_WORKBENCH_TABS.find(tab => tab.id === 'readings')?.icon).toBe('table');
+    expect(METER_WORKBENCH_TABS.slice(-2).map(tab => [tab.id, tab.icon])).toEqual([
+      ['bill-inspection', 'monocle'],
+      ['quality', 'warning']
+    ]);
 
     buttons.find(button => button.textContent?.includes('Quality Report'))?.click();
 

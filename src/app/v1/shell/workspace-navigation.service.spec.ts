@@ -129,6 +129,16 @@ describe('WorkspaceNavigationService', () => {
       'meter-a',
       'readings'
     ]);
+    expect(service.facilityMeterRoute('facility-a', 'meter-a', 'bill-inspection')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-a',
+      'bill-inspection'
+    ]);
     expect(service.facilityMeterGroupRoute('facility-a', 'group-a', 'yearly')).toEqual([
       '/v1',
       'workspace',

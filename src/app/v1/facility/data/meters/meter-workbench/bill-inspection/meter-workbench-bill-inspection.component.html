@@ -1,0 +1,59 @@
+@let currentMeter = meter();
+@let currentReport = report();
+
+<section class="v1-meter-bill-inspection" aria-label="Utility bill inspection">
+  @if (!currentMeter) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="meter"></app-ui-icon>
+      <h2>Select a meter</h2>
+      <p>Open an electricity meter with configured charges before reviewing utility bill charges.</p>
+    </article>
+  } @else if (!isEligible()) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="tags"></app-ui-icon>
+      <h2>No bill charges to inspect</h2>
+      <p>Bill Inspection is available for electricity meters with configured meter charges.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openChargeSettings()">
+        <app-ui-icon name="settings"></app-ui-icon>
+        Open Charge Settings
+      </button>
+    </article>
+  } @else if (!currentReport?.hasReadings) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="table"></app-ui-icon>
+      <h2>No readings found</h2>
+      <p>Add utility bill readings before inspecting charge behavior for {{ currentMeter.name }}.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
+        <app-ui-icon name="table"></app-ui-icon>
+        Open Readings
+      </button>
+    </article>
+  } @else if (!currentReport.hasChargeAmountData) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="chartLine"></app-ui-icon>
+      <h2>No charge amounts found</h2>
+      <p>Enter charge amounts on utility bill readings before inspecting charge behavior.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
+        <app-ui-icon name="table"></app-ui-icon>
+        Open Readings
+      </button>
+    </article>
+  } @else if (currentReport) {
+    <app-bill-inspection-overview-chart
+      class="v1-meter-bill-inspection__panel v1-meter-bill-inspection__chart-panel"
+      aria-labelledby="bill-inspection-overview-heading"
+      [report]="currentReport"
+      [meterName]="currentMeter.name">
+    </app-bill-inspection-overview-chart>
+
+    <div class="v1-meter-bill-inspection__charge-list">
+      @for (chargeView of currentReport.charges; track chargeView.charge.guid) {
+        <app-bill-inspection-charge-section
+          class="v1-meter-bill-inspection__panel"
+          [attr.aria-labelledby]="'bill-inspection-charge-' + chargeView.charge.guid"
+          [chargeView]="chargeView">
+        </app-bill-inspection-charge-section>
+      }
+    </div>
+  }
+</section>

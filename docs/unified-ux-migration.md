@@ -116,6 +116,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 quality helper and component specs, plus ECharts scatter browser coverage when the directive registration changes. Skip `build-prod` in the Codex sandbox because it does not work reliably there; leave production build validation to CI or a non-sandbox environment.
 
+### Facility Meter Bill Inspection Workflow
+
+- **Workflow:** v1 selected-meter Bill Inspection tab.
+- **Existing v0 entry point:** `meter-charges-visualization` under the current Data Management meter routes.
+- **Decision:** Rebuild in v1 as an electricity-only meter workbench tab for meters with configured charges. Use raw utility bill readings and Apache ECharts to compare detailed charge amounts with bill consumption, total cost, and demand.
+- **Parity:** Preserve the v0 charge-over-time and per-charge correlation inspection intent while adding v1 empty states, accessible data tables, scrollable legends, zoom, and PNG download.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker payload, report export, or Electron contract changes.
+- **Tests:** Focused v1 route/navigation specs, meter tab visibility specs, and bill inspection component specs for chart data preparation, regression lines, and empty states.
+
 ### Portfolio Resource Card Reuse Decision
 
 - **Workflow:** v1 account portfolio resource tabs, starting with account-wide Meters and extending next to Predictors, Energy Uses, Analyses, and Reports.
@@ -130,11 +139,13 @@ If the workflow needs current-state detail, add a short current-state note using
 - Do not add v0/v1 conditionals to legacy components.
 - Rebuild v1 UI components from scratch using the new architecture and P1 learnings.
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.
+- Put v1 child components in their own folders with their `.ts`, template, styles, and spec files colocated. Keep parent workflow folders for the route/container component and shared workflow models/helpers, not piles of sibling child component files.
+- In v1 workbench tabs, stack primary content sections with connected borders, square outer corners, and no vertical gaps between sections. Avoid floating, rounded card treatment for top-level workbench content; reserve card styling for repeated items inside a section only when it improves scanning.
 - In v1, use the themed content-control color (`--v1-content-control`, orange in the default theme) as the active fill, border, or indicator for tabs, segmented toggles, selectors, nav-panel active indicators, and other content navigation controls. Keep active labels on neutral text unless contrast requires otherwise. Use the themed action color (`--v1-action`, blue in the default theme) for additive page actions such as adding a facility, meter, or group. Prefer the semantic tokens and button classes over hard-coded colors.
 - Keep current public v0 URLs stable while v0 remains the default experience.
 - Keep `/p1` prototype routes and `/v1` production routes out of `develop`; on `unified-ux`, root routing lazy-loads `/p1`, `/v1`, and the default v0 route tree.
 - Treat `/p1` as non-production reference material. It may temporarily import `@v0/shared/*` while production v1 must not import from `@v0/*`.
-- Prefer aliases for cross-boundary imports: `@app/*`, `@shared/*`, `@v0/*`, `@data/*`, `@domain/*`, and `@platform/*`.
+- Prefer aliases for cross-boundary imports: `@app/*`, `@shared/*`, `@v0/*`, `@data/*`, `@domain/*`, and `@platform/*`. Use aliases instead of long relative paths when crossing from a feature into app shell, shared, data, domain, or platform code; keep relative imports for files that are local to the same feature/component folder.
 - Do not import from `@v0/*` in root shared, data, domain, platform, or production v1 code.
 - Use `@v0/shared/*` for legacy reusable UI even when only v0 imports it today; use `@shared/*` only when v1 can safely depend on the code without inheriting v0 presentation behavior.
 

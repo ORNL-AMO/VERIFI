@@ -12,7 +12,7 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
-export type FacilityMeterRouteTab = 'settings' | 'readings' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
+export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
