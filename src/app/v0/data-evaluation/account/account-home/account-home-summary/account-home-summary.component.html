@@ -53,6 +53,12 @@
               Export Account <br> Utility Data
             </button>
           </div>
+          <div class="p-1">
+            <button class="btn btn-outline m-0" (click)="openEmailModal()">
+              <span class="fa fa-envelope"></span><br>
+              Email Account <br> Data
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +81,7 @@
   }
 </div>
 
-<div [ngClass]="{'windowOverlay': showExportModal}">
+<div [ngClass]="{'windowOverlay': showExportModal || showEmailModal }">
 </div>
 
 <div class="popup" [class.open]="showExportModal">
@@ -92,6 +98,59 @@
     <div class="popup-footer text-end mt-4">
       <button class="btn btn-secondary" (click)="closeExportModal()">Cancel</button>
       <button class="btn btn-success" (click)="exportData()">Export</button>
+    </div>
+  </div>
+</div>
+
+<div class="popup email-modal" [class.open]="showEmailModal">
+  <div class="popup-header">Email {{_account?.name}} backup
+    <button class="item-right" (click)="closeEmailModal()">x</button>
+  </div>
+  <div class="popup-body">
+    @if (emailForm) {
+    <form [formGroup]="emailForm">
+      <div class="mb-4">
+        <label class="w-100 fw-bold mb-1" for="senderEmail">Sender Email</label>
+        <input type="text" id="senderEmail" class="form-control" formControlName="senderEmail" (input)="save()">
+        @if (emailForm.controls.senderEmail.invalid && emailForm.controls.senderEmail.dirty &&
+        emailForm.controls.senderEmail.errors?.email) {
+        <div class="text-danger mt-1">Please enter a valid email address.</div>
+        }
+      </div>
+      <div class="mb-4">
+        <label class="w-100 fw-bold mb-1" for="recipientEmail">Recipient Email</label>
+        <input type="text" id="recipientEmail" class="form-control" formControlName="recipientEmail" (input)="save()">
+        <label class="text-muted mt-1">Separate multiple email addresses with commas</label>
+        @if (emailForm.controls.recipientEmail.invalid && emailForm.controls.recipientEmail.dirty) {
+        @if (emailForm.controls.recipientEmail.errors?.invalidEmails) {
+        <div class="text-danger mt-1">One or more email addresses are invalid.</div>
+        }
+        @if (emailForm.controls.recipientEmail.errors?.required) {
+        <div class="text-danger mt-1">Recipient email is required.</div>
+        }
+        }
+      </div>
+      <div class="mb-4">
+        <label class="w-100 fw-bold mb-1" for="attachmentName">Attachment Name</label>
+        <div class="input-group">
+          <input id="attachmentName" class="form-control" type="text" formControlName="attachmentName"
+            onfocus="this.select();" maxlength="100">
+          <span class="input-group-text">.json</span>
+        </div>
+        @if (emailForm.controls.attachmentName.invalid && emailForm.controls.attachmentName.dirty) {
+        @if (emailForm.controls.attachmentName.errors?.required) {
+        <div class="text-danger mt-1">Attachment name is required</div>
+        }
+        @if (emailForm.controls.attachmentName.invalid) {
+        <div class="text-danger mt-1">Only letters, numbers, spaces, dots, underscores, and hyphens are allowed.</div>
+        }
+        }
+      </div>
+    </form>
+    }
+    <div class="popup-footer text-end mt-4">
+      <button class="btn btn-secondary" (click)="closeEmailModal()">Cancel</button>
+      <button class="btn btn-success" [disabled]="emailForm?.invalid">Send</button>
     </div>
   </div>
 </div>
