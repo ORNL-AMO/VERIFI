@@ -26,6 +26,7 @@ export interface BillInspectionChargeValue {
 }
 
 export interface BillInspectionCorrelationPoint {
+  readonly readingGuid: string;
   readonly dateLabel: string;
   readonly x: number;
   readonly y: number;
@@ -137,6 +138,9 @@ export function tooltipParamValue(param: unknown): [number, number] | undefined 
   }
   const x = Number(value[0]);
   const y = Number(value[1]);
+  if (value[0] === null || value[0] === undefined || value[1] === null || value[1] === undefined) {
+    return undefined;
+  }
   return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : undefined;
 }
 
@@ -261,8 +265,9 @@ function buildCorrelationPlots(
   rows: readonly BillInspectionReadingRow[],
   valuesByReading: Readonly<Record<string, BillInspectionChargeValue>>
 ): readonly BillInspectionCorrelationPlot[] {
+  const energyUnit = meter.energyUnit || 'kWh';
   return [
-    correlationPlot('consumption', 'Charge vs Consumption', `Total Consumption (${meter.startingUnit || 'kWh'})`, meter.startingUnit, false, rows, valuesByReading),
+    correlationPlot('consumption', 'Charge vs Consumption', `Total Consumption (${energyUnit})`, energyUnit, false, rows, valuesByReading),
     correlationPlot('totalCost', 'Charge vs Total Cost', 'Total Cost ($)', undefined, true, rows, valuesByReading),
     correlationPlot('demand', 'Charge vs Demand', `Demand (${meter.demandUnit || 'kW'})`, meter.demandUnit || 'kW', false, rows, valuesByReading)
   ].filter((plot): plot is BillInspectionCorrelationPlot => plot.points.length > 0);
@@ -286,6 +291,7 @@ function correlationPlot(
         return undefined;
       }
       return {
+        readingGuid: row.reading.guid,
         dateLabel: row.dateLabel,
         x,
         y,

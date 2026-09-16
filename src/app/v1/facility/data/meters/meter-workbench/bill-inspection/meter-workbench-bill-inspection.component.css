@@ -8,6 +8,7 @@
   background: var(--v1-surface, #ffffff);
   border: 1px solid var(--v1-border, #d7dfda);
   border-radius: 0;
+  display: block;
   padding: 1rem;
 }
 
@@ -17,80 +18,8 @@
   border-top: 0;
 }
 
-.v1-meter-bill-inspection__panel-heading {
-  align-items: flex-start;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.v1-meter-bill-inspection__panel-heading p,
-.v1-meter-bill-inspection__correlation-heading p {
-  color: var(--v1-muted, #5f6f68);
-  font-size: 0.82rem;
-  margin: 0;
-}
-
-.v1-meter-bill-inspection__panel-heading h2,
-.v1-meter-bill-inspection__correlation-heading h3 {
-  color: var(--v1-text, #17231f);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.25;
-  margin: 0;
-}
-
-.v1-meter-bill-inspection__overview-chart {
-  block-size: 28rem;
-  inline-size: 100%;
-  min-block-size: 22rem;
-}
-
 .v1-meter-bill-inspection__charge-list {
   display: flex;
   flex-direction: column;
   gap: 0;
-}
-
-.v1-meter-bill-inspection__charge-total {
-  color: var(--v1-text, #17231f);
-  font-size: 1rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.v1-meter-bill-inspection__correlation-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-}
-
-.v1-meter-bill-inspection__correlation {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.v1-meter-bill-inspection__correlation-heading {
-  min-block-size: 5.25rem;
-}
-
-.v1-meter-bill-inspection__correlation-chart {
-  block-size: 19rem;
-  inline-size: 100%;
-  min-block-size: 17rem;
-}
-
-@media (max-width: 640px) {
-  .v1-meter-bill-inspection__panel-heading {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .v1-meter-bill-inspection__correlation-grid {
-    grid-template-columns: 1fr;
-  }
 }

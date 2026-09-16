@@ -4,7 +4,7 @@ import { BillInspectionChargeView } from '../meter-workbench-bill-inspection.mod
 @Component({
   selector: 'app-bill-inspection-charge-section',
   templateUrl: './bill-inspection-charge-section.component.html',
-  styleUrls: ['../meter-workbench-bill-inspection.component.css'],
+  styleUrls: ['./bill-inspection-charge-section.component.css'],
   host: { role: 'region' },
   standalone: false
 })

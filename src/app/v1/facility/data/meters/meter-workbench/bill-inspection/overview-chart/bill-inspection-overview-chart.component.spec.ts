@@ -98,6 +98,39 @@ describe('BillInspectionOverviewChartComponent options', () => {
       }
     ])).toContain('Total Cost: $120');
   });
+
+  it('omits missing charge values from overview tooltips instead of showing zero dollars', () => {
+    const demandCharge = charge('charge-demand', 'Demand Charge', 'demand');
+    const report = buildBillInspectionReport(
+      meter({ guid: 'meter-a', charges: [demandCharge] }),
+      [
+        reading({
+          guid: 'reading-a',
+          totalCost: 120,
+          charges: []
+        })
+      ]
+    );
+
+    const option = billInspectionTimeSeriesOption(report) as Record<string, any>;
+    const tooltip = option.tooltip as Record<string, any>;
+    const tooltipHtml = tooltip.formatter([
+      {
+        value: [report.rows[0].sortValue, 120],
+        seriesName: 'Total Cost',
+        marker: ''
+      },
+      {
+        value: [report.rows[0].sortValue, null],
+        seriesName: 'Demand Charge',
+        marker: ''
+      }
+    ]);
+
+    expect(tooltipHtml).toContain('Total Cost: $120');
+    expect(tooltipHtml).not.toContain('Demand Charge');
+    expect(tooltipHtml).not.toContain('$0');
+  });
 });
 
 function charge(guid: string, name: string, chargeType: 'demand' | 'other') {

@@ -26,7 +26,7 @@ const TIME_SERIES_COLORS = [
 @Component({
   selector: 'app-bill-inspection-overview-chart',
   templateUrl: './bill-inspection-overview-chart.component.html',
-  styleUrls: ['../meter-workbench-bill-inspection.component.css'],
+  styleUrls: ['./bill-inspection-overview-chart.component.css'],
   host: { role: 'region' },
   standalone: false
 })

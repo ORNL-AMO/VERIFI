@@ -27,7 +27,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (point of plot.points; track point.dateLabel) {
+      @for (point of plot.points; track point.readingGuid) {
         <tr>
           <th scope="row">{{ point.dateLabel }}</th>
           <td>{{ point.xLabel }}</td>

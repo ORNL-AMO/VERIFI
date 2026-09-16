@@ -5,7 +5,7 @@ describe('Bill Inspection report model', () => {
   it('builds raw-reading correlations against consumption, total cost, billed demand, and real demand', () => {
     const demandCharge = charge('charge-demand', 'Demand Charge', 'demand');
     const report = buildBillInspectionReport(
-      meter({ guid: 'meter-a', startingUnit: 'kWh', demandUnit: 'kW', charges: [demandCharge] }),
+      meter({ guid: 'meter-a', startingUnit: 'CCF', energyUnit: 'MMBtu', demandUnit: 'kW', charges: [demandCharge] }),
       [
         reading({
           guid: 'reading-a',
@@ -46,6 +46,9 @@ describe('Bill Inspection report model', () => {
       [110, 25, 35],
       [120, 30, 45]
     ]);
+    expect(consumptionPlot?.xLabel).toBe('Total Consumption (MMBtu)');
+    expect(consumptionPlot?.xUnit).toBe('MMBtu');
+    expect(consumptionPlot?.points.map(point => point.readingGuid)).toEqual(['reading-a', 'reading-b', 'reading-c']);
     expect(totalCostPlot?.points.map(point => [point.x, point.y, point.xLabel, point.yLabel])).toEqual([
       [120, 20, '$120', '$20'],
       [130, 25, '$130', '$25'],

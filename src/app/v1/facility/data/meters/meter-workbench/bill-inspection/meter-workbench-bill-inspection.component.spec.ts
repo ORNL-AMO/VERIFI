@@ -11,6 +11,10 @@ import { MeterWorkbenchBillInspectionComponent } from './meter-workbench-bill-in
 import { BillInspectionChargeView, BillInspectionReport } from './meter-workbench-bill-inspection.models';
 
 describe('MeterWorkbenchBillInspectionComponent', () => {
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   it('renders empty states for missing readings and missing charge amounts', () => {
     const noReadingsFixture = setup({ meterData: [] });
     noReadingsFixture.detectChanges();
@@ -27,6 +31,66 @@ describe('MeterWorkbenchBillInspectionComponent', () => {
     noChargeAmountsFixture.detectChanges();
 
     expect((noChargeAmountsFixture.nativeElement as HTMLElement).textContent).toContain('No charge amounts found');
+  });
+
+  it('renders the eligible report path with overview and charge section children', () => {
+    const fixture = setup();
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const overview = element.querySelector('app-bill-inspection-overview-chart') as HTMLElement;
+    const chargeSections = element.querySelectorAll('app-bill-inspection-charge-section');
+
+    expect(overview).not.toBeNull();
+    expect(overview.getAttribute('aria-labelledby')).toBe('bill-inspection-overview-heading');
+    expect(chargeSections).toHaveLength(1);
+    expect(chargeSections[0].getAttribute('aria-labelledby')).toBe('bill-inspection-charge-charge-demand');
+  });
+
+  it('routes empty-state actions to readings and charge settings', () => {
+    const noReadingsFixture = setup({ meterData: [] });
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    noReadingsFixture.detectChanges();
+
+    (noReadingsFixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.v1-btn')?.click();
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-a',
+      'readings'
+    ]);
+
+    TestBed.resetTestingModule();
+
+    const ineligibleFixture = setup({
+      selectedMeter: meter({
+        guid: 'meter-b',
+        source: 'Electricity',
+        charges: []
+      }),
+      meterData: []
+    });
+    const ineligibleRouter = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    ineligibleFixture.detectChanges();
+
+    (ineligibleFixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.v1-btn')?.click();
+
+    expect(ineligibleRouter.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'meters',
+      'meter-b',
+      'settings'
+    ], { fragment: 'meter-charges' });
   });
 
 });

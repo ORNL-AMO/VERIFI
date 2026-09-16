@@ -4,11 +4,10 @@
 
 .v1-meter-quality {
   display: grid;
-  gap: var(--v1-space-4);
+  gap: 0;
   padding: var(--v1-space-4);
   border: 1px solid var(--v1-border);
-  border-top: 0;
-  border-radius: 0 0 var(--v1-radius) var(--v1-radius);
+  border-radius: 0;
   background: var(--v1-surface);
 }
 

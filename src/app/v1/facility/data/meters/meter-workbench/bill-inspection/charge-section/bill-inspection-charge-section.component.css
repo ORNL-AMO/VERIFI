@@ -1,0 +1,46 @@
+.v1-meter-bill-inspection__panel-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.v1-meter-bill-inspection__panel-heading p {
+  color: var(--v1-muted, #5f6f68);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.v1-meter-bill-inspection__panel-heading h2 {
+  color: var(--v1-text, #17231f);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.v1-meter-bill-inspection__charge-total {
+  color: var(--v1-text, #17231f);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.v1-meter-bill-inspection__correlation-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+@media (max-width: 640px) {
+  .v1-meter-bill-inspection__panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .v1-meter-bill-inspection__correlation-grid {
+    grid-template-columns: 1fr;
+  }
+}

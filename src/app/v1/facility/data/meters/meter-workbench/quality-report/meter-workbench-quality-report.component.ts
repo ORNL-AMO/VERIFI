@@ -7,8 +7,8 @@ import {
   buildMeterDataQualityReport
 } from '@domain/calculations/data-quality/meter-data-quality';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
-import { EChartsChartDirective, V1EChartsOption } from '../../../../../shared/charts/echarts-chart.directive';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
+import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import { meterWorkbenchTab } from '../../facility-meters.models';
 

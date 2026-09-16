@@ -20,7 +20,7 @@ export interface BillInspectionAxisBounds {
 @Component({
   selector: 'app-bill-inspection-correlation-chart',
   templateUrl: './bill-inspection-correlation-chart.component.html',
-  styleUrls: ['../meter-workbench-bill-inspection.component.css'],
+  styleUrls: ['./bill-inspection-correlation-chart.component.css'],
   standalone: false
 })
 export class BillInspectionCorrelationChartComponent implements OnChanges {
