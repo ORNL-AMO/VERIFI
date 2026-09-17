@@ -2,6 +2,28 @@
   display: block;
 }
 
+.v1-meter-workbench-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--v1-bg);
+  box-shadow: 0 .45rem .9rem color-mix(in srgb, var(--v1-shadow-soft) 45%, transparent);
+}
+
+.v1-meter-workbench-header__facts-region {
+  display: grid;
+  gap: var(--v1-space-4);
+}
+
+.v1-meter-workbench-header__facts-region[hidden] {
+  display: none;
+}
+
+.v1-meter-workbench-header__facts-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .v1-meter-workbench-header__issues {
   display: flex;
   flex-wrap: wrap;

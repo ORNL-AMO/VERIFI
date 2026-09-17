@@ -2,6 +2,7 @@ import { Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject,
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import {
@@ -29,8 +30,10 @@ export class MeterWorkbenchComponent {
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly activeTab = this.activeTabState.asReadonly();
   readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
+  readonly factsExpanded = this.workbenchLayout.factsExpanded;
   readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
@@ -80,6 +83,10 @@ export class MeterWorkbenchComponent {
 
   toggleMeterSwitcher(): void {
     this.meterSwitcherOpenState.update(open => !open);
+  }
+
+  toggleFacts(): void {
+    this.workbenchLayout.toggleFacts();
   }
 
   closeMeterSwitcher(): void {

@@ -87,27 +87,29 @@
         role="img"
         [attr.aria-label]="ariaLabel">
       </div>
-      <table class="visually-hidden v1-meter-results-chart__accessible-data">
-        <caption>{{ ariaLabel }} data</caption>
-        <thead>
-          <tr>
-            <th scope="col">{{ accessiblePeriodHeader() }}</th>
-            @for (column of accessibleColumns(); track column.id) {
-              <th scope="col">{{ column.label }}</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of accessibleRows(); track row.periodKey) {
+      <div class="visually-hidden v1-meter-results-chart__accessible-data">
+        <table>
+          <caption>{{ ariaLabel }} data</caption>
+          <thead>
             <tr>
-              <th scope="row">{{ row.periodLabel }}</th>
-              @for (cell of row.cells; track cell.metricId) {
-                <td>{{ cell.valueLabel }}</td>
+              <th scope="col">{{ accessiblePeriodHeader() }}</th>
+              @for (column of accessibleColumns(); track column.id) {
+                <th scope="col">{{ column.label }}</th>
               }
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (row of accessibleRows(); track row.periodKey) {
+              <tr>
+                <th scope="row">{{ row.periodLabel }}</th>
+                @for (cell of row.cells; track cell.metricId) {
+                  <td>{{ cell.valueLabel }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   }
 </section>

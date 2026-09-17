@@ -42,7 +42,7 @@
 
 .v1-meters-browse__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 25rem));
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
   gap: var(--v1-space-4);
   align-items: stretch;
 }

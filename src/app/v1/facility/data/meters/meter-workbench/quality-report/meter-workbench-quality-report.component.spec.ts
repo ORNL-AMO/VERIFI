@@ -141,6 +141,9 @@ describe('MeterWorkbenchQualityReportComponent', () => {
     fixture.detectChanges();
 
     const element = fixture.nativeElement as HTMLElement;
+    const accessibleData = element.querySelector('.v1-meter-quality__accessible-data') as HTMLDivElement;
+    expect(accessibleData.classList).toContain('visually-hidden');
+    expect(accessibleData.querySelector('table')?.classList).not.toContain('visually-hidden');
     expect(element.textContent).toContain('No data');
     expect(element.textContent).not.toContain('undefined');
   });

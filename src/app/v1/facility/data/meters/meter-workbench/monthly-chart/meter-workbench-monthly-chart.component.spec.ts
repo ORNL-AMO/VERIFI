@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { vi } from 'vitest';
@@ -57,6 +58,50 @@ describe('MeterWorkbenchMonthlyChartComponent', () => {
         values: expect.objectContaining({ energyConsumption: 10, energyUse: 20, energyCost: 30 })
       })
     ]);
+
+    const comparison = fixture.debugElement.query(By.directive(MeterFiscalYearComparisonChartStubComponent))
+      .componentInstance as MeterFiscalYearComparisonChartStubComponent;
+    expect(comparison.monthlyRows).toHaveLength(1);
+    expect(comparison.utilityMetric?.id).toBe('energyConsumption');
+    expect(comparison.costMetric?.id).toBe('energyCost');
+  });
+
+  it('keeps the fiscal-year comparison but omits its cost panel when lifetime cost is zero', () => {
+    const fixture = setup({
+      selectedMeter: meter({ guid: 'meter-a', meterReadingDataApplication: 'fullMonth' }),
+      calendarizedMeters: [
+        calendarizedMeter([
+          monthlyData({ energyConsumption: 10, energyUse: 20, energyCost: 0 }),
+          monthlyData({ monthNumValue: 1, energyConsumption: 12, energyUse: 24, energyCost: 0 })
+        ])
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const comparison = fixture.debugElement.query(By.directive(MeterFiscalYearComparisonChartStubComponent))
+      .componentInstance as MeterFiscalYearComparisonChartStubComponent;
+    expect(comparison.utilityMetric?.id).toBe('energyConsumption');
+    expect(comparison.costMetric).toBeUndefined();
+  });
+
+  it('passes the facility fiscal-year month order to the comparison chart', () => {
+    const fixture = setup({
+      selectedFacility: facility({
+        guid: 'facility-a',
+        energyUnit: 'MMBtu',
+        fiscalYear: 'nonCalendarYear',
+        fiscalYearMonth: 6
+      }),
+      calendarizedMeters: [calendarizedMeter([monthlyData()])]
+    });
+
+    fixture.detectChanges();
+
+    const comparison = fixture.debugElement.query(By.directive(MeterFiscalYearComparisonChartStubComponent))
+      .componentInstance as MeterFiscalYearComparisonChartStubComponent;
+    expect(comparison.fiscalYearStartMonth).toBe(6);
+    expect(comparison.usesFiscalYearLabels).toBe(true);
   });
 });
 
@@ -83,8 +128,22 @@ class MeterResultsChartStubComponent {
   @Input() joinsFollowingSection = false;
 }
 
+@Component({
+  selector: 'app-meter-fiscal-year-comparison-chart',
+  template: '',
+  standalone: true
+})
+class MeterFiscalYearComparisonChartStubComponent {
+  @Input() monthlyRows: readonly MonthlyData[] = [];
+  @Input() utilityMetric?: MeterResultsChartMetric;
+  @Input() costMetric?: MeterResultsChartMetric;
+  @Input() fiscalYearStartMonth = 0;
+  @Input() usesFiscalYearLabels = false;
+}
+
 function setup(options: {
   selectedMeter?: ReturnType<typeof meter>;
+  selectedFacility?: ReturnType<typeof facility>;
   calendarizedMeters?: readonly CalanderizedMeter[];
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
 } = {}): ComponentFixture<MeterWorkbenchMonthlyChartComponent> {
@@ -96,13 +155,13 @@ function setup(options: {
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchMonthlyChartComponent],
-    imports: [CommonModule, IconComponent, MeterResultsChartStubComponent],
+    imports: [CommonModule, IconComponent, MeterResultsChartStubComponent, MeterFiscalYearComparisonChartStubComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
           account: signal(account({ displayEmissions: true })),
-          facility: signal(facility({ guid: 'facility-a', energyUnit: 'MMBtu' })),
+          facility: signal(options.selectedFacility ?? facility({ guid: 'facility-a', energyUnit: 'MMBtu' })),
           selectedMeter: signal(selectedMeter),
           calendarizedMeters: signal(options.calendarizedMeters ?? []),
           calendarizationState: signal(options.calendarizationState ?? 'ready')

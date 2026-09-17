@@ -664,6 +664,10 @@ export function meterDataChartMetrics(
     }));
 }
 
+export function meterHasLifetimeCost(rows: readonly { readonly energyCost: number }[]): boolean {
+  return rows.reduce((total, row) => total + row.energyCost, 0) !== 0;
+}
+
 export function meterMonthlyChartRows(monthlyRows: readonly MonthlyData[]): MeterResultsChartRow[] {
   return monthlyRows
     .map(row => ({

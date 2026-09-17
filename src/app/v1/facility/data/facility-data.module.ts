@@ -14,6 +14,7 @@ import { BillInspectionCorrelationChartComponent } from './meters/meter-workbenc
 import { BillInspectionOverviewChartComponent } from './meters/meter-workbench/bill-inspection/overview-chart/bill-inspection-overview-chart.component';
 import { MeterWorkbenchBillInspectionComponent } from './meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
 import { MeterWorkbenchMonthlyChartComponent } from './meters/meter-workbench/monthly-chart/meter-workbench-monthly-chart.component';
+import { MeterFiscalYearComparisonChartComponent } from './meters/meter-workbench/monthly-chart/fiscal-year-comparison-chart/meter-fiscal-year-comparison-chart.component';
 import { MeterWorkbenchMonthlyDataComponent } from './meters/meter-workbench/monthly-data/meter-workbench-monthly-data.component';
 import { MeterWorkbenchQualityReportComponent } from './meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterWorkbenchReadingsComponent } from './meters/meter-workbench/readings/meter-workbench-readings.component';
@@ -78,6 +79,7 @@ import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/
     RouterModule,
     EChartsChartDirective,
     MeterResultsChartComponent,
+    MeterFiscalYearComparisonChartComponent,
     FacilityMetersComponent,
     ConfirmDeleteMeterModalComponent,
     MetersDashboardComponent,

@@ -10,6 +10,7 @@ import {
   formatMeterGroupPeriodLabel,
   meterDataChartMetrics,
   meterMonthlyChartRows,
+  meterHasLifetimeCost,
   MeterGroupResultRow,
   meterCalendarizationMethodLabel,
   meterWorkbenchTabsForMeter,
@@ -23,6 +24,13 @@ import {
 import { account, facility, group, meter, reading } from './facility-meters.testing';
 
 describe('facility meter view models', () => {
+  it('shows cost data only when the meter lifetime total is nonzero', () => {
+    expect(meterHasLifetimeCost([])).toBe(false);
+    expect(meterHasLifetimeCost([{ energyCost: 0 }, { energyCost: 0 }])).toBe(false);
+    expect(meterHasLifetimeCost([{ energyCost: 20 }, { energyCost: -20 }])).toBe(false);
+    expect(meterHasLifetimeCost([{ energyCost: 0 }, { energyCost: 10 }])).toBe(true);
+  });
+
   it('maps meter sources to semantic v1 icons', () => {
     expect([
       meterSourceIcon('Electricity'),

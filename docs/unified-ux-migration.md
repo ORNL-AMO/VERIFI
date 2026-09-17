@@ -134,6 +134,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes should be introduced by the presentational extraction itself.
 - **Tests:** Cover the shared presentational card behavior separately, then cover each resource wrapper in both facility and account portfolio contexts. Avoid account-portfolio shims for facility-only services once the shared card API exists.
 
+### V1 Workbench Header Behavior
+
+- **Workflow:** Production v1 selected-record workbenches, beginning with Facility Data > Meters.
+- **Decision:** Keep the selected record heading and workbench tabs sticky within the workspace scroll area. Make the contextual facts region collapsible so users can reclaim vertical space without losing record identity or task navigation. Store the expanded or collapsed choice as one shared session setting so it follows the user between records and participating workbenches, then reset to expanded when a new application session begins.
+- **Application:** New production v1 workbenches should adopt this header behavior unless the workflow has no contextual facts or a documented interaction need requires a different layout. Keep facts expanded by default, place the disclosure control with the workbench summary controls, and preserve the heading and tabs in both states.
+- **Accessibility and responsive behavior:** Use a labeled button with `aria-expanded` and `aria-controls`; hide the facts region semantically when collapsed. Allow heading controls and tabs to wrap at narrow widths without obscuring the active workbench content.
+- **Shared contracts:** This is presentation-only session state. It does not change IndexedDB, backup, import/export, calculation, Worker, report, or Electron contracts.
+- **Tests:** Cover the disclosure interaction in each adopting workbench and the shared session-setting restore/update behavior once in the reusable layout service.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.
@@ -141,6 +150,7 @@ If the workflow needs current-state detail, add a short current-state note using
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.
 - Put v1 child components in their own folders with their `.ts`, template, styles, and spec files colocated. Keep parent workflow folders for the route/container component and shared workflow models/helpers, not piles of sibling child component files.
 - In v1 workbench tabs, stack primary content sections with connected borders, square outer corners, and no vertical gaps between sections. Avoid floating, rounded card treatment for top-level workbench content; reserve card styling for repeated items inside a section only when it improves scanning.
+- Apply the [v1 workbench header behavior](#v1-workbench-header-behavior) to production selected-record workbenches: sticky heading and tabs, collapsible facts, and one shared session-scoped expanded/collapsed preference.
 - In v1, use the themed content-control color (`--v1-content-control`, orange in the default theme) as the active fill, border, or indicator for tabs, segmented toggles, selectors, nav-panel active indicators, and other content navigation controls. Keep active labels on neutral text unless contrast requires otherwise. Use the themed action color (`--v1-action`, blue in the default theme) for additive page actions such as adding a facility, meter, or group. Prefer the semantic tokens and button classes over hard-coded colors.
 - Keep current public v0 URLs stable while v0 remains the default experience.
 - Keep `/p1` prototype routes and `/v1` production routes out of `develop`; on `unified-ux`, root routing lazy-loads `/p1`, `/v1`, and the default v0 route tree.

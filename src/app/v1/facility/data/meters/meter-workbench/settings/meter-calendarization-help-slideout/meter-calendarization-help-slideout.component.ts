@@ -4,7 +4,9 @@ import { IdbUtilityMeter, MeterReadingDataApplication } from '@data/models/idbMo
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import {
   CalendarizationExample,
+  CalendarizationExampleMonth,
   CalendarizationExampleReadingSummary,
+  CalendarizationExampleSummaryItem,
   buildCalendarizationReferenceExample,
   buildCalendarizationExample
 } from '@domain/calculations/calanderization/calendarizationExample';
@@ -43,10 +45,12 @@ export class MeterCalendarizationHelpSlideoutComponent implements OnChanges {
   readonly referenceExample = buildCalendarizationReferenceExample();
   readonly weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   example?: CalendarizationExample;
+  displayMonths: readonly CalendarizationExampleMonth[] = this.referenceExample.displayMonths;
+  workedAllocationSummaries: readonly CalendarizationExampleSummaryItem[] = [];
 
   ngOnChanges(): void {
     if (this.meter) {
-      this.example = buildCalendarizationExample(this.meter, this.readings);
+      this.setExample(this.meter);
     }
   }
 
@@ -58,10 +62,7 @@ export class MeterCalendarizationHelpSlideoutComponent implements OnChanges {
     if (!this.canChangeMethod || !this.meter || this.example?.method === method) {
       return;
     }
-    this.example = buildCalendarizationExample(
-      { ...this.meter, meterReadingDataApplication: method },
-      this.readings
-    );
+    this.setExample({ ...this.meter, meterReadingDataApplication: method });
     this.methodChange.emit(method);
   }
 
@@ -79,6 +80,34 @@ export class MeterCalendarizationHelpSlideoutComponent implements OnChanges {
   readingTrackBy(index: number, summary: CalendarizationExampleReadingSummary): string {
     return `${index}-${summary.readDate.getTime()}-${summary.daysApplied}`;
   }
+
+  private setExample(meter: IdbUtilityMeter): void {
+    this.example = buildCalendarizationExample(meter, this.readings);
+    this.displayMonths = this.example.displayMonths.length > 0
+      ? this.example.displayMonths
+      : this.referenceExample.displayMonths;
+    this.workedAllocationSummaries = visibleWorkedAllocationSummaries(this.example);
+  }
+}
+
+function visibleWorkedAllocationSummaries(
+  example: CalendarizationExample
+): readonly CalendarizationExampleSummaryItem[] {
+  return example.summaries.flatMap(summary => {
+    const visibleAllocations = summary.monthReadingSummaries
+      .filter(allocation => allocation.readingIndex !== undefined && allocation.readingIndex < 4);
+    if (visibleAllocations.length === 0) {
+      return [];
+    }
+    return [{
+      ...summary,
+      monthReadingSummaries: visibleAllocations,
+      totalEnergyUse: visibleAllocations.reduce(
+        (total, allocation) => total + allocation.totalEnergyFromBill,
+        0
+      )
+    }];
+  });
 }
 
 function calendarizationMethodPresentation(
