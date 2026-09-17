@@ -329,7 +329,9 @@ function formatComparisonTooltip(
   const header = items[0]?.axisValueLabel ? `<div>${escapeHtml(items[0].axisValueLabel)}</div>` : '';
   const rows = items.map(item => {
     const currency = (item.xAxisIndex === 1 || item.axisIndex === 1) && !!costMetric;
-    const value = typeof item.value === 'number' ? item.value : Number(item.value);
+    const value = item.value === null || item.value === undefined
+      ? Number.NaN
+      : typeof item.value === 'number' ? item.value : Number(item.value);
     const valueLabel = Number.isFinite(value)
       ? formatMetricValue(value, currency || !!(!utilityMetric && costMetric?.currency))
       : 'No data';

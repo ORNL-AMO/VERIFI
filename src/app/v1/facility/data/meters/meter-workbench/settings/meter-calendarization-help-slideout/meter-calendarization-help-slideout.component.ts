@@ -95,7 +95,7 @@ function visibleWorkedAllocationSummaries(
 ): readonly CalendarizationExampleSummaryItem[] {
   return example.summaries.flatMap(summary => {
     const visibleAllocations = summary.monthReadingSummaries
-      .filter(allocation => allocation.readingIndex !== undefined);
+      .filter(allocation => allocation.readingIndex !== undefined && allocation.readingIndex < 4);
     if (visibleAllocations.length === 0) {
       return [];
     }
