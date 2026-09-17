@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, ViewChild, computed, signal } from '@angular/core';
 import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { MeterResultsChartMetric, MeterResultsChartRow, MeterResultsPeriod } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterResultsChartMetric, MeterResultsChartRow, MeterResultsPeriod } from '@app/v1/facility/data/meters/models';
 
 type MeterChartState = 'idle' | 'loading' | 'ready' | 'error';
 type MeterChartSeriesDisplay = 'off' | 'bar' | 'line';

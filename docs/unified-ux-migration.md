@@ -143,6 +143,14 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** This is presentation-only session state. It does not change IndexedDB, backup, import/export, calculation, Worker, report, or Electron contracts.
 - **Tests:** Cover the disclosure interaction in each adopting workbench and the shared session-setting restore/update behavior once in the reusable layout service.
 
+### Production v1 Data workbench model organization
+
+- Use a feature-local `models/` folder when presentation state and deterministic builders serve multiple components in a production v1 Data workbench. Split modules by business responsibility and reason to change, not arbitrary line limits or separate type/function buckets.
+- Colocate view contracts with their deterministic builders. Keep Angular state, persistence, and other side effects outside model modules.
+- Expose cross-component contracts through explicit named exports in `models/index.ts`. Model modules must import siblings directly rather than through the barrel so their dependency direction remains visible and cycle-free.
+- Keep meter-, predictor-, and energy-use-specific shaping inside the owning feature. Promote code to `@shared/*`, `@data/*`, or `@domain/*` only when it is version-neutral and another feature needs the same semantics.
+- Reuse this organization for Predictors and Energy Uses without copying meter-specific names, units, statuses, or aggregation rules. Protect each resource's units, date boundaries, missing-data behavior, and calculation contracts with focused tests.
+
 ## Implementation Rules
 
 - Do not add v0/v1 conditionals to legacy components.

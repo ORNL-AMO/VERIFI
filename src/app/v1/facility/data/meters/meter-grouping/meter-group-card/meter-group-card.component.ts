@@ -1,6 +1,6 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterCardView } from '@app/v1/facility/data/meters/models';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({

@@ -7,7 +7,7 @@ import {
   MeterGroupSectionView,
   meterGroupDropListId,
   meterGroupTargetFromSection
-} from '@app/v1/facility/data/meters/facility-meters.models';
+} from '@app/v1/facility/data/meters/models';
 import { MeterGroupCardComponent } from '../meter-group-card/meter-group-card.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 

@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterCardView } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';

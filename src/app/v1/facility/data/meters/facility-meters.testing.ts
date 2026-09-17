@@ -3,6 +3,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 
 export function account(options: Partial<IdbAccount> = {}): IdbAccount {
   return {
@@ -81,4 +82,44 @@ export function group(options: Partial<IdbUtilityMeterGroup>): IdbUtilityMeterGr
     visible: true,
     ...options
   } as IdbUtilityMeterGroup;
+}
+
+export function calendarizedMeter(
+  meterValue: IdbUtilityMeter,
+  monthlyDataValue: MonthlyData[],
+  options: Partial<CalanderizedMeter> = {}
+): CalanderizedMeter {
+  return {
+    meter: meterValue,
+    consumptionUnit: options.consumptionUnit ?? 'kgal',
+    monthlyData: monthlyDataValue,
+    showConsumption: options.showConsumption ?? true,
+    showEnergyUse: options.showEnergyUse ?? true,
+    showElectricalEmissions: false,
+    showOtherScope2Emissions: false,
+    showStationaryEmissions: false,
+    showFugitiveEmissions: false,
+    showProcessEmissions: false,
+    showMobileEmissions: false,
+    energyUnit: options.energyUnit ?? 'MMBtu',
+    energyIsSource: false,
+    ...options
+  };
+}
+
+export function monthlyData(options: Partial<MonthlyData> = {}): MonthlyData {
+  const year = options.year ?? 2026;
+  const monthNumValue = options.monthNumValue ?? 0;
+  return {
+    month: options.month ?? 'January',
+    monthNumValue,
+    year,
+    fiscalYear: options.fiscalYear ?? year,
+    energyConsumption: options.energyConsumption ?? 0,
+    energyUse: options.energyUse ?? 0,
+    energyCost: options.energyCost ?? 0,
+    date: options.date ?? new Date(year, monthNumValue, 1),
+    readingType: options.readingType ?? 'metered',
+    ...options
+  } as MonthlyData;
 }

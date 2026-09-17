@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { buildMeterGroupSections } from '@app/v1/facility/data/meters/facility-meters.models';
+import { buildMeterGroupSections } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';

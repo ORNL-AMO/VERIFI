@@ -8,7 +8,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
-import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';

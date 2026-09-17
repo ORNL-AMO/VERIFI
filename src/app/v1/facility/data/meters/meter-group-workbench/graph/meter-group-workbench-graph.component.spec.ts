@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { MeterGroupResultRow, MeterGroupResultsView, MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterGroupResultRow, MeterGroupResultsView, MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/facility/data/meters/models';
 import { group } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchGraphComponent } from './meter-group-workbench-graph.component';
 

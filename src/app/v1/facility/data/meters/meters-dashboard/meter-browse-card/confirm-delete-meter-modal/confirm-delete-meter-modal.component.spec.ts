@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterCardView } from '@app/v1/facility/data/meters/models';
 import { meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal.component';
 

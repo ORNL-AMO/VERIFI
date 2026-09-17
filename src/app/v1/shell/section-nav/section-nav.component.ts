@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { meterSourceIcon } from '@app/v1/facility/data/meters/facility-meters.models';
+import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 type SettingsNavItem = {

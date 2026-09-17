@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
-import { buildMeterCards, MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { buildMeterCards, MeterCardView } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
 

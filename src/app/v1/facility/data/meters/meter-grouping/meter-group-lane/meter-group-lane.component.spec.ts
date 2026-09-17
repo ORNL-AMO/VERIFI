@@ -1,7 +1,7 @@
 import { CdkDragDrop, CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { buildMeterGroupSections, MeterCardView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { buildMeterGroupSections, MeterCardView } from '@app/v1/facility/data/meters/models';
 import { group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupLaneComponent } from './meter-group-lane.component';
 

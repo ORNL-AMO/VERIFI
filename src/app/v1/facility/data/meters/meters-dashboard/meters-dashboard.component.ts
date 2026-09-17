@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { MeterDraft } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterDraft } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterDraftSlideoutComponent } from './meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
 import { MeterBrowseCardComponent } from './meter-browse-card/meter-browse-card.component';
