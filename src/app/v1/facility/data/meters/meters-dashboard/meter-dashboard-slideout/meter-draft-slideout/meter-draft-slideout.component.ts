@@ -5,8 +5,8 @@ import {
   METER_SOURCES,
   MeterDraft,
   canAssignSourceToGroup
-} from '../../../facility-meters.models';
-import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
+} from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({

@@ -3,7 +3,7 @@ import { Directive, EventEmitter, Input, Output, forwardRef } from '@angular/cor
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { vi } from 'vitest';
-import { meter, reading } from '../../../facility-meters.testing';
+import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import {
   BillInspectionCorrelationChartComponent,
   billInspectionAxisBounds,

@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import {
   MeterGroupResultRow,
   MeterGroupResultsView,
@@ -10,7 +10,7 @@ import {
   formatMeterGroupPeriodLabel,
   meterGroupResultRowsForPeriod,
   meterGroupResultUtilityValue
-} from '../../facility-meters.models';
+} from '@app/v1/facility/data/meters/facility-meters.models';
 
 type MeterGroupResultsSortColumn = 'period' | 'utility' | 'cost';
 type MeterGroupResultsSortDirection = 'asc' | 'desc';

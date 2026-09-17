@@ -10,11 +10,11 @@ import { ToastNotificationsService } from '@shared/notifications/toast-notificat
 import { ElectronService } from '@platform/electron/electron.service';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { IconComponent } from '../../../../../shared/icons/icon.component';
-import { ModalPortalService } from '../../../../../shell/modal-portal.service';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { account, facility, meter, reading } from '../../facility-meters.testing';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterReadingColumnDraft, buildColumnDraft } from './meter-workbench-readings.models';
 import { MeterReadingBillSlideoutComponent } from './meter-reading-bill-slideout/meter-reading-bill-slideout.component';
 import { MeterReadingsColumnsSlideoutComponent } from './meter-readings-columns-slideout/meter-readings-columns-slideout.component';

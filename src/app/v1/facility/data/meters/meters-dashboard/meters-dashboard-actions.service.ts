@@ -17,7 +17,7 @@ import {
   MeterGroupDropTarget,
   canAssignMeterToGroup,
   canAssignSourceToGroup
-} from '../facility-meters.models';
+} from '@app/v1/facility/data/meters/facility-meters.models';
 
 @Injectable()
 export class MetersDashboardActionsService {

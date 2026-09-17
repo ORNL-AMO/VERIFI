@@ -1,12 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import {
   MeterGroupResultsPeriod,
   formatMeterGroupPeriodLabel,
   meterGroupResultRowsForPeriod,
   meterGroupResultUtilityValue
-} from '../../facility-meters.models';
+} from '@app/v1/facility/data/meters/facility-meters.models';
 
 @Component({
   selector: 'app-meter-group-workbench-graph',

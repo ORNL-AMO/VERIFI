@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { MeterSource } from '@data/models/constantsAndTypes';
-import { IconComponent } from '../../shared/icons/icon.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { FacilityPickerComponent } from './facility-picker/facility-picker.component';
 import { SectionNavComponent } from './section-nav.component';

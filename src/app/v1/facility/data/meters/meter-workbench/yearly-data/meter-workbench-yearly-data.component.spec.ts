@@ -6,11 +6,11 @@ import { By } from '@angular/platform-browser';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { IconComponent } from '../../../../../shared/icons/icon.component';
-import { MeterResultsChartMetric, MeterResultsChartRow } from '../../facility-meters.models';
-import { account, facility, meter } from '../../facility-meters.testing';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/facility/data/meters/facility-meters.models';
+import { account, facility, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterWorkbenchYearlyDataComponent } from './meter-workbench-yearly-data.component';
 
 describe('MeterWorkbenchYearlyDataComponent', () => {

@@ -4,9 +4,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MeterGroupResultRow, MeterGroupResultsView, MeterResultsChartMetric, MeterResultsChartRow } from '../../facility-meters.models';
-import { group } from '../../facility-meters.testing';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { MeterGroupResultRow, MeterGroupResultsView, MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/facility/data/meters/facility-meters.models';
+import { group } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchGraphComponent } from './meter-group-workbench-graph.component';
 
 describe('MeterGroupWorkbenchGraphComponent', () => {

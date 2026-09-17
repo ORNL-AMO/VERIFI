@@ -12,8 +12,8 @@ import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { PortfolioFacilityService } from '../portfolio-facility.service';
 
 type FacilityStatusFilter = 'all' | 'attention' | 'noMeters' | 'noReadings' | 'noAnalyses';

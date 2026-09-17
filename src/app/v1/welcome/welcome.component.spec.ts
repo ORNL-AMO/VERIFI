@@ -6,8 +6,8 @@ import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-list-subscribe.service';
 import { BehaviorSubject, of } from 'rxjs';
-import { WorkspaceNavigationService } from '../shell/workspace-navigation.service';
-import { NotificationService } from '../shared/notifications/notification.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { NotificationService } from '@app/v1/shared/notifications/notification.service';
 import { WelcomeComponent } from './welcome.component';
 
 describe('WelcomeComponent', () => {

@@ -1,8 +1,8 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { PortfolioFacilityService } from '../../portfolio/portfolio-facility.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { PortfolioFacilityService } from '@app/v1/account/portfolio/portfolio-facility.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 type PortfolioSettingsAction = 'apply' | 'delete';

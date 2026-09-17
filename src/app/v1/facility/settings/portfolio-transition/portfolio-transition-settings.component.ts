@@ -3,8 +3,8 @@ import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject }
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 interface PortfolioTransitionResult {

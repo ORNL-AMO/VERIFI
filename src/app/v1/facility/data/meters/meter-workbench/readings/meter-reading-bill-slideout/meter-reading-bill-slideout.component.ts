@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, injec
 import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
+import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
 import { MeterReadingFormContext, MeterReadingFormService } from '../meter-reading-form.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 

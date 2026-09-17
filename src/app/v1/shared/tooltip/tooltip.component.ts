@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IconComponent } from '../icons/icon.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 let nextTooltipId = 0;
 

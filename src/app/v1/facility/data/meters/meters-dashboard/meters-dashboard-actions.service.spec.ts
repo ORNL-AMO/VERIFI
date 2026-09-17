@@ -6,7 +6,7 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
-import { account, facility, group, meter, reading } from '../facility-meters.testing';
+import { account, facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 
 describe('MetersDashboardActionsService', () => {

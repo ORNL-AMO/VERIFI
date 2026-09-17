@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommandNotificationBridgeService } from '../../shared/notifications/command-notification-bridge.service';
+import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 @Component({

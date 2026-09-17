@@ -4,7 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { DATA_STALENESS_OPTIONS } from '@domain/calculations/status-check-calculations/statusCheckModels';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 @Component({

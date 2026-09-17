@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { meter, reading } from '../../../facility-meters.testing';
+import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterReadingBillSlideoutComponent } from './meter-reading-bill-slideout.component';
 
 describe('MeterReadingBillSlideoutComponent', () => {

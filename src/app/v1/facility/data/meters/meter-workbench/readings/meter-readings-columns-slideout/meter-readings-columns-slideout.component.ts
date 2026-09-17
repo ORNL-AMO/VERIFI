@@ -4,7 +4,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter, MeterCharge } from '@data/models/idbModels/utilityMeter';
 import { checkShowEmissionsOutputRate, checkShowHeatCapacity, getIsEnergyUnit } from '@shared/sharedHelperFunctions';
-import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
+import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
   MeterReadingColumnDraft,

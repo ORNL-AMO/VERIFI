@@ -12,8 +12,8 @@ import {
 } from '@domain/calculations/calanderization/calendarizationExample';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { MeterSlideoutComponent } from '../../../shared/meter-slideout/meter-slideout.component';
-import { METER_CALENDARIZATION_METHODS, meterCalendarizationMethodLabel } from '../../../facility-meters.models';
+import { MeterSlideoutComponent } from '@app/v1/facility/data/meters/shared/meter-slideout/meter-slideout.component';
+import { METER_CALENDARIZATION_METHODS, meterCalendarizationMethodLabel } from '@app/v1/facility/data/meters/facility-meters.models';
 
 interface CalendarizationMethodCard {
   readonly value: MeterReadingDataApplication;

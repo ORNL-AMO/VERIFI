@@ -6,8 +6,8 @@ import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 @Component({

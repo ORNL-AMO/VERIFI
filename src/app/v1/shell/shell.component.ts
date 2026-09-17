@@ -3,7 +3,7 @@ import { Component, DestroyRef, ViewEncapsulation, inject, signal } from '@angul
 import { NavigationEnd, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
-import { AppearanceService } from '../appearance/appearance.service';
+import { AppearanceService } from '@app/v1/appearance/appearance.service';
 import { ModalPortalService } from './modal-portal.service';
 
 @Component({
