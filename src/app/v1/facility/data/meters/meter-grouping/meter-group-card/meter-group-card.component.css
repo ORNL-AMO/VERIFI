@@ -3,7 +3,6 @@
   gap: var(--v1-space-2);
   align-items: start;
   min-width: 0;
-  max-width: 16rem;
   padding: var(--v1-space-3);
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius);
@@ -121,10 +120,4 @@
 
 .cdk-drag-placeholder {
   opacity: .35;
-}
-
-@media (max-width: 680px) {
-  .v1-meter-group-card {
-    max-width: none;
-  }
 }

@@ -110,7 +110,7 @@
 
 .v1-meter-lane__dropzone {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 16rem));
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
   align-content: start;
   gap: var(--v1-space-2);
   min-height: 5.5rem;
