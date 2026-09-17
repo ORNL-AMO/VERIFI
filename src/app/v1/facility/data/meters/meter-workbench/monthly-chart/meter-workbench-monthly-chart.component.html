@@ -23,10 +23,21 @@
     emptyDescription="Add readings or review the selected calendarization method."
     downloadFileName="meter-monthly-data-chart"
     period="monthly"
+    [joinsFollowingSection]="showFiscalYearComparison()"
     [state]="workspace.calendarizationState()"
     [chartRows]="chartRows()"
     [metrics]="metrics()"
     [defaultLeftMetricId]="defaultLeftMetricId()"
     [defaultRightMetricId]="defaultRightMetricId()">
   </app-meter-results-chart>
+
+  @if (showFiscalYearComparison() && utilityMetric(); as currentUtilityMetric) {
+    <app-meter-fiscal-year-comparison-chart
+      [monthlyRows]="monthlyRows()"
+      [utilityMetric]="currentUtilityMetric"
+      [costMetric]="costMetric()"
+      [fiscalYearStartMonth]="fiscalYearStartMonth()"
+      [usesFiscalYearLabels]="usesFiscalYearLabels()">
+    </app-meter-fiscal-year-comparison-chart>
+  }
 }

@@ -1,0 +1,59 @@
+@let comparisonData = comparison();
+
+<section class="v1-meter-fiscal-comparison" aria-labelledby="meter-fiscal-comparison-heading">
+  <header class="v1-meter-fiscal-comparison__header">
+    <div>
+      <p>Monthly comparison</p>
+      <h2 id="meter-fiscal-comparison-heading">Monthly patterns by fiscal year</h2>
+    </div>
+    <button
+      type="button"
+      class="v1-icon-btn"
+      title="Download fiscal year comparison as PNG"
+      aria-label="Download fiscal year comparison as PNG"
+      [disabled]="comparisonData.series.length === 0"
+      (click)="downloadPng()">
+      <app-ui-icon name="download"></app-ui-icon>
+    </button>
+  </header>
+
+  @if (comparisonData.series.length === 0) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="chartLine"></app-ui-icon>
+      <h3>No fiscal year comparison available</h3>
+      <p>Add monthly meter data to compare recurring patterns across fiscal years.</p>
+    </article>
+  } @else {
+    <div
+      class="v1-meter-fiscal-comparison__chart"
+      [class.v1-meter-fiscal-comparison__chart--stacked]="comparisonData.hasCost"
+      [appV1ECharts]="chartOption()"
+      role="img"
+      [attr.aria-label]="ariaLabel()">
+    </div>
+
+    <div class="visually-hidden v1-meter-fiscal-comparison__accessible-data">
+      <table>
+        <caption>{{ ariaLabel() }} data</caption>
+        <thead>
+          <tr>
+            <th scope="col">Month</th>
+            @for (column of accessibleColumns(); track column.id) {
+              <th scope="col">{{ column.label }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of accessibleRows(); track row.monthIndex) {
+            <tr>
+              <th scope="row">{{ row.monthLabel }}</th>
+              @for (cell of row.cells; track cell.id) {
+                <td>{{ cell.valueLabel }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -68,6 +68,32 @@ describe('MeterResultsChartComponent', () => {
     expect(component.costDisplay()).toBe('line');
   });
 
+  it.each([
+    ['monthly', 'all values are zero', [0, 0, 0]],
+    ['monthly', 'values net to zero', [20, -20, 0]],
+    ['yearly', 'all values are zero', [0, 0, 0]],
+    ['yearly', 'values net to zero', [20, -20, 0]]
+  ] as const)('hides total cost controls and series for %s charts when %s', (period, _scenario, costs) => {
+    const fixture = setup();
+    fixture.componentRef.setInput('period', period);
+    fixture.componentRef.setInput('chartRows', costs.map((cost, index) => ({
+      periodKey: `${index}`,
+      periodLabel: `${index + 1}`,
+      sortValue: index,
+      values: { utility: 10 + index, cost }
+    })));
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const option = component.chartOption() as Record<string, any>;
+    const controls = fixture.nativeElement.querySelector('.v1-meter-results-chart__series-controls') as HTMLElement;
+
+    expect(component.costMetric()).toBeUndefined();
+    expect(controls.textContent).not.toContain('Total Cost');
+    expect(option.series.map((series: { name: string }) => series.name)).toEqual(['Total Energy']);
+    expect(component.accessibleColumns().map(column => column.label)).toEqual(['Total Energy (MMBtu)']);
+  });
+
   it('zooms in, zooms out, and resets the chart window', () => {
     const fixture = setup();
     const component = fixture.componentInstance;
@@ -132,9 +158,11 @@ describe('MeterResultsChartComponent', () => {
   it('provides a screen-reader data table for the rendered chart', () => {
     const fixture = setup();
 
-    const table = fixture.nativeElement.querySelector('.v1-meter-results-chart__accessible-data') as HTMLTableElement;
+    const accessibleData = fixture.nativeElement.querySelector('.v1-meter-results-chart__accessible-data') as HTMLDivElement;
+    const table = accessibleData.querySelector('table') as HTMLTableElement;
+    expect(accessibleData.classList).toContain('visually-hidden');
     expect(table).not.toBeNull();
-    expect(table.classList).toContain('visually-hidden');
+    expect(table.classList).not.toContain('visually-hidden');
     expect(table.textContent).toContain('Meter results chart data');
     expect(table.textContent).toContain('Month');
     expect(table.textContent).toContain('Total Energy (MMBtu)');

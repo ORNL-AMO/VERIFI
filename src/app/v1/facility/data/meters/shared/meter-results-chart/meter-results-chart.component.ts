@@ -63,7 +63,12 @@ export class MeterResultsChartComponent implements OnChanges {
   readonly zoomStart = signal(0);
   readonly zoomEnd = signal(100);
   readonly utilityMetric = computed(() => metricById(this.metricOptions(), this.utilityMetricId()));
-  readonly costMetric = computed(() => metricById(this.metricOptions(), this.costMetricId()));
+  readonly costMetric = computed(() => {
+    const metric = metricById(this.metricOptions(), this.costMetricId());
+    return metric?.currency && metricLifetimeTotal(this.rows(), metric.id) === 0
+      ? undefined
+      : metric;
+  });
   readonly canZoom = computed(() => this.rows().length > 2);
   readonly visibleMetrics = computed<readonly MeterResultsChartMetric[]>(() => {
     const metrics: MeterResultsChartMetric[] = [];
@@ -261,6 +266,10 @@ function accessibleMetricLabel(metric: MeterResultsChartMetric): string {
 
 function chartValue(row: MeterResultsChartRow, metricId: string): number {
   return Number(row.values[metricId]) || 0;
+}
+
+function metricLifetimeTotal(rows: readonly MeterResultsChartRow[], metricId: string): number {
+  return rows.reduce((total, row) => total + chartValue(row, metricId), 0);
 }
 
 function alignDualYAxis(yAxis: Array<Record<string, unknown>>): Array<Record<string, unknown>> {

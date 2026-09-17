@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+.v1-meter-fiscal-comparison {
+  display: grid;
+  gap: var(--v1-space-3);
+  padding: var(--v1-space-4);
+  border: 1px solid var(--v1-border);
+  border-top: 0;
+  border-radius: 0 0 var(--v1-radius) var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-meter-fiscal-comparison__header {
+  display: flex;
+  gap: var(--v1-space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.v1-meter-fiscal-comparison__header p,
+.v1-meter-fiscal-comparison__header h2 {
+  margin: 0;
+}
+
+.v1-meter-fiscal-comparison__header p {
+  color: var(--v1-muted);
+  font-size: .76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.v1-meter-fiscal-comparison__header h2 {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.v1-meter-fiscal-comparison__chart {
+  width: 100%;
+  min-height: 28rem;
+  background: var(--v1-surface);
+}
+
+.v1-meter-fiscal-comparison__chart--stacked {
+  min-height: 46rem;
+}
+
+@media (max-width: 680px) {
+  .v1-meter-fiscal-comparison {
+    padding: var(--v1-space-3);
+  }
+
+  .v1-meter-fiscal-comparison__chart {
+    min-height: 24rem;
+  }
+
+  .v1-meter-fiscal-comparison__chart--stacked {
+    min-height: 40rem;
+  }
+}

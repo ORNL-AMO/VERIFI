@@ -3,9 +3,11 @@ import { Router } from '@angular/router';
 import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
 import {
+  MeterResultsChartMetric,
   buildMeterDataColumns,
   meterCalendarizationMethodLabel,
   meterDataChartMetrics,
+  meterHasLifetimeCost,
   meterMonthlyChartRows,
   preferredMeterCostMetricId,
   preferredMeterUtilityMetricId
@@ -37,6 +39,7 @@ export class MeterWorkbenchMonthlyChartComponent {
   });
   readonly consumptionLabel = computed(() => this.meter()?.scope === 2 ? 'Distance' : 'Consumption');
   readonly calendarizationMethodLabel = computed(() => meterCalendarizationMethodLabel(this.meter()?.meterReadingDataApplication));
+  readonly monthlyRows = computed(() => this.selectedCalendarizedMeter()?.monthlyData ?? []);
   readonly columns = computed(() => buildMeterDataColumns(
     this.selectedCalendarizedMeter(),
     this.account(),
@@ -44,10 +47,28 @@ export class MeterWorkbenchMonthlyChartComponent {
     this.consumptionLabel(),
     'monthly'
   ));
-  readonly chartRows = computed(() => meterMonthlyChartRows(this.selectedCalendarizedMeter()?.monthlyData ?? []));
+  readonly chartRows = computed(() => meterMonthlyChartRows(this.monthlyRows()));
   readonly metrics = computed(() => meterDataChartMetrics(this.columns()));
   readonly defaultLeftMetricId = computed(() => preferredMeterUtilityMetricId(this.columns()));
   readonly defaultRightMetricId = computed(() => preferredMeterCostMetricId(this.columns()));
+  readonly utilityMetric = computed(() => metricById(this.metrics(), this.defaultLeftMetricId()));
+  readonly costMetric = computed(() => meterHasLifetimeCost(this.monthlyRows())
+    ? metricById(this.metrics(), this.defaultRightMetricId())
+    : undefined);
+  readonly fiscalYearStartMonth = computed(() => {
+    const currentFacility = this.facility();
+    return currentFacility?.fiscalYear === 'nonCalendarYear'
+      ? currentFacility.fiscalYearMonth ?? 0
+      : 0;
+  });
+  readonly usesFiscalYearLabels = computed(() => this.facility()?.fiscalYear === 'nonCalendarYear');
+  readonly showFiscalYearComparison = computed(() => {
+    const state = this.workspace.calendarizationState();
+    return state !== 'loading'
+      && state !== 'error'
+      && this.monthlyRows().length > 0
+      && !!this.utilityMetric();
+  });
 
   openSettings(): void {
     const facility = this.facility();
@@ -56,4 +77,11 @@ export class MeterWorkbenchMonthlyChartComponent {
       void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, 'settings'), { fragment: 'meter-reading-settings' });
     }
   }
+}
+
+function metricById(
+  metrics: readonly MeterResultsChartMetric[],
+  metricId: string | undefined
+): MeterResultsChartMetric | undefined {
+  return metricId ? metrics.find(metric => metric.id === metricId) : undefined;
 }

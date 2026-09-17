@@ -98,37 +98,39 @@
           role="img"
           [attr.aria-label]="'Reading quality chart for ' + currentMeter.name">
         </div>
-        <table class="visually-hidden">
-          <caption>Reading quality chart data</caption>
-          <thead>
-            <tr>
-              <th scope="col">Reading date</th>
-              @if (currentReport.showConsumption) {
-                <th scope="col">Total Consumption</th>
-                <th scope="col">Consumption Status</th>
-              }
-              @if (currentReport.includeCosts) {
-                <th scope="col">Total Cost</th>
-                <th scope="col">Cost Status</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of currentReport.chartRows; track row.reading.guid) {
+        <div class="visually-hidden v1-meter-quality__accessible-data">
+          <table>
+            <caption>Reading quality chart data</caption>
+            <thead>
               <tr>
-                <th scope="row">{{ row.dateLabel }}</th>
+                <th scope="col">Reading date</th>
                 @if (currentReport.showConsumption) {
-                  <td>{{ row.consumptionValue ?? 'No data' }}</td>
-                  <td>{{ row.consumptionValue === undefined ? 'No data' : row.consumptionOutlier ? 'Outlier' : 'Expected range' }}</td>
+                  <th scope="col">Total Consumption</th>
+                  <th scope="col">Consumption Status</th>
                 }
                 @if (currentReport.includeCosts) {
-                  <td>{{ row.costValue ?? 'No data' }}</td>
-                  <td>{{ row.costValue === undefined ? 'No data' : row.costOutlier ? 'Outlier' : 'Expected range' }}</td>
+                  <th scope="col">Total Cost</th>
+                  <th scope="col">Cost Status</th>
                 }
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (row of currentReport.chartRows; track row.reading.guid) {
+                <tr>
+                  <th scope="row">{{ row.dateLabel }}</th>
+                  @if (currentReport.showConsumption) {
+                    <td>{{ row.consumptionValue ?? 'No data' }}</td>
+                    <td>{{ row.consumptionValue === undefined ? 'No data' : row.consumptionOutlier ? 'Outlier' : 'Expected range' }}</td>
+                  }
+                  @if (currentReport.includeCosts) {
+                    <td>{{ row.costValue ?? 'No data' }}</td>
+                    <td>{{ row.costValue === undefined ? 'No data' : row.costOutlier ? 'Outlier' : 'Expected range' }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
     }
 

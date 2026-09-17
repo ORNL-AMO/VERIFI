@@ -94,6 +94,30 @@ describe('MeterWorkbenchYearlyDataComponent', () => {
       vi.useRealTimers();
     }
   });
+
+  it.each([
+    ['all cost values are zero', [0, 0]],
+    ['cost values net to zero', [30, -30]]
+  ] as const)('hides the yearly Total Cost column when %s', (_scenario, costs) => {
+    const fixture = setup({
+      calendarizedMeters: [
+        calendarizedMeter(costs.map((energyCost, index) => monthlyData({
+          date: new Date(2026, index, 1),
+          monthNumValue: index,
+          energyCost
+        })))
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const element = fixture.nativeElement as HTMLElement;
+    expect(component.hasLifetimeCost()).toBe(false);
+    expect(component.columns().map(column => column.id)).not.toContain('energyCost');
+    expect(component.defaultRightMetricId()).toBeUndefined();
+    expect(element.textContent).not.toContain('Total Cost');
+  });
 });
 
 @Component({

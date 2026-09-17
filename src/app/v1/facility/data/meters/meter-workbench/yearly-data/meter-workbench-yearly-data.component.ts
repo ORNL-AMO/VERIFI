@@ -12,6 +12,7 @@ import {
   meterCalendarizationMethodLabel,
   meterDataChartMetrics,
   meterDataColumnValue,
+  meterHasLifetimeCost,
   meterWorkbenchTab,
   meterYearlyChartRows,
   preferredMeterCostMetricId,
@@ -51,14 +52,16 @@ export class MeterWorkbenchYearlyDataComponent {
   });
   readonly consumptionLabel = computed(() => this.meter()?.scope === 2 ? 'Distance' : 'Consumption');
   readonly calendarizationMethodLabel = computed(() => meterCalendarizationMethodLabel(this.meter()?.meterReadingDataApplication));
-  readonly columns = computed(() => buildMeterDataColumns(
+  readonly rows = computed(() => buildMeterYearlyDataRows(this.selectedCalendarizedMeter()?.monthlyData ?? []));
+  readonly hasLifetimeCost = computed(() => meterHasLifetimeCost(this.rows()));
+  readonly columns = computed(() => (buildMeterDataColumns(
     this.selectedCalendarizedMeter(),
     this.account(),
     this.isRECs(),
     this.consumptionLabel(),
     'yearly'
-  ) as Array<MeterDataColumn<MeterYearlyDataColumnId>>);
-  readonly rows = computed(() => buildMeterYearlyDataRows(this.selectedCalendarizedMeter()?.monthlyData ?? []));
+  ) as Array<MeterDataColumn<MeterYearlyDataColumnId>>)
+    .filter(column => column.id !== 'energyCost' || this.hasLifetimeCost()));
   readonly sortedRows = computed(() => [...this.rows()].sort((first, second) => {
     const result = compareRows(first, second, this.sortColumn());
     return this.sortDirection() === 'asc' ? result : -result;
