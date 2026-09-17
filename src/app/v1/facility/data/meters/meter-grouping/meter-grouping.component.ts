@@ -11,7 +11,7 @@ import {
   MetersGroupingSlideout,
   meterGroupDropListId,
   meterGroupTargetFromSection
-} from '@app/v1/facility/data/meters/facility-meters.models';
+} from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterGroupDraftSlideoutComponent } from './meter-group-draft-slideout/meter-group-draft-slideout.component';
 import { MeterGroupLaneComponent } from './meter-group-lane/meter-group-lane.component';

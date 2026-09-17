@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { MeterGroupResultsView, MeterUsageFactsView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterGroupResultsView, MeterUsageFactsView } from '@app/v1/facility/data/meters/models';
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchComponent } from './meter-group-workbench.component';
 

@@ -17,7 +17,7 @@ import {
   meterYearlyChartRows,
   preferredMeterCostMetricId,
   preferredMeterUtilityMetricId
-} from '@app/v1/facility/data/meters/facility-meters.models';
+} from '@app/v1/facility/data/meters/models';
 
 type YearlyDataSortDirection = 'asc' | 'desc';
 

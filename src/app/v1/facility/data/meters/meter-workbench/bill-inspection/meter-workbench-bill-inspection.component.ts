@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { meterWorkbenchTab, shouldShowMeterBillInspectionTab } from '@app/v1/facility/data/meters/facility-meters.models';
+import { meterWorkbenchTab, shouldShowMeterBillInspectionTab } from '@app/v1/facility/data/meters/models';
 import { buildBillInspectionReport } from './meter-workbench-bill-inspection.models';
 
 @Component({

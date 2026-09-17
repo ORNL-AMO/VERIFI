@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { METER_WORKBENCH_TABS } from '@app/v1/facility/data/meters/facility-meters.models';
+import { METER_WORKBENCH_TABS } from '@app/v1/facility/data/meters/models';
 import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs.component';
 
 describe('MeterWorkbenchTabsComponent', () => {

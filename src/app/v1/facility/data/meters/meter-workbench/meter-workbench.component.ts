@@ -11,7 +11,7 @@ import {
   meterWorkbenchTabsForMeter,
   shouldShowMeterBillInspectionTab,
   shouldShowMeterMonthlyDataTab
-} from '@app/v1/facility/data/meters/facility-meters.models';
+} from '@app/v1/facility/data/meters/models';
 
 @Component({
   selector: 'app-meter-workbench',

@@ -11,7 +11,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 import { runWorker } from '@platform/web-workers/run-worker';
-import { buildMeterCards, buildMeterGroupResultsView, buildMeterGroupSections, buildMeterUsageFactsFromCalendarizedMeters } from './facility-meters.models';
+import { buildMeterCards, buildMeterGroupResultsView, buildMeterGroupSections, buildMeterUsageFactsFromCalendarizedMeters } from './models';
 
 interface CalendarizationWorkerResponse {
   readonly calanderizedMeters?: CalanderizedMeter[];

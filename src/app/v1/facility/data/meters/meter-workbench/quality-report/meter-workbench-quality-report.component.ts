@@ -10,7 +10,7 @@ import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { meterWorkbenchTab } from '@app/v1/facility/data/meters/facility-meters.models';
+import { meterWorkbenchTab } from '@app/v1/facility/data/meters/models';
 
 type QualityStatisticColumnId = keyof Statistics;
 

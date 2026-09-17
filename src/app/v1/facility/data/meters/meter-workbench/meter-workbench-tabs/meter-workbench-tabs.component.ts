@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MeterWorkbenchTab, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterWorkbenchTab, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/models';
 
 @Component({
   selector: 'app-meter-workbench-tabs',

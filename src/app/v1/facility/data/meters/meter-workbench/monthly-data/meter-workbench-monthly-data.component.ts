@@ -11,7 +11,7 @@ import {
   meterCalendarizationMethodLabel,
   meterDataColumnValue,
   meterWorkbenchTab
-} from '@app/v1/facility/data/meters/facility-meters.models';
+} from '@app/v1/facility/data/meters/models';
 
 type MonthlyDataSortDirection = 'asc' | 'desc';
 

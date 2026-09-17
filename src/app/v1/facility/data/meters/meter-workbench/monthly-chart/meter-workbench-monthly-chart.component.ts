@@ -11,7 +11,7 @@ import {
   meterMonthlyChartRows,
   preferredMeterCostMetricId,
   preferredMeterUtilityMetricId
-} from '@app/v1/facility/data/meters/facility-meters.models';
+} from '@app/v1/facility/data/meters/models';
 
 @Component({
   selector: 'app-meter-workbench-monthly-chart',

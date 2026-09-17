@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { MeterGroupResultRow, MeterGroupResultsView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { MeterGroupResultRow, MeterGroupResultsView } from '@app/v1/facility/data/meters/models';
 import { group } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchTableComponent } from './meter-group-workbench-table.component';
 
