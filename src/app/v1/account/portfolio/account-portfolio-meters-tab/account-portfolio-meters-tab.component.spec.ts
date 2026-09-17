@@ -1,15 +1,16 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
-import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding } from '@app/v1/status/status.models';
 import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { AccountPortfolioModule } from '../account-portfolio.module';
 import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab.component';
@@ -80,13 +81,9 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
     facilityFixture('facility-a', 'Alpha Plant'),
     facilityFixture('facility-b', 'Beta Works')
   ]);
-  const statusCheck = {
-    getFacilityStatusCheckByFacilityId: (facilityGuid: string) => ({
-      metersStatusChecks: facilityGuid === 'facility-a'
-        ? [{ meterId: 'meter-electric', status: 'warning', actions: [] }]
-        : [{ meterId: 'meter-water', status: 'good', actions: [] }]
-    })
-  };
+  const electricFinding = presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', {
+    kind: 'meter', guid: 'meter-electric', name: 'Main Electric', accountGuid: 'account-a', facilityGuid: 'facility-a'
+  }, { latestPeriod: '2026-01', thresholdMonths: 3 }));
 
   TestBed.configureTestingModule({
     imports: [
@@ -113,7 +110,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
           hasPending: signal(false)
         }
       },
-      { provide: AccountStatusCheckService, useValue: { accountStatusCheck: of(statusCheck) } },
+      { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([electricFinding]) } },
       {
         provide: WorkspaceNavigationService,
         useValue: {

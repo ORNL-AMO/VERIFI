@@ -15,6 +15,9 @@ import { SectionNavComponent } from '../section-nav/section-nav.component';
 import { SupportPanelComponent } from '../support-panel/support-panel.component';
 import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } from '../workspace-navigation.service';
 import { WorkspaceShellComponent } from './workspace-shell.component';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding } from '@app/v1/status/status.models';
 
 @NgModule({
   imports: [CommonModule, FormsModule, IconComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
@@ -46,7 +49,9 @@ describe('WorkspaceShellComponent', () => {
       activePanelTab: vi.fn(() => 'help'),
       panelContent: vi.fn(() => ({
         help: ['Help text'],
-        todos: ['Todo item'],
+        todos: [presentFinding(makeFinding('account.facilities.missing', 'error', 'readiness', {
+          kind: 'account', guid: 'account-a', name: 'Account A', accountGuid: 'account-a'
+        }))],
         results: [{ label: 'Facilities', value: '1', tone: 'info' }],
         details: [{ label: 'Context', value: 'Account workspace' }]
       })),
@@ -71,7 +76,8 @@ describe('WorkspaceShellComponent', () => {
       imports: [WorkspaceShellTestModule],
       providers: [
         { provide: CommandNotificationBridgeService, useValue: {} },
-        { provide: WorkspaceNavigationService, useValue: navigation }
+        { provide: WorkspaceNavigationService, useValue: navigation },
+        { provide: WorkspaceStatusService, useValue: { state: vi.fn(() => 'ready'), navigateTo: vi.fn() } }
       ]
     });
     fixture = TestBed.createComponent(WorkspaceShellComponent);

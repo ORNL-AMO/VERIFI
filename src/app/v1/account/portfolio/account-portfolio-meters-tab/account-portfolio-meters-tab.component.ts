@@ -1,9 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildMeterCards, MeterCardView } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
@@ -42,8 +41,7 @@ interface PortfolioMeterCard {
 })
 export class AccountPortfolioMetersTabComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
-  private readonly statusChecks = inject(AccountStatusCheckService);
-  private readonly accountStatusCheck = toSignal(this.statusChecks.accountStatusCheck, { initialValue: undefined });
+  private readonly status = inject(WorkspaceStatusService);
 
   readonly search = signal('');
   readonly statusFilter = signal<PortfolioMeterStatusFilter>('all');
@@ -54,14 +52,13 @@ export class AccountPortfolioMetersTabComponent {
     const meters = this.workspace.meters();
     const meterData = this.workspace.meterData();
     const meterGroups = this.workspace.meterGroups();
-    const statusCheck = this.accountStatusCheck();
 
     return facilities.flatMap(facility => {
       const facilityMeters = meters.filter(meter => meter.facilityId === facility.guid);
       const facilityMeterData = meterData.filter(reading => reading.facilityId === facility.guid);
       const facilityMeterGroups = meterGroups.filter(group => group.facilityId === facility.guid);
-      const meterStatusChecks = statusCheck?.getFacilityStatusCheckByFacilityId(facility.guid)?.metersStatusChecks ?? [];
-      return buildMeterCards(facilityMeters, facilityMeterData, facilityMeterGroups, meterStatusChecks, facility)
+      const findings = this.status.items().filter(item => item.entity.kind === 'meter' && item.entity.facilityGuid === facility.guid);
+      return buildMeterCards(facilityMeters, facilityMeterData, facilityMeterGroups, findings, facility, [], this.status.state() === 'ready')
         .map(card => this.buildPortfolioMeterCard(card, facility, facilityMeterData));
     });
   });

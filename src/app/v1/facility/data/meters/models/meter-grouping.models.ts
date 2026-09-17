@@ -3,7 +3,7 @@ import { EnergySources, MeterSource, WaterSources } from '@data/models/constants
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { StatusItem } from '@app/v1/status/status.models';
 import { buildMeterCards, MeterCardView } from './meter-card.models';
 
 type MeterGroupSectionTone = 'energy' | 'water' | 'other' | 'ungrouped';
@@ -47,9 +47,10 @@ export function buildMeterGroupSections(
   meters: readonly IdbUtilityMeter[],
   meterData: readonly IdbUtilityMeterData[],
   groups: readonly IdbUtilityMeterGroup[],
-  meterStatusChecks: readonly MeterStatusCheck[] = []
+  statusFindings: readonly StatusItem[] = [],
+  statusReady = true
 ): MeterGroupSectionView[] {
-  const cards = buildMeterCards(meters, meterData, groups, meterStatusChecks);
+  const cards = buildMeterCards(meters, meterData, groups, statusFindings, undefined, [], statusReady);
   const groupedSections = [...groups]
     .sort(sortGroupsForDisplay)
     .map(group => ({

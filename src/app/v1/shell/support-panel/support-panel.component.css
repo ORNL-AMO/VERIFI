@@ -88,6 +88,18 @@
   gap: .55rem;
 }
 
+ul.v1-panel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v1-panel__item h3 {
+  margin: .3rem 0 0;
+  color: var(--v1-text);
+  font-size: .9rem;
+}
+
 .v1-panel__item,
 .v1-panel__result {
   padding: .65rem;
@@ -98,6 +110,24 @@
 
 .v1-panel__item p {
   margin: .25rem 0 0;
+}
+
+.v1-panel__item strong,
+.v1-panel__item small {
+  display: block;
+  margin-top: .3rem;
+}
+
+.v1-panel__item--error {
+  border-color: color-mix(in srgb, var(--v1-danger) 42%, var(--v1-border));
+}
+
+.v1-panel__item--warning {
+  border-color: color-mix(in srgb, var(--v1-warning) 42%, var(--v1-border));
+}
+
+.v1-panel__item .v1-btn {
+  margin-top: .55rem;
 }
 
 .v1-panel__result strong {

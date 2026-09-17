@@ -36,12 +36,31 @@
     }
 
     @if (activeTab === 'todos') {
-      <section class="v1-panel__list" aria-label="Todo items">
-        @for (item of content.todos; track item) {
-          <article class="v1-panel__item">
-            <span>Future workflow</span>
-            <p>{{ item }}</p>
-          </article>
+      <section aria-labelledby="v1-todo-heading">
+        <h2 id="v1-todo-heading" class="visually-hidden">Todo items</h2>
+        @if (status.state() === 'evaluating' || status.state() === 'idle') {
+          <div class="v1-alert v1-alert--info" role="status">Checking workspace data...</div>
+        } @else if (status.state() === 'error') {
+          <div class="v1-alert v1-alert--danger" role="alert">Workspace status could not be evaluated. Try again after the workspace finishes loading.</div>
+        } @else if (content.todos.length === 0) {
+          <div class="v1-alert v1-alert--success" role="status">No data issues need attention.</div>
+        } @else {
+          <ul class="v1-panel__list">
+            @for (item of content.todos; track item.id) {
+              <li>
+                <article class="v1-panel__item v1-panel__item--{{ item.severity }}">
+                  <span>{{ item.severity }} · {{ item.category }} · {{ item.entity.name }}</span>
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.description }}</p>
+                  @if (item.destination.kind === 'unavailable') {
+                    <small>Fix workflow not yet available in v1</small>
+                  } @else {
+                    <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="status.navigateTo(item)">Review</button>
+                  }
+                </article>
+              </li>
+            }
+          </ul>
         }
       </section>
     }

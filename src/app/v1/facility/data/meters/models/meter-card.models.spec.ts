@@ -1,4 +1,5 @@
-import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding } from '@app/v1/status/status.models';
 import { calendarizedMeter, facility, meter, monthlyData, reading } from '../facility-meters.testing';
 import { buildMeterCards, meterSourceIcon } from './meter-card.models';
 
@@ -28,13 +29,10 @@ describe('meter card models', () => {
       [meter({ guid: 'meter-electric', name: 'Electric Main' })],
       [reading({ meterId: 'meter-electric', month: 1, year: 2026 })],
       [],
-      [{
-        meterId: 'meter-electric',
-        status: 'good',
-        lastDateEntry: new Date(2026, 0, 1),
-        hasNoData: false,
-        actions: []
-      } as MeterStatusCheck]
+      [],
+      undefined,
+      [],
+      true
     );
 
     expect(cards[0].statusLabel).toBe('Valid');
@@ -42,6 +40,18 @@ describe('meter card models', () => {
     expect(cards[0].sourceIcon).toBe('electricity');
     expect(cards[0].firstReadingLabel).toBe('Jan 2026');
     expect(cards[0].latestReadingLabel).toBe('Jan 2026');
+  });
+
+  it('uses the highest finding severity for browse-card status', () => {
+    const meterValue = meter({ guid: 'meter-electric', name: 'Electric Main' });
+    const entity = { kind: 'meter' as const, guid: meterValue.guid, name: meterValue.name, accountGuid: meterValue.accountId, facilityGuid: meterValue.facilityId };
+    const cards = buildMeterCards([meterValue], [], [], [
+      presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', entity, { latestPeriod: '2026-01', thresholdMonths: 3 })),
+      presentFinding(makeFinding('meter.data.missing', 'error', 'completeness', entity))
+    ]);
+
+    expect(cards[0].statusLabel).toBe('Action needed');
+    expect(cards[0].statusTone).toBe('danger');
   });
 
   it('labels the earliest and latest meter readings for browse cards', () => {

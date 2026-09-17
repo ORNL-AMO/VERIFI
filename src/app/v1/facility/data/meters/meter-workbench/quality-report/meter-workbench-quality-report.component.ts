@@ -11,6 +11,7 @@ import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/ec
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { meterWorkbenchTab } from '@app/v1/facility/data/meters/models';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 type QualityStatisticColumnId = keyof Statistics;
 
@@ -57,6 +58,7 @@ export class MeterWorkbenchQualityReportComponent {
   private readonly copyTableService = inject(CopyTableService);
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
+  private readonly status = inject(WorkspaceStatusService);
 
   readonly tab = meterWorkbenchTab('quality');
   readonly statisticTableColspan = QUALITY_STATISTIC_COLUMNS.length + 1;
@@ -84,11 +86,13 @@ export class MeterWorkbenchQualityReportComponent {
     return buildStatisticRows(report);
   });
   readonly issueSummaries = computed(() => {
-    const report = this.report();
-    if (!report) {
+    const meter = this.meter();
+    if (!meter) {
       return [];
     }
-    return buildIssueSummaries(report);
+    return this.status.meterFindings(meter.guid)
+      .filter(finding => finding.category === 'quality' || finding.code === 'meter.data.duplicate-date')
+      .map(finding => finding.description);
   });
   readonly hasConsumptionChartData = computed(() => {
     const report = this.report();
@@ -186,20 +190,6 @@ function statisticRow(
         : undefined
     }))
   };
-}
-
-function buildIssueSummaries(report: MeterDataQualityReport): string[] {
-  const issues: string[] = [];
-  if (report.showConsumption && report.energyOutlierCount > 0) {
-    issues.push(`${report.energyOutlierCount} consumption reading${report.energyOutlierCount === 1 ? '' : 's'} outside the expected range.`);
-  }
-  if (report.includeCosts && report.costOutlierCount > 0) {
-    issues.push(`${report.costOutlierCount} cost reading${report.costOutlierCount === 1 ? '' : 's'} outside the expected range.`);
-  }
-  if (report.duplicateMonths.length > 0) {
-    issues.push(`${report.duplicateMonths.length} month${report.duplicateMonths.length === 1 ? '' : 's'} with multiple readings.`);
-  }
-  return issues;
 }
 
 function qualityChartOption(rows: readonly MeterDataQualityChartRow[], plots: readonly QualityChartPlot[]): V1EChartsOption {

@@ -21,6 +21,7 @@ import { MeterReadingsColumnsSlideoutComponent } from './meter-readings-columns-
 import { MeterReadingsStatusComponent } from './meter-readings-status/meter-readings-status.component';
 import { MeterReadingsTableComponent } from './meter-readings-table/meter-readings-table.component';
 import { MeterWorkbenchReadingsComponent } from './meter-workbench-readings.component';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 describe('MeterWorkbenchReadingsComponent', () => {
   it('renders readings table actions without legacy navigation buttons', () => {
@@ -214,17 +215,11 @@ describe('MeterWorkbenchReadingsComponent', () => {
 
   it('fills missing months with zero readings through the command boundary', async () => {
     const { fixture, meterHandler } = setupHarness({
-      status: {
-        meterId: 'meter-a',
-        isMeterValid: true,
-        isDataOutdated: false,
-        hasNegativeReadings: false,
-        hasDuplicateEntries: false,
-        duplicateEntryDates: [],
-        missingDataMonths: [{ month: 3, year: 2026 }],
-        missingDataYears: [],
-        isDataCurrent: true
-      }
+      readings: [
+        reading({ guid: 'reading-a', meterId: 'meter-a', month: 2, year: 2026 }),
+        reading({ guid: 'reading-b', meterId: 'meter-a', month: 4, year: 2026 })
+      ],
+      meterValue: meter({ id: 2, guid: 'meter-a', name: 'Electric Main', source: 'Electricity', meterReadingDataApplication: 'fullMonth' })
     });
     const component = fixture.componentInstance;
 
@@ -277,7 +272,6 @@ interface SetupOptions {
   readonly hasPending?: boolean;
   readonly facilityValue?: ReturnType<typeof facility>;
   readonly meterValue?: ReturnType<typeof meter>;
-  readonly status?: ReturnType<typeof defaultStatus>;
 }
 
 function setupHarness(options: SetupOptions = {}) {
@@ -329,7 +323,6 @@ function setupHarness(options: SetupOptions = {}) {
           facility: signal(facilityValue),
           selectedMeter: signal(meterValue),
           selectedMeterData: signal(readings),
-          meterStatusChecks: signal([options.status ?? defaultStatus()]),
           canWrite: signal(options.canWrite ?? true),
           hasPending: signal(options.hasPending ?? false)
         }
@@ -367,6 +360,14 @@ function setupHarness(options: SetupOptions = {}) {
       { provide: ModalPortalService, useValue: modalPortal },
       { provide: Router, useValue: router },
       {
+        provide: WorkspaceStatusService,
+        useValue: {
+          state: signal('ready'),
+          meterFindings: vi.fn(() => []),
+          calendarizedMeters: signal([])
+        }
+      },
+      {
         provide: WorkspaceNavigationService,
         useValue: {
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab: string) => [
@@ -390,19 +391,5 @@ function setupHarness(options: SetupOptions = {}) {
     meterHandler,
     modalPortal,
     router
-  };
-}
-
-function defaultStatus() {
-  return {
-    meterId: 'meter-a',
-    isMeterValid: true,
-    isDataOutdated: false,
-    hasNegativeReadings: false,
-    hasDuplicateEntries: false,
-    duplicateEntryDates: [],
-    missingDataMonths: [],
-    missingDataYears: [],
-    isDataCurrent: true
   };
 }

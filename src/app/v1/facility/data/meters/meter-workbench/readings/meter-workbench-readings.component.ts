@@ -6,7 +6,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbUtilityMeterData, getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { missingMeterMonths } from '@app/v1/status/status.evaluator';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { getDateFromMeterData, setMeterDataDateFromDate } from '@shared/dateHelperFunctions';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ElectronService } from '@platform/electron/electron.service';
@@ -40,6 +41,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  readonly status = inject(WorkspaceStatusService);
   private confirmModalOpen = false;
 
   readonly tab = meterWorkbenchTab('readings');
@@ -62,9 +64,9 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   readonly actionError = signal<string | undefined>(undefined);
   readonly isElectron = this.electronService.isElectron;
   readonly canAct = computed(() => this.canWrite() && !this.hasPending() && !this.saving());
-  readonly selectedMeterStatusCheck = computed<MeterStatusCheck | undefined>(() => {
+  readonly selectedMeterFindings = computed(() => {
     const meter = this.meter();
-    return meter ? this.workspace.meterStatusChecks().find(status => status.meterId === meter.guid) : undefined;
+    return meter ? this.status.meterFindings(meter.guid) : [];
   });
   readonly tableView = computed(() => this.tableService.buildTableView({
     account: this.account(),
@@ -75,7 +77,12 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     customGWPs: this.customGWPs()
   }));
   readonly selectedCount = computed(() => this.bulkDeleteReadings().length);
-  readonly missingDataMonths = computed(() => this.selectedMeterStatusCheck()?.missingDataMonths ?? []);
+  readonly missingDataMonths = computed(() => {
+    const meter = this.meter();
+    return meter ? missingMeterMonths(meter, this.selectedMeterData()) : [];
+  });
+  readonly isDataOutdated = computed(() => this.selectedMeterFindings().some(finding => finding.code === 'meter.currency.stale'));
+  readonly hasBlockingConfiguration = computed(() => this.selectedMeterFindings().some(finding => finding.code === 'meter.configuration.invalid'));
 
   private readonly selectedMeterGuid = computed(() => this.meter()?.guid);
   private readonly resetOnMeterChange = effect(() => {

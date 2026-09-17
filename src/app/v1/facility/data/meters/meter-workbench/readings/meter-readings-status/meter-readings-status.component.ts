@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
+import { StatusItem } from '@app/v1/status/status.models';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
@@ -11,7 +11,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
   imports: [CommonModule, IconComponent]
 })
 export class MeterReadingsStatusComponent {
-  @Input() status?: MeterStatusCheck;
+  @Input() findings: readonly StatusItem[] = [];
+  @Input() state: 'idle' | 'evaluating' | 'ready' | 'error' = 'idle';
   @Input() canAct = true;
   @Output() settingsRequested = new EventEmitter<void>();
   @Output() qualityRequested = new EventEmitter<void>();

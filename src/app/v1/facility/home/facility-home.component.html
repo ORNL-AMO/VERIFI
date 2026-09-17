@@ -11,6 +11,18 @@
       </p>
     </header>
 
+    @let statusState = status.state();
+    @let summary = status.selectedFacilitySummary();
+    <section class="v1-alert" [class.v1-alert--success]="statusState === 'ready' && summary.state === 'valid'" [class.v1-alert--warning]="statusState === 'ready' && summary.state === 'warning'" [class.v1-alert--danger]="statusState === 'error' || (statusState === 'ready' && summary.state === 'error')" [class.v1-alert--info]="statusState === 'idle' || statusState === 'evaluating' || (statusState === 'ready' && summary.state === 'information')" aria-label="Facility data status" aria-live="polite">
+      @if (statusState === 'ready') {
+        <span><strong>{{ summary.state === 'valid' ? 'Facility data is ready' : summary.total + ' issue' + (summary.total === 1 ? '' : 's') + ' need attention' }}</strong> — {{ summary.errorCount }} errors and {{ summary.warningCount }} warnings.</span>
+      } @else if (statusState === 'error') {
+        <span>Facility data status could not be evaluated.</span>
+      } @else {
+        <span>Checking facility data...</span>
+      }
+    </section>
+
     <div class="v1-home__metrics" aria-label="Facility summary">
       <article>
         <span>Meters</span>

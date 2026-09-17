@@ -7,8 +7,7 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { ScopeOptions } from '@data/models/scopeOption';
-import { MeterStatusCheck } from '@domain/calculations/status-check-calculations/meterStatusCheck';
-import { StatusCheckAction } from '@domain/calculations/status-check-calculations/statusCheckModels';
+import { StatusItem } from '@app/v1/status/status.models';
 import { UtilityColors } from '@shared/utilityColors';
 import { buildMeterUsageFactsFromCalendarizedMeters, MeterUsageFactsView } from './meter-usage.models';
 
@@ -18,7 +17,7 @@ export interface MeterCardView {
   readonly meter: IdbUtilityMeter;
   readonly group?: IdbUtilityMeterGroup;
   readonly readingCount: number;
-  readonly meterStatusCheck?: MeterStatusCheck;
+  readonly statusFindings?: readonly StatusItem[];
   readonly sourceColor?: string;
   readonly sourceIcon?: IconName;
   readonly statusLabel?: string;
@@ -37,32 +36,33 @@ export function buildMeterCards(
   meters: readonly IdbUtilityMeter[],
   meterData: readonly IdbUtilityMeterData[],
   groups: readonly IdbUtilityMeterGroup[],
-  meterStatusChecks: readonly MeterStatusCheck[] = [],
+  statusFindings: readonly StatusItem[] = [],
   facility?: IdbFacility,
-  calendarizedMeters: readonly CalanderizedMeter[] = []
+  calendarizedMeters: readonly CalanderizedMeter[] = [],
+  statusReady = true
 ): MeterCardView[] {
   return [...meters]
     .sort(sortMetersByName)
     .map(meter => {
       const readings = meterData.filter(reading => reading.meterId === meter.guid);
-      const meterStatusCheck = meterStatusChecks.find(statusCheck => statusCheck.meterId === meter.guid);
+      const meterFindings = statusFindings.filter(finding => finding.entity.kind === 'meter' && finding.entity.guid === meter.guid);
       const meterCalendarizedMeters = calendarizedMeters.filter(calendarizedMeter => calendarizedMeter.meter.guid === meter.guid);
       return {
         meter,
         group: groups.find(group => group.guid === meter.groupId),
         readingCount: readings.length,
-        meterStatusCheck,
+        statusFindings: meterFindings,
         sourceColor: meterSourceColor(meter.source),
         sourceIcon: meterSourceIcon(meter.source),
-        statusLabel: meterStatusLabel(meterStatusCheck),
-        statusTone: meterStatusTone(meterStatusCheck),
-        statusIcon: meterStatusIcon(meterStatusCheck),
+        statusLabel: meterStatusLabel(meterFindings, statusReady),
+        statusTone: meterStatusTone(meterFindings, statusReady),
+        statusIcon: meterStatusIcon(meterFindings, statusReady),
         firstReadingLabel: firstReadingLabel(readings),
-        latestReadingLabel: latestReadingLabel(meterStatusCheck, readings),
+        latestReadingLabel: latestReadingLabel(readings),
         scopeLabel: scopeLabel(meter.scope),
         fuelLabel: fuelLabel(meter),
-        statusIssueLabels: meterStatusIssueLabels(meterStatusCheck),
-        statusActionSummaries: meterStatusActionSummaries(meterStatusCheck),
+        statusIssueLabels: meterStatusIssueLabels(meterFindings),
+        statusActionSummaries: meterFindings.slice(0, 2).map(finding => finding.description),
         usageFacts: meterCalendarizedMeters.length > 0
           ? buildMeterUsageFactsFromCalendarizedMeters(meterCalendarizedMeters, facility)
           : undefined
@@ -97,54 +97,28 @@ function meterSourceColor(source: MeterSource): string {
   return UtilityColors[source]?.color ?? '';
 }
 
-function meterStatusLabel(statusCheck: MeterStatusCheck | undefined): string {
-  switch (statusCheck?.status) {
-    case 'good':
-      return 'Valid';
-    case 'warning':
-      return 'Needs review';
-    case 'error':
-      return 'Action needed';
-    case 'outdated':
-      return 'Outdated';
-    default:
-      return 'Checking';
-  }
+function meterStatusLabel(findings: readonly StatusItem[], ready: boolean): string {
+  if (!ready) return 'Checking';
+  if (findings.some(finding => finding.severity === 'error')) return 'Action needed';
+  if (findings.some(finding => finding.severity === 'warning')) return 'Needs review';
+  return 'Valid';
 }
 
-function meterStatusTone(statusCheck: MeterStatusCheck | undefined): MeterCardStatusTone {
-  switch (statusCheck?.status) {
-    case 'good':
-      return 'success';
-    case 'warning':
-      return 'warning';
-    case 'error':
-      return 'danger';
-    case 'outdated':
-    default:
-      return statusCheck ? 'warning' : 'info';
-  }
+function meterStatusTone(findings: readonly StatusItem[], ready: boolean): MeterCardStatusTone {
+  if (!ready) return 'info';
+  if (findings.some(finding => finding.severity === 'error')) return 'danger';
+  if (findings.some(finding => finding.severity === 'warning')) return 'warning';
+  return 'success';
 }
 
-function meterStatusIcon(statusCheck: MeterStatusCheck | undefined): IconName {
-  switch (statusCheck?.status) {
-    case 'good':
-      return 'success';
-    case 'warning':
-      return 'warning';
-    case 'error':
-      return 'danger';
-    case 'outdated':
-      return 'clock';
-    default:
-      return 'loading';
-  }
+function meterStatusIcon(findings: readonly StatusItem[], ready: boolean): IconName {
+  if (!ready) return 'loading';
+  if (findings.some(finding => finding.severity === 'error')) return 'danger';
+  if (findings.some(finding => finding.severity === 'warning')) return findings.every(finding => finding.category === 'currency') ? 'clock' : 'warning';
+  return 'success';
 }
 
-function latestReadingLabel(statusCheck: MeterStatusCheck | undefined, readings: readonly IdbUtilityMeterData[]): string {
-  if (statusCheck?.lastDateEntry && !statusCheck.hasNoData) {
-    return formatMonthYear(statusCheck.lastDateEntry);
-  }
+function latestReadingLabel(readings: readonly IdbUtilityMeterData[]): string {
   const latestReading = readings.reduce<IdbUtilityMeterData | undefined>((latest, reading) => {
     if (!latest) {
       return reading;
@@ -183,40 +157,12 @@ function fuelLabel(meter: IdbUtilityMeter): string | undefined {
   return meter.scope === 2 ? meter.vehicleFuel : meter.fuel;
 }
 
-function meterStatusIssueLabels(statusCheck: MeterStatusCheck | undefined): string[] {
-  if (!statusCheck || statusCheck.status === 'good') {
-    return [];
-  }
-  const labels: string[] = [];
-  if (statusCheck.hasNoData) {
-    labels.push('No data');
-  }
-  if (!statusCheck.isMeterValid) {
-    labels.push('Invalid setup');
-  }
-  if (statusCheck.hasDuplicateEntries) {
-    labels.push('Duplicates');
-  }
-  if (statusCheck.hasNegativeReadings) {
-    labels.push('Negative readings');
-  }
-  if (statusCheck.isMissingData) {
-    labels.push('Missing data');
-  }
-  if (statusCheck.hasNoCalendarizationMethod) {
-    labels.push('No calendarization');
-  }
-  if (statusCheck.status === 'outdated') {
-    labels.push('Outdated');
-  } else if (!statusCheck.isDataCurrent && !statusCheck.hasNoData) {
-    labels.push('Not current');
-  }
-  return labels;
-}
-
-function meterStatusActionSummaries(statusCheck: MeterStatusCheck | undefined): string[] {
-  return statusCheck?.actions
-    ?.filter((action: StatusCheckAction) => action.status !== 'good')
-    .map(action => action.description)
-    .slice(0, 2) ?? [];
+function meterStatusIssueLabels(findings: readonly StatusItem[]): string[] {
+  const labels: Partial<Record<StatusItem['code'], string>> = {
+    'meter.data.missing': 'No data', 'meter.configuration.invalid': 'Invalid setup', 'meter.data.duplicate-date': 'Duplicates',
+    'meter.data.negative': 'Negative readings', 'meter.data.gap': 'Missing data', 'meter.calendarization.missing': 'No calendarization',
+    'meter.currency.stale': 'Outdated', 'meter.currency.behind-facility': 'Not current',
+    'meter.quality.consumption-outlier': 'Consumption outliers', 'meter.quality.cost-outlier': 'Cost outliers'
+  };
+  return findings.map(finding => labels[finding.code]).filter((label): label is string => !!label);
 }

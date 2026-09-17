@@ -2,6 +2,8 @@
 
 Use this guide with issue #2559 when planning or implementing new UI/UX work. It is intentionally lightweight: do not create an exhaustive feature register before building. Add workflow notes only when a workflow is actively planned, rebuilt, bridged, deferred, combined, or retired. Use the [current-state notes guide](unified-ux-current-state.md) with issue #2558 when a v1 workflow needs existing v0 behavior documented.
 
+The production v1 validation policy is defined in [V1 Data Validation and Status Rules](v1-data-validation-rules.md). Update that document, the rule catalog, presentation copy, and tests together whenever v1 validation behavior changes.
+
 ## Source Layout
 
 - `src/app/v0/` contains the current production UI. Keep legacy routes and v0-only presentation behavior here.
@@ -115,6 +117,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Parity:** Statistics use the existing min, max, average, median, MAD, median +/- 5 MAD, and outlier rules. Time-series charts use one shared-x-axis figure with stacked consumption and cost plots, marker-bearing line series, outlier overlays, and the expected MAD range as a shaded band. Cost sections render only when finite non-zero cost data exists.
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 quality helper and component specs, plus ECharts scatter browser coverage when the directive registration changes. Skip `build-prod` in the Codex sandbox because it does not work reliably there; leave production build validation to CI or a non-sandbox environment.
+
+### V1 Data Validation, Status, and Todo Workflow
+
+- **Workflow:** Account-wide v1 data validation, Home status summaries, support-panel Todos, meter cards, Readings alerts, and the selected-meter Quality Report.
+- **Existing v0 entry point:** Legacy mutable status-check classes and `AccountStatusCheckService`, with URLs and user copy assembled inside status objects.
+- **Decision:** Rebuild as a v1-owned deterministic evaluator under `src/app/v1/status/`. Rules emit stable codes and structured evidence; a separate catalog owns copy, Todo inclusion, and v1 remediation destinations. v0 remains unchanged.
+- **Parity:** Preserve sound account, facility, meter, predictor, analysis, and report checks while intentionally reporting independent simultaneous problems, using an explicit evaluation date, excluding statistical outliers from global Todos, and never linking unavailable v1 fixes back to v0. The acceptance baseline is [V1 Data Validation and Status Rules](v1-data-validation-rules.md).
+- **Shared contracts:** Reuse the existing calendarization Worker payload/result contract and pure analysis/report validators. One revision-bound, account-wide calendarization result now serves both v1 status and meter workbenches. No IndexedDB, backup, import/export, persisted-model, report-export, or Electron contract changes.
+- **Tests:** Table-driven rule/catalog tests, v1 consumer specs, and a browser Worker test that rejects superseded account revisions. Run the validation planner, fast and browser suites, app type-check, and production web build.
 
 ### Facility Meter Bill Inspection Workflow
 
