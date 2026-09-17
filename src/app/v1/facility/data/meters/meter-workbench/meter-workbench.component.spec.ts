@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
 import { IconComponent } from '../../../../shared/icons/icon.component';
+import { WorkbenchLayoutService } from '../../../../shared/workbench/workbench-layout.service';
 import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '../facility-meters.models';
 import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { account, facility, group, meter } from '../facility-meters.testing';
@@ -121,6 +122,47 @@ describe('MeterWorkbenchComponent', () => {
     expect(text).toContain('+10% vs previous 12 mo');
     expect(text).toContain('AVG. Jan 2025 - Dec 2025');
     expect(text).not.toContain('110 MMBtu');
+  });
+
+  it('collapses and restores meter facts while keeping the heading and tabs available', () => {
+    const fixture = setup();
+
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const toggle = element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__facts-toggle');
+    const factsRegion = element.querySelector<HTMLElement>('#v1-meter-workbench-facts');
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle?.getAttribute('aria-controls')).toBe('v1-meter-workbench-facts');
+    expect(factsRegion?.hidden).toBe(false);
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle?.textContent).toContain('Show facts');
+    expect(factsRegion?.hidden).toBe(true);
+    expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
+    expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
+    expect(element.querySelector('app-meter-workbench-tabs')).not.toBeNull();
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(factsRegion?.hidden).toBe(false);
+  });
+
+  it('uses the session workbench preference when the meter workbench is recreated', () => {
+    const fixture = setup({ factsExpanded: false });
+
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('.v1-meter-workbench-header__facts-toggle')?.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector<HTMLElement>('#v1-meter-workbench-facts')?.hidden).toBe(true);
+    expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
+    expect(element.querySelector('app-meter-workbench-tabs')).not.toBeNull();
   });
 
   it('renders usage fact placeholders while calendarized meter values are loading', () => {
@@ -444,6 +486,7 @@ function setup(options: {
   hasPending?: boolean;
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
   selectedMeterUsageFacts?: MeterUsageFactsView;
+  factsExpanded?: boolean;
 } = {}): ComponentFixture<MeterWorkbenchComponent> {
   const selectedMeter = signal(options.selectedMeter === undefined && options.hasMeterRoute
     ? undefined
@@ -460,6 +503,7 @@ function setup(options: {
   const hasMeterRoute = signal(options.hasMeterRoute ?? true);
   const calendarizationState = signal(options.calendarizationState ?? 'ready');
   const selectedMeterUsageFacts = signal(options.selectedMeterUsageFacts ?? usageFactsView());
+  const factsExpanded = signal(options.factsExpanded ?? true);
   const routerEvents = new Subject<NavigationEnd>();
 
   TestBed.configureTestingModule({
@@ -487,6 +531,13 @@ function setup(options: {
           canWrite,
           hasPending,
           hasMeterRoute
+        }
+      },
+      {
+        provide: WorkbenchLayoutService,
+        useValue: {
+          factsExpanded: factsExpanded.asReadonly(),
+          toggleFacts: () => factsExpanded.update(expanded => !expanded)
         }
       },
       {
