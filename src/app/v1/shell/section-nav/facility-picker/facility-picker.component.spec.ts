@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { IconComponent } from '../../../shared/icons/icon.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityPickerComponent } from './facility-picker.component';
 
 function facility(guid: string, name: string, city = '', state = ''): IdbFacility {

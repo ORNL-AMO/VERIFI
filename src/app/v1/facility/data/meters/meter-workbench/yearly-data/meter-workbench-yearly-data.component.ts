@@ -1,8 +1,8 @@
 import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import {
   MeterDataColumn,
   MeterYearlyDataColumnId,
@@ -17,7 +17,7 @@ import {
   meterYearlyChartRows,
   preferredMeterCostMetricId,
   preferredMeterUtilityMetricId
-} from '../../facility-meters.models';
+} from '@app/v1/facility/data/meters/facility-meters.models';
 
 type YearlyDataSortDirection = 'asc' | 'desc';
 

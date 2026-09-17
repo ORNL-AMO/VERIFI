@@ -12,8 +12,8 @@ import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-t
 import { AccountPortfolioPlaceholderTabComponent } from './account-portfolio-placeholder-tab/account-portfolio-placeholder-tab.component';
 import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
 import { AccountPortfolioReportsTabComponent } from './account-portfolio-reports-tab/account-portfolio-reports-tab.component';
-import { CreateFacilityDrawerComponent } from '../create-facility-drawer/create-facility-drawer.component';
-import { DrawerFocusTrapDirective } from '../../welcome/shared/drawer-focus-trap.directive';
+import { CreateFacilityDrawerComponent } from '@app/v1/account/create-facility-drawer/create-facility-drawer.component';
+import { DrawerFocusTrapDirective } from '@app/v1/welcome/shared/drawer-focus-trap.directive';
 
 @NgModule({
   declarations: [

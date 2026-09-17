@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
-import { reading } from '../../../facility-meters.testing';
+import { reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterReadingColumn, MeterReadingTableRow, MeterReadingTableView } from '../meter-workbench-readings.models';
 import { MeterReadingsTableComponent } from './meter-readings-table.component';
 

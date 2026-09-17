@@ -4,7 +4,7 @@ import {
   BackgroundPattern,
   CornerStyle,
   Palette
-} from '../../appearance/appearance.service';
+} from '@app/v1/appearance/appearance.service';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 

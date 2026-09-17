@@ -5,7 +5,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { EnergyUnitOptions, MassUnitOptions, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 @Component({

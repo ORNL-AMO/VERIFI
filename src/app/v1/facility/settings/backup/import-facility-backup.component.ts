@@ -3,7 +3,7 @@ import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.
 import { FutureBackupVersionError, PreparedBackupFile } from '@data/backup/backup-preparation.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { DrawerFocusTrapDirective } from '../../../welcome/shared/drawer-focus-trap.directive';
+import { DrawerFocusTrapDirective } from '@app/v1/welcome/shared/drawer-focus-trap.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({

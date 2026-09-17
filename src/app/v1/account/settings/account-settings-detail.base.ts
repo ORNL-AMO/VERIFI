@@ -4,7 +4,7 @@ import { AccountCommandHandler } from '@data/account-workspace/handlers/account-
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { SettingsDetailBase, SettingsSaveState } from '../../shared/settings/settings-detail.base';
+import { SettingsDetailBase, SettingsSaveState } from '@app/v1/shared/settings/settings-detail.base';
 
 export type AccountSettingsDetail = 'profile' | 'units' | 'goals' | 'financial' | 'staleness' | 'backup' | 'portfolio' | 'delete';
 export type AccountSettingsSaveState = SettingsSaveState;

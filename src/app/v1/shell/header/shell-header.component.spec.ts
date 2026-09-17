@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { AppearanceService } from '../../appearance/appearance.service';
-import { IconComponent } from '../../shared/icons/icon.component';
+import { AppearanceService } from '@app/v1/appearance/appearance.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { ShellHeaderComponent } from './shell-header.component';
 

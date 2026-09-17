@@ -3,15 +3,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
-import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
-import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import {
   MeterWorkbenchTab,
   MeterWorkbenchTabId,
   meterWorkbenchTabsForMeter,
   shouldShowMeterBillInspectionTab,
   shouldShowMeterMonthlyDataTab
-} from '../facility-meters.models';
+} from '@app/v1/facility/data/meters/facility-meters.models';
 
 @Component({
   selector: 'app-meter-workbench',

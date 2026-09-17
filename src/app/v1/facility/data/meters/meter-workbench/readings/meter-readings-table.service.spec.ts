@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { EGridService } from '@shared/helper-services/e-grid.service';
-import { account, facility, meter, reading } from '../../facility-meters.testing';
+import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterReadingsTableService } from './meter-readings-table.service';
 
 describe('MeterReadingsTableService', () => {

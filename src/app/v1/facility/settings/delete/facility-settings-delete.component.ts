@@ -3,9 +3,9 @@ import { Component, TemplateRef, ViewChild, ViewContainerRef, computed, inject }
 import { Router } from '@angular/router';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { FACILITY_DELETION_MESSAGES } from '@data/indexedDB/facility-deletion.config';
-import { NotificationService } from '../../../shared/notifications/notification.service';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { NotificationService } from '@app/v1/shared/notifications/notification.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 @Component({

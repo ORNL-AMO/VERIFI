@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormArray } from '@angular/forms';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
-import { account, facility, meter } from '../../facility-meters.testing';
+import { account, facility, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterSettingsFormService, MeterSettingsRuleContext } from './meter-settings-form.service';
 
 describe('MeterSettingsFormService', () => {

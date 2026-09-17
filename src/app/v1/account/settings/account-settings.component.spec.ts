@@ -26,8 +26,8 @@ import { AccountSettingsGoalsComponent } from './goals/account-settings-goals.co
 import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-portfolio.component';
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
-import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
-import { V1Routes } from '../../v1.routes';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { V1Routes } from '@app/v1/v1.routes';
 
 describe('Account settings routed components', () => {
   let account: ReturnType<typeof signal<IdbAccount | undefined>>;

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { METER_CALENDARIZATION_METHODS } from '../../../facility-meters.models';
+import { METER_CALENDARIZATION_METHODS } from '@app/v1/facility/data/meters/facility-meters.models';
 import { MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
 
 @Component({

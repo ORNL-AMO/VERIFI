@@ -10,10 +10,10 @@ import { MeterStatusCheck } from '@domain/calculations/status-check-calculations
 import { getDateFromMeterData, setMeterDataDateFromDate } from '@shared/dateHelperFunctions';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { ElectronService } from '@platform/electron/electron.service';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { ModalPortalService } from '../../../../../shell/modal-portal.service';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { meterWorkbenchTab } from '../../facility-meters.models';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { meterWorkbenchTab } from '@app/v1/facility/data/meters/facility-meters.models';
 import { MeterReadingBillSave } from './meter-reading-bill-slideout/meter-reading-bill-slideout.component';
 import { MeterReadingsTableService } from './meter-readings-table.service';
 import { MeterReadingColumnDraft } from './meter-workbench-readings.models';

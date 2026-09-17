@@ -2,7 +2,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import { ModalPortalService } from '../../shell/modal-portal.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 
 export type PortfolioTabPath = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
 

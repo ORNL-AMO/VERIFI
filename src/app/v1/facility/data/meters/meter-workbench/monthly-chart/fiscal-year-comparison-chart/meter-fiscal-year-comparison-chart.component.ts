@@ -3,7 +3,7 @@ import { Component, Input, OnChanges, SimpleChanges, ViewChild, computed, signal
 import { MonthlyData } from '@data/models/calanderization';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { MeterResultsChartMetric, meterHasLifetimeCost } from '../../../facility-meters.models';
+import { MeterResultsChartMetric, meterHasLifetimeCost } from '@app/v1/facility/data/meters/facility-meters.models';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 const FISCAL_YEAR_COLORS = [

@@ -1,8 +1,8 @@
 import { Component, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { NotificationService } from '../../../shared/notifications/notification.service';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { NotificationService } from '@app/v1/shared/notifications/notification.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 
 @Component({

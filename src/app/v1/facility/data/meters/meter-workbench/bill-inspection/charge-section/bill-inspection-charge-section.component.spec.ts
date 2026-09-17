@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { meter, reading } from '../../../facility-meters.testing';
+import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { BillInspectionChargeView, BillInspectionCorrelationPlot, buildBillInspectionReport } from '../meter-workbench-bill-inspection.models';
 import { BillInspectionChargeSectionComponent } from './bill-inspection-charge-section.component';
 

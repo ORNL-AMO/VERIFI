@@ -5,9 +5,9 @@ import { vi } from 'vitest';
 import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
-import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
-import { AccountPortfolioModule } from '../portfolio/account-portfolio.module';
-import { PortfolioFacilityService } from '../portfolio/portfolio-facility.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { AccountPortfolioModule } from '@app/v1/account/portfolio/account-portfolio.module';
+import { PortfolioFacilityService } from '@app/v1/account/portfolio/portfolio-facility.service';
 import { CreateFacilityDrawerComponent } from './create-facility-drawer.component';
 
 describe('CreateFacilityDrawerComponent', () => {

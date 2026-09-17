@@ -5,12 +5,12 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
-import { WorkspaceNavigationService } from '../../../../shell/workspace-navigation.service';
-import { IconComponent } from '../../../../shared/icons/icon.component';
-import { WorkbenchLayoutService } from '../../../../shared/workbench/workbench-layout.service';
-import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '../facility-meters.models';
-import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
-import { account, facility, group, meter } from '../facility-meters.testing';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
+import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/facility-meters.models';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meter-workbench.component';
 

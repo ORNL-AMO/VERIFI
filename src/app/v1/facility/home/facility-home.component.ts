@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 
 @Component({
   selector: 'app-workspace-facility-home',

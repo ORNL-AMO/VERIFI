@@ -5,24 +5,24 @@ import { RouterModule } from '@angular/router';
 import { PortalModule } from '@angular/cdk/portal';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 
-import { AccountDataModule } from './account/data/account-data.module';
-import { AccountHomeComponent } from './account/home/account-home.component';
-import { AccountPortfolioModule } from './account/portfolio/account-portfolio.module';
-import { AccountSettingsModule } from './account/settings/account-settings.module';
-import { FacilityDataModule } from './facility/data/facility-data.module';
-import { FacilityHomeComponent } from './facility/home/facility-home.component';
-import { FacilitySettingsModule } from './facility/settings/facility-settings.module';
-import { ShellHeaderComponent } from './shell/header/shell-header.component';
-import { PrimaryRailComponent } from './shell/primary-rail/primary-rail.component';
-import { FacilityPickerComponent } from './shell/section-nav/facility-picker/facility-picker.component';
-import { SectionNavComponent } from './shell/section-nav/section-nav.component';
-import { NotificationsModule } from './shared/notifications/notifications.module';
-import { IconsModule } from './shared/icons/icons.module';
-import { ShellComponent } from './shell/shell.component';
-import { SupportPanelComponent } from './shell/support-panel/support-panel.component';
-import { WorkspaceShellComponent } from './shell/workspace-shell/workspace-shell.component';
+import { AccountDataModule } from '@app/v1/account/data/account-data.module';
+import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
+import { AccountPortfolioModule } from '@app/v1/account/portfolio/account-portfolio.module';
+import { AccountSettingsModule } from '@app/v1/account/settings/account-settings.module';
+import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
+import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
+import { FacilitySettingsModule } from '@app/v1/facility/settings/facility-settings.module';
+import { ShellHeaderComponent } from '@app/v1/shell/header/shell-header.component';
+import { PrimaryRailComponent } from '@app/v1/shell/primary-rail/primary-rail.component';
+import { FacilityPickerComponent } from '@app/v1/shell/section-nav/facility-picker/facility-picker.component';
+import { SectionNavComponent } from '@app/v1/shell/section-nav/section-nav.component';
+import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
+import { IconsModule } from '@app/v1/shared/icons/icons.module';
+import { ShellComponent } from '@app/v1/shell/shell.component';
+import { SupportPanelComponent } from '@app/v1/shell/support-panel/support-panel.component';
+import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { V1Routes } from './v1.routes';
-import { WelcomeComponent } from './welcome/welcome.component';
+import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
 
 @NgModule({
   declarations: [

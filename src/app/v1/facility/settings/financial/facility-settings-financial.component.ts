@@ -4,7 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { Months } from '@shared/form-data/months';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 @Component({

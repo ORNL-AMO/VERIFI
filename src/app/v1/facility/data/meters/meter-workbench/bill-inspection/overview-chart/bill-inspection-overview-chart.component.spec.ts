@@ -1,4 +1,4 @@
-import { meter, reading } from '../../../facility-meters.testing';
+import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { billInspectionTimeSeriesOption } from './bill-inspection-overview-chart.component';
 import { buildBillInspectionReport } from '../meter-workbench-bill-inspection.models';
 

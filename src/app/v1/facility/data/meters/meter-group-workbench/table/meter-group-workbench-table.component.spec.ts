@@ -4,11 +4,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { vi } from 'vitest';
-import { IconComponent } from '../../../../../shared/icons/icon.component';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MeterGroupResultRow, MeterGroupResultsView } from '../../facility-meters.models';
-import { group } from '../../facility-meters.testing';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { MeterGroupResultRow, MeterGroupResultsView } from '@app/v1/facility/data/meters/facility-meters.models';
+import { group } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterGroupWorkbenchTableComponent } from './meter-group-workbench-table.component';
 
 describe('MeterGroupWorkbenchTableComponent', () => {

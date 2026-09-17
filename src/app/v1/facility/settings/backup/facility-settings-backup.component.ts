@@ -2,8 +2,8 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { WorkspaceNavigationService } from '../../../shell/workspace-navigation.service';
-import { ModalPortalService } from '../../../shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilitySettingsDetailBase } from '../facility-settings-detail.base';
 
 @Component({

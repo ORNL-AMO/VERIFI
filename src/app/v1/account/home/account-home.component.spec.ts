@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { WorkspaceNavigationService } from '../../shell/workspace-navigation.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountHomeComponent } from './account-home.component';
 
 describe('AccountHomeComponent', () => {

@@ -7,8 +7,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
-import { facility, meter, reading } from '../../facility-meters.testing';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
+import { facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterWorkbenchQualityReportComponent } from './meter-workbench-quality-report.component';
 
 describe('MeterWorkbenchQualityReportComponent', () => {

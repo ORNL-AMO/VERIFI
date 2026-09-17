@@ -7,10 +7,10 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterReadingDataApplication } from '@data/models/idbModels/utilityMeter';
 import { updateMeterDataCharges } from '@data/models/idbModels/utilityMeterData';
-import { ModalPortalService } from '../../../../../shell/modal-portal.service';
-import { WorkspaceNavigationService } from '../../../../../shell/workspace-navigation.service';
-import { FacilityMetersWorkspaceService } from '../../facility-meters-workspace.service';
-import { MetersDashboardActionsService } from '../../meters-dashboard/meters-dashboard-actions.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
 import {
   MeterSettingsFormService,
   MeterSettingsRuleChange,
