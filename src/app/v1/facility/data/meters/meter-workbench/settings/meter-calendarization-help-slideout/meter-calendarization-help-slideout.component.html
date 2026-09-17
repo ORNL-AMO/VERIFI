@@ -65,12 +65,12 @@
     <section class="calendarization-help__calendar-section" aria-label="Four-reading calendar example">
       <div class="calendarization-help__section-heading">
         <h4>Calendar example</h4>
-        <p>A fixed four-reading example showing which bill period supplies usage to each calendar day.</p>
+        <p>A four-reading example showing which bill period supplies usage to each calendar day.</p>
       </div>
 
       <div class="calendarization-help-calendar-strip">
         <div class="calendarization-help-calendar-strip__months">
-          @for (month of referenceExample.displayMonths; track month.monthKey) {
+          @for (month of displayMonths; track month.monthKey) {
           <article class="calendarization-help-month calendarization-help-month--compact">
             <h5>{{ month.label }}</h5>
             <div class="calendarization-help-month__weekdays" aria-hidden="true">
@@ -102,19 +102,19 @@
         </div>
         <p class="calendarization-help-calendar-strip__caption">
           Dark circles are meter reading dates. Matching lighter circles are the days where that bill's per-day
-          average is applied. Four readings are used here so the example matches the Monthly Table calculation gate.
+          average is applied. Meter readings are used when available; otherwise this fixed example explains the method.
         </p>
       </div>
     </section>
 
-    @if (currentExample.summaries.length > 0) {
+    @if (workedAllocationSummaries.length > 0) {
     <section class="calendarization-help__worked-example" aria-label="Worked allocation example">
       <div class="calendarization-help__section-heading">
         <h4>Worked allocation</h4>
         <p>Each row shows how a bill contributes usage to one reporting month.</p>
       </div>
 
-      @for (summary of currentExample.summaries; track summary.calanderizedMonth) {
+      @for (summary of workedAllocationSummaries; track summary.calanderizedMonth) {
       <div class="calendarization-help-summary">
         <h5>{{ summary.calanderizedMonth | date:'MMMM y' }}</h5>
         <div class="calendarization-help-summary__scroller">

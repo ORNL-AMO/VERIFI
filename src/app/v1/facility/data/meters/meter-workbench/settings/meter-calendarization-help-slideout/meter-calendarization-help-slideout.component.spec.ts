@@ -4,7 +4,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { MeterCalendarizationHelpSlideoutComponent } from './meter-calendarization-help-slideout.component';
 
 describe('MeterCalendarizationHelpSlideoutComponent', () => {
-  it('renders a large dense slideout with method option cards and the reference calendar', () => {
+  it('renders a large dense slideout with method option cards and the meter calendar', () => {
     const fixture = setup();
 
     fixture.detectChanges();
@@ -14,13 +14,47 @@ describe('MeterCalendarizationHelpSlideoutComponent', () => {
     expect(element.querySelectorAll('.calendarization-help-choice')).toHaveLength(3);
     expect(element.querySelector('.calendarization-help-choice--selected')?.textContent).toContain('Calendarize Meter Data');
     expect(element.textContent).toContain('Calendar example');
-    expect(element.textContent).toContain('December 2021');
-    expect(element.textContent).toContain('March 2022');
+    expect(element.textContent).toContain('Dec 2021');
+    expect(element.textContent).toContain('Mar 2022');
     expect(element.querySelectorAll('.calendarization-help-month--compact')).toHaveLength(4);
-    expect(element.textContent).toContain('Four readings are used here');
+    expect(element.textContent).toContain('Meter readings are used when available');
   });
 
-  it('leaves days after the final reference reading unallocated', () => {
+  it('uses the same meter dates for the calendar and worked allocation', () => {
+    const fixture = setup({
+      readings: [
+        reading({ guid: 'reading-a', month: 1, day: 1, year: 2017, totalEnergyUse: 100 }),
+        reading({ guid: 'reading-b', month: 2, day: 1, year: 2017, totalEnergyUse: 200 }),
+        reading({ guid: 'reading-c', month: 3, day: 1, year: 2017, totalEnergyUse: 300 }),
+        reading({ guid: 'reading-d', month: 4, day: 1, year: 2017, totalEnergyUse: 400 })
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const calendarText = element.querySelector('.calendarization-help-calendar-strip')?.textContent;
+    const workedAllocationText = element.querySelector('.calendarization-help__worked-example')?.textContent;
+    expect(calendarText).toContain('Jan 2017');
+    expect(calendarText).toContain('Apr 2017');
+    expect(calendarText).not.toContain('December 2021');
+    expect(workedAllocationText).toContain('February 2017');
+    expect(workedAllocationText).toContain('March 2017');
+  });
+
+  it('uses the fixed calendar example when the meter has no readings', () => {
+    const fixture = setup({ readings: [] });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const calendarText = element.querySelector('.calendarization-help-calendar-strip')?.textContent;
+    expect(calendarText).toContain('December 2021');
+    expect(calendarText).toContain('March 2022');
+    expect(element.querySelector('.calendarization-help__worked-example')).toBeNull();
+  });
+
+  it('leaves days after the final displayed reading unallocated', () => {
     const fixture = setup();
 
     fixture.detectChanges();
@@ -56,6 +90,33 @@ describe('MeterCalendarizationHelpSlideoutComponent', () => {
     const februaryReading = readingDateCell(fixture, 'Feb 4, 2022');
     expect(januaryReading.querySelector('.calendarization-help-reading-dot--1')).not.toBeNull();
     expect(februaryReading.querySelector('.calendarization-help-reading-dot--2')).not.toBeNull();
+  });
+
+  it('shows worked allocations only for the four bills represented by the calendar', () => {
+    const fixture = setup({
+      readings: [
+        reading({ guid: 'reading-a', month: 12, day: 3, year: 2021, totalEnergyUse: 100 }),
+        reading({ guid: 'reading-b', month: 1, day: 2, year: 2022, totalEnergyUse: 200 }),
+        reading({ guid: 'reading-c', month: 2, day: 4, year: 2022, totalEnergyUse: 300 }),
+        reading({ guid: 'reading-d', month: 3, day: 4, year: 2022, totalEnergyUse: 400 }),
+        reading({ guid: 'reading-e', month: 4, day: 4, year: 2022, totalEnergyUse: 500 }),
+        reading({ guid: 'reading-f', month: 5, day: 4, year: 2022, totalEnergyUse: 600 })
+      ]
+    });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const workedAllocation = element.querySelector('.calendarization-help__worked-example');
+    const workedAllocationText = workedAllocation?.textContent;
+    const allocationRows = Array.from(workedAllocation?.querySelectorAll('tbody tr') ?? []);
+    expect(allocationRows.length).toBeGreaterThan(0);
+    expect(allocationRows.every(row => row.querySelector('.calendarization-help-reading-dot'))).toBe(true);
+    expect(workedAllocationText).toContain('Jan 2, 2022');
+    expect(workedAllocationText).toContain('Feb 4, 2022');
+    expect(workedAllocationText).toContain('Mar 4, 2022');
+    expect(workedAllocationText).not.toContain('Apr 4, 2022');
+    expect(workedAllocationText).not.toContain('May 4, 2022');
   });
 
   it('explains the four-reading minimum for backward live examples', () => {
