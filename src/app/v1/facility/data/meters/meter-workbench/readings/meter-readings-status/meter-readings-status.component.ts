@@ -14,7 +14,9 @@ export class MeterReadingsStatusComponent {
   @Input() findings: readonly StatusItem[] = [];
   @Input() state: 'idle' | 'evaluating' | 'ready' | 'error' = 'idle';
   @Input() canAct = true;
+  @Input() canManageWarnings = true;
   @Output() settingsRequested = new EventEmitter<void>();
   @Output() qualityRequested = new EventEmitter<void>();
   @Output() fillMissingRequested = new EventEmitter<void>();
+  @Output() discardRequested = new EventEmitter<StatusItem>();
 }

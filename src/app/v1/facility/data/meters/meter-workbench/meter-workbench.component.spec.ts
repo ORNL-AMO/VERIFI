@@ -16,6 +16,8 @@ import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbe
 import { MeterWorkbenchComponent } from './meter-workbench.component';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchComponent', () => {
   it('renders the selected meter header and active workbench tab from the child route', () => {
@@ -128,7 +130,12 @@ describe('MeterWorkbenchComponent', () => {
   });
 
   it('collapses and restores meter facts while keeping the heading and tabs available', () => {
-    const fixture = setup();
+    const fixture = setup({
+      selectedMeterCard: {
+        ...defaultMeterCard(),
+        statusActionSummaries: ['A calendarization method is required.']
+      }
+    });
 
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
@@ -137,6 +144,7 @@ describe('MeterWorkbenchComponent', () => {
 
     expect(toggle?.getAttribute('aria-expanded')).toBe('true');
     expect(toggle?.getAttribute('aria-controls')).toBe('v1-meter-workbench-facts');
+    expect(toggle?.querySelector('.v1-meter-workbench-header__facts-symbol')?.textContent?.trim()).toBe('−');
     expect(factsRegion?.hidden).toBe(false);
 
     toggle?.click();
@@ -144,8 +152,11 @@ describe('MeterWorkbenchComponent', () => {
 
     expect(toggle?.getAttribute('aria-expanded')).toBe('false');
     expect(toggle?.textContent).toContain('Show facts');
+    expect(toggle?.querySelector('.v1-meter-workbench-header__facts-symbol')?.textContent?.trim()).toBe('+');
     expect(factsRegion?.hidden).toBe(true);
     expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
+    expect(element.querySelector('.v1-meter-workbench-header__status-notes')?.textContent)
+      .toContain('A calendarization method is required.');
     expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
     expect(element.querySelector('app-meter-workbench-tabs')).not.toBeNull();
 
@@ -171,6 +182,9 @@ describe('MeterWorkbenchComponent', () => {
       fixture.componentInstance.energyUnitOptions().map(option => option.value)
     );
     expect(unitControl?.textContent).not.toContain('Facility default');
+    expect(unitControl?.querySelector('label')?.textContent).toContain('Displayed energy unit');
+    expect(unitControl?.querySelector('label')?.classList.contains('visually-hidden')).toBe(true);
+    expect(unitControl?.querySelector('label')?.getAttribute('for')).toBe('v1-meter-display-energy-unit');
     expect(actions?.textContent).toContain('Site');
     expect(actions?.textContent).toContain('Source');
     expect(actions?.textContent).not.toContain('Facility default');
@@ -595,6 +609,7 @@ function setup(options: {
   selectedMeterUsageFacts?: MeterUsageFactsView;
   factsExpanded?: boolean;
   facilityValue?: ReturnType<typeof facility>;
+  statusFindings?: StatusItem[];
 } = {}): ComponentFixture<MeterWorkbenchComponent> {
   const selectedMeter = signal(options.selectedMeter === undefined && options.hasMeterRoute
     ? undefined
@@ -683,6 +698,13 @@ function setup(options: {
         }
       },
       { provide: Router, useValue: { navigate: vi.fn(), events: routerEvents } },
+      {
+        provide: WorkspaceStatusService,
+        useValue: {
+          state: signal('ready'),
+          meterFindings: () => options.statusFindings ?? []
+        }
+      },
       {
         provide: WorkspaceCommandBoundary,
         useValue: {

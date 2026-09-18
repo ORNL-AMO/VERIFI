@@ -396,7 +396,10 @@ function setupHarness(options: SetupOptions = {}) {
         useValue: {
           state: signal(options.statusState ?? 'ready'),
           meterFindings: vi.fn(() => options.statusFindings ?? []),
-          calendarizedMeters: signal([])
+          calendarizedMeters: signal([]),
+          warningActionError: signal(undefined),
+          canManageWarnings: signal(true),
+          discardWarning: vi.fn()
         }
       },
       {

@@ -95,7 +95,13 @@
                       [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
                       [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
                       <app-ui-icon [name]="item.icon"></app-ui-icon>
-                      {{ item.label }}
+                      <span class="v1-nav__item-label">{{ item.label }}</span>
+                      @if (facilityMetersAttention(); as attention) {
+                        <span class="v1-nav__attention v1-nav__attention--{{ attention.state }}">
+                          <span aria-hidden="true">{{ attention.total }}</span>
+                          <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                        </span>
+                      }
                     </a>
                     @if (meterItems.length > 0 && isFacilityMetersRoute()) {
                       <button
@@ -122,7 +128,13 @@
                           [routerLink]="navigation.facilityMeterRoute(selectedFacility.guid, meter.guid, 'settings')"
                           [attr.aria-current]="isMeterChildActive(meter.guid) ? 'page' : null">
                           <app-ui-icon [name]="meter.icon"></app-ui-icon>
-                          <span>{{ meter.label }}</span>
+                          <span class="v1-nav__item-label">{{ meter.label }}</span>
+                          @if (meter.attention; as attention) {
+                            <span class="v1-nav__attention v1-nav__attention--{{ attention.state }}">
+                              <span aria-hidden="true">{{ attention.total }}</span>
+                              <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                            </span>
+                          }
                         </a>
                       }
                     </div>
@@ -165,7 +177,7 @@
                           [routerLink]="navigation.facilityMeterGroupRoute(selectedFacility.guid, group.guid, 'monthly-table')"
                           [attr.aria-current]="isGroupChildActive(group.guid) ? 'page' : null">
                           <app-ui-icon [name]="group.icon"></app-ui-icon>
-                          <span>{{ group.label }}</span>
+                          <span class="v1-nav__item-label">{{ group.label }}</span>
                         </a>
                       }
                     </div>

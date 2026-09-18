@@ -53,6 +53,24 @@ describe('MeterReadingsStatusComponent', () => {
       .find(item => item.textContent?.includes('Fill Missing Months with Zeros'));
     expect(button?.disabled).toBe(true);
   });
+
+  it('offers discard only for warnings and emits the selected warning', () => {
+    const warning = finding('meter.currency.stale', 'warning', 'currency', { latestPeriod: '2025-12', thresholdMonths: 3 });
+    const error = finding('meter.data.gap', 'error', 'completeness', { count: 1, periodType: 'month' });
+    const fixture = setup([warning, error]);
+    const discarded: StatusItem[] = [];
+    fixture.componentInstance.discardRequested.subscribe(item => discarded.push(item));
+
+    const discardButtons = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button'))
+      .filter(button => button.textContent?.includes('Discard'));
+    expect(discardButtons).toHaveLength(1);
+    discardButtons[0].click();
+    expect(discarded).toEqual([warning]);
+
+    fixture.componentRef.setInput('canManageWarnings', false);
+    fixture.detectChanges();
+    expect(discardButtons[0].disabled).toBe(true);
+  });
 });
 
 function setup(findings: readonly StatusItem[] = [], state: 'idle' | 'evaluating' | 'ready' | 'error' = 'ready', canAct = true): ComponentFixture<MeterReadingsStatusComponent> {

@@ -22,11 +22,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { PreparedBackupFile } from './backup-preparation.service';
-
-interface GuidPair {
-  oldId: string;
-  newId: string;
-}
+import { GuidPair, remapStatusWarningDismissals } from './status-warning-dismissal-remap';
 
 interface PredictorGuidPair extends GuidPair {
   predictorName: string;
@@ -286,9 +282,12 @@ export class BackupImportCommandService {
       }
 
       this.loadingService.setCurrentLoadingIndex(++currIdx);
+      const accountReportGUIDs: Array<GuidPair> = [];
       for (let i = 0; i < backupFile.accountReports?.length; i++) {
         const accountReport: IdbAccountReport = backupFile.accountReports[i];
+        const oldGuid = accountReport.guid;
         accountReport.guid = this.getGUID();
+        accountReportGUIDs.push({ oldId: oldGuid, newId: accountReport.guid });
         delete accountReport.id;
         accountReport.accountId = accountGUIDs.newId;
         accountReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
@@ -321,9 +320,12 @@ export class BackupImportCommandService {
       }
 
       this.loadingService.setLoadingMessage('Adding Facility Reports...');
+      const facilityReportGUIDs: Array<GuidPair> = [];
       for (let i = 0; i < backupFile.facilityReports?.length; i++) {
         const facilityReport: IdbFacilityReport = backupFile.facilityReports[i];
+        const oldGuid = facilityReport.guid;
         facilityReport.guid = this.getGUID();
+        facilityReportGUIDs.push({ oldId: oldGuid, newId: facilityReport.guid });
         delete facilityReport.id;
         facilityReport.accountId = accountGUIDs.newId;
         facilityReport.facilityId = this.getNewId(facilityReport.facilityId, facilityGUIDs);
@@ -362,6 +364,23 @@ export class BackupImportCommandService {
       }
 
       let needsAccountUpdate: boolean = false;
+      if (newAccount.statusWarningDismissals?.length) {
+        newAccount.statusWarningDismissals = remapStatusWarningDismissals(
+          newAccount.statusWarningDismissals,
+          {
+            account: accountGUIDs,
+            facilities: facilityGUIDs,
+            meters: meterGUIDs,
+            meterGroups: meterGroupGUIDs,
+            predictors: predictorGUIDs,
+            facilityAnalyses: facilityAnalysisGUIDs,
+            accountAnalyses: accountAnalysisGUIDs,
+            facilityReports: facilityReportGUIDs,
+            accountReports: accountReportGUIDs
+          }
+        );
+        needsAccountUpdate = true;
+      }
       if (newAccount.selectedEnergyAnalysisId) {
         newAccount.selectedEnergyAnalysisId = this.getNewId(newAccount.selectedEnergyAnalysisId, accountAnalysisGUIDs);
         needsAccountUpdate = true;

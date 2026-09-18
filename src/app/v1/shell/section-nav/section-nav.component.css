@@ -212,10 +212,38 @@
   flex: 0 0 auto;
 }
 
-.v1-nav__child span {
+.v1-nav__item-label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.v1-nav__attention {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  margin-left: auto;
+  padding: 0 .4rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.v1-nav__attention--error {
+  background: var(--v1-danger);
+}
+
+.v1-nav__attention--warning {
+  border-color: color-mix(in srgb, var(--v1-warning) 65%, #000);
+  background: color-mix(in srgb, var(--v1-warning) 35%, #ffd166);
+  color: #211600;
 }
 
 .v1-nav__group a.v1-nav__item--danger {

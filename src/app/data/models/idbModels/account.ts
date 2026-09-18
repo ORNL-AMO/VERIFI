@@ -1,6 +1,7 @@
 import { AccountAndFacility } from "./accountAndFacility"
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { DEFAULT_DATA_STALENESS_MONTHS } from "@domain/calculations/status-check-calculations/statusCheckModels";
+import { StatusWarningDismissal } from "@data/models/status-warning-dismissal";
 
 
 
@@ -21,7 +22,9 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     toDoListOutdatedDays?: number
     migratedDates?: boolean,
     displayEmissions: boolean,
-    isSingleFacilityCompany?: boolean
+    isSingleFacilityCompany?: boolean,
+    /** V1 warnings discarded for their current evidence occurrence. */
+    statusWarningDismissals?: ReadonlyArray<StatusWarningDismissal>
 }
 
 export function getNewIdbAccount(): IdbAccount {
@@ -78,6 +81,7 @@ export function getNewIdbAccount(): IdbAccount {
         assessmentReportVersion: 'AR6',
         displayEmissions: false,
         isSingleFacilityCompany: false,
+        statusWarningDismissals: [],
         dataStalenessSettings: {
             enabled: true,
             thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS

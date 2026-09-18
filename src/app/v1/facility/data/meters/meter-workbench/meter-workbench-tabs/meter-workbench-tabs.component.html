@@ -1,5 +1,6 @@
 <nav class="v1-data-tabs v1-data-tabs--connected" aria-label="Meter workbench sections">
   @for (tab of tabs; track tab.id) {
+    @let tabAttention = attention[tab.id];
     <button
       type="button"
       class="v1-data-tabs__tab"
@@ -8,6 +9,12 @@
       [attr.aria-current]="activeTab === tab.id ? 'page' : null">
       <app-ui-icon [name]="tab.icon"></app-ui-icon>
       {{ tab.label }}
+      @if (tabAttention && tabAttention.total > 0) {
+        <span class="v1-data-tabs__attention v1-data-tabs__attention--{{ tabAttention.state }}">
+          <span aria-hidden="true">{{ tabAttention.total }}</span>
+          <span class="visually-hidden">{{ tabAttention.total }} issues: {{ tabAttention.errorCount }} errors, {{ tabAttention.warningCount }} warnings</span>
+        </span>
+      }
     </button>
   }
 </nav>

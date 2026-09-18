@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { account, facility } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
@@ -32,14 +34,58 @@ describe('WorkspaceStatusService', () => {
     expect(service.state()).toBe('error');
     expect(service.evaluation()).toBeUndefined();
   });
+
+  it('persists warning discard and restore while retaining raw findings', async () => {
+    const snapshot = signal(workspaceSnapshot({ account: account({ name: 'New Account' }) }));
+    const service = setup(snapshot, signal(1), new BehaviorSubject(result('ready')));
+    const warning = service.items().find(item => item.code === 'account.configuration.default-name');
+    expect(warning).toBeDefined();
+
+    await expect(service.discardWarning(warning!)).resolves.toBe(true);
+
+    expect(service.rawFindings().some(item => item.id === warning!.id)).toBe(true);
+    expect(service.items().some(item => item.id === warning!.id)).toBe(false);
+    expect(service.discardedItems().map(item => item.id)).toContain(warning!.id);
+    expect(snapshot().account.statusWarningDismissals).toHaveLength(1);
+
+    await expect(service.restoreWarning(service.discardedItems()[0])).resolves.toBe(true);
+    expect(service.items().map(item => item.id)).toContain(warning!.id);
+    expect(snapshot().account.statusWarningDismissals).toEqual([]);
+  });
+
+  it('does not persist errors and leaves warnings visible when persistence fails', async () => {
+    const snapshot = signal(workspaceSnapshot({ account: account({ name: 'New Account' }) }));
+    const service = setup(snapshot, signal(1), new BehaviorSubject(result('ready')), new Error('save failed'));
+    const warning = service.items().find(item => item.code === 'account.configuration.default-name');
+    const error = service.items().find(item => item.severity === 'error');
+
+    await expect(service.discardWarning(error!)).resolves.toBe(false);
+    await expect(service.discardWarning(warning!)).resolves.toBe(false);
+
+    expect(service.items().map(item => item.id)).toContain(warning!.id);
+    expect(snapshot().account.statusWarningDismissals).toBeUndefined();
+    expect(service.warningActionError()).toBe('save failed');
+  });
 });
 
 function setup(
   snapshot: WritableSignal<AccountWorkspaceSnapshot>,
   revision: WritableSignal<number>,
-  calendarResult: BehaviorSubject<WorkspaceCalendarizationBaseResult>
+  calendarResult: BehaviorSubject<WorkspaceCalendarizationBaseResult>,
+  commandError?: Error
 ): WorkspaceStatusService {
   const calendarizeBase = vi.fn(() => calendarResult.asObservable());
+  const accountHandler = {
+    update: vi.fn(async (updatedAccount: AccountWorkspaceSnapshot['account']) => updatedAccount)
+  };
+  const commandBoundary = {
+    execute: vi.fn(async (_request: unknown, persist: () => Promise<AccountWorkspaceSnapshot['account']>) => {
+      if (commandError) throw commandError;
+      const value = await persist();
+      snapshot.update(current => ({ ...current, account: value }));
+      return { value, change: {} };
+    })
+  };
   TestBed.configureTestingModule({
     providers: [
       WorkspaceStatusService,
@@ -47,14 +93,17 @@ function setup(
         provide: AccountWorkspaceStore,
         useValue: {
           isReady: signal(true), snapshot, revision,
-          selectedFacility: signal(facility()), account: () => snapshot().account
+          selectedFacility: signal(facility()), account: () => snapshot().account,
+          canWrite: signal(true), hasPending: signal(false)
         }
       },
       {
         provide: WorkspaceCalendarizationService,
         useValue: { calendarizeBase, currentInputFingerprint: signal('fingerprint-a') }
       },
-      { provide: Router, useValue: { navigate: vi.fn() } }
+      { provide: Router, useValue: { navigate: vi.fn() } },
+      { provide: AccountCommandHandler, useValue: accountHandler },
+      { provide: WorkspaceCommandBoundary, useValue: commandBoundary }
     ]
   });
   const service = TestBed.inject(WorkspaceStatusService);

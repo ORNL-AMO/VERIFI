@@ -18,6 +18,10 @@
   margin-top: -1px;
 }
 
+.meter-readings-status__list .v1-btn + .v1-btn {
+  margin-left: .35rem;
+}
+
 .meter-readings-status__link {
   display: inline;
   padding: 0;

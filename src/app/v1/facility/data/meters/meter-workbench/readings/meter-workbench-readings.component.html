@@ -13,14 +13,25 @@
     </div>
   }
 
+  @if (status.warningActionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ status.warningActionError() }}</span>
+    </div>
+  }
+
   @if (status.state() !== 'ready' || findings.length > 0) {
     <app-meter-readings-status
+      #readingsStatus
+      tabindex="-1"
       [findings]="findings"
       [state]="status.state()"
       [canAct]="_canAct"
+      [canManageWarnings]="status.canManageWarnings()"
       (settingsRequested)="openSettings()"
       (qualityRequested)="openQuality()"
-      (fillMissingRequested)="requestFillMissing()">
+      (fillMissingRequested)="requestFillMissing()"
+      (discardRequested)="discardWarning($event)">
     </app-meter-readings-status>
   }
 

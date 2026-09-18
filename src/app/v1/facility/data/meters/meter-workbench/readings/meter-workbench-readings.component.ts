@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -7,6 +7,7 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbUtilityMeterData, getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { missingMeterMonths } from '@app/v1/status/status.evaluator';
+import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { getDateFromMeterData, setMeterDataDateFromDate } from '@shared/dateHelperFunctions';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
@@ -95,9 +96,20 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   });
 
   @ViewChild('readingsConfirmModal') private readonly readingsConfirmModal?: TemplateRef<unknown>;
+  @ViewChild('readingsStatus', { read: ElementRef }) private readonly readingsStatus?: ElementRef<HTMLElement>;
 
   ngOnDestroy(): void {
     this.hideConfirmModal();
+  }
+
+  async discardWarning(item: StatusItem): Promise<void> {
+    if (await this.status.discardWarning(item)) {
+      setTimeout(() => {
+        const host = this.readingsStatus?.nativeElement;
+        const nextAction = host?.querySelector<HTMLButtonElement>('button:not([disabled])');
+        (nextAction ?? host)?.focus();
+      });
+    }
   }
 
   openColumns(): void {

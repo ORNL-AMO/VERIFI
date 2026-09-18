@@ -1,5 +1,7 @@
 /** Meter and meter-group workbench tabs, visibility rules, and navigation metadata. */
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
+import { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 
 export type MeterWorkbenchTabId = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
@@ -11,6 +13,8 @@ export interface MeterWorkbenchTab {
   readonly icon: IconName;
   readonly summary: string;
 }
+
+export type MeterWorkbenchTabAttention = Readonly<Partial<Record<MeterWorkbenchTabId, StatusAttentionSummary>>>;
 
 export interface MeterGroupWorkbenchTab {
   readonly id: MeterGroupWorkbenchTabId;
@@ -48,6 +52,19 @@ export function meterWorkbenchTabsForMeter(meter: IdbUtilityMeter | undefined): 
     }
     return true;
   });
+}
+
+export function buildMeterWorkbenchTabAttention(
+  findings: readonly StatusItem[]
+): MeterWorkbenchTabAttention {
+  const attention: Partial<Record<MeterWorkbenchTabId, StatusAttentionSummary>> = {};
+  METER_WORKBENCH_TABS.forEach(tab => {
+    const tabFindings = findings.filter(finding => finding.destination.kind === 'meter-tab'
+      && finding.destination.tab === tab.id);
+    const summary = summarizeStatusAttention(tabFindings);
+    if (summary.total > 0) attention[tab.id] = summary;
+  });
+  return attention;
 }
 
 export function shouldShowMeterMonthlyDataTab(meter: IdbUtilityMeter | undefined): boolean {

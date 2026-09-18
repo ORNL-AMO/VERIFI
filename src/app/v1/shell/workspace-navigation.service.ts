@@ -36,6 +36,7 @@ export interface PanelTab {
 export interface PanelContent {
   readonly help: ReadonlyArray<string>;
   readonly todos: ReadonlyArray<StatusItem>;
+  readonly discardedWarnings: ReadonlyArray<StatusItem>;
   readonly results: ReadonlyArray<{ label: string; value: string; tone: StatusTone }>;
   readonly details: ReadonlyArray<{ label: string; value: string }>;
 }
@@ -395,6 +396,9 @@ export class WorkspaceNavigationService {
     return {
       help,
       todos: isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos(),
+      discardedWarnings: isFacility
+        ? this.status.selectedFacilityDiscardedWarnings()
+        : this.status.accountDiscardedWarnings(),
       results: [
         { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
         { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
