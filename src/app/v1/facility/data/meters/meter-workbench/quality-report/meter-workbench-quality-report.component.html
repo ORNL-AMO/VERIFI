@@ -25,15 +25,31 @@
     @if (issues.length > 0) {
       <div class="v1-alert v1-alert--warning v1-meter-quality__alert" role="alert">
         <app-ui-icon name="warning"></app-ui-icon>
-        <div>
-          <strong>Data quality issues found</strong>
-          <ul>
+        <div class="v1-meter-quality__alert-content">
+          <strong class="v1-meter-quality__alert-title">Data quality issues found</strong>
+          <ul class="v1-meter-quality__alert-list">
             @for (issue of issues; track issue) {
               <li>{{ issue }}</li>
             }
           </ul>
         </div>
       </div>
+    }
+
+    @if (currentReport.duplicateMonths.length > 0) {
+      <section class="v1-meter-quality__panel" aria-labelledby="meter-quality-duplicate-heading">
+        <div class="v1-meter-quality__panel-heading">
+          <div>
+            <p>Reading Dates</p>
+            <h2 id="meter-quality-duplicate-heading">Months with Multiple Readings</h2>
+          </div>
+        </div>
+        <div class="v1-meter-quality__chips" aria-label="Duplicate reading months">
+          @for (duplicateMonth of currentReport.duplicateMonths; track duplicateMonth.monthYear) {
+            <span class="v1-chip v1-chip--warning">{{ duplicateMonth.monthYear }}</span>
+          }
+        </div>
+      </section>
     }
 
     <section class="v1-meter-quality__panel" aria-labelledby="meter-quality-statistics-heading">
@@ -134,20 +150,5 @@
       </section>
     }
 
-    @if (currentReport.duplicateMonths.length > 0) {
-      <section class="v1-meter-quality__panel" aria-labelledby="meter-quality-duplicate-heading">
-        <div class="v1-meter-quality__panel-heading">
-          <div>
-            <p>Reading Dates</p>
-            <h2 id="meter-quality-duplicate-heading">Months with Multiple Readings</h2>
-          </div>
-        </div>
-        <div class="v1-meter-quality__chips" aria-label="Duplicate reading months">
-          @for (duplicateMonth of currentReport.duplicateMonths; track duplicateMonth.monthYear) {
-            <span class="v1-chip v1-chip--warning">{{ duplicateMonth.monthYear }}</span>
-          }
-        </div>
-      </section>
-    }
   }
 </section>

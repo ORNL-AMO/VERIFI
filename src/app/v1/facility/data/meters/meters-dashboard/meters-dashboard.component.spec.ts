@@ -63,8 +63,99 @@ describe('MetersDashboardComponent', () => {
     expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-mode-toggle')).toBeNull();
     expect(fixture.nativeElement.querySelector('app-meter-grouping')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-lane')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Meter filters"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Attention first');
     expect(text).not.toContain('Move meter');
     expect(text).not.toContain('Add group');
+  });
+
+  it('searches meter names, sources, groups, and statuses', () => {
+    const fixture = setup({
+      meters: [
+        meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' }),
+        meter({ guid: 'meter-water', name: 'City Water', groupId: undefined, source: 'Water Intake' })
+      ],
+      meterData: [
+        reading({ guid: 'reading-electric', meterId: 'meter-electric' }),
+        reading({ guid: 'reading-water', meterId: 'meter-water' })
+      ],
+      groups: [group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })]
+    });
+    fixture.detectChanges();
+
+    fixture.componentInstance.setSearch('water intake');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['City Water']);
+
+    fixture.componentInstance.setSearch('purchased electricity');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Electric Main']);
+
+    fixture.componentInstance.setSearch('ungrouped');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['City Water']);
+
+    fixture.componentInstance.setSearch('valid');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['City Water', 'Electric Main']);
+  });
+
+  it('filters meters by attention, missing readings, missing groups, and valid status', () => {
+    const fixture = setup({
+      meters: [
+        meter({ guid: 'meter-no-readings', name: 'No Readings', groupId: 'group-energy' }),
+        meter({ guid: 'meter-ungrouped', name: 'Ungrouped Meter', groupId: undefined }),
+        meter({ guid: 'meter-valid', name: 'Valid Meter', groupId: 'group-energy' })
+      ],
+      meterData: [
+        reading({ guid: 'reading-ungrouped', meterId: 'meter-ungrouped' }),
+        reading({ guid: 'reading-valid', meterId: 'meter-valid' })
+      ],
+      groups: [group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })]
+    });
+    fixture.detectChanges();
+
+    fixture.componentInstance.setStatusFilter('attention');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['No Readings', 'Ungrouped Meter']);
+
+    fixture.componentInstance.setStatusFilter('noReadings');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['No Readings']);
+
+    fixture.componentInstance.setStatusFilter('missingGroup');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Ungrouped Meter']);
+
+    fixture.componentInstance.setStatusFilter('valid');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['No Readings', 'Ungrouped Meter', 'Valid Meter']);
+  });
+
+  it('sorts meters by attention, name, and latest reading with stable name tie-breakers', () => {
+    const fixture = setup({
+      meters: [
+        meter({ guid: 'meter-zeta', name: 'Zeta Meter', groupId: 'group-energy' }),
+        meter({ guid: 'meter-alpha', name: 'Alpha Meter', groupId: 'group-energy' }),
+        meter({ guid: 'meter-empty', name: 'Empty Meter', groupId: 'group-energy' })
+      ],
+      meterData: [
+        reading({ guid: 'reading-zeta', meterId: 'meter-zeta', month: 1, year: 2026 }),
+        reading({ guid: 'reading-alpha', meterId: 'meter-alpha', month: 3, year: 2026 })
+      ],
+      groups: [group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })]
+    });
+    fixture.detectChanges();
+
+    expect(cardTitles(fixture)).toEqual(['Empty Meter', 'Alpha Meter', 'Zeta Meter']);
+
+    fixture.componentInstance.setSortBy('meterName');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Alpha Meter', 'Empty Meter', 'Zeta Meter']);
+
+    fixture.componentInstance.setSortBy('latestReading');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Alpha Meter', 'Zeta Meter', 'Empty Meter']);
   });
 
   it('ignores legacy dashboard mode query parameters and keeps rendering meters', () => {
@@ -86,6 +177,15 @@ describe('MetersDashboardComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('No meters yet');
     expect(fixture.nativeElement.textContent).toContain('Meter cards will appear here');
+  });
+
+  it('renders a filtered empty state without replacing the no-meter state', () => {
+    const fixture = setup();
+    fixture.componentInstance.setSearch('not a meter');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No meters match these filters');
+    expect(fixture.nativeElement.textContent).not.toContain('No meters yet');
   });
 
   it('opens the Add Meter slideout from the dashboard action bar', () => {
@@ -169,6 +269,7 @@ function setup(options: {
         useValue: {
           account: signal(account()),
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
+          meterData,
           meterGroups: groups,
           meterCards,
           calendarizationState,
@@ -217,4 +318,9 @@ function clickButton(fixture: ComponentFixture<MetersDashboardComponent>, label:
 function findButton(fixture: ComponentFixture<MetersDashboardComponent>, label: string): HTMLButtonElement | undefined {
   const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
   return buttons.find(button => button.textContent?.includes(label) || button.getAttribute('aria-label')?.includes(label));
+}
+
+function cardTitles(fixture: ComponentFixture<MetersDashboardComponent>): string[] {
+  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-meter-browse-card__title-text'))
+    .map(element => element.textContent!.trim());
 }

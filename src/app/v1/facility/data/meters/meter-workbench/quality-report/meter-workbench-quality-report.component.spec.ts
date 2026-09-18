@@ -64,6 +64,12 @@ describe('MeterWorkbenchQualityReportComponent', () => {
       expect(element.textContent).toContain('Months with Multiple Readings');
       expect(element.textContent).toContain('Jan 2026');
       expect(element.textContent).toContain('Readings Over Time');
+      const warning = element.querySelector('.v1-meter-quality__alert') as HTMLElement;
+      expect(warning.querySelector('.v1-meter-quality__alert-title')?.textContent).toContain('Data quality issues found');
+      expect(warning.querySelectorAll('.v1-meter-quality__alert-list > li')).toHaveLength(2);
+      const content = element.textContent || '';
+      expect(content.indexOf('Data quality issues found')).toBeLessThan(content.indexOf('Months with Multiple Readings'));
+      expect(content.indexOf('Months with Multiple Readings')).toBeLessThan(content.indexOf('Total Consumption and Cost Statistics'));
       expect(element.textContent).not.toContain('Time Series');
       expect(element.querySelectorAll('.v1-meter-quality__chart')).toHaveLength(1);
       const chartOption = component.qualityChartOption() as Record<string, any>;

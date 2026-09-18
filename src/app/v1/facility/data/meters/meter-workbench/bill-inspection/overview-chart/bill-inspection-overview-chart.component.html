@@ -15,27 +15,29 @@
     role="img"
     [attr.aria-label]="'Utility bill charges over time for ' + meterName">
   </div>
-  <table class="visually-hidden">
-    <caption>Utility bill charges over time data</caption>
-    <thead>
-      <tr>
-        <th scope="col">Reading date</th>
-        <th scope="col">Total Cost</th>
-        @for (charge of report.charges; track charge.charge.guid) {
-          <th scope="col">{{ charge.charge.name }}</th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      @for (row of report.rows; track row.reading.guid) {
+  <div class="visually-hidden v1-meter-bill-inspection__overview-accessible-data">
+    <table>
+      <caption>Utility bill charges over time data</caption>
+      <thead>
         <tr>
-          <th scope="row">{{ row.dateLabel }}</th>
-          <td>{{ row.totalCostLabel }}</td>
+          <th scope="col">Reading date</th>
+          <th scope="col">Total Cost</th>
           @for (charge of report.charges; track charge.charge.guid) {
-            <td>{{ charge.valuesByReading[row.reading.guid].amountLabel }}</td>
+            <th scope="col">{{ charge.charge.name }}</th>
           }
         </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (row of report.rows; track row.reading.guid) {
+          <tr>
+            <th scope="row">{{ row.dateLabel }}</th>
+            <td>{{ row.totalCostLabel }}</td>
+            @for (charge of report.charges; track charge.charge.guid) {
+              <td>{{ charge.valuesByReading[row.reading.guid].amountLabel }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 }
