@@ -161,7 +161,7 @@ export class FacilityModelingReportPptAdapter {
 
     buildCriticalIssuesSlides(criticalItems: Array<FacilityGroupAnalysisItem>): TableSlide {
         const title: string = 'Critical Issues';
-        const headers: Array<string> = ['Facility', 'Group', 'Model Validation Failures'];
+        const headers: Array<string> = ['Facility', 'Group', 'Critical Issues'];
         let rows: string[][] = [];
         criticalItems.forEach(item => {
             let row: string[] = [];
@@ -180,7 +180,7 @@ export class FacilityModelingReportPptAdapter {
 
     buildModerateIssuesSlides(moderateItems: Array<FacilityGroupAnalysisItem>): TableSlide {
         const title: string = 'Moderate Issues';
-        const headers: Array<string> = ['Facility', 'Group', 'Data Validation Failures'];
+        const headers: Array<string> = ['Facility', 'Group', 'Moderate Issues'];
         let rows: string[][] = [];
         moderateItems.forEach(item => {
             let row: string[] = [];
@@ -199,7 +199,7 @@ export class FacilityModelingReportPptAdapter {
 
     buildMinorIssuesSlides(minorItems: Array<FacilityGroupAnalysisItem>): TableSlide {
         const title: string = 'Minor Issues';
-        const headers: Array<string> = ['Facility', 'Group', 'Model Notes'];
+        const headers: Array<string> = ['Facility', 'Group', 'Minor Issues'];
         let rows: string[][] = [];
         minorItems.forEach(item => {
             let row: string[] = [];
@@ -218,7 +218,7 @@ export class FacilityModelingReportPptAdapter {
 
     buildModelDetailsTable(regressionGroupItems: Array<FacilityGroupAnalysisItem>, isDataValidation: boolean): TableSlide {
         let title: string = 'Analysis Type: Regression';
-        const headers: Array<string> = ['Facility', 'Group', 'Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Model Notes'];
+        const headers: Array<string> = ['Facility', 'Group', 'Model Year', 'Variable p-Values', 'R2', 'Adjusted R2', 'Model p-Value', 'Formula', 'Minor Issues'];
         const rows: string[][] = [];
         if (isDataValidation) {
             title = this.accountWorkspaceQuery.getMeterGroupName(regressionGroupItems[0].group.idbGroupId) || '-';
