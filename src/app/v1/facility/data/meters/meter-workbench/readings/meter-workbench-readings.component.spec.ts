@@ -17,6 +17,7 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterReadingColumnDraft, buildColumnDraft } from './meter-workbench-readings.models';
 import { MeterReadingBillSlideoutComponent } from './meter-reading-bill-slideout/meter-reading-bill-slideout.component';
+import { MeterReadingsConfirmationModalComponent } from './meter-readings-confirmation-modal/meter-readings-confirmation-modal.component';
 import { MeterReadingsColumnsSlideoutComponent } from './meter-readings-columns-slideout/meter-readings-columns-slideout.component';
 import { MeterReadingsStatusComponent } from './meter-readings-status/meter-readings-status.component';
 import { MeterReadingsTableComponent } from './meter-readings-table/meter-readings-table.component';
@@ -224,7 +225,7 @@ describe('MeterWorkbenchReadingsComponent', () => {
     await component.confirmDelete();
 
     expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(3);
-    expect(component.deleteTarget()).toBeUndefined();
+    expect(component.confirmation()).toBeUndefined();
     expect(modalPortal.hide).toHaveBeenCalledOnce();
   });
 
@@ -242,8 +243,7 @@ describe('MeterWorkbenchReadingsComponent', () => {
 
     expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(3);
     expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(4);
-    expect(component.bulkDeleteOpen()).toBe(false);
-    expect(component.bulkDeleteReadings()).toEqual([]);
+    expect(component.confirmation()).toBeUndefined();
     expect(modalPortal.hide).toHaveBeenCalledOnce();
   });
 
@@ -270,7 +270,7 @@ describe('MeterWorkbenchReadingsComponent', () => {
       }),
       'account-a'
     );
-    expect(component.fillMissingOpen()).toBe(false);
+    expect(component.confirmation()).toBeUndefined();
   });
 
   it('opens settings with the meter reading settings fragment from status alerts', () => {
@@ -405,6 +405,7 @@ function setupHarness(options: SetupOptions = {}) {
       CommonModule,
       IconComponent,
       MeterReadingBillSlideoutComponent,
+      MeterReadingsConfirmationModalComponent,
       MeterReadingsColumnsSlideoutComponent,
       MeterReadingsStatusComponent,
       MeterReadingsTableComponent

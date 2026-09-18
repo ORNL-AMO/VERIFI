@@ -4,31 +4,6 @@
   min-width: 0;
 }
 
-.meter-readings__empty h3,
-.meter-readings__empty p {
-  margin: 0;
-}
-
-.meter-readings__empty p {
-  color: var(--v1-muted);
-}
-
-.meter-readings__empty {
-  display: grid;
-  justify-items: center;
-  gap: var(--v1-space-2);
-  padding: var(--v1-space-6) var(--v1-space-4);
-  border: 1px dashed var(--v1-border);
-  border-radius: var(--v1-radius-sm);
-  background: var(--v1-panel);
-  text-align: center;
-}
-
-.meter-readings__empty > .v1-icon {
-  color: var(--v1-content-control);
-  font-size: 1.8rem;
-}
-
 .v1-alert {
   align-items: center;
 }

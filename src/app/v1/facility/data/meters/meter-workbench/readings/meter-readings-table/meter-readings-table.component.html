@@ -4,7 +4,18 @@
 @let _columns = displayColumns();
 @let _sectionSpans = columnSectionSpans();
 
-<div class="meter-readings-table">
+@if (_view.rows.length === 0) {
+  <div class="meter-readings-table__empty">
+    <app-ui-icon name="table"></app-ui-icon>
+    <h3>No bills found for {{ meterName || 'this meter' }}.</h3>
+    <p>Add a bill to begin tracking readings for this meter.</p>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct" (click)="addBillRequested.emit()">
+      <app-ui-icon name="add"></app-ui-icon>
+      Add New Bill
+    </button>
+  </div>
+} @else {
+  <div class="meter-readings-table">
   <div class="meter-readings-table__action-row" aria-label="Readings table controls">
     <div class="meter-readings-table__table-controls">
       @if (isDataOutdated) {
@@ -197,4 +208,5 @@
       </ngb-pagination>
     }
   </footer>
-</div>
+  </div>
+}

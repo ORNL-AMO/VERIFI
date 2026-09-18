@@ -6,6 +6,20 @@ import { MeterReadingColumn, MeterReadingTableRow, MeterReadingTableView } from 
 import { MeterReadingsTableComponent } from './meter-readings-table.component';
 
 describe('MeterReadingsTableComponent', () => {
+  it('owns the empty state and emits Add Bill without rendering table controls', () => {
+    const fixture = setup(tableView({ rows: [] }), 'Natural Gas');
+    const addRequested = vi.fn();
+    fixture.componentInstance.addBillRequested.subscribe(addRequested);
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.textContent).toContain('No bills found for Natural Gas.');
+    expect(root.textContent).not.toContain('Choose Columns');
+    expect(root.querySelector('table')).toBeNull();
+
+    clickButton(root, 'Add New Bill');
+    expect(addRequested).toHaveBeenCalledOnce();
+  });
+
   it('groups adjacent columns under their table section headers', () => {
     const fixture = setup(tableView({
       columns: [
@@ -196,7 +210,7 @@ describe('MeterReadingsTableComponent', () => {
   });
 });
 
-function setup(view: MeterReadingTableView): ComponentFixture<MeterReadingsTableComponent> {
+function setup(view: MeterReadingTableView, meterName?: string): ComponentFixture<MeterReadingsTableComponent> {
   const fixture = TestBed.configureTestingModule({
     imports: [MeterReadingsTableComponent],
     providers: [
@@ -204,6 +218,7 @@ function setup(view: MeterReadingTableView): ComponentFixture<MeterReadingsTable
     ]
   }).createComponent(MeterReadingsTableComponent);
   fixture.componentInstance.view = view;
+  fixture.componentInstance.meterName = meterName;
   fixture.detectChanges();
   return fixture;
 }
