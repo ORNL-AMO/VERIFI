@@ -24,7 +24,7 @@
     </app-meter-readings-status>
   }
 
-  @if (status.state() === 'ready' && !hasBlockingConfiguration()) {
+  @if (!hasBlockingConfiguration()) {
     @if (_table.rows.length === 0) {
       <div class="meter-readings__empty">
         <app-ui-icon name="table"></app-ui-icon>

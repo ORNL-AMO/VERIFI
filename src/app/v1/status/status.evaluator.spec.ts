@@ -74,6 +74,31 @@ describe('v1 workspace status evaluator', () => {
   it('uses an explicit evaluation date and treats the exact staleness threshold as current', () => {
     expect(isOlderThanThreshold(new Date(2026, 0, 17), new Date(2026, 3, 17), 3)).toBe(false);
     expect(isOlderThanThreshold(new Date(2026, 0, 16), new Date(2026, 3, 17), 3)).toBe(true);
+    expect(isOlderThanThreshold(new Date(2026, 1, 28), new Date(2026, 4, 31), 3)).toBe(false);
+    expect(isOlderThanThreshold(new Date(2026, 1, 27), new Date(2026, 4, 31), 3)).toBe(true);
+    expect(isOlderThanThreshold(new Date(2024, 1, 29), new Date(2024, 4, 31), 3)).toBe(false);
+  });
+
+  it('uses the calendarized last month for annual-meter currency checks', () => {
+    const annualMeter = meter({ guid: 'meter-a', meterReadingDataApplication: 'fullYear' });
+    const annualMonths = Array.from({ length: 12 }, (_, monthNumValue) => monthlyData({
+      year: 2026,
+      monthNumValue,
+      month: new Date(2026, monthNumValue, 1).toLocaleString('en-US', { month: 'long' })
+    }));
+    const result = evaluate(
+      snapshot({
+        meters: [annualMeter],
+        meterData: [reading({ guid: 'reading-a', meterId: annualMeter.guid, month: 1, year: 2026 })]
+      }),
+      [calendarizedMeter(annualMeter, annualMonths)],
+      new Date(2027, 2, 1)
+    );
+
+    expect(entityCodes(result, annualMeter.guid)).not.toEqual(expect.arrayContaining([
+      'meter.currency.stale',
+      'meter.currency.behind-facility'
+    ]));
   });
 
   it('keeps validation findings independent from meter display unit and basis preferences', () => {

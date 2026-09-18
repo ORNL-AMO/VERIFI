@@ -101,6 +101,30 @@ describe('MeterWorkbenchQualityReportComponent', () => {
     }
   });
 
+  it.each(['idle', 'evaluating', 'error'] as const)(
+    'keeps locally-derived quality warnings visible while workspace status is %s',
+    statusState => {
+      const fixture = setup({
+        statusState,
+        statusFindings: [],
+        meterData: [
+          reading({ guid: 'reading-a', month: 1, year: 2026, totalEnergyUse: 10, totalCost: 10 }),
+          reading({ guid: 'reading-b', month: 1, year: 2026, day: 15, totalEnergyUse: 10, totalCost: 10 }),
+          reading({ guid: 'reading-c', month: 2, year: 2026, totalEnergyUse: 10, totalCost: 10 }),
+          reading({ guid: 'reading-d', month: 3, year: 2026, totalEnergyUse: 100, totalCost: 100 })
+        ]
+      });
+
+      fixture.detectChanges();
+
+      const text = (fixture.nativeElement as HTMLElement).textContent;
+      expect(text).toContain('Data quality issues found');
+      expect(text).toContain('1 consumption reading outside the expected range.');
+      expect(text).toContain('1 cost reading outside the expected range.');
+      expect(text).toContain('1 month with multiple readings.');
+    }
+  );
+
   it('hides cost and consumption sections when meter display rules exclude them', () => {
     const fixture = setup({
       selectedMeter: meter({ guid: 'meter-a', source: 'Electricity', includeInEnergy: false }),
@@ -202,6 +226,8 @@ function setup(options: {
   selectedMeter?: ReturnType<typeof meter>;
   meterData?: ReturnType<typeof reading>[];
   copyTable?: ReturnType<typeof vi.fn>;
+  statusState?: 'idle' | 'evaluating' | 'ready' | 'error';
+  statusFindings?: StatusItem[];
 } = {}): ComponentFixture<MeterWorkbenchQualityReportComponent> {
   const selectedMeter = options.selectedMeter ?? meter({
     guid: 'meter-a',
@@ -214,9 +240,9 @@ function setup(options: {
   ];
   const qualityReport = buildMeterDataQualityReport(meterData, selectedMeter);
   const entity = { kind: 'meter' as const, guid: selectedMeter.guid, name: selectedMeter.name, accountGuid: selectedMeter.accountId, facilityGuid: selectedMeter.facilityId };
-  const findings: StatusItem[] = [];
-  if (qualityReport.energyOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.consumption-outlier', 'warning', 'quality', entity, { count: qualityReport.energyOutlierCount })));
-  if (qualityReport.costOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: qualityReport.costOutlierCount })));
+  const findings: StatusItem[] = options.statusFindings ? [...options.statusFindings] : [];
+  if (!options.statusFindings && qualityReport.energyOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.consumption-outlier', 'warning', 'quality', entity, { count: qualityReport.energyOutlierCount })));
+  if (!options.statusFindings && qualityReport.costOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: qualityReport.costOutlierCount })));
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchQualityReportComponent],
@@ -232,7 +258,10 @@ function setup(options: {
       },
       { provide: CopyTableService, useValue: { copyTable: options.copyTable ?? vi.fn() } },
       { provide: Router, useValue: { navigate: vi.fn() } },
-      { provide: WorkspaceStatusService, useValue: { meterFindings: vi.fn(() => findings) } },
+      {
+        provide: WorkspaceStatusService,
+        useValue: { state: signal(options.statusState ?? 'ready'), meterFindings: vi.fn(() => findings) }
+      },
       {
         provide: WorkspaceNavigationService,
         useValue: {

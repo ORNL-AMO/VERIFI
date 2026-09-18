@@ -87,8 +87,12 @@ export class MeterWorkbenchQualityReportComponent {
   });
   readonly issueSummaries = computed(() => {
     const meter = this.meter();
-    if (!meter) {
+    const report = this.report();
+    if (!meter || !report) {
       return [];
+    }
+    if (this.status.state() !== 'ready') {
+      return buildIssueSummaries(report);
     }
     return this.status.meterFindings(meter.guid)
       .filter(finding => finding.category === 'quality' || finding.code === 'meter.data.duplicate-date')
@@ -190,6 +194,20 @@ function statisticRow(
         : undefined
     }))
   };
+}
+
+function buildIssueSummaries(report: MeterDataQualityReport): string[] {
+  const issues: string[] = [];
+  if (report.showConsumption && report.energyOutlierCount > 0) {
+    issues.push(`${report.energyOutlierCount} consumption reading${report.energyOutlierCount === 1 ? '' : 's'} outside the expected range.`);
+  }
+  if (report.includeCosts && report.costOutlierCount > 0) {
+    issues.push(`${report.costOutlierCount} cost reading${report.costOutlierCount === 1 ? '' : 's'} outside the expected range.`);
+  }
+  if (report.duplicateMonths.length > 0) {
+    issues.push(`${report.duplicateMonths.length} month${report.duplicateMonths.length === 1 ? '' : 's'} with multiple readings.`);
+  }
+  return issues;
 }
 
 function qualityChartOption(rows: readonly MeterDataQualityChartRow[], plots: readonly QualityChartPlot[]): V1EChartsOption {

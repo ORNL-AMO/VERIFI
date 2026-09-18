@@ -22,6 +22,8 @@ import { MeterReadingsStatusComponent } from './meter-readings-status/meter-read
 import { MeterReadingsTableComponent } from './meter-readings-table/meter-readings-table.component';
 import { MeterWorkbenchReadingsComponent } from './meter-workbench-readings.component';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchReadingsComponent', () => {
   it('renders readings table actions without legacy navigation buttons', () => {
@@ -49,6 +51,38 @@ describe('MeterWorkbenchReadingsComponent', () => {
     expect(text).toContain('No bills found');
     expect(text).toContain('Add New Bill');
     expect(text).not.toContain('Import');
+  });
+
+  it.each(['evaluating', 'error'] as const)('keeps raw readings and repair actions available while status is %s', statusState => {
+    const fixture = setup({ statusState });
+
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain(statusState === 'error' ? 'Meter status could not be evaluated' : 'Checking meter data');
+    expect(text).toContain('Choose Columns');
+    expect(text).toContain('Add New Bill');
+    expect(fixture.nativeElement.querySelector('app-meter-readings-table')).not.toBeNull();
+  });
+
+  it('hides the readings table only for a known blocking meter configuration finding', () => {
+    const meterValue = meter({ id: 2, guid: 'meter-a', name: 'Electric Main', source: 'Electricity' });
+    const finding = presentFinding(makeFinding(
+      'meter.configuration.invalid',
+      'error',
+      'configuration',
+      {
+        kind: 'meter', guid: meterValue.guid, name: meterValue.name,
+        accountGuid: meterValue.accountId, facilityGuid: meterValue.facilityId
+      },
+      { fields: ['energyUnit'] }
+    ));
+    const fixture = setup({ meterValue, statusFindings: [finding] });
+
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Review these meter settings');
+    expect(fixture.nativeElement.querySelector('app-meter-readings-table')).toBeNull();
   });
 
   it('opens column and bill slideouts from workbench actions', () => {
@@ -258,11 +292,7 @@ describe('MeterWorkbenchReadingsComponent', () => {
   });
 });
 
-function setup(options: {
-  readings?: ReturnType<typeof reading>[];
-  canWrite?: boolean;
-  hasPending?: boolean;
-} = {}): ComponentFixture<MeterWorkbenchReadingsComponent> {
+function setup(options: SetupOptions = {}): ComponentFixture<MeterWorkbenchReadingsComponent> {
   return setupHarness(options).fixture;
 }
 
@@ -272,6 +302,8 @@ interface SetupOptions {
   readonly hasPending?: boolean;
   readonly facilityValue?: ReturnType<typeof facility>;
   readonly meterValue?: ReturnType<typeof meter>;
+  readonly statusState?: 'idle' | 'evaluating' | 'ready' | 'error';
+  readonly statusFindings?: readonly StatusItem[];
 }
 
 function setupHarness(options: SetupOptions = {}) {
@@ -362,8 +394,8 @@ function setupHarness(options: SetupOptions = {}) {
       {
         provide: WorkspaceStatusService,
         useValue: {
-          state: signal('ready'),
-          meterFindings: vi.fn(() => []),
+          state: signal(options.statusState ?? 'ready'),
+          meterFindings: vi.fn(() => options.statusFindings ?? []),
           calendarizedMeters: signal([])
         }
       },

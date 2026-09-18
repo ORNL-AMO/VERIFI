@@ -55,6 +55,7 @@ export function evaluateWorkspaceStatus(context: EvaluationContext): StatusEvalu
     const facilityPredictors = snapshot.predictors.filter(predictor => predictor.facilityId === facility.guid);
     const facilityPredictorData = snapshot.predictorData.filter(data => data.facilityId === facility.guid);
     const facilityCalendarized = calendarizedMeters.filter(item => item.meter.facilityId === facility.guid);
+    const calendarizedByMeter = new Map(facilityCalendarized.map(item => [item.meter.guid, item]));
     const latestFacilityMonth = latestCalendarizedMonth(facilityCalendarized);
     const staleness = effectiveStaleness(snapshot.account, facility);
 
@@ -63,6 +64,7 @@ export function evaluateWorkspaceStatus(context: EvaluationContext): StatusEvalu
       findings.push(...evaluateMeter(
         meter,
         facilityMeterData.filter(reading => reading.meterId === meter.guid),
+        calendarizedByMeter.get(meter.guid),
         snapshot.customFuels,
         latestFacilityMonth,
         staleness,
@@ -125,6 +127,7 @@ function evaluateFacility(
 function evaluateMeter(
   meter: IdbUtilityMeter,
   readings: readonly IdbUtilityMeterData[],
+  calendarizedMeter: CalanderizedMeter | undefined,
   customFuels: readonly IdbCustomFuel[],
   facilityLatest: Date | undefined,
   staleness: { enabled: boolean; thresholdMonths: DataStalenessMonths },
@@ -163,7 +166,7 @@ function evaluateMeter(
     }));
   }
 
-  const latest = latestMeterDate(readings);
+  const latest = latestCalendarizedMonth(calendarizedMeter ? [calendarizedMeter] : []) ?? latestMeterDate(readings);
   findings.push(...currencyFindings('meter', entity, latest, facilityLatest, meter.ignoreDateStatusChecks, meter.noLongerInUse, meter.noLongerInUseMonth, meter.noLongerInUseYear, staleness, asOfDate));
 
   const quality = buildMeterDataQualityReport(readings, meter);
@@ -544,7 +547,13 @@ function effectiveStaleness(account: IdbAccount, facility: IdbFacility): { enabl
 }
 
 export function isOlderThanThreshold(date: Date, asOfDate: Date, thresholdMonths: number): boolean {
-  const threshold = new Date(asOfDate.getFullYear(), asOfDate.getMonth() - thresholdMonths, asOfDate.getDate());
+  const targetMonth = new Date(asOfDate.getFullYear(), asOfDate.getMonth() - thresholdMonths, 1);
+  const lastTargetDay = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate();
+  const threshold = new Date(
+    targetMonth.getFullYear(),
+    targetMonth.getMonth(),
+    Math.min(asOfDate.getDate(), lastTargetDay)
+  );
   return date < threshold;
 }
 

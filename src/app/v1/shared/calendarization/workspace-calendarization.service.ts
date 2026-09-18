@@ -76,6 +76,16 @@ export class WorkspaceCalendarizationService {
         error: { code: 'invalid-projection', message: 'The account workspace is not ready.' }
       };
     }
+    if (base.inputFingerprint !== this.currentInputFingerprint()) {
+      return {
+        state: 'error', accountGuid: base.accountGuid ?? snapshot.account.guid,
+        inputFingerprint: base.inputFingerprint ?? '', meters: [],
+        error: {
+          code: 'invalid-projection',
+          message: 'Canonical calendarization is stale for the current workspace inputs.'
+        }
+      };
+    }
     return projectWorkspaceCalendarization(base, snapshot, request);
   }
 
