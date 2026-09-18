@@ -8,7 +8,9 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { EmailStatusCode, EmailVerifiBackupService } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.service';
+import { ToastNotificationsService } from '@app/shared/notifications/toast-notifications.service';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -35,11 +37,12 @@ export class AccountHomeSummaryComponent {
     return (accountMeterData.length == 0);
   });
 
-  private formBuilder: FormBuilder = inject(FormBuilder);
   showEmailModal: boolean = false;
-  emailForm: FormGroup;
+  emailStatusSubscription: Subscription;
 
-  constructor() {
+  constructor(private toastNotificationsService: ToastNotificationsService,
+    private emailVerifiBackupService: EmailVerifiBackupService
+  ) {
     effect(() => {
       const loadingContext = this.navigationAfterLoading();
       if (loadingContext === 'export-facilities-to-excel') {
@@ -47,6 +50,22 @@ export class AccountHomeSummaryComponent {
         this.loadingService.navigationAfterLoading.next(undefined);
       }
     });
+  }
+
+  ngOnInit() {
+    this.emailStatusSubscription = this.emailVerifiBackupService.emailStatus
+      .pipe(
+        filter((status): status is EmailStatusCode => status !== undefined)
+      )
+      .subscribe(status => {
+        this.closeEmailModal(status);
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.emailStatusSubscription) {
+      this.emailStatusSubscription.unsubscribe();
+    }
   }
 
   navigateTo(urlStr: string) {
@@ -83,45 +102,27 @@ export class AccountHomeSummaryComponent {
   }
 
   openEmailModal() {
-    this.emailForm = this.buildEmailForm();
+    this.emailVerifiBackupService.resetEmailStatus();
     this.showEmailModal = true;
   }
 
-  closeEmailModal() {
+  closeEmailModal(status?: EmailStatusCode) {
     this.showEmailModal = false;
-  }
-
-  buildEmailForm(): FormGroup {
-    const accountName = this.account()?.name;
-    const defaultName = `${accountName}-backup`;
-    return this.formBuilder.group({
-      senderEmail: ['', [Validators.email]],
-      recipientEmail: ['', [Validators.required, this.multipleEmailsValidator()]],
-      attachmentName: [defaultName, [Validators.required, this.attachmentNameValidator()]]
-    });
-  }
-
-  multipleEmailsValidator(): ValidatorFn {
-    return (control: AbstractControl) => {
-      if (!control.value) {
-        return null;
+    if (status) {
+      switch (status) {
+        case 'success':
+          this.toastNotificationsService.showToast('Email sent successfully!', undefined, 5000, false, "alert-success");
+          break;
+        case 'failed':
+          this.toastNotificationsService.showToast('Email sending failed!', undefined, 5000, false, "alert-danger");
+          break;
+        case 'content-too-large':
+          this.toastNotificationsService.showToast('Email content too large.', undefined, 5000, false, "alert-warning");
+          break;
+        default:
+          this.toastNotificationsService.showToast('There was an error sending the email.', undefined, 5000, false, "alert-danger");
+          break;
       }
-      const emails = control.value.split(/[, ]+/).map((email: string) => email.trim());
-      const invalidEmails = emails.filter((email: string) => Validators.email(new FormControl(email)) !== null);
-      return invalidEmails.length > 0 ? { invalidEmails: true } : null;
-    };
-  }
-
-  attachmentNameValidator() {
-    const regex = /^[a-zA-Z0-9._\- ]+$/;
-    return (control: AbstractControl) => {
-      if (!control.value) {
-        return null;
-      }
-      return regex.test(control.value) ? null : { invalidAttachmentName: true };
-    };
-  }
-
-  save() {
+    }
   }
 }

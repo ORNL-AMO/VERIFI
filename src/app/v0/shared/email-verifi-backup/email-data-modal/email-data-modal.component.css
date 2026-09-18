@@ -1,0 +1,8 @@
+
+.popup.email-modal {
+    width: 750px;
+    left: calc(50% - 375px);
+    top: 10%;
+    max-height: 80vh;
+    overflow-y: auto;
+}

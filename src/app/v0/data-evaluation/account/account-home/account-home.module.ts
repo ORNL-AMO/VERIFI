@@ -13,6 +13,7 @@ import { AccountWaterCardComponent } from '@v0/data-evaluation/account/account-h
 import { DataOverviewModule } from '@v0/shared/data-overview/data-overview.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AccountStatusCheckComponent } from '@v0/data-evaluation/account/account-home/account-status-check/account-status-check.component';
+import { EmailVerifiBackupModule } from '@app/v0/shared/email-verifi-backup/email-verifi-backup.module';
 
 
 
@@ -34,7 +35,8 @@ import { AccountStatusCheckComponent } from '@v0/data-evaluation/account/account
     CalculatingSpinnerModule,
     DataOverviewModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    EmailVerifiBackupModule
   ]
 })
 export class AccountHomeModule { }

@@ -1,0 +1,53 @@
+<div [ngClass]="{'windowOverlay': true }">
+</div>
+<div class="popup email-modal open">
+  <div class="popup-header">Email {{modalHeader}}
+    <button class="item-right" (click)="closeEmailModal()">x</button>
+  </div>
+  <div class="popup-body">
+    @if (emailForm) {
+    <form [formGroup]="emailForm">
+      <div class="mb-4">
+        <label class="w-100 fw-bold mb-1" for="senderEmail">Sender Email</label>
+        <input type="text" id="senderEmail" class="form-control" formControlName="senderEmail">
+        @if (emailForm.controls.senderEmail.invalid && emailForm.controls.senderEmail.dirty &&
+        emailForm.controls.senderEmail.errors?.email) {
+        <div class="text-danger mt-1">Please enter a valid email address.</div>
+        }
+      </div>
+      <div class="mb-4">
+        <label class="w-100 fw-bold mb-1" for="receiverEmail">Receiver Email</label>
+        <input type="text" id="receiverEmail" class="form-control" formControlName="receiverEmail">
+        <label class="text-muted mt-1">Separate multiple email addresses with commas</label>
+        @if (emailForm.controls.receiverEmail.invalid && emailForm.controls.receiverEmail.dirty) {
+        @if (emailForm.controls.receiverEmail.errors?.invalidEmails) {
+        <div class="text-danger mt-1">One or more email addresses are invalid.</div>
+        }
+        @if (emailForm.controls.receiverEmail.errors?.required) {
+        <div class="text-danger mt-1">Receiver email is required.</div>
+        }
+        }
+      </div>
+      <div class="mb-4">
+        <label class="w-100 fw-bold mb-1" for="attachmentName">Attachment Name</label>
+        <div class="input-group">
+          <input id="attachmentName" class="form-control" type="text" formControlName="attachmentName" maxlength="100">
+          <span class="input-group-text">.json</span>
+        </div>
+        @if (emailForm.controls.attachmentName.invalid && emailForm.controls.attachmentName.dirty) {
+        @if (emailForm.controls.attachmentName.errors?.required) {
+        <div class="text-danger mt-1">Attachment name is required</div>
+        }
+        @if (emailForm.controls.attachmentName.errors?.invalidAttachmentName) {
+        <div class="text-danger mt-1">Only letters, numbers, spaces, dots, underscores, parentheses and hyphens are allowed.</div>
+        }
+        }
+      </div>
+    </form>
+    }
+    <div class="popup-footer text-end mt-4">
+      <button class="btn btn-secondary" (click)="closeEmailModal()">Cancel</button>
+      <button class="btn btn-success" [disabled]="emailForm?.invalid" (click)="sendEmail()">Send</button>
+    </div>
+  </div>
+</div>
