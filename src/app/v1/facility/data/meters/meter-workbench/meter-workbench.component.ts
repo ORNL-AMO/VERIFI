@@ -45,8 +45,7 @@ export class MeterWorkbenchComponent {
   readonly activeTab = this.activeTabState.asReadonly();
   readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
   readonly factsExpanded = this.workbenchLayout.factsExpanded;
-  readonly energyUnitOptions = EnergyUnitOptions;
-  readonly displayEnergyUnitControl = new FormControl('', { nonNullable: true });
+  readonly energyUnitOptions = computed(() => EnergyUnitOptions);
   readonly savingDisplaySettings = this.savingDisplaySettingsState.asReadonly();
   readonly displaySettingsError = this.displaySettingsErrorState.asReadonly();
   readonly displaySettings = computed(() => {
@@ -54,6 +53,10 @@ export class MeterWorkbenchComponent {
     const meter = this.workspace.selectedMeter();
     return facility && meter ? resolveMeterDisplaySettings(meter, facility) : undefined;
   });
+  readonly displayEnergyUnitControl = new FormControl(
+    this.displaySettings()?.energyUnit ?? '',
+    { nonNullable: true }
+  );
   readonly canEditDisplaySettings = computed(() => this.workspace.canWrite()
     && !this.workspace.hasPending()
     && !this.savingDisplaySettingsState());

@@ -33,9 +33,12 @@ describe('WorkspaceCalendarizationService browser contract', () => {
     await settleSignals();
 
     expect(FakeWorker.instances).toHaveLength(1);
-    const displayOnly = workspaceSnapshot('account-a', 10);
-    displayOnly.facilities[0] = { ...displayOnly.facilities[0], energyUnit: 'GJ', energyIsSource: true };
-    displayOnly.meters[0] = { ...displayOnly.meters[0], displayEnergyUnit: 'kWh', displayEnergyIsSource: true };
+    const original = workspaceSnapshot('account-a', 10);
+    const displayOnly: AccountWorkspaceSnapshot = {
+      ...original,
+      facilities: [{ ...original.facilities[0], energyUnit: 'GJ', energyIsSource: true }],
+      meters: [{ ...original.meters[0], displayEnergyUnit: 'kWh', displayEnergyIsSource: true }]
+    };
     snapshot.set(displayOnly);
     await settleSignals();
 

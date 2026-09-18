@@ -168,7 +168,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(select?.value).toBe('kWh');
     expect(Array.from(select?.options ?? []).every(option => option.value.length > 0)).toBe(true);
     expect(Array.from(select?.options ?? []).map(option => option.textContent?.trim())).toEqual(
-      fixture.componentInstance.energyUnitOptions.map(option => option.value)
+      fixture.componentInstance.energyUnitOptions().map(option => option.value)
     );
     expect(unitControl?.textContent).not.toContain('Facility default');
     expect(actions?.textContent).toContain('Site');
