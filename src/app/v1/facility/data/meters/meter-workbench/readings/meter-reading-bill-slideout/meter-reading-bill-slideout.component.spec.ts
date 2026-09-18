@@ -43,10 +43,52 @@ describe('MeterReadingBillSlideoutComponent', () => {
     expect(form?.controls['readDate'].hasError('duplicateReadingDate')).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('A reading already exists for this date.');
   });
+
+  it('calculates disabled energy use when consumption changes for a non-energy unit', () => {
+    const fixture = setup({
+      meterValue: meter({
+        guid: 'meter-a',
+        source: 'Natural Gas',
+        startingUnit: 'ft3',
+        energyUnit: 'MMBtu',
+        heatCapacity: 0.001029
+      }),
+      readingValue: reading({
+        guid: 'reading-a',
+        meterId: 'meter-a',
+        totalVolume: undefined,
+        totalEnergyUse: undefined,
+        heatCapacity: 0.001029
+      })
+    });
+    const component = fixture.componentInstance;
+    const energyUseInput = fixture.nativeElement.querySelector('[formcontrolname="totalEnergyUse"]') as HTMLInputElement;
+    const savedReadings: number[] = [];
+    component.saved.subscribe(event => savedReadings.push(event.reading.totalEnergyUse));
+
+    expect(component.form?.controls['totalEnergyUse'].disabled).toBe(true);
+    expect(energyUseInput.disabled).toBe(true);
+
+    component.form?.controls['totalVolume'].setValue(1_000);
+    fixture.detectChanges();
+
+    expect(component.form?.controls['totalEnergyUse'].value).toBe(1.029);
+    expect(energyUseInput.valueAsNumber).toBe(1.029);
+
+    component.save(false);
+    expect(savedReadings).toEqual([1.029]);
+
+    component.form?.controls['totalVolume'].setValue(0);
+    expect(component.form?.controls['totalEnergyUse'].value).toBe(0);
+
+    component.form?.controls['totalVolume'].setValue(null);
+    expect(component.form?.controls['totalEnergyUse'].value).toBeUndefined();
+  });
 });
 
 function setup(options: {
   readonly mode?: 'add' | 'edit';
+  readonly meterValue?: ReturnType<typeof meter>;
   readonly readingValue?: ReturnType<typeof reading>;
   readonly existingReadings?: ReturnType<typeof reading>[];
 } = {}): ComponentFixture<MeterReadingBillSlideoutComponent> {
@@ -55,7 +97,7 @@ function setup(options: {
   }).createComponent(MeterReadingBillSlideoutComponent);
 
   fixture.componentRef.setInput('mode', options.mode ?? 'add');
-  fixture.componentRef.setInput('meter', meter({
+  fixture.componentRef.setInput('meter', options.meterValue ?? meter({
     guid: 'meter-a',
     source: 'Electricity',
     energyUnit: 'kWh',

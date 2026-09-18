@@ -100,7 +100,25 @@ export class MeterReadingFormService {
     }
     form.controls['heatCapacity'].disable();
     form.controls['vehicleFuelEfficiency'].disable();
+    if (context.displayVolumeInput) {
+      this.bindCalculatedEnergyUse(meter, form);
+    }
     return form;
+  }
+
+  private bindCalculatedEnergyUse(meter: IdbUtilityMeter, form: FormGroup): void {
+    const updateEnergyUse = (): void => {
+      form.controls['totalEnergyUse'].setValue(calculateEnergyUseFromConsumption(
+        meter,
+        form.controls['totalVolume'].value,
+        form.controls['heatCapacity'].value,
+        form.controls['vehicleFuelEfficiency'].value
+      ), { emitEvent: false });
+    };
+
+    form.controls['totalVolume'].valueChanges.subscribe(updateEnergyUse);
+    form.controls['heatCapacity'].valueChanges.subscribe(updateEnergyUse);
+    form.controls['vehicleFuelEfficiency'].valueChanges.subscribe(updateEnergyUse);
   }
 
   private buildChargesArray(meterData: IdbUtilityMeterData): FormArray {
@@ -114,6 +132,35 @@ export class MeterReadingFormService {
   private getChargesArray(form: FormGroup): FormArray {
     return form.get('chargesArray') as FormArray;
   }
+}
+
+function calculateEnergyUseFromConsumption(
+  meter: IdbUtilityMeter,
+  consumptionValue: unknown,
+  heatCapacityValue: unknown,
+  fuelEfficiencyValue: unknown
+): number | undefined {
+  const consumption = finiteNumber(consumptionValue);
+  const heatCapacity = finiteNumber(heatCapacityValue);
+  if (consumption === undefined || heatCapacity === undefined) {
+    return undefined;
+  }
+
+  if (meter.scope === 2 && meter.vehicleCategory === 2 && meter.vehicleCollectionType === 2) {
+    const fuelEfficiency = finiteNumber(fuelEfficiencyValue);
+    return fuelEfficiency !== undefined && fuelEfficiency > 0
+      ? consumption / fuelEfficiency * heatCapacity
+      : undefined;
+  }
+  return consumption * heatCapacity;
+}
+
+function finiteNumber(value: unknown): number | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : undefined;
 }
 
 function enabledControlValue(form: FormGroup, controlName: string): any {
