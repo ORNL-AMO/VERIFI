@@ -106,7 +106,7 @@ describe('MeterWorkbenchMonthlyDataComponent', () => {
       const element = fixture.nativeElement as HTMLElement;
       expect(element.textContent).toContain('Calendarize Meter Data');
       expect(element.textContent).toContain('Total Consumption');
-      expect(element.textContent).toContain('Total Energy');
+      expect(element.textContent).toContain('Total Site Energy');
       expect(element.textContent).toContain('Total Market-Based Emissions');
       expect(element.textContent).toContain('Total Location-Based Emissions');
       expect(element.textContent).toContain('Total Cost');

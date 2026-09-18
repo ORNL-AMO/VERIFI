@@ -53,6 +53,7 @@ describe('meter results models', () => {
       'totalWithLocationEmissions',
       'energyCost'
     ]);
+    expect(columns.find(column => column.id === 'energyUse')?.label).toBe('Total Site Energy');
     expect(yearlyRows).toEqual([
       expect.objectContaining({
         year: 2026,

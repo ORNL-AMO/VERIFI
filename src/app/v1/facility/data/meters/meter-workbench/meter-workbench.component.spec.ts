@@ -13,6 +13,8 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meter-workbench.component';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 
 describe('MeterWorkbenchComponent', () => {
   it('renders the selected meter header and active workbench tab from the child route', () => {
@@ -151,6 +153,93 @@ describe('MeterWorkbenchComponent', () => {
 
     expect(toggle?.getAttribute('aria-expanded')).toBe('true');
     expect(factsRegion?.hidden).toBe(false);
+  });
+
+  it('shows compact unit labels without facility-default helper content', () => {
+    const fixture = setup();
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const select = element.querySelector<HTMLSelectElement>('#v1-meter-display-energy-unit');
+    const actions = element.querySelector('.v1-meter-workbench-header__chips');
+    const unitControl = element.querySelector('.v1-meter-workbench-header__unit-control');
+    expect(select?.value).toBe('kWh');
+    expect(Array.from(select?.options ?? []).every(option => option.value.length > 0)).toBe(true);
+    expect(Array.from(select?.options ?? []).map(option => option.textContent?.trim())).toEqual(
+      fixture.componentInstance.energyUnitOptions.map(option => option.value)
+    );
+    expect(unitControl?.textContent).not.toContain('Facility default');
+    expect(actions?.textContent).toContain('Site');
+    expect(actions?.textContent).toContain('Source');
+    expect(actions?.textContent).not.toContain('Facility default');
+    expect(actions?.lastElementChild?.previousElementSibling?.textContent).toContain('Hide facts');
+  });
+
+  it('selects the inherited facility energy unit on initial render', () => {
+    const fixture = setup({
+      facilityValue: facility({
+        guid: 'facility-a', accountId: 'account-a', name: 'Facility A', energyUnit: 'MMBtu',
+        volumeLiquidUnit: 'kgal', volumeGasUnit: 'CCF', massUnit: 'lb', energyIsSource: true
+      })
+    });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const select = element.querySelector<HTMLSelectElement>('#v1-meter-display-energy-unit');
+    expect(select?.value).toBe('MMBtu');
+    expect(select?.selectedOptions[0]?.textContent?.trim()).toBe('MMBtu');
+  });
+
+  it('persists meter display overrides and can restore the facility basis', async () => {
+    const fixture = setup({
+      selectedMeter: meter({
+        guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', displayEnergyIsSource: true
+      })
+    });
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeter: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    fixture.componentInstance.setDisplayEnergyUnit({ target: { value: 'GJ' } } as unknown as Event);
+    await fixture.whenStable();
+
+    expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.objectContaining({ displayEnergyUnit: 'GJ' }), 'account-a');
+
+    meterHandler.updateMeter.mockClear();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__basis-control button'))
+      .find(button => button.textContent?.trim() === 'Site')
+      ?.click();
+    await fixture.whenStable();
+    expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.not.objectContaining({ displayEnergyIsSource: expect.anything() }), 'account-a');
+  });
+
+  it('restores facility unit inheritance by selecting the facility unit', async () => {
+    const fixture = setup({
+      selectedMeter: meter({
+        guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', displayEnergyUnit: 'GJ'
+      })
+    });
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeter: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    fixture.componentInstance.setDisplayEnergyUnit({ target: { value: 'kWh' } } as unknown as Event);
+    await fixture.whenStable();
+
+    expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.any(Object), 'account-a');
+    expect(meterHandler.updateMeter.mock.calls[0][0]).not.toHaveProperty('displayEnergyUnit');
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Use facility unit');
+  });
+
+  it('hides energy display controls for a water meter', () => {
+    const fixture = setup({ selectedMeter: meter({ guid: 'meter-water', source: 'Water Intake', startingUnit: 'gal' }) });
+
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('#v1-meter-display-energy-unit')).toBeNull();
+    expect(element.querySelector('.v1-meter-workbench-header__basis-control')).toBeNull();
   });
 
   it('uses the session workbench preference when the meter workbench is recreated', () => {
@@ -487,6 +576,7 @@ function setup(options: {
   calendarizationState?: 'idle' | 'loading' | 'ready' | 'error';
   selectedMeterUsageFacts?: MeterUsageFactsView;
   factsExpanded?: boolean;
+  facilityValue?: ReturnType<typeof facility>;
 } = {}): ComponentFixture<MeterWorkbenchComponent> {
   const selectedMeter = signal(options.selectedMeter === undefined && options.hasMeterRoute
     ? undefined
@@ -519,7 +609,10 @@ function setup(options: {
         provide: FacilityMetersWorkspaceService,
         useValue: {
           account: signal(account({ guid: 'account-a', name: 'Account A' })),
-          facility: signal(facility({ guid: 'facility-a', accountId: 'account-a', name: 'Facility A' })),
+          facility: signal(options.facilityValue ?? facility({
+            guid: 'facility-a', accountId: 'account-a', name: 'Facility A', energyUnit: 'kWh',
+            volumeLiquidUnit: 'kgal', volumeGasUnit: 'CCF', massUnit: 'lb', energyIsSource: false
+          })),
           selectedMeter,
           selectedMeterCard,
           meterCards,
@@ -572,6 +665,16 @@ function setup(options: {
         }
       },
       { provide: Router, useValue: { navigate: vi.fn(), events: routerEvents } },
+      {
+        provide: WorkspaceCommandBoundary,
+        useValue: {
+          execute: vi.fn(async (_options, persist: () => Promise<unknown>) => ({ value: await persist() }))
+        }
+      },
+      {
+        provide: MeterCommandHandler,
+        useValue: { updateMeter: vi.fn(async (updatedMeter: unknown) => updatedMeter) }
+      },
       {
         provide: ActivatedRoute,
         useValue: {

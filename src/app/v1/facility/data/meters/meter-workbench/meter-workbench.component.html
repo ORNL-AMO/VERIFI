@@ -21,6 +21,7 @@
 } @else if (currentMeter) {
   @let currentCard = workspace.selectedMeterCard();
   @let usageFacts = workspace.selectedMeterUsageFacts();
+  @let currentDisplaySettings = displaySettings();
   @let accountMetersLink = accountMetersRoute();
   <div class="v1-meter-workbench-sticky">
     <header class="v1-data-workbench-header v1-meter-workbench-header">
@@ -106,6 +107,46 @@
             </app-ui-icon>
             {{ currentCard?.statusLabel || 'Checking' }}
           </span>
+          @if (currentDisplaySettings?.showEnergyUnit) {
+            <label class="visually-hidden" for="v1-meter-display-energy-unit">Displayed energy unit</label>
+            <div class="v1-meter-workbench-header__unit-control">
+              <select
+                id="v1-meter-display-energy-unit"
+                class="v1-select v1-meter-workbench-header__unit-select"
+                [disabled]="!canEditDisplaySettings()"
+                (change)="setDisplayEnergyUnit($event)">
+                @for (option of energyUnitOptions; track option.value) {
+                  <option
+                    [value]="option.value"
+                    [selected]="option.value === currentDisplaySettings?.energyUnit">
+                    {{ option.value }}
+                  </option>
+                }
+              </select>
+            </div>
+          }
+          @if (currentDisplaySettings?.showSiteToSource) {
+            <div class="v1-meter-workbench-header__basis-control">
+              <div class="v1-segmented" role="group" aria-label="Displayed energy basis">
+                <button
+                  type="button"
+                  class="v1-segmented__btn"
+                  [attr.aria-pressed]="currentDisplaySettings?.energyIsSource === false"
+                  [disabled]="!canEditDisplaySettings()"
+                  (click)="setDisplayEnergyIsSource(false)">
+                  Site
+                </button>
+                <button
+                  type="button"
+                  class="v1-segmented__btn"
+                  [attr.aria-pressed]="currentDisplaySettings?.energyIsSource === true"
+                  [disabled]="!canEditDisplaySettings()"
+                  (click)="setDisplayEnergyIsSource(true)">
+                  Source
+                </button>
+              </div>
+            </div>
+          }
           <button
             type="button"
             class="v1-btn v1-btn--quiet v1-btn--sm v1-meter-workbench-header__facts-toggle"
@@ -115,8 +156,18 @@
             <app-ui-icon [name]="factsExpanded() ? 'chevronUp' : 'chevronDown'"></app-ui-icon>
             {{ factsExpanded() ? 'Hide facts' : 'Show facts' }}
           </button>
+          <span class="visually-hidden" aria-live="polite">
+            @if (savingDisplaySettings()) { Saving meter display settings. }
+          </span>
         </div>
       </div>
+
+      @if (displaySettingsError()) {
+        <div class="v1-alert v1-alert--danger v1-meter-workbench-header__display-error" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ displaySettingsError() }}</span>
+        </div>
+      }
 
       <div
         id="v1-meter-workbench-facts"
@@ -151,7 +202,7 @@
         </dl>
 
         @if (usageFacts.unitLabel) {
-          <p class="v1-data-workbench-facts-note">Usage values shown in {{ usageFacts.unitLabel }}/month</p>
+          <p class="v1-data-workbench-facts-note">Usage values shown in {{ usageFacts.basisLabel ? usageFacts.basisLabel + ' ' : '' }}{{ usageFacts.unitLabel }}/month</p>
         }
 
         <dl class="v1-data-workbench-facts v1-data-workbench-facts--usage v1-meter-workbench-header__facts" aria-label="Meter usage facts">

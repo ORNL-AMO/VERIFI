@@ -1,10 +1,12 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { evaluateWorkspaceStatus } from './status.evaluator';
 import { presentFindings, todoItems } from './status.catalog';
 import { StatusEvaluationState, StatusFinding, StatusItem, summarizeFindings } from './status.models';
-import { WorkspaceCalendarizationService } from './workspace-calendarization.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceStatusService {
@@ -13,12 +15,16 @@ export class WorkspaceStatusService {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly evaluationDate = signal(startOfToday());
+  private readonly coverage = toSignal(this.calendarization.calendarizeBase(), {
+    initialValue: IDLE_WORKSPACE_CALENDARIZATION
+  });
   private dateRefreshTimeout?: ReturnType<typeof setTimeout>;
 
   private readonly canEvaluate = computed(() => this.workspace.isReady()
     && !!this.workspace.snapshot()
-    && this.calendarization.state() === 'ready'
-    && this.calendarization.revision() === this.workspace.revision());
+    && this.coverage().state === 'ready'
+    && this.coverage().accountGuid === this.workspace.account()?.guid
+    && this.coverage().inputFingerprint === this.calendarization.currentInputFingerprint());
   private readonly evaluationResult = computed(() => {
     const snapshot = this.workspace.snapshot();
     if (!snapshot || !this.canEvaluate()) return undefined;
@@ -26,7 +32,7 @@ export class WorkspaceStatusService {
       return {
         evaluation: evaluateWorkspaceStatus({
           snapshot,
-          calendarizedMeters: this.calendarization.calendarizedMeters(),
+          calendarizedMeters: this.coverage().meters,
           revision: this.workspace.revision(),
           asOfDate: this.evaluationDate()
         })
@@ -37,7 +43,7 @@ export class WorkspaceStatusService {
   });
   readonly state = computed<StatusEvaluationState>(() => {
     if (!this.workspace.isReady() || !this.workspace.snapshot()) return 'idle';
-    if (this.calendarization.state() === 'error') return 'error';
+    if (this.coverage().state === 'error') return 'error';
     if (!this.canEvaluate()) return 'evaluating';
     return this.evaluationResult()?.error ? 'error' : 'ready';
   });
@@ -52,7 +58,6 @@ export class WorkspaceStatusService {
   });
   readonly selectedFacilitySummary = computed(() => summarizeFindings(this.selectedFacilityFindings()));
   readonly selectedFacilityTodos = computed(() => todoItems(this.selectedFacilityFindings()));
-  readonly calendarizedMeters = this.calendarization.calendarizedMeters;
 
   constructor() {
     this.scheduleDateRefresh();

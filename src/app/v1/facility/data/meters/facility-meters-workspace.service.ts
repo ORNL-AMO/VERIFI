@@ -1,11 +1,19 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { buildMeterCards, buildMeterGroupResultsView, buildMeterGroupSections, buildMeterUsageFactsFromCalendarizedMeters } from './models';
+import {
+  buildMeterCards,
+  buildMeterGroupResultsView,
+  buildMeterGroupSections,
+  buildMeterUsageFactsFromCalendarizedMeters,
+  resolveMeterDisplaySettings
+} from './models';
 
 @Injectable()
 export class FacilityMetersWorkspaceService {
@@ -13,6 +21,7 @@ export class FacilityMetersWorkspaceService {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly status = inject(WorkspaceStatusService);
+  private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly currentUrl = signal(this.router.url);
 
   readonly account = this.workspace.account;
@@ -22,12 +31,51 @@ export class FacilityMetersWorkspaceService {
   readonly meters = computed(() => [...this.workspace.facilityMeters()]);
   readonly meterData = computed(() => [...this.workspace.facilityMeterData()]);
   readonly meterGroups = computed(() => [...this.workspace.facilityMeterGroups()]);
+  private readonly calendarizationResult = toSignal(this.calendarization.calendarizeBase(), {
+    initialValue: IDLE_WORKSPACE_CALENDARIZATION
+  });
+  private readonly facilityProjection = computed(() => {
+    const base = this.calendarizationResult();
+    const facility = this.facility();
+    if (base.state !== 'ready' || !facility) return undefined;
+    return this.calendarization.project(base, {
+      context: { kind: 'facility', guid: facility.guid },
+      energyUnit: facility.energyUnit,
+      waterUnit: facility.volumeLiquidUnit,
+      energyIsSource: facility.energyIsSource,
+      includeEmissions: false
+    });
+  });
+  private readonly meterDisplayProjection = computed(() => {
+    const base = this.calendarizationResult();
+    const facility = this.facility();
+    if (base.state !== 'ready' || !facility) return undefined;
+    const meters = this.meters().flatMap(meter => {
+      const settings = resolveMeterDisplaySettings(meter, facility);
+      const result = this.calendarization.project(base, {
+        context: { kind: 'facility', guid: facility.guid },
+        meterGuids: [meter.guid],
+        energyUnit: settings.energyUnit,
+        waterUnit: facility.volumeLiquidUnit,
+        energyIsSource: settings.energyIsSource,
+        includeEmissions: false
+      });
+      return result.state === 'ready' ? result.meters : [];
+    });
+    return { state: 'ready' as const, meters };
+  });
   readonly meterFindings = computed(() => this.status.items().filter(item => item.entity.kind === 'meter' && item.entity.facilityGuid === this.facility()?.guid));
   readonly calendarizationState = computed<'idle' | 'loading' | 'ready' | 'error'>(() => {
-    const state = this.status.state();
-    return state === 'evaluating' ? 'loading' : state;
+    const state = this.calendarizationResult().state;
+    if (state === 'evaluating') return 'loading';
+    if (state !== 'ready') return state;
+    if (this.facilityProjection()?.state === 'error') return 'error';
+    return 'ready';
   });
-  readonly calendarizedMeters = computed(() => this.status.calendarizedMeters().filter(item => item.meter.facilityId === this.facility()?.guid));
+  readonly facilityCalendarizedMeters = computed(() => this.facilityProjection()?.state === 'ready'
+    ? this.facilityProjection()?.meters ?? []
+    : []);
+  readonly calendarizedMeters = computed(() => this.meterDisplayProjection()?.meters ?? []);
   readonly meterCards = computed(() => buildMeterCards(
     this.meters(),
     this.meterData(),
@@ -72,7 +120,7 @@ export class FacilityMetersWorkspaceService {
     this.selectedMeterGroupForWorkbench(),
     this.facility(),
     this.groupSections(),
-    this.calendarizedMeters()
+    this.facilityCalendarizedMeters()
   ));
   readonly selectedMeterUsageFacts = computed(() => {
     const selectedGuid = this.selectedMeterGuid();

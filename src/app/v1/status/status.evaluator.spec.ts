@@ -76,6 +76,16 @@ describe('v1 workspace status evaluator', () => {
     expect(isOlderThanThreshold(new Date(2026, 0, 16), new Date(2026, 3, 17), 3)).toBe(true);
   });
 
+  it('keeps validation findings independent from meter display unit and basis preferences', () => {
+    const original = snapshot();
+    const withDisplayOverrides = snapshot({
+      meters: [{ ...original.meters[0], displayEnergyUnit: 'GJ', displayEnergyIsSource: true }]
+    });
+
+    expect(evaluate(withDisplayOverrides).findings.map(finding => finding.code))
+      .toEqual(evaluate(original).findings.map(finding => finding.code));
+  });
+
   it('combines wall-clock staleness and facility lag into one primary currency finding', () => {
     const result = evaluate(
       snapshot({ meterData: [reading({ month: 1, year: 2025 })] }),

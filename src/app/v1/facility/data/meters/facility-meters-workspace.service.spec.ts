@@ -1,9 +1,11 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { group, meter, reading } from './facility-meters.testing';
@@ -12,7 +14,7 @@ import { FacilityMetersWorkspaceService } from './facility-meters-workspace.serv
 describe('FacilityMetersWorkspaceService', () => {
   it('exposes selected meter context from the current meter route', () => {
     const events = new Subject<unknown>();
-    const service = setupService(events);
+    const { service } = setupService(events);
 
     expect(service.selectedMeterGuid()).toBe('meter-a');
     expect(service.selectedMeter()?.name).toBe('Electric Main');
@@ -30,24 +32,55 @@ describe('FacilityMetersWorkspaceService', () => {
     expect(service.selectedMeterCard()).toBeUndefined();
   });
 
-  it('reuses account-wide calendarization and filters it to the selected facility', () => {
+  it('projects the shared canonical result into meter display settings', () => {
     const events = new Subject<unknown>();
     const currentMeter = meter({ guid: 'meter-a', name: 'Electric Main', groupId: 'group-a' });
-    const otherMeter = meter({ guid: 'meter-other', facilityId: 'facility-b' });
-    const calendarizedMeters = signal([
-      { meter: currentMeter, monthlyData: [] },
-      { meter: otherMeter, monthlyData: [] }
-    ] as any[]);
-    const service = setupService(events, calendarizedMeters);
+    const calendarizedMeters = [
+      { meter: currentMeter, monthlyData: [] }
+    ] as any[];
+    const { service, calendarizeBase, project } = setupService(events, calendarizedMeters);
 
     expect(service.calendarizationState()).toBe('ready');
     expect(service.calendarizedMeters().map(item => item.meter.guid)).toEqual(['meter-a']);
+    expect(calendarizeBase).toHaveBeenCalledOnce();
+    expect(project).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      context: { kind: 'facility', guid: 'facility-a' }, includeEmissions: false
+    }));
+  });
+
+  it('reprojects a facility switch without requesting another base calculation', () => {
+    const events = new Subject<unknown>();
+    const { service, calendarizeBase, project, selectedFacility } = setupService(events);
+
+    selectedFacility.set(facilityValue({ guid: 'facility-b', name: 'Facility B' }));
+    TestBed.flushEffects();
+    service.calendarizationState();
+    service.calendarizedMeters();
+
+    expect(calendarizeBase).toHaveBeenCalledOnce();
+    expect(project).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({
+      context: { kind: 'facility', guid: 'facility-b' }
+    }));
   });
 });
 
-function setupService(events: Subject<unknown>, calendarizedMeters = signal<any[]>([])): FacilityMetersWorkspaceService {
+function setupService(events: Subject<unknown>, calendarizedMeters: any[] = []): {
+  service: FacilityMetersWorkspaceService;
+  calendarizeBase: ReturnType<typeof vi.fn>;
+  project: ReturnType<typeof vi.fn>;
+  selectedFacility: { set(value: ReturnType<typeof facilityValue>): void };
+} {
   const meterA = meter({ guid: 'meter-a', name: 'Electric Main', groupId: 'group-a' });
   const statusEntity = { kind: 'meter' as const, guid: meterA.guid, name: meterA.name, accountGuid: meterA.accountId, facilityGuid: meterA.facilityId };
+  const calendarizeBase = vi.fn(() => of(calendarizationResult(calendarizedMeters)));
+  const project = vi.fn((_base, request) => ({
+    state: 'ready', accountGuid: 'account-a', inputFingerprint: 'fingerprint-a',
+    projection: { context: request.context },
+    meters: request.meterGuids
+      ? calendarizedMeters.filter(item => request.meterGuids.includes(item.meter.guid))
+      : calendarizedMeters
+  }));
+  const selectedFacility = signal(facilityValue());
   TestBed.configureTestingModule({
     providers: [
       FacilityMetersWorkspaceService,
@@ -56,7 +89,7 @@ function setupService(events: Subject<unknown>, calendarizedMeters = signal<any[
         provide: AccountWorkspaceStore,
         useValue: {
           account: signal({ guid: 'account-a', name: 'Account A' }),
-          selectedFacility: signal({ guid: 'facility-a', name: 'Facility A' }),
+          selectedFacility,
           canWrite: signal(true),
           hasPending: signal(false),
           facilityMeters: signal([meterA, meter({ guid: 'meter-b', name: 'Water Main', source: 'Water Intake' })]),
@@ -71,11 +104,30 @@ function setupService(events: Subject<unknown>, calendarizedMeters = signal<any[
         provide: WorkspaceStatusService,
         useValue: {
           state: signal('ready'),
-          items: signal([presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', statusEntity, { latestPeriod: '2026-02', thresholdMonths: 3 }))]),
-          calendarizedMeters
+          items: signal([presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', statusEntity, { latestPeriod: '2026-02', thresholdMonths: 3 }))])
         }
-      }
+      },
+      { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase, project } }
     ]
   });
-  return TestBed.inject(FacilityMetersWorkspaceService);
+  const service = TestBed.inject(FacilityMetersWorkspaceService);
+  TestBed.flushEffects();
+  return { service, calendarizeBase, project, selectedFacility };
+}
+
+function calendarizationResult(meters: any[]): WorkspaceCalendarizationBaseResult {
+  return {
+    state: 'ready',
+    accountGuid: 'account-a',
+    inputFingerprint: 'fingerprint-a',
+    meters
+  };
+}
+
+function facilityValue(overrides = {}) {
+  return {
+    guid: 'facility-a', accountId: 'account-a', name: 'Facility A', energyUnit: 'kWh', volumeLiquidUnit: 'kgal',
+    volumeGasUnit: 'CCF', massUnit: 'lb', energyIsSource: false, fiscalYear: 'calendarYear' as const,
+    fiscalYearMonth: 0, fiscalYearCalendarEnd: true, ...overrides
+  } as any;
 }

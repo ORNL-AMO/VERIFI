@@ -70,6 +70,7 @@ Independent predictor problems are all reported; one warning cannot hide an erro
 - Staleness uses the effective account/facility setting of 2, 3, 6, or 12 months; the default is 3 months.
 - A date exactly on the threshold is current. It becomes stale only when older than the threshold.
 - Evaluation receives an explicit date. It does not read the clock inside individual rules.
+- Status evaluates dates, completeness, and scale-invariant quality evidence from the current account's canonical calendarization result. Display units and Site/Source preferences do not change validation findings; workbenches convert only the selected display slice on demand.
 - **Ignore date status checks** suppresses both stale and behind-facility findings.
 - Records marked **no longer in use** are compared with their configured stop month/year and are not wall-clock stale.
 - **Allow negative values** suppresses negative-value findings.

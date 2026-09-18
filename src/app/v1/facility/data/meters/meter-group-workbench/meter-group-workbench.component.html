@@ -134,7 +134,7 @@
     </dl>
 
     @if (currentResults.usageFacts.unitLabel) {
-      <p class="v1-data-workbench-facts-note">Usage values shown in {{ currentResults.usageFacts.unitLabel }}/month</p>
+      <p class="v1-data-workbench-facts-note">Usage values shown in {{ currentResults.usageFacts.basisLabel ? currentResults.usageFacts.basisLabel + ' ' : '' }}{{ currentResults.usageFacts.unitLabel }}/month</p>
     }
 
     <dl class="v1-data-workbench-facts v1-data-workbench-facts--usage v1-meter-group-workbench-header__facts" aria-label="Meter group usage facts">

@@ -66,7 +66,7 @@
     @if (displayUsageFacts; as usageFacts) {
       <section class="v1-meter-browse-card__usage" aria-label="Meter usage facts">
         @if (usageFacts.unitLabel) {
-          <p class="v1-meter-browse-card__usage-note">Usage values shown in {{ usageFacts.unitLabel }}/month</p>
+          <p class="v1-meter-browse-card__usage-note">Usage values shown in {{ usageFacts.basisLabel ? usageFacts.basisLabel + ' ' : '' }}{{ usageFacts.unitLabel }}/month</p>
         }
         <dl class="v1-meter-browse-card__usage-facts">
           @for (fact of usageFacts.facts; track fact.id) {
