@@ -1,5 +1,6 @@
 import { Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
@@ -45,6 +46,7 @@ export class MeterWorkbenchComponent {
   readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
   readonly factsExpanded = this.workbenchLayout.factsExpanded;
   readonly energyUnitOptions = EnergyUnitOptions;
+  readonly displayEnergyUnitControl = new FormControl('', { nonNullable: true });
   readonly savingDisplaySettings = this.savingDisplaySettingsState.asReadonly();
   readonly displaySettingsError = this.displaySettingsErrorState.asReadonly();
   readonly displaySettings = computed(() => {
@@ -55,6 +57,19 @@ export class MeterWorkbenchComponent {
   readonly canEditDisplaySettings = computed(() => this.workspace.canWrite()
     && !this.workspace.hasPending()
     && !this.savingDisplaySettingsState());
+  private readonly syncDisplayEnergyUnitEffect = effect(() => {
+    const energyUnit = this.displaySettings()?.energyUnit ?? '';
+    const saving = this.savingDisplaySettingsState();
+    if (!saving && this.displayEnergyUnitControl.value !== energyUnit) {
+      this.displayEnergyUnitControl.setValue(energyUnit, { emitEvent: false });
+    }
+
+    if (this.canEditDisplaySettings()) {
+      this.displayEnergyUnitControl.enable({ emitEvent: false });
+    } else {
+      this.displayEnergyUnitControl.disable({ emitEvent: false });
+    }
+  });
   readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly showWorkspaceUnavailable = computed(() => !this.workspace.canWrite() && this.activeTabState() !== 'settings');
   readonly showWorkspacePending = computed(() => this.workspace.hasPending() && this.activeTabState() !== 'settings');
@@ -195,6 +210,7 @@ export class MeterWorkbenchComponent {
         () => this.meterHandler.updateMeter(updatedMeter, account.guid)
       );
     } catch (error) {
+      this.displayEnergyUnitControl.setValue(this.displaySettings()?.energyUnit ?? '', { emitEvent: false });
       this.displaySettingsErrorState.set(error instanceof Error
         ? error.message
         : 'The meter display settings could not be saved.');

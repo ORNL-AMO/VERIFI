@@ -1,6 +1,7 @@
 import { Directive, Input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -230,6 +231,23 @@ describe('MeterWorkbenchComponent', () => {
     expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.any(Object), 'account-a');
     expect(meterHandler.updateMeter.mock.calls[0][0]).not.toHaveProperty('displayEnergyUnit');
     expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Use facility unit');
+  });
+
+  it('restores the effective unit when a display preference cannot be saved', async () => {
+    const fixture = setup();
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeter: ReturnType<typeof vi.fn> };
+    meterHandler.updateMeter.mockRejectedValueOnce(new Error('Display preference save failed.'));
+
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const select = element.querySelector<HTMLSelectElement>('#v1-meter-display-energy-unit') as HTMLSelectElement;
+    select.value = 'GJ';
+    select.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(select.value).toBe('kWh');
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('Display preference save failed.');
   });
 
   it('hides energy display controls for a water meter', () => {
@@ -603,7 +621,7 @@ function setup(options: {
       RouterOutletStubDirective,
       RouterLinkStubDirective
     ],
-    imports: [CommonModule, IconComponent],
+    imports: [CommonModule, ReactiveFormsModule, IconComponent],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,
