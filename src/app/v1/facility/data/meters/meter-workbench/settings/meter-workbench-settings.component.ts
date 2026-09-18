@@ -1,5 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -11,6 +12,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { of, startWith, switchMap } from 'rxjs';
 import {
   MeterSettingsFormService,
   MeterSettingsRuleChange,
@@ -52,6 +54,14 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   readonly saveState = signal<MeterSettingsSaveState>('idle');
   readonly saveMessage = signal('Changes save automatically.');
   readonly formSignal = signal<FormGroup | undefined>(undefined);
+  private readonly formValue = toSignal(
+    toObservable(this.formSignal).pipe(
+      switchMap(form => form
+        ? form.valueChanges.pipe(startWith(form.getRawValue()))
+        : of(undefined))
+    ),
+    { initialValue: undefined }
+  );
   readonly deleting = signal(false);
   readonly deleteError = signal<string | undefined>(undefined);
   readonly calendarizationHelpOpen = signal(false);
@@ -62,6 +72,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
   readonly showReadOnlyNotice = computed(() => !this.canWrite() && !this.savingOwnChanges());
   readonly viewModel = computed((): MeterSettingsViewModel | undefined => {
     const form = this.formSignal();
+    this.formValue();
     const context = this.context();
     return form && context ? this.formService.buildMeterSettingsViewModel(form, context) : undefined;
   });
@@ -97,7 +108,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     this.saveMessage.set('Changes save automatically.');
     const form = this.formService.buildMeterSettingsForm(meter);
     this.formSignal.set(form);
-    this.applyRuleChange('source', false);
+    this.applyRuleChange('source');
     form.markAsPristine();
     untracked(() => this.applyFormEnabledState());
   });
@@ -121,14 +132,14 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
 
   onImmediateChange(kind?: MeterSettingsRuleChange): void {
     if (kind) {
-      this.applyRuleChange(kind, true);
+      this.applyRuleChange(kind);
     }
     this.formSignal()?.markAsDirty();
     void this.saveNow();
   }
 
   onRuleChange(kind: MeterSettingsRuleChange): void {
-    this.applyRuleChange(kind, true);
+    this.applyRuleChange(kind);
     this.formSignal()?.markAsDirty();
     this.scheduleSave();
   }
@@ -274,7 +285,7 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     });
   }
 
-  private applyRuleChange(kind: MeterSettingsRuleChange, saveUserChange: boolean): void {
+  private applyRuleChange(kind: MeterSettingsRuleChange): void {
     const form = this.formSignal();
     const context = this.context();
     if (!form || !context) {
@@ -282,9 +293,6 @@ export class MeterWorkbenchSettingsComponent implements AfterViewInit, OnDestroy
     }
     this.formService.applyMeterSettingsRuleChange(kind, form, context);
     this.applyFormEnabledState();
-    if (saveUserChange) {
-      this.viewModel();
-    }
   }
 
   private context(): MeterSettingsRuleContext | undefined {
