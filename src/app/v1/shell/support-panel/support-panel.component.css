@@ -130,6 +130,28 @@ ul.v1-panel__list {
   margin-top: .55rem;
 }
 
+.v1-panel__item .v1-btn + .v1-btn {
+  margin-left: .35rem;
+}
+
+.v1-panel__discarded {
+  margin-top: 1rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--v1-divider);
+}
+
+.v1-panel__discarded > h3 {
+  margin: 0 0 .55rem;
+  color: var(--v1-muted);
+  font-size: .8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.v1-panel__item--discarded {
+  opacity: .85;
+}
+
 .v1-panel__result strong {
   display: block;
   color: var(--v1-text);

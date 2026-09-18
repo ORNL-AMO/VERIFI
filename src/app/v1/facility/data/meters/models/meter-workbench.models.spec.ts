@@ -1,10 +1,13 @@
 import { meter } from '../facility-meters.testing';
 import { METER_CALENDARIZATION_METHODS, meterCalendarizationMethodLabel } from './meter-configuration.models';
 import {
+  buildMeterWorkbenchTabAttention,
   METER_WORKBENCH_TABS,
   meterWorkbenchTabsForMeter,
   shouldShowMeterBillInspectionTab
 } from './meter-workbench.models';
+import { makeFinding } from '@app/v1/status/status.models';
+import { presentFindings } from '@app/v1/status/status.catalog';
 
 describe('meter workbench models', () => {
   it('labels calendarization methods and hides monthly data only for do-not-calendarize meters', () => {
@@ -34,5 +37,21 @@ describe('meter workbench models', () => {
 
     expect(tabIds.slice(-2)).toEqual(['bill-inspection', 'quality']);
     expect(billInspection?.icon).toBe('monocle');
+  });
+
+  it('groups active finding counts by their workbench destination', () => {
+    const entity = { kind: 'meter' as const, guid: 'meter-a', name: 'Meter A', accountGuid: 'account-a', facilityGuid: 'facility-a' };
+    const findings = presentFindings([
+      makeFinding('meter.configuration.invalid', 'error', 'configuration', entity, { fields: ['name'] }),
+      makeFinding('meter.calendarization.missing', 'warning', 'configuration', entity),
+      makeFinding('meter.currency.stale', 'warning', 'currency', entity, { latestPeriod: '2026-01', thresholdMonths: 3 }),
+      makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: 2 })
+    ]);
+
+    expect(buildMeterWorkbenchTabAttention(findings)).toEqual({
+      settings: { total: 2, errorCount: 1, warningCount: 1, state: 'error' },
+      readings: { total: 1, errorCount: 0, warningCount: 1, state: 'warning' },
+      quality: { total: 1, errorCount: 0, warningCount: 1, state: 'warning' }
+    });
   });
 });

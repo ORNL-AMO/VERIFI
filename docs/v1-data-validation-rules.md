@@ -19,7 +19,8 @@ Findings use one of five categories: **configuration**, **completeness**, **curr
 - Warnings that require user remediation are included, even when their v1 fix workflow is not available yet.
 - Informational findings and statistical-outlier warnings are not global Todos.
 - Available fixes link to the narrowest useful v1 screen. Unavailable fixes are labeled **Fix workflow not yet available in v1** and never link back to v0.
-- Findings cannot be dismissed generically. They clear when the underlying data or settings change, or when an existing domain exception is enabled.
+- Errors and informational findings cannot be discarded. Any warning can be discarded for its current evidence occurrence; it is removed from active status summaries, Todos, cards, inline findings, and navigation indicators until its evidence changes or the user restores it from the Todos panel.
+- Warning dismissal is an account-owned presentation preference. It does not change validation inputs, rule evaluation, stored source data, or domain exceptions. Full account backups preserve it; facility-only backups do not transfer it.
 - Todos are grouped and sorted by severity, affected record, and stable rule code.
 
 ## Account and facility rules
@@ -76,6 +77,7 @@ Independent predictor problems are all reported; one warning cannot hide an erro
 - **Allow negative values** suppresses negative-value findings.
 - **Ignore weather warnings** suppresses only the weather finding.
 - Validation never mutates, rounds, repairs, or otherwise rewrites stored data.
+- A discarded warning becomes active again when its structured evidence changes. Changing an underlying domain exception can still clear the raw finding entirely.
 
 ## Facility and account analysis rules
 

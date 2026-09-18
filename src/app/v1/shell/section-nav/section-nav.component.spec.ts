@@ -6,6 +6,9 @@ import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { MeterSource } from '@data/models/constantsAndTypes';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { presentFindings } from '@app/v1/status/status.catalog';
+import { makeFinding, StatusItem } from '@app/v1/status/status.models';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { FacilityPickerComponent } from './facility-picker/facility-picker.component';
 import { SectionNavComponent } from './section-nav.component';
@@ -25,6 +28,8 @@ describe('SectionNavComponent', () => {
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let setFacility: ReturnType<typeof vi.fn>;
+  let statusState: ReturnType<typeof signal<'ready' | 'evaluating'>>;
+  let statusItems: ReturnType<typeof signal<StatusItem[]>>;
 
   beforeEach(() => {
     activeSection = signal('home');
@@ -41,6 +46,8 @@ describe('SectionNavComponent', () => {
     facilityMeters = signal([]);
     facilityMeterGroups = signal([]);
     setFacility = vi.fn();
+    statusState = signal<'ready' | 'evaluating'>('ready');
+    statusItems = signal([]);
     TestBed.configureTestingModule({
       declarations: [SectionNavComponent, FacilityPickerComponent],
       imports: [RouterModule.forRoot([]), FormsModule, IconComponent],
@@ -77,6 +84,14 @@ describe('SectionNavComponent', () => {
           useValue: {
             facilityMeters,
             facilityMeterGroups
+          }
+        },
+        {
+          provide: WorkspaceStatusService,
+          useValue: {
+            state: statusState,
+            items: statusItems,
+            meterFindings: (meterGuid: string) => statusItems().filter(item => item.entity.guid === meterGuid)
           }
         }
       ]
@@ -296,6 +311,31 @@ describe('SectionNavComponent', () => {
     expect(currentLinks).toHaveLength(1);
     expect(currentLinks[0].textContent).toContain('Gas Backup');
     expect(currentLinks[0].classList.contains('v1-nav__child')).toBe(true);
+  });
+
+  it('shows severity count badges for the meters parent and affected meter child', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    facilityMeters.set([meterNav('meter-electric', 'Electric Main')]);
+    const entity = { kind: 'meter' as const, guid: 'meter-electric', name: 'Electric Main', accountGuid: 'account-a', facilityGuid: 'facility-a' };
+    statusItems.set(presentFindings([
+      makeFinding('meter.configuration.invalid', 'error', 'configuration', entity, { fields: ['name'] }),
+      makeFinding('meter.currency.stale', 'warning', 'currency', entity, { latestPeriod: '2026-01', thresholdMonths: 3 })
+    ]));
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const badges = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-nav__attention'));
+
+    expect(badges).toHaveLength(2);
+    expect(badges.every(badge => badge.textContent?.includes('2 issues: 1 errors, 1 warnings'))).toBe(true);
+    expect(badges.every(badge => badge.classList.contains('v1-nav__attention--error'))).toBe(true);
+
+    statusState.set('evaluating');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.v1-nav__attention')).toHaveLength(0);
   });
 
   it('does not show a meter child toggle when there are no meters', () => {

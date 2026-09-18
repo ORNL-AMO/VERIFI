@@ -16,6 +16,7 @@ describe('WorkspaceBackupSnapshotBuilder', () => {
     expect(backup.account.dataBackupFilePath).toBeUndefined();
     expect(backup.account.dataBackupId).toBeUndefined();
     expect(backup.account.lastBackup).toBeUndefined();
+    expect(backup.account.statusWarningDismissals).toEqual(snapshot.account.statusWarningDismissals);
     expect(backup.facilities).toHaveLength(2);
     expect(backup.meters[0]).toEqual(expect.objectContaining({
       displayEnergyUnit: 'GJ', displayEnergyIsSource: true
@@ -33,6 +34,7 @@ describe('WorkspaceBackupSnapshotBuilder', () => {
     expect(backup.backupFileType).toBe('Facility');
     expect(backup.dataBackupId).toBeTruthy();
     expect(backup.facility.guid).toBe('facility-a');
+    expect(backup.account).toBeUndefined();
     expect(backup.meters.map(item => item.facilityId)).toEqual(['facility-a']);
     expect(backup.groups.map(item => item.facilityId)).toEqual(['facility-a']);
     expect(backup.predictors.map(item => item.facilityId)).toEqual(['facility-a']);
@@ -47,7 +49,12 @@ function createSnapshot(): AccountWorkspaceSnapshot {
       name: 'Account A',
       dataBackupFilePath: '/tmp/account-a.json',
       dataBackupId: 'machine-local',
-      lastBackup: new Date('2026-08-01T12:00:00.000Z')
+      lastBackup: new Date('2026-08-01T12:00:00.000Z'),
+      statusWarningDismissals: [{
+        findingId: 'meter.currency.stale:meter:meter-a',
+        evidenceSignature: 'signature-a',
+        discardedAt: '2026-09-18T12:00:00.000Z'
+      }]
     },
     facilities: [
       { guid: 'facility-a', accountId: 'account-a', name: 'Facility A' },

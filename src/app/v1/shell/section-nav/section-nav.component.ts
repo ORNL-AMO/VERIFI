@@ -2,6 +2,9 @@ import { Component, computed, inject, signal } from '@angular/core';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
+import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
+import { StatusAttentionSummary } from '@app/v1/status/status.models';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 
 type SettingsNavItem = {
@@ -21,6 +24,7 @@ type MeterNavItem = {
   readonly guid: string;
   readonly label: string;
   readonly icon: IconName;
+  readonly attention?: StatusAttentionSummary;
 };
 
 type MeterGroupNavItem = {
@@ -82,6 +86,7 @@ const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Po
 export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly status = inject(WorkspaceStatusService);
   private readonly meterChildrenState = signal<ChildLinksState>({
     collapsed: false
   });
@@ -100,13 +105,30 @@ export class SectionNavComponent {
   });
   readonly facilityDataItems = computed(() => FACILITY_DATA_ITEMS);
   readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
+    const statusReady = this.status.state() === 'ready';
     return [...this.workspace.facilityMeters()]
-      .map(meter => ({
-        guid: meter.guid,
-        label: meter.name || 'Untitled meter',
-        icon: meterSourceIcon(meter.source)
-      }))
+      .map(meter => {
+        const attention = summarizeStatusAttention(statusReady ? this.status.meterFindings(meter.guid) : []);
+        return {
+          guid: meter.guid,
+          label: meter.name || 'Untitled meter',
+          icon: meterSourceIcon(meter.source),
+          attention: attention.total > 0 ? attention : undefined
+        };
+      })
       .sort((first, second) => first.label.localeCompare(second.label));
+  });
+  readonly facilityMetersAttention = computed(() => {
+    const facilityGuid = this.navigation.facility()?.guid;
+    if (!facilityGuid || this.status.state() !== 'ready') return undefined;
+    const findings = this.status.items().filter(item =>
+      (item.destination.kind === 'meter-tab' && item.destination.facilityGuid === facilityGuid)
+      || (item.destination.kind === 'facility-data'
+        && item.destination.facilityGuid === facilityGuid
+        && item.destination.detail === 'meters')
+    );
+    const attention = summarizeStatusAttention(findings);
+    return attention.total > 0 ? attention : undefined;
   });
   readonly facilityMeterGroupItems = computed<ReadonlyArray<MeterGroupNavItem>>(() => {
     return [...this.workspace.facilityMeterGroups()]

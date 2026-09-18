@@ -11,6 +11,9 @@ describe('MeterWorkbenchTabsComponent', () => {
     component.tabSelected.subscribe(tabId => emitted.push(tabId));
     component.tabs = METER_WORKBENCH_TABS;
     component.activeTab = 'monthly';
+    component.attention = {
+      readings: { total: 3, errorCount: 1, warningCount: 2, state: 'error' }
+    };
 
     fixture.detectChanges();
 
@@ -22,6 +25,9 @@ describe('MeterWorkbenchTabsComponent', () => {
       ['bill-inspection', 'monocle'],
       ['quality', 'warning']
     ]);
+    const readingsButton = buttons.find(button => button.textContent?.includes('Readings'));
+    expect(readingsButton?.textContent).toContain('3');
+    expect(readingsButton?.textContent).toContain('3 issues: 1 errors, 2 warnings');
 
     buttons.find(button => button.textContent?.includes('Quality Report'))?.click();
 

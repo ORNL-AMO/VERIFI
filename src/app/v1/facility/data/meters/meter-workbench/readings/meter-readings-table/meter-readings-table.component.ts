@@ -63,6 +63,7 @@ export class MeterReadingsTableComponent {
       this.sortDirection.set('desc');
     }
   }
+  @Input() meterName?: string;
   @Input() canAct = true;
   @Input() isElectron = false;
   @Input() isDataOutdated = false;

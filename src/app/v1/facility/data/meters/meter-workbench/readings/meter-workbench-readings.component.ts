@@ -1,5 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
+import { FocusMonitor } from '@angular/cdk/a11y';
+import { Component, ElementRef, Injector, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -7,6 +8,7 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbUtilityMeterData, getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { missingMeterMonths } from '@app/v1/status/status.evaluator';
+import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { getDateFromMeterData, setMeterDataDateFromDate } from '@shared/dateHelperFunctions';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
@@ -17,7 +19,7 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { meterWorkbenchTab } from '@app/v1/facility/data/meters/models';
 import { MeterReadingBillSave } from './meter-reading-bill-slideout/meter-reading-bill-slideout.component';
 import { MeterReadingsTableService } from './meter-readings-table.service';
-import { MeterReadingColumnDraft } from './meter-workbench-readings.models';
+import { MeterReadingColumnDraft, MeterReadingsConfirmation } from './meter-workbench-readings.models';
 
 interface BillPanelState {
   readonly mode: 'add' | 'edit';
@@ -41,6 +43,8 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly focusMonitor = inject(FocusMonitor);
+  private readonly injector = inject(Injector);
   readonly status = inject(WorkspaceStatusService);
   private confirmModalOpen = false;
 
@@ -56,10 +60,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   readonly customGWPs = this.accountWorkspace.customGWPs;
   readonly columnsOpen = signal(false);
   readonly billPanel = signal<BillPanelState | undefined>(undefined);
-  readonly deleteTarget = signal<IdbUtilityMeterData | undefined>(undefined);
-  readonly bulkDeleteReadings = signal<readonly IdbUtilityMeterData[]>([]);
-  readonly bulkDeleteOpen = signal(false);
-  readonly fillMissingOpen = signal(false);
+  readonly confirmation = signal<MeterReadingsConfirmation | undefined>(undefined);
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly isElectron = this.electronService.isElectron;
@@ -76,7 +77,6 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     customFuels: this.customFuels(),
     customGWPs: this.customGWPs()
   }));
-  readonly selectedCount = computed(() => this.bulkDeleteReadings().length);
   readonly missingDataMonths = computed(() => {
     const meter = this.meter();
     return meter ? missingMeterMonths(meter, this.selectedMeterData()) : [];
@@ -89,15 +89,25 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     this.selectedMeterGuid();
     this.columnsOpen.set(false);
     this.billPanel.set(undefined);
-    this.bulkDeleteReadings.set([]);
-    this.bulkDeleteOpen.set(false);
+    this.confirmation.set(undefined);
     this.hideConfirmModal();
   });
 
   @ViewChild('readingsConfirmModal') private readonly readingsConfirmModal?: TemplateRef<unknown>;
+  @ViewChild('readingsRegion', { read: ElementRef }) private readonly readingsRegion?: ElementRef<HTMLElement>;
 
   ngOnDestroy(): void {
     this.hideConfirmModal();
+  }
+
+  async discardWarning(item: StatusItem): Promise<void> {
+    if (await this.status.discardWarning(item)) {
+      afterNextRender(() => {
+        if (this.readingsRegion) {
+          this.focusMonitor.focusVia(this.readingsRegion, 'program');
+        }
+      }, { injector: this.injector });
+    }
   }
 
   openColumns(): void {
@@ -140,33 +150,43 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
 
   requestDelete(reading: IdbUtilityMeterData): void {
     if (this.canAct()) {
-      this.deleteTarget.set(reading);
+      this.confirmation.set({ kind: 'delete-one', reading });
       this.showConfirmModal();
     }
   }
 
-  cancelDelete(): void {
+  cancelConfirmation(): void {
     if (!this.saving()) {
-      this.deleteTarget.set(undefined);
-      this.bulkDeleteOpen.set(false);
-      this.bulkDeleteReadings.set([]);
-      this.fillMissingOpen.set(false);
-      this.hideConfirmModal();
+      this.closeConfirmation();
     }
   }
 
   requestBulkDelete(readings: readonly IdbUtilityMeterData[]): void {
     if (this.canAct() && readings.length > 0) {
-      this.bulkDeleteReadings.set(readings);
-      this.bulkDeleteOpen.set(true);
+      this.confirmation.set({ kind: 'delete-many', readings });
       this.showConfirmModal();
     }
   }
 
   requestFillMissing(): void {
-    if (this.canAct() && this.missingDataMonths().length > 0) {
-      this.fillMissingOpen.set(true);
+    const count = this.missingDataMonths().length;
+    if (this.canAct() && count > 0) {
+      this.confirmation.set({ kind: 'fill-missing', count });
       this.showConfirmModal();
+    }
+  }
+
+  async confirmPendingAction(): Promise<void> {
+    switch (this.confirmation()?.kind) {
+      case 'delete-one':
+        await this.confirmDelete();
+        break;
+      case 'delete-many':
+        await this.confirmBulkDelete();
+        break;
+      case 'fill-missing':
+        await this.confirmFillMissing();
+        break;
     }
   }
 
@@ -255,7 +275,8 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   }
 
   async confirmDelete(): Promise<void> {
-    const target = this.deleteTarget();
+    const confirmation = this.confirmation();
+    const target = confirmation?.kind === 'delete-one' ? confirmation.reading : undefined;
     if (target?.id === undefined) {
       return;
     }
@@ -271,14 +292,16 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
         },
         () => this.meterHandler.deleteMeterData(idToDelete)
       );
-      this.deleteTarget.set(undefined);
-      this.hideConfirmModal();
+      this.closeConfirmation();
       this.toastNotifications.showToast('Meter Data Deleted', undefined, undefined, false, 'alert-success');
     });
   }
 
   async confirmBulkDelete(): Promise<void> {
-    const readings = this.bulkDeleteReadings().filter(reading => reading.id !== undefined);
+    const confirmation = this.confirmation();
+    const readings = confirmation?.kind === 'delete-many'
+      ? confirmation.readings.filter(reading => reading.id !== undefined)
+      : [];
     if (readings.length === 0) {
       return;
     }
@@ -296,14 +319,15 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
           }
         }
       );
-      this.bulkDeleteOpen.set(false);
-      this.bulkDeleteReadings.set([]);
-      this.hideConfirmModal();
+      this.closeConfirmation();
       this.toastNotifications.showToast('Meter Data Deleted', undefined, undefined, false, 'alert-success');
     });
   }
 
   async confirmFillMissing(): Promise<void> {
+    if (this.confirmation()?.kind !== 'fill-missing') {
+      return;
+    }
     const account = this.account();
     const meter = this.meter();
     if (!account || !meter) {
@@ -312,8 +336,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
     const currentMonthKeys = new Set(this.selectedMeterData().map(reading => `${reading.year}-${reading.month}`));
     const missingMonths = this.missingDataMonths().filter(({ month, year }) => !currentMonthKeys.has(`${year}-${month}`));
     if (missingMonths.length === 0) {
-      this.fillMissingOpen.set(false);
-      this.hideConfirmModal();
+      this.closeConfirmation();
       return;
     }
     await this.runAction('Missing months could not be filled.', async () => {
@@ -341,8 +364,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
           return addedReadings;
         }
       );
-      this.fillMissingOpen.set(false);
-      this.hideConfirmModal();
+      this.closeConfirmation();
       this.toastNotifications.showToast(`${missingMonths.length} Missing Month${missingMonths.length === 1 ? '' : 's'} Filled`, undefined, undefined, false, 'alert-success');
     });
   }
@@ -415,5 +437,10 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
       this.confirmModalOpen = false;
       this.modalPortal.hide();
     }
+  }
+
+  private closeConfirmation(): void {
+    this.confirmation.set(undefined);
+    this.hideConfirmModal();
   }
 }

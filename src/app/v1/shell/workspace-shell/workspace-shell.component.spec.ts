@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ScrollingModule, CdkScrollable } from '@angular/cdk/scrolling';
-import { NgModule } from '@angular/core';
+import { NgModule, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +34,7 @@ class WorkspaceShellTestModule { }
 describe('WorkspaceShellComponent', () => {
   let fixture: ComponentFixture<WorkspaceShellComponent>;
   let navigation: any;
+  let status: any;
 
   beforeEach(() => {
     navigation = {
@@ -52,6 +53,7 @@ describe('WorkspaceShellComponent', () => {
         todos: [presentFinding(makeFinding('account.facilities.missing', 'error', 'readiness', {
           kind: 'account', guid: 'account-a', name: 'Account A', accountGuid: 'account-a'
         }))],
+        discardedWarnings: [],
         results: [{ label: 'Facilities', value: '1', tone: 'info' }],
         details: [{ label: 'Context', value: 'Account workspace' }]
       })),
@@ -71,13 +73,21 @@ describe('WorkspaceShellComponent', () => {
         ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview']
       )
     };
+    status = {
+      state: vi.fn(() => 'ready'),
+      navigateTo: vi.fn(),
+      warningActionError: vi.fn(() => undefined),
+      canManageWarnings: vi.fn(() => true),
+      discardWarning: vi.fn(),
+      restoreWarning: vi.fn()
+    };
 
     TestBed.configureTestingModule({
       imports: [WorkspaceShellTestModule],
       providers: [
         { provide: CommandNotificationBridgeService, useValue: {} },
         { provide: WorkspaceNavigationService, useValue: navigation },
-        { provide: WorkspaceStatusService, useValue: { state: vi.fn(() => 'ready'), navigateTo: vi.fn() } }
+        { provide: WorkspaceStatusService, useValue: status }
       ]
     });
     fixture = TestBed.createComponent(WorkspaceShellComponent);
@@ -107,5 +117,85 @@ describe('WorkspaceShellComponent', () => {
 
     expect(workspace.classList.contains('v1-workspace--entry')).toBe(true);
     expect(workspace.classList.contains('v1-workspace--account')).toBe(true);
+  });
+
+  it('offers discard for active warnings and restore for discarded warnings', () => {
+    const entity = { kind: 'account' as const, guid: 'account-a', name: 'Account A', accountGuid: 'account-a' };
+    const activeWarning = presentFinding(makeFinding('account.configuration.default-name', 'warning', 'configuration', entity));
+    const discardedWarning = presentFinding(makeFinding('facility.meter-groups.missing', 'warning', 'readiness', {
+      kind: 'facility', guid: 'facility-a', name: 'Facility A', accountGuid: 'account-a', facilityGuid: 'facility-a'
+    }));
+    navigation.activePanelTab.mockReturnValue('todos');
+    navigation.panelContent.mockReturnValue({
+      help: [],
+      todos: [activeWarning],
+      discardedWarnings: [discardedWarning],
+      results: [],
+      details: []
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(WorkspaceShellComponent);
+    fixture.detectChanges();
+
+    const buttons = fixture.debugElement.queryAll(By.css('.v1-panel__content button'));
+    buttons.find(button => button.nativeElement.textContent.includes('Discard'))?.triggerEventHandler('click');
+    buttons.find(button => button.nativeElement.textContent.includes('Restore'))?.triggerEventHandler('click');
+
+    expect(status.discardWarning).toHaveBeenCalledWith(activeWarning);
+    expect(status.restoreWarning).toHaveBeenCalledWith(discardedWarning);
+  });
+
+  it('focuses the stable Todo region after discarding the last Todo', async () => {
+    const activeWarning = presentFinding(makeFinding('account.configuration.default-name', 'warning', 'configuration', {
+      kind: 'account', guid: 'account-a', name: 'Account A', accountGuid: 'account-a'
+    }));
+    navigation.activePanelTab.mockReturnValue('todos');
+    const panelContent = signal({
+      help: [], todos: [activeWarning], discardedWarnings: [], results: [], details: []
+    });
+    navigation.panelContent.mockImplementation(() => panelContent());
+    status.discardWarning.mockImplementation(async () => {
+      panelContent.set({
+        help: [], todos: [], discardedWarnings: [activeWarning], results: [], details: []
+      });
+      return true;
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(WorkspaceShellComponent);
+    fixture.detectChanges();
+    const panel = fixture.debugElement.query(By.directive(SupportPanelComponent)).componentInstance as SupportPanelComponent;
+
+    await panel.discardWarning(activeWarning);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[aria-labelledby="v1-todo-heading"]'));
+  });
+
+  it('focuses the stable Todo region after restoring a warning without a matching Todo', async () => {
+    const discardedWarning = presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', {
+      kind: 'meter', guid: 'meter-a', name: 'Meter A', accountGuid: 'account-a', facilityGuid: 'facility-a'
+    }));
+    navigation.activePanelTab.mockReturnValue('todos');
+    const panelContent = signal({
+      help: [], todos: [], discardedWarnings: [discardedWarning], results: [], details: []
+    });
+    navigation.panelContent.mockImplementation(() => panelContent());
+    status.restoreWarning.mockImplementation(async () => {
+      panelContent.set({
+        help: [], todos: [], discardedWarnings: [], results: [], details: []
+      });
+      return true;
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(WorkspaceShellComponent);
+    fixture.detectChanges();
+    const panel = fixture.debugElement.query(By.directive(SupportPanelComponent)).componentInstance as SupportPanelComponent;
+
+    await panel.restoreWarning(discardedWarning);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[aria-labelledby="v1-todo-heading"]'));
   });
 });

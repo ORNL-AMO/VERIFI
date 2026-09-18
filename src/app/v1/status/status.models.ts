@@ -65,6 +65,13 @@ export interface StatusSummary {
   readonly infoCount: number;
 }
 
+export interface StatusAttentionSummary {
+  readonly total: number;
+  readonly errorCount: number;
+  readonly warningCount: number;
+  readonly state: 'valid' | 'warning' | 'error';
+}
+
 export type StatusDestination =
   | { readonly kind: 'account-settings'; readonly accountGuid: string; readonly detail: string }
   | { readonly kind: 'facility-data'; readonly facilityGuid: string; readonly detail: string }

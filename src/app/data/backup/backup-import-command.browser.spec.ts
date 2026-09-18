@@ -46,6 +46,47 @@ describe('BackupImportCommandService restore transactions in Chromium', () => {
     expect(await harness.getAll('utilityMeter')).toEqual([]);
   });
 
+  it('remaps account-backup warning dismissals with imported entity GUIDs', async () => {
+    const service = createService();
+    const restoredAccount = await service.importAccountBackupFile(createAccountBackup(), 0);
+    const storedMeters = await harness.getAll<any>('utilityMeter');
+    const storedAccount = (await harness.getAll<any>('accounts'))[0];
+
+    expect(storedMeters).toHaveLength(1);
+    expect(storedAccount.statusWarningDismissals).toEqual([expect.objectContaining({
+      findingId: `meter.currency.stale:meter:${storedMeters[0].guid}`
+    })]);
+    expect(restoredAccount.statusWarningDismissals).toEqual(storedAccount.statusWarningDismissals);
+
+    await harness.reopen();
+    expect((await harness.getAll<any>('accounts'))[0].statusWarningDismissals)
+      .toEqual(storedAccount.statusWarningDismissals);
+  });
+
+  it('ignores malformed warning dismissals instead of aborting account restore', async () => {
+    const service = createService();
+    const backup = createAccountBackup();
+    const valid = backup.account.statusWarningDismissals![0];
+    (backup.account as any).statusWarningDismissals = [
+      null,
+      {},
+      { ...valid, findingId: false },
+      { ...valid, evidenceSignature: null },
+      { ...valid, discardedAt: 42 },
+      valid
+    ];
+
+    const restoredAccount = await service.importAccountBackupFile(backup, 0);
+    const storedAccount = (await harness.getAll<any>('accounts'))[0];
+    const storedMeter = (await harness.getAll<any>('utilityMeter'))[0];
+
+    expect(restoredAccount.statusWarningDismissals).toEqual([{
+      ...valid,
+      findingId: `meter.currency.stale:meter:${storedMeter.guid}`
+    }]);
+    expect(storedAccount.statusWarningDismissals).toEqual(restoredAccount.statusWarningDismissals);
+  });
+
   it('rolls back facility restore when a later store write fails', async () => {
     await harness.seed({
       accounts: [{ id: 1, guid: 'existing-account', name: 'Existing Account', deleteAccount: false }]
@@ -104,7 +145,12 @@ function createAccountBackup(): PreparedBackupFile {
     account: {
       guid: 'import-account-guid',
       name: 'Imported Account',
-      deleteAccount: false
+      deleteAccount: false,
+      statusWarningDismissals: [{
+        findingId: 'meter.currency.stale:meter:import-meter-guid',
+        evidenceSignature: 'signature-a',
+        discardedAt: '2026-09-18T12:00:00.000Z'
+      }]
     },
     facility: undefined,
     facilities: [{

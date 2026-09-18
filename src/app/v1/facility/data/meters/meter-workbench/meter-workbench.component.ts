@@ -5,6 +5,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { resolveMeterDisplaySettings } from '@app/v1/facility/data/meters/models';
 import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
@@ -15,6 +16,7 @@ import { EnergyUnitOptions } from '@shared/unitOptions';
 import {
   MeterWorkbenchTab,
   MeterWorkbenchTabId,
+  buildMeterWorkbenchTabAttention,
   meterWorkbenchTabsForMeter,
   shouldShowMeterBillInspectionTab,
   shouldShowMeterMonthlyDataTab
@@ -40,6 +42,7 @@ export class MeterWorkbenchComponent {
   @ViewChild('meterSwitcherToggle') private readonly meterSwitcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
+  readonly status = inject(WorkspaceStatusService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly activeTab = this.activeTabState.asReadonly();
@@ -79,6 +82,11 @@ export class MeterWorkbenchComponent {
   readonly accountMetersRoute = computed(() => {
     const account = this.workspace.account();
     return account ? [...this.navigation.accountDataRoute(account.guid), 'meters'] : undefined;
+  });
+  readonly tabAttention = computed(() => {
+    const meter = this.workspace.selectedMeter();
+    if (!meter || this.status.state() !== 'ready') return {};
+    return buildMeterWorkbenchTabAttention(this.status.meterFindings(meter.guid));
   });
   private readonly redirectHiddenMonthlyTabEffect = effect(() => {
     const facility = this.workspace.facility();

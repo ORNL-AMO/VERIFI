@@ -34,6 +34,16 @@
               <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="qualityRequested.emit()">View Quality Report</button>
             }
           }
+          @if (finding.severity === 'warning') {
+            <button
+              type="button"
+              class="v1-btn v1-btn--sm v1-btn--quiet"
+              [disabled]="!canManageWarnings"
+              [attr.aria-label]="'Discard ' + finding.title"
+              (click)="discardRequested.emit(finding)">
+              Discard
+            </button>
+          }
         </div>
       </li>
     }

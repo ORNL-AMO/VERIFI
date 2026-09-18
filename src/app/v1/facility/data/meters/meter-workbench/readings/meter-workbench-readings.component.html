@@ -4,7 +4,7 @@
 @let _canAct = canAct();
 @let _billPanel = billPanel();
 
-<section class="meter-readings" aria-label="Meter readings">
+<section #readingsRegion class="meter-readings" aria-label="Meter readings" tabindex="-1">
 
   @if (actionError()) {
     <div class="v1-alert v1-alert--danger" role="alert">
@@ -13,42 +13,40 @@
     </div>
   }
 
+  @if (status.warningActionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ status.warningActionError() }}</span>
+    </div>
+  }
+
   @if (status.state() !== 'ready' || findings.length > 0) {
     <app-meter-readings-status
       [findings]="findings"
       [state]="status.state()"
       [canAct]="_canAct"
+      [canManageWarnings]="status.canManageWarnings()"
       (settingsRequested)="openSettings()"
       (qualityRequested)="openQuality()"
-      (fillMissingRequested)="requestFillMissing()">
+      (fillMissingRequested)="requestFillMissing()"
+      (discardRequested)="discardWarning($event)">
     </app-meter-readings-status>
   }
 
   @if (!hasBlockingConfiguration()) {
-    @if (_table.rows.length === 0) {
-      <div class="meter-readings__empty">
-        <app-ui-icon name="table"></app-ui-icon>
-        <h3>No bills found for {{ _meter?.name }}.</h3>
-        <p>Add a bill to begin tracking readings for this meter.</p>
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="!_canAct" (click)="openAddBill()">
-          <app-ui-icon name="add"></app-ui-icon>
-          Add New Bill
-        </button>
-      </div>
-    } @else {
-      <app-meter-readings-table
-        [view]="_table"
-        [canAct]="_canAct"
-        [isElectron]="isElectron"
-        [isDataOutdated]="isDataOutdated()"
-        (chooseColumnsRequested)="openColumns()"
-        (addBillRequested)="openAddBill()"
-        (editRequested)="openEditBill($event)"
-        (deleteRequested)="requestDelete($event)"
-        (bulkDeleteRequested)="requestBulkDelete($event)"
-        (viewBillRequested)="openConnectedBill($event)">
-      </app-meter-readings-table>
-    }
+    <app-meter-readings-table
+      [view]="_table"
+      [meterName]="_meter?.name"
+      [canAct]="_canAct"
+      [isElectron]="isElectron"
+      [isDataOutdated]="isDataOutdated()"
+      (chooseColumnsRequested)="openColumns()"
+      (addBillRequested)="openAddBill()"
+      (editRequested)="openEditBill($event)"
+      (deleteRequested)="requestDelete($event)"
+      (bulkDeleteRequested)="requestBulkDelete($event)"
+      (viewBillRequested)="openConnectedBill($event)">
+    </app-meter-readings-table>
   }
 </section>
 
@@ -76,40 +74,12 @@
 }
 
 <ng-template #readingsConfirmModal>
-  <div class="v1-modal-layer">
-    <button type="button" class="v1-modal-backdrop" aria-label="Cancel readings action" [disabled]="saving()" (click)="cancelDelete()"></button>
-    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="meter-readings-confirm-title">
-      <header class="v1-modal__header">
-        <h2 id="meter-readings-confirm-title">
-          @if (fillMissingOpen()) {
-            Fill Missing Meter Data
-          } @else {
-            Delete Meter Data
-          }
-        </h2>
-        <button type="button" class="v1-icon-btn" aria-label="Cancel readings action" [disabled]="saving()" (click)="cancelDelete()">
-          <app-ui-icon name="close"></app-ui-icon>
-        </button>
-      </header>
-      <div class="v1-modal__body">
-        @if (fillMissingOpen()) {
-          <p>Zero-valued meter readings will be added for {{ missingDataMonths().length }} missing month{{ missingDataMonths().length === 1 ? '' : 's' }}.</p>
-        } @else if (bulkDeleteOpen()) {
-          <p>Deleting {{ selectedCount() }} selected meter reading{{ selectedCount() === 1 ? '' : 's' }} cannot be undone.</p>
-        } @else {
-          <p>Deleting this meter reading cannot be undone.</p>
-        }
-      </div>
-      <footer class="v1-modal__footer">
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelDelete()">Cancel</button>
-        @if (fillMissingOpen()) {
-          <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmFillMissing()">Fill with Zeros</button>
-        } @else if (bulkDeleteOpen()) {
-          <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmBulkDelete()">Delete Selected</button>
-        } @else {
-          <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmDelete()">Delete</button>
-        }
-      </footer>
-    </section>
-  </div>
+  @if (confirmation(); as pendingConfirmation) {
+    <app-meter-readings-confirmation-modal
+      [confirmation]="pendingConfirmation"
+      [saving]="saving()"
+      (confirmed)="confirmPendingAction()"
+      (cancelled)="cancelConfirmation()">
+    </app-meter-readings-confirmation-modal>
+  }
 </ng-template>

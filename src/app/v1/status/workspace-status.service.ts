@@ -2,23 +2,41 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { IdbAccount } from '@data/models/idbModels/account';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { evaluateWorkspaceStatus } from './status.evaluator';
 import { presentFindings, todoItems } from './status.catalog';
 import { StatusEvaluationState, StatusFinding, StatusItem, summarizeFindings } from './status.models';
+import { createStatusWarningDismissal, partitionStatusFindings, statusFindingEvidenceSignature } from './status.dismissals';
+
+interface WarningActionState {
+  readonly accountGuid: string;
+  readonly findingId: string;
+}
+
+interface WarningActionErrorState {
+  readonly accountGuid: string;
+  readonly message: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceStatusService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly router = inject(Router);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly accountHandler = inject(AccountCommandHandler);
   private readonly destroyRef = inject(DestroyRef);
   private readonly evaluationDate = signal(startOfToday());
   private readonly coverage = toSignal(this.calendarization.calendarizeBase(), {
     initialValue: IDLE_WORKSPACE_CALENDARIZATION
   });
   private dateRefreshTimeout?: ReturnType<typeof setTimeout>;
+  private readonly warningActionState = signal<WarningActionState | undefined>(undefined);
+  private readonly warningActionErrorState = signal<WarningActionErrorState | undefined>(undefined);
 
   private readonly canEvaluate = computed(() => this.workspace.isReady()
     && !!this.workspace.snapshot()
@@ -48,8 +66,15 @@ export class WorkspaceStatusService {
     return this.evaluationResult()?.error ? 'error' : 'ready';
   });
   readonly evaluation = computed(() => this.evaluationResult()?.evaluation);
-  readonly findings = computed<readonly StatusFinding[]>(() => this.evaluation()?.findings ?? []);
+  readonly rawFindings = computed<readonly StatusFinding[]>(() => this.evaluation()?.findings ?? []);
+  private readonly findingPartition = computed(() => partitionStatusFindings(
+    this.rawFindings(),
+    this.workspace.account()?.statusWarningDismissals ?? []
+  ));
+  readonly findings = computed<readonly StatusFinding[]>(() => this.findingPartition().active);
+  readonly discardedFindings = computed<readonly StatusFinding[]>(() => this.findingPartition().discarded);
   readonly items = computed<readonly StatusItem[]>(() => presentFindings(this.findings()));
+  readonly discardedItems = computed<readonly StatusItem[]>(() => presentFindings(this.discardedFindings()));
   readonly accountSummary = computed(() => summarizeFindings(this.findings()));
   readonly accountTodos = computed(() => todoItems(this.findings()));
   readonly selectedFacilityFindings = computed(() => {
@@ -58,6 +83,24 @@ export class WorkspaceStatusService {
   });
   readonly selectedFacilitySummary = computed(() => summarizeFindings(this.selectedFacilityFindings()));
   readonly selectedFacilityTodos = computed(() => todoItems(this.selectedFacilityFindings()));
+  readonly accountDiscardedWarnings = computed(() => this.discardedItems());
+  readonly selectedFacilityDiscardedWarnings = computed(() => {
+    const facilityGuid = this.workspace.selectedFacility()?.guid;
+    return facilityGuid
+      ? this.discardedItems().filter(item => item.entity.facilityGuid === facilityGuid)
+      : [];
+  });
+  readonly warningActionId = computed(() => {
+    const action = this.warningActionState();
+    return action?.accountGuid === this.workspace.account()?.guid ? action.findingId : undefined;
+  });
+  readonly warningActionError = computed(() => {
+    const error = this.warningActionErrorState();
+    return error?.accountGuid === this.workspace.account()?.guid ? error.message : undefined;
+  });
+  readonly canManageWarnings = computed(() => this.workspace.canWrite()
+    && !this.workspace.hasPending()
+    && !this.warningActionId());
 
   constructor() {
     this.scheduleDateRefresh();
@@ -72,6 +115,36 @@ export class WorkspaceStatusService {
 
   meterFindings(meterGuid: string): StatusItem[] {
     return this.findingsForEntity(meterGuid);
+  }
+
+  async discardWarning(item: StatusItem): Promise<boolean> {
+    if (item.severity !== 'warning') return false;
+    const account = this.workspace.account();
+    if (!account || !this.canManageWarnings()) return false;
+
+    const dismissal = createStatusWarningDismissal(item, new Date().toISOString());
+    const updatedAccount = {
+      ...structuredClone(account),
+      statusWarningDismissals: [
+        ...(account.statusWarningDismissals ?? []).filter(existing => existing.findingId !== item.id),
+        dismissal
+      ]
+    };
+    return this.persistWarningPreference(item.id, 'Discarding status warning', updatedAccount);
+  }
+
+  async restoreWarning(item: StatusItem): Promise<boolean> {
+    if (item.severity !== 'warning') return false;
+    const account = this.workspace.account();
+    if (!account || !this.canManageWarnings()) return false;
+    const signature = statusFindingEvidenceSignature(item);
+    const updatedAccount = {
+      ...structuredClone(account),
+      statusWarningDismissals: (account.statusWarningDismissals ?? []).filter(existing =>
+        existing.findingId !== item.id || existing.evidenceSignature !== signature
+      )
+    };
+    return this.persistWarningPreference(item.id, 'Restoring status warning', updatedAccount);
   }
 
   navigateTo(item: StatusItem): void {
@@ -93,6 +166,47 @@ export class WorkspaceStatusService {
       this.evaluationDate.set(startOfToday());
       this.scheduleDateRefresh();
     });
+  }
+
+  private async persistWarningPreference(
+    findingId: string,
+    label: string,
+    updatedAccount: IdbAccount
+  ): Promise<boolean> {
+    const action: WarningActionState = {
+      accountGuid: updatedAccount.guid,
+      findingId
+    };
+    this.warningActionState.set(action);
+    this.warningActionErrorState.set(undefined);
+    try {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'account',
+          changeKind: 'update',
+          entityGuid: updatedAccount.guid,
+          label,
+          notification: { suppressSuccessToast: true },
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }
+        },
+        () => this.accountHandler.update(updatedAccount, updatedAccount.guid)
+      );
+      return true;
+    } catch (error) {
+      if (this.warningActionState() === action) {
+        this.warningActionErrorState.set({
+          accountGuid: action.accountGuid,
+          message: error instanceof Error
+            ? error.message
+            : 'The warning preference could not be saved.'
+        });
+      }
+      return false;
+    } finally {
+      if (this.warningActionState() === action) {
+        this.warningActionState.set(undefined);
+      }
+    }
   }
 }
 

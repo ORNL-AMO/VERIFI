@@ -39,8 +39,48 @@ describe('BackupPreparationService', () => {
     const prepared = service.prepare(input);
     expect(prepared.facilityReports).toEqual([]);
     expect(prepared.facilityEnergyUseEquipment).toEqual([]);
+    expect(prepared.account.statusWarningDismissals).toEqual([]);
     expect(prepared.account.selectedEnergyAnalysisId).toBe('missing-optional-analysis');
   });
+
+  it('normalizes malformed warning dismissals without mutating the source backup', () => {
+    const input = accountBackup() as any;
+    const valid = {
+      findingId: 'meter.currency.stale:meter:meter',
+      evidenceSignature: 'signature',
+      discardedAt: '2026-09-18T12:00:00.000Z',
+      ignored: 'not part of the persisted contract'
+    };
+    input.account.statusWarningDismissals = [
+      null,
+      'warning',
+      {},
+      { ...valid, findingId: 4 },
+      { ...valid, evidenceSignature: null },
+      { ...valid, discardedAt: false },
+      valid
+    ];
+
+    const prepared = service.prepare(input);
+
+    expect(prepared.account.statusWarningDismissals).toEqual([{
+      findingId: valid.findingId,
+      evidenceSignature: valid.evidenceSignature,
+      discardedAt: valid.discardedAt
+    }]);
+    expect(input.account.statusWarningDismissals).toHaveLength(7);
+    expect(input.account.statusWarningDismissals[6]).toHaveProperty('ignored');
+  });
+
+  it.each([null, true, 'warnings', { findingId: 'meter.currency.stale:meter:meter' }])(
+    'normalizes a non-array warning dismissal collection to empty: %j',
+    value => {
+      const input = accountBackup() as any;
+      input.account.statusWarningDismissals = value;
+
+      expect(service.prepare(input).account.statusWarningDismissals).toEqual([]);
+    }
+  );
 
   it('sanitizes machine-local account backup fields but preserves top-level backup metadata', () => {
     const input = accountBackup();

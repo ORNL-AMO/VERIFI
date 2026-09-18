@@ -36,8 +36,11 @@
     }
 
     @if (activeTab === 'todos') {
-      <section aria-labelledby="v1-todo-heading">
+      <section #todoRegion aria-labelledby="v1-todo-heading" tabindex="-1">
         <h2 id="v1-todo-heading" class="visually-hidden">Todo items</h2>
+        @if (status.warningActionError()) {
+          <div class="v1-alert v1-alert--danger" role="alert">{{ status.warningActionError() }}</div>
+        }
         @if (status.state() === 'evaluating' || status.state() === 'idle') {
           <div class="v1-alert v1-alert--info" role="status">Checking workspace data...</div>
         } @else if (status.state() === 'error') {
@@ -57,10 +60,45 @@
                   } @else {
                     <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="status.navigateTo(item)">Review</button>
                   }
+                  @if (item.severity === 'warning') {
+                    <button
+                      type="button"
+                      class="v1-btn v1-btn--sm v1-btn--quiet"
+                      [disabled]="!status.canManageWarnings()"
+                      [attr.aria-label]="'Discard ' + item.title"
+                      (click)="discardWarning(item)">
+                      Discard
+                    </button>
+                  }
                 </article>
               </li>
             }
           </ul>
+        }
+
+        @if (content.discardedWarnings.length > 0) {
+          <section class="v1-panel__discarded" aria-labelledby="v1-discarded-warning-heading">
+            <h3 id="v1-discarded-warning-heading">Discarded warnings</h3>
+            <ul class="v1-panel__list">
+              @for (item of content.discardedWarnings; track item.id) {
+                <li>
+                  <article class="v1-panel__item v1-panel__item--discarded">
+                    <span>{{ item.category }} · {{ item.entity.name }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.description }}</p>
+                    <button
+                      type="button"
+                      class="v1-btn v1-btn--sm v1-btn--quiet"
+                      [disabled]="!status.canManageWarnings()"
+                      [attr.aria-label]="'Restore ' + item.title"
+                      (click)="restoreWarning(item)">
+                      Restore
+                    </button>
+                  </article>
+                </li>
+              }
+            </ul>
+          </section>
         }
       </section>
     }

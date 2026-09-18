@@ -19,6 +19,7 @@ import { MeterWorkbenchMonthlyDataComponent } from './meters/meter-workbench/mon
 import { MeterWorkbenchQualityReportComponent } from './meters/meter-workbench/quality-report/meter-workbench-quality-report.component';
 import { MeterWorkbenchReadingsComponent } from './meters/meter-workbench/readings/meter-workbench-readings.component';
 import { MeterReadingBillSlideoutComponent } from './meters/meter-workbench/readings/meter-reading-bill-slideout/meter-reading-bill-slideout.component';
+import { MeterReadingsConfirmationModalComponent } from './meters/meter-workbench/readings/meter-readings-confirmation-modal/meter-readings-confirmation-modal.component';
 import { MeterReadingsColumnsSlideoutComponent } from './meters/meter-workbench/readings/meter-readings-columns-slideout/meter-readings-columns-slideout.component';
 import { MeterReadingsStatusComponent } from './meters/meter-workbench/readings/meter-readings-status/meter-readings-status.component';
 import { MeterReadingsTableComponent } from './meters/meter-workbench/readings/meter-readings-table/meter-readings-table.component';
@@ -85,6 +86,7 @@ import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/
     MetersDashboardComponent,
     MeterGroupingComponent,
     MeterReadingBillSlideoutComponent,
+    MeterReadingsConfirmationModalComponent,
     MeterReadingsColumnsSlideoutComponent,
     MeterCalendarizationHelpSlideoutComponent,
     TooltipComponent,

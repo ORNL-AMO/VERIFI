@@ -1,0 +1,25 @@
+.v1-data-tabs__attention {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  margin-left: .15rem;
+  padding: 0 .4rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.v1-data-tabs__attention--error {
+  background: var(--v1-danger);
+}
+
+.v1-data-tabs__attention--warning {
+  border-color: color-mix(in srgb, var(--v1-warning) 65%, #000);
+  background: color-mix(in srgb, var(--v1-warning) 35%, #ffd166);
+  color: #211600;
+}

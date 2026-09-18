@@ -68,7 +68,12 @@ describe('WorkspaceNavigationService', () => {
         { provide: AccountWorkspaceService, useValue: workspaceService },
         {
           provide: WorkspaceStatusService,
-          useValue: { accountTodos: vi.fn(() => []), selectedFacilityTodos: vi.fn(() => []) }
+          useValue: {
+            accountTodos: vi.fn(() => []),
+            selectedFacilityTodos: vi.fn(() => []),
+            accountDiscardedWarnings: vi.fn(() => []),
+            selectedFacilityDiscardedWarnings: vi.fn(() => [])
+          }
         }
       ]
     });

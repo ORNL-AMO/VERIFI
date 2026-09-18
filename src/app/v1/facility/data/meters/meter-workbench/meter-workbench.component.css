@@ -21,13 +21,37 @@
 
 .v1-meter-workbench-header__facts-toggle {
   flex: 0 0 auto;
+  border-color: transparent;
+  background: transparent;
+  color: var(--v1-link);
+  font-weight: 850;
   white-space: nowrap;
+}
+
+.v1-meter-workbench-header__facts-toggle:hover,
+.v1-meter-workbench-header__facts-toggle:focus-visible {
+  border-color: color-mix(in srgb, var(--v1-content-control) 30%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 7%, var(--v1-surface));
+  color: var(--v1-text);
+}
+
+.v1-meter-workbench-header__facts-symbol {
+  display: inline-grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .v1-meter-workbench-header__unit-select {
   width: auto;
   max-width: 15rem;
   min-height: var(--v1-control-height-sm);
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background-color: var(--v1-control-surface);
   padding-block: .3rem;
   font-size: .82rem;
   font-weight: 800;
@@ -35,8 +59,9 @@
 
 .v1-meter-workbench-header__unit-control {
   display: inline-flex;
-  gap: var(--v1-space-1);
+  flex: 0 0 auto;
   align-items: center;
+  min-height: var(--v1-control-height-sm);
 }
 
 .v1-meter-workbench-header__basis-control {
@@ -138,8 +163,22 @@
 
 .v1-meter-workbench-header__status {
   gap: var(--v1-space-1);
+  align-items: center;
   min-height: 1.65rem;
   font-size: .78rem;
+  line-height: 1;
+}
+
+.v1-meter-workbench-header__status > .v1-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.v1-meter-workbench-header__status-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1rem;
+  line-height: 1;
 }
 
 .v1-meter-workbench-header__group-value {
@@ -167,16 +206,22 @@
 }
 
 .v1-meter-workbench-header__status-notes li {
-  display: flex;
-  gap: var(--v1-space-1);
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  column-gap: var(--v1-space-1);
   align-items: flex-start;
   min-width: 0;
 }
 
 .v1-meter-workbench-header__status-notes .v1-icon {
-  flex: 0 0 auto;
-  margin-top: .14rem;
+  width: 1rem;
+  height: 1rem;
+  margin-top: .08rem;
   color: inherit;
+}
+
+.v1-meter-workbench-header__status-note-text {
+  min-width: 0;
 }
 
 @media (max-width: 760px) {
