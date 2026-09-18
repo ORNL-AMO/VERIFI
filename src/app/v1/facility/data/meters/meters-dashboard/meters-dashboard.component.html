@@ -1,6 +1,8 @@
 @let currentFacility = workspace.facility();
 @let currentAccount = workspace.account();
 @let accountMetersLink = accountMetersRoute();
+@let allMeterCards = meterCards();
+@let visibleMeterCards = filteredMeterCards();
 
 @if (!currentFacility) {
   <article class="v1-empty-state" role="status">
@@ -58,17 +60,58 @@
         </div>
       }
 
-      @if (workspace.meterCards().length === 0) {
+      <form class="v1-meters-browse__toolbar" aria-label="Meter filters">
+        <div class="v1-meters-browse__search">
+          <span class="input-group-text">
+            <app-ui-icon name="search"></app-ui-icon>
+          </span>
+          <input
+            id="v1-facility-meter-search"
+            type="search"
+            aria-label="Find meter, source, group, or status"
+            placeholder="Find meter, source, group, or status"
+            [value]="search()"
+            (input)="setSearch($any($event.target).value)">
+        </div>
+
+        <label>
+          <span>Status</span>
+          <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+            <option value="all">All</option>
+            <option value="attention">Needs attention</option>
+            <option value="noReadings">No readings</option>
+            <option value="missingGroup">Missing group</option>
+            <option value="valid">Valid</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Sort</span>
+          <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+            <option value="attention">Attention first</option>
+            <option value="meterName">Meter name</option>
+            <option value="latestReading">Latest reading</option>
+          </select>
+        </label>
+      </form>
+
+      @if (allMeterCards.length === 0) {
         <article class="v1-empty-state" role="status">
           <app-ui-icon name="meter"></app-ui-icon>
           <h2>No meters yet</h2>
           <p>Meter cards will appear here after utility meters are added or imported for this facility.</p>
         </article>
+      } @else if (visibleMeterCards.length === 0) {
+        <article class="v1-empty-state" role="status">
+          <app-ui-icon name="clearFilter"></app-ui-icon>
+          <h2>No meters match these filters</h2>
+          <p>Adjust the search or filter controls to return to the full meter list.</p>
+        </article>
       } @else {
-        <div class="v1-meters-browse__grid" role="list">
-          @for (card of workspace.meterCards(); track card.meter.guid) {
+        <div class="v1-meters-browse__grid" role="list" aria-label="Facility meters">
+          @for (item of visibleMeterCards; track item.card.meter.guid) {
             <app-meter-browse-card
-              [card]="card"
+              [card]="item.card"
               [usageFactsLoading]="workspace.calendarizationState() === 'loading'">
             </app-meter-browse-card>
           }
