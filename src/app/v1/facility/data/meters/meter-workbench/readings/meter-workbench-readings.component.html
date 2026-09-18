@@ -4,7 +4,7 @@
 @let _canAct = canAct();
 @let _billPanel = billPanel();
 
-<section class="meter-readings" aria-label="Meter readings">
+<section #readingsRegion class="meter-readings" aria-label="Meter readings" tabindex="-1">
 
   @if (actionError()) {
     <div class="v1-alert v1-alert--danger" role="alert">
@@ -22,8 +22,6 @@
 
   @if (status.state() !== 'ready' || findings.length > 0) {
     <app-meter-readings-status
-      #readingsStatus
-      tabindex="-1"
       [findings]="findings"
       [state]="status.state()"
       [canAct]="_canAct"

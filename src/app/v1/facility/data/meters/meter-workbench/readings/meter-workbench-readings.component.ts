@@ -1,5 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
+import { FocusMonitor } from '@angular/cdk/a11y';
+import { Component, ElementRef, Injector, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -42,6 +43,8 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly focusMonitor = inject(FocusMonitor);
+  private readonly injector = inject(Injector);
   readonly status = inject(WorkspaceStatusService);
   private confirmModalOpen = false;
 
@@ -96,7 +99,7 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   });
 
   @ViewChild('readingsConfirmModal') private readonly readingsConfirmModal?: TemplateRef<unknown>;
-  @ViewChild('readingsStatus', { read: ElementRef }) private readonly readingsStatus?: ElementRef<HTMLElement>;
+  @ViewChild('readingsRegion', { read: ElementRef }) private readonly readingsRegion?: ElementRef<HTMLElement>;
 
   ngOnDestroy(): void {
     this.hideConfirmModal();
@@ -104,11 +107,11 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
 
   async discardWarning(item: StatusItem): Promise<void> {
     if (await this.status.discardWarning(item)) {
-      setTimeout(() => {
-        const host = this.readingsStatus?.nativeElement;
-        const nextAction = host?.querySelector<HTMLButtonElement>('button:not([disabled])');
-        (nextAction ?? host)?.focus();
-      });
+      afterNextRender(() => {
+        if (this.readingsRegion) {
+          this.focusMonitor.focusVia(this.readingsRegion, 'program');
+        }
+      }, { injector: this.injector });
     }
   }
 

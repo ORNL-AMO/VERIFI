@@ -65,6 +65,51 @@ describe('WorkspaceStatusService', () => {
     expect(service.items().map(item => item.id)).toContain(warning!.id);
     expect(snapshot().account.statusWarningDismissals).toBeUndefined();
     expect(service.warningActionError()).toBe('save failed');
+
+    snapshot.update(current => ({
+      ...current,
+      account: account({ guid: 'account-b', name: 'Other Account' })
+    }));
+    expect(service.warningActionError()).toBeUndefined();
+
+    snapshot.update(current => ({
+      ...current,
+      account: account({ guid: 'account-a', name: 'New Account' })
+    }));
+    expect(service.warningActionError()).toBe('save failed');
+  });
+
+  it('does not let a late account action clear a newer account action', async () => {
+    const snapshot = signal(workspaceSnapshot({ account: account({ name: 'New Account' }) }));
+    const calendarResult = new BehaviorSubject(result('ready'));
+    const completions: Array<() => void> = [];
+    const execute = vi.fn(() => new Promise(resolve => {
+      completions.push(() => resolve({ value: undefined, change: {} }));
+    }));
+    const service = setup(snapshot, signal(1), calendarResult, undefined, execute);
+    const firstWarning = service.items().find(item => item.code === 'account.configuration.default-name');
+
+    const firstAction = service.discardWarning(firstWarning!);
+    expect(service.warningActionId()).toBe(firstWarning!.id);
+
+    snapshot.update(current => ({
+      ...current,
+      account: account({ guid: 'account-b', name: 'New Account' })
+    }));
+    calendarResult.next(result('ready', 'account-b'));
+    expect(service.warningActionId()).toBeUndefined();
+    expect(service.canManageWarnings()).toBe(true);
+    const secondWarning = service.items().find(item => item.code === 'account.configuration.default-name');
+    const secondAction = service.discardWarning(secondWarning!);
+    expect(service.warningActionId()).toBe(secondWarning!.id);
+
+    completions[0]();
+    await firstAction;
+    expect(service.warningActionId()).toBe(secondWarning!.id);
+
+    completions[1]();
+    await secondAction;
+    expect(service.warningActionId()).toBeUndefined();
   });
 });
 
@@ -72,14 +117,15 @@ function setup(
   snapshot: WritableSignal<AccountWorkspaceSnapshot>,
   revision: WritableSignal<number>,
   calendarResult: BehaviorSubject<WorkspaceCalendarizationBaseResult>,
-  commandError?: Error
+  commandError?: Error,
+  commandExecute?: (...args: any[]) => Promise<any>
 ): WorkspaceStatusService {
   const calendarizeBase = vi.fn(() => calendarResult.asObservable());
   const accountHandler = {
     update: vi.fn(async (updatedAccount: AccountWorkspaceSnapshot['account']) => updatedAccount)
   };
   const commandBoundary = {
-    execute: vi.fn(async (_request: unknown, persist: () => Promise<AccountWorkspaceSnapshot['account']>) => {
+    execute: commandExecute ?? vi.fn(async (_request: unknown, persist: () => Promise<AccountWorkspaceSnapshot['account']>) => {
       if (commandError) throw commandError;
       const value = await persist();
       snapshot.update(current => ({ ...current, account: value }));
@@ -111,10 +157,13 @@ function setup(
   return service;
 }
 
-function result(state: WorkspaceCalendarizationBaseResult['state']): WorkspaceCalendarizationBaseResult {
+function result(
+  state: WorkspaceCalendarizationBaseResult['state'],
+  accountGuid = 'account-a'
+): WorkspaceCalendarizationBaseResult {
   return {
     state,
-    accountGuid: state === 'ready' ? 'account-a' : undefined,
+    accountGuid: state === 'ready' ? accountGuid : undefined,
     inputFingerprint: state === 'ready' ? 'fingerprint-a' : undefined,
     meters: []
   };

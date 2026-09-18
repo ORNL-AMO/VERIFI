@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ScrollingModule, CdkScrollable } from '@angular/cdk/scrolling';
-import { NgModule } from '@angular/core';
+import { NgModule, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -143,5 +143,59 @@ describe('WorkspaceShellComponent', () => {
 
     expect(status.discardWarning).toHaveBeenCalledWith(activeWarning);
     expect(status.restoreWarning).toHaveBeenCalledWith(discardedWarning);
+  });
+
+  it('focuses the stable Todo region after discarding the last Todo', async () => {
+    const activeWarning = presentFinding(makeFinding('account.configuration.default-name', 'warning', 'configuration', {
+      kind: 'account', guid: 'account-a', name: 'Account A', accountGuid: 'account-a'
+    }));
+    navigation.activePanelTab.mockReturnValue('todos');
+    const panelContent = signal({
+      help: [], todos: [activeWarning], discardedWarnings: [], results: [], details: []
+    });
+    navigation.panelContent.mockImplementation(() => panelContent());
+    status.discardWarning.mockImplementation(async () => {
+      panelContent.set({
+        help: [], todos: [], discardedWarnings: [activeWarning], results: [], details: []
+      });
+      return true;
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(WorkspaceShellComponent);
+    fixture.detectChanges();
+    const panel = fixture.debugElement.query(By.directive(SupportPanelComponent)).componentInstance as SupportPanelComponent;
+
+    await panel.discardWarning(activeWarning);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[aria-labelledby="v1-todo-heading"]'));
+  });
+
+  it('focuses the stable Todo region after restoring a warning without a matching Todo', async () => {
+    const discardedWarning = presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', {
+      kind: 'meter', guid: 'meter-a', name: 'Meter A', accountGuid: 'account-a', facilityGuid: 'facility-a'
+    }));
+    navigation.activePanelTab.mockReturnValue('todos');
+    const panelContent = signal({
+      help: [], todos: [], discardedWarnings: [discardedWarning], results: [], details: []
+    });
+    navigation.panelContent.mockImplementation(() => panelContent());
+    status.restoreWarning.mockImplementation(async () => {
+      panelContent.set({
+        help: [], todos: [], discardedWarnings: [], results: [], details: []
+      });
+      return true;
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(WorkspaceShellComponent);
+    fixture.detectChanges();
+    const panel = fixture.debugElement.query(By.directive(SupportPanelComponent)).componentInstance as SupportPanelComponent;
+
+    await panel.restoreWarning(discardedWarning);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[aria-labelledby="v1-todo-heading"]'));
   });
 });

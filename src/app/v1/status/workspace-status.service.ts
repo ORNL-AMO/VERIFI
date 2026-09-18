@@ -12,6 +12,16 @@ import { presentFindings, todoItems } from './status.catalog';
 import { StatusEvaluationState, StatusFinding, StatusItem, summarizeFindings } from './status.models';
 import { createStatusWarningDismissal, partitionStatusFindings, statusFindingEvidenceSignature } from './status.dismissals';
 
+interface WarningActionState {
+  readonly accountGuid: string;
+  readonly findingId: string;
+}
+
+interface WarningActionErrorState {
+  readonly accountGuid: string;
+  readonly message: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorkspaceStatusService {
   private readonly workspace = inject(AccountWorkspaceStore);
@@ -25,8 +35,8 @@ export class WorkspaceStatusService {
     initialValue: IDLE_WORKSPACE_CALENDARIZATION
   });
   private dateRefreshTimeout?: ReturnType<typeof setTimeout>;
-  private readonly warningActionIdState = signal<string | undefined>(undefined);
-  private readonly warningActionErrorState = signal<string | undefined>(undefined);
+  private readonly warningActionState = signal<WarningActionState | undefined>(undefined);
+  private readonly warningActionErrorState = signal<WarningActionErrorState | undefined>(undefined);
 
   private readonly canEvaluate = computed(() => this.workspace.isReady()
     && !!this.workspace.snapshot()
@@ -80,11 +90,17 @@ export class WorkspaceStatusService {
       ? this.discardedItems().filter(item => item.entity.facilityGuid === facilityGuid)
       : [];
   });
-  readonly warningActionId = this.warningActionIdState.asReadonly();
-  readonly warningActionError = this.warningActionErrorState.asReadonly();
+  readonly warningActionId = computed(() => {
+    const action = this.warningActionState();
+    return action?.accountGuid === this.workspace.account()?.guid ? action.findingId : undefined;
+  });
+  readonly warningActionError = computed(() => {
+    const error = this.warningActionErrorState();
+    return error?.accountGuid === this.workspace.account()?.guid ? error.message : undefined;
+  });
   readonly canManageWarnings = computed(() => this.workspace.canWrite()
     && !this.workspace.hasPending()
-    && !this.warningActionIdState());
+    && !this.warningActionId());
 
   constructor() {
     this.scheduleDateRefresh();
@@ -157,7 +173,11 @@ export class WorkspaceStatusService {
     label: string,
     updatedAccount: IdbAccount
   ): Promise<boolean> {
-    this.warningActionIdState.set(findingId);
+    const action: WarningActionState = {
+      accountGuid: updatedAccount.guid,
+      findingId
+    };
+    this.warningActionState.set(action);
     this.warningActionErrorState.set(undefined);
     try {
       await this.commandBoundary.execute(
@@ -173,12 +193,19 @@ export class WorkspaceStatusService {
       );
       return true;
     } catch (error) {
-      this.warningActionErrorState.set(error instanceof Error
-        ? error.message
-        : 'The warning preference could not be saved.');
+      if (this.warningActionState() === action) {
+        this.warningActionErrorState.set({
+          accountGuid: action.accountGuid,
+          message: error instanceof Error
+            ? error.message
+            : 'The warning preference could not be saved.'
+        });
+      }
       return false;
     } finally {
-      this.warningActionIdState.set(undefined);
+      if (this.warningActionState() === action) {
+        this.warningActionState.set(undefined);
+      }
     }
   }
 }

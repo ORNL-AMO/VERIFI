@@ -290,6 +290,59 @@ describe('MeterWorkbenchReadingsComponent', () => {
       'settings'
     ], { fragment: 'meter-reading-settings' });
   });
+
+  it('focuses the stable readings region after discarding the only warning', async () => {
+    const meterValue = meter({ id: 2, guid: 'meter-a', name: 'Electric Main', source: 'Electricity' });
+    const finding = presentFinding(makeFinding(
+      'meter.currency.stale',
+      'warning',
+      'currency',
+      {
+        kind: 'meter', guid: meterValue.guid, name: meterValue.name,
+        accountGuid: meterValue.accountId, facilityGuid: meterValue.facilityId
+      }
+    ));
+    const { fixture, status, statusFindings } = setupHarness({ meterValue, statusFindings: [finding] });
+    status.discardWarning.mockImplementation(async () => {
+      statusFindings.set([]);
+      return true;
+    });
+    fixture.detectChanges();
+    const discardButton = fixture.nativeElement.querySelector('[aria-label^="Discard"]') as HTMLButtonElement;
+    discardButton.focus();
+
+    await fixture.componentInstance.discardWarning(finding);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const readingsRegion = fixture.nativeElement.querySelector('.meter-readings');
+    expect(fixture.nativeElement.querySelector('app-meter-readings-status')).toBeNull();
+    expect(document.activeElement).toBe(readingsRegion);
+  });
+
+  it('leaves the warning and focus in place when discard persistence fails', async () => {
+    const meterValue = meter({ id: 2, guid: 'meter-a', name: 'Electric Main', source: 'Electricity' });
+    const finding = presentFinding(makeFinding(
+      'meter.currency.stale',
+      'warning',
+      'currency',
+      {
+        kind: 'meter', guid: meterValue.guid, name: meterValue.name,
+        accountGuid: meterValue.accountId, facilityGuid: meterValue.facilityId
+      }
+    ));
+    const { fixture, status } = setupHarness({ meterValue, statusFindings: [finding] });
+    status.discardWarning.mockResolvedValue(false);
+    fixture.detectChanges();
+    const discardButton = fixture.nativeElement.querySelector('[aria-label^="Discard"]') as HTMLButtonElement;
+    discardButton.focus();
+
+    await fixture.componentInstance.discardWarning(finding);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-meter-readings-status')).not.toBeNull();
+    expect(document.activeElement).toBe(discardButton);
+  });
 });
 
 function setup(options: SetupOptions = {}): ComponentFixture<MeterWorkbenchReadingsComponent> {
@@ -336,6 +389,15 @@ function setupHarness(options: SetupOptions = {}) {
     hide: vi.fn()
   };
   const router = { navigate: vi.fn() };
+  const statusFindings = signal<readonly StatusItem[]>(options.statusFindings ?? []);
+  const status = {
+    state: signal(options.statusState ?? 'ready'),
+    meterFindings: vi.fn(() => statusFindings()),
+    calendarizedMeters: signal([]),
+    warningActionError: signal(undefined),
+    canManageWarnings: signal(true),
+    discardWarning: vi.fn()
+  };
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchReadingsComponent],
@@ -393,14 +455,7 @@ function setupHarness(options: SetupOptions = {}) {
       { provide: Router, useValue: router },
       {
         provide: WorkspaceStatusService,
-        useValue: {
-          state: signal(options.statusState ?? 'ready'),
-          meterFindings: vi.fn(() => options.statusFindings ?? []),
-          calendarizedMeters: signal([]),
-          warningActionError: signal(undefined),
-          canManageWarnings: signal(true),
-          discardWarning: vi.fn()
-        }
+        useValue: status
       },
       {
         provide: WorkspaceNavigationService,
@@ -425,6 +480,8 @@ function setupHarness(options: SetupOptions = {}) {
     commandBoundary,
     meterHandler,
     modalPortal,
-    router
+    router,
+    status,
+    statusFindings
   };
 }

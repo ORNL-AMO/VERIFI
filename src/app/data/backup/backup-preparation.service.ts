@@ -3,6 +3,7 @@ import { BackupFile } from '@data/models/backup-file';
 import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } from '@data/indexedDB/data-migrations/data-migration.errors';
 import { DATA_MIGRATIONS } from '@data/indexedDB/data-migrations/data-migration.registry';
 import { CURRENT_DATA_VERSION, MigrationData } from '@data/indexedDB/data-migrations/data-migration.models';
+import { StatusWarningDismissal } from '@data/models/status-warning-dismissal';
 
 export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION };
 
@@ -110,6 +111,10 @@ export class BackupPreparationService {
     if (backup.backupFileType === 'Account' && (!backup.account || typeof backup.account !== 'object')) {
       throw new InvalidBackupError('This account backup does not contain an account record.');
     }
+    if (backup.backupFileType === 'Account') {
+      const account = backup.account as Record<string, unknown>;
+      account['statusWarningDismissals'] = normalizeStatusWarningDismissals(account['statusWarningDismissals']);
+    }
     if (backup.backupFileType === 'Facility' && (!backup.facility || typeof backup.facility !== 'object')) {
       throw new InvalidBackupError('This facility backup does not contain a facility record.');
     }
@@ -121,6 +126,24 @@ export class BackupPreparationService {
     }
     return backup as unknown as BackupFile;
   }
+}
+
+function normalizeStatusWarningDismissals(value: unknown): StatusWarningDismissal[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap(item => {
+    if (!item || typeof item !== 'object') return [];
+    const dismissal = item as Record<string, unknown>;
+    if (typeof dismissal['findingId'] !== 'string'
+      || typeof dismissal['evidenceSignature'] !== 'string'
+      || typeof dismissal['discardedAt'] !== 'string') {
+      return [];
+    }
+    return [{
+      findingId: dismissal['findingId'],
+      evidenceSignature: dismissal['evidenceSignature'],
+      discardedAt: dismissal['discardedAt']
+    }];
+  });
 }
 
 export function backupToMigrationData(backup: BackupFile): MigrationData {

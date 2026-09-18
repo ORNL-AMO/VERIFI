@@ -363,35 +363,27 @@ export class BackupImportCommandService {
         await this.addRecord(transaction, 'facilityEnergyUseEquipment', facilityEnergyUseEquipment);
       }
 
-      let needsAccountUpdate: boolean = false;
-      if (newAccount.statusWarningDismissals?.length) {
-        newAccount.statusWarningDismissals = remapStatusWarningDismissals(
-          newAccount.statusWarningDismissals,
-          {
-            account: accountGUIDs,
-            facilities: facilityGUIDs,
-            meters: meterGUIDs,
-            meterGroups: meterGroupGUIDs,
-            predictors: predictorGUIDs,
-            facilityAnalyses: facilityAnalysisGUIDs,
-            accountAnalyses: accountAnalysisGUIDs,
-            facilityReports: facilityReportGUIDs,
-            accountReports: accountReportGUIDs
-          }
-        );
-        needsAccountUpdate = true;
-      }
+      newAccount.statusWarningDismissals = remapStatusWarningDismissals(
+        newAccount.statusWarningDismissals,
+        {
+          account: accountGUIDs,
+          facilities: facilityGUIDs,
+          meters: meterGUIDs,
+          meterGroups: meterGroupGUIDs,
+          predictors: predictorGUIDs,
+          facilityAnalyses: facilityAnalysisGUIDs,
+          accountAnalyses: accountAnalysisGUIDs,
+          facilityReports: facilityReportGUIDs,
+          accountReports: accountReportGUIDs
+        }
+      );
       if (newAccount.selectedEnergyAnalysisId) {
         newAccount.selectedEnergyAnalysisId = this.getNewId(newAccount.selectedEnergyAnalysisId, accountAnalysisGUIDs);
-        needsAccountUpdate = true;
       }
       if (newAccount.selectedWaterAnalysisId) {
         newAccount.selectedWaterAnalysisId = this.getNewId(newAccount.selectedWaterAnalysisId, accountAnalysisGUIDs);
-        needsAccountUpdate = true;
       }
-      if (needsAccountUpdate) {
-        await transaction.put('accounts', newAccount);
-      }
+      await transaction.put('accounts', newAccount);
 
       for (let i = 0; i < backupFile.facilities.length; i++) {
         const facility: IdbFacility = backupFile.facilities[i];

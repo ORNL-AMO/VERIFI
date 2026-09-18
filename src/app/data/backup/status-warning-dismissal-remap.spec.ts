@@ -45,4 +45,32 @@ describe('status warning dismissal backup remapping', () => {
 
     expect(remapStatusWarningDismissals(dismissals, maps)).toEqual([]);
   });
+
+  it.each([undefined, null, true, 'dismissal', { findingId: 'rule.code:meter:meter-old' }])(
+    'treats a non-array dismissal collection as empty: %j',
+    dismissals => {
+      expect(remapStatusWarningDismissals(dismissals, maps)).toEqual([]);
+    }
+  );
+
+  it('drops runtime-invalid entries while remapping valid entries', () => {
+    const valid = {
+      findingId: 'rule.code:meter:meter-old',
+      evidenceSignature: 'signature',
+      discardedAt: '2026-09-18T12:00:00.000Z'
+    };
+
+    expect(remapStatusWarningDismissals([
+      null,
+      12,
+      {},
+      { ...valid, findingId: null },
+      { ...valid, evidenceSignature: false },
+      { ...valid, discardedAt: new Date() },
+      valid
+    ], maps)).toEqual([{
+      ...valid,
+      findingId: 'rule.code:meter:meter-new'
+    }]);
+  });
 });

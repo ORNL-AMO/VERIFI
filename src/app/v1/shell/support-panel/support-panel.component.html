@@ -36,7 +36,7 @@
     }
 
     @if (activeTab === 'todos') {
-      <section aria-labelledby="v1-todo-heading">
+      <section #todoRegion aria-labelledby="v1-todo-heading" tabindex="-1">
         <h2 id="v1-todo-heading" class="visually-hidden">Todo items</h2>
         @if (status.warningActionError()) {
           <div class="v1-alert v1-alert--danger" role="alert">{{ status.warningActionError() }}</div>
@@ -66,8 +66,6 @@
                       class="v1-btn v1-btn--sm v1-btn--quiet"
                       [disabled]="!status.canManageWarnings()"
                       [attr.aria-label]="'Discard ' + item.title"
-                      data-warning-action="discard"
-                      [attr.data-finding-id]="item.id"
                       (click)="discardWarning(item)">
                       Discard
                     </button>
@@ -93,8 +91,6 @@
                       class="v1-btn v1-btn--sm v1-btn--quiet"
                       [disabled]="!status.canManageWarnings()"
                       [attr.aria-label]="'Restore ' + item.title"
-                      data-warning-action="restore"
-                      [attr.data-finding-id]="item.id"
                       (click)="restoreWarning(item)">
                       Restore
                     </button>

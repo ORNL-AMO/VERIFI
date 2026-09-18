@@ -1,4 +1,5 @@
-import { Component, ElementRef, inject } from '@angular/core';
+import { FocusMonitor } from '@angular/cdk/a11y';
+import { Component, ElementRef, Injector, ViewChild, afterNextRender, inject } from '@angular/core';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { StatusItem } from '@app/v1/status/status.models';
@@ -12,26 +13,28 @@ import { StatusItem } from '@app/v1/status/status.models';
 export class SupportPanelComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly status = inject(WorkspaceStatusService);
-  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly focusMonitor = inject(FocusMonitor);
+  private readonly injector = inject(Injector);
+
+  @ViewChild('todoRegion', { read: ElementRef }) private readonly todoRegion?: ElementRef<HTMLElement>;
 
   async discardWarning(item: StatusItem): Promise<void> {
     if (await this.status.discardWarning(item)) {
-      this.focusWarningAction('restore', item.id);
+      this.focusTodoRegion();
     }
   }
 
   async restoreWarning(item: StatusItem): Promise<void> {
     if (await this.status.restoreWarning(item)) {
-      this.focusWarningAction('discard', item.id);
+      this.focusTodoRegion();
     }
   }
 
-  private focusWarningAction(action: 'discard' | 'restore', findingId: string): void {
-    setTimeout(() => {
-      const buttons = this.elementRef.nativeElement.querySelectorAll<HTMLButtonElement>(
-        `button[data-warning-action="${action}"]`
-      );
-      Array.from(buttons).find(button => button.dataset['findingId'] === findingId)?.focus();
-    });
+  private focusTodoRegion(): void {
+    afterNextRender(() => {
+      if (this.todoRegion) {
+        this.focusMonitor.focusVia(this.todoRegion, 'program');
+      }
+    }, { injector: this.injector });
   }
 }

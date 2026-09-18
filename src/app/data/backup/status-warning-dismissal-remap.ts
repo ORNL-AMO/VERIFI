@@ -18,15 +18,30 @@ export interface StatusWarningDismissalGuidMaps {
 }
 
 export function remapStatusWarningDismissals(
-  dismissals: readonly StatusWarningDismissal[],
+  dismissals: unknown,
   maps: StatusWarningDismissalGuidMaps
 ): StatusWarningDismissal[] {
+  if (!Array.isArray(dismissals)) return [];
+
   return dismissals.flatMap(dismissal => {
+    if (!isStatusWarningDismissal(dismissal)) return [];
     const parsed = parseFindingId(dismissal.findingId);
     if (!parsed) return [];
     const guid = remapEntityGuid(parsed.kind, parsed.guid, maps);
-    return guid ? [{ ...dismissal, findingId: `${parsed.code}:${parsed.kind}:${guid}` }] : [];
+    return guid ? [{
+      findingId: `${parsed.code}:${parsed.kind}:${guid}`,
+      evidenceSignature: dismissal.evidenceSignature,
+      discardedAt: dismissal.discardedAt
+    }] : [];
   });
+}
+
+function isStatusWarningDismissal(value: unknown): value is StatusWarningDismissal {
+  if (!value || typeof value !== 'object') return false;
+  const dismissal = value as Record<string, unknown>;
+  return typeof dismissal['findingId'] === 'string'
+    && typeof dismissal['evidenceSignature'] === 'string'
+    && typeof dismissal['discardedAt'] === 'string';
 }
 
 function parseFindingId(findingId: string): { code: string; kind: string; guid: string } | undefined {
