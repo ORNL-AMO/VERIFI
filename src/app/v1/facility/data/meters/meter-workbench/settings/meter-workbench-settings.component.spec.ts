@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -151,6 +151,58 @@ describe('MeterWorkbenchSettingsComponent', () => {
 
     expect(commandBoundary.execute).not.toHaveBeenCalled();
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Resolve validation issues');
+  });
+
+  it('derives dependent settings from unsaved form state while calendarization is invalid', async () => {
+    vi.useFakeTimers();
+    const fixture = setup({ meterReadingDataApplication: undefined });
+    const commandBoundary = TestBed.inject(WorkspaceCommandBoundary) as unknown as { execute: ReturnType<typeof vi.fn> };
+    const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeterWithData: ReturnType<typeof vi.fn> };
+
+    fixture.detectChanges();
+    const sourceSelect = query<HTMLSelectElement>(fixture, 'select[formControlName="source"]');
+    const otherFuelsOption = Array.from(sourceSelect.options)
+      .find(option => option.textContent?.trim() === 'Other Fuels');
+    expect(otherFuelsOption).toBeDefined();
+
+    sourceSelect.value = otherFuelsOption!.value;
+    sourceSelect.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const form = fixture.componentInstance.formSignal();
+    expect(form?.controls.source.value).toBe('Other Fuels');
+    expect(form?.controls.scope.value).toBe(1);
+    expect(form?.controls.startingUnit.value).toBe('CCF');
+    expect(form?.controls.energyUnit.value).toBe('MMBtu');
+    expect(form?.controls.phase.hasValidator(Validators.required)).toBe(true);
+    expect(form?.controls.fuel.hasValidator(Validators.required)).toBe(true);
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('app-meter-settings-electricity-form')).toBeNull();
+    expect(element.querySelector('select[formControlName="phase"]')).not.toBeNull();
+    expect(element.querySelector('select[formControlName="fuel"]')).not.toBeNull();
+    expect(element.querySelector('input[formControlName="heatCapacity"]')).not.toBeNull();
+    expect(element.textContent).not.toContain('Demand Unit');
+
+    await vi.advanceTimersByTimeAsync(700);
+    expect(commandBoundary.execute).not.toHaveBeenCalled();
+
+    form?.controls.meterReadingDataApplication.patchValue('backward');
+    form?.controls.meterReadingDataApplication.markAsTouched();
+    form?.markAsDirty();
+    await fixture.componentInstance.saveNow();
+
+    expect(meterHandler.updateMeterWithData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'Other Fuels',
+        scope: 1,
+        startingUnit: 'CCF',
+        energyUnit: 'MMBtu',
+        meterReadingDataApplication: 'backward'
+      }),
+      [],
+      'account-a'
+    );
   });
 
   it('uses a tooltip for the calendarization change warning when readings exist', () => {
