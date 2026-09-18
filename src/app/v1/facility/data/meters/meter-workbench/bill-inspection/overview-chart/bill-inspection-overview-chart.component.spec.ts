@@ -1,5 +1,10 @@
+import { CommonModule } from '@angular/common';
+import { Directive, Input, forwardRef } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
-import { billInspectionTimeSeriesOption } from './bill-inspection-overview-chart.component';
+import { BillInspectionOverviewChartComponent, billInspectionTimeSeriesOption } from './bill-inspection-overview-chart.component';
 import { buildBillInspectionReport } from '../meter-workbench-bill-inspection.models';
 
 describe('BillInspectionOverviewChartComponent options', () => {
@@ -131,7 +136,50 @@ describe('BillInspectionOverviewChartComponent options', () => {
     expect(tooltipHtml).not.toContain('Demand Charge');
     expect(tooltipHtml).not.toContain('$0');
   });
+
+  it('keeps the accessible table inside a visually hidden wrapper', () => {
+    const demandCharge = charge('charge-demand', 'Demand Charge', 'demand');
+    const report = buildBillInspectionReport(
+      meter({ guid: 'meter-a', charges: [demandCharge] }),
+      [
+        reading({
+          guid: 'reading-a',
+          totalCost: 120,
+          charges: [{ chargeGuid: 'charge-demand', chargeAmount: 20, chargeUsage: 40 }]
+        })
+      ]
+    );
+    const fixture = setup(report);
+    const accessibleData = fixture.nativeElement.querySelector('.v1-meter-bill-inspection__overview-accessible-data') as HTMLDivElement;
+    const table = accessibleData.querySelector('table') as HTMLTableElement;
+
+    expect(accessibleData.classList).toContain('visually-hidden');
+    expect(table.classList).not.toContain('visually-hidden');
+    expect(table.caption?.textContent).toContain('Utility bill charges over time data');
+    expect(table.textContent).toContain('Demand Charge');
+  });
 });
+
+@Directive({
+  selector: '[appV1ECharts]',
+  standalone: true,
+  providers: [{ provide: EChartsChartDirective, useExisting: forwardRef(() => EChartsStubDirective) }]
+})
+class EChartsStubDirective {
+  @Input('appV1ECharts') option?: V1EChartsOption;
+}
+
+function setup(report: ReturnType<typeof buildBillInspectionReport>): ComponentFixture<BillInspectionOverviewChartComponent> {
+  TestBed.configureTestingModule({
+    declarations: [BillInspectionOverviewChartComponent],
+    imports: [CommonModule, IconComponent, EChartsStubDirective]
+  });
+  const fixture = TestBed.createComponent(BillInspectionOverviewChartComponent);
+  fixture.componentRef.setInput('report', report);
+  fixture.componentRef.setInput('meterName', 'Electric Main');
+  fixture.detectChanges();
+  return fixture;
+}
 
 function charge(guid: string, name: string, chargeType: 'demand' | 'other') {
   return {

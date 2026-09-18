@@ -107,6 +107,30 @@ describe('BillInspectionCorrelationChartComponent options', () => {
     expect(noRegressionFixture.nativeElement.textContent).toContain('Best fit needs at least three paired readings');
     expect(noRegressionFixture.nativeElement.textContent).not.toContain('R2');
   });
+
+  it('keeps the accessible table inside a visually hidden wrapper', () => {
+    const report = buildBillInspectionReport(
+      meter({ guid: 'meter-a', charges: [charge('charge-demand', 'Demand Charge', 'demand')] }),
+      [
+        reading({
+          guid: 'reading-a',
+          totalEnergyUse: 10,
+          charges: [{ chargeGuid: 'charge-demand', chargeAmount: 20, chargeUsage: 5 }]
+        })
+      ]
+    );
+    const fixture = setup();
+    fixture.componentInstance.chargeView = report.charges[0];
+    fixture.componentInstance.plot = report.charges[0].plots[0];
+    fixture.detectChanges();
+    const accessibleData = fixture.nativeElement.querySelector('.v1-meter-bill-inspection__correlation-accessible-data') as HTMLDivElement;
+    const table = accessibleData.querySelector('table') as HTMLTableElement;
+
+    expect(accessibleData.classList).toContain('visually-hidden');
+    expect(table.classList).not.toContain('visually-hidden');
+    expect(table.caption?.textContent).toContain('data for Demand Charge');
+    expect(table.textContent).toContain('Charge Usage');
+  });
 });
 
 @Directive({
