@@ -26,6 +26,10 @@ export interface IdbUtilityMeter {
 
     startingUnit: string,
     energyUnit: string,
+    /** V1 calculated-result display override. Undefined inherits the facility setting. */
+    displayEnergyUnit?: string,
+    /** V1 calculated-result display override. Undefined inherits the facility setting. */
+    displayEnergyIsSource?: boolean,
     demandUnit?: string,
     fuel?: string
     visible?: boolean

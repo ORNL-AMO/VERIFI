@@ -92,7 +92,7 @@ export function buildMeterDataColumns(
   if (calendarizedMeter.showEnergyUse && !isRECs) {
     columns.push({
       id: 'energyUse',
-      label: 'Total Energy',
+      label: `Total ${calendarizedMeter.energyIsSource ? 'Source' : 'Site'} Energy`,
       unit: calendarizedMeter.energyUnit
     });
   }

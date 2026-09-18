@@ -10,6 +10,10 @@ import { vi } from 'vitest';
 import { facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterWorkbenchQualityReportComponent } from './meter-workbench-quality-report.component';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { buildMeterDataQualityReport } from '@domain/calculations/data-quality/meter-data-quality';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchQualityReportComponent', () => {
   it('renders an empty state and routes users to readings when no meter readings exist', () => {
@@ -52,9 +56,8 @@ describe('MeterWorkbenchQualityReportComponent', () => {
 
       const element = fixture.nativeElement as HTMLElement;
       expect(element.textContent).toContain('Data quality issues found');
-      expect(element.textContent).toContain('1 consumption reading outside the expected range');
-      expect(element.textContent).toContain('1 cost reading outside the expected range');
-      expect(element.textContent).toContain('1 month with multiple readings');
+      expect(element.textContent).toContain('1 consumption value(s) fall outside the expected range');
+      expect(element.textContent).toContain('1 cost value(s) fall outside the expected range');
       expect(element.textContent).toContain('Total Consumption and Cost Statistics');
       expect(element.textContent).toContain('Total Consumption (kWh)');
       expect(element.textContent).toContain('Total Cost ($)');
@@ -97,6 +100,30 @@ describe('MeterWorkbenchQualityReportComponent', () => {
       vi.useRealTimers();
     }
   });
+
+  it.each(['idle', 'evaluating', 'error'] as const)(
+    'keeps locally-derived quality warnings visible while workspace status is %s',
+    statusState => {
+      const fixture = setup({
+        statusState,
+        statusFindings: [],
+        meterData: [
+          reading({ guid: 'reading-a', month: 1, year: 2026, totalEnergyUse: 10, totalCost: 10 }),
+          reading({ guid: 'reading-b', month: 1, year: 2026, day: 15, totalEnergyUse: 10, totalCost: 10 }),
+          reading({ guid: 'reading-c', month: 2, year: 2026, totalEnergyUse: 10, totalCost: 10 }),
+          reading({ guid: 'reading-d', month: 3, year: 2026, totalEnergyUse: 100, totalCost: 100 })
+        ]
+      });
+
+      fixture.detectChanges();
+
+      const text = (fixture.nativeElement as HTMLElement).textContent;
+      expect(text).toContain('Data quality issues found');
+      expect(text).toContain('1 consumption reading outside the expected range.');
+      expect(text).toContain('1 cost reading outside the expected range.');
+      expect(text).toContain('1 month with multiple readings.');
+    }
+  );
 
   it('hides cost and consumption sections when meter display rules exclude them', () => {
     const fixture = setup({
@@ -199,12 +226,23 @@ function setup(options: {
   selectedMeter?: ReturnType<typeof meter>;
   meterData?: ReturnType<typeof reading>[];
   copyTable?: ReturnType<typeof vi.fn>;
+  statusState?: 'idle' | 'evaluating' | 'ready' | 'error';
+  statusFindings?: StatusItem[];
 } = {}): ComponentFixture<MeterWorkbenchQualityReportComponent> {
   const selectedMeter = options.selectedMeter ?? meter({
     guid: 'meter-a',
     name: 'Electric Main',
     meterReadingDataApplication: 'backward'
   });
+  const meterData = options.meterData ?? [
+    reading({ guid: 'reading-a', totalEnergyUse: 10, totalCost: 20 }),
+    reading({ guid: 'reading-b', month: 2, totalEnergyUse: 12, totalCost: 24 })
+  ];
+  const qualityReport = buildMeterDataQualityReport(meterData, selectedMeter);
+  const entity = { kind: 'meter' as const, guid: selectedMeter.guid, name: selectedMeter.name, accountGuid: selectedMeter.accountId, facilityGuid: selectedMeter.facilityId };
+  const findings: StatusItem[] = options.statusFindings ? [...options.statusFindings] : [];
+  if (!options.statusFindings && qualityReport.energyOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.consumption-outlier', 'warning', 'quality', entity, { count: qualityReport.energyOutlierCount })));
+  if (!options.statusFindings && qualityReport.costOutlierCount > 0) findings.push(presentFinding(makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: qualityReport.costOutlierCount })));
 
   TestBed.configureTestingModule({
     declarations: [MeterWorkbenchQualityReportComponent],
@@ -215,14 +253,15 @@ function setup(options: {
         useValue: {
           facility: signal(facility({ guid: 'facility-a', energyUnit: 'MMBtu' })),
           selectedMeter: signal(selectedMeter),
-          selectedMeterData: signal(options.meterData ?? [
-            reading({ guid: 'reading-a', totalEnergyUse: 10, totalCost: 20 }),
-            reading({ guid: 'reading-b', month: 2, totalEnergyUse: 12, totalCost: 24 })
-          ])
+          selectedMeterData: signal(meterData)
         }
       },
       { provide: CopyTableService, useValue: { copyTable: options.copyTable ?? vi.fn() } },
       { provide: Router, useValue: { navigate: vi.fn() } },
+      {
+        provide: WorkspaceStatusService,
+        useValue: { state: signal(options.statusState ?? 'ready'), meterFindings: vi.fn(() => findings) }
+      },
       {
         provide: WorkspaceNavigationService,
         useValue: {

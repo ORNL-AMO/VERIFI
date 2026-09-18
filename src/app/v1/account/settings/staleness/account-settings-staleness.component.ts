@@ -1,7 +1,7 @@
 import { Component, effect, inject, untracked } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { DATA_STALENESS_OPTIONS } from '@domain/calculations/status-check-calculations/statusCheckModels';
+import { DATA_STALENESS_OPTIONS } from '@app/v1/status/status.settings';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
 

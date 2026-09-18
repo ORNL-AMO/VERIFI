@@ -1,5 +1,5 @@
 @let _meter = meter();
-@let _status = selectedMeterStatusCheck();
+@let findings = selectedMeterFindings();
 @let _table = tableView();
 @let _canAct = canAct();
 @let _billPanel = billPanel();
@@ -13,15 +13,18 @@
     </div>
   }
 
-  @if (!_status || _status.isMeterValid !== true) {
+  @if (status.state() !== 'ready' || findings.length > 0) {
     <app-meter-readings-status
-      [status]="_status"
+      [findings]="findings"
+      [state]="status.state()"
       [canAct]="_canAct"
       (settingsRequested)="openSettings()"
       (qualityRequested)="openQuality()"
       (fillMissingRequested)="requestFillMissing()">
     </app-meter-readings-status>
-  } @else {
+  }
+
+  @if (!hasBlockingConfiguration()) {
     @if (_table.rows.length === 0) {
       <div class="meter-readings__empty">
         <app-ui-icon name="table"></app-ui-icon>
@@ -37,20 +40,13 @@
         [view]="_table"
         [canAct]="_canAct"
         [isElectron]="isElectron"
-        [isDataOutdated]="_status.isDataOutdated"
+        [isDataOutdated]="isDataOutdated()"
         (chooseColumnsRequested)="openColumns()"
         (addBillRequested)="openAddBill()"
         (editRequested)="openEditBill($event)"
         (deleteRequested)="requestDelete($event)"
         (bulkDeleteRequested)="requestBulkDelete($event)"
         (viewBillRequested)="openConnectedBill($event)">
-        <app-meter-readings-status
-          [status]="_status"
-          [canAct]="_canAct"
-          (settingsRequested)="openSettings()"
-          (qualityRequested)="openQuality()"
-          (fillMissingRequested)="requestFillMissing()">
-        </app-meter-readings-status>
       </app-meter-readings-table>
     }
   }

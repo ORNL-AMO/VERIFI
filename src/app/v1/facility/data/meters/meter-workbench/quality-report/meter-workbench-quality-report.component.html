@@ -22,7 +22,7 @@
       </button>
     </article>
   } @else if (currentReport) {
-    @if (currentReport.showAlert) {
+    @if (issues.length > 0) {
       <div class="v1-alert v1-alert--warning v1-meter-quality__alert" role="alert">
         <app-ui-icon name="warning"></app-ui-icon>
         <div>

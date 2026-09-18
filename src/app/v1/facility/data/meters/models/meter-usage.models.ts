@@ -29,6 +29,7 @@ interface MeterUsageFactView {
 export interface MeterUsageFactsView {
   readonly facts: readonly MeterUsageFactView[];
   readonly unitLabel?: string;
+  readonly basisLabel?: 'Site' | 'Source';
 }
 
 export function buildMeterUsageFacts(
@@ -106,7 +107,12 @@ export function buildMeterUsageFactsFromCalendarizedMeters(
   const unit = useConsumption
     ? firstDefined(calendarizedMeters.map(calendarizedMeter => calendarizedMeter.consumptionUnit))
     : firstDefined(calendarizedMeters.map(calendarizedMeter => calendarizedMeter.energyUnit)) ?? facility?.energyUnit;
-  return buildMeterUsageFacts(rows, { useConsumption, unit });
+  return {
+    ...buildMeterUsageFacts(rows, { useConsumption, unit }),
+    basisLabel: useConsumption || calendarizedMeters.length === 0
+      ? undefined
+      : calendarizedMeters.some(calendarizedMeter => calendarizedMeter.energyIsSource) ? 'Source' : 'Site'
+  };
 }
 
 export function aggregateCalendarizedMeterRows(calendarizedMeters: readonly CalanderizedMeter[]): MeterUsageRow[] {

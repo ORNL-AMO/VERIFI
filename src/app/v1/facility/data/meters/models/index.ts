@@ -58,6 +58,10 @@ export {
   buildMeterUsageFactsFromCalendarizedMeters
 } from './meter-usage.models';
 export {
+  MeterDisplaySettings,
+  resolveMeterDisplaySettings
+} from './meter-display-settings.models';
+export {
   METER_GROUP_WORKBENCH_TABS,
   METER_WORKBENCH_TABS,
   MeterGroupWorkbenchTab,

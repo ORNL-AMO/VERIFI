@@ -17,6 +17,9 @@ describe('WorkspaceBackupSnapshotBuilder', () => {
     expect(backup.account.dataBackupId).toBeUndefined();
     expect(backup.account.lastBackup).toBeUndefined();
     expect(backup.facilities).toHaveLength(2);
+    expect(backup.meters[0]).toEqual(expect.objectContaining({
+      displayEnergyUnit: 'GJ', displayEnergyIsSource: true
+    }));
     expect(backup.facilityAnalysisItems[0].groups[0].models).toEqual([]);
     expect(snapshot.account.dataBackupFilePath).toBe('/tmp/account-a.json');
   });
@@ -51,7 +54,10 @@ function createSnapshot(): AccountWorkspaceSnapshot {
       { guid: 'facility-b', accountId: 'account-a', name: 'Facility B' }
     ],
     meters: [
-      { guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a', meterNumber: 'A', name: 'A' },
+      {
+        guid: 'meter-a', accountId: 'account-a', facilityId: 'facility-a', meterNumber: 'A', name: 'A',
+        displayEnergyUnit: 'GJ', displayEnergyIsSource: true
+      },
       { guid: 'meter-b', accountId: 'account-a', facilityId: 'facility-b', meterNumber: 'B', name: 'B' }
     ],
     meterData: [

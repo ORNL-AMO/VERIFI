@@ -7,6 +7,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 describe('WorkspaceNavigationService', () => {
   let service: WorkspaceNavigationService;
@@ -64,7 +65,11 @@ describe('WorkspaceNavigationService', () => {
         { provide: Router, useValue: router },
         { provide: ApplicationLifecycleService, useValue: { usableAccounts } },
         { provide: AccountWorkspaceStore, useValue: workspaceStore },
-        { provide: AccountWorkspaceService, useValue: workspaceService }
+        { provide: AccountWorkspaceService, useValue: workspaceService },
+        {
+          provide: WorkspaceStatusService,
+          useValue: { accountTodos: vi.fn(() => []), selectedFacilityTodos: vi.fn(() => []) }
+        }
       ]
     });
     service = TestBed.inject(WorkspaceNavigationService);

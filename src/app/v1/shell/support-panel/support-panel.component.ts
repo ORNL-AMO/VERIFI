@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 @Component({
   selector: 'app-support-panel',
@@ -9,4 +10,5 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 })
 export class SupportPanelComponent {
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly status = inject(WorkspaceStatusService);
 }

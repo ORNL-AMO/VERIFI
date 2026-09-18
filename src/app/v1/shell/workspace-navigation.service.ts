@@ -8,6 +8,8 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { StatusItem } from '@app/v1/status/status.models';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
@@ -33,7 +35,7 @@ export interface PanelTab {
 
 export interface PanelContent {
   readonly help: ReadonlyArray<string>;
-  readonly todos: ReadonlyArray<string>;
+  readonly todos: ReadonlyArray<StatusItem>;
   readonly results: ReadonlyArray<{ label: string; value: string; tone: StatusTone }>;
   readonly details: ReadonlyArray<{ label: string; value: string }>;
 }
@@ -102,6 +104,7 @@ export class WorkspaceNavigationService {
   private readonly lifecycle = inject(ApplicationLifecycleService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
+  private readonly status = inject(WorkspaceStatusService);
   private readonly currentUrl = signal(this.router.url);
   private readonly previousUrl = signal(this.router.url);
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
@@ -391,10 +394,7 @@ export class WorkspaceNavigationService {
 
     return {
       help,
-      todos: [
-        isFacility ? 'Review facility setup and migrated workflow readiness.' : this.activeSection() === 'settings' ? 'Confirm account settings before detailed workflows use them.' : 'Review account setup and portfolio readiness.',
-        'Data, analysis, reports, and import workflows remain in current VERIFI until their v1 slices are built.'
-      ],
+      todos: isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos(),
       results: [
         { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
         { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },

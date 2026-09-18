@@ -1,34 +1,28 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription, combineLatest, filter } from 'rxjs';
+import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { IdbAccount } from '@data/models/idbModels/account';
-import { CalanderizedMeter } from '@data/models/calanderization';
-import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
-import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
-import { runWorker } from '@platform/web-workers/run-worker';
-import { buildMeterCards, buildMeterGroupResultsView, buildMeterGroupSections, buildMeterUsageFactsFromCalendarizedMeters } from './models';
-
-interface CalendarizationWorkerResponse {
-  readonly calanderizedMeters?: CalanderizedMeter[];
-  readonly error?: boolean;
-}
+import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import {
+  buildMeterCards,
+  buildMeterGroupResultsView,
+  buildMeterGroupSections,
+  buildMeterUsageFactsFromCalendarizedMeters,
+  resolveMeterDisplaySettings
+} from './models';
 
 @Injectable()
 export class FacilityMetersWorkspaceService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly statusCheckService = inject(AccountStatusCheckService);
+  private readonly status = inject(WorkspaceStatusService);
+  private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly currentUrl = signal(this.router.url);
-  private readonly shouldCalendarize = computed(() => shouldCalendarizeForUrl(this.currentUrl()));
-  private readonly facilityStatusCheck = toSignal(this.statusCheckService.selectedFacilityStatusCheck$, { initialValue: undefined });
-  private calendarizationSubscription: Subscription | undefined;
-  private calendarizationRequestId = 0;
 
   readonly account = this.workspace.account;
   readonly facility = this.workspace.selectedFacility;
@@ -37,22 +31,66 @@ export class FacilityMetersWorkspaceService {
   readonly meters = computed(() => [...this.workspace.facilityMeters()]);
   readonly meterData = computed(() => [...this.workspace.facilityMeterData()]);
   readonly meterGroups = computed(() => [...this.workspace.facilityMeterGroups()]);
-  readonly meterStatusChecks = computed(() => this.facilityStatusCheck()?.metersStatusChecks ?? []);
-  readonly calendarizationState = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
-  readonly calendarizedMeters = signal<readonly CalanderizedMeter[]>([]);
+  private readonly calendarizationResult = toSignal(this.calendarization.calendarizeBase(), {
+    initialValue: IDLE_WORKSPACE_CALENDARIZATION
+  });
+  private readonly facilityProjection = computed(() => {
+    const base = this.calendarizationResult();
+    const facility = this.facility();
+    if (base.state !== 'ready' || !facility) return undefined;
+    return this.calendarization.project(base, {
+      context: { kind: 'facility', guid: facility.guid },
+      energyUnit: facility.energyUnit,
+      waterUnit: facility.volumeLiquidUnit,
+      energyIsSource: facility.energyIsSource,
+      includeEmissions: false
+    });
+  });
+  private readonly meterDisplayProjection = computed(() => {
+    const base = this.calendarizationResult();
+    const facility = this.facility();
+    if (base.state !== 'ready' || !facility) return undefined;
+    const meters = this.meters().flatMap(meter => {
+      const settings = resolveMeterDisplaySettings(meter, facility);
+      const result = this.calendarization.project(base, {
+        context: { kind: 'facility', guid: facility.guid },
+        meterGuids: [meter.guid],
+        energyUnit: settings.energyUnit,
+        waterUnit: facility.volumeLiquidUnit,
+        energyIsSource: settings.energyIsSource,
+        includeEmissions: false
+      });
+      return result.state === 'ready' ? result.meters : [];
+    });
+    return { state: 'ready' as const, meters };
+  });
+  readonly meterFindings = computed(() => this.status.items().filter(item => item.entity.kind === 'meter' && item.entity.facilityGuid === this.facility()?.guid));
+  readonly calendarizationState = computed<'idle' | 'loading' | 'ready' | 'error'>(() => {
+    const state = this.calendarizationResult().state;
+    if (state === 'evaluating') return 'loading';
+    if (state !== 'ready') return state;
+    if (this.facilityProjection()?.state === 'error') return 'error';
+    return 'ready';
+  });
+  readonly facilityCalendarizedMeters = computed(() => this.facilityProjection()?.state === 'ready'
+    ? this.facilityProjection()?.meters ?? []
+    : []);
+  readonly calendarizedMeters = computed(() => this.meterDisplayProjection()?.meters ?? []);
   readonly meterCards = computed(() => buildMeterCards(
     this.meters(),
     this.meterData(),
     this.meterGroups(),
-    this.meterStatusChecks(),
+    this.meterFindings(),
     this.facility(),
-    this.calendarizedMeters()
+    this.calendarizedMeters(),
+    this.status.state() === 'ready'
   ));
   readonly groupSections = computed(() => buildMeterGroupSections(
     this.meters(),
     this.meterData(),
     this.meterGroups(),
-    this.meterStatusChecks()
+    this.meterFindings(),
+    this.status.state() === 'ready'
   ));
   readonly selectedMeterGuid = computed(() => parseSelectedMeterGuid(this.currentUrl()));
   readonly selectedMeterGroupGuid = computed(() => parseSelectedMeterGroupGuid(this.currentUrl()));
@@ -82,7 +120,7 @@ export class FacilityMetersWorkspaceService {
     this.selectedMeterGroupForWorkbench(),
     this.facility(),
     this.groupSections(),
-    this.calendarizedMeters()
+    this.facilityCalendarizedMeters()
   ));
   readonly selectedMeterUsageFacts = computed(() => {
     const selectedGuid = this.selectedMeterGuid();
@@ -104,109 +142,12 @@ export class FacilityMetersWorkspaceService {
       )
       .subscribe(event => this.currentUrl.set(event.urlAfterRedirects));
 
-    combineLatest([
-      toObservable(this.account),
-      toObservable(this.facility),
-      toObservable(this.meters),
-      toObservable(this.meterData),
-      toObservable(this.shouldCalendarize)
-    ])
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([account, facility, meters, meterData, shouldCalendarize]) => {
-        this.refreshCalendarizedMeters(account, facility, meters, meterData, shouldCalendarize);
-      });
   }
 
   countReadings(meter: IdbUtilityMeter): number {
     return this.meterData().filter(reading => reading.meterId === meter.guid).length;
   }
 
-  private refreshCalendarizedMeters(
-    account: IdbAccount | undefined,
-    facility: IdbFacility | undefined,
-    meters: readonly IdbUtilityMeter[],
-    meterData: readonly IdbUtilityMeterData[],
-    shouldCalendarize: boolean
-  ): void {
-    this.calendarizationSubscription?.unsubscribe();
-    const requestId = ++this.calendarizationRequestId;
-    if (!shouldCalendarize) {
-      this.calendarizedMeters.set([]);
-      this.calendarizationState.set('idle');
-      return;
-    }
-    if (!account || !facility) {
-      this.calendarizedMeters.set([]);
-      this.calendarizationState.set('idle');
-      return;
-    }
-    if (meters.length === 0) {
-      this.calendarizedMeters.set([]);
-      this.calendarizationState.set('ready');
-      return;
-    }
-
-    const allMeterData = cloneMeterData(meterData);
-    const payload = {
-      meters: [...meters],
-      allMeterData,
-      accountOrFacility: facility,
-      monthDisplayShort: false,
-      calanderizationOptions: undefined,
-      co2Emissions: [],
-      customFuels: [],
-      facilities: [facility],
-      assessmentReportVersion: account.assessmentReportVersion,
-      customGWPs: []
-    };
-    this.calendarizationState.set('loading');
-
-    if (typeof Worker === 'undefined') {
-      try {
-        this.calendarizedMeters.set(getCalanderizedMeterData(
-          [...meters],
-          cloneMeterData(meterData),
-          facility,
-          false,
-          undefined,
-          [],
-          [],
-          [facility],
-          account.assessmentReportVersion,
-          []
-        ));
-        this.calendarizationState.set('ready');
-      } catch {
-        this.calendarizedMeters.set([]);
-        this.calendarizationState.set('error');
-      }
-      return;
-    }
-
-    const worker = new Worker(new URL('../../../../platform/web-workers/calanderization.worker', import.meta.url));
-    this.calendarizationSubscription = runWorker<CalendarizationWorkerResponse>(worker, payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: response => {
-          if (requestId !== this.calendarizationRequestId) {
-            return;
-          }
-          if (response.error) {
-            this.calendarizedMeters.set([]);
-            this.calendarizationState.set('error');
-            return;
-          }
-          this.calendarizedMeters.set(response.calanderizedMeters ?? []);
-          this.calendarizationState.set('ready');
-        },
-        error: () => {
-          if (requestId === this.calendarizationRequestId) {
-            this.calendarizedMeters.set([]);
-            this.calendarizationState.set('error');
-          }
-        }
-      });
-  }
 }
 
 function parseSelectedMeterGuid(url: string): string | undefined {
@@ -221,21 +162,4 @@ function parseSelectedMeterGroupGuid(url: string): string | undefined {
   const groupingIndex = parts.findIndex((part, index) => part === 'meter-grouping' && parts[index - 1] === 'data');
   const groupGuid = groupingIndex >= 0 ? parts[groupingIndex + 1] : undefined;
   return groupGuid ? decodeURIComponent(groupGuid) : undefined;
-}
-
-function shouldCalendarizeForUrl(url: string): boolean {
-  const parts = url.split(/[?#]/, 1)[0].split('/').filter(Boolean);
-  const dataIndex = parts.indexOf('data');
-  if (dataIndex < 0) {
-    return false;
-  }
-  const dataChild = parts[dataIndex + 1];
-  if (dataChild === 'meters') {
-    return true;
-  }
-  return dataChild === 'meter-grouping' && !!parts[dataIndex + 2];
-}
-
-function cloneMeterData(meterData: readonly IdbUtilityMeterData[]): IdbUtilityMeterData[] {
-  return meterData.map(reading => ({ ...reading }));
 }

@@ -1,7 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
-import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -10,7 +9,6 @@ import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -81,7 +79,6 @@ describe('AccountPortfolioComponent', () => {
         { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
         { provide: PortfolioFacilityService, useValue: portfolioFacilities },
         { provide: ModalPortalService, useValue: modalPortal },
-        { provide: AccountStatusCheckService, useValue: { accountStatusCheck: of(undefined) } },
         { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn() } },
         { provide: MeterCommandHandler, useValue: {} },
         { provide: MeterGroupCommandHandler, useValue: {} }

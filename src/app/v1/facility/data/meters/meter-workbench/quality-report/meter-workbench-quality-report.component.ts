@@ -11,6 +11,7 @@ import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/ec
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { meterWorkbenchTab } from '@app/v1/facility/data/meters/models';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 type QualityStatisticColumnId = keyof Statistics;
 
@@ -57,6 +58,7 @@ export class MeterWorkbenchQualityReportComponent {
   private readonly copyTableService = inject(CopyTableService);
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
+  private readonly status = inject(WorkspaceStatusService);
 
   readonly tab = meterWorkbenchTab('quality');
   readonly statisticTableColspan = QUALITY_STATISTIC_COLUMNS.length + 1;
@@ -84,11 +86,17 @@ export class MeterWorkbenchQualityReportComponent {
     return buildStatisticRows(report);
   });
   readonly issueSummaries = computed(() => {
+    const meter = this.meter();
     const report = this.report();
-    if (!report) {
+    if (!meter || !report) {
       return [];
     }
-    return buildIssueSummaries(report);
+    if (this.status.state() !== 'ready') {
+      return buildIssueSummaries(report);
+    }
+    return this.status.meterFindings(meter.guid)
+      .filter(finding => finding.category === 'quality' || finding.code === 'meter.data.duplicate-date')
+      .map(finding => finding.description);
   });
   readonly hasConsumptionChartData = computed(() => {
     const report = this.report();
