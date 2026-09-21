@@ -13,7 +13,7 @@
                   <input id="{{charge.name + '_' + charge.guid}}" class="form-control" type="number"
                     formControlName="chargeUsage" onfocus="this.select();" min="0">
                   <span class="input-group-text">
-                    @if (charge.chargeType == 'consumption' || charge.chargeType == 'demand') {
+                    @if (charge.chargeType === 'demand') {
                       {{editMeter.demandUnit}}
                     } @else {
                       <span [innerHTML]="editMeter.startingUnit | settingsLabel"></span>
