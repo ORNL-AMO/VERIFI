@@ -48,6 +48,7 @@ export class EditPredictorFormComponent {
   endYear: number;
   facilityPredictorData: Array<IdbPredictorData>;
   selectedWeatherTypes: Array<WeatherDataType>;
+  showFutureDatesWarning: boolean = false;
 
   constructor(
     private router: Router,
@@ -205,5 +206,18 @@ export class EditPredictorFormComponent {
     group.get(key)?.patchValue(checked, { emitEvent: false });
     this.setValidators();
     this.predictorForm.markAsDirty();
+  }
+
+  checkFutureDates() {
+    const currentDate = new Date();
+    const startMonth = this.predictorForm.controls.startMonth.value;
+    const startYear = this.predictorForm.controls.startYear.value;
+    const endMonth = this.predictorForm.controls.endMonth.value;
+    const endYear = this.predictorForm.controls.endYear.value;
+   
+    this.showFutureDatesWarning = startYear > currentDate.getFullYear() ||
+      (startYear === currentDate.getFullYear() && startMonth >= currentDate.getMonth()) ||
+      endYear > currentDate.getFullYear() ||
+      (endYear === currentDate.getFullYear() && endMonth >= currentDate.getMonth());
   }
 }
