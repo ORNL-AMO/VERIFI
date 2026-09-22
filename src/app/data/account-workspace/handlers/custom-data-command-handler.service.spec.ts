@@ -73,14 +73,15 @@ describe('CustomDataCommandHandler', () => {
   });
 
   it('rejects an atomic grid-factor rename when a facility has no active-account ownership', async () => {
-    const item = { ...customEmissions, id: 1 } as IdbCustomEmissionsItem;
-    const unownedFacility = { ...facility, id: 2, accountId: undefined } as IdbFacility;
+    const { handler, transactions } = createHandler();
+    const item = { id: 1, guid: 'ce-1', accountId: ACCOUNT } as IdbCustomEmissionsItem;
+    const unownedFacility = { id: 2, guid: 'facility-1', accountId: undefined } as IdbFacility;
 
     await expect(handler.updateCustomEmissionsWithReferences(
       item,
       undefined,
       [unownedFacility],
-      'account-a'
+      ACCOUNT
     )).rejects.toMatchObject({ code: 'cross-account-entity' });
     expect(transactions.runTransaction).not.toHaveBeenCalled();
   });

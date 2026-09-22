@@ -193,6 +193,19 @@
                 </a>
               }
             }
+
+            @if (isSingleSiteWorkspace()) {
+              <div class="v1-nav__subgroup" aria-labelledby="v1-single-site-custom-data-nav-title">
+                <span id="v1-single-site-custom-data-nav-title" class="v1-nav__sublabel">Custom Database Items</span>
+                @for (item of accountCustomDataItems(); track item.id) {
+                  <a
+                    [routerLink]="navigation.accountDataRoute(account.guid, item.id)">
+                    <app-ui-icon [name]="item.icon"></app-ui-icon>
+                    {{ item.label }}
+                  </a>
+                }
+              </div>
+            }
           } @else {
             @for (item of dataItems(); track item.id) {
               <a
