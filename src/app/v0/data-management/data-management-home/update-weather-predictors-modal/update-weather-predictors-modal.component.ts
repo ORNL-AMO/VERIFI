@@ -41,6 +41,7 @@ export class UpdateWeatherPredictorsModalComponent {
   ngOnInit() {
     this.setFacilityList();
     this.setInvalidForm();
+    this.checkFutureDates();
   }
 
 
