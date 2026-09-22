@@ -30,6 +30,7 @@ export class UpdateWeatherPredictorsModalComponent {
     endDate: Date
   }>
   invalidForm: boolean;
+  showFutureDatesWarning: boolean;
 
   constructor(
     private weatherPredictorManagementService: WeatherPredictorManagementService,
@@ -40,6 +41,7 @@ export class UpdateWeatherPredictorsModalComponent {
   ngOnInit() {
     this.setFacilityList();
     this.setInvalidForm();
+    this.checkFutureDates();
   }
 
 
@@ -70,7 +72,7 @@ export class UpdateWeatherPredictorsModalComponent {
   setFacilityList() {
     this.facilityList = new Array();
     let facilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
-    if(this.fileReference){
+    if (this.fileReference) {
       facilities = this.fileReference.importFacilities;
     }
     facilities.forEach(facility => {
@@ -125,6 +127,7 @@ export class UpdateWeatherPredictorsModalComponent {
     //-1 on month
     this.facilityList[facilityIndex].endDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
     this.setInvalidForm();
+    this.checkFutureDates();
   }
 
   async setStartDate(eventData: string, facilityIndex: number) {
@@ -141,9 +144,58 @@ export class UpdateWeatherPredictorsModalComponent {
     }) !== undefined;
   }
 
-  setEndDateToCurrentDate(){
+  setEndDateToCurrentDate() {
+    const currentDate = new Date();
+    const latestMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     this.facilityList.forEach(facilityItem => {
-      facilityItem.endDate = new Date();
+      facilityItem.endDate = new Date(latestMonth);
+    });
+    this.setInvalidForm();
+    this.checkFutureDates();
+  }
+
+  openCalendar(event: Event, inputElement: HTMLInputElement): void {
+    event.preventDefault();
+    try {
+      if (typeof inputElement.showPicker === 'function') {
+        inputElement.showPicker();
+      } else {
+        inputElement.click();
+      }
+    } catch {
+      inputElement.focus();
+      inputElement.click();
+    }
+  }
+
+  setBulkDates(event: Event, dateType: 'start' | 'end') {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.value) {
+      return;
+    }
+    const [year, month] = input.value.split('-').map(Number);
+    if (!year || !month) {
+      return;
+    }
+
+    const newDate = new Date(year, month - 1, 1);
+    this.facilityList.forEach(facilityItem => {
+      if (dateType === 'start') {
+        facilityItem.startDate = new Date(newDate);
+      } else {
+        facilityItem.endDate = new Date(newDate);
+      }
+    });
+    this.setInvalidForm();
+    this.checkFutureDates();
+  }
+
+  checkFutureDates() {
+    const currentDate = new Date();
+    this.showFutureDatesWarning = this.facilityList.some(facilityItem => {
+      return facilityItem.endDate && (facilityItem.endDate.getFullYear() > currentDate.getFullYear() ||
+        (facilityItem.endDate.getFullYear() === currentDate.getFullYear() && facilityItem.endDate.getMonth() >= currentDate.getMonth()));
     });
   }
 }

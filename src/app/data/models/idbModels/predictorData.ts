@@ -15,7 +15,8 @@ export interface IdbPredictorData extends IdbEntry {
     weatherDataWarning: boolean,
     weatherOverride: boolean,
     notes?: string,
-    migratedDates?: boolean
+    migratedDates?: boolean,
+    weatherDataChanged?: boolean
 }
 
 export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: Array<IdbPredictorData>): IdbPredictorData {
@@ -43,6 +44,7 @@ export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: A
         weatherDataWarning: false,
         weatherOverride: false,
         notes: '',
-        migratedDates: true
+        migratedDates: true,
+        weatherDataChanged: false,
     }
 }
