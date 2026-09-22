@@ -1,0 +1,67 @@
+<section class="existing-fuel-picker" aria-labelledby="v1-existing-fuel-picker-title">
+  <header class="existing-fuel-picker__header">
+    <div>
+      <p class="v1-eyebrow">Standard database</p>
+      <h3 id="v1-existing-fuel-picker-title">Choose a fuel to start with</h3>
+      <p>We’ll copy its values into your custom fuel. The standard fuel will not change.</p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelled.emit()">
+      <app-ui-icon name="arrowLeft"></app-ui-icon>
+      Back to form
+    </button>
+  </header>
+
+  <div class="existing-fuel-picker__filters">
+    <label>
+      <span>Fuel category</span>
+      <select [value]="groupId()" (change)="setGroup($any($event.target).value)">
+        @for (groupOption of groups; track groupOption.id) {
+          <option [value]="groupOption.id">{{ groupOption.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Find fuel</span>
+      <input type="search" placeholder="Search fuel names" [value]="search()" (input)="setSearch($any($event.target).value)">
+    </label>
+  </div>
+
+  @if (options().length === 0) {
+    <div class="v1-empty-state" role="status">
+      <app-ui-icon name="clearFilter"></app-ui-icon>
+      <h4>No fuels found</h4>
+      <p>Try a different search or category.</p>
+    </div>
+  } @else {
+    <div class="existing-fuel-picker__table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Fuel</th>
+            <th scope="col">Heat capacity</th>
+            <th scope="col">CO<sub>2</sub></th>
+            <th scope="col">CH<sub>4</sub></th>
+            <th scope="col">N<sub>2</sub>O</th>
+            <th scope="col"><span class="visually-hidden">Select</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (option of options(); track option.value) {
+            <tr>
+              <th scope="row">{{ option.value }}</th>
+              <td>{{ option.heatCapacityValue ?? '—' }} @if (option.heatCapacityValue != null) { MMBtu/{{ option.startingUnit }} }</td>
+              <td>{{ option.CO2 ?? '—' }} @if (option.CO2 != null) { {{ group().mobile ? 'kg/gal' : 'kg/MMBtu' }} }</td>
+              <td>{{ option.CH4 ?? '—' }} @if (option.CH4 != null) { {{ group().mobile ? (option.isOnRoad ? 'g/mi' : 'g/gal') : 'g/MMBtu' }} }</td>
+              <td>{{ option.N2O ?? '—' }} @if (option.N2O != null) { {{ group().mobile ? (option.isOnRoad ? 'g/mi' : 'g/gal') : 'g/MMBtu' }} }</td>
+              <td>
+                <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Use ' + option.value" (click)="select(option)">
+                  Use fuel
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

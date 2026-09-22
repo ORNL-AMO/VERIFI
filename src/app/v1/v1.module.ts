@@ -7,7 +7,6 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
-import { AccountPortfolioModule } from '@app/v1/account/portfolio/account-portfolio.module';
 import { AccountSettingsModule } from '@app/v1/account/settings/account-settings.module';
 import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
 import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
@@ -44,7 +43,6 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     PortalModule,
     ScrollingModule,
     AccountDataModule,
-    AccountPortfolioModule,
     FacilityDataModule,
     AccountSettingsModule,
     FacilitySettingsModule,

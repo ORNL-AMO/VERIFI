@@ -20,8 +20,7 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.v1-portfolio-selector,
-.v1-empty-state {
+.v1-portfolio-selector {
   background: var(--v1-surface);
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius);
@@ -78,29 +77,6 @@
   color: var(--v1-text);
   font-size: 1.5rem;
   line-height: 1.1;
-}
-
-.v1-empty-state {
-  align-items: start;
-  display: grid;
-  gap: .6rem;
-  justify-items: start;
-  padding: 1.25rem;
-}
-
-.v1-empty-state > .v1-icon {
-  color: var(--v1-account);
-  font-size: 1.5rem;
-}
-
-.v1-empty-state h2,
-.v1-empty-state p {
-  margin: 0;
-}
-
-.v1-empty-state p {
-  color: var(--v1-muted);
-  max-width: 42rem;
 }
 
 @media (max-width: 70rem) {

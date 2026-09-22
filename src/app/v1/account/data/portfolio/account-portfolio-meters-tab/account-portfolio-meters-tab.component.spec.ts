@@ -12,7 +12,7 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
-import { AccountPortfolioModule } from '../account-portfolio.module';
+import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 
@@ -88,7 +88,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
   TestBed.configureTestingModule({
     imports: [
       RouterModule.forRoot([]),
-      AccountPortfolioModule
+      AccountDataModule
     ],
     providers: [
       {

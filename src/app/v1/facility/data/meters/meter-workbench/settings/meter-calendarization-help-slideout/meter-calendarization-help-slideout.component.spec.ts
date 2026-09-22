@@ -10,7 +10,7 @@ describe('MeterCalendarizationHelpSlideoutComponent', () => {
     fixture.detectChanges();
 
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.querySelector('.v1-meter-slideout--large')).not.toBeNull();
+    expect(element.querySelector('.v1-workspace-slideout--large')).not.toBeNull();
     expect(element.querySelectorAll('.calendarization-help-choice')).toHaveLength(3);
     expect(element.querySelector('.calendarization-help-choice--selected')?.textContent).toContain('Calendarize Meter Data');
     expect(element.textContent).toContain('Calendar example');

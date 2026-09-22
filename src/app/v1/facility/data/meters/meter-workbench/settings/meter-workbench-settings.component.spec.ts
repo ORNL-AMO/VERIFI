@@ -234,7 +234,7 @@ describe('MeterWorkbenchSettingsComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Calendarization example');
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Worked allocation');
 
-    query<HTMLButtonElement>(fixture, '.v1-meter-slideout__header .v1-icon-btn').click();
+    query<HTMLButtonElement>(fixture, '.v1-workspace-slideout__header .v1-icon-btn').click();
     fixture.detectChanges();
 
     expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Calendarization example');

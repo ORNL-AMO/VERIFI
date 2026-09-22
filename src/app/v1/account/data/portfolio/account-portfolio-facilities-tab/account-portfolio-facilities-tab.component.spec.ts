@@ -7,7 +7,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { AccountPortfolioModule } from '../account-portfolio.module';
+import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { PortfolioFacilityService } from '../portfolio-facility.service';
 import { AccountPortfolioFacilitiesTabComponent } from './account-portfolio-facilities-tab.component';
 
@@ -95,7 +95,7 @@ function setup(): ComponentFixture<AccountPortfolioFacilitiesTabComponent> {
   TestBed.configureTestingModule({
     imports: [
       RouterModule.forRoot([]),
-      AccountPortfolioModule
+      AccountDataModule
     ],
     providers: [
       {

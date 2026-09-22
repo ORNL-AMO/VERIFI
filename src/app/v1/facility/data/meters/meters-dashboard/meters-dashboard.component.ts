@@ -7,6 +7,7 @@ import { MeterDraftSlideoutComponent } from './meter-dashboard-slideout/meter-dr
 import { MeterBrowseCardComponent } from './meter-browse-card/meter-browse-card.component';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { DataEmptyStateComponent } from '@app/v1/shared/data-empty-state/data-empty-state.component';
 
 type FacilityMeterStatusFilter = 'all' | 'attention' | 'noReadings' | 'missingGroup' | 'valid';
 type FacilityMeterSort = 'attention' | 'meterName' | 'latestReading';
@@ -28,6 +29,7 @@ interface FacilityMeterCard {
   standalone: true,
   imports: [
     IconComponent,
+    DataEmptyStateComponent,
     MeterBrowseCardComponent,
     MeterDraftSlideoutComponent,
     RouterLink

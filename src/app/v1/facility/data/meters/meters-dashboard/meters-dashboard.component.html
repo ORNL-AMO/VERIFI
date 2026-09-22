@@ -96,11 +96,16 @@
       </form>
 
       @if (allMeterCards.length === 0) {
-        <article class="v1-empty-state" role="status">
-          <app-ui-icon name="meter"></app-ui-icon>
-          <h2>No meters yet</h2>
-          <p>Meter cards will appear here after utility meters are added or imported for this facility.</p>
-        </article>
+        <app-data-empty-state
+          icon="meter"
+          context="facility"
+          title="No meters"
+          description="Add or import a meter to get started.">
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
+            <app-ui-icon name="add"></app-ui-icon>
+            Add meter
+          </button>
+        </app-data-empty-state>
       } @else if (visibleMeterCards.length === 0) {
         <article class="v1-empty-state" role="status">
           <app-ui-icon name="clearFilter"></app-ui-icon>

@@ -1,14 +1,16 @@
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { AccountCustomDataPlaceholderComponent } from '@app/v1/account/data/account-custom-data-placeholder.component';
+import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
+import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
-import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
-import { AccountPortfolioComponent } from '@app/v1/account/portfolio/account-portfolio.component';
-import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
-import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
-import { AccountPortfolioMetersTabComponent } from '@app/v1/account/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
-import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { AccountPortfolioReportsTabComponent } from '@app/v1/account/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
+import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
+import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
+import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
+import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
+import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
+import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
+import { AccountPortfolioReportsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountSettingsComponent } from '@app/v1/account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from '@app/v1/account/settings/backup/account-settings-backup.component';
 import { AccountSettingsDeleteComponent } from '@app/v1/account/settings/delete/account-settings-delete.component';
@@ -87,7 +89,7 @@ export const V1Routes: Routes = [
                 ]
               },
               { path: 'custom-grid-factors', component: AccountCustomDataPlaceholderComponent, data: { title: 'Grid Factors' } },
-              { path: 'custom-fuels', component: AccountCustomDataPlaceholderComponent, data: { title: 'Fuels' } },
+              { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-gwps', component: AccountCustomDataPlaceholderComponent, data: { title: 'Global Warming Potentials' } },
               { path: '**', redirectTo: 'portfolio' }
             ]

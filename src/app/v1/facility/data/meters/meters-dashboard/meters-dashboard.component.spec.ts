@@ -175,8 +175,8 @@ describe('MetersDashboardComponent', () => {
 
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('No meters yet');
-    expect(fixture.nativeElement.textContent).toContain('Meter cards will appear here');
+    expect(fixture.nativeElement.textContent).toContain('No meters');
+    expect(fixture.nativeElement.textContent).toContain('Add or import a meter to get started.');
   });
 
   it('renders a filtered empty state without replacing the no-meter state', () => {
@@ -185,7 +185,7 @@ describe('MetersDashboardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No meters match these filters');
-    expect(fixture.nativeElement.textContent).not.toContain('No meters yet');
+    expect(fixture.nativeElement.querySelector('app-data-empty-state')).toBeNull();
   });
 
   it('opens the Add Meter slideout from the dashboard action bar', () => {

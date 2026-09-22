@@ -43,10 +43,10 @@
     }
 
     @if (totals().facilities === 0) {
-      <article class="v1-empty-state" role="status">
-        <app-ui-icon name="accountIssue"></app-ui-icon>
-        <h2>No facilities yet</h2>
-        <p>Add the first facility to start portfolio setup. You will continue with profile, units, goals, financial reporting, and staleness in facility settings.</p>
+      <app-data-empty-state
+        icon="facility"
+        title="No facilities"
+        description="Add your first facility to start building this portfolio.">
         <button
           type="button"
           class="v1-btn v1-btn--action"
@@ -55,7 +55,7 @@
           <app-ui-icon name="add"></app-ui-icon>
           Add facility
         </button>
-      </article>
+      </app-data-empty-state>
     } @else {
       <router-outlet></router-outlet>
     }

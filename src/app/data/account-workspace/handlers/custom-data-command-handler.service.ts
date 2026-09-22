@@ -6,9 +6,11 @@ import { firstValueFrom } from 'rxjs';
 import { CustomEmissionsDbService } from '@data/indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from '@data/indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from '@data/indexedDB/custom-gwp-db.service';
+import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 
 @Injectable({ providedIn: 'root' })
@@ -16,7 +18,8 @@ export class CustomDataCommandHandler {
   constructor(
     private readonly customEmissionsDb: CustomEmissionsDbService,
     private readonly customFuelDb: CustomFuelDbService,
-    private readonly customGWPDb: CustomGWPDbService
+    private readonly customGWPDb: CustomGWPDbService,
+    private readonly transactions: IndexedDbTransactionService
   ) { }
 
   // ---------------------------------------------------------------------------
@@ -51,6 +54,27 @@ export class CustomDataCommandHandler {
   async updateCustomFuel(fuel: IdbCustomFuel, activeAccountGuid: string): Promise<IdbCustomFuel> {
     this.assertOwnership(fuel.accountId, activeAccountGuid, 'custom fuel');
     return firstValueFrom(this.customFuelDb.updateWithObservable({ ...fuel }));
+  }
+
+  async updateCustomFuelWithMeters(
+    fuel: IdbCustomFuel,
+    meters: readonly IdbUtilityMeter[],
+    activeAccountGuid: string
+  ): Promise<IdbCustomFuel> {
+    this.assertOwnership(fuel.accountId, activeAccountGuid, 'custom fuel');
+    this.assertPersistedId(fuel.id, 'custom fuel');
+    for (const meter of meters) {
+      this.assertOwnership(meter.accountId, activeAccountGuid, 'meter');
+      this.assertPersistedId(meter.id, 'meter');
+    }
+
+    return this.transactions.runTransaction(['customFuels', 'utilityMeter'], 'readwrite', async transaction => {
+      await transaction.put('customFuels', { ...fuel });
+      for (const meter of meters) {
+        await transaction.put('utilityMeter', { ...meter });
+      }
+      return fuel;
+    });
   }
 
   async deleteCustomFuel(fuel: IdbCustomFuel, activeAccountGuid: string): Promise<number> {
@@ -89,6 +113,12 @@ export class CustomDataCommandHandler {
         'cross-account-entity',
         `${label} belongs to account ${entityAccountGuid}, not the active account ${activeAccountGuid}.`
       );
+    }
+  }
+
+  private assertPersistedId(id: number | undefined, label: string): asserts id is number {
+    if (typeof id !== 'number' || !Number.isFinite(id)) {
+      throw new WorkspaceWriteError('validation-failed', `${label} is missing its IndexedDB id.`);
     }
   }
 }

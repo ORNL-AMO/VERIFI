@@ -39,11 +39,16 @@
   }
 
   @if (workspace.groupSections().length === 0) {
-    <article class="v1-empty-state" role="status">
-      <app-ui-icon name="meterGroup"></app-ui-icon>
-      <h2>No groups or meters yet</h2>
-      <p>Add a group or add a meter to start organizing this facility.</p>
-    </article>
+    <app-data-empty-state
+      icon="meterGroup"
+      context="facility"
+      title="No groups or meters"
+      description="Add a group or meter to start organizing this facility.">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddGroup()">
+        <app-ui-icon name="meterGroup"></app-ui-icon>
+        Add group
+      </button>
+    </app-data-empty-state>
   } @else {
     <div class="v1-facility-meters__groups" aria-label="Facility meters by group">
       @for (section of workspace.groupSections(); track section.id) {

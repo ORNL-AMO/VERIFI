@@ -39,11 +39,11 @@
   </form>
 
   @if (allCards.length === 0) {
-    <article class="v1-empty-state" role="status">
-      <app-ui-icon name="meter"></app-ui-icon>
-      <h2>No meters yet</h2>
-      <p>Meter cards will appear here after utility meters are added or imported for facilities in this account.</p>
-    </article>
+    <app-data-empty-state
+      icon="meter"
+      title="No meters"
+      description="Meters will appear here after you add or import them for a facility.">
+    </app-data-empty-state>
   } @else if (visibleCards.length === 0) {
     <article class="v1-empty-state" role="status">
       <app-ui-icon name="clearFilter"></app-ui-icon>

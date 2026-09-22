@@ -6,8 +6,8 @@ import { getNewIdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { AccountPortfolioModule } from '@app/v1/account/portfolio/account-portfolio.module';
-import { PortfolioFacilityService } from '@app/v1/account/portfolio/portfolio-facility.service';
+import { AccountDataModule } from '@app/v1/account/data/account-data.module';
+import { PortfolioFacilityService } from '@app/v1/account/data/portfolio/portfolio-facility.service';
 import { CreateFacilityDrawerComponent } from './create-facility-drawer.component';
 
 describe('CreateFacilityDrawerComponent', () => {
@@ -23,7 +23,7 @@ describe('CreateFacilityDrawerComponent', () => {
     };
     router = { navigate: vi.fn(async () => true) };
     TestBed.configureTestingModule({
-      imports: [AccountPortfolioModule],
+      imports: [AccountDataModule],
       providers: [
         SettingsFormService,
         { provide: PortfolioFacilityService, useValue: portfolioFacilities },

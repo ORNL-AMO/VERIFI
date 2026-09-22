@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 
 @Component({
   selector: 'app-meter-slideout',
   templateUrl: './meter-slideout.component.html',
   styleUrls: ['./meter-slideout.component.css'],
   standalone: true,
-  imports: [IconComponent]
+  imports: [WorkspaceSlideoutComponent]
 })
 export class MeterSlideoutComponent {
   @Input({ required: true }) title = '';

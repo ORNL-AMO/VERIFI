@@ -12,7 +12,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { AccountPortfolioModule } from './account-portfolio.module';
+import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountPortfolioComponent } from './account-portfolio.component';
 import { PortfolioFacilityService } from './portfolio-facility.service';
 
@@ -43,7 +43,7 @@ describe('AccountPortfolioComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterModule.forRoot([]),
-        AccountPortfolioModule
+        AccountDataModule
       ],
       providers: [
         SettingsFormService,
@@ -130,7 +130,7 @@ describe('AccountPortfolioComponent', () => {
     facilities.set([]);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('No facilities yet');
+    expect(fixture.nativeElement.textContent).toContain('No facilities');
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeNull();
 
     buttonByText('Add facility').click();
