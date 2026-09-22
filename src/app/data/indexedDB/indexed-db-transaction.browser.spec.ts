@@ -81,6 +81,59 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     expect(await harness.getAll('facilities')).toEqual([accountBFixture.facility]);
   });
 
+  it('commits a grid-factor rename with its account and facility references in one transaction', async () => {
+    const renamedSubregion = 'Renamed Custom Region';
+    const updatedGridFactor = {
+      ...accountAFixture.customEmissions,
+      subregion: renamedSubregion
+    };
+    const updatedAccount = {
+      ...accountAFixture.account,
+      eGridSubregion: renamedSubregion
+    };
+    const updatedFacility = {
+      ...accountAFixture.facility,
+      eGridSubregion: renamedSubregion
+    };
+
+    await transactionService.runTransaction(
+      ['customEmissionsItems', 'accounts', 'facilities'],
+      'readwrite',
+      async transaction => {
+        await transaction.put('customEmissionsItems', updatedGridFactor);
+        await transaction.put('accounts', updatedAccount);
+        await transaction.put('facilities', updatedFacility);
+      }
+    );
+
+    await harness.reopen();
+    expect(await harness.getAll('customEmissionsItems')).toContainEqual(updatedGridFactor);
+    expect(await harness.getAll('accounts')).toContainEqual(updatedAccount);
+    expect(await harness.getAll('facilities')).toContainEqual(updatedFacility);
+  });
+
+  it('rolls back all grid-factor rename records when a later write fails', async () => {
+    const updatedGridFactor = { ...accountAFixture.customEmissions, subregion: 'Must Roll Back' };
+    const updatedAccount = { ...accountAFixture.account, eGridSubregion: 'Must Roll Back' };
+    const updatedFacility = { ...accountAFixture.facility, eGridSubregion: 'Must Roll Back' };
+
+    await expect(transactionService.runTransaction(
+      ['customEmissionsItems', 'accounts', 'facilities'],
+      'readwrite',
+      async transaction => {
+        await transaction.put('customEmissionsItems', updatedGridFactor);
+        await transaction.put('accounts', updatedAccount);
+        await transaction.put('facilities', updatedFacility);
+        await transaction.add('facilities', accountBFixture.facility);
+      }
+    )).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('customEmissionsItems')).toContainEqual(accountAFixture.customEmissions);
+    expect(await harness.getAll('accounts')).toContainEqual(accountAFixture.account);
+    expect(await harness.getAll('facilities')).toContainEqual(accountAFixture.facility);
+  });
+
   it('rolls back earlier writes when a later request fails', async () => {
     const updatedAccount = { ...accountAFixture.account, name: 'Must Roll Back' };
 

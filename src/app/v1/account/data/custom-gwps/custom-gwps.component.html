@@ -1,0 +1,118 @@
+@let currentAccount = account();
+@let gwpCards = cards();
+@let reportVersion = assessmentReportVersion();
+
+<section class="custom-gwps" aria-labelledby="v1-custom-gwps-title">
+  <header class="v1-section-header custom-gwps__header">
+    <div>
+      <p class="v1-eyebrow">Account data</p>
+      <h1 id="v1-custom-gwps-title" class="custom-gwps__title">
+        <app-ui-icon name="earth" [size]="24"></app-ui-icon>
+        <span>Custom Global Warming Potentials</span>
+      </h1>
+      <p>Add a gas or refrigerant value for process and fugitive emissions meters.</p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openAdd()">
+      <app-ui-icon name="add"></app-ui-icon>
+      Add GWP
+    </button>
+  </header>
+
+  @if (!canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon><span>GWP actions are unavailable while the workspace is loading or switching.</span></div>
+  }
+  @if (hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon><span>A workspace change is being saved. GWP actions will resume when it finishes.</span></div>
+  }
+  @if (workspaceError(); as error) {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ error.message }}</span></div>
+  }
+
+  @if (currentAccount && gwpCards.length === 0) {
+    <app-data-empty-state icon="earth" title="No custom global warming potentials"
+      description="Add a value for a gas or refrigerant that is not already available in VERIFI.">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openAdd()">
+        <app-ui-icon name="add"></app-ui-icon>
+        Add GWP
+      </button>
+    </app-data-empty-state>
+  } @else {
+    <div class="custom-gwps__grid" role="list" aria-label="Custom global warming potentials">
+      @for (card of gwpCards; track card.gwp.guid) {
+        <article class="custom-gwp-card" role="listitem">
+          <header class="custom-gwp-card__header">
+            <div>
+              <span class="v1-chip">{{ reportVersion }}</span>
+              <h2>{{ card.gwp.label || 'Untitled GWP' }}</h2>
+            </div>
+            <div class="custom-gwp-card__actions" aria-label="Global warming potential actions">
+              <button type="button" class="v1-icon-btn" [attr.aria-label]="'Edit ' + card.gwp.label"
+                [disabled]="!canWrite() || hasPending()" (click)="openEdit(card.gwp)"><app-ui-icon name="edit"></app-ui-icon></button>
+              <button type="button" class="v1-icon-btn v1-icon-btn--danger" [attr.aria-label]="'Delete ' + card.gwp.label"
+                [disabled]="!canWrite() || hasPending()" (click)="requestDelete(card.gwp)"><app-ui-icon name="delete"></app-ui-icon></button>
+            </div>
+          </header>
+          <dl class="custom-gwp-card__facts">
+            <div><dt>{{ reportVersion }} value</dt><dd>{{ card.valueLabel }}</dd></div>
+            <div><dt>Used for</dt><dd>AR4, AR5, and AR6</dd></div>
+          </dl>
+          <footer class="custom-gwp-card__impact" [class.custom-gwp-card__impact--used]="card.impact.meterCount > 0">
+            <app-ui-icon [name]="card.impact.meterCount > 0 ? 'meter' : 'check'"></app-ui-icon>
+            @if (card.impact.meterCount > 0) {
+              <span>
+                Used by <strong>{{ card.impact.meterCount }}</strong> {{ card.impact.meterCount === 1 ? 'meter' : 'meters' }}
+                in <strong>{{ card.impact.facilityCount }}</strong> {{ card.impact.facilityCount === 1 ? 'facility' : 'facilities' }}.
+                Value changes affect emissions calculations and reports.
+              </span>
+            } @else {
+              <span>Not currently used by a meter.</span>
+            }
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (editorOpen()) {
+  <app-custom-gwp-form [gwp]="selectedGwp()" [impact]="editorImpact()"
+    (dirtyChange)="setEditorDirty($event)" (savingChange)="setEditorSaving($event)"
+    (closed)="requestCloseEditor()" (saved)="handleSaved()">
+  </app-custom-gwp-form>
+}
+
+<ng-template #deleteGwpModal>
+  @let pendingDelete = gwpToDelete();
+  @if (pendingDelete) {
+    @let impact = deleteImpact();
+    <div class="v1-modal-layer">
+      <button type="button" class="v1-modal-backdrop" aria-label="Cancel GWP deletion" [disabled]="isDeleting" (click)="cancelDelete()"></button>
+      <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-gwp-title">
+        <header class="v1-modal__header">
+          <h2 id="v1-delete-gwp-title">Delete {{ pendingDelete.label }}?</h2>
+          <button type="button" class="v1-icon-btn" aria-label="Cancel GWP deletion" [disabled]="isDeleting" (click)="cancelDelete()"><app-ui-icon name="close"></app-ui-icon></button>
+        </header>
+        <div class="v1-modal__body">
+          @if (deleteError) {
+            <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ deleteError }}</span></div>
+          }
+          @if (impact && impact.meterCount > 0) {
+            <div class="v1-alert v1-alert--danger" role="alert">
+              <app-ui-icon name="lock"></app-ui-icon>
+              <span>This GWP cannot be deleted because it is used by {{ impact.meterCount }} {{ impact.meterCount === 1 ? 'meter' : 'meters' }}: {{ impact.meterNames.join(', ') }}.</span>
+            </div>
+          } @else {
+            <p>This permanently removes the custom global warming potential from the account. This action cannot be undone.</p>
+          }
+        </div>
+        <footer class="v1-modal__footer">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting" (click)="cancelDelete()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="(impact?.meterCount ?? 0) > 0 || isDeleting" (click)="confirmDelete()">
+            @if (isDeleting) { <app-ui-icon name="loading" spin></app-ui-icon> Deleting }
+            @else { Delete GWP <app-ui-icon name="delete"></app-ui-icon> }
+          </button>
+        </footer>
+      </section>
+    </div>
+  }
+</ng-template>

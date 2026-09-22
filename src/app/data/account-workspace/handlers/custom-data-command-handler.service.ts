@@ -10,6 +10,8 @@ import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transact
 import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 
@@ -34,6 +36,41 @@ export class CustomDataCommandHandler {
   async updateCustomEmissions(item: IdbCustomEmissionsItem, activeAccountGuid: string): Promise<IdbCustomEmissionsItem> {
     this.assertOwnership(item.accountId, activeAccountGuid, 'custom emissions');
     return firstValueFrom(this.customEmissionsDb.updateWithObservable({ ...item }));
+  }
+
+  async updateCustomEmissionsWithReferences(
+    item: IdbCustomEmissionsItem,
+    account: IdbAccount | undefined,
+    facilities: readonly IdbFacility[],
+    activeAccountGuid: string
+  ): Promise<IdbCustomEmissionsItem> {
+    this.assertRequiredOwnership(item.accountId, activeAccountGuid, 'custom emissions');
+    this.assertPersistedId(item.id, 'custom emissions');
+    if (account) {
+      if (account.guid !== activeAccountGuid) {
+        throw new WorkspaceWriteError('cross-account-entity', 'Account reference does not belong to the active account.');
+      }
+      this.assertPersistedId(account.id, 'account');
+    }
+    for (const facility of facilities) {
+      this.assertRequiredOwnership(facility.accountId, activeAccountGuid, 'facility');
+      this.assertPersistedId(facility.id, 'facility');
+    }
+
+    return this.transactions.runTransaction(
+      ['customEmissionsItems', 'accounts', 'facilities'],
+      'readwrite',
+      async transaction => {
+        await transaction.put('customEmissionsItems', { ...item });
+        if (account) {
+          await transaction.put('accounts', { ...account });
+        }
+        for (const facility of facilities) {
+          await transaction.put('facilities', { ...facility });
+        }
+        return item;
+      }
+    );
   }
 
   async deleteCustomEmissions(item: IdbCustomEmissionsItem, activeAccountGuid: string): Promise<number> {
@@ -112,6 +149,15 @@ export class CustomDataCommandHandler {
       throw new WorkspaceWriteError(
         'cross-account-entity',
         `${label} belongs to account ${entityAccountGuid}, not the active account ${activeAccountGuid}.`
+      );
+    }
+  }
+
+  private assertRequiredOwnership(entityAccountGuid: string | undefined, activeAccountGuid: string, label: string): void {
+    if (entityAccountGuid !== activeAccountGuid) {
+      throw new WorkspaceWriteError(
+        'cross-account-entity',
+        `${label} does not belong to the active account ${activeAccountGuid}.`
       );
     }
   }

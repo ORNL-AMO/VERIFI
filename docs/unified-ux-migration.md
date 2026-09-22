@@ -82,14 +82,14 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 route helper, single-site redirect, and section navigation specs; validation planner decides parent checks.
 
-### Account Custom Fuels Workflow
+### Account Custom Database Workflow
 
-- **Workflow:** v1 Account Data > Custom Fuels, first slice of issue #2650.
-- **Existing v0 entry point:** Custom fuels are managed under the account custom-data routes in Data Management and Data Evaluation.
-- **Decision:** Rebuild fuel inventory, add/edit, standard-fuel cloning, usage impact, and guarded deletion as a v1 card grid with a side-drawer editor. Keep Custom Grid Factors and Custom GWPs as placeholders until their own slices establish type-specific fields and rules.
-- **Parity:** Preserve custom-fuel defaults, account-unit display, MMBtu storage, duplicate-name validation, direct or calculated emissions rates, and command-boundary persistence. Renames update both stationary `fuel` and mobile `vehicleFuel` meter references atomically.
+- **Workflow:** v1 Account Data > Custom Fuels, Custom Grid Factors, and Custom Global Warming Potentials, issue #2650.
+- **Existing v0 entry point:** Account custom database items are managed under the account custom-data routes in Data Management and Data Evaluation.
+- **Decision:** Rebuild all three custom-data inventories as type-specific v1 card grids with reusable empty states, large workspace slideout editors, visible usage impact, guarded deletion, and unsaved-change protection. Reuse presentation primitives without introducing a config-driven CRUD framework.
+- **Parity:** Preserve custom-fuel defaults and normalized storage; grid-factor location and residual year series and units; and custom GWP identifiers and AR values. Referenced fuel and grid-factor renames update their dependent records atomically. Editing a custom GWP applies one selected value to AR4, AR5, and AR6 by design.
 - **Shared contracts:** No IndexedDB schema, data-version, backup, import/export, calculation, Worker, report, or Electron contract changes.
-- **Tests:** Focused custom-fuel model, form, inventory, command, unsaved-change guard, account-data route, and relocated Portfolio specs; validation planner decides parent checks.
+- **Tests:** Focused feature model, form, inventory, command, unsaved-change guard, route, and IndexedDB transaction specs; validation planner decides parent checks.
 
 ### V1 Card Inventory Empty States
 

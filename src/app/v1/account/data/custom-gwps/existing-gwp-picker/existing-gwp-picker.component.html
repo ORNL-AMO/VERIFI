@@ -1,0 +1,32 @@
+<section class="existing-gwp-picker" aria-labelledby="v1-existing-gwp-picker-title">
+  <header class="existing-gwp-picker__header">
+    <div>
+      <p class="v1-eyebrow">Standard database</p>
+      <h3 id="v1-existing-gwp-picker-title">Start from a standard GWP</h3>
+      <p>Select an existing gas or refrigerant, then adjust its name or value.</p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelled.emit()">
+      <app-ui-icon name="arrowLeft"></app-ui-icon>
+      Back to editor
+    </button>
+  </header>
+
+  <label class="existing-gwp-picker__search">
+    <span>Search standard GWPs</span>
+    <div>
+      <app-ui-icon name="search"></app-ui-icon>
+      <input type="search" [value]="query()" (input)="updateQuery($event)" placeholder="Search by name">
+    </div>
+  </label>
+
+  <div class="existing-gwp-picker__list" role="list" aria-label="Standard global warming potentials">
+    @for (option of filteredOptions(); track option.label) {
+      <button type="button" class="existing-gwp-picker__option" (click)="selected.emit(option)">
+        <span>{{ option.label }}</span>
+        <strong>{{ valueFor(option) | number }} kg CO<sub>2</sub>e/kg · {{ assessmentReportVersion }}</strong>
+      </button>
+    } @empty {
+      <p class="existing-gwp-picker__empty">No standard GWPs match that search.</p>
+    }
+  </div>
+</section>

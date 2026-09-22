@@ -2,8 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { Route } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
-import { AccountCustomDataPlaceholderComponent } from '@app/v1/account/data/account-custom-data-placeholder.component';
+import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
 import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
+import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
 import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
@@ -84,16 +85,16 @@ describe('V1Routes facility data meters routes', () => {
     });
   });
 
-  it('keeps grid factors and global warming potentials as placeholders', () => {
+  it('routes grid factors and global warming potentials through protected v1 editors', () => {
     const children = accountDataRoute().children ?? [];
 
     expect(children.find(child => child.path === 'custom-grid-factors')).toMatchObject({
-      component: AccountCustomDataPlaceholderComponent,
-      data: { title: 'Grid Factors' }
+      component: CustomGridFactorsComponent,
+      canDeactivate: [unsavedChangesGuard]
     });
     expect(children.find(child => child.path === 'custom-gwps')).toMatchObject({
-      component: AccountCustomDataPlaceholderComponent,
-      data: { title: 'Global Warming Potentials' }
+      component: CustomGwpsComponent,
+      canDeactivate: [unsavedChangesGuard]
     });
   });
 

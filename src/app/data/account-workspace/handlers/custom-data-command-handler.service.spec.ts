@@ -5,6 +5,8 @@ import { IdbCustomEmissionsItem } from '@data/models/idbModels/customEmissions';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbFacility } from '@data/models/idbModels/facility';
 
 const ACCOUNT = 'acct-1';
 
@@ -39,6 +41,48 @@ describe('CustomDataCommandHandler', () => {
     customEmissionsDb.deleteWithObservable.mockReturnValue(of(undefined));
     const result = await handler.deleteCustomEmissions({ id: 3, guid: 'ce-1', accountId: ACCOUNT } as IdbCustomEmissionsItem, ACCOUNT);
     expect(result).toBe(3);
+  });
+
+  it('updates a custom grid factor and its account and facility references atomically', async () => {
+    const { handler, transaction, transactions } = createHandler();
+    const item = { id: 3, guid: 'ce-1', accountId: ACCOUNT, subregion: 'Renamed' } as IdbCustomEmissionsItem;
+    const account = { id: 1, guid: ACCOUNT, eGridSubregion: 'Renamed' } as IdbAccount;
+    const facility = { id: 2, guid: 'facility-1', accountId: ACCOUNT, eGridSubregion: 'Renamed' } as IdbFacility;
+
+    const result = await handler.updateCustomEmissionsWithReferences(item, account, [facility], ACCOUNT);
+
+    expect(transactions.runTransaction).toHaveBeenCalledWith(
+      ['customEmissionsItems', 'accounts', 'facilities'],
+      'readwrite',
+      expect.any(Function)
+    );
+    expect(transaction.put).toHaveBeenNthCalledWith(1, 'customEmissionsItems', item);
+    expect(transaction.put).toHaveBeenNthCalledWith(2, 'accounts', account);
+    expect(transaction.put).toHaveBeenNthCalledWith(3, 'facilities', facility);
+    expect(result).toBe(item);
+  });
+
+  it('rejects an atomic grid-factor rename when a referenced record is not persisted', async () => {
+    const { handler, transactions } = createHandler();
+    const item = { id: 3, guid: 'ce-1', accountId: ACCOUNT } as IdbCustomEmissionsItem;
+    const facility = { guid: 'facility-1', accountId: ACCOUNT } as IdbFacility;
+
+    await expect(handler.updateCustomEmissionsWithReferences(item, undefined, [facility], ACCOUNT))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects an atomic grid-factor rename when a facility has no active-account ownership', async () => {
+    const item = { ...customEmissions, id: 1 } as IdbCustomEmissionsItem;
+    const unownedFacility = { ...facility, id: 2, accountId: undefined } as IdbFacility;
+
+    await expect(handler.updateCustomEmissionsWithReferences(
+      item,
+      undefined,
+      [unownedFacility],
+      'account-a'
+    )).rejects.toMatchObject({ code: 'cross-account-entity' });
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
   });
 
   it('addCustomFuel persists and returns the new fuel', async () => {

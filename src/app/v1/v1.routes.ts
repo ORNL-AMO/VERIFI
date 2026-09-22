@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
-import { AccountCustomDataPlaceholderComponent } from '@app/v1/account/data/account-custom-data-placeholder.component';
+import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
 import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
+import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
 import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
 import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
@@ -88,9 +89,9 @@ export const V1Routes: Routes = [
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },
-              { path: 'custom-grid-factors', component: AccountCustomDataPlaceholderComponent, data: { title: 'Grid Factors' } },
+              { path: 'custom-grid-factors', component: CustomGridFactorsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },
-              { path: 'custom-gwps', component: AccountCustomDataPlaceholderComponent, data: { title: 'Global Warming Potentials' } },
+              { path: 'custom-gwps', component: CustomGwpsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: '**', redirectTo: 'portfolio' }
             ]
           },

@@ -1,0 +1,77 @@
+<section class="grid-factor-rates" [attr.aria-label]="title">
+  <header class="grid-factor-rates__header">
+    <div>
+      <h3>{{ title }}</h3>
+      <p>Enter one rate for each year you want to track.</p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="addRate.emit()">
+      <app-ui-icon name="add"></app-ui-icon>
+      Add year
+    </button>
+  </header>
+
+  @if (rates.hasError('duplicateYears')) {
+    <p class="grid-factor-rates__error" role="alert">Each year can appear only once in this list.</p>
+  }
+
+  <div class="grid-factor-rates__rows">
+    @for (rate of rates.controls; track rate; let index = $index) {
+      <fieldset class="grid-factor-rate" [formGroup]="$any(rate)">
+        <legend>{{ title }} row {{ index + 1 }}</legend>
+        <div class="grid-factor-rate__heading">
+          <label>
+            <span>Year <b>*</b></span>
+            <select formControlName="year" required>
+              <option [ngValue]="null">Select year</option>
+              @for (year of years; track year) {
+                <option [ngValue]="year">{{ year }}</option>
+              }
+            </select>
+          </label>
+          <button type="button" class="v1-icon-btn v1-icon-btn--danger" [attr.aria-label]="'Remove ' + title + ' row ' + (index + 1)"
+            [disabled]="saving || rates.length === 1" (click)="removeRate.emit(index)">
+            <app-ui-icon name="delete"></app-ui-icon>
+          </button>
+        </div>
+
+        @if (directRate) {
+          <label>
+            <span>Emissions rate <b>*</b></span>
+            <div class="grid-factor-rate__input-group">
+              <input type="number" step="any" min="0" formControlName="co2Emissions" required>
+              <span>kg CO<sub>2</sub>e/MWh</span>
+            </div>
+          </label>
+        } @else {
+          <div class="grid-factor-rate__factors">
+            <label>
+              <span>CO<sub>2</sub> factor <b>*</b></span>
+              <div class="grid-factor-rate__input-group">
+                <input type="number" step="any" min="0" formControlName="CO2" required (input)="recalculate.emit(index)">
+                <span>kg/MWh</span>
+              </div>
+            </label>
+            <label>
+              <span>CH<sub>4</sub> factor <b>*</b></span>
+              <div class="grid-factor-rate__input-group">
+                <input type="number" step="any" min="0" formControlName="CH4" required (input)="recalculate.emit(index)">
+                <span>g/MWh</span>
+              </div>
+            </label>
+            <label>
+              <span>N<sub>2</sub>O factor <b>*</b></span>
+              <div class="grid-factor-rate__input-group">
+                <input type="number" step="any" min="0" formControlName="N2O" required (input)="recalculate.emit(index)">
+                <span>g/MWh</span>
+              </div>
+            </label>
+          </div>
+          <p class="grid-factor-rate__output">
+            AR5 emissions rate
+            <strong>{{ rate.get('co2Emissions')?.value ?? '—' }} kg CO<sub>2</sub>e/MWh</strong>
+          </p>
+        }
+      </fieldset>
+    }
+  </div>
+</section>
