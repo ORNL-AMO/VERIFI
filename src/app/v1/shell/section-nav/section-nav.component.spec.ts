@@ -415,8 +415,16 @@ describe('SectionNavComponent', () => {
     expect(element.textContent).toContain('Fuels');
     expect(element.textContent).not.toContain('Grid Factors');
     expect(element.textContent).not.toContain('Global Warming Potentials');
-    expect(element.querySelector<HTMLAnchorElement>('a[href$="/data/custom-fuels"]')?.getAttribute('href'))
-      .toBe('/v1/workspace/account/account-a/data/custom-fuels');
+    const fuelLink = element.querySelector<HTMLAnchorElement>('a[href$="/data/custom-fuels"]');
+    expect(fuelLink?.getAttribute('href')).toBe('/v1/workspace/account/account-a/data/custom-fuels');
+    expect(fuelLink?.classList.contains('active')).toBe(false);
+    expect(fuelLink?.hasAttribute('aria-current')).toBe(false);
+
+    activeDetail.set('custom-fuels');
+    fixture.detectChanges();
+
+    expect(fuelLink?.classList.contains('active')).toBe(true);
+    expect(fuelLink?.getAttribute('aria-current')).toBe('page');
   });
 
   it('includes emissions custom data in the single-facility sidebar when emissions display is enabled', () => {

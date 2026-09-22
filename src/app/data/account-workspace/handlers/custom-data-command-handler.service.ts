@@ -57,18 +57,23 @@ export class CustomDataCommandHandler {
       this.assertPersistedId(facility.id, 'facility');
     }
 
+    const changedAt = new Date();
+    const updatedItem = { ...item, date: changedAt };
+    const updatedAccount = account ? { ...account, modifiedDate: changedAt } : undefined;
+    const updatedFacilities = facilities.map(facility => ({ ...facility, modifiedDate: changedAt }));
+
     return this.transactions.runTransaction(
       ['customEmissionsItems', 'accounts', 'facilities'],
       'readwrite',
       async transaction => {
-        await transaction.put('customEmissionsItems', { ...item });
-        if (account) {
-          await transaction.put('accounts', { ...account });
+        await transaction.put('customEmissionsItems', updatedItem);
+        if (updatedAccount) {
+          await transaction.put('accounts', updatedAccount);
         }
-        for (const facility of facilities) {
+        for (const facility of updatedFacilities) {
           await transaction.put('facilities', { ...facility });
         }
-        return item;
+        return updatedItem;
       }
     );
   }
@@ -105,12 +110,14 @@ export class CustomDataCommandHandler {
       this.assertPersistedId(meter.id, 'meter');
     }
 
+    const updatedFuel = { ...fuel, date: new Date() };
+
     return this.transactions.runTransaction(['customFuels', 'utilityMeter'], 'readwrite', async transaction => {
-      await transaction.put('customFuels', { ...fuel });
+      await transaction.put('customFuels', updatedFuel);
       for (const meter of meters) {
         await transaction.put('utilityMeter', { ...meter });
       }
-      return fuel;
+      return updatedFuel;
     });
   }
 

@@ -11,6 +11,10 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 const ACCOUNT = 'acct-1';
 
 describe('CustomDataCommandHandler', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   function createHandler() {
     const customEmissionsDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
     const customFuelDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
@@ -45,9 +49,19 @@ describe('CustomDataCommandHandler', () => {
 
   it('updates a custom grid factor and its account and facility references atomically', async () => {
     const { handler, transaction, transactions } = createHandler();
-    const item = { id: 3, guid: 'ce-1', accountId: ACCOUNT, subregion: 'Renamed' } as IdbCustomEmissionsItem;
-    const account = { id: 1, guid: ACCOUNT, eGridSubregion: 'Renamed' } as IdbAccount;
-    const facility = { id: 2, guid: 'facility-1', accountId: ACCOUNT, eGridSubregion: 'Renamed' } as IdbFacility;
+    const previousDate = new Date('2026-09-01T12:00:00.000Z');
+    const changedAt = new Date('2026-09-22T12:00:00.000Z');
+    vi.useFakeTimers();
+    vi.setSystemTime(changedAt);
+    const item = { id: 3, guid: 'ce-1', accountId: ACCOUNT, subregion: 'Renamed', date: previousDate } as IdbCustomEmissionsItem;
+    const account = { id: 1, guid: ACCOUNT, eGridSubregion: 'Renamed', modifiedDate: previousDate } as IdbAccount;
+    const facility = {
+      id: 2,
+      guid: 'facility-1',
+      accountId: ACCOUNT,
+      eGridSubregion: 'Renamed',
+      modifiedDate: previousDate
+    } as IdbFacility;
 
     const result = await handler.updateCustomEmissionsWithReferences(item, account, [facility], ACCOUNT);
 
@@ -56,10 +70,14 @@ describe('CustomDataCommandHandler', () => {
       'readwrite',
       expect.any(Function)
     );
-    expect(transaction.put).toHaveBeenNthCalledWith(1, 'customEmissionsItems', item);
-    expect(transaction.put).toHaveBeenNthCalledWith(2, 'accounts', account);
-    expect(transaction.put).toHaveBeenNthCalledWith(3, 'facilities', facility);
-    expect(result).toBe(item);
+    expect(transaction.put).toHaveBeenNthCalledWith(1, 'customEmissionsItems', { ...item, date: changedAt });
+    expect(transaction.put).toHaveBeenNthCalledWith(2, 'accounts', { ...account, modifiedDate: changedAt });
+    expect(transaction.put).toHaveBeenNthCalledWith(3, 'facilities', { ...facility, modifiedDate: changedAt });
+    expect(result).toEqual({ ...item, date: changedAt });
+    expect(result).not.toBe(item);
+    expect(item.date).toBe(previousDate);
+    expect(account.modifiedDate).toBe(previousDate);
+    expect(facility.modifiedDate).toBe(previousDate);
   });
 
   it('rejects an atomic grid-factor rename when a referenced record is not persisted', async () => {
@@ -95,7 +113,11 @@ describe('CustomDataCommandHandler', () => {
 
   it('updates a custom fuel and linked meters atomically', async () => {
     const { handler, transaction, transactions } = createHandler();
-    const fuel = { id: 4, guid: 'cf-1', accountId: ACCOUNT, value: 'Renamed' } as IdbCustomFuel;
+    const previousDate = new Date('2026-09-01T12:00:00.000Z');
+    const changedAt = new Date('2026-09-22T12:00:00.000Z');
+    vi.useFakeTimers();
+    vi.setSystemTime(changedAt);
+    const fuel = { id: 4, guid: 'cf-1', accountId: ACCOUNT, value: 'Renamed', date: previousDate } as IdbCustomFuel;
     const meters = [
       { id: 9, guid: 'meter-1', accountId: ACCOUNT, fuel: 'Renamed' } as IdbUtilityMeter,
       { id: 10, guid: 'meter-2', accountId: ACCOUNT, vehicleFuel: 'Renamed' } as IdbUtilityMeter
@@ -108,10 +130,12 @@ describe('CustomDataCommandHandler', () => {
       'readwrite',
       expect.any(Function)
     );
-    expect(transaction.put).toHaveBeenNthCalledWith(1, 'customFuels', fuel);
+    expect(transaction.put).toHaveBeenNthCalledWith(1, 'customFuels', { ...fuel, date: changedAt });
     expect(transaction.put).toHaveBeenNthCalledWith(2, 'utilityMeter', meters[0]);
     expect(transaction.put).toHaveBeenNthCalledWith(3, 'utilityMeter', meters[1]);
-    expect(result).toBe(fuel);
+    expect(result).toEqual({ ...fuel, date: changedAt });
+    expect(result).not.toBe(fuel);
+    expect(fuel.date).toBe(previousDate);
   });
 
   it('rejects an atomic fuel rename when a record is missing its persisted id', async () => {

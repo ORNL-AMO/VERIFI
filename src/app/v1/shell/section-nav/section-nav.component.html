@@ -199,7 +199,9 @@
                 <span id="v1-single-site-custom-data-nav-title" class="v1-nav__sublabel">Custom Database Items</span>
                 @for (item of accountCustomDataItems(); track item.id) {
                   <a
-                    [routerLink]="navigation.accountDataRoute(account.guid, item.id)">
+                    [class.active]="navigation.activeDetail() === item.id"
+                    [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
+                    [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
                     <app-ui-icon [name]="item.icon"></app-ui-icon>
                     {{ item.label }}
                   </a>
