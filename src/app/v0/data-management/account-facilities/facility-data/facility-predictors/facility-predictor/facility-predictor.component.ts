@@ -162,6 +162,7 @@ export class FacilityPredictorComponent {
             predictorExists.year = newDate.getFullYear();
             predictorExists.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
             predictorExists.weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
+            predictorExists.weatherDataChanged = false;
             const accountGuid = this.accountWorkspaceStore.account()?.guid;
             await this.predictorHandler.updatePredictorData(predictorExists, accountGuid);
           }
