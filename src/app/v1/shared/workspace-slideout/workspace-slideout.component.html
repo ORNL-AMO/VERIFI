@@ -1,0 +1,32 @@
+<div class="v1-workspace-slideout-layer">
+  <button
+    type="button"
+    class="v1-workspace-slideout-backdrop"
+    aria-label="Close panel"
+    [disabled]="saving"
+    (click)="requestClose()">
+  </button>
+  <aside
+    class="v1-workspace-slideout"
+    [class.v1-workspace-slideout--large]="size === 'large'"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="v1-workspace-slideout-title"
+    appDrawerFocusTrap
+    (escapePressed)="requestClose()">
+    <header class="v1-workspace-slideout__header">
+      <div>
+        <h2 id="v1-workspace-slideout-title">{{ title }}</h2>
+        @if (description) {
+          <p>{{ description }}</p>
+        }
+      </div>
+      <button type="button" class="v1-icon-btn" aria-label="Close panel" [disabled]="saving" (click)="requestClose()">
+        <app-ui-icon name="close"></app-ui-icon>
+      </button>
+    </header>
+    <div class="v1-workspace-slideout__body">
+      <ng-content></ng-content>
+    </div>
+  </aside>
+</div>

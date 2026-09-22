@@ -1,0 +1,12 @@
+<div class="data-empty-state" [class.data-empty-state--facility]="context === 'facility'">
+  <span class="data-empty-state__icon" aria-hidden="true">
+    <app-ui-icon [name]="icon" [size]="28"></app-ui-icon>
+  </span>
+  <div class="data-empty-state__copy">
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+  </div>
+  <div class="data-empty-state__actions">
+    <ng-content></ng-content>
+  </div>
+</div>

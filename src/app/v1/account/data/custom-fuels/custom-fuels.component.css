@@ -1,0 +1,146 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.custom-fuels {
+  display: grid;
+  gap: var(--v1-space-4);
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.custom-fuels__header {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.custom-fuels__header p,
+.custom-fuels__header h1 {
+  margin: 0;
+}
+
+.custom-fuels__header > div > p:last-child {
+  color: var(--v1-muted);
+}
+
+.custom-fuels__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v1-space-2);
+}
+
+.custom-fuels__title .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-account);
+}
+
+.custom-fuels__grid {
+  display: grid;
+  gap: var(--v1-space-4);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.custom-fuel-card {
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+  box-shadow: 0 1rem 2rem var(--v1-shadow-soft);
+}
+
+.custom-fuel-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+}
+
+.custom-fuel-card__header {
+  display: flex;
+  gap: var(--v1-space-3);
+  align-items: start;
+  justify-content: space-between;
+  padding: var(--v1-space-4);
+  border-bottom: 1px solid var(--v1-divider);
+}
+
+.custom-fuel-card__header h2,
+.custom-fuel-card__header p {
+  margin: 0;
+}
+
+.custom-fuel-card__header h2 {
+  margin-top: .45rem;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+}
+
+.custom-fuel-card__header p {
+  color: var(--v1-muted);
+}
+
+.custom-fuel-card__actions {
+  display: flex;
+  gap: .35rem;
+}
+
+.custom-fuel-card__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: var(--v1-space-4);
+}
+
+.custom-fuel-card__facts > div {
+  min-width: 0;
+  padding: .65rem;
+  border: 1px solid var(--v1-divider);
+  margin: -1px 0 0 -1px;
+}
+
+.custom-fuel-card__facts dt {
+  color: var(--v1-muted);
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.custom-fuel-card__facts dd {
+  margin: .25rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.custom-fuel-card__impact {
+  display: flex;
+  gap: .55rem;
+  align-items: start;
+  padding: var(--v1-space-3) var(--v1-space-4);
+  border-top: 1px solid var(--v1-divider);
+  color: var(--v1-muted);
+  font-size: .88rem;
+}
+
+.custom-fuel-card__impact--used {
+  background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface));
+  color: var(--v1-text);
+}
+
+.v1-modal__body {
+  display: grid;
+  gap: var(--v1-space-3);
+}
+
+.v1-modal__body p {
+  margin: 0;
+}
+
+@media (max-width: 76rem) {
+  .custom-fuels__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .custom-fuels__header,
+  .custom-fuels__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -8,6 +8,7 @@ import { AccountWorkspaceService } from '@data/account-workspace/account-workspa
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 describe('WorkspaceNavigationService', () => {
   let service: WorkspaceNavigationService;
@@ -191,6 +192,16 @@ describe('WorkspaceNavigationService', () => {
       'home',
       'overview'
     ]);
+  });
+
+  it('does not switch accounts when discarding registered changes is declined', async () => {
+    TestBed.inject(UnsavedChangesService).register(() => true, vi.fn());
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    await service.openWorkspace('account-b');
+
+    expect(workspaceService.selectAccount).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('opens valid single-site accounts on the sole facility workspace route', async () => {

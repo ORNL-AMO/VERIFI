@@ -1,0 +1,99 @@
+<app-workspace-slideout
+  [title]="isAdd ? 'Add custom grid factor' : 'Edit custom grid factor'"
+  description="Set the electricity emissions rates used by facilities in this account."
+  [saving]="isSaving"
+  size="large"
+  (closed)="requestClose()">
+  @if (saveError) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ saveError }}</span>
+    </div>
+  }
+
+  @if (impact?.isUsed) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <app-ui-icon name="electricity"></app-ui-icon>
+      <span>
+        @if (impact?.accountUses) {
+          This is the account default@if ((impact?.facilityCount ?? 0) > 0) { and is also used by }
+        } @else {
+          This factor is used by
+        }
+        @if ((impact?.facilityCount ?? 0) > 0) {
+          {{ impact?.facilityCount }} {{ impact?.facilityCount === 1 ? 'facility' : 'facilities' }}:
+          {{ impact?.facilityNames?.join(', ') }}
+        }.
+        Changes affect electricity emissions calculations and reports that use it.
+      </span>
+    </div>
+  }
+
+  <form class="grid-factor-form" [formGroup]="form" (ngSubmit)="save()">
+    <div class="grid-factor-form__lead">
+      <label class="grid-factor-field">
+        <span>Subregion name <b>*</b></span>
+        <input type="text" formControlName="subregion" maxlength="120" required
+          [attr.aria-invalid]="fieldInvalid('subregion') ? 'true' : null"
+          aria-describedby="v1-grid-factor-name-error">
+      </label>
+      <label class="grid-factor-field">
+        <span>Rate method <b>*</b></span>
+        <select formControlName="directEmissionsRate" (change)="onMethodChanged()">
+          <option [ngValue]="false">Calculate from gas factors</option>
+          <option [ngValue]="true">Enter emissions rate directly</option>
+        </select>
+      </label>
+    </div>
+    @if (fieldInvalid('subregion')) {
+      <em id="v1-grid-factor-name-error" class="grid-factor-form__error">
+        {{ form.controls['subregion'].hasError('duplicateGridFactorName') ? 'Subregion name must be unique.' : 'Subregion name is required.' }}
+      </em>
+    }
+
+    <p class="grid-factor-form__note">
+      @if (directRate) {
+        Enter CO<sub>2</sub>e rates that use the same GWP basis across the account.
+      } @else {
+        AR5 factors calculate the preview below. Analyses and reports use the account’s selected GWP basis.
+      }
+    </p>
+
+    <div class="grid-factor-form__lists">
+      <app-grid-factor-rate-list
+        title="Location rates"
+        [rates]="locationRates"
+        [years]="years"
+        [directRate]="directRate"
+        [saving]="isSaving"
+        (addRate)="addRate('location')"
+        (removeRate)="removeRate('location', $event)"
+        (recalculate)="recalculateRate('location', $event)">
+      </app-grid-factor-rate-list>
+
+      <app-grid-factor-rate-list
+        title="Residual rates"
+        [rates]="residualRates"
+        [years]="years"
+        [directRate]="directRate"
+        [saving]="isSaving"
+        (addRate)="addRate('residual')"
+        (removeRate)="removeRate('residual', $event)"
+        (recalculate)="recalculateRate('residual', $event)">
+      </app-grid-factor-rate-list>
+    </div>
+
+    <div class="grid-factor-form__actions">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isSaving" (click)="requestClose()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="!canSave">
+        @if (isSaving) {
+          <app-ui-icon name="loading" spin></app-ui-icon>
+          Saving
+        } @else {
+          Save grid factor
+          <app-ui-icon name="check"></app-ui-icon>
+        }
+      </button>
+    </div>
+  </form>
+</app-workspace-slideout>

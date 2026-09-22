@@ -16,7 +16,7 @@ const ENTITY_LABELS: Record<WorkspaceEntityKind, string> = {
   accountAnalysis: 'Account analysis',
   facilityReport: 'Facility report',
   accountReport: 'Account report',
-  customEmissions: 'Custom emissions item',
+  customEmissions: 'Custom grid factor',
   customFuel: 'Custom fuel',
   customGWP: 'Custom GWP',
   energyUseGroup: 'Energy-use group',

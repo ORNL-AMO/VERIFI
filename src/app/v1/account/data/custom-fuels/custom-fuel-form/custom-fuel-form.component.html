@@ -1,0 +1,174 @@
+<app-workspace-slideout
+  [title]="isAdd ? 'Add custom fuel' : 'Edit custom fuel'"
+  description="Set up a fuel that meters in this account can use."
+  [saving]="isSaving"
+  size="large"
+  (closed)="requestClose()">
+      @if (saveError) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ saveError }}</span>
+        </div>
+      }
+
+      @if (impact && impact.meterCount > 0) {
+        <div class="v1-alert v1-alert--warning" role="status">
+          <app-ui-icon name="meter"></app-ui-icon>
+          <span>
+            Used by {{ impact.meterCount }} {{ impact.meterCount === 1 ? 'meter' : 'meters' }} in
+            {{ impact.facilityCount }} {{ impact.facilityCount === 1 ? 'facility' : 'facilities' }}.
+            Renaming or changing this fuel affects their emissions calculations and reports.
+          </span>
+        </div>
+      }
+
+      @if (pickerOpen) {
+        <app-existing-fuel-picker (selected)="selectStandardFuel($event)" (cancelled)="closePicker()"></app-existing-fuel-picker>
+      } @else {
+        <form class="custom-fuel-form" [formGroup]="form" (ngSubmit)="save()">
+          <div class="custom-fuel-form__lead">
+            <label class="custom-fuel-field">
+              <span>Fuel name <b>*</b></span>
+              <input type="text" formControlName="fuelName" maxlength="120" required
+                [attr.aria-invalid]="fieldInvalid('fuelName') ? 'true' : null"
+                aria-describedby="v1-custom-fuel-name-error">
+            </label>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isSaving" (click)="openPicker()">
+              <app-ui-icon name="table"></app-ui-icon>
+              Start from standard fuel
+            </button>
+          </div>
+          @if (fieldInvalid('fuelName')) {
+            <em id="v1-custom-fuel-name-error" class="custom-fuel-error">
+              {{ form.controls['fuelName'].hasError('duplicateFuelName') ? 'Fuel name must be unique.' : 'Fuel name is required.' }}
+            </em>
+          }
+
+          <section class="custom-fuel-form__section" aria-labelledby="v1-custom-fuel-type-title">
+            <h3 id="v1-custom-fuel-type-title">Fuel type</h3>
+            <div class="custom-fuel-form__grid custom-fuel-form__grid--3">
+              <label class="custom-fuel-field">
+                <span>Use <b>*</b></span>
+                <select formControlName="isMobile" (change)="onMobileChanged()">
+                  <option [ngValue]="false">Stationary</option>
+                  <option [ngValue]="true">Mobile</option>
+                </select>
+              </label>
+              @if (isMobile) {
+                <label class="custom-fuel-field">
+                  <span>Road use <b>*</b></span>
+                  <select formControlName="isOnRoad">
+                    <option [ngValue]="true">On-road</option>
+                    <option [ngValue]="false">Off-road</option>
+                  </select>
+                </label>
+              } @else {
+                <label class="custom-fuel-field">
+                  <span>Phase <b>*</b></span>
+                  <select formControlName="phase">
+                    <option value="Gas">Gas</option>
+                    <option value="Liquid">Liquid</option>
+                    <option value="Solid">Solid</option>
+                  </select>
+                </label>
+              }
+              <label class="custom-fuel-field">
+                <span>Biofuel <b>*</b></span>
+                <select formControlName="isBiofuel">
+                  <option [ngValue]="true">Yes</option>
+                  <option [ngValue]="false">No</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          @if (!isMobile) {
+            <section class="custom-fuel-form__section" aria-labelledby="v1-custom-fuel-energy-title">
+              <h3 id="v1-custom-fuel-energy-title">Energy properties</h3>
+              <div class="custom-fuel-form__grid custom-fuel-form__grid--2">
+                <label class="custom-fuel-field">
+                  <span>Heat capacity <b>*</b></span>
+                  <div class="custom-fuel-input-group">
+                    <input type="number" step="any" formControlName="heatCapacityValue" required>
+                    <span>{{ account.energyUnit }}/{{ startingUnit }}</span>
+                  </div>
+                </label>
+                <label class="custom-fuel-field">
+                  <span>Site-to-source multiplier <b>*</b></span>
+                  <input type="number" step="any" formControlName="siteToSourceMultiplier" required>
+                </label>
+              </div>
+            </section>
+          }
+
+          <section class="custom-fuel-form__section" aria-labelledby="v1-custom-fuel-emissions-title">
+            <div class="custom-fuel-form__section-heading">
+              <div>
+                <h3 id="v1-custom-fuel-emissions-title">Emissions</h3>
+                <p>{{ isMobile ? 'Enter the values used to calculate emissions.' : 'Enter each gas factor or use one direct emissions rate.' }}</p>
+              </div>
+              @if (!isMobile) {
+                <label class="custom-fuel-toggle">
+                  <input type="checkbox" formControlName="directEmissionsRate" (change)="onDirectRateChanged()">
+                  <span>Enter direct rate</span>
+                </label>
+              }
+            </div>
+
+            @if (!directRate || isMobile) {
+              <div class="custom-fuel-form__grid custom-fuel-form__grid--3">
+                <label class="custom-fuel-field">
+                  <span>CO<sub>2</sub> factor <b>*</b></span>
+                  <div class="custom-fuel-input-group">
+                    <input type="number" step="any" formControlName="CO2" required (input)="recalculateOutputRate()">
+                    <span>kg</span>
+                  </div>
+                </label>
+                <label class="custom-fuel-field">
+                  <span>CH<sub>4</sub> factor <b>*</b></span>
+                  <div class="custom-fuel-input-group">
+                    <input type="number" step="any" formControlName="CH4" required (input)="recalculateOutputRate()">
+                    <span>g</span>
+                  </div>
+                </label>
+                <label class="custom-fuel-field">
+                  <span>N<sub>2</sub>O factor <b>*</b></span>
+                  <div class="custom-fuel-input-group">
+                    <input type="number" step="any" formControlName="N2O" required (input)="recalculateOutputRate()">
+                    <span>g</span>
+                  </div>
+                </label>
+              </div>
+            }
+
+            @if (!isMobile) {
+              <label class="custom-fuel-field custom-fuel-field--output">
+                <span>Emissions output rate <b>*</b></span>
+                <div class="custom-fuel-input-group">
+                  <input type="number" step="any" formControlName="emissionsOutputRate" [readonly]="!directRate" required>
+                  <span>kg CO<sub>2</sub>e/{{ account.energyUnit }}</span>
+                </div>
+              </label>
+              @if (!directRate) {
+                <p class="custom-fuel-form__note">
+                  Calculated with AR5 factors. Analyses and reports use the account's selected GWP basis.
+                </p>
+              }
+            }
+          </section>
+
+          <div class="custom-fuel-form__actions">
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isSaving" (click)="requestClose()">Cancel</button>
+            <button type="submit" class="v1-btn v1-btn--action" [disabled]="!canSave">
+              @if (isSaving) {
+                <app-ui-icon name="loading" spin></app-ui-icon>
+                Saving
+              } @else {
+                Save fuel
+                <app-ui-icon name="check"></app-ui-icon>
+              }
+            </button>
+          </div>
+        </form>
+      }
+</app-workspace-slideout>

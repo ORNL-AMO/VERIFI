@@ -35,8 +35,8 @@ describe('MeterSlideoutComponent', () => {
     fixture.componentInstance.size = 'large';
     fixture.detectChanges();
 
-    const slideout = fixture.nativeElement.querySelector('.v1-meter-slideout') as HTMLElement;
-    expect(slideout.classList.contains('v1-meter-slideout--large')).toBe(true);
+    const slideout = fixture.nativeElement.querySelector('.v1-workspace-slideout') as HTMLElement;
+    expect(slideout.classList.contains('v1-workspace-slideout--large')).toBe(true);
   });
 });
 
@@ -49,9 +49,9 @@ function setup(): ComponentFixture<MeterSlideoutComponent> {
 }
 
 function backdropButton(fixture: ComponentFixture<MeterSlideoutComponent>): HTMLButtonElement {
-  return fixture.nativeElement.querySelector('.v1-meter-slideout-backdrop') as HTMLButtonElement;
+  return fixture.nativeElement.querySelector('.v1-workspace-slideout-backdrop') as HTMLButtonElement;
 }
 
 function closeButton(fixture: ComponentFixture<MeterSlideoutComponent>): HTMLButtonElement {
-  return fixture.nativeElement.querySelector('.v1-meter-slideout__header .v1-icon-btn') as HTMLButtonElement;
+  return fixture.nativeElement.querySelector('.v1-workspace-slideout__header .v1-icon-btn') as HTMLButtonElement;
 }

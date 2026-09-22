@@ -1,0 +1,79 @@
+.existing-fuel-picker {
+  display: grid;
+  gap: var(--v1-space-4);
+}
+
+.existing-fuel-picker__header,
+.existing-fuel-picker__filters {
+  display: flex;
+  gap: var(--v1-space-3);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.existing-fuel-picker__header h3,
+.existing-fuel-picker__header p {
+  margin: 0;
+}
+
+.existing-fuel-picker__header p:last-child {
+  color: var(--v1-muted);
+}
+
+.existing-fuel-picker__filters label {
+  display: grid;
+  flex: 1 1 0;
+  gap: var(--v1-space-2);
+  font-weight: 800;
+}
+
+.existing-fuel-picker__filters input,
+.existing-fuel-picker__filters select {
+  width: 100%;
+  min-height: var(--v1-control-height);
+  padding: .55rem .7rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-control-surface);
+  color: var(--v1-text);
+}
+
+.existing-fuel-picker__table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: .65rem;
+  border-bottom: 1px solid var(--v1-divider);
+  text-align: left;
+  white-space: nowrap;
+}
+
+thead th {
+  color: var(--v1-muted);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+tbody th {
+  white-space: normal;
+}
+
+@media (max-width: 720px) {
+  .existing-fuel-picker__header,
+  .existing-fuel-picker__filters {
+    flex-direction: column;
+  }
+
+  .existing-fuel-picker__header > *,
+  .existing-fuel-picker__filters label {
+    width: 100%;
+  }
+}

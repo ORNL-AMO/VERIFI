@@ -82,6 +82,23 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 route helper, single-site redirect, and section navigation specs; validation planner decides parent checks.
 
+### Account Custom Database Workflow
+
+- **Workflow:** v1 Account Data > Custom Fuels, Custom Grid Factors, and Custom Global Warming Potentials, issue #2650.
+- **Existing v0 entry point:** Account custom database items are managed under the account custom-data routes in Data Management and Data Evaluation.
+- **Decision:** Rebuild all three custom-data inventories as type-specific v1 card grids with reusable empty states, large workspace slideout editors, visible usage impact, guarded deletion, and unsaved-change protection. Reuse presentation primitives without introducing a config-driven CRUD framework.
+- **Parity:** Preserve custom-fuel defaults and normalized storage; grid-factor location and residual year series and units; and custom GWP identifiers and AR values. Referenced fuel and grid-factor renames update their dependent records atomically. Editing a custom GWP applies one selected value to AR4, AR5, and AR6 by design.
+- **Shared contracts:** No IndexedDB schema, data-version, backup, import/export, calculation, Worker, report, or Electron contract changes.
+- **Tests:** Focused feature model, form, inventory, command, unsaved-change guard, route, and IndexedDB transaction specs; validation planner decides parent checks.
+
+### V1 Card Inventory Empty States
+
+- **Workflow:** Empty states for v1 pages that normally show cards backed by account or facility data.
+- **Decision:** Use the shared `DataEmptyStateComponent` for the initial no-data state. It centers one contextual icon, a short heading, one plain-language sentence, and an optional primary action. Keep filtered-zero-results, loading, and errors as separate states with their own copy and treatment.
+- **Parity:** The shared presentation does not change how records are created, imported, filtered, or stored.
+- **Shared contracts:** No data, calculation, import/export, Worker, report, or Electron contracts change.
+- **Tests:** Cover shared semantics and projected actions, then preserve focused feature tests for each inventory's state and action wiring.
+
 ### Facility Meters Workspace Navigation Workflow
 
 - **Workflow:** v1 Facility Data > Meters workspace, issues #2644 and #2645.

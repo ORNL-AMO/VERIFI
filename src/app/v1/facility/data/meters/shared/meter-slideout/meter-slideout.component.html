@@ -1,24 +1,8 @@
-<div class="v1-meter-slideout-layer">
-  <button type="button" class="v1-meter-slideout-backdrop" aria-label="Close panel" [disabled]="saving" (click)="closed.emit()"></button>
-  <aside
-    class="v1-meter-slideout"
-    [class.v1-meter-slideout--large]="size === 'large'"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-labelledby]="'v1-meter-slideout-title'">
-    <header class="v1-meter-slideout__header">
-      <div>
-        <h2 id="v1-meter-slideout-title">{{ title }}</h2>
-        @if (description) {
-          <p>{{ description }}</p>
-        }
-      </div>
-      <button type="button" class="v1-icon-btn" aria-label="Close panel" [disabled]="saving" (click)="closed.emit()">
-        <app-ui-icon name="close"></app-ui-icon>
-      </button>
-    </header>
-    <div class="v1-meter-slideout__body">
-      <ng-content></ng-content>
-    </div>
-  </aside>
-</div>
+<app-workspace-slideout
+  [title]="title"
+  [description]="description"
+  [saving]="saving"
+  [size]="size"
+  (closed)="closed.emit()">
+  <ng-content></ng-content>
+</app-workspace-slideout>

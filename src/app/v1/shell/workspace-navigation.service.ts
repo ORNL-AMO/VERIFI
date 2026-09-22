@@ -10,6 +10,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { StatusItem } from '@app/v1/status/status.models';
+import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 export type ContextMode = 'account' | 'facility';
 export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-in' | 'account-drill-out';
@@ -106,6 +107,7 @@ export class WorkspaceNavigationService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly status = inject(WorkspaceStatusService);
+  private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly currentUrl = signal(this.router.url);
   private readonly previousUrl = signal(this.router.url);
   private readonly activePanelTabState = signal<PanelTabId>(DEFAULT_PANEL_TAB);
@@ -151,6 +153,7 @@ export class WorkspaceNavigationService {
   }
 
   async openAccount(accountGuid: string): Promise<void> {
+    if (!this.unsavedChanges.confirmDiscard()) return;
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result === 'published') {
       await this.router.navigate(this.accountRoute(accountGuid));
@@ -158,6 +161,7 @@ export class WorkspaceNavigationService {
   }
 
   async openWorkspace(accountGuid: string): Promise<void> {
+    if (!this.unsavedChanges.confirmDiscard()) return;
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result !== 'published') {
       return;
@@ -180,6 +184,7 @@ export class WorkspaceNavigationService {
   }
 
   async openAccountData(accountGuid: string): Promise<void> {
+    if (!this.unsavedChanges.confirmDiscard()) return;
     const result = await this.workspaceService.selectAccount(accountGuid);
     if (result === 'published') {
       await this.router.navigate(this.accountDataRoute(accountGuid));

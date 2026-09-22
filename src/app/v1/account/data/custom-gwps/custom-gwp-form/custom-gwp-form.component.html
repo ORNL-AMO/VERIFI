@@ -1,0 +1,73 @@
+<app-workspace-slideout
+  [title]="isAdd ? 'Add custom global warming potential' : 'Edit custom global warming potential'"
+  description="Set up a value for process or fugitive emissions meters in this account."
+  [saving]="isSaving"
+  size="large"
+  (closed)="requestClose()">
+  @if (saveError) {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ saveError }}</span></div>
+  }
+  @if (impact && impact.meterCount > 0) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <app-ui-icon name="meter"></app-ui-icon>
+      <span>
+        Used by {{ impact.meterCount }} {{ impact.meterCount === 1 ? 'meter' : 'meters' }} in
+        {{ impact.facilityCount }} {{ impact.facilityCount === 1 ? 'facility' : 'facilities' }}.
+        Value changes affect their emissions calculations and reports.
+      </span>
+    </div>
+  }
+  @if (normalizesAssessmentValues) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="info"></app-ui-icon>
+      <span>This record has different AR values. The {{ assessmentReportVersion }} value is shown; saving applies it to AR4, AR5, and AR6.</span>
+    </div>
+  }
+
+  @if (pickerOpen) {
+    <app-existing-gwp-picker [assessmentReportVersion]="assessmentReportVersion"
+      (selected)="selectStandardGwp($event)" (cancelled)="closePicker()">
+    </app-existing-gwp-picker>
+  } @else {
+    <form class="custom-gwp-form" [formGroup]="form" (ngSubmit)="save()">
+      <div class="custom-gwp-form__lead">
+        <label class="custom-gwp-field">
+          <span>Name <b>*</b></span>
+          <input type="text" formControlName="label" maxlength="120" required
+            [attr.aria-invalid]="fieldInvalid('label') ? 'true' : null" aria-describedby="v1-custom-gwp-name-error">
+        </label>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isSaving" (click)="openPicker()">
+          <app-ui-icon name="table"></app-ui-icon>
+          Start from standard GWP
+        </button>
+      </div>
+      @if (fieldInvalid('label')) {
+        <em id="v1-custom-gwp-name-error" class="custom-gwp-form__error">
+          {{ form.controls['label'].hasError('duplicateGwpName') ? 'Name must be unique.' : 'Name is required.' }}
+        </em>
+      }
+
+      <section class="custom-gwp-form__section" aria-labelledby="v1-custom-gwp-value-title">
+        <div>
+          <h3 id="v1-custom-gwp-value-title">Global warming potential</h3>
+          <p>This one value is used for AR4, AR5, and AR6 calculations.</p>
+        </div>
+        <label class="custom-gwp-field">
+          <span>GWP value <b>*</b></span>
+          <div class="custom-gwp-input-group">
+            <input type="number" step="any" min="0" formControlName="value" required>
+            <span>kg CO<sub>2</sub>e/kg</span>
+          </div>
+        </label>
+      </section>
+
+      <div class="custom-gwp-form__actions">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isSaving" (click)="requestClose()">Cancel</button>
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="!canSave">
+          @if (isSaving) { <app-ui-icon name="loading" spin></app-ui-icon> Saving }
+          @else { Save GWP <app-ui-icon name="check"></app-ui-icon> }
+        </button>
+      </div>
+    </form>
+  }
+</app-workspace-slideout>

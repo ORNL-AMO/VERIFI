@@ -1,0 +1,173 @@
+@let currentAccount = account();
+@let fuelCards = cards();
+
+<section class="custom-fuels" aria-labelledby="v1-custom-fuels-title">
+  <header class="v1-section-header custom-fuels__header">
+    <div>
+      <p class="v1-eyebrow">Account data</p>
+      <h1 id="v1-custom-fuels-title" class="custom-fuels__title">
+        <app-ui-icon name="fuel" [size]="24"></app-ui-icon>
+        <span>Custom Fuels</span>
+      </h1>
+      <p>Create and manage fuels that are not already available in VERIFI.</p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openAdd()">
+      <app-ui-icon name="add"></app-ui-icon>
+      Add custom fuel
+    </button>
+  </header>
+
+  @if (!canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <app-ui-icon name="lock"></app-ui-icon>
+      <span>Custom fuel actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  }
+
+  @if (hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="loading" spin></app-ui-icon>
+      <span>A workspace change is being saved. Custom fuel actions will resume when it finishes.</span>
+    </div>
+  }
+
+  @if (workspaceError(); as error) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ error.message }}</span>
+    </div>
+  }
+
+  @if (currentAccount && fuelCards.length === 0) {
+    <app-data-empty-state
+      icon="fuel"
+      title="No custom fuels"
+      description="Add a fuel from scratch or start with values from a standard fuel.">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openAdd()">
+        <app-ui-icon name="add"></app-ui-icon>
+        Add custom fuel
+      </button>
+    </app-data-empty-state>
+  } @else {
+    <div class="custom-fuels__grid" role="list" aria-label="Custom fuels">
+      @for (card of fuelCards; track card.fuel.guid) {
+        <article class="custom-fuel-card" role="listitem">
+          <header class="custom-fuel-card__header">
+            <div>
+              <span class="v1-chip">{{ card.typeLabel }}</span>
+              <h2>{{ card.fuel.value || 'Untitled fuel' }}</h2>
+              <p>{{ card.phaseLabel }} · {{ card.fuel.isBiofuel ? 'Biofuel' : 'Non-biofuel' }}</p>
+            </div>
+            <div class="custom-fuel-card__actions" aria-label="Custom fuel actions">
+              <button type="button" class="v1-icon-btn" title="Edit fuel" [attr.aria-label]="'Edit ' + card.fuel.value"
+                [disabled]="!canWrite() || hasPending()" (click)="openEdit(card.fuel)">
+                <app-ui-icon name="edit"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete fuel" [attr.aria-label]="'Delete ' + card.fuel.value"
+                [disabled]="!canWrite() || hasPending()" (click)="requestDelete(card.fuel)">
+                <app-ui-icon name="delete"></app-ui-icon>
+              </button>
+            </div>
+          </header>
+
+          <dl class="custom-fuel-card__facts">
+            @if (!card.fuel.isMobile) {
+              <div>
+                <dt>Heat capacity</dt>
+                <dd>{{ card.fuel.heatCapacityValue ?? 'Not set' }} {{ currentAccount?.energyUnit }}/{{ card.fuel.startingUnit }}</dd>
+              </div>
+              <div>
+                <dt>Site-to-source</dt>
+                <dd>{{ card.fuel.siteToSourceMultiplier ?? 'Not set' }}</dd>
+              </div>
+            }
+            <div>
+              <dt>CO<sub>2</sub> factor</dt>
+              <dd>{{ card.emissionsLabel }}</dd>
+            </div>
+            @if (!card.fuel.isMobile) {
+              <div>
+                <dt>Output rate</dt>
+                <dd>{{ card.outputRateLabel }}</dd>
+              </div>
+            }
+          </dl>
+
+          <footer class="custom-fuel-card__impact" [class.custom-fuel-card__impact--used]="card.impact.meterCount > 0">
+            <app-ui-icon [name]="card.impact.meterCount > 0 ? 'meter' : 'check'"></app-ui-icon>
+            @if (card.impact.meterCount > 0) {
+              <span>
+                Used by <strong>{{ card.impact.meterCount }}</strong> {{ card.impact.meterCount === 1 ? 'meter' : 'meters' }}
+                in <strong>{{ card.impact.facilityCount }}</strong> {{ card.impact.facilityCount === 1 ? 'facility' : 'facilities' }}.
+                Changes affect their emissions calculations and reports.
+              </span>
+            } @else {
+              <span>Not currently used by a meter.</span>
+            }
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (editorOpen()) {
+  <app-custom-fuel-form
+    [fuel]="selectedFuel()"
+    [impact]="editorImpact()"
+    (dirtyChange)="setEditorDirty($event)"
+    (savingChange)="setEditorSaving($event)"
+    (closed)="requestCloseEditor()"
+    (saved)="handleSaved()">
+  </app-custom-fuel-form>
+}
+
+<ng-template #deleteFuelModal>
+  @let pendingDelete = fuelToDelete();
+  @if (pendingDelete) {
+    @let impact = deleteImpact();
+    <div class="v1-modal-layer">
+      <button type="button" class="v1-modal-backdrop" aria-label="Cancel custom fuel deletion" [disabled]="isDeleting" (click)="cancelDelete()"></button>
+      <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-custom-fuel-title">
+        <header class="v1-modal__header">
+          <h2 id="v1-delete-custom-fuel-title">Delete {{ pendingDelete.value }}?</h2>
+          <button type="button" class="v1-icon-btn" aria-label="Cancel custom fuel deletion" [disabled]="isDeleting" (click)="cancelDelete()">
+            <app-ui-icon name="close"></app-ui-icon>
+          </button>
+        </header>
+        <div class="v1-modal__body">
+          @if (deleteError) {
+            <div class="v1-alert v1-alert--danger" role="alert">
+              <app-ui-icon name="warning"></app-ui-icon>
+              <span>{{ deleteError }}</span>
+            </div>
+          }
+          @if (impact && impact.meterCount > 0) {
+            <div class="v1-alert v1-alert--danger" role="alert">
+              <app-ui-icon name="lock"></app-ui-icon>
+              <span>
+                This fuel cannot be deleted because it is used by {{ impact.meterCount }}
+                {{ impact.meterCount === 1 ? 'meter' : 'meters' }}:
+                {{ impact.meterNames.join(', ') }}.
+              </span>
+            </div>
+          } @else {
+            <p>This permanently removes the custom fuel from the account. This action cannot be undone.</p>
+          }
+        </div>
+        <footer class="v1-modal__footer">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting" (click)="cancelDelete()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="(impact?.meterCount ?? 0) > 0 || isDeleting" (click)="confirmDelete()">
+            @if (isDeleting) {
+              <app-ui-icon name="loading" spin></app-ui-icon>
+              Deleting
+            } @else {
+              Delete fuel
+              <app-ui-icon name="delete"></app-ui-icon>
+            }
+          </button>
+        </footer>
+      </section>
+    </div>
+  }
+</ng-template>

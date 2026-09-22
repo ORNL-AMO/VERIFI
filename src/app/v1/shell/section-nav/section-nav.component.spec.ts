@@ -400,6 +400,63 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Facility Settings');
   });
 
+  it('links account custom data from the single-facility Data sidebar', () => {
+    isSingleSiteWorkspace.set(true);
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.textContent).toContain('Facility Data');
+    expect(element.textContent).toContain('Custom Database Items');
+    expect(element.textContent).toContain('Fuels');
+    expect(element.textContent).not.toContain('Grid Factors');
+    expect(element.textContent).not.toContain('Global Warming Potentials');
+    const fuelLink = element.querySelector<HTMLAnchorElement>('a[href$="/data/custom-fuels"]');
+    expect(fuelLink?.getAttribute('href')).toBe('/v1/workspace/account/account-a/data/custom-fuels');
+    expect(fuelLink?.classList.contains('active')).toBe(false);
+    expect(fuelLink?.hasAttribute('aria-current')).toBe(false);
+
+    activeDetail.set('custom-fuels');
+    fixture.detectChanges();
+
+    expect(fuelLink?.classList.contains('active')).toBe(true);
+    expect(fuelLink?.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('includes emissions custom data in the single-facility sidebar when emissions display is enabled', () => {
+    account.set({
+      guid: 'account-a',
+      name: 'Account A',
+      isSingleFacilityCompany: true,
+      displayEmissions: true
+    });
+    isSingleSiteWorkspace.set(true);
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('meters');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const links = Array.from<HTMLAnchorElement>(
+      fixture.nativeElement.querySelectorAll('.v1-nav__subgroup a')
+    );
+
+    expect(links.map(link => link.textContent?.trim())).toEqual([
+      'Grid Factors',
+      'Fuels',
+      'Global Warming Potentials'
+    ]);
+    expect(links.map(link => link.getAttribute('href'))).toEqual([
+      '/v1/workspace/account/account-a/data/custom-grid-factors',
+      '/v1/workspace/account/account-a/data/custom-fuels',
+      '/v1/workspace/account/account-a/data/custom-gwps'
+    ]);
+  });
+
   it('shows a recovery link for invalid single-site facility counts', () => {
     account.set({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
     hasSingleSiteRecovery.set(true);

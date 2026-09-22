@@ -13,7 +13,7 @@ import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
 import { AccountSettingsStalenessComponent } from './staleness/account-settings-staleness.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
-import { AccountPortfolioModule } from '@app/v1/account/portfolio/account-portfolio.module';
+import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 
 @NgModule({
   declarations: [
@@ -32,7 +32,7 @@ import { AccountPortfolioModule } from '@app/v1/account/portfolio/account-portfo
     IconsModule,
     ReactiveFormsModule,
     RouterModule,
-    AccountPortfolioModule,
+    AccountDataModule,
     ImportAccountBackupComponent
   ],
   exports: [AccountSettingsComponent]

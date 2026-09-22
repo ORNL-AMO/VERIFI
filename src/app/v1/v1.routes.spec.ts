@@ -2,13 +2,17 @@ import { TestBed } from '@angular/core/testing';
 import { Route } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
-import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
-import { AccountPortfolioComponent } from '@app/v1/account/portfolio/account-portfolio.component';
-import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
-import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
-import { AccountPortfolioMetersTabComponent } from '@app/v1/account/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
-import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { AccountPortfolioReportsTabComponent } from '@app/v1/account/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
+import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
+import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
+import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
+import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
+import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
+import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
+import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
+import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
+import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
+import { AccountPortfolioReportsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
 import { FacilityMetersComponent } from '@app/v1/facility/data/meters/facility-meters.component';
 import { MeterWorkbenchBillInspectionComponent } from '@app/v1/facility/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
@@ -68,6 +72,29 @@ describe('V1Routes facility data meters routes', () => {
     expect(children.find(child => child.path === '**')).toMatchObject({
       path: '**',
       redirectTo: 'facilities'
+    });
+  });
+
+  it('routes Custom Fuels through the v1 editor with unsaved-change protection', () => {
+    const route = accountDataRoute().children?.find(child => child.path === 'custom-fuels');
+
+    expect(route).toMatchObject({
+      path: 'custom-fuels',
+      component: CustomFuelsComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+  });
+
+  it('routes grid factors and global warming potentials through protected v1 editors', () => {
+    const children = accountDataRoute().children ?? [];
+
+    expect(children.find(child => child.path === 'custom-grid-factors')).toMatchObject({
+      component: CustomGridFactorsComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+    expect(children.find(child => child.path === 'custom-gwps')).toMatchObject({
+      component: CustomGwpsComponent,
+      canDeactivate: [unsavedChangesGuard]
     });
   });
 

@@ -1,0 +1,144 @@
+@let currentAccount = account();
+@let gridFactorCards = cards();
+
+<section class="custom-grid-factors" aria-labelledby="v1-custom-grid-factors-title">
+  <header class="v1-section-header custom-grid-factors__header">
+    <div>
+      <p class="v1-eyebrow">Account data</p>
+      <h1 id="v1-custom-grid-factors-title" class="custom-grid-factors__title">
+        <app-ui-icon name="table" [size]="24"></app-ui-icon>
+        <span>Custom Grid Factors</span>
+      </h1>
+      <p>Add electricity emissions rates for regions that are not already available in VERIFI.</p>
+    </div>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openAdd()">
+      <app-ui-icon name="add"></app-ui-icon>
+      Add grid factor
+    </button>
+  </header>
+
+  @if (!canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <app-ui-icon name="lock"></app-ui-icon>
+      <span>Grid factor actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  }
+  @if (hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="loading" spin></app-ui-icon>
+      <span>A workspace change is being saved. Grid factor actions will resume when it finishes.</span>
+    </div>
+  }
+  @if (workspaceError(); as error) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ error.message }}</span>
+    </div>
+  }
+
+  @if (currentAccount && gridFactorCards.length === 0) {
+    <app-data-empty-state icon="table" title="No custom grid factors"
+      description="Add electricity emissions rates for a region used by this account.">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openAdd()">
+        <app-ui-icon name="add"></app-ui-icon>
+        Add grid factor
+      </button>
+    </app-data-empty-state>
+  } @else {
+    <div class="custom-grid-factors__grid" role="list" aria-label="Custom grid factors">
+      @for (card of gridFactorCards; track card.item.guid) {
+        <article class="custom-grid-factor-card" role="listitem">
+          <header class="custom-grid-factor-card__header">
+            <div>
+              <span class="v1-chip">{{ card.methodLabel }}</span>
+              <h2>{{ card.item.subregion || 'Untitled subregion' }}</h2>
+            </div>
+            <div class="custom-grid-factor-card__actions" aria-label="Grid factor actions">
+              <button type="button" class="v1-icon-btn" [attr.aria-label]="'Edit ' + card.item.subregion"
+                [disabled]="!canWrite() || hasPending()" (click)="openEdit(card.item)">
+                <app-ui-icon name="edit"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn v1-icon-btn--danger" [attr.aria-label]="'Delete ' + card.item.subregion"
+                [disabled]="!canWrite() || hasPending()" (click)="requestDelete(card.item)">
+                <app-ui-icon name="delete"></app-ui-icon>
+              </button>
+            </div>
+          </header>
+          <dl class="custom-grid-factor-card__facts">
+            <div><dt>Location years</dt><dd>{{ card.locationCoverage }}</dd></div>
+            <div><dt>Latest location rate</dt><dd>{{ card.locationRate }}</dd></div>
+            <div><dt>Residual years</dt><dd>{{ card.residualCoverage }}</dd></div>
+            <div><dt>Latest residual rate</dt><dd>{{ card.residualRate }}</dd></div>
+          </dl>
+          <footer class="custom-grid-factor-card__impact" [class.custom-grid-factor-card__impact--used]="card.impact.isUsed">
+            <app-ui-icon [name]="card.impact.isUsed ? 'electricity' : 'check'"></app-ui-icon>
+            @if (card.impact.isUsed) {
+              <span>
+                Used{{ card.impact.accountUses ? ' as the account default' : '' }}
+                @if (card.impact.accountUses && card.impact.facilityCount > 0) { and }
+                @if (card.impact.facilityCount > 0) {
+                  by <strong>{{ card.impact.facilityCount }}</strong> {{ card.impact.facilityCount === 1 ? 'facility' : 'facilities' }}
+                }.
+                Changes affect electricity emissions calculations and reports.
+              </span>
+            } @else {
+              <span>Not currently used by the account or a facility.</span>
+            }
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (editorOpen()) {
+  <app-custom-grid-factor-form
+    [gridFactor]="selectedItem()"
+    [impact]="editorImpact()"
+    (dirtyChange)="setEditorDirty($event)"
+    (savingChange)="setEditorSaving($event)"
+    (closed)="requestCloseEditor()"
+    (saved)="handleSaved()">
+  </app-custom-grid-factor-form>
+}
+
+<ng-template #deleteGridFactorModal>
+  @let pendingDelete = itemToDelete();
+  @if (pendingDelete) {
+    @let impact = deleteImpact();
+    <div class="v1-modal-layer">
+      <button type="button" class="v1-modal-backdrop" aria-label="Cancel grid factor deletion" [disabled]="isDeleting" (click)="cancelDelete()"></button>
+      <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-delete-grid-factor-title">
+        <header class="v1-modal__header">
+          <h2 id="v1-delete-grid-factor-title">Delete {{ pendingDelete.subregion }}?</h2>
+          <button type="button" class="v1-icon-btn" aria-label="Cancel grid factor deletion" [disabled]="isDeleting" (click)="cancelDelete()">
+            <app-ui-icon name="close"></app-ui-icon>
+          </button>
+        </header>
+        <div class="v1-modal__body">
+          @if (deleteError) {
+            <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ deleteError }}</span></div>
+          }
+          @if (impact?.isUsed) {
+            <div class="v1-alert v1-alert--danger" role="alert">
+              <app-ui-icon name="lock"></app-ui-icon>
+              <span>
+                This grid factor cannot be deleted because it is used{{ impact?.accountUses ? ' as the account default' : '' }}
+                @if (impact?.facilityCount) { by {{ impact?.facilityNames?.join(', ') }} }.
+              </span>
+            </div>
+          } @else {
+            <p>This permanently removes the custom grid factor from the account. This action cannot be undone.</p>
+          }
+        </div>
+        <footer class="v1-modal__footer">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isDeleting" (click)="cancelDelete()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="impact?.isUsed || isDeleting" (click)="confirmDelete()">
+            @if (isDeleting) { <app-ui-icon name="loading" spin></app-ui-icon> Deleting }
+            @else { Delete grid factor <app-ui-icon name="delete"></app-ui-icon> }
+          </button>
+        </footer>
+      </section>
+    </div>
+  }
+</ng-template>
