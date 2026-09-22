@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
+import { predictorIcon } from '@app/v1/facility/data/predictors/models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import { StatusAttentionSummary } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -33,6 +34,12 @@ type MeterGroupNavItem = {
   readonly icon: IconName;
 };
 
+type PredictorNavItem = {
+  readonly guid: string;
+  readonly label: string;
+  readonly icon: IconName;
+};
+
 type ChildLinksState = {
   readonly facilityGuid?: string;
   readonly collapsed: boolean;
@@ -51,7 +58,7 @@ const ACCOUNT_CUSTOM_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
 const FACILITY_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
   { id: 'meters', label: 'Meters', icon: 'meter' },
   { id: 'meter-grouping', label: 'Meter Grouping', icon: 'meterGroup' },
-  { id: 'predictors', label: 'Predictors', icon: 'chartLine' },
+  { id: 'predictors', label: 'Predictors', icon: 'predictor' },
   { id: 'energy-uses', label: 'Energy Uses', icon: 'tools' }
 ];
 
@@ -91,6 +98,9 @@ export class SectionNavComponent {
     collapsed: false
   });
   private readonly groupChildrenState = signal<ChildLinksState>({
+    collapsed: false
+  });
+  private readonly predictorChildrenState = signal<ChildLinksState>({
     collapsed: false
   });
 
@@ -139,6 +149,15 @@ export class SectionNavComponent {
       }))
       .sort((first, second) => first.label.localeCompare(second.label));
   });
+  readonly facilityPredictorItems = computed<ReadonlyArray<PredictorNavItem>>(() => {
+    return [...this.workspace.facilityPredictors()]
+      .map(predictor => ({
+        guid: predictor.guid,
+        label: predictor.name || 'Untitled predictor',
+        icon: predictorIcon(predictor)
+      }))
+      .sort((first, second) => first.label.localeCompare(second.label));
+  });
   readonly isFacilityMetersRoute = computed(() =>
     this.navigation.contextMode() === 'facility'
     && this.navigation.activeSection() === 'data'
@@ -148,6 +167,11 @@ export class SectionNavComponent {
     this.navigation.contextMode() === 'facility'
     && this.navigation.activeSection() === 'data'
     && this.navigation.activeDetail() === 'meter-grouping'
+  );
+  readonly isFacilityPredictorsRoute = computed(() =>
+    this.navigation.contextMode() === 'facility'
+    && this.navigation.activeSection() === 'data'
+    && this.navigation.activeDetail() === 'predictors'
   );
   readonly isMeterChildrenOpen = computed(() => {
     const facilityGuid = this.navigation.facility()?.guid;
@@ -172,6 +196,13 @@ export class SectionNavComponent {
       return !stateApplies || !state.collapsed;
     }
     return false;
+  });
+  readonly isPredictorChildrenOpen = computed(() => {
+    const facilityGuid = this.navigation.facility()?.guid;
+    const state = this.predictorChildrenState();
+    const stateApplies = !!facilityGuid && state.facilityGuid === facilityGuid;
+    if (this.facilityPredictorItems().length === 0) return false;
+    return this.isFacilityPredictorsRoute() && (!stateApplies || !state.collapsed);
   });
   readonly settingsItems = computed<ReadonlyArray<SettingsNavItem>>(() => {
     if (this.navigation.contextMode() !== 'facility') {
@@ -218,6 +249,9 @@ export class SectionNavComponent {
     if (item.id === 'meter-grouping') {
       return this.isFacilityMeterGroupingRoute() && !this.navigation.activeMeterGroupGuid();
     }
+    if (item.id === 'predictors') {
+      return this.isFacilityPredictorsRoute() && !this.navigation.activePredictorGuid();
+    }
     if (item.id !== 'meters') {
       return this.navigation.activeDetail() === item.id;
     }
@@ -232,12 +266,20 @@ export class SectionNavComponent {
     return this.navigation.activeMeterGroupGuid() === groupGuid;
   }
 
+  isPredictorChildActive(predictorGuid: string): boolean {
+    return this.navigation.activePredictorGuid() === predictorGuid;
+  }
+
   meterChildrenId(): string {
     return `v1-meter-nav-items-${this.navigation.facility()?.guid || 'none'}`;
   }
 
   groupChildrenId(): string {
     return `v1-meter-group-nav-items-${this.navigation.facility()?.guid || 'none'}`;
+  }
+
+  predictorChildrenId(): string {
+    return `v1-predictor-nav-items-${this.navigation.facility()?.guid || 'none'}`;
   }
 
   toggleMeterChildren(): void {
@@ -261,6 +303,15 @@ export class SectionNavComponent {
     this.groupChildrenState.set({
       facilityGuid,
       collapsed: isOpen
+    });
+  }
+
+  togglePredictorChildren(): void {
+    const facilityGuid = this.navigation.facility()?.guid;
+    if (!facilityGuid || this.facilityPredictorItems().length === 0 || !this.isFacilityPredictorsRoute()) return;
+    this.predictorChildrenState.set({
+      facilityGuid,
+      collapsed: this.isPredictorChildrenOpen()
     });
   }
 }

@@ -1,0 +1,45 @@
+@let currentFacility = workspace.facility();
+@let currentAccount = workspace.account();
+@let accountPredictorsLink = accountPredictorsRoute();
+@let predictorCards = workspace.predictorCards();
+
+@if (!currentFacility) {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="accountIssue"></app-ui-icon>
+    <h1>No facility selected</h1>
+    <p>Select a facility before reviewing predictors and predictor data.</p>
+  </article>
+} @else {
+  <header class="v1-section-header v1-facility-predictors__header">
+    <div>
+      <nav class="v1-data-context-breadcrumb" aria-label="Predictors context">
+        <ol>
+          @if (currentAccount && accountPredictorsLink) {
+            <li><a [routerLink]="accountPredictorsLink">{{ currentAccount.name || 'Account' }}</a></li>
+            <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          }
+          <li>{{ currentFacility.name || 'Facility' }}</li>
+        </ol>
+      </nav>
+      <h1 id="v1-facility-predictors-title" class="v1-facility-predictors__title">
+        <app-ui-icon name="predictor"></app-ui-icon>
+        <span>Predictors</span>
+      </h1>
+    </div>
+  </header>
+
+  @if (predictorCards.length === 0) {
+    <app-data-empty-state
+      icon="predictor"
+      context="facility"
+      title="No predictors"
+      description="Add or import a predictor in the current workspace to see it here.">
+    </app-data-empty-state>
+  } @else {
+    <div class="v1-predictors-browse__grid" role="list" aria-label="Facility predictors">
+      @for (card of predictorCards; track card.predictor.guid) {
+        <app-predictor-browse-card [card]="card"></app-predictor-browse-card>
+      }
+    </div>
+  }
+}

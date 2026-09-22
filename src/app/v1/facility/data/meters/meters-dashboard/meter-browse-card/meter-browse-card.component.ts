@@ -9,14 +9,15 @@ import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/fac
 import { ConfirmCopyMeterModalComponent } from './confirm-copy-meter-modal/confirm-copy-meter-modal.component';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
-import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
+import { ResourceBrowseCardAction, ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
 
 @Component({
   selector: 'app-meter-browse-card',
   templateUrl: './meter-browse-card.component.html',
   styleUrls: ['./meter-browse-card.component.css'],
   standalone: true,
-  imports: [ConfirmCopyMeterModalComponent, ConfirmDeleteMeterModalComponent, IconComponent]
+  imports: [ConfirmCopyMeterModalComponent, ConfirmDeleteMeterModalComponent, ResourceBrowseCardComponent]
 })
 export class MeterBrowseCardComponent implements OnDestroy {
   private readonly router = inject(Router);
@@ -52,6 +53,68 @@ export class MeterBrowseCardComponent implements OnDestroy {
     return this.card?.usageFacts ?? (this.usageFactsLoading ? this.placeholderUsageFacts : undefined);
   }
 
+  get resourceView(): ResourceBrowseCardView {
+    const usageFacts = this.displayUsageFacts;
+    return {
+      title: this.card.meter.name,
+      openLabel: `Open ${this.card.meter.name} settings`,
+      icon: this.card.sourceIcon || 'meter',
+      iconColor: this.card.sourceColor,
+      statusTone: this.card.statusTone,
+      owner: this.showFacilityHeader && this.portfolioFacility
+        ? { label: this.portfolioFacility.name, icon: 'facility' }
+        : undefined,
+      chips: [
+        { id: 'source', label: this.card.meter.source, icon: this.card.sourceIcon || 'meter', accentColor: this.card.sourceColor },
+        {
+          id: 'status',
+          label: this.card.statusLabel || 'Checking',
+          icon: this.card.statusIcon || 'loading',
+          tone: this.card.statusTone || 'info',
+          loading: !this.card.statusIcon || this.card.statusIcon === 'loading'
+        }
+      ],
+      factSections: [
+        {
+          id: 'identity',
+          facts: [
+            { id: 'first-reading', label: 'First reading', valueLabel: this.card.firstReadingLabel || 'No data' },
+            { id: 'latest-reading', label: 'Latest', valueLabel: this.card.latestReadingLabel || 'No data' },
+            { id: 'scope', label: 'Scope', valueLabel: this.card.scopeLabel || 'Not set' },
+            ...(this.card.fuelLabel ? [{ id: 'fuel', label: 'Fuel', valueLabel: this.card.fuelLabel }] : [])
+          ]
+        },
+        ...(usageFacts
+          ? [{
+            id: 'usage',
+            ariaLabel: 'Meter usage facts',
+            emphasis: 'secondary' as const,
+            note: usageFacts.unitLabel
+              ? `Usage values shown in ${usageFacts.basisLabel ? usageFacts.basisLabel + ' ' : ''}${usageFacts.unitLabel}/month`
+              : undefined,
+            facts: usageFacts.facts.map(fact => ({ ...fact, metaLabel: fact.periodLabel, loading: this.usageFactsLoading }))
+          }]
+          : [])
+      ],
+      notes: this.card.statusActionSummaries?.map((summary, index) => ({
+        id: `status-${index}`,
+        label: summary,
+        icon: this.card.statusIcon || 'loading',
+        loading: !this.card.statusIcon || this.card.statusIcon === 'loading'
+      })),
+      footerTag: { label: this.card.group?.name || 'Ungrouped', icon: 'meterGroupItem' },
+      errorMessage: this.actionError()
+    };
+  }
+
+  get resourceActions(): ReadonlyArray<ResourceBrowseCardAction> {
+    return [
+      { id: 'readings', label: 'Open readings', icon: 'table' },
+      { id: 'copy', label: 'Copy meter', icon: 'copy', disabled: !this.canAct(), loading: this.saving() },
+      { id: 'delete', label: 'Delete meter', icon: 'delete', tone: 'danger', disabled: !this.canAct() }
+    ];
+  }
+
   ngOnDestroy(): void {
     this.hideActiveModal();
   }
@@ -62,6 +125,12 @@ export class MeterBrowseCardComponent implements OnDestroy {
 
   openReadings(): void {
     this.openMeterTab('readings');
+  }
+
+  handleCardAction(actionId: string): void {
+    if (actionId === 'readings') this.openReadings();
+    if (actionId === 'copy') this.requestCopyMeter();
+    if (actionId === 'delete') this.requestDeleteMeter();
   }
 
   requestCopyMeter(): void {

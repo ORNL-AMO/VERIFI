@@ -17,6 +17,7 @@ export type WorkspaceRouteMotion = 'none' | 'workspace-entry' | 'facility-drill-
 export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'reports' | 'settings' | 'imports';
 export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
+export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -58,6 +59,7 @@ interface RouteState {
   readonly facilityGuid?: string;
   readonly meterGuid?: string;
   readonly meterGroupGuid?: string;
+  readonly predictorGuid?: string;
   readonly section: SectionId;
   readonly detail: string;
 }
@@ -128,6 +130,7 @@ export class WorkspaceNavigationService {
   readonly activeDetail = computed(() => this.routeState().detail);
   readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
+  readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
@@ -294,6 +297,14 @@ export class WorkspaceNavigationService {
     tab: FacilityMeterGroupRouteTab = 'monthly-table'
   ): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'meter-grouping', groupGuid, tab];
+  }
+
+  facilityPredictorRoute(
+    facilityGuid: string,
+    predictorGuid: string,
+    tab: FacilityPredictorRouteTab = 'settings'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab];
   }
 
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
@@ -477,6 +488,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,
       meterGroupGuid: section === 'data' && detail === 'meter-grouping' && routeParts[5]
+        ? safeDecodeRoutePart(routeParts[5])
+        : undefined,
+      predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined
     };

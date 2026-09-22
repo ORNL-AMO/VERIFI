@@ -25,8 +25,10 @@ describe('SectionNavComponent', () => {
   let activeDetail: ReturnType<typeof signal<string>>;
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
+  let activePredictorGuid: ReturnType<typeof signal<string | undefined>>;
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
+  let facilityPredictors: ReturnType<typeof signal<Array<any>>>;
   let setFacility: ReturnType<typeof vi.fn>;
   let statusState: ReturnType<typeof signal<'ready' | 'evaluating'>>;
   let statusItems: ReturnType<typeof signal<StatusItem[]>>;
@@ -43,8 +45,10 @@ describe('SectionNavComponent', () => {
     activeDetail = signal('profile');
     activeMeterGuid = signal<string | undefined>(undefined);
     activeMeterGroupGuid = signal<string | undefined>(undefined);
+    activePredictorGuid = signal<string | undefined>(undefined);
     facilityMeters = signal([]);
     facilityMeterGroups = signal([]);
+    facilityPredictors = signal([]);
     setFacility = vi.fn();
     statusState = signal<'ready' | 'evaluating'>('ready');
     statusItems = signal([]);
@@ -66,12 +70,14 @@ describe('SectionNavComponent', () => {
             activeDetail,
             activeMeterGuid,
             activeMeterGroupGuid,
+            activePredictorGuid,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
             facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
+            facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -83,7 +89,8 @@ describe('SectionNavComponent', () => {
           provide: AccountWorkspaceStore,
           useValue: {
             facilityMeters,
-            facilityMeterGroups
+            facilityMeterGroups,
+            facilityPredictors
           }
         },
         {
@@ -351,6 +358,41 @@ describe('SectionNavComponent', () => {
     expect(meterChildLinks(element)).toHaveLength(0);
   });
 
+  it('shows sorted, collapsible predictor links and marks the selected predictor active', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('predictors');
+    activePredictorGuid.set('predictor-z');
+    facilityPredictors.set([
+      { guid: 'predictor-z', name: 'Zulu Output' },
+      { guid: 'predictor-a', name: 'Alpha Output' }
+    ]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const toggle = element.querySelector<HTMLButtonElement>('[aria-label="Hide predictor links"]');
+
+    expect(predictorChildLinks(element).map(link => link.textContent?.trim())).toEqual(['Alpha Output', 'Zulu Output']);
+    expect(predictorChildLinks(element)[0].getAttribute('href')).toContain('/data/predictors/predictor-a/settings');
+    expect(element.querySelector('[aria-current="page"]')?.textContent).toContain('Zulu Output');
+
+    toggle?.click();
+    fixture.detectChanges();
+    expect(predictorChildLinks(element)).toHaveLength(0);
+  });
+
+  it('does not show a predictor child toggle when there are no predictors', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('predictors');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[aria-label$="predictor links"]')).toBeNull();
+  });
+
   it('shows facility settings navigation in facility context', () => {
     contextMode.set('facility');
     selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
@@ -518,6 +560,10 @@ describe('SectionNavComponent', () => {
 
   function groupChildLinks(element: HTMLElement): HTMLAnchorElement[] {
     return Array.from<HTMLAnchorElement>(element.querySelectorAll('[aria-label="Meter group links"] .v1-nav__child'));
+  }
+
+  function predictorChildLinks(element: HTMLElement): HTMLAnchorElement[] {
+    return Array.from<HTMLAnchorElement>(element.querySelectorAll('[aria-label="Predictor links"] .v1-nav__child'));
   }
 
   function meterNav(guid: string, name: string, source: MeterSource = 'Electricity'): { guid: string; name: string; source: MeterSource } {

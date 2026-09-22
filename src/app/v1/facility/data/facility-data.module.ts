@@ -44,6 +44,12 @@ import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
 import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.component';
 import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/meter-results-chart.component';
+import { FacilityPredictorsComponent } from './predictors/facility-predictors.component';
+import { PredictorWorkbenchComponent } from './predictors/predictor-workbench/predictor-workbench.component';
+import { PredictorWorkbenchQualityReportComponent } from './predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
+import { PredictorWorkbenchReadingsComponent } from './predictors/predictor-workbench/readings/predictor-workbench-readings.component';
+import { PredictorWorkbenchSettingsComponent } from './predictors/predictor-workbench/settings/predictor-workbench-settings.component';
+import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/predictors-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -91,7 +97,13 @@ import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/
     MeterCalendarizationHelpSlideoutComponent,
     TooltipComponent,
     MeterReadingsStatusComponent,
-    MeterReadingsTableComponent
+    MeterReadingsTableComponent,
+    FacilityPredictorsComponent,
+    PredictorsDashboardComponent,
+    PredictorWorkbenchComponent,
+    PredictorWorkbenchSettingsComponent,
+    PredictorWorkbenchReadingsComponent,
+    PredictorWorkbenchQualityReportComponent
   ],
   exports: [
     FacilityDataPlaceholderComponent,
@@ -99,7 +111,10 @@ import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/
     MetersDashboardComponent,
     MeterGroupingComponent,
     MeterGroupWorkbenchComponent,
-    MeterWorkbenchComponent
+    MeterWorkbenchComponent,
+    FacilityPredictorsComponent,
+    PredictorsDashboardComponent,
+    PredictorWorkbenchComponent
   ],
   providers: [MetersDashboardActionsService]
 })

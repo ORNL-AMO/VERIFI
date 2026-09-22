@@ -56,7 +56,7 @@ describe('MetersDashboardComponent', () => {
     expect(text).toContain('Scope');
     expect(text).toContain('Add meter');
     expect(fixture.nativeElement.querySelectorAll('app-meter-browse-card').length).toBe(2);
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__source-chip')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-resource-browse-card__chip')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-facility-meters__header .v1-btn--action')?.textContent).toContain('Add meter');
     expect(findButton(fixture, 'Add meter')?.classList.contains('v1-btn--action')).toBe(true);
@@ -321,6 +321,6 @@ function findButton(fixture: ComponentFixture<MetersDashboardComponent>, label: 
 }
 
 function cardTitles(fixture: ComponentFixture<MetersDashboardComponent>): string[] {
-  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-meter-browse-card__title-text'))
+  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__title-text'))
     .map(element => element.textContent!.trim());
 }

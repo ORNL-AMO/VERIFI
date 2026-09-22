@@ -1,0 +1,21 @@
+@let cards = predictorCards();
+
+<section class="v1-account-portfolio-predictors" aria-label="Portfolio predictors">
+  @if (cards.length === 0) {
+    <app-data-empty-state
+      icon="predictor"
+      title="No predictors"
+      description="Predictors will appear here after you add or import them for a facility.">
+    </app-data-empty-state>
+  } @else {
+    <div class="v1-account-portfolio-predictors__cards" role="list" aria-label="Account predictors">
+      @for (item of cards; track item.card.predictor.guid) {
+        <app-predictor-browse-card
+          [card]="item.card"
+          [portfolioFacility]="item.facility"
+          [showFacilityHeader]="true">
+        </app-predictor-browse-card>
+      }
+    </div>
+  }
+</section>

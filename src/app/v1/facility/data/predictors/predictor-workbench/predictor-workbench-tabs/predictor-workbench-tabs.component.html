@@ -1,0 +1,13 @@
+<nav class="v1-data-tabs v1-data-tabs--connected" aria-label="Predictor workbench sections">
+  @for (tab of tabs; track tab.id) {
+    <button
+      type="button"
+      class="v1-data-tabs__tab"
+      [class.v1-data-tabs__tab--active]="activeTab === tab.id"
+      [attr.aria-current]="activeTab === tab.id ? 'page' : null"
+      (click)="tabSelected.emit(tab.id)">
+      <app-ui-icon [name]="tab.icon"></app-ui-icon>
+      {{ tab.label }}
+    </button>
+  }
+</nav>

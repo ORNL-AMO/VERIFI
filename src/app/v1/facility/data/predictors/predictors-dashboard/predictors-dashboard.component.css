@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.v1-facility-predictors__header {
+  display: flex;
+  gap: var(--v1-space-4);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.v1-facility-predictors__title {
+  display: inline-flex;
+  gap: var(--v1-space-2);
+  align-items: center;
+}
+
+.v1-facility-predictors__title .v1-icon {
+  color: var(--v1-facility);
+}
+
+.v1-predictors-browse__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: var(--v1-space-4);
+  align-items: stretch;
+  padding-top: var(--v1-space-3);
+}
+
+@media (max-width: 680px) {
+  .v1-predictors-browse__grid { grid-template-columns: 1fr; }
+}

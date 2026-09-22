@@ -160,6 +160,16 @@ describe('WorkspaceNavigationService', () => {
       'group-a',
       'yearly'
     ]);
+    expect(service.facilityPredictorRoute('facility-a', 'predictor-a', 'quality')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'predictors',
+      'predictor-a',
+      'quality'
+    ]);
     expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
       '/v1',
       'workspace',
@@ -393,6 +403,24 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeDetail()).toBe('meter-grouping');
     expect(service.activeMeterGuid()).toBeUndefined();
     expect(service.activeMeterGroupGuid()).toBeUndefined();
+
+    router.events.next(new NavigationEnd(
+      7,
+      '/v1/workspace/facility/facility-a/data/predictors/predictor%20a/quality',
+      '/v1/workspace/facility/facility-a/data/predictors/predictor%20a/quality'
+    ));
+
+    expect(service.activeDetail()).toBe('predictors');
+    expect(service.activePredictorGuid()).toBe('predictor a');
+    expect(service.activeMeterGuid()).toBeUndefined();
+
+    router.events.next(new NavigationEnd(
+      8,
+      '/v1/workspace/facility/facility-a/data/predictors',
+      '/v1/workspace/facility/facility-a/data/predictors'
+    ));
+
+    expect(service.activePredictorGuid()).toBeUndefined();
   });
 
   it('shows separate support panel help for Meters and Meter Grouping', () => {

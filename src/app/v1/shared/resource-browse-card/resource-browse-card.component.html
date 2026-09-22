@@ -1,0 +1,137 @@
+<article
+  class="v1-resource-browse-card"
+  role="listitem"
+  [class.v1-resource-browse-card--status-info]="view.statusTone === 'info'"
+  [class.v1-resource-browse-card--status-warning]="view.statusTone === 'warning'"
+  [class.v1-resource-browse-card--status-danger]="view.statusTone === 'danger'">
+  @if (view.owner; as owner) {
+    <div class="v1-resource-browse-card__owner">
+      <app-ui-icon [name]="owner.icon || 'facility'"></app-ui-icon>
+      <span>{{ owner.label }}</span>
+    </div>
+  }
+
+  <header class="v1-resource-browse-card__header">
+    <button
+      type="button"
+      class="v1-resource-browse-card__title"
+      [attr.aria-label]="view.openLabel"
+      (click)="opened.emit()">
+      <app-ui-icon [name]="view.icon" [style.color]="view.iconColor || null"></app-ui-icon>
+      <span class="v1-resource-browse-card__title-text">{{ view.title }}</span>
+      <app-ui-icon name="chevronRight" class="v1-resource-browse-card__title-chevron"></app-ui-icon>
+    </button>
+  </header>
+
+  <div class="v1-resource-browse-card__body">
+    @if (view.loading) {
+      <span class="visually-hidden" aria-live="polite">{{ view.loadingLabel || 'Loading resource details' }}</span>
+    }
+    @if (view.errorMessage) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>{{ view.errorMessage }}</span>
+      </div>
+    }
+
+    @if (view.chips?.length) {
+      <div class="v1-resource-browse-card__chips">
+        @for (chip of view.chips; track chip.id) {
+          <span
+            class="v1-resource-browse-card__chip"
+            [class.v1-chip]="chip.tone"
+            [class.v1-chip--success]="chip.tone === 'success'"
+            [class.v1-chip--warning]="chip.tone === 'warning'"
+            [class.v1-chip--danger]="chip.tone === 'danger'"
+            [class.v1-chip--info]="chip.tone === 'info'"
+            [class.v1-chip--neutral]="chip.tone === 'neutral'"
+            [style.--v1-resource-accent]="chip.accentColor || null">
+            @if (chip.icon) {
+              <app-ui-icon [name]="chip.loading ? 'loading' : chip.icon" [spin]="chip.loading === true"></app-ui-icon>
+            }
+            {{ chip.label }}
+          </span>
+        }
+      </div>
+    }
+
+    @for (section of view.factSections || []; track section.id) {
+      <section
+        class="v1-resource-browse-card__fact-section"
+        [class.v1-resource-browse-card__fact-section--secondary]="section.emphasis === 'secondary'"
+        [attr.aria-label]="section.ariaLabel || null">
+        @if (section.note) {
+          <p class="v1-resource-browse-card__fact-note">{{ section.note }}</p>
+        }
+        <dl class="v1-resource-browse-card__facts">
+          @for (fact of section.facts; track fact.id) {
+            <div>
+              <dt>{{ fact.label }}</dt>
+              <dd [class.v1-resource-browse-card__fact-value--unavailable]="fact.unavailable">
+                @if (fact.loading) {
+                  <span class="placeholder-glow w-100" aria-hidden="true">
+                    <span class="placeholder col-9"></span>
+                    <span class="placeholder col-6"></span>
+                  </span>
+                  <span class="visually-hidden">Calculating {{ fact.label }}</span>
+                } @else {
+                  <span class="v1-resource-browse-card__fact-primary">{{ fact.valueLabel }}</span>
+                  @if (fact.metaLabel) {
+                    <span class="v1-resource-browse-card__fact-meta">{{ fact.metaLabel }}</span>
+                  }
+                  @if (fact.changeLabel) {
+                    <span class="v1-resource-browse-card__fact-change v1-resource-browse-card__fact-change--{{ fact.changeTone || 'unavailable' }}">
+                      {{ fact.changeLabel }}
+                    </span>
+                  }
+                }
+              </dd>
+            </div>
+          }
+        </dl>
+      </section>
+    }
+
+    @if (view.notes?.length) {
+      <ul class="v1-resource-browse-card__notes">
+        @for (note of view.notes; track note.id) {
+          <li>
+            @if (note.icon) {
+              <app-ui-icon [name]="note.icon" [spin]="note.loading === true"></app-ui-icon>
+            }
+            <span>{{ note.label }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (view.footerTag || actions.length > 0) {
+    <footer class="v1-resource-browse-card__footer">
+      @if (view.footerTag; as footerTag) {
+        <span class="v1-resource-browse-card__footer-tag">
+          @if (footerTag.icon) {
+            <app-ui-icon [name]="footerTag.icon"></app-ui-icon>
+          }
+          {{ footerTag.label }}
+        </span>
+      }
+      @if (actions.length > 0) {
+        <div class="v1-resource-browse-card__actions" aria-label="Resource actions">
+          @for (action of actions; track action.id) {
+            <button
+              type="button"
+              class="v1-icon-btn"
+              [class.v1-icon-btn--danger]="action.tone === 'danger'"
+              [title]="action.label"
+              [attr.aria-label]="action.label"
+              [disabled]="action.disabled || action.loading"
+              (click)="selectAction(action)">
+              <app-ui-icon [name]="action.loading ? 'loading' : action.icon" [spin]="action.loading === true"></app-ui-icon>
+            </button>
+          }
+        </div>
+      }
+    </footer>
+  }
+</article>

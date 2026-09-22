@@ -37,6 +37,12 @@ import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/facility/data/me
 import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
+import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
+import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
+import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
+import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
+import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
+import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
 import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
 import { FacilitySettingsComponent } from '@app/v1/facility/settings/facility-settings.component';
 import { FacilitySettingsBackupComponent } from '@app/v1/facility/settings/backup/facility-settings-backup.component';
@@ -173,7 +179,24 @@ export const V1Routes: Routes = [
                   }
                 ]
               },
-              { path: 'predictors', component: FacilityDataPlaceholderComponent, data: { title: 'Predictors' } },
+              {
+                path: 'predictors',
+                component: FacilityPredictorsComponent,
+                children: [
+                  { path: '', pathMatch: 'full', component: PredictorsDashboardComponent },
+                  {
+                    path: ':predictorGuid',
+                    component: PredictorWorkbenchComponent,
+                    children: [
+                      { path: '', pathMatch: 'full', redirectTo: 'settings' },
+                      { path: 'settings', component: PredictorWorkbenchSettingsComponent, data: { predictorTab: 'settings' } },
+                      { path: 'readings', component: PredictorWorkbenchReadingsComponent, data: { predictorTab: 'readings' } },
+                      { path: 'quality', component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } },
+                      { path: '**', redirectTo: 'settings' }
+                    ]
+                  }
+                ]
+              },
               { path: 'energy-uses', component: FacilityDataPlaceholderComponent, data: { title: 'Energy Uses' } },
               { path: '**', redirectTo: 'meters' }
             ]
