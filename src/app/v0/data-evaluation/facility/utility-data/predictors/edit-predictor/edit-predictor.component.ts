@@ -180,7 +180,8 @@ export class EditPredictorComponent {
                   const updated: IdbPredictorData = {
                     ...predictorData[i],
                     amount: getDegreeDayAmount(degreeDays, this.predictor.weatherDataType),
-                    weatherDataWarning: hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType)
+                    weatherDataWarning: hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType),
+                    weatherDataChanged: false
                   };
                   await this.predictorHandler.updatePredictorData(updated, activeAccountGuid);
                 }

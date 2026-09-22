@@ -9,12 +9,12 @@
 @let _selectedFacility = selectedFacility();
 
 @if (showInUseMessage()) {
-  <div class="p-2 alert alert-info text-center">
-    <button type="button" class="btn-close" aria-label="Close" (click)="toggleHideInUseMessage()"></button>
-    This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
-    to the corresponding analysis items. Making changes to this analysis may effect the results of the account
-    analysis.
-  </div>
+<div class="p-2 alert alert-info text-center">
+  <button type="button" class="btn-close" aria-label="Close" (click)="toggleHideInUseMessage()"></button>
+  This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+  to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+  analysis.
+</div>
 }
 
 @if (!selectedInspectModel) {
@@ -37,19 +37,19 @@
 <div class="d-flex flex-wrap justify-content-start align-items-center gap-3 mb-2">
   <div class="d-flex align-items-center me-3">
     <label class="show-models-label bold me-2" for="showInvalid">
-      Show Statistically Invalid Models
+      Show Models with Critical Issues
     </label>
     <div>
       <label class="switch mb-0" for="showInvalid">
-        <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid"
-          [ngModel]="_showInvalid" (ngModelChange)="showInvalid.set($event)">
+        <input class="checkbox" type="checkbox" id="showInvalid" name="showInvalid" [ngModel]="_showInvalid"
+          (ngModelChange)="showInvalid.set($event)">
         <span class="slider round"></span>
       </label>
     </div>
   </div>
   <div class="d-flex align-items-center me-3">
     <label class="show-models-label bold me-2" for="showFailedValidationModel">
-      Show Models that fail Data Validation
+      Show Models with Moderate Issues
     </label>
     <div>
       <label class="switch mb-0" for="showFailedValidationModel">
@@ -113,19 +113,19 @@
         <th>
           Formula
         </th>
-        <th>
-          Model Notes
-        </th>
         @if (_showInvalid) {
         <th>
-          Model Validation<br> Failures
+          Critical Issues
         </th>
         }
         @if (_showFailedValidationModel) {
         <th>
-          Data Validation<br> Failures
+          Moderate issues
         </th>
         }
+        <th>
+          Minor Issues
+        </th>
         <th>
         </th>
       </tr>
@@ -191,20 +191,6 @@
           }
         </td>
         }
-        @if (!model.errorModeling) {
-        <td>
-          @for (notes of model.modelNotes; track notes) {
-          <span>
-            {{notes}}<br>
-          </span>
-          }
-          @if (model.modelNotes.length == 0) {
-          <span>
-            &mdash;
-          </span>
-          }
-        </td>
-        }
         @if (_showInvalid && !model.errorModeling) {
         <td>
           @if (model.isValid) {
@@ -226,6 +212,20 @@
           }
           @if (model.SEPValidationPass) {
           <span>&mdash;</span>
+          }
+        </td>
+        }
+        @if (!model.errorModeling) {
+        <td>
+          @for (notes of model.modelNotes; track notes) {
+          <span>
+            {{notes}}<br>
+          </span>
+          }
+          @if (model.modelNotes.length == 0) {
+          <span>
+            &mdash;
+          </span>
           }
         </td>
         }

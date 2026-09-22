@@ -1,6 +1,6 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, inject, Injector } from '@angular/core';
+import { Component, computed, inject, Injector, Signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -50,6 +50,11 @@ export class DataManagementHomeComponent {
 
   statusCheckSub: Subscription;
   loadingSub: Subscription;
+  showWeatherPredictorsChangeModal: boolean = false;
+
+  hasActiveWeatherPredictors: Signal<boolean> = computed(() =>
+    this.accountWorkspaceStore.predictors().some(p => p.predictorType === 'Weather' && !p.noLongerInUse)
+  );
 
   constructor(
     private accountStatusCheckService: AccountStatusCheckService,
@@ -60,9 +65,7 @@ export class DataManagementHomeComponent {
     private toastNotificationService: ToastNotificationsService,
     private injector: Injector
 
-  ) {
-
-  }
+  ) { }
 
   ngOnInit() {
     this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(account => {
@@ -117,7 +120,6 @@ export class DataManagementHomeComponent {
       facilityTodoItems,
       otherItems: statusCheck.actions
     };
-
     this.allTodoItems = facilityTodoItems.flatMap(f => f.meterTodoItems.concat(f.predictorTodoItems));
 
     this.showWeatherButton = this.allTodoItems.some(item => item.isWeather && item.type === 'predictor');
@@ -153,5 +155,54 @@ export class DataManagementHomeComponent {
 
   toggleShowMeterItem(facilityIndex: number) {
     this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems = !this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems;
+  }
+
+  openWeatherPredictorsChangeModal() {
+    this.showWeatherPredictorsChangeModal = true;
+  }
+
+  closeWeatherPredictorsChangeModal() {
+    this.showWeatherPredictorsChangeModal = false;
+  }
+
+  async setUpdatedAmount(checkAll: boolean) {
+    this.closeWeatherPredictorsChangeModal();
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage('Checking for weather predictor changes...');
+
+    try {
+      const results = await this.weatherPredictorManagementService.checkAccountPredictorsForChanges(checkAll);
+
+      if (results.length > 0) {
+        this.toastNotificationService.showToast(
+          "Weather Predictor Changes Found",
+          `${results.length} predictor(s) have changed readings. Review the to-do list for details`,
+          undefined,
+          false,
+          "alert-warning"
+        );
+      }
+      else {
+        this.toastNotificationService.showToast(
+          "No Weather Predictor Changes",
+          "No changes were found in your weather predictors.",
+          undefined,
+          false,
+          "alert-success"
+        );
+      }
+    }
+    catch {
+      this.toastNotificationService.showToast(
+        "Error Checking Weather Predictor Changes",
+        "An error occurred while checking for weather predictor changes.",
+        undefined,
+        false,
+        "alert-danger"
+      );
+    }
+    finally {
+      this.loadingService.setLoadingStatus(false);
+    }
   }
 }

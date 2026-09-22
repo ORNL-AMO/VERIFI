@@ -36,36 +36,38 @@
           <th>
             HHV
           </th>
-          <th>
-            CO<sub>2</sub> Factor
-            @if (isMobile) {
-              (kg / gal)
-            } @else {
-              (kg)
-            }
-          </th>
-          <th>
-            CH<sub>4</sub> Factor
-            @if (isMobile) {
-              (g / gal)
-            } @else {
-              (g)
-            }
-          </th>
-          <th>
-            N<sub>2</sub>O Factor
-            @if (isMobile) {
-              (g / gal)
-            } @else {
-              (g)
-            }
-          </th>
-          <th>
-            Emissions Output Rate<br>
-            <span>
-              kg CO<sub>2</sub>e
-            </span>
-          </th>
+          @if (selectedAccount.displayEmissions) {
+            <th>
+              CO<sub>2</sub> Factor
+              @if (isMobile) {
+                (kg / gal)
+              } @else {
+                (kg)
+              }
+            </th>
+            <th>
+              CH<sub>4</sub> Factor
+              @if (isMobile) {
+                (g / gal)
+              } @else {
+                (g)
+              }
+            </th>
+            <th>
+              N<sub>2</sub>O Factor
+              @if (isMobile) {
+                (g / gal)
+              } @else {
+                (g)
+              }
+            </th>
+            <th>
+              Emissions Output Rate<br>
+              <span>
+                kg CO<sub>2</sub>e
+              </span>
+            </th>
+          }
         </tr>
       </thead>
       <tbody>
@@ -82,38 +84,40 @@
                 &mdash;
               }
             </td>
-            <td>
-              @if (option.CO2) {
-                {{option| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
-              }
-              @if (!option.CO2) {
-                &mdash;
-              }
-            </td>
-            <td>
-              @if (option.CH4) {
-                {{option| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
-              }
-              @if (!option.CH4) {
-                &mdash;
-              }
-            </td>
-            <td>
-              @if (option.N2O) {
-                {{option| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
-              }
-              @if (!option.N2O) {
-                &mdash;
-              }
-            </td>
-            <td>
-              @if (option.emissionsOutputRate) {
-                {{option.emissionsOutputRate}}
-              }
-              @if (!option.emissionsOutputRate) {
-                &mdash;
-              }
-            </td>
+            @if (selectedAccount.displayEmissions) {
+              <td>
+                @if (option.CO2) {
+                  {{option| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
+                }
+                @if (!option.CO2) {
+                  &mdash;
+                }
+              </td>
+              <td>
+                @if (option.CH4) {
+                  {{option| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
+                }
+                @if (!option.CH4) {
+                  &mdash;
+                }
+              </td>
+              <td>
+                @if (option.N2O) {
+                  {{option| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
+                }
+                @if (!option.N2O) {
+                  &mdash;
+                }
+              </td>
+              <td>
+                @if (option.emissionsOutputRate) {
+                  {{option.emissionsOutputRate}}
+                }
+                @if (!option.emissionsOutputRate) {
+                  &mdash;
+                }
+              </td>
+            }
           </tr>
         }
       </tbody>

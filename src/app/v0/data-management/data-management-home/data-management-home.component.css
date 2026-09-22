@@ -16,11 +16,13 @@ label.form-label {
 }
 
 .btn .fa.fa-temperature-half,
-.btn .fa.fa-upload {
+.btn .fa.fa-upload,
+.btn .fa.fa-refresh {
     font-size: 14px;
 }
 
-.btn:hover .fa.fa-temperature-half {
+.btn:hover .fa.fa-temperature-half,
+.btn:hover .fa.fa-refresh {
     color: white;
 }
 
