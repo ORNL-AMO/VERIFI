@@ -25,6 +25,7 @@ import ChevronLeftIcon from '@hugeicons/core-free-icons/ChevronLeftIcon';
 import ChevronRightIcon from '@hugeicons/core-free-icons/ChevronRightIcon';
 import ChevronUpIcon from '@hugeicons/core-free-icons/ChevronUpIcon';
 import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon';
+import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
 import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
 import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
@@ -32,6 +33,7 @@ import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
 import DragDropVerticalIcon from '@hugeicons/core-free-icons/DragDropVerticalIcon';
 import DropletOffIcon from '@hugeicons/core-free-icons/DropletOffIcon';
+import DropletIcon from '@hugeicons/core-free-icons/DropletIcon';
 import EarthIcon from '@hugeicons/core-free-icons/EarthIcon';
 import ElectricPlugsIcon from '@hugeicons/core-free-icons/ElectricPlugsIcon';
 import EnergyIcon from '@hugeicons/core-free-icons/EnergyIcon';
@@ -50,20 +52,27 @@ import GearsIcon from '@hugeicons/core-free-icons/GearsIcon';
 import GroupIcon from '@hugeicons/core-free-icons/GroupIcon';
 import HelpCircleIcon from '@hugeicons/core-free-icons/HelpCircleIcon';
 import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
+import HumidityIcon from '@hugeicons/core-free-icons/HumidityIcon';
 import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon';
 import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
 import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
 import LockIcon from '@hugeicons/core-free-icons/LockIcon';
 import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
+import PackageIcon from '@hugeicons/core-free-icons/PackageIcon';
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
 import PieChartIcon from '@hugeicons/core-free-icons/PieChartIcon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
+import RainDropIcon from '@hugeicons/core-free-icons/RainDropIcon';
 import RulerIcon from '@hugeicons/core-free-icons/RulerIcon';
 import Search01Icon from '@hugeicons/core-free-icons/Search01Icon';
+import ShippingLoadingIcon from '@hugeicons/core-free-icons/ShippingLoadingIcon';
 import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon';
 import SlidersHorizontalIcon from '@hugeicons/core-free-icons/SlidersHorizontalIcon';
 import SquareIcon from '@hugeicons/core-free-icons/SquareIcon';
 import TableIcon from '@hugeicons/core-free-icons/TableIcon';
+import ThermometerSnowflakeIcon from '@hugeicons/core-free-icons/ThermometerSnowflakeIcon';
+import ThermometerSunIcon from '@hugeicons/core-free-icons/ThermometerSunIcon';
+import ThermometerWarmIcon from '@hugeicons/core-free-icons/ThermometerWarmIcon';
 import TagsIcon from '@hugeicons/core-free-icons/TagsIcon';
 import Target02Icon from '@hugeicons/core-free-icons/Target02Icon';
 import ToolsIcon from '@hugeicons/core-free-icons/ToolsIcon';
@@ -95,12 +104,14 @@ export const ICON_REGISTRY = {
   checklist: CheckListIcon,
   close: Cancel01Icon,
   clock: Clock01Icon,
+  cloudRain: CloudRainIcon,
   copy: Copy01Icon,
   danger: CancelCircleIcon,
   database: DatabaseIcon,
   delete: Delete02Icon,
   download: Download04Icon,
   drag: DragDropVerticalIcon,
+  droplet: DropletIcon,
   electricity: ElectricPlugsIcon,
   earth: EarthIcon,
   edit: PencilEdit02Icon,
@@ -118,6 +129,7 @@ export const ICON_REGISTRY = {
   gears: GearsIcon,
   help: HelpCircleIcon,
   home: Home01Icon,
+  humidity: HumidityIcon,
   info: InformationCircleIcon,
   loading: Loading03Icon,
   location: Location01Icon,
@@ -127,10 +139,13 @@ export const ICON_REGISTRY = {
   meterGroupItem: GroupIcon,
   monocle: Monocle01Icon,
   overview: PieChartIcon,
+  package: PackageIcon,
+  predictor: ShippingLoadingIcon,
   otherEnergy: EnergyIcon,
   otherFuel: Fuel01Icon,
   reports: File01Icon,
   refresh: RefreshIcon,
+  rainDrop: RainDropIcon,
   ruler: RulerIcon,
   search: Search01Icon,
   settings: Settings02Icon,
@@ -143,6 +158,9 @@ export const ICON_REGISTRY = {
   tableColumns: ChartColumnIcon,
   tags: TagsIcon,
   target: Target02Icon,
+  thermometerSnowflake: ThermometerSnowflakeIcon,
+  thermometerSun: ThermometerSunIcon,
+  thermometerWarm: ThermometerWarmIcon,
   tools: ToolsIcon,
   transfer: ArrowDataTransferHorizontalIcon,
   upload: Upload04Icon,

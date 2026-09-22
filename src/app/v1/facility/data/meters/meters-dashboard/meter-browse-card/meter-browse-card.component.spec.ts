@@ -43,16 +43,16 @@ describe('MeterBrowseCardComponent', () => {
     expect(text).toContain('Scope');
     expect(text).toContain('Purchased Electricity');
     expect(text).toContain('A calendarization method is required');
-    expect(element.querySelector('.v1-meter-browse-card__issues')).toBeNull();
+    expect(element.querySelector('.v1-resource-browse-card__issues')).toBeNull();
     expect(text).toContain('Purchased Electricity');
-    expect(element.querySelector('.v1-meter-browse-card__source-chip')?.getAttribute('style')).toContain('#a59a04');
-    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__title app-ui-icon')).componentInstance.name).toBe('electricity');
-    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__source-chip app-ui-icon')).componentInstance.name).toBe('electricity');
-    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__group-tag app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
-    expect(element.querySelector('.v1-meter-browse-card__status app-ui-icon')).not.toBeNull();
-    expect(element.querySelector('.v1-meter-browse-card')?.classList.contains('v1-meter-browse-card--status-warning')).toBe(true);
-    expect(element.querySelector('.v1-meter-browse-card__title .v1-meter-browse-card__title-chevron')).not.toBeNull();
-    expect(element.querySelector('.v1-meter-browse-card__facility-header')).toBeNull();
+    expect(element.querySelector('.v1-resource-browse-card__chip')?.getAttribute('style')).toContain('#a59a04');
+    expect(fixture.debugElement.query(By.css('.v1-resource-browse-card__title app-ui-icon')).componentInstance.name).toBe('electricity');
+    expect(fixture.debugElement.query(By.css('.v1-resource-browse-card__chip app-ui-icon')).componentInstance.name).toBe('electricity');
+    expect(fixture.debugElement.query(By.css('.v1-resource-browse-card__footer-tag app-ui-icon')).componentInstance.name).toBe('meterGroupItem');
+    expect(element.querySelectorAll('.v1-resource-browse-card__chip app-ui-icon')).toHaveLength(2);
+    expect(element.querySelector('.v1-resource-browse-card')?.classList.contains('v1-resource-browse-card--status-warning')).toBe(true);
+    expect(element.querySelector('.v1-resource-browse-card__title .v1-resource-browse-card__title-chevron')).not.toBeNull();
+    expect(element.querySelector('.v1-resource-browse-card__owner')).toBeNull();
     expect(element.querySelector('[cdkdrag]')).toBeNull();
     expect(text).not.toContain('Move meter');
     expect(text).not.toContain('Coming soon');
@@ -71,8 +71,8 @@ describe('MeterBrowseCardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Valid');
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card__status app-ui-icon')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-browse-card')?.className).not.toContain('v1-meter-browse-card--status');
+    expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__chip app-ui-icon')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('.v1-resource-browse-card')?.className).not.toContain('v1-resource-browse-card--status');
   });
 
   it('renders compact calendarized usage facts without repeating the unit on each value', () => {
@@ -93,7 +93,7 @@ describe('MeterBrowseCardComponent', () => {
     expect(text).toContain('AVG. Jan 2026 - Dec 2026');
     expect(text).toContain('+10% vs previous 12 mo');
     expect(text).not.toContain('110 MMBtu');
-    expect(element.querySelector('.v1-meter-browse-card__usage-facts')).not.toBeNull();
+    expect(element.querySelectorAll('.v1-resource-browse-card__fact-section')).toHaveLength(2);
   });
 
   it('renders usage fact placeholders while calendarized meter values are loading', () => {
@@ -107,7 +107,7 @@ describe('MeterBrowseCardComponent', () => {
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
-    expect(element.querySelectorAll('.v1-meter-browse-card__usage-facts .placeholder').length).toBeGreaterThan(0);
+    expect(element.querySelectorAll('.v1-resource-browse-card__fact-section--secondary .placeholder').length).toBeGreaterThan(0);
     expect(element.textContent).toContain('Calculating Dec 2026');
   });
 
@@ -150,7 +150,7 @@ describe('MeterBrowseCardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
-    expect(fixture.debugElement.query(By.css('.v1-meter-browse-card__facility-header app-ui-icon')).componentInstance.name).toBe('facility');
+    expect(fixture.debugElement.query(By.css('.v1-resource-browse-card__owner app-ui-icon')).componentInstance.name).toBe('facility');
 
     (fixture.nativeElement.querySelector('[aria-label="Open Meter B settings"]') as HTMLButtonElement).click();
 

@@ -1,0 +1,16 @@
+:host { display: block; }
+
+.v1-predictor-workbench-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--v1-bg);
+  box-shadow: 0 .45rem .9rem color-mix(in srgb, var(--v1-shadow-soft) 45%, transparent);
+}
+
+.v1-predictor-workbench-header__title { display: inline-flex; gap: var(--v1-space-2); align-items: center; max-width: 100%; }
+.v1-predictor-workbench-header__title > .v1-icon { flex: 0 0 auto; color: var(--v1-facility); }
+.v1-predictor-workbench-header__toggle { max-width: min(36rem, 74vw); padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.v1-predictor-workbench-header__toggle:hover,
+.v1-predictor-workbench-header__toggle:focus-visible { color: var(--v1-link); }
+.v1-predictor-workbench-header__facts-toggle { flex: 0 0 auto; border-color: transparent; background: transparent; color: var(--v1-link); font-weight: 850; white-space: nowrap; }

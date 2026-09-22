@@ -25,7 +25,7 @@ interface PortfolioTotals {
 const PORTFOLIO_SELECTORS: ReadonlyArray<Omit<PortfolioSelectorSummary, 'total'>> = [
   { path: 'facilities', label: 'Facilities', icon: 'account' },
   { path: 'meters', label: 'Meters', icon: 'meter' },
-  { path: 'predictors', label: 'Predictors', icon: 'chartLine' },
+  { path: 'predictors', label: 'Predictors', icon: 'predictor' },
   { path: 'energy-uses', label: 'Energy Uses', icon: 'tools' },
   { path: 'analyses', label: 'Analyses', icon: 'barChart' },
   { path: 'reports', label: 'Reports', icon: 'reports' }

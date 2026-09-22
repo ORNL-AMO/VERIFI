@@ -29,6 +29,12 @@ import { MeterGroupWorkbenchYearlyDataComponent } from '@app/v1/facility/data/me
 import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter-group-workbench/meter-group-workbench.component';
 import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
+import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
+import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
+import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
+import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
+import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
+import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
 import { V1Routes } from './v1.routes';
 
 describe('V1Routes facility data meters routes', () => {
@@ -176,6 +182,25 @@ describe('V1Routes facility data meters routes', () => {
       redirectTo: 'settings'
     });
   });
+
+  it('routes Predictors to the dashboard and all read-only workbench tabs', () => {
+    const predictorsRoute = predictorsRouteConfig();
+    const predictorRoute = predictorsRoute.children?.find(child => child.path === ':predictorGuid');
+    const children = predictorRoute?.children ?? [];
+
+    expect(predictorsRoute.component).toBe(FacilityPredictorsComponent);
+    expect(predictorsRoute.children?.find(child => child.path === '')).toMatchObject({
+      path: '',
+      pathMatch: 'full',
+      component: PredictorsDashboardComponent
+    });
+    expect(predictorRoute?.component).toBe(PredictorWorkbenchComponent);
+    expect(children.find(child => child.path === '')).toMatchObject({ path: '', pathMatch: 'full', redirectTo: 'settings' });
+    expect(children.find(child => child.path === 'settings')).toMatchObject({ component: PredictorWorkbenchSettingsComponent, data: { predictorTab: 'settings' } });
+    expect(children.find(child => child.path === 'readings')).toMatchObject({ component: PredictorWorkbenchReadingsComponent, data: { predictorTab: 'readings' } });
+    expect(children.find(child => child.path === 'quality')).toMatchObject({ component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } });
+    expect(children.find(child => child.path === '**')).toMatchObject({ path: '**', redirectTo: 'settings' });
+  });
 });
 
 function accountDataRoute(): Route {
@@ -219,6 +244,12 @@ function meterGuidRoute(): Route {
   if (!route) {
     throw new Error('Facility Data Meters workbench route was not found.');
   }
+  return route;
+}
+
+function predictorsRouteConfig(): Route {
+  const route = facilityDataRoute().children?.find(child => child.path === 'predictors');
+  if (!route) throw new Error('Facility Data Predictors route was not found.');
   return route;
 }
 

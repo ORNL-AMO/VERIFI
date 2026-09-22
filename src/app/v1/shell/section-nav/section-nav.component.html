@@ -84,6 +84,7 @@
           @if (contextMode === 'facility' && selectedFacility) {
             @let meterItems = facilityMeterItems();
             @let groupItems = facilityMeterGroupItems();
+            @let predictorItems = facilityPredictorItems();
             @for (item of facilityDataItems(); track item.id) {
               @if (item.id === 'meters') {
                 <div
@@ -178,6 +179,49 @@
                           [attr.aria-current]="isGroupChildActive(group.guid) ? 'page' : null">
                           <app-ui-icon [name]="group.icon"></app-ui-icon>
                           <span class="v1-nav__item-label">{{ group.label }}</span>
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else if (item.id === 'predictors') {
+                <div
+                  class="v1-nav__item"
+                  [class.v1-nav__item--open]="isPredictorChildrenOpen()">
+                  <div class="v1-nav__item-row">
+                    <a
+                      [class.active]="isFacilityDataItemActive(item)"
+                      [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
+                      [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
+                      <app-ui-icon [name]="item.icon"></app-ui-icon>
+                      {{ item.label }}
+                    </a>
+                    @if (predictorItems.length > 0 && isFacilityPredictorsRoute()) {
+                      <button
+                        type="button"
+                        class="v1-nav__child-toggle"
+                        [attr.aria-expanded]="isPredictorChildrenOpen()"
+                        [attr.aria-controls]="predictorChildrenId()"
+                        [attr.aria-label]="(isPredictorChildrenOpen() ? 'Hide' : 'Show') + ' predictor links'"
+                        (click)="togglePredictorChildren()">
+                        <app-ui-icon name="chevronRight"></app-ui-icon>
+                      </button>
+                    }
+                  </div>
+
+                  @if (isPredictorChildrenOpen()) {
+                    <div
+                      class="v1-nav__children"
+                      [id]="predictorChildrenId()"
+                      aria-label="Predictor links">
+                      @for (predictor of predictorItems; track predictor.guid) {
+                        <a
+                          class="v1-nav__child"
+                          [class.active]="isPredictorChildActive(predictor.guid)"
+                          [routerLink]="navigation.facilityPredictorRoute(selectedFacility.guid, predictor.guid, 'settings')"
+                          [attr.aria-current]="isPredictorChildActive(predictor.guid) ? 'page' : null">
+                          <app-ui-icon [name]="predictor.icon"></app-ui-icon>
+                          <span class="v1-nav__item-label">{{ predictor.label }}</span>
                         </a>
                       }
                     </div>

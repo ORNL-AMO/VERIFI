@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.v1-predictor-workbench-placeholder {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--v1-space-3);
+  align-items: start;
+  padding: var(--v1-space-5);
+  border: 1px solid var(--v1-border);
+  border-top: 0;
+  border-radius: 0;
+  background: var(--v1-surface);
+}
+
+.v1-predictor-workbench-placeholder > .v1-icon {
+  color: var(--v1-facility);
+  font-size: 1.4rem;
+}
+
+.v1-predictor-workbench-placeholder h2,
+.v1-predictor-workbench-placeholder p { margin: 0; }
+.v1-predictor-workbench-placeholder h2 { font-size: 1.1rem; }
+.v1-predictor-workbench-placeholder p { margin-top: var(--v1-space-1); color: var(--v1-muted); }

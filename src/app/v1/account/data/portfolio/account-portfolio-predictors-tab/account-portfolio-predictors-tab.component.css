@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.v1-account-portfolio-predictors {
+  display: grid;
+  gap: .85rem;
+  min-width: 0;
+}
+
+.v1-account-portfolio-predictors__cards {
+  display: grid;
+  gap: .85rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+}

@@ -28,7 +28,7 @@ describe('AccountPortfolioMetersTabComponent', () => {
     expect(text).toContain('Beta Works');
     expect(text).toContain('Main Electric');
     expect(text).toContain('City Water');
-    expect(fixture.nativeElement.querySelectorAll('.v1-meter-browse-card__facility-header').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__owner').length).toBe(2);
   });
 
   it('owns meter search, status filtering, and sort order', () => {
@@ -138,7 +138,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
 }
 
 function cardTitles(fixture: ComponentFixture<AccountPortfolioMetersTabComponent>): string[] {
-  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-meter-browse-card__title-text'))
+  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__title-text'))
     .map(element => element.textContent!.trim());
 }
 
