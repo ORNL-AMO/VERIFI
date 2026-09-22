@@ -87,12 +87,13 @@
             <label class="semibold d-block mb-1" for="startDateMonth">Start Date</label>
             <div class="d-flex gap-2">
               <select id="startMonth" class="form-select form-select-sm weather-data-select"
-                formControlName="startMonth">
+                formControlName="startMonth" (change)="checkFutureDates()">
                 @for (month of months; track month.monthNumValue) {
                 <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
                 }
               </select>
-              <select id="startYear" class="form-select form-select-sm weather-data-select" formControlName="startYear">
+              <select id="startYear" class="form-select form-select-sm weather-data-select" formControlName="startYear"
+                (change)="checkFutureDates()">
                 @for (year of yearOptions; track year) {
                 <option [ngValue]="year">{{year}}</option>
                 }
@@ -102,12 +103,14 @@
           <div class="d-flex flex-column align-items-center">
             <label class="semibold d-block mb-1" for="endDateMonth">End Date</label>
             <div class="d-flex gap-2">
-              <select id="endMonth" class="form-select form-select-sm weather-data-select" formControlName="endMonth">
+              <select id="endMonth" class="form-select form-select-sm weather-data-select" formControlName="endMonth"
+                (change)="checkFutureDates()">
                 @for (month of months; track month.monthNumValue) {
                 <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
                 }
               </select>
-              <select id="endYear" class="form-select form-select-sm weather-data-select" formControlName="endYear">
+              <select id="endYear" class="form-select form-select-sm weather-data-select" formControlName="endYear"
+                (change)="checkFutureDates()">
                 @for (year of yearOptions; track year) {
                 <option [ngValue]="year">{{year}}</option>
                 }
@@ -115,6 +118,13 @@
             </div>
           </div>
         </div>
+        @if (showFutureDatesWarning) {
+        <div class="d-flex justify-content-center">
+          <div class="alert alert-warning alert-sm mt-3">
+            Weather predictor data for future dates may not be accurate.
+          </div>
+        </div>
+        }
         <div class="d-flex flex-column mb-3 mt-3" formGroupName="weatherSelections">
           @if(predictorForm.get('weatherSelections.cdd')?.value || predictorForm.get('weatherSelections.hdd')?.value) {
           <div class="row justify-content-end">
