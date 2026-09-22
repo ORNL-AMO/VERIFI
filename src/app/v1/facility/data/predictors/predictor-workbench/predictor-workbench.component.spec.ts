@@ -23,7 +23,16 @@ describe('PredictorWorkbenchComponent', () => {
     TestBed.configureTestingModule({
       imports: [PredictorWorkbenchComponent],
       providers: [
-        { provide: Router, useValue: { url: '', events, navigate } },
+        {
+          provide: Router,
+          useValue: {
+            url: '',
+            events,
+            navigate,
+            createUrlTree: vi.fn(() => ({})),
+            serializeUrl: vi.fn(() => '/account/portfolio')
+          }
+        },
         { provide: ActivatedRoute, useValue: route },
         {
           provide: WorkspaceNavigationService,

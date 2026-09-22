@@ -43,9 +43,9 @@ export function predictorIcon(predictor: IdbPredictor): IconName {
   if (predictor.predictorType === 'Weather') {
     switch (predictor.weatherDataType) {
       case 'HDD':
-        return 'thermometerSun';
-      case 'CDD':
         return 'thermometerSnowflake';
+      case 'CDD':
+        return 'thermometerSun';
       case 'relativeHumidity':
         return 'humidity';
       case 'dryBulbTemp':

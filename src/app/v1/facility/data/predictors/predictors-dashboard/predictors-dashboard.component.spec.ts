@@ -11,7 +11,15 @@ describe('PredictorsDashboardComponent', () => {
     TestBed.configureTestingModule({
       imports: [PredictorsDashboardComponent],
       providers: [
-        { provide: Router, useValue: { navigate: vi.fn(), events: { subscribe: vi.fn() } } },
+        {
+          provide: Router,
+          useValue: {
+            navigate: vi.fn(),
+            events: { subscribe: vi.fn() },
+            createUrlTree: vi.fn(() => ({})),
+            serializeUrl: vi.fn(() => '/account/portfolio')
+          }
+        },
         { provide: ActivatedRoute, useValue: {} },
         {
           provide: WorkspaceNavigationService,
