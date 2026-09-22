@@ -30,6 +30,7 @@ export class UpdateWeatherPredictorsModalComponent {
     endDate: Date
   }>
   invalidForm: boolean;
+  showFutureDatesWarning: boolean;
 
   constructor(
     private weatherPredictorManagementService: WeatherPredictorManagementService,
@@ -40,6 +41,7 @@ export class UpdateWeatherPredictorsModalComponent {
   ngOnInit() {
     this.setFacilityList();
     this.setInvalidForm();
+    this.checkFutureDates();
   }
 
 
@@ -125,6 +127,7 @@ export class UpdateWeatherPredictorsModalComponent {
     //-1 on month
     this.facilityList[facilityIndex].endDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
     this.setInvalidForm();
+    this.checkFutureDates();
   }
 
   async setStartDate(eventData: string, facilityIndex: number) {
@@ -148,6 +151,7 @@ export class UpdateWeatherPredictorsModalComponent {
       facilityItem.endDate = new Date(latestMonth);
     });
     this.setInvalidForm();
+    this.checkFutureDates();
   }
 
   openCalendar(event: Event, inputElement: HTMLInputElement): void {
@@ -184,5 +188,14 @@ export class UpdateWeatherPredictorsModalComponent {
       }
     });
     this.setInvalidForm();
+    this.checkFutureDates();
+  }
+
+  checkFutureDates() {
+    const currentDate = new Date();
+    this.showFutureDatesWarning = this.facilityList.some(facilityItem => {
+      return facilityItem.endDate && (facilityItem.endDate.getFullYear() > currentDate.getFullYear() ||
+        (facilityItem.endDate.getFullYear() === currentDate.getFullYear() && facilityItem.endDate.getMonth() >= currentDate.getMonth()));
+    });
   }
 }
