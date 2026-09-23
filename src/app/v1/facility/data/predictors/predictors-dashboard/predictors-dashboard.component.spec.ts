@@ -3,11 +3,14 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
+import { PredictorWorkspaceActionsService } from '../predictor-workspace-actions.service';
+import { buildPredictorCard } from '../models';
 import { PredictorsDashboardComponent } from './predictors-dashboard.component';
 
 describe('PredictorsDashboardComponent', () => {
-  it('renders a read-only predictor grid and the account/facility context', () => {
+  it('renders a writable predictor grid and the account/facility context', () => {
     TestBed.configureTestingModule({
       imports: [PredictorsDashboardComponent],
       providers: [
@@ -21,6 +24,8 @@ describe('PredictorsDashboardComponent', () => {
           }
         },
         { provide: ActivatedRoute, useValue: {} },
+        { provide: PredictorWorkspaceActionsService, useValue: { createPredictor: vi.fn() } },
+        { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         {
           provide: WorkspaceNavigationService,
           useValue: {
@@ -33,12 +38,12 @@ describe('PredictorsDashboardComponent', () => {
           useValue: {
             account: signal({ guid: 'account-a', name: 'Account A' }),
             facility: signal({ guid: 'facility-a', name: 'Facility A' }),
-            predictorCards: signal([{
-              predictor: { guid: 'predictor-a', name: 'Output' },
-              icon: 'package',
-              typeLabel: 'Standard', classificationLabel: 'Production', unitLabel: 'tons', readingCount: 0,
-              firstReadingLabel: 'No data', latestReadingLabel: 'No data'
-            }])
+            canWrite: signal(true),
+            hasPending: signal(false),
+            isLoading: signal(false),
+            predictorCards: signal([buildPredictorCard({
+              guid: 'predictor-a', name: 'Output', predictorType: 'Standard', production: true, unit: 'tons'
+            } as any, [], [], true)])
           }
         }
       ]
@@ -50,7 +55,7 @@ describe('PredictorsDashboardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Facility A');
     expect(fixture.nativeElement.textContent).toContain('Output');
     expect(fixture.nativeElement.querySelectorAll('app-predictor-browse-card')).toHaveLength(1);
-    expect(fixture.nativeElement.textContent).not.toContain('Add predictor');
+    expect(fixture.nativeElement.textContent).toContain('Add predictor');
   });
 
   it('shows no-facility and empty-predictor states', () => {
@@ -61,10 +66,11 @@ describe('PredictorsDashboardComponent', () => {
       providers: [
         { provide: Router, useValue: { navigate: vi.fn(), events: { subscribe: vi.fn() } } },
         { provide: ActivatedRoute, useValue: {} },
+        { provide: PredictorWorkspaceActionsService, useValue: { createPredictor: vi.fn() } },
         { provide: WorkspaceNavigationService, useValue: { accountDataRoute: () => [] } },
         {
           provide: FacilityPredictorsWorkspaceService,
-          useValue: { account: signal(undefined), facility, predictorCards }
+          useValue: { account: signal(undefined), facility, predictorCards, canWrite: signal(true), hasPending: signal(false), isLoading: signal(false) }
         }
       ]
     });

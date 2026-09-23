@@ -1,6 +1,13 @@
-<app-resource-browse-card
-  [view]="resourceView"
-  [actions]="actions"
-  (opened)="openSettings()"
-  (actionSelected)="handleAction($event)">
-</app-resource-browse-card>
+<app-resource-browse-card [view]="resourceView" [actions]="resourceActions" (opened)="openSettings()" (actionSelected)="handleAction($event)"></app-resource-browse-card>
+
+<ng-template #deletePredictorConfirmModal>
+  @if (deleting()) {
+    <app-confirm-delete-predictor-modal
+      [card]="card"
+      [saving]="saving()"
+      [error]="actionError()"
+      (confirmed)="confirmDeletePredictor()"
+      (cancelled)="cancelDeletePredictor()">
+    </app-confirm-delete-predictor-modal>
+  }
+</ng-template>

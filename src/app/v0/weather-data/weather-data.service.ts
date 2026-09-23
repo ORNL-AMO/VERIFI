@@ -5,6 +5,8 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculations';
 import { environment } from 'src/environments/environment';
+import { WeatherStationLookupService, mapWeatherStation } from '@platform/weather/weather-station-lookup.service';
+import { WeatherLocation, WeatherStationResponse } from '@platform/weather/weather-station-lookup.models';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +45,7 @@ export class WeatherDataService {
     // 'Access-Control-Allow-Methods': 'POST'
   });
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient, private stationLookup: WeatherStationLookupService) {
     this.applyToFacility = new BehaviorSubject<boolean>(false);
   }
 
@@ -103,11 +105,7 @@ export class WeatherDataService {
   // }
 
   async getStationsLatLong(latLong: { latitude: number, longitude: number }, distance: number): Promise<Array<WeatherStation>> {
-    let apiData: string = await firstValueFrom(this.getStationsAPILatLong(latLong, distance));
-    let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
-      return getWeatherStation(station)
-    });
-    return stations;
+    return [...await this.stationLookup.findStations(latLong, distance)];
   }
 
   async getStationsByCountry(country: string): Promise<Array<WeatherStation>> {
@@ -129,16 +127,7 @@ export class WeatherDataService {
 
   async getStation(stationId: string): Promise<WeatherStation | 'error'> {
     try {
-      let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
-      let stationsResponse: { stations: Array<WeatherStationResponse> } = JSON.parse(apiData);
-      let stationsArr: Array<WeatherStationResponse> = stationsResponse.stations;
-      if (stationsArr.length > 0) {
-        let station: WeatherStation = getWeatherStation(stationsArr[0]);
-        station.ID = stationId;
-        return station;
-      } else {
-        return 'error';
-      }
+      return await this.stationLookup.getStation(stationId) ?? 'error';
     } catch (err) {
       return 'error'
     }
@@ -187,24 +176,12 @@ export class WeatherDataService {
   }
 
   async getLocation(addressString: string): Promise<Array<NominatimLocation>> {
-    if (addressString) {
-      let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addressString)}&format=json`;
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.length > 0) {
-          // let latLong = {
-          //   latitude: parseFloat(data[0].lat),
-          //   longitude: parseFloat(data[0].lon),
-          // };
-          // console.log(latLong);
-          return data;
-        }
-      } catch (err) {
-        return [];
-      }
+    if (!addressString) return null;
+    try {
+      return [...await this.stationLookup.searchLocations(addressString)];
+    } catch {
+      return [];
     }
-    return null;
   }
 
 
@@ -218,33 +195,10 @@ export function getWeatherDataDate(date: Date): string {
 export type WeatherDataParams = 'dry_bulb_temp' | 'humidity' | 'dew_point_temp' | 'wet_bulb_temp' | 'pressure' | 'precipitation' | 'wind_speed';
 
 export function getWeatherStation(response: WeatherStationResponse): WeatherStation {
-  return {
-    name: response.name,
-    country: undefined,
-    state: response.state,
-    lat: response.lat,
-    lon: response.lon,
-    begin: new Date(response.data_begin_date),
-    end: new Date(response.data_end_date),
-    USAF: undefined,
-    WBAN: undefined,
-    ID: response.station_id,
-    distanceFrom: response.distance,
-    ratingPercent: response.rating_percent
-  }
+  return mapWeatherStation(response);
 }
 
-export interface WeatherStationResponse {
-  "station_id": string,
-  "name": string,
-  "data_begin_date": string,
-  "data_end_date": string,
-  "distance": number,
-  "rating_percent": number,
-  "lat": string,
-  "lon": string,
-  "state": string
-}
+export type { WeatherStationResponse } from '@platform/weather/weather-station-lookup.models';
 
 export interface WeatherDataReading {
   "time": Date,
@@ -257,10 +211,4 @@ export interface WeatherDataReading {
   'wind_speed': number
 }
 
-export interface NominatimLocation {
-  addresstype: string,
-  display_name: string,
-  lat: string,
-  lon: string,
-  place_id: number
-}
+export type NominatimLocation = WeatherLocation;

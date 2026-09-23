@@ -1,7 +1,91 @@
-<section class="v1-predictor-workbench-placeholder" aria-labelledby="predictor-settings-title">
-  <app-ui-icon name="settings"></app-ui-icon>
-  <div>
-    <h2 id="predictor-settings-title">Predictor settings</h2>
-    <p>Settings are read-only in this first workspace phase. Editing will be added with the predictor form.</p>
-  </div>
-</section>
+@let settingsForm = form();
+@let predictor = workspace.selectedPredictor();
+
+@if (predictor && !supportedPredictor()) {
+  <section class="v1-settings-panel predictor-settings">
+    <div class="v1-alert v1-alert--warning" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ predictor.predictorType }} predictors are preserved but cannot be edited in the v1 workspace. Standard and Weather predictors are supported.</span>
+    </div>
+  </section>
+} @else if (predictor && settingsForm) {
+  <form class="v1-settings-panel predictor-settings" [formGroup]="settingsForm" aria-label="Predictor settings">
+    @if (!workspace.canWrite()) {
+      <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
+    }
+    @if (hasReadings()) {
+      <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span><strong>Readings exist for this predictor.</strong> Type and weather calculation settings are locked to avoid invalidating existing values.</span></div>
+    }
+
+    <section class="predictor-settings__section" aria-labelledby="predictor-settings-identity">
+      <div class="predictor-settings__heading">
+        <div><p>Settings</p><h2 id="predictor-settings-identity">Predictor identity</h2></div>
+        <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState() === 'error' || saveState() === 'invalid'">
+          @if (saveState() === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> }
+          {{ saveMessage() }}
+          @if (saveState() === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" (click)="saveNow()">Retry</button> }
+        </p>
+      </div>
+      <div class="predictor-settings__grid">
+        <label><span>Name</span><input type="text" maxlength="100" formControlName="name" required (input)="onTextChange()">
+          @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small class="predictor-settings__error">Enter a name of 100 characters or fewer.</small> }
+        </label>
+        <label><span>Unit</span><input type="text" maxlength="100" formControlName="unit" (input)="onTextChange()"></label>
+        <label><span>Classification</span><select formControlName="production" (change)="onImmediateChange()"><option [ngValue]="true">Production</option><option [ngValue]="false">Other</option></select></label>
+        <label><span>Type</span><select formControlName="predictorType" (change)="onImmediateChange()"><option value="Standard">Standard</option><option value="Weather">Weather</option></select></label>
+        <label class="predictor-settings__wide"><span>Description</span><textarea rows="3" formControlName="description" (input)="onTextChange()"></textarea></label>
+      </div>
+    </section>
+
+    @if (settingsForm.controls.predictorType.value === 'Weather') {
+      <section class="predictor-settings__section" aria-labelledby="predictor-settings-weather">
+        <div class="predictor-settings__heading"><div><p>Source</p><h2 id="predictor-settings-weather">Weather setup</h2></div></div>
+        <div class="predictor-settings__grid">
+          <label><span>Weather data type</span><select formControlName="weatherDataType" (change)="setWeatherDataType($any($event.target).value)">
+            @for (option of weatherTypes; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+          </select></label>
+          @if (settingsForm.controls.weatherDataType.value === 'HDD') {
+            <label><span>Heating base temperature (°F)</span><input type="number" formControlName="heatingBaseTemperature" required (change)="onImmediateChange()"></label>
+          } @else if (settingsForm.controls.weatherDataType.value === 'CDD') {
+            <label><span>Cooling base temperature (°F)</span><input type="number" formControlName="coolingBaseTemperature" required (change)="onImmediateChange()"></label>
+          }
+        </div>
+        @if (settingsForm.errors?.['weatherStationRequired'] || settingsForm.errors?.['heatingBaseRequired'] || settingsForm.errors?.['coolingBaseRequired']) {
+          <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Select a station and enter the applicable base temperature before saving.</span></div>
+        }
+        <app-weather-station-selector
+          [selectedStationId]="settingsForm.controls.weatherStationId.value"
+          [selectedStationName]="settingsForm.controls.weatherStationName.value"
+          [initialSearch]="initialStationSearch()"
+          [disabled]="!canEdit() || hasReadings()"
+          (stationSelected)="selectStation($event)">
+        </app-weather-station-selector>
+      </section>
+    }
+
+    <section class="predictor-settings__section" aria-labelledby="predictor-settings-status">
+      <div class="predictor-settings__heading"><div><p>Validation</p><h2 id="predictor-settings-status">Status settings</h2></div></div>
+      <div class="predictor-settings__status-grid">
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="noLongerInUse" (change)="onImmediateChange()"><span>No longer in use</span></label>
+        @if (settingsForm.controls.noLongerInUse.value) {
+          <label><span>Stop month <small>Optional</small></span><input type="month" formControlName="stopMonth" (change)="onImmediateChange()"></label>
+        }
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="canBeNegative" (change)="onImmediateChange()"><span>Allow negative values</span></label>
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="ignoreDateStatusChecks" (change)="onImmediateChange()"><span>Ignore date status checks</span></label>
+      </div>
+    </section>
+
+    <footer class="predictor-settings__footer">
+      <span>Press Ctrl+S or ⌘S to save pending text changes.</span>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDeletePredictor()"><app-ui-icon name="delete"></app-ui-icon> Delete predictor</button>
+    </footer>
+  </form>
+} @else {
+  <section class="v1-settings-panel predictor-settings"><div class="v1-alert v1-alert--info"><app-ui-icon name="info"></app-ui-icon><span>Select a predictor to edit its settings.</span></div></section>
+}
+
+<ng-template #deletePredictorConfirmModal>
+  @if (workspace.selectedPredictorCard(); as card) {
+    <app-confirm-delete-predictor-modal [card]="card" [saving]="deleting()" [error]="deleteError()" (confirmed)="confirmDeletePredictor()" (cancelled)="cancelDeletePredictor()"></app-confirm-delete-predictor-modal>
+  }
+</ng-template>

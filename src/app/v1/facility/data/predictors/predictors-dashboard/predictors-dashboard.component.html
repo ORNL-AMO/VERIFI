@@ -1,45 +1,84 @@
 @let currentFacility = workspace.facility();
 @let currentAccount = workspace.account();
 @let accountPredictorsLink = accountPredictorsRoute();
-@let predictorCards = workspace.predictorCards();
+@let allPredictorCards = workspace.predictorCards();
+@let visiblePredictorCards = filteredPredictorCards();
 
-@if (!currentFacility) {
+@if (workspace.isLoading()) {
   <article class="v1-empty-state" role="status">
-    <app-ui-icon name="accountIssue"></app-ui-icon>
-    <h1>No facility selected</h1>
-    <p>Select a facility before reviewing predictors and predictor data.</p>
+    <app-ui-icon name="loading" spin></app-ui-icon><h1>Loading predictors</h1>
+    <p>The active workspace is being prepared.</p>
+  </article>
+} @else if (!currentFacility) {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1>
+    <p>Select a facility before managing predictors and predictor data.</p>
   </article>
 } @else {
   <header class="v1-section-header v1-facility-predictors__header">
     <div>
-      <nav class="v1-data-context-breadcrumb" aria-label="Predictors context">
-        <ol>
-          @if (currentAccount && accountPredictorsLink) {
-            <li><a [routerLink]="accountPredictorsLink">{{ currentAccount.name || 'Account' }}</a></li>
-            <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          }
-          <li>{{ currentFacility.name || 'Facility' }}</li>
-        </ol>
-      </nav>
+      <nav class="v1-data-context-breadcrumb" aria-label="Predictors context"><ol>
+        @if (currentAccount && accountPredictorsLink) {
+          <li><a [routerLink]="accountPredictorsLink">{{ currentAccount.name || 'Account' }}</a></li>
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+        }
+        <li>{{ currentFacility.name || 'Facility' }}</li>
+      </ol></nav>
       <h1 id="v1-facility-predictors-title" class="v1-facility-predictors__title">
-        <app-ui-icon name="predictor"></app-ui-icon>
-        <span>Predictors</span>
+        <app-ui-icon name="predictor"></app-ui-icon><span>Predictors</span>
       </h1>
+    </div>
+    <div class="v1-facility-predictors__header-actions">
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddPredictor()">
+        <app-ui-icon name="add"></app-ui-icon> Add predictor
+      </button>
     </div>
   </header>
 
-  @if (predictorCards.length === 0) {
-    <app-data-empty-state
-      icon="predictor"
-      context="facility"
-      title="No predictors"
-      description="Add or import a predictor in the current workspace to see it here.">
-    </app-data-empty-state>
-  } @else {
-    <div class="v1-predictors-browse__grid" role="list" aria-label="Facility predictors">
-      @for (card of predictorCards; track card.predictor.guid) {
-        <app-predictor-browse-card [card]="card"></app-predictor-browse-card>
-      }
+  @if (!workspace.canWrite()) {
+    <div class="v1-alert v1-alert--warning" role="status">
+      <app-ui-icon name="lock"></app-ui-icon><span>Predictor actions are unavailable while the workspace is loading or switching.</span>
+    </div>
+  } @else if (workspace.hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="loading" spin></app-ui-icon><span>Another workspace update is still finishing.</span>
     </div>
   }
+
+  <div class="v1-predictor-dashboard-workspace"><div class="v1-predictors-browse" aria-label="Facility predictors">
+    @if (actionError()) {
+      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() }}</span></div>
+    }
+    <form class="v1-predictors-browse__toolbar" aria-label="Predictor filters">
+      <div class="v1-predictors-browse__search">
+        <span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span>
+        <input type="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status" [value]="search()" (input)="setSearch($any($event.target).value)">
+      </div>
+      <label><span>Status</span><select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+        <option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">Clear</option>
+      </select></label>
+      <label><span>Type</span><select [value]="typeFilter()" (change)="setTypeFilter($any($event.target).value)">
+        <option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option>
+      </select></label>
+      <label><span>Sort</span><select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+        <option value="attention">Attention first</option><option value="predictorName">Predictor name</option><option value="latestReading">Latest reading</option>
+      </select></label>
+    </form>
+
+    @if (allPredictorCards.length === 0) {
+      <app-data-empty-state icon="predictor" context="facility" title="No predictors" description="Add or import a predictor to get started.">
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddPredictor()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button>
+      </app-data-empty-state>
+    } @else if (visiblePredictorCards.length === 0) {
+      <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No predictors match these filters</h2><p>Adjust the search or filter controls to return to the full predictor list.</p></article>
+    } @else {
+      <div class="v1-predictors-browse__grid" role="list" aria-label="Facility predictors">
+        @for (card of visiblePredictorCards; track card.predictor.guid) { <app-predictor-browse-card [card]="card"></app-predictor-browse-card> }
+      </div>
+    }
+
+    @if (addPredictorOpen()) {
+      <app-predictor-draft-slideout [saving]="saving()" [error]="actionError()" [initialStationSearch]="initialStationSearch()" (submitted)="savePredictorDraft($event)" (cancelled)="closeAddPredictor()"></app-predictor-draft-slideout>
+    }
+  </div></div>
 }

@@ -3,7 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
+import { buildPredictorCard } from '../../models';
 import { PredictorBrowseCardComponent } from './predictor-browse-card.component';
 
 describe('PredictorBrowseCardComponent', () => {
@@ -13,6 +15,7 @@ describe('PredictorBrowseCardComponent', () => {
       imports: [PredictorBrowseCardComponent],
       providers: [
         { provide: Router, useValue: { navigate } },
+        { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         { provide: FacilityPredictorsWorkspaceService, useValue: { facility: signal({ guid: 'facility-a' }) } },
         {
           provide: WorkspaceNavigationService,
@@ -24,16 +27,15 @@ describe('PredictorBrowseCardComponent', () => {
       ]
     });
     const fixture = TestBed.createComponent(PredictorBrowseCardComponent);
-    fixture.componentRef.setInput('card', {
-      predictor: { guid: 'predictor-a', name: 'Production', predictorType: 'Standard' },
-      icon: 'package',
-      typeLabel: 'Standard',
-      classificationLabel: 'Production',
-      unitLabel: 'tons',
-      readingCount: 3,
-      firstReadingLabel: 'Jan 2025',
-      latestReadingLabel: 'Mar 2025'
-    });
+    fixture.componentRef.setInput('card', buildPredictorCard(
+      { guid: 'predictor-a', name: 'Production', predictorType: 'Standard', production: true, unit: 'tons' } as any,
+      [
+        { guid: 'r1', predictorId: 'predictor-a', year: 2025, month: 1, amount: 1 },
+        { guid: 'r2', predictorId: 'predictor-a', year: 2025, month: 2, amount: 2 },
+        { guid: 'r3', predictorId: 'predictor-a', year: 2025, month: 3, amount: 3 }
+      ] as any,
+      [], true
+    ));
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
 

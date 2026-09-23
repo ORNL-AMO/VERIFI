@@ -5,6 +5,8 @@ import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { AccountDataModule } from '../../account-data.module';
 import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab.component';
 
@@ -14,6 +16,8 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
     TestBed.configureTestingModule({
       imports: [AccountDataModule],
       providers: [
+        { provide: WorkspaceStatusService, useValue: { items: signal([]), state: signal('ready') } },
+        { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         {
           provide: AccountWorkspaceStore,
           useValue: {

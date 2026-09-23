@@ -1,0 +1,9 @@
+:host { display: contents; }
+.predictor-draft-form { display: grid; gap: 1rem; }
+.predictor-draft-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+.predictor-draft-form label { display: grid; gap: .3rem; min-width: 0; }
+.predictor-draft-form label > span { font-size: .82rem; font-weight: 800; }
+.predictor-draft-form label small { color: var(--v1-muted); font-weight: 500; }
+.predictor-draft-form input, .predictor-draft-form select { width: 100%; min-width: 0; min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
+.predictor-draft-form__footer { display: flex; gap: .5rem; justify-content: flex-end; padding-top: .75rem; border-top: 1px solid var(--v1-border); }
+@media (max-width: 42rem) { .predictor-draft-form__grid { grid-template-columns: 1fr; } .predictor-draft-form__footer { display: grid; } }

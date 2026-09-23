@@ -1,4 +1,4 @@
-import { buildPredictorCards } from './predictor-card.models';
+import { buildPredictorCards, buildPredictorStatistics } from './predictor-card.models';
 
 describe('predictor card models', () => {
   it('sorts predictors and builds deterministic classification and reading facts', () => {
@@ -26,6 +26,26 @@ describe('predictor card models', () => {
       latestReadingLabel: 'No data'
     });
   });
+
+  it('requires one finite reading for every month in a twelve-month average', () => {
+    const readings = Array.from({ length: 24 }, (_, index) => reading({
+      guid: `reading-${index}`,
+      year: 2024 + Math.floor(index / 12),
+      month: index % 12 + 1,
+      amount: index + 1
+    }));
+
+    const complete = buildPredictorStatistics(readings, 'tons');
+    expect(complete.facts.map(fact => fact.valueLabel)).toEqual(['24', '12', '18.5', '6.5']);
+
+    const withDuplicate = buildPredictorStatistics([
+      ...readings,
+      reading({ guid: 'duplicate', year: 2025, month: 12, amount: 100 })
+    ], 'tons');
+    expect(withDuplicate.facts[0]).toMatchObject({ valueLabel: 'Not available', unavailable: true });
+    expect(withDuplicate.facts[2]).toMatchObject({ valueLabel: 'Not available', unavailable: true });
+    expect(withDuplicate.facts[3]).toMatchObject({ valueLabel: '6.5', unavailable: false });
+  });
 });
 
 function predictor(overrides: Record<string, unknown>): any {
@@ -33,5 +53,5 @@ function predictor(overrides: Record<string, unknown>): any {
 }
 
 function reading(overrides: Record<string, unknown>): any {
-  return { predictorId: 'predictor', year: 2025, month: 1, ...overrides };
+  return { guid: 'reading', predictorId: 'predictor', year: 2025, month: 1, amount: 1, ...overrides };
 }

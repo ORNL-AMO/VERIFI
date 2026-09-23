@@ -80,6 +80,10 @@
         <div class="v1-data-workbench-actions" aria-label="Predictor summary and controls">
           <span class="v1-chip v1-chip--info">{{ currentCard.typeLabel }}</span>
           <span class="v1-chip v1-chip--neutral">{{ currentCard.classificationLabel }}</span>
+          <span class="v1-chip v1-chip--{{ currentCard.statusTone }}">
+            <app-ui-icon [name]="currentCard.statusIcon" [spin]="currentCard.statusTone === 'info'"></app-ui-icon>
+            {{ currentCard.statusLabel }}
+          </span>
           <button
             type="button"
             class="v1-btn v1-btn--quiet v1-btn--sm v1-predictor-workbench-header__facts-toggle"

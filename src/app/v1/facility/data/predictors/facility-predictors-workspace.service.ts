@@ -3,23 +3,32 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildPredictorCards } from './models';
 
 @Injectable()
 export class FacilityPredictorsWorkspaceService {
   private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly currentUrl = signal(this.router.url);
 
   readonly account = this.workspace.account;
+  readonly workspaceState = this.workspace.status;
+  readonly isLoading = computed(() => ['idle', 'loading', 'switching'].includes(this.workspaceState()));
   readonly facility = this.workspace.selectedFacility;
   readonly canWrite = this.workspace.canWrite;
   readonly hasPending = this.workspace.hasPending;
   readonly predictors = computed(() => [...this.workspace.facilityPredictors()]
     .sort((first, second) => (first.name || '').localeCompare(second.name || '')));
   readonly predictorReadings = computed(() => [...this.workspace.facilityPredictorData()]);
-  readonly predictorCards = computed(() => buildPredictorCards(this.predictors(), this.predictorReadings()));
+  readonly predictorCards = computed(() => buildPredictorCards(
+    this.predictors(),
+    this.predictorReadings(),
+    this.status.items(),
+    this.status.state() === 'ready'
+  ));
   readonly selectedPredictorGuid = computed(() => parseSelectedPredictorGuid(this.currentUrl()));
   readonly selectedPredictor = computed(() => {
     const guid = this.selectedPredictorGuid();

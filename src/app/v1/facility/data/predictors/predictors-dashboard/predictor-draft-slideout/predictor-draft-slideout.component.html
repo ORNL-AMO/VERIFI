@@ -1,0 +1,73 @@
+<app-workspace-slideout
+  title="Add predictor"
+  description="Create one predictor setup, then continue in its workbench. Readings are not generated in this step."
+  size="large"
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  @let currentDraft = draft();
+  <form class="predictor-draft-form" (submit)="$event.preventDefault(); submit()">
+    <div class="predictor-draft-form__grid">
+      <label>
+        <span>Predictor name</span>
+        <input type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName($any($event.target).value)">
+      </label>
+      <label>
+        <span>Classification</span>
+        <select [value]="currentDraft.production ? 'production' : 'other'" [disabled]="saving" (change)="setProduction($any($event.target).value)">
+          <option value="production">Production</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label>
+        <span>Type</span>
+        <select [value]="currentDraft.predictorType" [disabled]="saving" (change)="setPredictorType($any($event.target).value)">
+          <option value="Standard">Standard</option>
+          <option value="Weather">Weather</option>
+        </select>
+      </label>
+      @if (!isWeather()) {
+        <label>
+          <span>Unit <small>Optional</small></span>
+          <input type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit($any($event.target).value)">
+        </label>
+      } @else {
+        <label>
+          <span>Weather data type</span>
+          <select [value]="currentDraft.weatherDataType" [disabled]="saving" (change)="setWeatherDataType($any($event.target).value)">
+            @for (option of weatherTypes; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+        @if (needsBaseTemperature()) {
+          <label>
+            <span>{{ currentDraft.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span>
+            <input type="number" required [value]="currentDraft.baseTemperature" [disabled]="saving" (input)="setBaseTemperature($any($event.target).value)">
+          </label>
+        }
+      }
+    </div>
+
+    @if (isWeather()) {
+      <app-weather-station-selector
+        [selectedStationId]="currentDraft.weatherStation?.ID"
+        [selectedStationName]="currentDraft.weatherStation?.name"
+        [initialSearch]="initialStationSearch"
+        [disabled]="saving"
+        (stationSelected)="selectStation($event)">
+      </app-weather-station-selector>
+    }
+
+    @if (error) {
+      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ error }}</span></div>
+    }
+
+    <footer class="predictor-draft-form__footer">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
+        <app-ui-icon [name]="saving ? 'loading' : 'add'" [spin]="saving"></app-ui-icon>
+        Add predictor
+      </button>
+    </footer>
+  </form>
+</app-workspace-slideout>

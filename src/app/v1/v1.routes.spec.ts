@@ -183,7 +183,7 @@ describe('V1Routes facility data meters routes', () => {
     });
   });
 
-  it('routes Predictors to the dashboard and all read-only workbench tabs', () => {
+  it('routes Predictors to the dashboard and guarded Settings workbench', () => {
     const predictorsRoute = predictorsRouteConfig();
     const predictorRoute = predictorsRoute.children?.find(child => child.path === ':predictorGuid');
     const children = predictorRoute?.children ?? [];
@@ -196,7 +196,11 @@ describe('V1Routes facility data meters routes', () => {
     });
     expect(predictorRoute?.component).toBe(PredictorWorkbenchComponent);
     expect(children.find(child => child.path === '')).toMatchObject({ path: '', pathMatch: 'full', redirectTo: 'settings' });
-    expect(children.find(child => child.path === 'settings')).toMatchObject({ component: PredictorWorkbenchSettingsComponent, data: { predictorTab: 'settings' } });
+    expect(children.find(child => child.path === 'settings')).toMatchObject({
+      component: PredictorWorkbenchSettingsComponent,
+      canDeactivate: [unsavedChangesGuard],
+      data: { predictorTab: 'settings' }
+    });
     expect(children.find(child => child.path === 'readings')).toMatchObject({ component: PredictorWorkbenchReadingsComponent, data: { predictorTab: 'readings' } });
     expect(children.find(child => child.path === 'quality')).toMatchObject({ component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } });
     expect(children.find(child => child.path === '**')).toMatchObject({ path: '**', redirectTo: 'settings' });

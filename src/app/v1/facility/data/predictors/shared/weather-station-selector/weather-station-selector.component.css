@@ -1,0 +1,16 @@
+:host { display: block; min-width: 0; }
+.weather-station-selector { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-content-block); }
+.weather-station-selector__heading { display: flex; flex-wrap: wrap; gap: .75rem; align-items: start; justify-content: space-between; }
+.weather-station-selector h3, .weather-station-selector p { margin: 0; }
+.weather-station-selector h3 { font-size: .95rem; font-weight: 900; }
+.weather-station-selector__heading p, .weather-station-selector__message { color: var(--v1-muted); font-size: .82rem; }
+.weather-station-selector__search { display: grid; gap: .3rem; }
+.weather-station-selector__search > label, .weather-station-selector__results > p { color: var(--v1-muted); font-size: .76rem; font-weight: 800; text-transform: uppercase; }
+.weather-station-selector__search > div { display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
+.weather-station-selector input { width: 100%; min-width: 0; min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
+.weather-station-selector__results { display: grid; gap: .4rem; }
+.weather-station-selector__choices { display: grid; gap: .35rem; max-height: 12rem; overflow: auto; }
+.weather-station-selector__choices button { display: grid; gap: .15rem; width: 100%; padding: .6rem .7rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); text-align: left; }
+.weather-station-selector__choices button:hover:not(:disabled), .weather-station-selector__choices button:focus-visible { border-color: var(--v1-content-control); }
+.weather-station-selector__choices span { color: var(--v1-muted); font-size: .78rem; }
+@media (max-width: 34rem) { .weather-station-selector__search > div { grid-template-columns: 1fr; } }

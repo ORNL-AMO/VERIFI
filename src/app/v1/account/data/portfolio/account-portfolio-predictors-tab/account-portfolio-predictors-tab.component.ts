@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { PredictorCardView, buildPredictorCards } from '@app/v1/facility/data/predictors/models';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 interface PortfolioPredictorCard {
   readonly card: PredictorCardView;
@@ -16,6 +17,7 @@ interface PortfolioPredictorCard {
 })
 export class AccountPortfolioPredictorsTabComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly status = inject(WorkspaceStatusService);
 
   readonly predictorCards = computed<PortfolioPredictorCard[]>(() => {
     const predictors = this.workspace.predictors();
@@ -24,7 +26,12 @@ export class AccountPortfolioPredictorsTabComponent {
     return this.workspace.facilities().flatMap(facility => {
       const facilityPredictors = predictors.filter(predictor => predictor.facilityId === facility.guid);
       const facilityPredictorData = predictorData.filter(reading => reading.facilityId === facility.guid);
-      return buildPredictorCards(facilityPredictors, facilityPredictorData)
+      return buildPredictorCards(
+        facilityPredictors,
+        facilityPredictorData,
+        this.status.items(),
+        this.status.state() === 'ready'
+      )
         .map(card => ({ card, facility }));
     });
   });
