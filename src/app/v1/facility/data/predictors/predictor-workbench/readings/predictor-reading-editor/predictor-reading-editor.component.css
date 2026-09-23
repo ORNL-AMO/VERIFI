@@ -1,0 +1,14 @@
+.predictor-reading-editor { display: grid; gap: var(--v1-space-4); }
+.predictor-reading-editor textarea { resize: vertical; }
+.predictor-reading-editor__error { color: var(--v1-danger, #a51d1d); font-size: .82rem; }
+.predictor-reading-editor__manual {
+  display: grid;
+  justify-items: start;
+  gap: var(--v1-space-2);
+  padding: var(--v1-space-3);
+  border: 1px solid var(--v1-divider);
+  background: var(--v1-panel);
+}
+.predictor-reading-editor__manual p { margin: 0; color: var(--v1-muted); }
+.predictor-reading-editor__footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--v1-space-2); padding-top: var(--v1-space-3); border-top: 1px solid var(--v1-divider); }
+@media (max-width: 520px) { .predictor-reading-editor__footer .v1-btn { flex: 1 1 100%; } }

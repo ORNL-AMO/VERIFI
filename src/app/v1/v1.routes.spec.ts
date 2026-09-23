@@ -201,7 +201,11 @@ describe('V1Routes facility data meters routes', () => {
       canDeactivate: [unsavedChangesGuard],
       data: { predictorTab: 'settings' }
     });
-    expect(children.find(child => child.path === 'readings')).toMatchObject({ component: PredictorWorkbenchReadingsComponent, data: { predictorTab: 'readings' } });
+    expect(children.find(child => child.path === 'readings')).toMatchObject({
+      component: PredictorWorkbenchReadingsComponent,
+      canDeactivate: [unsavedChangesGuard],
+      data: { predictorTab: 'readings' }
+    });
     expect(children.find(child => child.path === 'quality')).toMatchObject({ component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } });
     expect(children.find(child => child.path === '**')).toMatchObject({ path: '**', redirectTo: 'settings' });
   });

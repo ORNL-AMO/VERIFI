@@ -190,7 +190,7 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'settings' } },
-                      { path: 'readings', component: PredictorWorkbenchReadingsComponent, data: { predictorTab: 'readings' } },
+                      { path: 'readings', component: PredictorWorkbenchReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'readings' } },
                       { path: 'quality', component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } },
                       { path: '**', redirectTo: 'settings' }
                     ]

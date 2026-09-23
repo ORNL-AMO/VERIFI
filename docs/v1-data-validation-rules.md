@@ -56,13 +56,13 @@ Required meter configuration includes applicable name, source, starting and ener
 
 | Rule code | Finding | Severity / category | Trigger and exceptions | Todo and remediation |
 | --- | --- | --- | --- | --- |
-| `predictor.data.missing` | Add predictor data | Error / completeness | The predictor has no entries. Derived gap, currency, and weather findings are suppressed. | Yes; predictor data workflow, currently unavailable in v1. |
-| `predictor.data.duplicate-month` | Resolve duplicate predictor data | Error / quality | Multiple entries use the same month and year. | Yes; currently unavailable in v1. |
-| `predictor.data.gap` | Fill missing predictor data | Error / completeness | A month is missing between the first and last entry. | Yes; currently unavailable in v1. |
-| `predictor.data.negative` | Review negative predictor data | Error / quality | A value is negative and negative values are not allowed. | Yes; currently unavailable in v1. |
-| `predictor.currency.stale` | Update stale predictor data | Warning / currency | The latest entry is older than the configured threshold. Facility lag is included as evidence when both apply. | Yes; currently unavailable in v1. |
-| `predictor.currency.behind-facility` | Bring predictor data current | Warning / currency | Predictor data ends before the facility's latest meter month and is not already stale. | Yes; currently unavailable in v1. |
-| `predictor.weather.warning` | Review weather data | Warning / quality | A weather predictor contains a source-data warning that has not been ignored. | Yes; currently unavailable in v1. |
+| `predictor.data.missing` | Add predictor data | Error / completeness | The predictor has no entries. Derived gap, currency, and weather findings are suppressed. | Yes; Predictor Readings. Direct status navigation remains deferred. |
+| `predictor.data.duplicate-month` | Resolve duplicate predictor data | Error / quality | Multiple entries use the same month and year. | Yes; Predictor Readings. Direct status navigation remains deferred. |
+| `predictor.data.gap` | Fill missing predictor data | Error / completeness | A month is missing between the first and last entry. | Yes; Predictor Readings can preview and fill internal gaps with zero. Direct status navigation remains deferred. |
+| `predictor.data.negative` | Review negative predictor data | Error / quality | A value is negative and negative values are not allowed. | Yes; Predictor Readings or Settings. Direct status navigation remains deferred. |
+| `predictor.currency.stale` | Update stale predictor data | Warning / currency | The latest entry is older than the configured threshold. Facility lag is included as evidence when both apply. | Yes; Predictor Readings. Direct status navigation remains deferred. |
+| `predictor.currency.behind-facility` | Bring predictor data current | Warning / currency | Predictor data ends before the facility's latest meter month and is not already stale. | Yes; Predictor Readings. Direct status navigation remains deferred. |
+| `predictor.weather.warning` | Review weather data | Warning / quality | A weather predictor contains a source-data warning that has not been ignored. | Yes; Predictor Readings supports manual overrides. Direct status navigation remains deferred. |
 
 Independent predictor problems are all reported; one warning cannot hide an error.
 

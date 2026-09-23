@@ -1,0 +1,50 @@
+<div class="v1-modal-layer">
+  <button type="button" class="v1-modal-backdrop" aria-label="Cancel predictor readings action"
+    [disabled]="saving" (click)="cancelled.emit()"></button>
+  <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="predictor-readings-confirm-title">
+    <header class="v1-modal__header">
+      <h2 id="predictor-readings-confirm-title">
+        {{ confirmation.kind === 'fill-missing' ? 'Fill Missing Predictor Data' : 'Delete Predictor Data' }}
+      </h2>
+      <button type="button" class="v1-icon-btn" aria-label="Cancel predictor readings action"
+        [disabled]="saving" (click)="cancelled.emit()">
+        <app-ui-icon name="close"></app-ui-icon>
+      </button>
+    </header>
+    <div class="v1-modal__body">
+      @if (error) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ error }}</span>
+        </div>
+      }
+      @switch (confirmation.kind) {
+        @case ('fill-missing') {
+          <p>Zero-valued predictor readings will be added for these missing months:</p>
+          <ul class="predictor-readings-confirmation__months" aria-label="Missing months">
+            @for (month of confirmation.months; track month.key) { <li>{{ month.label }}</li> }
+          </ul>
+          @if (isWeather) {
+            <p class="predictor-readings-confirmation__note">Weather predictor values added here will be saved as manual overrides.</p>
+          }
+        }
+        @case ('delete-many') {
+          <p>Deleting {{ confirmation.readings.length }} selected predictor reading{{ confirmation.readings.length === 1 ? '' : 's' }} cannot be undone.</p>
+        }
+        @case ('delete-one') {
+          <p>Deleting this predictor reading cannot be undone.</p>
+        }
+      }
+    </div>
+    <footer class="v1-modal__footer">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="saving" (click)="confirmed.emit()">
+        @switch (confirmation.kind) {
+          @case ('fill-missing') { Fill with Zeros }
+          @case ('delete-many') { Delete Selected }
+          @case ('delete-one') { Delete }
+        }
+      </button>
+    </footer>
+  </section>
+</div>

@@ -1,0 +1,137 @@
+@let view = viewModel();
+@let rows = sortedRows();
+@let displayed = displayedRows();
+
+@if (view.rows.length === 0) {
+  <div class="predictor-readings-table__empty">
+    <app-ui-icon name="table"></app-ui-icon>
+    <h3>No readings found for {{ predictorName || 'this predictor' }}.</h3>
+    <p>Add a monthly reading to begin tracking this predictor.</p>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct" (click)="addRequested.emit()">
+      <app-ui-icon name="add"></app-ui-icon>
+      Add Reading
+    </button>
+  </div>
+} @else {
+  <section class="predictor-readings-table" aria-label="Predictor readings table">
+    <div class="predictor-readings-table__toolbar">
+      <div class="predictor-readings-table__controls">
+        <label>
+          <span>Rows</span>
+          <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+            <option [value]="10">10</option>
+            <option [value]="25">25</option>
+            <option [value]="50">50</option>
+          </select>
+        </label>
+        <label>
+          <span>Filter</span>
+          <select class="v1-select" [value]="filter()" (change)="setFilter($event)">
+            <option value="all">All entries</option>
+            <option value="attention" [disabled]="!view.hasAttention">Needs attention</option>
+          </select>
+        </label>
+      </div>
+      <div class="predictor-readings-table__actions-bar">
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct" (click)="addRequested.emit()">
+          <app-ui-icon name="add"></app-ui-icon>
+          Add Reading
+        </button>
+        <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct || selectedCount() === 0" (click)="requestBulkDelete()">
+          <app-ui-icon name="delete"></app-ui-icon>
+          Delete Selected<span class="visually-hidden"> readings</span>
+          @if (selectedCount() > 0) { ({{ selectedCount() }}) }
+        </button>
+      </div>
+    </div>
+
+    @if (rows.length === 0) {
+      <div class="predictor-readings-table__no-results" role="status">
+        <app-ui-icon name="clearFilter"></app-ui-icon>
+        <span>No readings match the selected filter.</span>
+      </div>
+    } @else {
+      <div class="predictor-readings-table__scroller">
+        <table>
+          <thead>
+            <tr>
+              <th class="predictor-readings-table__select">
+                <input type="checkbox" aria-label="Select visible predictor readings"
+                  [checked]="allVisibleSelected()" [disabled]="!canAct || displayed.length === 0"
+                  (change)="toggleVisible($event)">
+              </th>
+              <th>
+                <button type="button" class="predictor-readings-table__sort" [class.active]="sortColumn() === 'month'" (click)="requestSort('month')">
+                  Month
+                  <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
+                </button>
+              </th>
+              <th class="predictor-readings-table__number">
+                <button type="button" class="predictor-readings-table__sort" [class.active]="sortColumn() === 'value'" (click)="requestSort('value')">
+                  Value @if (view.unit) { ({{ view.unit }}) }
+                  <app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon>
+                </button>
+              </th>
+              <th>Notes</th>
+              <th>Status</th>
+              <th class="predictor-readings-table__row-actions" aria-label="Reading actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of displayed; track row.reading.guid) {
+              <tr [class.predictor-readings-table__row--attention]="row.attention.hasAttention">
+                <td class="predictor-readings-table__select">
+                  <input type="checkbox" [attr.aria-label]="'Select ' + row.monthLabel"
+                    [checked]="isSelected(row.reading.guid)" [disabled]="!canAct"
+                    (change)="toggleRow(row.reading.guid)">
+                </td>
+                <td>{{ row.monthLabel }}</td>
+                <td class="predictor-readings-table__number">{{ row.amountLabel }}</td>
+                <td class="predictor-readings-table__notes">{{ row.reading.notes || '—' }}</td>
+                <td>
+                  <div class="predictor-readings-table__markers">
+                    @if (row.attention.invalidDate || row.attention.invalidValue) {
+                      <app-ui-icon name="danger" [decorative]="false" label="Invalid reading" title="Invalid reading"></app-ui-icon>
+                    }
+                    @if (row.attention.duplicateMonth) {
+                      <app-ui-icon name="warning" [decorative]="false" label="Duplicate month" title="Duplicate month"></app-ui-icon>
+                    }
+                    @if (row.attention.negativeValue) {
+                      <app-ui-icon name="warning" [decorative]="false" label="Negative value is not allowed" title="Negative value is not allowed"></app-ui-icon>
+                    }
+                    @if (row.reading.weatherDataWarning) {
+                      <app-ui-icon name="cloudRain" [decorative]="false" label="Weather source warning" title="Weather source warning"></app-ui-icon>
+                    }
+                    @if (row.reading.weatherOverride) {
+                      <app-ui-icon name="edit" [decorative]="false" label="Manual weather override" title="Manual weather override"></app-ui-icon>
+                    }
+                    @if (!row.attention.hasAttention && !row.reading.weatherOverride && !row.reading.weatherDataWarning) {
+                      <span class="predictor-readings-table__clear">Clear</span>
+                    }
+                  </div>
+                </td>
+                <td class="predictor-readings-table__row-actions">
+                  <button type="button" class="v1-icon-btn" title="Edit reading" aria-label="Edit reading"
+                    [disabled]="!canAct" (click)="editRequested.emit(row.reading)">
+                    <app-ui-icon name="edit"></app-ui-icon>
+                  </button>
+                  <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete reading" aria-label="Delete reading"
+                    [disabled]="!canAct" (click)="deleteRequested.emit(row.reading)">
+                    <app-ui-icon name="delete"></app-ui-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (rows.length > pageSize()) {
+        <footer class="predictor-readings-table__footer">
+          <ngb-pagination [collectionSize]="rows.length" [pageSize]="pageSize()" [maxSize]="5"
+            [ellipses]="false" [page]="currentPage()" (pageChange)="currentPage.set($event)">
+          </ngb-pagination>
+        </footer>
+      }
+    }
+  </section>
+}

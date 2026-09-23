@@ -1,0 +1,15 @@
+.predictor-readings-confirmation__months {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  margin: var(--v1-space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+.predictor-readings-confirmation__months li {
+  padding: .3rem .55rem;
+  border: 1px solid var(--v1-divider);
+  background: var(--v1-panel);
+  font-weight: 700;
+}
+.predictor-readings-confirmation__note { color: var(--v1-muted); font-size: .88rem; }

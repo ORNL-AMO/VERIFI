@@ -13,12 +13,15 @@ describe('PredictorWorkspaceActionsService', () => {
     id: 10, guid: 'predictor-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Production',
     predictorType: 'Standard', production: true, productionInAnalysis: true, unit: 'tons'
   } as any;
-  const readings = signal<any[]>([{ id: 20, guid: 'reading-a', predictorId: 'predictor-a', accountId: 'account-a' }]);
+  const readings = signal<any[]>([reading('reading-a', 20, 2026, 1)]);
   const predictorHandler = {
     addPredictor: vi.fn(async (value: any) => ({ ...value, id: 11 })),
     updatePredictor: vi.fn(async (value: any) => value),
     deletePredictor: vi.fn(async () => 10),
-    deletePredictorData: vi.fn(async () => 20)
+    deletePredictorData: vi.fn(async () => 20),
+    addPredictorData: vi.fn(async (value: any) => ({ ...value, id: 21 })),
+    updatePredictorData: vi.fn(async (value: any) => value),
+    reconcilePredictorData: vi.fn(async () => undefined)
   };
   const analysisHandler = {
     addAnalysisPredictor: vi.fn(async () => undefined),
@@ -28,6 +31,7 @@ describe('PredictorWorkspaceActionsService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    readings.set([reading('reading-a', 20, 2026, 1)]);
     TestBed.configureTestingModule({ providers: [
       PredictorWorkspaceActionsService,
       { provide: AccountWorkspaceStore, useValue: {
@@ -66,4 +70,50 @@ describe('PredictorWorkspaceActionsService', () => {
 
     expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
   });
+
+  it('updates readings through the predictor command handler', async () => {
+    const updated = { ...readings()[0], amount: 42 };
+
+    await TestBed.inject(PredictorWorkspaceActionsService).updatePredictorReading(updated);
+
+    expect(predictorHandler.updatePredictorData).toHaveBeenCalledWith(expect.objectContaining({ id: 20, amount: 42 }), 'account-a');
+  });
+
+  it('deletes selected readings in one atomic reconciliation command', async () => {
+    readings.set([reading('reading-a', 20, 2026, 1), reading('reading-b', 21, 2026, 2)]);
+
+    await TestBed.inject(PredictorWorkspaceActionsService).deletePredictorReadings('predictor-a', readings());
+
+    expect(predictorHandler.reconcilePredictorData).toHaveBeenCalledWith(
+      'predictor-a',
+      { add: [], update: [], delete: readings() },
+      'account-a'
+    );
+  });
+
+  it('rechecks gaps and fills Weather months as manual overrides', async () => {
+    readings.set([reading('reading-a', 20, 2026, 1), reading('reading-c', 22, 2026, 3)]);
+    const weather = { ...existing, predictorType: 'Weather' };
+    (TestBed.inject(AccountWorkspaceStore) as any).predictors.set([weather]);
+
+    const added = await TestBed.inject(PredictorWorkspaceActionsService).fillMissingPredictorMonths(
+      'predictor-a',
+      [{ year: 2026, month: 2, key: '2026-02', label: 'Feb 2026' }]
+    );
+
+    expect(added).toHaveLength(1);
+    expect(added[0]).toEqual(expect.objectContaining({ amount: 0, month: 2, weatherOverride: true }));
+    expect(predictorHandler.reconcilePredictorData).toHaveBeenCalledWith(
+      'predictor-a',
+      expect.objectContaining({ add: added }),
+      'account-a'
+    );
+  });
 });
+
+function reading(guid: string, id: number, year: number, month: number): any {
+  return {
+    id, guid, predictorId: 'predictor-a', accountId: 'account-a', facilityId: 'facility-a',
+    year, month, amount: 1, notes: '', weatherDataWarning: false, weatherOverride: false
+  };
+}

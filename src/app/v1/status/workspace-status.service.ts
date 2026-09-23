@@ -117,6 +117,10 @@ export class WorkspaceStatusService {
     return this.findingsForEntity(meterGuid);
   }
 
+  predictorFindings(predictorGuid: string): StatusItem[] {
+    return this.findingsForEntity(predictorGuid);
+  }
+
   async discardWarning(item: StatusItem): Promise<boolean> {
     if (item.severity !== 'warning') return false;
     const account = this.workspace.account();

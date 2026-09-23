@@ -1,7 +1,117 @@
-<section class="v1-predictor-workbench-placeholder" aria-labelledby="predictor-readings-title">
-  <app-ui-icon name="table"></app-ui-icon>
-  <div>
-    <h2 id="predictor-readings-title">Predictor readings</h2>
-    <p>Monthly reading maintenance will be added in the readings phase.</p>
-  </div>
+@let predictor = workspace.selectedPredictor();
+@let predictorFindings = findings();
+@let canEdit = canAct();
+@let panel = editorPanel();
+
+<section #readingsRegion class="predictor-readings" aria-label="Predictor readings" tabindex="-1">
+  <div class="visually-hidden" aria-live="polite">{{ actionStatus() }}</div>
+
+  @if (actionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ actionError() }}</span>
+    </div>
+  }
+
+  @if (!workspace.isLoading() && !workspace.canWrite()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="lock"></app-ui-icon>
+      <span>Predictor readings are read-only while this workspace is unavailable for changes.</span>
+    </div>
+  } @else if (workspace.hasPending()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="loading" spin></app-ui-icon>
+      <span>Finishing a predictor workspace change...</span>
+    </div>
+  }
+
+  @if (workspace.isLoading()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <app-ui-icon name="loading" spin></app-ui-icon>
+      <span>Loading predictor readings...</span>
+    </div>
+  } @else {
+    @if (status.state() === 'idle' || status.state() === 'evaluating') {
+      <div class="v1-alert v1-alert--info" role="status">
+        <app-ui-icon name="loading" spin></app-ui-icon>
+        <span>Checking predictor data...</span>
+      </div>
+    } @else if (status.state() === 'error') {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>Predictor status could not be evaluated. The absence of findings does not mean these readings are valid.</span>
+      </div>
+    } @else if (predictorFindings.length > 0) {
+      <ul class="predictor-readings__findings" aria-label="Predictor data findings">
+        @for (finding of predictorFindings; track finding.id) {
+          <li>
+            <div class="v1-alert" [class.v1-alert--danger]="finding.severity === 'error'"
+              [class.v1-alert--warning]="finding.severity === 'warning'" role="alert">
+              <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : finding.category === 'currency' ? 'clock' : 'warning'"></app-ui-icon>
+              <span><strong>{{ finding.title }}.</strong> {{ finding.description }}</span>
+              @switch (finding.code) {
+                @case ('predictor.data.missing') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--action" [disabled]="!canEdit" (click)="openAddReading()">Add Reading</button>
+                }
+                @case ('predictor.data.gap') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--danger" [disabled]="!canEdit" (click)="requestFillMissing()">Fill Missing Months</button>
+                }
+                @case ('predictor.data.duplicate-month') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="showAttentionEntries()">Show Entries</button>
+                }
+                @case ('predictor.data.negative') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="showAttentionEntries()">Show Entries</button>
+                }
+                @case ('predictor.weather.warning') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="showAttentionEntries()">Show Entries</button>
+                }
+                @case ('predictor.currency.stale') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--action" [disabled]="!canEdit" (click)="openAddReading()">Add Current Reading</button>
+                }
+                @case ('predictor.currency.behind-facility') {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--action" [disabled]="!canEdit" (click)="openAddReading()">Add Reading</button>
+                }
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    <app-predictor-readings-table
+      [view]="tableView()"
+      [predictorName]="predictor?.name"
+      [canAct]="canEdit"
+      (addRequested)="openAddReading()"
+      (editRequested)="openEditReading($event)"
+      (deleteRequested)="requestDelete($event)"
+      (bulkDeleteRequested)="requestBulkDelete($event)">
+    </app-predictor-readings-table>
+  }
 </section>
+
+@if (panel && predictor) {
+  <app-predictor-reading-editor
+    [predictor]="predictor"
+    [reading]="panel.reading"
+    [mode]="panel.mode"
+    [existingReadings]="workspace.selectedReadings()"
+    [saving]="saving()"
+    [error]="actionError()"
+    (saved)="saveReading($event)"
+    (cancelled)="requestCloseEditor()">
+  </app-predictor-reading-editor>
+}
+
+<ng-template #readingsConfirmationModal>
+  @if (confirmation(); as pendingConfirmation) {
+    <app-predictor-readings-confirmation-modal
+      [confirmation]="pendingConfirmation"
+      [isWeather]="predictor?.predictorType === 'Weather'"
+      [saving]="saving()"
+      [error]="actionError()"
+      (confirmed)="confirmPendingAction()"
+      (cancelled)="cancelConfirmation()">
+    </app-predictor-readings-confirmation-modal>
+  }
+</ng-template>
