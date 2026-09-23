@@ -98,7 +98,8 @@ describe('SectionNavComponent', () => {
           useValue: {
             state: statusState,
             items: statusItems,
-            meterFindings: (meterGuid: string) => statusItems().filter(item => item.entity.guid === meterGuid)
+            meterFindings: (meterGuid: string) => statusItems().filter(item => item.entity.guid === meterGuid),
+            predictorFindings: (predictorGuid: string) => statusItems().filter(item => item.entity.guid === predictorGuid)
           }
         }
       ]
@@ -380,6 +381,36 @@ describe('SectionNavComponent', () => {
     toggle?.click();
     fixture.detectChanges();
     expect(predictorChildLinks(element)).toHaveLength(0);
+  });
+
+  it('shows active severity counts for the Predictors parent and affected child', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('predictors');
+    facilityPredictors.set([{ guid: 'predictor-a', name: 'Production' }]);
+    const entity = { kind: 'predictor' as const, guid: 'predictor-a', name: 'Production', accountGuid: 'account-a', facilityGuid: 'facility-a' };
+    statusItems.set(presentFindings([
+      makeFinding('predictor.data.duplicate-month', 'error', 'quality', entity, { count: 1 }),
+      makeFinding('predictor.quality.outlier', 'warning', 'quality', entity, { count: 2, periods: ['2026-01', '2026-02'] })
+    ]));
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const badges = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-nav__attention'));
+
+    expect(badges).toHaveLength(2);
+    expect(badges.every(badge => badge.textContent?.includes('2 issues: 1 errors, 1 warnings'))).toBe(true);
+    expect(badges.every(badge => badge.classList.contains('v1-nav__attention--error'))).toBe(true);
+
+    statusItems.set(statusItems().filter(item => item.severity !== 'warning'));
+    fixture.detectChanges();
+    expect(Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-nav__attention'))
+      .every(badge => badge.textContent?.includes('1 issues: 1 errors, 0 warnings'))).toBe(true);
+
+    statusState.set('evaluating');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.v1-nav__attention')).toHaveLength(0);
   });
 
   it('does not show a predictor child toggle when there are no predictors', () => {

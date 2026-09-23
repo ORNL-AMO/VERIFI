@@ -5,8 +5,9 @@ import { filter } from 'rxjs';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
-import { PREDICTOR_WORKBENCH_TABS, PredictorWorkbenchTabId } from '../models';
+import { PREDICTOR_WORKBENCH_TABS, PredictorWorkbenchTabId, buildPredictorWorkbenchTabAttention } from '../models';
 import { PredictorWorkbenchTabsComponent } from './predictor-workbench-tabs/predictor-workbench-tabs.component';
 
 @Component({
@@ -26,12 +27,17 @@ export class PredictorWorkbenchComponent {
   @ViewChild('predictorSwitcherToggle') private readonly switcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  private readonly status = inject(WorkspaceStatusService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly tabs = PREDICTOR_WORKBENCH_TABS;
   readonly activeTab = this.activeTabState.asReadonly();
   readonly switcherOpen = this.switcherOpenState.asReadonly();
   readonly factsExpanded = this.workbenchLayout.factsExpanded;
+  readonly tabAttention = computed(() => {
+    const predictor = this.workspace.selectedPredictor();
+    return buildPredictorWorkbenchTabAttention(predictor ? this.status.predictorFindings(predictor.guid) : []);
+  });
   readonly accountPredictorsRoute = computed(() => {
     const account = this.workspace.account();
     return account ? [...this.navigation.accountDataRoute(account.guid), 'predictors'] : undefined;

@@ -135,6 +135,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 quality helper and component specs, plus ECharts scatter browser coverage when the directive registration changes. Skip `build-prod` in the Codex sandbox because it does not work reliably there; leave production build validation to CI or a non-sandbox environment.
 
+### Facility Predictor Data Quality Report Workflow
+
+- **Workflow:** v1 selected-Predictor Quality Report tab and Predictor status destinations.
+- **Existing v0 entry point:** Facility Predictor Data Quality Report under the current Data Management Predictor routes.
+- **Decision:** Rebuild in v1 using a version-neutral Predictor data-quality helper and Apache ECharts. Preserve statistics, Median +/- 5 MAD outlier detection, duplicate and missing month review, Weather-source indicators, and the raw monthly time series. Intentionally omit the v0 histogram and binning controls.
+- **Parity:** Predictor outliers retain the legacy zero-MAD exception. The report shows raw allowed negatives and ignored Weather flags for context while workspace findings continue to honor the configured exceptions. Predictor findings route to the dashboard, Readings, or Quality Report and drive accessible workbench tab attention badges.
+- **Shared contracts:** No IndexedDB schema, migration, backup, import/export, Worker payload, report export, or Electron contract changes.
+- **Tests:** Focused Predictor quality calculation, component, status catalog/evaluator, navigation, and tab-attention specs; omit `build-prod` from Codex validation for this workflow.
+
 ### V1 Data Validation, Status, and Todo Workflow
 
 - **Workflow:** Account-wide v1 data validation, Home status summaries, support-panel Todos, meter cards, Readings alerts, and the selected-meter Quality Report.

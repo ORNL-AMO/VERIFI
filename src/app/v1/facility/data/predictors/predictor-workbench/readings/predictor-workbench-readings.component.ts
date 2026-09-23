@@ -19,6 +19,7 @@ import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
@@ -85,7 +86,10 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   readonly missingMonths = computed(() => findMissingPredictorMonths(this.workspace.selectedReadings()));
   readonly findings = computed(() => {
     const predictor = this.workspace.selectedPredictor();
-    return predictor ? this.status.predictorFindings(predictor.guid) : [];
+    return predictor
+      ? this.status.predictorFindings(predictor.guid).filter(finding =>
+        finding.destination.kind === 'predictor-tab' && finding.destination.tab === 'readings')
+      : [];
   });
   readonly weatherRange = computed(() => weatherRangeForReadings(this.workspace.selectedReadings())
     ?? this.workspace.defaultWeatherRange());
@@ -125,6 +129,16 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
 
   isNavigationBlocked(): boolean {
     return this.saving();
+  }
+
+  async discardWarning(item: StatusItem): Promise<void> {
+    if (await this.status.discardWarning(item)) {
+      afterNextRender(() => {
+        if (this.readingsRegion) {
+          this.focusMonitor.focusVia(this.readingsRegion, 'program');
+        }
+      }, { injector: this.injector });
+    }
   }
 
   openAddReading(): void {

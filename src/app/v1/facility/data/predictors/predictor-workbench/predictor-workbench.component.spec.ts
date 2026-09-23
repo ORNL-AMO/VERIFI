@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PredictorWorkbenchComponent } from './predictor-workbench.component';
 
@@ -45,6 +46,15 @@ describe('PredictorWorkbenchComponent', () => {
         },
         { provide: WorkbenchLayoutService, useValue: { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) } },
         {
+          provide: WorkspaceStatusService,
+          useValue: {
+            predictorFindings: vi.fn(() => [{
+              id: 'gap', severity: 'error',
+              destination: { kind: 'predictor-tab', facilityGuid: 'facility-a', predictorGuid: 'predictor-a', tab: 'readings' }
+            }])
+          }
+        },
+        {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {
             account: signal({ guid: 'account-a', name: 'Account A' }),
@@ -66,6 +76,7 @@ describe('PredictorWorkbenchComponent', () => {
     expect(fixture.componentInstance.activeTab()).toBe('readings');
     expect(fixture.nativeElement.textContent).toContain('Oak Ridge');
     expect(fixture.nativeElement.textContent).toContain('Apr 2025');
+    expect(fixture.nativeElement.textContent).toContain('1 issues: 1 errors, 0 warnings');
 
     fixture.componentInstance.switchPredictor('predictor-b');
     expect(navigate).toHaveBeenLastCalledWith(['/predictors', 'predictor-b', 'readings']);
@@ -91,6 +102,7 @@ describe('PredictorWorkbenchComponent', () => {
           }
         },
         { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
+        { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
         {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {

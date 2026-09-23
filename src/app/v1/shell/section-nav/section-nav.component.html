@@ -194,7 +194,13 @@
                       [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
                       [attr.aria-current]="isFacilityDataItemActive(item) ? 'page' : null">
                       <app-ui-icon [name]="item.icon"></app-ui-icon>
-                      {{ item.label }}
+                      <span class="v1-nav__item-label">{{ item.label }}</span>
+                      @if (facilityPredictorsAttention(); as attention) {
+                        <span class="v1-nav__attention v1-nav__attention--{{ attention.state }}">
+                          <span aria-hidden="true">{{ attention.total }}</span>
+                          <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                        </span>
+                      }
                     </a>
                     @if (predictorItems.length > 0 && isFacilityPredictorsRoute()) {
                       <button
@@ -222,6 +228,12 @@
                           [attr.aria-current]="isPredictorChildActive(predictor.guid) ? 'page' : null">
                           <app-ui-icon [name]="predictor.icon"></app-ui-icon>
                           <span class="v1-nav__item-label">{{ predictor.label }}</span>
+                          @if (predictor.attention; as attention) {
+                            <span class="v1-nav__attention v1-nav__attention--{{ attention.state }}">
+                              <span aria-hidden="true">{{ attention.total }}</span>
+                              <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                            </span>
+                          }
                         </a>
                       }
                     </div>

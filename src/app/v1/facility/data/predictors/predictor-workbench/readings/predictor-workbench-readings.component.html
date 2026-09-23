@@ -13,6 +13,13 @@
     </div>
   }
 
+  @if (status.warningActionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ status.warningActionError() }}</span>
+    </div>
+  }
+
   @if (!workspace.isLoading() && !workspace.canWrite()) {
     <div class="v1-alert v1-alert--info" role="status">
       <app-ui-icon name="lock"></app-ui-icon>
@@ -71,6 +78,16 @@
                 @case ('predictor.currency.behind-facility') {
                   <button type="button" class="v1-btn v1-btn--sm v1-btn--action" [disabled]="!canEdit" (click)="openAddReading()">Add Reading</button>
                 }
+              }
+              @if (finding.severity === 'warning') {
+                <button
+                  type="button"
+                  class="v1-btn v1-btn--sm v1-btn--quiet"
+                  [disabled]="!status.canManageWarnings()"
+                  [attr.aria-label]="'Discard ' + finding.title"
+                  (click)="discardWarning(finding)">
+                  Discard
+                </button>
               }
             </div>
           </li>

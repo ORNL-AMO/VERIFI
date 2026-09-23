@@ -38,6 +38,7 @@ type PredictorNavItem = {
   readonly guid: string;
   readonly label: string;
   readonly icon: IconName;
+  readonly attention?: StatusAttentionSummary;
 };
 
 type ChildLinksState = {
@@ -150,13 +151,30 @@ export class SectionNavComponent {
       .sort((first, second) => first.label.localeCompare(second.label));
   });
   readonly facilityPredictorItems = computed<ReadonlyArray<PredictorNavItem>>(() => {
+    const statusReady = this.status.state() === 'ready';
     return [...this.workspace.facilityPredictors()]
-      .map(predictor => ({
-        guid: predictor.guid,
-        label: predictor.name || 'Untitled predictor',
-        icon: predictorIcon(predictor)
-      }))
+      .map(predictor => {
+        const attention = summarizeStatusAttention(statusReady ? this.status.predictorFindings(predictor.guid) : []);
+        return {
+          guid: predictor.guid,
+          label: predictor.name || 'Untitled predictor',
+          icon: predictorIcon(predictor),
+          attention: attention.total > 0 ? attention : undefined
+        };
+      })
       .sort((first, second) => first.label.localeCompare(second.label));
+  });
+  readonly facilityPredictorsAttention = computed(() => {
+    const facilityGuid = this.navigation.facility()?.guid;
+    if (!facilityGuid || this.status.state() !== 'ready') return undefined;
+    const findings = this.status.items().filter(item =>
+      (item.destination.kind === 'predictor-tab' && item.destination.facilityGuid === facilityGuid)
+      || (item.destination.kind === 'facility-data'
+        && item.destination.facilityGuid === facilityGuid
+        && item.destination.detail === 'predictors')
+    );
+    const attention = summarizeStatusAttention(findings);
+    return attention.total > 0 ? attention : undefined;
   });
   readonly isFacilityMetersRoute = computed(() =>
     this.navigation.contextMode() === 'facility'

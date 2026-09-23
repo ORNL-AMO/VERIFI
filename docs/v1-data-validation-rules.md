@@ -31,7 +31,7 @@ Findings use one of five categories: **configuration**, **completeness**, **curr
 | `account.facilities.missing` | Add a facility | Error / readiness | The account has no facilities. | Yes; Account Settings > Portfolio. |
 | `facility.meters.missing` | Add utility meters | Error / readiness | The facility has no meters. | Yes; Facility Data > Meters. |
 | `facility.meter-groups.missing` | Add meter groups | Warning / readiness | The facility has meters but no meter groups. | Yes; Facility Data > Meter Grouping. |
-| `facility.predictors.missing` | Add predictors | Error / readiness | The facility has no predictors. This remains a facility-wide readiness finding. | Yes; Facility Data > Predictors. Direct status navigation remains deferred. |
+| `facility.predictors.missing` | Add predictors | Error / readiness | The facility has no predictors. This remains a facility-wide readiness finding. | Yes; Facility Data > Predictors. |
 
 Account summaries include account findings and all descendant facility, data, analysis, and report findings. Facility summaries include their descendant meter, predictor, analysis, and report findings. Aggregation does not create duplicate parent findings.
 
@@ -56,15 +56,16 @@ Required meter configuration includes applicable name, source, starting and ener
 
 | Rule code | Finding | Severity / category | Trigger and exceptions | Todo and remediation |
 | --- | --- | --- | --- | --- |
-| `predictor.data.missing` | Add predictor data | Error / completeness | The predictor has no entries. Derived gap, currency, and weather findings are suppressed. | Yes; Predictor Readings. Direct status navigation remains deferred. |
-| `predictor.data.duplicate-month` | Resolve duplicate predictor data | Error / quality | Multiple entries use the same month and year. | Yes; Predictor Readings. Direct status navigation remains deferred. |
-| `predictor.data.gap` | Fill missing predictor data | Error / completeness | A month is missing between the first and last entry. | Yes; Predictor Readings can preview and fill internal gaps with zero. Direct status navigation remains deferred. |
-| `predictor.data.negative` | Review negative predictor data | Error / quality | A value is negative and negative values are not allowed. | Yes; Predictor Readings or Settings. Direct status navigation remains deferred. |
-| `predictor.currency.stale` | Update stale predictor data | Warning / currency | The latest entry is older than the configured threshold. Facility lag is included as evidence when both apply. | Yes; Predictor Readings. Direct status navigation remains deferred. |
-| `predictor.currency.behind-facility` | Bring predictor data current | Warning / currency | Predictor data ends before the facility's latest meter month and is not already stale. | Yes; Predictor Readings. Direct status navigation remains deferred. |
-| `predictor.weather.warning` | Review weather data | Warning / quality | A weather predictor contains an incomplete-source warning or revised source data that has not been reconciled or ignored. | Yes; Predictor Readings supports manual overrides, reviewed source refresh, range maintenance, and restoration of calculated values. Direct status navigation remains deferred. |
+| `predictor.data.missing` | Add predictor data | Error / completeness | The predictor has no entries. Derived gap, currency, weather, and outlier findings are suppressed. | Yes; Predictor Readings. |
+| `predictor.data.duplicate-month` | Resolve duplicate predictor data | Error / quality | Multiple entries use the same month and year. | Yes; Predictor Readings. |
+| `predictor.data.gap` | Fill missing predictor data | Error / completeness | A month is missing between the first and last entry. | Yes; Predictor Readings can preview and fill internal gaps with zero. |
+| `predictor.data.negative` | Review negative predictor data | Error / quality | A value is negative and negative values are not allowed. | Yes; Predictor Readings, with Predictor Settings available to allow valid negative values. |
+| `predictor.currency.stale` | Update stale predictor data | Warning / currency | The latest entry is older than the configured threshold. Facility lag is included as evidence when both apply. | Yes; Predictor Readings. |
+| `predictor.currency.behind-facility` | Bring predictor data current | Warning / currency | Predictor data ends before the facility's latest meter month and is not already stale. | Yes; Predictor Readings. |
+| `predictor.weather.warning` | Review weather data | Warning / quality | A weather predictor contains an incomplete-source warning or revised source data that has not been reconciled or ignored. | Yes; Predictor Readings supports manual overrides, reviewed source refresh, range maintenance, and restoration of calculated values. |
+| `predictor.quality.outlier` | Review predictor outliers | Warning / quality | One or more finite values fall outside Median +/- 5 MAD. When MAD is zero, no values are classified as outliers. Evidence includes the count and affected periods. | Context only; Predictor Quality Report. |
 
-Independent predictor problems are all reported; one warning cannot hide an error.
+Independent predictor problems are all reported; one warning cannot hide an error. Active Predictor findings contribute to the Facility Data sidebar counts for both the Predictors parent and affected Predictor child. Predictor warnings can be discarded from Readings or Quality Report and restored from the Todos panel; discarded occurrences are excluded from those counts until their evidence changes.
 
 ## Date and exception rules
 
@@ -114,5 +115,5 @@ Every validation change must update this document, the stable rule catalog, pres
 - Staleness uses the evaluation date supplied to the engine; it does not read the wall clock inside individual record checks.
 - Findings contain stable codes and evidence only. URLs, user-facing copy, Todo inclusion, and workflow availability live in the v1 presentation catalog.
 - Meter configuration findings identify all affected fields instead of exposing only one invalid flag.
-- Statistical outliers are visible on meter cards, Readings, and the Quality Report but are intentionally excluded from global Todos.
+- Statistical outliers are visible on resource cards and Quality Reports but are intentionally excluded from global Todos.
 - v1 may therefore show more findings than v0 for the same account. This is expected; no v0 status behavior is changed.

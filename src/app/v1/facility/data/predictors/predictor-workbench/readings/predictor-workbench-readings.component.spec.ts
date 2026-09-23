@@ -4,6 +4,8 @@ import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
@@ -95,9 +97,42 @@ describe('PredictorWorkbenchReadingsComponent', () => {
 
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
   });
+
+  it('discards active Predictor warnings through workspace status', async () => {
+    const warning = presentFinding(makeFinding(
+      'predictor.weather.warning',
+      'warning',
+      'quality',
+      { kind: 'predictor', guid: 'predictor-a', name: 'Production', accountGuid: 'account-a', facilityGuid: 'facility-a' },
+      { count: 1 }
+    ));
+    const qualityWarning = presentFinding(makeFinding(
+      'predictor.quality.outlier',
+      'warning',
+      'quality',
+      warning.entity,
+      { count: 1, periods: ['2026-01'] }
+    ));
+    const discardWarning = vi.fn(async () => true);
+    const fixture = createFixture({}, {}, {
+      predictorFindings: vi.fn(() => [warning, qualityWarning]),
+      discardWarning
+    });
+
+    expect(fixture.nativeElement.textContent).not.toContain('Review predictor outliers');
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('[aria-label="Discard Review weather data"]')?.click();
+    await fixture.whenStable();
+
+    expect(discardWarning).toHaveBeenCalledWith(warning);
+  });
 });
 
-function createFixture(predictorOverrides: Record<string, unknown> = {}, actionOverrides: Record<string, unknown> = {}) {
+function createFixture(
+  predictorOverrides: Record<string, unknown> = {},
+  actionOverrides: Record<string, unknown> = {},
+  statusOverrides: Record<string, unknown> = {}
+) {
   const predictor = {
     id: 1, guid: 'predictor-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Production',
     unit: 'tons', predictorType: 'Standard', canBeNegative: false, ...predictorOverrides
@@ -114,7 +149,10 @@ function createFixture(predictorOverrides: Record<string, unknown> = {}, actionO
         state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(), cancel: vi.fn(),
         previewMaintenance: vi.fn(), previewRestore: vi.fn(), commitMaintenance: vi.fn()
       } },
-      { provide: WorkspaceStatusService, useValue: { state: signal('ready'), predictorFindings: vi.fn(() => []) } },
+      { provide: WorkspaceStatusService, useValue: {
+        state: signal('ready'), predictorFindings: vi.fn(() => []), warningActionError: signal(undefined),
+        canManageWarnings: signal(true), discardWarning: vi.fn(async () => true), ...statusOverrides
+      } },
       { provide: PredictorWorkspaceActionsService, useValue: {
         addPredictorReading: vi.fn(async (value: any) => ({ ...value, id: 10 })),
         updatePredictorReading: vi.fn(async (value: any) => value), deletePredictorReading: vi.fn(),

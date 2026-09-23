@@ -1,7 +1,258 @@
-<section class="v1-predictor-workbench-placeholder" aria-labelledby="predictor-quality-title">
-  <app-ui-icon name="warning"></app-ui-icon>
-  <div>
-    <h2 id="predictor-quality-title">Predictor quality report</h2>
-    <p>Statistics, charts, and quality findings will be added in the quality-report phase.</p>
-  </div>
+@let predictor = workspace.selectedPredictor();
+@let currentReport = report();
+@let qualityFindings = findings();
+@let statistics = statisticCells();
+@let chartOption = qualityChartOption();
+@let accessibleRows = accessibleChartRows();
+
+<section #qualityRegion class="predictor-quality" aria-label="Predictor data quality report" tabindex="-1">
+  @if (status.warningActionError()) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ status.warningActionError() }}</span>
+    </div>
+  }
+
+  @if (!predictor) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="predictor"></app-ui-icon>
+      <h2>Select a predictor</h2>
+      <p>Open a predictor before reviewing data quality.</p>
+    </article>
+  } @else if (!currentReport?.hasData) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="table"></app-ui-icon>
+      <h2>No readings found</h2>
+      <p>Add readings before reviewing the data quality report for {{ predictor.name }}.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
+        <app-ui-icon name="table"></app-ui-icon>
+        Open Readings
+      </button>
+    </article>
+  } @else if (!currentReport?.hasUsableData) {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <h2>No usable values</h2>
+      <p>Review the Predictor readings and correct values that are not finite numbers.</p>
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="openReadings()">
+        <app-ui-icon name="table"></app-ui-icon>
+        Open Readings
+      </button>
+    </article>
+  } @else if (currentReport) {
+    @if (qualityFindings.length > 0) {
+      <section class="predictor-quality__findings" aria-labelledby="predictor-quality-findings-heading">
+        <div class="predictor-quality__panel-heading">
+          <div>
+            <p>Review</p>
+            <h2 id="predictor-quality-findings-heading">Data quality findings</h2>
+          </div>
+        </div>
+        <ul>
+          @for (finding of qualityFindings; track finding.id) {
+            <li class="v1-alert" [class.v1-alert--danger]="finding.severity === 'error'" [class.v1-alert--warning]="finding.severity === 'warning'">
+              <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'"></app-ui-icon>
+              <div>
+                <strong>{{ finding.title }}</strong>
+                <span>{{ finding.description }}</span>
+              </div>
+              <div class="predictor-quality__finding-actions">
+                <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Open Readings</button>
+                @if (finding.settingsAction) {
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">Open Settings</button>
+                }
+                @if (finding.item; as statusItem) {
+                  @if (statusItem.severity === 'warning') {
+                    <button
+                      type="button"
+                      class="v1-btn v1-btn--sm v1-btn--quiet"
+                      [disabled]="!status.canManageWarnings()"
+                      [attr.aria-label]="'Discard ' + finding.title"
+                      (click)="discardWarning(statusItem)">
+                      Discard
+                    </button>
+                  }
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (currentReport.duplicateMonths.length > 0 || currentReport.missingMonths.length > 0) {
+      <section class="predictor-quality__panel" aria-labelledby="predictor-quality-months-heading">
+        <div class="predictor-quality__panel-heading">
+          <div>
+            <p>Reading months</p>
+            <h2 id="predictor-quality-months-heading">Duplicate and missing months</h2>
+          </div>
+          <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Review Readings</button>
+        </div>
+        @if (currentReport.duplicateMonths.length > 0) {
+          <div class="predictor-quality__issue-group">
+            <strong>Multiple readings</strong>
+            <div class="predictor-quality__chips" aria-label="Duplicate reading months">
+              @for (month of currentReport.duplicateMonths; track month.key) {
+                <span class="v1-chip v1-chip--warning">{{ month.monthLabel }} ({{ month.count }})</span>
+              }
+            </div>
+          </div>
+        }
+        @if (currentReport.missingMonths.length > 0) {
+          <div class="predictor-quality__issue-group">
+            <strong>Missing months</strong>
+            <div class="predictor-quality__chips" aria-label="Missing reading months">
+              @for (month of currentReport.missingMonths; track month.key) {
+                <span class="v1-chip v1-chip--danger">{{ month.monthLabel }}</span>
+              }
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    @if (currentReport.negativeMonths.length > 0) {
+      <section class="predictor-quality__panel" aria-labelledby="predictor-quality-negative-heading">
+        <div class="predictor-quality__panel-heading">
+          <div>
+            <p>Value review</p>
+            <h2 id="predictor-quality-negative-heading">Negative values</h2>
+          </div>
+          <div class="predictor-quality__heading-actions">
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Review Readings</button>
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">Open Settings</button>
+          </div>
+        </div>
+        <p class="predictor-quality__note">
+          @if (predictor.canBeNegative) {
+            Negative values are permitted by this Predictor's settings.
+          } @else {
+            Negative values are not permitted by this Predictor's settings.
+          }
+        </p>
+        <div class="predictor-quality__chips" aria-label="Months with negative values">
+          @for (month of currentReport.negativeMonths; track month.key) {
+            <span class="v1-chip" [class.v1-chip--neutral]="predictor.canBeNegative" [class.v1-chip--danger]="!predictor.canBeNegative">{{ month.monthLabel }}</span>
+          }
+        </div>
+      </section>
+    }
+
+    @if (currentReport.weatherWarningMonths.length > 0 || currentReport.weatherChangedMonths.length > 0) {
+      <section class="predictor-quality__panel" aria-labelledby="predictor-quality-weather-heading">
+        <div class="predictor-quality__panel-heading">
+          <div>
+            <p>Weather source</p>
+            <h2 id="predictor-quality-weather-heading">Weather data review</h2>
+          </div>
+          <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Manage Calculated Data</button>
+        </div>
+        @if (predictor.ignoreWeatherDataWarning) {
+          <p class="predictor-quality__note">These source conditions are currently ignored in workspace status.</p>
+        }
+        @if (currentReport.weatherWarningMonths.length > 0) {
+          <div class="predictor-quality__issue-group">
+            <strong>Incomplete source data</strong>
+            <div class="predictor-quality__chips" aria-label="Months with weather warnings">
+              @for (month of currentReport.weatherWarningMonths; track month.key) {
+                <span class="v1-chip v1-chip--warning">{{ month.monthLabel }}</span>
+              }
+            </div>
+          </div>
+        }
+        @if (currentReport.weatherChangedMonths.length > 0) {
+          <div class="predictor-quality__issue-group">
+            <strong>Revised source data</strong>
+            <div class="predictor-quality__chips" aria-label="Months with revised weather data">
+              @for (month of currentReport.weatherChangedMonths; track month.key) {
+                <span class="v1-chip v1-chip--info">{{ month.monthLabel }}</span>
+              }
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    <section class="predictor-quality__panel" aria-labelledby="predictor-quality-statistics-heading">
+      <div class="predictor-quality__panel-heading">
+        <h2 id="predictor-quality-statistics-heading">Predictor statistics</h2>
+      </div>
+      <div class="predictor-quality__scroller">
+        <table #statisticsTable class="predictor-quality__table" [class.copying-table]="copyingStatisticsTable()">
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              @for (cell of statistics; track cell.id) {
+                <th scope="col" class="predictor-quality__number">{{ cell.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">{{ predictor.name }} @if (currentReport.unit) { ({{ currentReport.unit }}) }</th>
+              @for (cell of statistics; track cell.id) {
+                <td class="predictor-quality__number">
+                  @if (cell.tone) {
+                    <span class="v1-badge v1-badge--{{ cell.tone }}">{{ cell.valueLabel }}</span>
+                  } @else {
+                    {{ cell.valueLabel }}
+                  }
+                </td>
+              }
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="predictor-quality__footer">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="copyStatisticsTable()">
+          <app-ui-icon name="copy"></app-ui-icon>
+          Copy Table
+        </button>
+      </footer>
+    </section>
+
+    @if (chartOption) {
+      <section class="predictor-quality__panel predictor-quality__chart-panel" aria-labelledby="predictor-quality-chart-heading">
+        <div class="predictor-quality__panel-heading">
+          <h2 id="predictor-quality-chart-heading">Readings over time</h2>
+          <button type="button" class="v1-icon-btn" title="Download PNG" aria-label="Download Predictor readings chart as PNG" (click)="downloadQualityChart()">
+            <app-ui-icon name="download"></app-ui-icon>
+          </button>
+        </div>
+        <div
+          #qualityChart
+          class="predictor-quality__chart"
+          [appV1ECharts]="chartOption"
+          role="img"
+          [attr.aria-label]="'Reading quality chart for ' + predictor.name">
+        </div>
+        <div class="visually-hidden predictor-quality__accessible-data">
+          <table>
+            <caption>Predictor reading quality chart data</caption>
+            <thead>
+              <tr>
+                <th scope="col">Month</th>
+                <th scope="col">Value</th>
+                <th scope="col">Expected range status</th>
+                <th scope="col">Negative value</th>
+                <th scope="col">Weather source status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of accessibleRows; track row.id) {
+                <tr>
+                  <th scope="row">{{ row.dateLabel }}</th>
+                  <td>{{ row.valueLabel }}</td>
+                  <td>{{ row.expectedRangeLabel }}</td>
+                  <td>{{ row.negativeLabel }}</td>
+                  <td>{{ row.weatherStatusLabel }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
 </section>
