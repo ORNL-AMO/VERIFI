@@ -8,6 +8,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { PredictorWorkbenchSettingsComponent } from './predictor-workbench-settings.component';
 
 describe('PredictorWorkbenchSettingsComponent', () => {
@@ -29,16 +30,35 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(fixture.componentInstance.saveState()).toBe('saved');
   });
 
-  it('locks weather-defining fields when readings exist', () => {
+  it('keeps the predictor type locked while allowing reviewed weather-setting changes', () => {
     const fixture = createFixture({
       readings: [{ guid: 'reading-a' }],
       predictor: predictor({ predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Oak Ridge', heatingBaseTemperature: 60 })
     });
     const form = fixture.componentInstance.form()!;
     expect(form.controls.predictorType.disabled).toBe(true);
-    expect(form.controls.weatherDataType.disabled).toBe(true);
-    expect(form.controls.weatherStationId.disabled).toBe(true);
+    expect(form.controls.weatherDataType.enabled).toBe(true);
+    expect(form.controls.weatherStationId.enabled).toBe(true);
     expect(form.controls.name.enabled).toBe(true);
+  });
+
+  it('previews recalculated readings before saving weather-defining changes', async () => {
+    const fixture = createFixture({
+      readings: [{ guid: 'reading-a', year: 2026, month: 1 }],
+      predictor: predictor({ predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Oak Ridge', heatingBaseTemperature: 60 })
+    });
+    const workflow = TestBed.inject(PredictorWeatherWorkflowService) as any;
+    const form = fixture.componentInstance.form()!;
+    form.controls.heatingBaseTemperature.setValue(65);
+
+    fixture.componentInstance.onWeatherDefinitionChange();
+    await fixture.componentInstance.saveNow();
+
+    expect(workflow.previewSettingsChange).toHaveBeenCalledWith(
+      expect.objectContaining({ heatingBaseTemperature: 60 }),
+      expect.objectContaining({ heatingBaseTemperature: 65 }),
+      expect.any(Array)
+    );
   });
 });
 
@@ -53,6 +73,10 @@ function createFixture(options: { updatePredictor?: any; readings?: any[]; predi
       } },
       { provide: PredictorWorkspaceActionsService, useValue: {
         updatePredictor: options.updatePredictor ?? vi.fn(async (value: any) => value), deletePredictor: vi.fn()
+      } },
+      { provide: PredictorWeatherWorkflowService, useValue: {
+        state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(), cancel: vi.fn(),
+        previewSettingsChange: vi.fn(async () => undefined), commitSettings: vi.fn()
       } },
       { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()) } },
       { provide: WeatherStationLookupService, useValue: { getStation: vi.fn(async () => undefined), searchLocations: vi.fn(), findStations: vi.fn() } },

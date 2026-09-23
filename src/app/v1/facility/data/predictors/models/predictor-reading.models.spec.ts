@@ -37,6 +37,13 @@ describe('predictor reading models', () => {
     expect(created).toEqual(expect.objectContaining({ month: 2, year: 2026, weatherOverride: true, weatherDataWarning: false }));
     expect(created.id).toBeUndefined();
   });
+
+  it('marks revised weather source data for attention', () => {
+    const revised = { ...reading('a', 2026, 1, 2), weatherDataChanged: true };
+    const view = buildPredictorReadingTableView({ ...predictor, predictorType: 'Weather' }, [revised]);
+
+    expect(view.rows[0].attention).toEqual(expect.objectContaining({ weatherDataChanged: true, hasAttention: true }));
+  });
 });
 
 function reading(guid: string, year: number, month: number, amount: number): any {

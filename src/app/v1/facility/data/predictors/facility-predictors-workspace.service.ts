@@ -4,12 +4,15 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { WeatherMonthRange } from '@platform/weather/hourly-weather-data.models';
 import { buildPredictorCards } from './models';
+import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.service';
 
 @Injectable()
 export class FacilityPredictorsWorkspaceService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
+  private readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly currentUrl = signal(this.router.url);
@@ -19,7 +22,18 @@ export class FacilityPredictorsWorkspaceService {
   readonly isLoading = computed(() => ['idle', 'loading', 'switching'].includes(this.workspaceState()));
   readonly facility = this.workspace.selectedFacility;
   readonly canWrite = this.workspace.canWrite;
-  readonly hasPending = this.workspace.hasPending;
+  readonly hasPending = computed(() => this.workspace.hasPending() || this.weatherWorkflow.busy());
+  readonly defaultWeatherRange = computed<WeatherMonthRange | undefined>(() => {
+    const readings = this.workspace.facilityMeterData()
+      .filter(reading => Number.isInteger(reading.year) && reading.year > 0
+        && Number.isInteger(reading.month) && reading.month >= 1 && reading.month <= 12)
+      .sort((first, second) => first.year * 12 + first.month - (second.year * 12 + second.month));
+    if (readings.length === 0) return undefined;
+    return {
+      start: { year: readings[0].year, month: readings[0].month },
+      end: { year: readings[readings.length - 1].year, month: readings[readings.length - 1].month }
+    };
+  });
   readonly predictors = computed(() => [...this.workspace.facilityPredictors()]
     .sort((first, second) => (first.name || '').localeCompare(second.name || '')));
   readonly predictorReadings = computed(() => [...this.workspace.facilityPredictorData()]);

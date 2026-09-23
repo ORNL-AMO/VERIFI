@@ -6,7 +6,16 @@ import { DataEmptyStateComponent } from '@app/v1/shared/data-empty-state/data-em
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../predictor-workspace-actions.service';
-import { FacilityPredictorSort, FacilityPredictorStatusFilter, FacilityPredictorTypeFilter, PredictorCardView, PredictorDraft } from '../models';
+import {
+  FacilityPredictorSort,
+  FacilityPredictorStatusFilter,
+  FacilityPredictorTypeFilter,
+  PredictorCardView,
+  PredictorDraft,
+  WeatherPredictorGenerationDraft,
+  WeatherPredictorGenerationPreview
+} from '../models';
+import { PredictorWeatherWorkflowService } from '../predictor-weather-workflow.service';
 import { PredictorBrowseCardComponent } from './predictor-browse-card/predictor-browse-card.component';
 import { PredictorDraftSlideoutComponent } from './predictor-draft-slideout/predictor-draft-slideout.component';
 
@@ -18,11 +27,13 @@ import { PredictorDraftSlideoutComponent } from './predictor-draft-slideout/pred
 export class PredictorsDashboardComponent {
   private readonly router = inject(Router);
   private readonly actions = inject(PredictorWorkspaceActionsService);
+  readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly addPredictorOpen = signal(false);
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
+  readonly weatherPreview = signal<WeatherPredictorGenerationPreview | undefined>(undefined);
   readonly search = signal('');
   readonly statusFilter = signal<FacilityPredictorStatusFilter>('all');
   readonly typeFilter = signal<FacilityPredictorTypeFilter>('all');
@@ -59,7 +70,12 @@ export class PredictorsDashboardComponent {
     if (this.canAct()) { this.actionError.set(undefined); this.addPredictorOpen.set(true); }
   }
   closeAddPredictor(): void {
-    if (!this.saving()) { this.addPredictorOpen.set(false); this.actionError.set(undefined); }
+    if (!this.saving()) {
+      this.weatherWorkflow.cancel();
+      this.addPredictorOpen.set(false);
+      this.weatherPreview.set(undefined);
+      this.actionError.set(undefined);
+    }
   }
   async savePredictorDraft(draft: PredictorDraft): Promise<void> {
     if (!this.canAct()) return;
@@ -73,6 +89,40 @@ export class PredictorsDashboardComponent {
     } catch (error) {
       this.actionError.set(error instanceof Error ? error.message : 'The predictor could not be added.');
     } finally { this.saving.set(false); }
+  }
+
+  async previewWeatherPredictors(draft: WeatherPredictorGenerationDraft): Promise<void> {
+    if (this.saving()) return;
+    this.actionError.set(undefined);
+    this.weatherPreview.set(undefined);
+    const preview = await this.weatherWorkflow.previewGeneration(draft);
+    if (preview) this.weatherPreview.set(preview);
+  }
+
+  clearWeatherPreview(): void {
+    if (this.weatherWorkflow.busy()) return;
+    this.weatherPreview.set(undefined);
+    this.weatherWorkflow.reset();
+  }
+
+  async confirmWeatherPredictors(): Promise<void> {
+    const preview = this.weatherPreview();
+    if (!preview || this.saving()) return;
+    this.saving.set(true);
+    this.actionError.set(undefined);
+    try {
+      const predictors = await this.weatherWorkflow.commitGeneration(preview);
+      this.weatherPreview.set(undefined);
+      this.addPredictorOpen.set(false);
+      const facility = this.workspace.facility();
+      if (facility && predictors[0]) {
+        await this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictors[0].guid, 'readings'));
+      }
+    } catch (error) {
+      this.actionError.set(error instanceof Error ? error.message : 'The weather predictors could not be created.');
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   private matchesStatus(card: PredictorCardView, filter: FacilityPredictorStatusFilter): boolean {

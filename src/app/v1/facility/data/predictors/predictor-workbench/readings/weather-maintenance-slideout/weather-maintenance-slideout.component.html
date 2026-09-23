@@ -1,0 +1,66 @@
+<app-workspace-slideout [title]="title()"
+  [description]="mode === 'maintenance' ? 'Extend or trim the monthly range and optionally check existing source data.' : 'Review every calculated change before it is saved.'"
+  size="large" [saving]="saving" (closed)="cancelled.emit()">
+  <div class="weather-maintenance">
+    @if (mode === 'maintenance' && !preview) {
+      <section class="weather-maintenance__setup" aria-labelledby="weather-maintenance-range">
+        <header><p>Source range</p><h2 id="weather-maintenance-range">Select monthly data to maintain</h2></header>
+        <div class="weather-maintenance__grid">
+          <label><span>Start month</span><input type="month" [value]="startMonth()" [disabled]="saving" (change)="startMonth.set($any($event.target).value)"></label>
+          <label><span>End month</span><input type="month" [value]="endMonth()" [disabled]="saving" (change)="endMonth.set($any($event.target).value)"></label>
+          <label class="weather-maintenance__wide"><span>Check existing calculated entries</span>
+            <select [value]="sourceCheck()" [disabled]="saving" (change)="setSourceCheck($any($event.target).value)">
+              <option value="none">Do not check existing entries</option>
+              <option value="last-six">Check the latest six entries</option>
+              <option value="all">Check all entries</option>
+            </select>
+          </label>
+        </div>
+        <p class="weather-maintenance__hint">Months outside the requested range will be removed. Manual overrides inside the range are preserved.</p>
+        @if (workflowState.status === 'loading' || workflowState.status === 'calculating') {
+          <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon><span>{{ workflowState.message }}</span></div>
+        }
+        @if (requestError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ requestError() }}</span></div> }
+        @if (workflowState.error) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ workflowState.error }}</span></div> }
+        <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="workflowState.status === 'committing'" (click)="cancelled.emit()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="saving" (click)="requestPreview()"><app-ui-icon [name]="saving ? 'loading' : 'refresh'" [spin]="saving"></app-ui-icon> Load preview</button></footer>
+      </section>
+    } @else if (preview; as currentPreview) {
+      <section class="weather-maintenance__review" aria-labelledby="weather-maintenance-review">
+        <header><p>Review</p><h2 id="weather-maintenance-review">Calculated reading changes</h2>
+          <span>{{ changedCount() }} change{{ changedCount() === 1 ? '' : 's' }} · {{ preservedCount() }} manual override{{ preservedCount() === 1 ? '' : 's' }} preserved</span></header>
+        @if (currentPreview.warningCount > 0) {
+          <div class="v1-alert v1-alert--warning"><app-ui-icon name="cloudRain"></app-ui-icon><span>{{ currentPreview.warningCount }} proposed month{{ currentPreview.warningCount === 1 ? '' : 's' }} contain incomplete weather source data.</span></div>
+        }
+        @if (workflowState.error) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ workflowState.error }}</span></div> }
+        <div class="weather-maintenance__table-wrap">
+          <table>
+            <thead><tr><th>Month</th><th>Current</th><th>Proposed</th><th>Difference</th><th>Result</th></tr></thead>
+            <tbody>
+              @for (row of currentPreview.rows; track row.key) {
+                <tr [class.is-change]="row.kind !== 'unchanged' && row.kind !== 'preserved-override'">
+                  <td>{{ row.monthLabel }}</td>
+                  <td>{{ row.existing?.amount ?? '—' }}</td>
+                  <td>{{ row.proposed?.amount ?? '—' }}</td>
+                  <td>{{ row.difference === undefined ? '—' : row.difference }}</td>
+                  <td><span class="weather-maintenance__kind">{{ row.kind === 'preserved-override' ? 'Manual override preserved' : row.kind }}</span>
+                    @if (row.proposed?.weatherDataWarning) { <app-ui-icon name="cloudRain" [decorative]="false" label="Weather source warning"></app-ui-icon> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="weather-maintenance__hint">No changes are written until you apply this preview.</p>
+        <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="saving" (click)="confirmed.emit()"><app-ui-icon [name]="saving ? 'loading' : 'check'" [spin]="saving"></app-ui-icon> Apply changes</button></footer>
+      </section>
+    } @else {
+      <div class="weather-maintenance__loading" [class.v1-alert]="!!workflowState.error" [class.v1-alert--danger]="!!workflowState.error"
+        [attr.role]="workflowState.error ? 'alert' : 'status'">
+        <app-ui-icon [name]="workflowState.error ? 'warning' : 'loading'" [spin]="!workflowState.error"></app-ui-icon><span>{{ workflowState.message || 'Preparing calculated changes…' }}</span>
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelled.emit()">Cancel</button>
+      </div>
+    }
+  </div>
+</app-workspace-slideout>

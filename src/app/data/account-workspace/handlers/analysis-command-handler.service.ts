@@ -101,28 +101,7 @@ export class AnalysisCommandHandler {
     const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
       .filter(item => item.facilityId === facilityId);
 
-    for (const analysisItem of facilityAnalysisItems) {
-      const updated = {
-        ...analysisItem,
-        groups: analysisItem.groups.map(group => {
-          const existingById = new Set(group.predictorVariables.map(v => v.id));
-          const varsToAdd = facilityPredictors
-            .filter(p => !existingById.has(p.guid))
-            .map(p => ({
-              id: p.guid,
-              name: p.name,
-              production: p.production,
-              productionInAnalysis: p.productionInAnalysis,
-              regressionCoefficient: undefined,
-              unit: p.unit
-            }));
-
-          return {
-            ...group,
-            predictorVariables: [...group.predictorVariables, ...varsToAdd]
-          };
-        })
-      };
+    for (const updated of buildFacilityAnalysesWithPredictors(facilityAnalysisItems, facilityPredictors)) {
 
       await firstValueFrom(this.analysisDb.updateWithObservable(updated));
     }
@@ -135,26 +114,7 @@ export class AnalysisCommandHandler {
   async updateAnalysisPredictor(predictor: IdbPredictor): Promise<void> {
     const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
       .filter(item => item.facilityId === predictor.facilityId);
-    for (const analysisItem of facilityAnalysisItems) {
-      const updated = {
-        ...analysisItem,
-        groups: analysisItem.groups.map(group => ({
-          ...group,
-          predictorVariables: group.predictorVariables.map(pVar =>
-            pVar.id === predictor.guid
-              ? { ...pVar, name: predictor.name, production: predictor.production, unit: predictor.unit }
-              : pVar
-          ),
-          models: group.models?.map(model => ({
-            ...model,
-            predictorVariables: model.predictorVariables.map(pVar =>
-              pVar.id === predictor.guid
-                ? { ...pVar, name: predictor.name, production: predictor.production, unit: predictor.unit }
-                : pVar
-            )
-          }))
-        }))
-      };
+    for (const updated of buildFacilityAnalysisPredictorUpdates(facilityAnalysisItems, predictor)) {
       await firstValueFrom(this.analysisDb.updateWithObservable(updated));
     }
   }
@@ -216,4 +176,48 @@ export class AnalysisCommandHandler {
       );
     }
   }
+}
+
+export function buildFacilityAnalysesWithPredictors(
+  analyses: readonly IdbAnalysisItem[],
+  predictors: readonly IdbPredictor[]
+): IdbAnalysisItem[] {
+  return analyses.map(analysisItem => ({
+    ...structuredClone(analysisItem),
+    groups: analysisItem.groups.map(group => {
+      const existingById = new Set(group.predictorVariables.map(variable => variable.id));
+      const variables = predictors
+        .filter(predictor => predictor.facilityId === analysisItem.facilityId && !existingById.has(predictor.guid))
+        .map(predictor => ({
+          id: predictor.guid,
+          name: predictor.name,
+          production: predictor.production,
+          productionInAnalysis: predictor.productionInAnalysis,
+          regressionCoefficient: undefined,
+          unit: predictor.unit
+        }));
+      return { ...group, predictorVariables: [...group.predictorVariables, ...variables] };
+    })
+  }));
+}
+
+export function buildFacilityAnalysisPredictorUpdates(
+  analyses: readonly IdbAnalysisItem[],
+  predictor: IdbPredictor
+): IdbAnalysisItem[] {
+  return analyses.map(analysisItem => ({
+    ...structuredClone(analysisItem),
+    groups: analysisItem.groups.map(group => ({
+      ...group,
+      predictorVariables: group.predictorVariables.map(variable => variable.id === predictor.guid
+        ? { ...variable, name: predictor.name, production: predictor.production, unit: predictor.unit }
+        : variable),
+      models: group.models?.map(model => ({
+        ...model,
+        predictorVariables: model.predictorVariables.map(variable => variable.id === predictor.guid
+          ? { ...variable, name: predictor.name, production: predictor.production, unit: predictor.unit }
+          : variable)
+      }))
+    }))
+  }));
 }

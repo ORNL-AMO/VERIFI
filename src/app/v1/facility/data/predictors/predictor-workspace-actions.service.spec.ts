@@ -21,7 +21,9 @@ describe('PredictorWorkspaceActionsService', () => {
     deletePredictorData: vi.fn(async () => 20),
     addPredictorData: vi.fn(async (value: any) => ({ ...value, id: 21 })),
     updatePredictorData: vi.fn(async (value: any) => value),
-    reconcilePredictorData: vi.fn(async () => undefined)
+    reconcilePredictorData: vi.fn(async () => undefined),
+    createWeatherPredictors: vi.fn(async () => undefined),
+    updateWeatherPredictor: vi.fn(async () => undefined)
   };
   const analysisHandler = {
     addAnalysisPredictor: vi.fn(async () => undefined),
@@ -36,7 +38,7 @@ describe('PredictorWorkspaceActionsService', () => {
       PredictorWorkspaceActionsService,
       { provide: AccountWorkspaceStore, useValue: {
         account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }),
-        predictors: signal([existing]), predictorData: readings
+        predictors: signal([existing]), predictorData: readings, facilityAnalyses: signal([]), revision: signal(4)
       } },
       { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn(async () => 'published') } },
       { provide: WorkspaceCommandBoundary, useValue: {
@@ -108,6 +110,31 @@ describe('PredictorWorkspaceActionsService', () => {
       expect.objectContaining({ add: added }),
       'account-a'
     );
+  });
+
+  it('creates generated predictors and readings in one atomic command', async () => {
+    const generated = { ...existing, id: undefined, guid: 'weather-a', predictorType: 'Weather' };
+    const generatedReading = { ...reading('weather-reading', 0, 2026, 1), id: undefined, predictorId: 'weather-a' };
+
+    await TestBed.inject(PredictorWorkspaceActionsService).createWeatherPredictors({
+      workspaceRevision: 4,
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      predictors: [generated], readings: [generatedReading], warningMonths: []
+    });
+
+    expect(predictorHandler.createWeatherPredictors).toHaveBeenCalledWith(expect.objectContaining({
+      predictors: [generated], predictorData: [generatedReading]
+    }), 'account-a');
+  });
+
+  it('rejects a stale weather preview before persistence', async () => {
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).createWeatherPredictors({
+      workspaceRevision: 3,
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      predictors: [], readings: [], warningMonths: []
+    })).rejects.toThrow('changed');
+
+    expect(predictorHandler.createWeatherPredictors).not.toHaveBeenCalled();
   });
 });
 

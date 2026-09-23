@@ -12,7 +12,8 @@ import {
   computed,
   effect,
   inject,
-  signal
+  signal,
+  untracked
 } from '@angular/core';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -25,14 +26,20 @@ import {
   PredictorReadingEditorMode,
   PredictorReadingSaveRequest,
   PredictorReadingsConfirmation,
+  WeatherMaintenanceMode,
+  WeatherMaintenancePreview,
+  WeatherMaintenanceRequest,
   buildPredictorReadingTableView,
   createPredictorReading,
-  findMissingPredictorMonths
+  findMissingPredictorMonths,
+  weatherRangeForReadings
 } from '../../models';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { PredictorReadingEditorComponent } from './predictor-reading-editor/predictor-reading-editor.component';
 import { PredictorReadingsConfirmationModalComponent } from './predictor-readings-confirmation-modal/predictor-readings-confirmation-modal.component';
 import { PredictorReadingsTableComponent } from './predictor-readings-table/predictor-readings-table.component';
+import { WeatherMaintenanceSlideoutComponent } from './weather-maintenance-slideout/weather-maintenance-slideout.component';
 
 interface PredictorReadingPanelState {
   readonly mode: PredictorReadingEditorMode;
@@ -48,11 +55,13 @@ interface PredictorReadingPanelState {
     IconComponent,
     PredictorReadingEditorComponent,
     PredictorReadingsConfirmationModalComponent,
-    PredictorReadingsTableComponent
+    PredictorReadingsTableComponent,
+    WeatherMaintenanceSlideoutComponent
   ]
 })
 export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, OnDestroy {
   private readonly actions = inject(PredictorWorkspaceActionsService);
+  readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -66,6 +75,8 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly actionStatus = signal('');
+  readonly weatherPanelMode = signal<WeatherMaintenanceMode | undefined>(undefined);
+  readonly weatherPreview = signal<WeatherMaintenancePreview | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly tableView = computed(() => buildPredictorReadingTableView(
     this.workspace.selectedPredictor(),
@@ -76,6 +87,8 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
     const predictor = this.workspace.selectedPredictor();
     return predictor ? this.status.predictorFindings(predictor.guid) : [];
   });
+  readonly weatherRange = computed(() => weatherRangeForReadings(this.workspace.selectedReadings())
+    ?? this.workspace.defaultWeatherRange());
 
   private confirmationModalOpen = false;
   private returnFocusTarget?: HTMLElement;
@@ -87,10 +100,13 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   private readonly selectedPredictorGuid = computed(() => this.workspace.selectedPredictor()?.guid);
   private readonly resetOnPredictorChange = effect(() => {
     this.selectedPredictorGuid();
-    this.editorPanel.set(undefined);
-    this.confirmation.set(undefined);
-    this.hideConfirmationModal();
-    this.actionError.set(undefined);
+    untracked(() => {
+      this.editorPanel.set(undefined);
+      this.confirmation.set(undefined);
+      this.closeWeatherPanel();
+      this.hideConfirmationModal();
+      this.actionError.set(undefined);
+    });
   });
 
   @ViewChild(PredictorReadingEditorComponent) private readonly editor?: PredictorReadingEditorComponent;
@@ -222,6 +238,49 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   showAttentionEntries(): void {
     this.table?.filter.set('attention');
     this.table?.currentPage.set(1);
+  }
+
+  openWeatherMaintenance(): void {
+    if (this.workspace.selectedPredictor()?.predictorType !== 'Weather' || !this.canAct()) return;
+    this.captureFocus();
+    this.weatherWorkflow.reset();
+    this.weatherPreview.set(undefined);
+    this.weatherPanelMode.set('maintenance');
+  }
+
+  async previewWeatherMaintenance(request: WeatherMaintenanceRequest): Promise<void> {
+    const predictor = this.workspace.selectedPredictor();
+    if (!predictor || predictor.predictorType !== 'Weather') return;
+    const preview = await this.weatherWorkflow.previewMaintenance(predictor, this.workspace.selectedReadings(), request);
+    this.weatherPreview.set(preview);
+  }
+
+  async requestRestoreCalculated(reading: IdbPredictorData): Promise<void> {
+    const predictor = this.workspace.selectedPredictor();
+    if (!predictor || predictor.predictorType !== 'Weather' || !this.canAct()) return;
+    this.captureFocus();
+    this.weatherWorkflow.reset();
+    this.weatherPanelMode.set('restore');
+    this.weatherPreview.set(undefined);
+    this.weatherPreview.set(await this.weatherWorkflow.previewRestore(predictor, reading));
+  }
+
+  async applyWeatherPreview(): Promise<void> {
+    const preview = this.weatherPreview();
+    if (!preview || this.saving()) return;
+    await this.runAction('Calculated weather readings could not be updated.', async () => {
+      await this.weatherWorkflow.commitMaintenance(preview);
+      this.closeWeatherPanel();
+      this.actionStatus.set(preview.mode === 'restore' ? 'Calculated value restored.' : 'Weather readings updated.');
+    });
+  }
+
+  closeWeatherPanel(): void {
+    if (this.weatherWorkflow.busy()) this.weatherWorkflow.cancel();
+    else this.weatherWorkflow.reset();
+    this.weatherPanelMode.set(undefined);
+    this.weatherPreview.set(undefined);
+    this.restoreFocus();
   }
 
   private async runAction(errorMessage: string, action: () => Promise<void>): Promise<void> {

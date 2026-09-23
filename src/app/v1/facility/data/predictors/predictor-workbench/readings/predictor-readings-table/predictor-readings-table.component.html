@@ -102,6 +102,9 @@
                     @if (row.reading.weatherDataWarning) {
                       <app-ui-icon name="cloudRain" [decorative]="false" label="Weather source warning" title="Weather source warning"></app-ui-icon>
                     }
+                    @if (row.reading.weatherDataChanged) {
+                      <app-ui-icon name="refresh" [decorative]="false" label="Updated weather source data is available" title="Updated weather source data is available"></app-ui-icon>
+                    }
                     @if (row.reading.weatherOverride) {
                       <app-ui-icon name="edit" [decorative]="false" label="Manual weather override" title="Manual weather override"></app-ui-icon>
                     }
@@ -115,6 +118,12 @@
                     [disabled]="!canAct" (click)="editRequested.emit(row.reading)">
                     <app-ui-icon name="edit"></app-ui-icon>
                   </button>
+                  @if (isWeather && row.reading.weatherOverride) {
+                    <button type="button" class="v1-icon-btn" title="Restore calculated value" aria-label="Restore calculated value"
+                      [disabled]="!canAct" (click)="restoreRequested.emit(row.reading)">
+                      <app-ui-icon name="refresh"></app-ui-icon>
+                    </button>
+                  }
                   <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete reading" aria-label="Delete reading"
                     [disabled]="!canAct" (click)="deleteRequested.emit(row.reading)">
                     <app-ui-icon name="delete"></app-ui-icon>

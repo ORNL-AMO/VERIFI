@@ -81,12 +81,23 @@
     <app-predictor-readings-table
       [view]="tableView()"
       [predictorName]="predictor?.name"
+      [isWeather]="predictor?.predictorType === 'Weather'"
       [canAct]="canEdit"
       (addRequested)="openAddReading()"
       (editRequested)="openEditReading($event)"
       (deleteRequested)="requestDelete($event)"
+      (restoreRequested)="requestRestoreCalculated($event)"
       (bulkDeleteRequested)="requestBulkDelete($event)">
     </app-predictor-readings-table>
+
+    @if (predictor?.predictorType === 'Weather') {
+      <div class="predictor-readings__weather-actions">
+        <div><strong>Calculated weather data</strong><span>Extend the range, check revised source data, or review updates before applying them.</span></div>
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit" (click)="openWeatherMaintenance()">
+          <app-ui-icon name="refresh"></app-ui-icon> Manage Calculated Data
+        </button>
+      </div>
+    }
   }
 </section>
 
@@ -101,6 +112,19 @@
     (saved)="saveReading($event)"
     (cancelled)="requestCloseEditor()">
   </app-predictor-reading-editor>
+}
+
+@if (weatherPanelMode(); as weatherMode) {
+  <app-weather-maintenance-slideout
+    [mode]="weatherMode"
+    [defaultRange]="weatherRange()"
+    [preview]="weatherPreview()"
+    [workflowState]="weatherWorkflow.state()"
+    [saving]="saving() || weatherWorkflow.busy()"
+    (previewRequested)="previewWeatherMaintenance($event)"
+    (confirmed)="applyWeatherPreview()"
+    (cancelled)="closeWeatherPanel()">
+  </app-weather-maintenance-slideout>
 }
 
 <ng-template #readingsConfirmationModal>

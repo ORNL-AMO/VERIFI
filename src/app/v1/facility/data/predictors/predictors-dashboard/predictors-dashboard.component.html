@@ -78,7 +78,19 @@
     }
 
     @if (addPredictorOpen()) {
-      <app-predictor-draft-slideout [saving]="saving()" [error]="actionError()" [initialStationSearch]="initialStationSearch()" (submitted)="savePredictorDraft($event)" (cancelled)="closeAddPredictor()"></app-predictor-draft-slideout>
+      <app-predictor-draft-slideout
+        [saving]="saving() || weatherWorkflow.busy()"
+        [error]="actionError()"
+        [initialStationSearch]="initialStationSearch()"
+        [defaultWeatherRange]="workspace.defaultWeatherRange()"
+        [weatherPreview]="weatherPreview()"
+        [workflowState]="weatherWorkflow.state()"
+        (submitted)="savePredictorDraft($event)"
+        (weatherPreviewRequested)="previewWeatherPredictors($event)"
+        (weatherConfirmed)="confirmWeatherPredictors()"
+        (draftChanged)="clearWeatherPreview()"
+        (cancelled)="closeAddPredictor()">
+      </app-predictor-draft-slideout>
     }
   </div></div>
 }

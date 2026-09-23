@@ -1,0 +1,74 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { HourlyWeatherDataService } from '@platform/weather/hourly-weather-data.service';
+import { Observable, Subject, of } from 'rxjs';
+import { vi } from 'vitest';
+import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
+import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.service';
+
+const actions = {
+  createWeatherPredictors: vi.fn(async () => undefined),
+  applyWeatherMaintenance: vi.fn(async () => undefined),
+  applyWeatherSettings: vi.fn(async () => undefined)
+};
+
+describe('PredictorWeatherWorkflowService', () => {
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it('builds and commits a reviewed multi-type generation preview', async () => {
+    const service = createService(of([hourlyReading()]));
+    const preview = await service.previewGeneration({
+      production: false,
+      station: { ID: 'station-a', name: 'Oak Ridge' } as any,
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      definitions: [
+        { weatherDataType: 'HDD', name: 'HDD', baseTemperature: 60 },
+        { weatherDataType: 'relativeHumidity', name: 'Humidity' }
+      ]
+    });
+
+    expect(preview?.predictors).toHaveLength(2);
+    expect(preview?.readings).toHaveLength(2);
+    expect(preview?.workspaceRevision).toBe(7);
+    await service.commitGeneration(preview!);
+    expect(actions.createWeatherPredictors).toHaveBeenCalledWith(preview);
+    expect(service.state().status).toBe('idle');
+  });
+
+  it('cancels an in-flight weather request without producing a preview', async () => {
+    const response = new Subject<any[]>();
+    const service = createService(response);
+    const result = service.previewGeneration({
+      production: false,
+      station: { ID: 'station-a', name: 'Oak Ridge' } as any,
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      definitions: [{ weatherDataType: 'HDD', name: 'HDD', baseTemperature: 60 }]
+    });
+
+    service.cancel();
+
+    await expect(result).resolves.toBeUndefined();
+    expect(service.state().status).toBe('cancelled');
+  });
+});
+
+function createService(response: Observable<any[]> | Subject<any[]>): PredictorWeatherWorkflowService {
+  TestBed.configureTestingModule({ providers: [
+    PredictorWeatherWorkflowService,
+    { provide: AccountWorkspaceStore, useValue: {
+      account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }), revision: signal(7)
+    } },
+    { provide: HourlyWeatherDataService, useValue: { load: vi.fn(() => response) } },
+    { provide: PredictorWorkspaceActionsService, useValue: actions }
+  ] });
+  return TestBed.inject(PredictorWeatherWorkflowService);
+}
+
+function hourlyReading(): any {
+  return {
+    time: new Date(2026, 0, 1, 0), dry_bulb_temp: 50, humidity: 45,
+    dew_point_temp: 40, wet_bulb_temp: 45, precipitation: 0
+  };
+}

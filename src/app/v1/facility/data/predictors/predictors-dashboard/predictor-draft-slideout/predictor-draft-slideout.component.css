@@ -6,4 +6,21 @@
 .predictor-draft-form label small { color: var(--v1-muted); font-weight: 500; }
 .predictor-draft-form input, .predictor-draft-form select { width: 100%; min-width: 0; min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
 .predictor-draft-form__footer { display: flex; gap: .5rem; justify-content: flex-end; padding-top: .75rem; border-top: 1px solid var(--v1-border); }
+.predictor-weather-types { display: grid; gap: .8rem; padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface-subtle); }
+.predictor-weather-types h3, .predictor-weather-review h2 { margin: 0; font-size: 1rem; }
+.predictor-weather-types p, .predictor-weather-review header p { margin: 0 0 .15rem; color: var(--v1-muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.predictor-weather-types__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
+.predictor-weather-types__option { display: flex !important; grid-template-columns: auto 1fr; align-items: center; padding: .5rem .65rem; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.predictor-weather-types__option input { width: auto; min-height: auto; }
+.predictor-weather-types__definitions { display: grid; gap: .65rem; }
+.predictor-weather-types__definition { display: grid; grid-template-columns: minmax(0, 1fr) minmax(10rem, .55fr); gap: .65rem; }
+.predictor-weather-review__list { display: grid; gap: .45rem; }
+.predictor-weather-review__list article { display: flex; gap: .65rem; align-items: center; padding: .7rem; border: 1px solid var(--v1-border); background: var(--v1-surface-subtle); }
+.predictor-weather-review__list article div { display: grid; }
+.predictor-weather-review__list article span { color: var(--v1-muted); font-size: .78rem; }
+.predictor-weather-review__facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; gap: .5rem; }
+.predictor-weather-review__facts div { padding: .65rem; background: var(--v1-surface-subtle); }
+.predictor-weather-review__facts dt { color: var(--v1-muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; }
+.predictor-weather-review__facts dd { margin: .1rem 0 0; font-weight: 700; }
 @media (max-width: 42rem) { .predictor-draft-form__grid { grid-template-columns: 1fr; } .predictor-draft-form__footer { display: grid; } }
+@media (max-width: 42rem) { .predictor-weather-types__options, .predictor-weather-types__definition, .predictor-weather-review__facts { grid-template-columns: 1fr; } }

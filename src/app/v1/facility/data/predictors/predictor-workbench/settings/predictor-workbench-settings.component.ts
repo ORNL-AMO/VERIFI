@@ -13,18 +13,23 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorSettingsSaveState, WEATHER_DATA_TYPE_OPTIONS } from '../../models';
+import { WeatherMaintenancePreview } from '../../models';
+import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherStationSelectorComponent } from '../../shared/weather-station-selector/weather-station-selector.component';
 import { ConfirmDeletePredictorModalComponent } from '../../predictors-dashboard/predictor-browse-card/confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
 import { PredictorSettingsForm, PredictorSettingsFormService } from './predictor-settings-form.service';
+import { WeatherMaintenanceSlideoutComponent } from '../readings/weather-maintenance-slideout/weather-maintenance-slideout.component';
 
 @Component({
   selector: 'app-predictor-workbench-settings', templateUrl: './predictor-workbench-settings.component.html',
   styleUrls: ['./predictor-workbench-settings.component.css'], standalone: true,
-  imports: [ReactiveFormsModule, IconComponent, WeatherStationSelectorComponent, ConfirmDeletePredictorModalComponent]
+  imports: [ReactiveFormsModule, IconComponent, WeatherStationSelectorComponent, ConfirmDeletePredictorModalComponent,
+    WeatherMaintenanceSlideoutComponent]
 })
 export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, OnDestroy {
   private readonly formService = inject(PredictorSettingsFormService);
   private readonly actions = inject(PredictorWorkspaceActionsService);
+  readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -37,6 +42,9 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
   readonly saveMessage = signal('Changes save automatically.');
   readonly deleting = signal(false);
   readonly deleteError = signal<string | undefined>(undefined);
+  readonly weatherDefinitionDirty = signal(false);
+  readonly weatherPreviewOpen = signal(false);
+  readonly weatherPreview = signal<WeatherMaintenancePreview | undefined>(undefined);
   readonly weatherTypes = WEATHER_DATA_TYPE_OPTIONS;
   readonly hasReadings = computed(() => this.workspace.selectedReadings().length > 0);
   readonly supportedPredictor = computed(() => {
@@ -74,6 +82,9 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
       this.currentPredictorGuid = predictor.guid;
       this.saveState.set('idle');
       this.saveMessage.set('Changes save automatically.');
+      this.weatherDefinitionDirty.set(false);
+      this.weatherPreviewOpen.set(false);
+      this.weatherPreview.set(undefined);
       this.form.set(this.formService.build(predictor));
     }
     untracked(() => this.applyEnabledState());
@@ -87,6 +98,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     this.clearDebounce();
     this.unregisterUnsavedChanges();
     this.hideDeleteModal();
+    this.weatherWorkflow.reset();
   }
 
   hasUnsavedChanges(): boolean { return !!this.form()?.dirty; }
@@ -95,6 +107,10 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     const predictor = this.workspace.selectedPredictor();
     if (predictor && this.supportedPredictor()) this.form.set(this.formService.build(predictor));
     this.clearDebounce();
+    this.weatherDefinitionDirty.set(false);
+    this.weatherPreviewOpen.set(false);
+    this.weatherPreview.set(undefined);
+    this.weatherWorkflow.reset();
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -112,22 +128,34 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     form?.updateValueAndValidity();
     void this.saveNow();
   }
+  onWeatherDefinitionChange(): void {
+    const form = this.form();
+    form?.markAsDirty();
+    form?.updateValueAndValidity();
+    this.weatherDefinitionDirty.set(true);
+    if (this.hasReadings()) {
+      this.saveState.set('idle');
+      this.saveMessage.set('Review recalculated readings to save these weather settings.');
+      return;
+    }
+    void this.saveNow();
+  }
   selectStation(station: WeatherStation): void {
     const form = this.form();
-    if (!form || !this.canEdit() || this.hasReadings()) return;
+    if (!form || !this.canEdit()) return;
     form.controls.weatherStationId.setValue(station.ID);
     form.controls.weatherStationName.setValue(station.name);
     form.markAsDirty();
     form.updateValueAndValidity();
-    void this.saveNow();
+    this.onWeatherDefinitionChange();
   }
   setWeatherDataType(value: string): void {
     const form = this.form();
-    if (!form || this.hasReadings()) return;
+    if (!form || !this.canEdit()) return;
     form.controls.weatherDataType.setValue(value as WeatherDataType);
     form.markAsDirty();
     form.updateValueAndValidity();
-    void this.saveNow();
+    this.onWeatherDefinitionChange();
   }
 
   async saveNow(): Promise<void> {
@@ -143,18 +171,76 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
       return;
     }
     const updated = this.formService.updatePredictor(predictor, form);
+    if (predictor.predictorType === 'Weather' && this.hasReadings() && this.weatherDefinitionDirty()) {
+      await this.previewWeatherSettings(predictor, updated);
+      return;
+    }
     this.saveState.set('saving');
     this.saveMessage.set('Saving settings…');
     this.applyEnabledState();
     try {
       await this.actions.updatePredictor(updated);
       form.markAsPristine();
+      this.weatherDefinitionDirty.set(false);
       this.saveState.set('saved');
       this.saveMessage.set('Saved.');
     } catch {
       this.saveState.set('error');
       this.saveMessage.set('Settings could not be saved. Try again.');
     } finally { this.applyEnabledState(); }
+  }
+
+  async previewWeatherSettings(currentPredictor = this.workspace.selectedPredictor(), proposedPredictor?: typeof currentPredictor): Promise<void> {
+    const form = this.form();
+    if (!form || !currentPredictor || currentPredictor.predictorType !== 'Weather') return;
+    form.updateValueAndValidity();
+    if (form.invalid) {
+      form.markAllAsTouched();
+      this.saveState.set('invalid');
+      this.saveMessage.set('Resolve validation issues before recalculating readings.');
+      return;
+    }
+    const proposed = proposedPredictor ?? this.formService.updatePredictor(currentPredictor, form);
+    this.clearDebounce();
+    this.weatherPreviewOpen.set(true);
+    this.weatherPreview.set(undefined);
+    this.saveState.set('saving');
+    this.saveMessage.set('Preparing recalculated readings…');
+    const preview = await this.weatherWorkflow.previewSettingsChange(currentPredictor, proposed, this.workspace.selectedReadings());
+    this.weatherPreview.set(preview);
+    this.saveState.set(preview ? 'idle' : 'error');
+    this.saveMessage.set(preview ? 'Review the calculated changes before saving.' : 'Weather data could not be prepared. Try again.');
+  }
+
+  async confirmWeatherSettings(): Promise<void> {
+    const preview = this.weatherPreview();
+    const form = this.form();
+    if (!preview || !form || this.saveState() === 'saving') return;
+    this.saveState.set('saving');
+    this.saveMessage.set('Saving settings and recalculated readings…');
+    try {
+      await this.weatherWorkflow.commitSettings(preview);
+      form.markAsPristine();
+      this.weatherDefinitionDirty.set(false);
+      this.weatherPreviewOpen.set(false);
+      this.weatherPreview.set(undefined);
+      this.saveState.set('saved');
+      this.saveMessage.set('Saved.');
+    } catch {
+      this.saveState.set('error');
+      this.saveMessage.set('Settings and readings could not be saved. Try again.');
+    }
+  }
+
+  closeWeatherPreview(): void {
+    if (this.weatherWorkflow.busy()) this.weatherWorkflow.cancel();
+    else this.weatherWorkflow.reset();
+    this.weatherPreviewOpen.set(false);
+    this.weatherPreview.set(undefined);
+    if (this.form()?.dirty) {
+      this.saveState.set('idle');
+      this.saveMessage.set('Weather setting changes remain unsaved.');
+    }
   }
 
   requestDeletePredictor(): void {
@@ -198,8 +284,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     if (!this.canEdit()) { form.disable({ emitEvent: false }); return; }
     form.enable({ emitEvent: false });
     if (this.hasReadings()) {
-      ['predictorType', 'weatherDataType', 'weatherStationId', 'weatherStationName', 'heatingBaseTemperature', 'coolingBaseTemperature']
-        .forEach(name => form.get(name)?.disable({ emitEvent: false }));
+      form.controls.predictorType.disable({ emitEvent: false });
     }
   }
   private hideDeleteModal(): void {

@@ -1,9 +1,8 @@
 /**
  * Persistence-only handler for predictor and predictor-data commands.
  *
- * Weather bulk refresh is coordinated by WeatherPredictorManagementService
- * (migrated in a later commit); this handler exposes the lower-level CRUD
- * primitives consumed by that service and by direct data-entry components.
+ * Compound weather operations use the transaction methods in this handler so
+ * predictor settings, monthly data, and analysis references commit together.
  */
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -24,6 +23,12 @@ export interface PredictorDataBatchChanges {
 export interface WeatherPredictorCreationChanges {
   readonly predictors: readonly IdbPredictor[];
   readonly predictorData: readonly IdbPredictorData[];
+  readonly facilityAnalyses: readonly IdbAnalysisItem[];
+}
+
+export interface WeatherPredictorUpdateChanges {
+  readonly predictor: IdbPredictor;
+  readonly predictorData: PredictorDataBatchChanges;
   readonly facilityAnalyses: readonly IdbAnalysisItem[];
 }
 
@@ -160,6 +165,40 @@ export class PredictorCommandHandler {
           throw new WorkspaceWriteError('validation-failed', 'Facility analysis is missing its IndexedDB id.');
         }
         await transaction.put('analysisItems', analysis);
+      }
+    });
+  }
+
+  async updateWeatherPredictor(
+    changes: WeatherPredictorUpdateChanges,
+    activeAccountGuid: string
+  ): Promise<void> {
+    const predictor = changes.predictor;
+    this.assertOwnership(predictor.accountId, activeAccountGuid, 'predictor');
+    if (predictor.id === undefined) {
+      throw new WorkspaceWriteError('validation-failed', 'Predictor is missing its IndexedDB id.');
+    }
+    changes.predictorData.add.forEach(entry => this.assertPredictorData(entry, predictor.guid, activeAccountGuid));
+    changes.predictorData.update.forEach(entry => {
+      this.assertPredictorData(entry, predictor.guid, activeAccountGuid);
+      if (entry.id === undefined) throw new WorkspaceWriteError('validation-failed', 'Predictor data is missing its IndexedDB id.');
+    });
+    changes.predictorData.delete.forEach(entry => {
+      this.assertPredictorData(entry, predictor.guid, activeAccountGuid);
+      if (entry.id === undefined) throw new WorkspaceWriteError('validation-failed', 'Predictor data is missing its IndexedDB id.');
+    });
+    changes.facilityAnalyses.forEach(analysis => {
+      this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
+      if (analysis.id === undefined) throw new WorkspaceWriteError('validation-failed', 'Facility analysis is missing its IndexedDB id.');
+    });
+
+    await this.transactions.runTransaction(['predictor', 'predictorData', 'analysisItems'], 'readwrite', async transaction => {
+      await transaction.put('predictor', { ...predictor, modifiedDate: new Date() });
+      for (const entry of changes.predictorData.delete) await transaction.deleteByKey('predictorData', entry.id);
+      for (const entry of changes.predictorData.update) await transaction.put('predictorData', { ...entry });
+      for (const entry of changes.predictorData.add) await transaction.add('predictorData', { ...entry });
+      for (const analysis of changes.facilityAnalyses) {
+        await transaction.put('analysisItems', { ...analysis, modifiedDate: new Date() });
       }
     });
   }

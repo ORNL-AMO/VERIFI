@@ -1,0 +1,21 @@
+:host { display: block; }
+.weather-maintenance { padding: 1rem; }
+.weather-maintenance section { display: grid; gap: 1rem; }
+.weather-maintenance header p, .weather-maintenance header h2 { margin: 0; }
+.weather-maintenance header p { color: var(--v1-muted); font-size: .74rem; font-weight: 800; text-transform: uppercase; }
+.weather-maintenance header h2 { font-size: 1.05rem; }
+.weather-maintenance header span, .weather-maintenance__hint { color: var(--v1-muted); font-size: .82rem; }
+.weather-maintenance__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+.weather-maintenance label { display: grid; gap: .3rem; }
+.weather-maintenance label span { font-size: .82rem; font-weight: 800; }
+.weather-maintenance input, .weather-maintenance select { min-height: var(--v1-control-height); padding: .48rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
+.weather-maintenance__wide { grid-column: 1 / -1; }
+.weather-maintenance__table-wrap { overflow: auto; border: 1px solid var(--v1-border); }
+.weather-maintenance table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.weather-maintenance th, .weather-maintenance td { padding: .6rem; border-bottom: 1px solid var(--v1-border); text-align: left; white-space: nowrap; }
+.weather-maintenance tr.is-change { background: var(--v1-warning-soft, rgba(245, 158, 11, .08)); }
+.weather-maintenance td:last-child { display: flex; gap: .35rem; align-items: center; }
+.weather-maintenance__kind { text-transform: capitalize; }
+.weather-maintenance footer { display: flex; gap: .65rem; justify-content: flex-end; }
+.weather-maintenance__loading { display: flex; gap: .55rem; align-items: center; min-height: 10rem; justify-content: center; }
+@media (max-width: 42rem) { .weather-maintenance__grid { grid-template-columns: 1fr; } .weather-maintenance__wide { grid-column: auto; } }

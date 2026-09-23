@@ -31,7 +31,7 @@ Findings use one of five categories: **configuration**, **completeness**, **curr
 | `account.facilities.missing` | Add a facility | Error / readiness | The account has no facilities. | Yes; Account Settings > Portfolio. |
 | `facility.meters.missing` | Add utility meters | Error / readiness | The facility has no meters. | Yes; Facility Data > Meters. |
 | `facility.meter-groups.missing` | Add meter groups | Warning / readiness | The facility has meters but no meter groups. | Yes; Facility Data > Meter Grouping. |
-| `facility.predictors.missing` | Add predictors | Error / readiness | The facility has no predictors. This remains a facility-wide readiness finding. | Yes; fix workflow currently unavailable in v1. |
+| `facility.predictors.missing` | Add predictors | Error / readiness | The facility has no predictors. This remains a facility-wide readiness finding. | Yes; Facility Data > Predictors. Direct status navigation remains deferred. |
 
 Account summaries include account findings and all descendant facility, data, analysis, and report findings. Facility summaries include their descendant meter, predictor, analysis, and report findings. Aggregation does not create duplicate parent findings.
 
@@ -62,7 +62,7 @@ Required meter configuration includes applicable name, source, starting and ener
 | `predictor.data.negative` | Review negative predictor data | Error / quality | A value is negative and negative values are not allowed. | Yes; Predictor Readings or Settings. Direct status navigation remains deferred. |
 | `predictor.currency.stale` | Update stale predictor data | Warning / currency | The latest entry is older than the configured threshold. Facility lag is included as evidence when both apply. | Yes; Predictor Readings. Direct status navigation remains deferred. |
 | `predictor.currency.behind-facility` | Bring predictor data current | Warning / currency | Predictor data ends before the facility's latest meter month and is not already stale. | Yes; Predictor Readings. Direct status navigation remains deferred. |
-| `predictor.weather.warning` | Review weather data | Warning / quality | A weather predictor contains a source-data warning that has not been ignored. | Yes; Predictor Readings supports manual overrides. Direct status navigation remains deferred. |
+| `predictor.weather.warning` | Review weather data | Warning / quality | A weather predictor contains an incomplete-source warning or revised source data that has not been reconciled or ignored. | Yes; Predictor Readings supports manual overrides, reviewed source refresh, range maintenance, and restoration of calculated values. Direct status navigation remains deferred. |
 
 Independent predictor problems are all reported; one warning cannot hide an error.
 

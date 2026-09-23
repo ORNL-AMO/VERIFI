@@ -7,6 +7,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { PredictorReadingEditorComponent } from './predictor-reading-editor/predictor-reading-editor.component';
 import { PredictorWorkbenchReadingsComponent } from './predictor-workbench-readings.component';
 
@@ -31,6 +32,17 @@ describe('PredictorWorkbenchReadingsComponent', () => {
     fixture.componentInstance.openAddReading();
 
     expect(fixture.componentInstance.editorPanel()?.reading.weatherOverride).toBe(true);
+  });
+
+  it('keeps weather maintenance open while a preview is loading', () => {
+    const fixture = createFixture({ predictorType: 'Weather' });
+    const workflow = TestBed.inject(PredictorWeatherWorkflowService) as any;
+    fixture.componentInstance.openWeatherMaintenance();
+
+    workflow.busy.set(true);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.weatherPanelMode()).toBe('maintenance');
   });
 
   it('saves through workspace actions and closes the editor', async () => {
@@ -96,7 +108,11 @@ function createFixture(predictorOverrides: Record<string, unknown> = {}, actionO
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
         selectedPredictor: signal(predictor), selectedReadings, canWrite: signal(true), hasPending: signal(false),
-        isLoading: signal(false)
+        isLoading: signal(false), defaultWeatherRange: signal(undefined)
+      } },
+      { provide: PredictorWeatherWorkflowService, useValue: {
+        state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(), cancel: vi.fn(),
+        previewMaintenance: vi.fn(), previewRestore: vi.fn(), commitMaintenance: vi.fn()
       } },
       { provide: WorkspaceStatusService, useValue: { state: signal('ready'), predictorFindings: vi.fn(() => []) } },
       { provide: PredictorWorkspaceActionsService, useValue: {

@@ -16,6 +16,7 @@ describe('PredictorWorkbenchComponent', () => {
     const selectedCard = signal<any>({
       predictor: selectedPredictor(), typeLabel: 'Weather', classificationLabel: 'Production', unitLabel: 'HDD',
       icon: 'thermometerSnowflake',
+      statusIcon: 'success', statusTone: 'success', statusLabel: 'Valid',
       readingCount: 4, firstReadingLabel: 'Jan 2025', latestReadingLabel: 'Apr 2025'
     });
     const factsExpanded = signal(true);

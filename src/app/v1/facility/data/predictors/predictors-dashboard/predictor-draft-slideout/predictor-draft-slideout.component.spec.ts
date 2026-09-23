@@ -11,16 +11,19 @@ describe('PredictorDraftSlideoutComponent', () => {
     });
     const fixture = TestBed.createComponent(PredictorDraftSlideoutComponent);
     const component = fixture.componentInstance;
-    const submitted = vi.fn();
-    component.submitted.subscribe(submitted);
-    component.setName('Weather');
+    const previewRequested = vi.fn();
+    component.weatherPreviewRequested.subscribe(previewRequested);
     component.setPredictorType('Weather');
     component.submit();
-    expect(submitted).not.toHaveBeenCalled();
+    expect(previewRequested).not.toHaveBeenCalled();
 
     component.selectStation({ ID: 'station-a', name: 'Oak Ridge' } as any);
-    component.setBaseTemperature('60');
+    component.setWeatherStart('2026-01');
+    component.setWeatherEnd('2026-03');
     component.submit();
-    expect(submitted).toHaveBeenCalledWith(expect.objectContaining({ predictorType: 'Weather', baseTemperature: 60 }));
+    expect(previewRequested).toHaveBeenCalledWith(expect.objectContaining({
+      station: expect.objectContaining({ ID: 'station-a' }),
+      definitions: [expect.objectContaining({ weatherDataType: 'HDD', baseTemperature: 60 })]
+    }));
   });
 });

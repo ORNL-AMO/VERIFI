@@ -7,6 +7,12 @@ import { getDetailedDataForMonth } from '@v0/weather-data/weatherDataCalculation
 import { environment } from 'src/environments/environment';
 import { WeatherStationLookupService, mapWeatherStation } from '@platform/weather/weather-station-lookup.service';
 import { WeatherLocation, WeatherStationResponse } from '@platform/weather/weather-station-lookup.models';
+import { HourlyWeatherDataService } from '@platform/weather/hourly-weather-data.service';
+import {
+  HourlyWeatherReading,
+  WeatherDataParameter,
+  WeatherMonthRange
+} from '@platform/weather/hourly-weather-data.models';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +51,11 @@ export class WeatherDataService {
     // 'Access-Control-Allow-Methods': 'POST'
   });
 
-  constructor(private httpClient: HttpClient, private stationLookup: WeatherStationLookupService) {
+  constructor(
+    private httpClient: HttpClient,
+    private stationLookup: WeatherStationLookupService,
+    private hourlyWeatherData: HourlyWeatherDataService
+  ) {
     this.applyToFacility = new BehaviorSubject<boolean>(false);
   }
 
@@ -136,30 +146,15 @@ export class WeatherDataService {
 
   async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading> | 'error'> {
     try {
-      let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
-      let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
-      return parsedData;
+      const range: WeatherMonthRange = {
+        start: { year: startDate.getFullYear(), month: startDate.getMonth() + 1 },
+        end: { year: endDate.getFullYear(), month: endDate.getMonth() + 1 }
+      };
+      return [...await firstValueFrom(this.hourlyWeatherData.load({ stationId, range, parameters }))];
     } catch (err) {
       console.log(err)
       return 'error';
     }
-  }
-
-
-  getHourlyDataAPI(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Observable<string> {
-    let monthAfterEndDate: Date = new Date(endDate);
-    monthAfterEndDate.setMonth(monthAfterEndDate.getMonth() + 1);
-    let data = {
-      "station_id": stationId,
-      "start_date": getWeatherDataDate(startDate),
-      "end_date": getWeatherDataDate(monthAfterEndDate),
-      "parameters": ['dry_bulb_temp', 'humidity', 'dew_point_temp', 'wet_bulb_temp', 'pressure', 'precipitation', 'wind_speed']
-    };
-    let httpOptions = {
-      responseType: 'text' as const,
-      headers: this.requestHeaders
-    };
-    return this.httpClient.post(environment.weatherApi + '/data', data, httpOptions);
   }
 
 
@@ -192,7 +187,7 @@ export function getWeatherDataDate(date: Date): string {
 }
 
 
-export type WeatherDataParams = 'dry_bulb_temp' | 'humidity' | 'dew_point_temp' | 'wet_bulb_temp' | 'pressure' | 'precipitation' | 'wind_speed';
+export type WeatherDataParams = WeatherDataParameter;
 
 export function getWeatherStation(response: WeatherStationResponse): WeatherStation {
   return mapWeatherStation(response);
@@ -200,15 +195,6 @@ export function getWeatherStation(response: WeatherStationResponse): WeatherStat
 
 export type { WeatherStationResponse } from '@platform/weather/weather-station-lookup.models';
 
-export interface WeatherDataReading {
-  "time": Date,
-  'dry_bulb_temp': number,
-  'humidity': number,
-  'dew_point_temp': number,
-  'wet_bulb_temp': number,
-  'pressure': number,
-  'precipitation': number,
-  'wind_speed': number
-}
+export type WeatherDataReading = HourlyWeatherReading;
 
 export type NominatimLocation = WeatherLocation;

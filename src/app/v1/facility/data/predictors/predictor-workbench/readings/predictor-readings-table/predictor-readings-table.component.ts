@@ -29,11 +29,13 @@ export class PredictorReadingsTableComponent {
     if (!value?.hasAttention) this.filter.set('all');
   }
   @Input() predictorName?: string;
+  @Input() isWeather = false;
   @Input() canAct = true;
   @Output() addRequested = new EventEmitter<void>();
   @Output() editRequested = new EventEmitter<IdbPredictorData>();
   @Output() deleteRequested = new EventEmitter<IdbPredictorData>();
   @Output() bulkDeleteRequested = new EventEmitter<readonly IdbPredictorData[]>();
+  @Output() restoreRequested = new EventEmitter<IdbPredictorData>();
 
   readonly currentPage = signal(1);
   readonly pageSize = signal(10);

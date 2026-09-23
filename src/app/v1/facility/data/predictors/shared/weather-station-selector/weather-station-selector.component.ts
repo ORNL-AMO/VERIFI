@@ -34,7 +34,7 @@ export class WeatherStationSelectorComponent implements OnChanges {
   readonly currentStationUnavailable = signal(false);
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialSearch'] && !this.query()) this.query.set(this.initialSearch);
+    if (changes['initialSearch'] && !this.query()) this.query.set(this.initialSearch || '');
     if (changes['selectedStationId']) void this.verifyCurrentStation();
   }
 

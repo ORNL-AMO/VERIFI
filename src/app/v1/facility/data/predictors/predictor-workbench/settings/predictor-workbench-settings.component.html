@@ -14,7 +14,7 @@
       <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
     }
     @if (hasReadings()) {
-      <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span><strong>Readings exist for this predictor.</strong> Type and weather calculation settings are locked to avoid invalidating existing values.</span></div>
+      <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span><strong>Readings exist for this predictor.</strong> Changing its weather source or calculation settings requires reviewing the recalculated values before saving.</span></div>
     }
 
     <section class="predictor-settings__section" aria-labelledby="predictor-settings-identity">
@@ -45,9 +45,9 @@
             @for (option of weatherTypes; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
           </select></label>
           @if (settingsForm.controls.weatherDataType.value === 'HDD') {
-            <label><span>Heating base temperature (°F)</span><input type="number" formControlName="heatingBaseTemperature" required (change)="onImmediateChange()"></label>
+            <label><span>Heating base temperature (°F)</span><input type="number" formControlName="heatingBaseTemperature" required (change)="onWeatherDefinitionChange()"></label>
           } @else if (settingsForm.controls.weatherDataType.value === 'CDD') {
-            <label><span>Cooling base temperature (°F)</span><input type="number" formControlName="coolingBaseTemperature" required (change)="onImmediateChange()"></label>
+            <label><span>Cooling base temperature (°F)</span><input type="number" formControlName="coolingBaseTemperature" required (change)="onWeatherDefinitionChange()"></label>
           }
         </div>
         @if (settingsForm.errors?.['weatherStationRequired'] || settingsForm.errors?.['heatingBaseRequired'] || settingsForm.errors?.['coolingBaseRequired']) {
@@ -57,7 +57,7 @@
           [selectedStationId]="settingsForm.controls.weatherStationId.value"
           [selectedStationName]="settingsForm.controls.weatherStationName.value"
           [initialSearch]="initialStationSearch()"
-          [disabled]="!canEdit() || hasReadings()"
+          [disabled]="!canEdit()"
           (stationSelected)="selectStation($event)">
         </app-weather-station-selector>
       </section>
@@ -77,11 +77,25 @@
 
     <footer class="predictor-settings__footer">
       <span>Press Ctrl+S or ⌘S to save pending text changes.</span>
+      @if (weatherDefinitionDirty() && hasReadings()) {
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit()" (click)="previewWeatherSettings()"><app-ui-icon name="refresh"></app-ui-icon> Review and Save</button>
+      }
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDeletePredictor()"><app-ui-icon name="delete"></app-ui-icon> Delete predictor</button>
     </footer>
   </form>
 } @else {
   <section class="v1-settings-panel predictor-settings"><div class="v1-alert v1-alert--info"><app-ui-icon name="info"></app-ui-icon><span>Select a predictor to edit its settings.</span></div></section>
+}
+
+@if (weatherPreviewOpen()) {
+  <app-weather-maintenance-slideout
+    mode="settings"
+    [preview]="weatherPreview()"
+    [workflowState]="weatherWorkflow.state()"
+    [saving]="saveState() === 'saving' || weatherWorkflow.busy()"
+    (confirmed)="confirmWeatherSettings()"
+    (cancelled)="closeWeatherPreview()">
+  </app-weather-maintenance-slideout>
 }
 
 <ng-template #deletePredictorConfirmModal>

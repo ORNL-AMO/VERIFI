@@ -19,6 +19,7 @@ export interface PredictorReadingAttentionFlags {
   readonly duplicateMonth: boolean;
   readonly negativeValue: boolean;
   readonly weatherWarning: boolean;
+  readonly weatherDataChanged: boolean;
   readonly hasAttention: boolean;
 }
 
@@ -76,7 +77,8 @@ export function buildPredictorReadingTableView(
       negativeValue: validValue && reading.amount < 0 && !predictor.canBeNegative,
       weatherWarning: predictor.predictorType === 'Weather'
         && !!reading.weatherDataWarning
-        && !predictor.ignoreWeatherDataWarning
+        && !predictor.ignoreWeatherDataWarning,
+      weatherDataChanged: predictor.predictorType === 'Weather' && !!reading.weatherDataChanged
     };
     return {
       reading,
@@ -87,7 +89,7 @@ export function buildPredictorReadingTableView(
       attention: {
         ...attention,
         hasAttention: attention.invalidDate || attention.invalidValue || attention.duplicateMonth
-          || attention.negativeValue || attention.weatherWarning
+          || attention.negativeValue || attention.weatherWarning || attention.weatherDataChanged
       }
     };
   });

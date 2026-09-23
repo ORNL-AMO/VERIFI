@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { FacilityPredictorsWorkspaceService } from './facility-predictors-workspace.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.service';
 
 describe('FacilityPredictorsWorkspaceService', () => {
   it('sorts predictors and resolves selected predictor readings from the route', () => {
@@ -21,6 +22,7 @@ describe('FacilityPredictorsWorkspaceService', () => {
     TestBed.configureTestingModule({
       providers: [
         FacilityPredictorsWorkspaceService,
+        { provide: PredictorWeatherWorkflowService, useValue: { busy: signal(false) } },
         { provide: WorkspaceStatusService, useValue: { items: signal([]), state: signal('ready') } },
         { provide: Router, useValue: { url: '/v1/workspace/facility/f/data/predictors', events } },
         {
@@ -32,7 +34,8 @@ describe('FacilityPredictorsWorkspaceService', () => {
             hasPending: signal(false),
             status: signal('ready'),
             facilityPredictors: predictors,
-            facilityPredictorData: readings
+            facilityPredictorData: readings,
+            facilityMeterData: signal([])
           }
         }
       ]
@@ -59,6 +62,7 @@ describe('FacilityPredictorsWorkspaceService', () => {
     TestBed.configureTestingModule({
       providers: [
         FacilityPredictorsWorkspaceService,
+        { provide: PredictorWeatherWorkflowService, useValue: { busy: signal(false) } },
         { provide: WorkspaceStatusService, useValue: { items: signal([]), state: signal('ready') } },
         { provide: Router, useValue: { url: '/v1/workspace/facility/f/data/meters/predictors/settings', events } },
         {
@@ -70,7 +74,8 @@ describe('FacilityPredictorsWorkspaceService', () => {
             hasPending: signal(false),
             status: signal('ready'),
             facilityPredictors: signal([]),
-            facilityPredictorData: signal([])
+            facilityPredictorData: signal([]),
+            facilityMeterData: signal([])
           }
         }
       ]
