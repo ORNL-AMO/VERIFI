@@ -4,6 +4,7 @@ import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from '@domain
 import * as _ from 'lodash';
 import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
 import { BetterClimateReportSetup } from '@data/models/overview-report';
+import type { BetterClimateChartDataOption } from '@v0/data-evaluation/account/account-reports/better-climate-report/better-climate-report.adapter';
 
 @Component({
     selector: 'app-top-performers-chart',
@@ -15,7 +16,7 @@ export class TopPerformersChartComponent {
   @Input()
   betterClimateReport: BetterClimateReport;
   @Input()
-  chartDataOption: 'scope1PercentReductions' | 'scope1ReductionContributionRelative' | 'scope2MarketPercentReductions' | 'scope2MarketReductionContributionRelative' | 'scope2LocationPercentReductions' | 'scope2LocationReductionContributionRelative';
+  chartDataOption: BetterClimateChartDataOption;
   @Input()
   betterClimateReportSetup: BetterClimateReportSetup
 
@@ -152,6 +153,26 @@ export class TopPerformersChartComponent {
       return yearSummary.percentReductions.scope2LocationEmissions;
     } else if (this.chartDataOption == 'scope2LocationReductionContributionRelative') {
       return yearSummary.relativeContribution.scope2LocationEmissions;
+    }
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.performanceChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      return await rawPlotly.toImage(this.performanceChart.nativeElement, {
+        format: 'jpeg',
+        height: 700,
+        width: 1400,
+        imageDataOnly: false
+      });
+    } catch {
+      return '';
     }
   }
 }
