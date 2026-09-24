@@ -10,7 +10,8 @@ import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.se
 const actions = {
   createWeatherPredictors: vi.fn(async () => undefined),
   applyWeatherMaintenance: vi.fn(async () => undefined),
-  applyWeatherSettings: vi.fn(async () => undefined)
+  applyWeatherSettings: vi.fn(async () => undefined),
+  applyWeatherStationGroup: vi.fn(async () => undefined)
 };
 
 describe('PredictorWeatherWorkflowService', () => {
@@ -52,13 +53,43 @@ describe('PredictorWeatherWorkflowService', () => {
     await expect(result).resolves.toBeUndefined();
     expect(service.state().status).toBe('cancelled');
   });
+
+  it('loads a station selection preview without saving the station', async () => {
+    const service = createService(of([hourlyReading()]));
+    const preview = await service.previewStationSelection(
+      { ID: 'station-a', name: 'Oak Ridge' } as any,
+      { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      [{ weatherDataType: 'HDD', name: 'HDD 60', baseTemperature: 60 }]
+    );
+
+    expect(preview?.series).toEqual([
+      expect.objectContaining({ name: 'HDD 60', unit: 'days', points: [expect.objectContaining({ warning: true })] })
+    ]);
+    expect(service.state().status).toBe('preview-ready');
+    expect(actions.applyWeatherStationGroup).not.toHaveBeenCalled();
+  });
+
+  it('rejects a station already owned by another weather workbench', async () => {
+    const service = createService(of([hourlyReading()]), [{
+      guid: 'existing', predictorType: 'Weather', weatherStationId: 'station-a'
+    }]);
+    const preview = await service.previewStationGroup({
+      station: { ID: 'station-a', name: 'Oak Ridge' } as any,
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      definitions: [{ weatherDataType: 'HDD', name: 'HDD', baseTemperature: 60, production: false }]
+    });
+
+    expect(preview).toBeUndefined();
+    expect(service.state().error).toContain('already has a workbench');
+  });
 });
 
-function createService(response: Observable<any[]> | Subject<any[]>): PredictorWeatherWorkflowService {
+function createService(response: Observable<any[]> | Subject<any[]>, predictors: any[] = []): PredictorWeatherWorkflowService {
   TestBed.configureTestingModule({ providers: [
     PredictorWeatherWorkflowService,
     { provide: AccountWorkspaceStore, useValue: {
-      account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }), revision: signal(7)
+      account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }), revision: signal(7),
+      facilityPredictors: signal(predictors), facilityAnalyses: signal([])
     } },
     { provide: HourlyWeatherDataService, useValue: { load: vi.fn(() => response) } },
     { provide: PredictorWorkspaceActionsService, useValue: actions }

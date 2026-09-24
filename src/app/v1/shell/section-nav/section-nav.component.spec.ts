@@ -26,9 +26,11 @@ describe('SectionNavComponent', () => {
   let activeMeterGuid: ReturnType<typeof signal<string | undefined>>;
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
   let activePredictorGuid: ReturnType<typeof signal<string | undefined>>;
+  let activeWeatherPredictorGroupKey: ReturnType<typeof signal<string | undefined>>;
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let facilityPredictors: ReturnType<typeof signal<Array<any>>>;
+  let facilityPredictorData: ReturnType<typeof signal<Array<any>>>;
   let setFacility: ReturnType<typeof vi.fn>;
   let statusState: ReturnType<typeof signal<'ready' | 'evaluating'>>;
   let statusItems: ReturnType<typeof signal<StatusItem[]>>;
@@ -46,9 +48,11 @@ describe('SectionNavComponent', () => {
     activeMeterGuid = signal<string | undefined>(undefined);
     activeMeterGroupGuid = signal<string | undefined>(undefined);
     activePredictorGuid = signal<string | undefined>(undefined);
+    activeWeatherPredictorGroupKey = signal<string | undefined>(undefined);
     facilityMeters = signal([]);
     facilityMeterGroups = signal([]);
     facilityPredictors = signal([]);
+    facilityPredictorData = signal([]);
     setFacility = vi.fn();
     statusState = signal<'ready' | 'evaluating'>('ready');
     statusItems = signal([]);
@@ -71,6 +75,7 @@ describe('SectionNavComponent', () => {
             activeMeterGuid,
             activeMeterGroupGuid,
             activePredictorGuid,
+            activeWeatherPredictorGroupKey,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
@@ -78,6 +83,7 @@ describe('SectionNavComponent', () => {
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
+            facilityWeatherPredictorRoute: (_facilityGuid: string, groupKey: string, tab = 'setup') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', groupKey, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -90,7 +96,8 @@ describe('SectionNavComponent', () => {
           useValue: {
             facilityMeters,
             facilityMeterGroups,
-            facilityPredictors
+            facilityPredictors,
+            facilityPredictorData
           }
         },
         {
@@ -381,6 +388,54 @@ describe('SectionNavComponent', () => {
     toggle?.click();
     fixture.detectChanges();
     expect(predictorChildLinks(element)).toHaveLength(0);
+  });
+
+  it('groups weather predictors by station so sidebar attention matches the station workbench', () => {
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeSection.set('data');
+    activeDetail.set('predictors');
+    activeWeatherPredictorGroupKey.set('station:KORD');
+    const weatherPredictors = [
+      { guid: 'cdd', name: 'CDD 65', predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare', weatherDataType: 'CDD' },
+      { guid: 'hdd', name: 'HDD 60', predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare', weatherDataType: 'HDD' },
+      { guid: 'humidity', name: 'Relative Humidity', predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare', weatherDataType: 'relativeHumidity' }
+    ];
+    facilityPredictors.set([
+      ...weatherPredictors,
+      { guid: 'production', name: 'Production', predictorType: 'Standard' }
+    ]);
+    const entity = (guid: string, name: string) => ({
+      kind: 'predictor' as const, guid, name, accountGuid: 'account-a', facilityGuid: 'facility-a'
+    });
+    statusItems.set(presentFindings([
+      ...weatherPredictors.flatMap(predictor => [
+        makeFinding('predictor.weather.warning', 'warning', 'quality', entity(predictor.guid, predictor.name)),
+        makeFinding('predictor.currency.stale', 'warning', 'currency', entity(predictor.guid, predictor.name), {
+          latestPeriod: '2025-12', thresholdMonths: 3
+        })
+      ]),
+      makeFinding('predictor.quality.outlier', 'warning', 'quality', entity('cdd', 'CDD 65'), {
+        count: 1, periods: ['2025-12']
+      })
+    ]));
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const links = predictorChildLinks(fixture.nativeElement);
+
+    expect(links).toHaveLength(2);
+    expect(links[0].textContent).toContain('Chicago O’Hare');
+    expect(links[0].querySelector('.v1-nav__attention')?.textContent).toContain('7');
+    expect(links[0].getAttribute('href')).toContain('/predictors/weather/station:KORD/setup');
+    expect(links[0].getAttribute('aria-current')).toBe('page');
+    expect(links[1].textContent).toContain('Production');
+    const outputs = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-nav__weather-output'));
+    expect(outputs.map(output => output.textContent?.trim())).toEqual(['CDD 65', 'HDD 60', 'Relative Humidity']);
+    expect(outputs).toHaveLength(3);
+    expect(fixture.nativeElement.querySelectorAll('.v1-nav__weather-outputs a')).toHaveLength(0);
+    expect(outputs.every(output => output.querySelector('app-ui-icon'))).toBe(true);
+    expect(links[0].getAttribute('title')).toBe('Chicago O’Hare');
   });
 
   it('shows active severity counts for the Predictors parent and affected child', () => {

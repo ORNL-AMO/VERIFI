@@ -82,7 +82,7 @@ describe('PredictorWorkbenchQualityReportComponent', () => {
 
       element.querySelector<HTMLButtonElement>('[aria-label="Download Predictor readings chart as PNG"]')?.click();
       const chart = fixture.debugElement.query(By.directive(EChartsStubDirective)).injector.get(EChartsStubDirective);
-      expect(chart.downloadPng).toHaveBeenCalledWith('predictor-data-quality-readings');
+      expect(chart.downloadPng).toHaveBeenCalledWith('production-data-quality-readings');
     } finally {
       vi.useRealTimers();
     }

@@ -42,6 +42,31 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(form.controls.name.enabled).toBe(true);
   });
 
+  it('styles form selects as selects and omits the manual-save footer note', () => {
+    const fixture = createFixture();
+    const element = fixture.nativeElement as HTMLElement;
+    const selects = Array.from(element.querySelectorAll<HTMLSelectElement>('select'));
+
+    expect(selects.length).toBeGreaterThan(0);
+    expect(selects.every(select => select.classList.contains('v1-select'))).toBe(true);
+    expect(element.textContent).not.toContain('Press Ctrl+S or ⌘S');
+  });
+
+  it('toggles no longer in use from the footer and saves the predictor', async () => {
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor });
+    const button = fixture.nativeElement.querySelector('.v1-btn--deactivate') as HTMLButtonElement;
+
+    expect(button.textContent).toContain('Mark no longer in use');
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(updatePredictor).toHaveBeenCalledWith(expect.objectContaining({ noLongerInUse: true }));
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+    expect(button.textContent).toContain('Return predictor to use');
+  });
+
   it('previews recalculated readings before saving weather-defining changes', async () => {
     const fixture = createFixture({
       readings: [{ guid: 'reading-a', year: 2026, month: 1 }],

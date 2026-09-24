@@ -27,3 +27,16 @@ export const WEATHER_DATA_TYPE_OPTIONS: ReadonlyArray<{ readonly value: WeatherD
 export function isDegreeDayType(type: WeatherDataType | undefined): type is 'HDD' | 'CDD' {
   return type === 'HDD' || type === 'CDD';
 }
+
+export function weatherPredictorUnit(type: WeatherDataType | undefined): string {
+  const units: Partial<Record<WeatherDataType, string>> = {
+    HDD: 'days',
+    CDD: 'days',
+    relativeHumidity: '%',
+    dryBulbTemp: '°F',
+    wetBulbTemp: '°F',
+    dewPointTemp: '°F',
+    precipitation: 'in'
+  };
+  return type ? units[type] ?? '' : '';
+}

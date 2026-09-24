@@ -76,7 +76,7 @@
 
         <label>
           <span>Status</span>
-          <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+          <select class="v1-select" [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
             <option value="all">All</option>
             <option value="attention">Needs attention</option>
             <option value="noReadings">No readings</option>
@@ -87,7 +87,7 @@
 
         <label>
           <span>Sort</span>
-          <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+          <select class="v1-select" [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
             <option value="attention">Attention first</option>
             <option value="meterName">Meter name</option>
             <option value="latestReading">Latest reading</option>

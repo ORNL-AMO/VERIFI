@@ -5,7 +5,7 @@ import { filter } from 'rxjs';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WeatherMonthRange } from '@platform/weather/hourly-weather-data.models';
-import { buildPredictorCards } from './models';
+import { PredictorBrowseItem, buildPredictorCards, buildWeatherStationGroups } from './models';
 import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.service';
 
 @Injectable()
@@ -18,6 +18,7 @@ export class FacilityPredictorsWorkspaceService {
   private readonly currentUrl = signal(this.router.url);
 
   readonly account = this.workspace.account;
+  readonly revision = this.workspace.revision;
   readonly workspaceState = this.workspace.status;
   readonly isLoading = computed(() => ['idle', 'loading', 'switching'].includes(this.workspaceState()));
   readonly facility = this.workspace.selectedFacility;
@@ -43,6 +44,31 @@ export class FacilityPredictorsWorkspaceService {
     this.status.items(),
     this.status.state() === 'ready'
   ));
+  readonly standardPredictorCards = computed(() => this.predictorCards()
+    .filter(card => card.predictor.predictorType !== 'Weather'));
+  readonly weatherStationGroups = computed(() => buildWeatherStationGroups(
+    this.predictors(),
+    this.predictorReadings(),
+    this.status.items(),
+    this.status.state() === 'ready'
+  ));
+  readonly browseItems = computed<readonly PredictorBrowseItem[]>(() => [
+    ...this.standardPredictorCards().map(card => ({ kind: 'standard' as const, card })),
+    ...this.weatherStationGroups().map(group => ({ kind: 'weather' as const, group }))
+  ]);
+  readonly selectedWeatherGroupKey = computed(() => parseWeatherGroupKey(this.currentUrl()));
+  readonly creatingWeatherGroup = computed(() => parseWeatherCreation(this.currentUrl()));
+  readonly selectedWeatherGroup = computed(() => {
+    const key = this.selectedWeatherGroupKey();
+    return key ? this.weatherStationGroups().find(group => group.routeKey === key) : undefined;
+  });
+  readonly selectedWeatherPredictors = computed(() => this.selectedWeatherGroup()?.predictors ?? []);
+  readonly selectedWeatherReadings = computed(() => {
+    const predictorIds = new Set(this.selectedWeatherPredictors().map(predictor => predictor.guid));
+    return this.predictorReadings().filter(reading => predictorIds.has(reading.predictorId));
+  });
+  readonly weatherGroupNotFound = computed(() =>
+    !!this.selectedWeatherGroupKey() && !this.selectedWeatherGroup());
   readonly selectedPredictorGuid = computed(() => parseSelectedPredictorGuid(this.currentUrl()));
   readonly selectedPredictor = computed(() => {
     const guid = this.selectedPredictorGuid();
@@ -73,10 +99,27 @@ function parseSelectedPredictorGuid(url: string): string | undefined {
   const parts = url.split(/[?#]/, 1)[0].split('/').filter(Boolean);
   const index = parts.findIndex((part, partIndex) => part === 'predictors' && parts[partIndex - 1] === 'data');
   const guid = index >= 0 ? parts[index + 1] : undefined;
-  if (!guid) return undefined;
+  if (!guid || guid === 'weather') return undefined;
+  return decodePart(guid);
+}
+
+function parseWeatherGroupKey(url: string): string | undefined {
+  const parts = url.split(/[?#]/, 1)[0].split('/').filter(Boolean);
+  const index = parts.findIndex((part, partIndex) => part === 'weather' && parts[partIndex - 1] === 'predictors');
+  const key = index >= 0 ? parts[index + 1] : undefined;
+  return key && key !== 'new' ? decodePart(key) : undefined;
+}
+
+function parseWeatherCreation(url: string): boolean {
+  const parts = url.split(/[?#]/, 1)[0].split('/').filter(Boolean);
+  const index = parts.findIndex((part, partIndex) => part === 'weather' && parts[partIndex - 1] === 'predictors');
+  return index >= 0 && parts[index + 1] === 'new';
+}
+
+function decodePart(value: string): string {
   try {
-    return decodeURIComponent(guid);
+    return decodeURIComponent(value);
   } catch {
-    return guid;
+    return value;
   }
 }

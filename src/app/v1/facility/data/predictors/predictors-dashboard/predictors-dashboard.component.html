@@ -1,8 +1,8 @@
 @let currentFacility = workspace.facility();
 @let currentAccount = workspace.account();
 @let accountPredictorsLink = accountPredictorsRoute();
-@let allPredictorCards = workspace.predictorCards();
-@let visiblePredictorCards = filteredPredictorCards();
+@let allBrowseItems = workspace.browseItems();
+@let visibleBrowseItems = filteredBrowseItems();
 
 @if (workspace.isLoading()) {
   <article class="v1-empty-state" role="status">
@@ -54,41 +54,41 @@
         <span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span>
         <input type="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status" [value]="search()" (input)="setSearch($any($event.target).value)">
       </div>
-      <label><span>Status</span><select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+      <label><span>Status</span><select class="v1-select" [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
         <option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">Clear</option>
       </select></label>
-      <label><span>Type</span><select [value]="typeFilter()" (change)="setTypeFilter($any($event.target).value)">
+      <label><span>Type</span><select class="v1-select" [value]="typeFilter()" (change)="setTypeFilter($any($event.target).value)">
         <option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option>
       </select></label>
-      <label><span>Sort</span><select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+      <label><span>Sort</span><select class="v1-select" [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
         <option value="attention">Attention first</option><option value="predictorName">Predictor name</option><option value="latestReading">Latest reading</option>
       </select></label>
     </form>
 
-    @if (allPredictorCards.length === 0) {
+    @if (allBrowseItems.length === 0) {
       <app-data-empty-state icon="predictor" context="facility" title="No predictors" description="Add or import a predictor to get started.">
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddPredictor()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button>
       </app-data-empty-state>
-    } @else if (visiblePredictorCards.length === 0) {
+    } @else if (visibleBrowseItems.length === 0) {
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No predictors match these filters</h2><p>Adjust the search or filter controls to return to the full predictor list.</p></article>
     } @else {
       <div class="v1-predictors-browse__grid" role="list" aria-label="Facility predictors">
-        @for (card of visiblePredictorCards; track card.predictor.guid) { <app-predictor-browse-card [card]="card"></app-predictor-browse-card> }
+        @for (item of visibleBrowseItems; track item.kind === 'standard' ? item.card.predictor.guid : item.group.routeKey) {
+          @if (item.kind === 'standard') {
+            <app-predictor-browse-card [card]="item.card"></app-predictor-browse-card>
+          } @else {
+            <app-weather-station-browse-card [group]="item.group"></app-weather-station-browse-card>
+          }
+        }
       </div>
     }
 
     @if (addPredictorOpen()) {
       <app-predictor-draft-slideout
-        [saving]="saving() || weatherWorkflow.busy()"
+        [saving]="saving()"
         [error]="actionError()"
-        [initialStationSearch]="initialStationSearch()"
-        [defaultWeatherRange]="workspace.defaultWeatherRange()"
-        [weatherPreview]="weatherPreview()"
-        [workflowState]="weatherWorkflow.state()"
         (submitted)="savePredictorDraft($event)"
-        (weatherPreviewRequested)="previewWeatherPredictors($event)"
-        (weatherConfirmed)="confirmWeatherPredictors()"
-        (draftChanged)="clearWeatherPreview()"
+        (weatherSelected)="openWeatherWorkbench()"
         (cancelled)="closeAddPredictor()">
       </app-predictor-draft-slideout>
     }

@@ -1,5 +1,6 @@
 import { getDetailedDataForMonth, hasWeatherDataWarning } from '@domain/calculations/weather/weather-data-calculations';
 import { WeatherStation } from '@data/models/degreeDays';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { getNewIdbPredictor, IdbPredictor, WeatherDataType } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import {
@@ -11,6 +12,7 @@ import {
   weatherMonthValue
 } from '@platform/weather/hourly-weather-data.models';
 import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
+import { weatherPredictorUnit } from './predictor-settings.models';
 
 export type PredictorWeatherWorkflowStatus =
   | 'idle'
@@ -50,6 +52,55 @@ export interface WeatherPredictorGenerationPreview {
   readonly range: WeatherMonthRange;
   readonly predictors: readonly IdbPredictor[];
   readonly readings: readonly IdbPredictorData[];
+  readonly warningMonths: readonly WeatherMonth[];
+}
+
+export interface WeatherStationSelectionPreviewPoint {
+  readonly month: WeatherMonth;
+  readonly monthLabel: string;
+  readonly amount: number;
+  readonly warning: boolean;
+}
+
+export interface WeatherStationSelectionPreviewSeries {
+  readonly key: string;
+  readonly name: string;
+  readonly weatherDataType: WeatherDataType;
+  readonly unit: string;
+  readonly points: readonly WeatherStationSelectionPreviewPoint[];
+}
+
+export interface WeatherStationSelectionPreview {
+  readonly station: WeatherStation;
+  readonly range: WeatherMonthRange;
+  readonly series: readonly WeatherStationSelectionPreviewSeries[];
+  readonly warningMonths: readonly WeatherMonth[];
+}
+
+export interface WeatherStationGroupDefinition extends WeatherPredictorDefinition {
+  readonly predictorGuid?: string;
+  readonly production: boolean;
+}
+
+export interface WeatherStationGroupDraft {
+  readonly sourceGroupKey?: string;
+  readonly station: WeatherStation;
+  readonly range: WeatherMonthRange;
+  readonly definitions: readonly WeatherStationGroupDefinition[];
+}
+
+export interface WeatherStationGroupPreview {
+  readonly workspaceRevision: number;
+  readonly sourceGroupKey?: string;
+  readonly station: WeatherStation;
+  readonly range: WeatherMonthRange;
+  readonly addPredictors: readonly IdbPredictor[];
+  readonly updatePredictors: readonly IdbPredictor[];
+  readonly deletePredictors: readonly IdbPredictor[];
+  readonly addReadings: readonly IdbPredictorData[];
+  readonly updateReadings: readonly IdbPredictorData[];
+  readonly deleteReadings: readonly IdbPredictorData[];
+  readonly facilityAnalyses: readonly IdbAnalysisItem[];
   readonly warningMonths: readonly WeatherMonth[];
 }
 
@@ -132,6 +183,127 @@ export function buildWeatherGenerationPreview(
     predictors,
     readings,
     warningMonths: enumerateWeatherMonths(draft.range).filter(month => warningKeys.has(weatherMonthKey(month.year, month.month)))
+  };
+}
+
+export function buildWeatherStationSelectionPreview(
+  station: WeatherStation,
+  range: WeatherMonthRange,
+  definitions: readonly WeatherPredictorDefinition[],
+  hourlyData: readonly HourlyWeatherReading[]
+): WeatherStationSelectionPreview {
+  const rangeError = validateWeatherMonthRange(range);
+  if (rangeError) throw new Error(rangeError);
+  if (definitions.length === 0) throw new Error('Add at least one weather predictor before selecting a station.');
+  const series = definitions.map((definition, index) => {
+    validateWeatherDefinition(definition);
+    return {
+      key: `${index}:${definition.weatherDataType}:${definition.name}`,
+      name: definition.name.trim(),
+      weatherDataType: definition.weatherDataType,
+      unit: weatherPredictorUnit(definition.weatherDataType),
+      points: calculateWeatherDefinitionMonths(definition, station, range, hourlyData)
+    };
+  });
+  const warningKeys = new Set(series.flatMap(item => item.points)
+    .filter(point => point.warning)
+    .map(point => weatherMonthKey(point.month.year, point.month.month)));
+  return {
+    station,
+    range,
+    series,
+    warningMonths: enumerateWeatherMonths(range)
+      .filter(month => warningKeys.has(weatherMonthKey(month.year, month.month)))
+  };
+}
+
+export function buildWeatherStationGroupPreview(
+  draft: WeatherStationGroupDraft,
+  currentPredictors: readonly IdbPredictor[],
+  currentReadings: readonly IdbPredictorData[],
+  hourlyData: readonly HourlyWeatherReading[],
+  accountGuid: string,
+  facilityGuid: string,
+  workspaceRevision: number
+): WeatherStationGroupPreview {
+  const rangeError = validateWeatherMonthRange(draft.range);
+  if (rangeError) throw new Error(rangeError);
+  const existingByGuid = new Map(currentPredictors.map(predictor => [predictor.guid, predictor]));
+  const seenGuids = new Set<string>();
+  for (const definition of draft.definitions) {
+    if (!definition.predictorGuid) continue;
+    if (seenGuids.has(definition.predictorGuid) || !existingByGuid.has(definition.predictorGuid)) {
+      throw new Error('The weather predictor selection is no longer current. Reload the workbench and try again.');
+    }
+    seenGuids.add(definition.predictorGuid);
+  }
+
+  const deletePredictors = currentPredictors.filter(predictor => !seenGuids.has(predictor.guid));
+  const deletedPredictorIds = new Set(deletePredictors.map(predictor => predictor.guid));
+  const deleteReadings = currentReadings.filter(reading => deletedPredictorIds.has(reading.predictorId));
+  const addPredictors: IdbPredictor[] = [];
+  const updatePredictors: IdbPredictor[] = [];
+  const addReadings: IdbPredictorData[] = [];
+  const updateReadings: IdbPredictorData[] = [];
+  const reconciledDeleteReadings: IdbPredictorData[] = [];
+  const warningKeys = new Set<string>();
+
+  for (const definition of draft.definitions) {
+    const current = definition.predictorGuid ? existingByGuid.get(definition.predictorGuid) : undefined;
+    if (!current) {
+      const generation = buildWeatherGenerationPreview(
+        {
+          production: definition.production,
+          station: draft.station,
+          range: draft.range,
+          definitions: [definition]
+        },
+        hourlyData,
+        accountGuid,
+        facilityGuid,
+        workspaceRevision
+      );
+      addPredictors.push(...generation.predictors);
+      addReadings.push(...generation.readings);
+      generation.warningMonths.forEach(month => warningKeys.add(weatherMonthKey(month.year, month.month)));
+      continue;
+    }
+
+    const proposed = weatherPredictorFromDefinition(current, definition, draft.station);
+    const readings = currentReadings.filter(reading => reading.predictorId === current.guid);
+    const maintenance = buildWeatherMaintenancePreview(
+      current,
+      readings,
+      { range: draft.range, sourceCheck: 'all' },
+      hourlyData,
+      workspaceRevision,
+      'settings',
+      proposed
+    );
+    updatePredictors.push(proposed);
+    addReadings.push(...maintenance.add);
+    updateReadings.push(...maintenance.update);
+    reconciledDeleteReadings.push(...maintenance.delete);
+    maintenance.rows
+      .filter(row => row.proposed?.weatherDataWarning)
+      .forEach(row => warningKeys.add(weatherMonthKey(row.month.year, row.month.month)));
+  }
+
+  const allDeleteReadings = [...deleteReadings, ...reconciledDeleteReadings];
+  return {
+    workspaceRevision,
+    sourceGroupKey: draft.sourceGroupKey,
+    station: draft.station,
+    range: draft.range,
+    addPredictors,
+    updatePredictors,
+    deletePredictors,
+    addReadings,
+    updateReadings,
+    deleteReadings: allDeleteReadings,
+    facilityAnalyses: [],
+    warningMonths: enumerateWeatherMonths(draft.range)
+      .filter(month => warningKeys.has(weatherMonthKey(month.year, month.month)))
   };
 }
 
@@ -254,7 +426,7 @@ function createWeatherPredictor(
   predictor.weatherDataType = definition.weatherDataType;
   predictor.weatherStationId = draft.station.ID;
   predictor.weatherStationName = draft.station.name;
-  predictor.unit = definition.unit?.trim() || undefined;
+  predictor.unit = weatherPredictorUnit(definition.weatherDataType);
   predictor.canBeNegative = false;
   predictor.ignoreDateStatusChecks = false;
   predictor.noLongerInUse = false;
@@ -263,31 +435,92 @@ function createWeatherPredictor(
   return predictor;
 }
 
+function weatherPredictorFromDefinition(
+  current: IdbPredictor,
+  definition: WeatherStationGroupDefinition,
+  station: WeatherStation
+): IdbPredictor {
+  const name = definition.name.trim();
+  if (!name || name.length > 100) throw new Error('Each weather predictor needs a name of 100 characters or fewer.');
+  if ((definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD')
+    && !Number.isFinite(definition.baseTemperature)) {
+    throw new Error('Enter the applicable base temperature for each degree-day predictor.');
+  }
+  const proposed = structuredClone(current);
+  proposed.name = name;
+  proposed.production = definition.production;
+  proposed.productionInAnalysis = definition.production;
+  proposed.unit = weatherPredictorUnit(definition.weatherDataType);
+  proposed.weatherDataType = definition.weatherDataType;
+  proposed.weatherStationId = station.ID;
+  proposed.weatherStationName = station.name;
+  proposed.heatingBaseTemperature = definition.weatherDataType === 'HDD' ? definition.baseTemperature : undefined;
+  proposed.coolingBaseTemperature = definition.weatherDataType === 'CDD' ? definition.baseTemperature : undefined;
+  return proposed;
+}
+
 function calculateWeatherReadings(
   predictor: IdbPredictor,
   range: WeatherMonthRange,
   hourlyData: readonly HourlyWeatherReading[]
 ): IdbPredictorData[] {
+  const definition: WeatherPredictorDefinition = {
+    weatherDataType: predictor.weatherDataType,
+    name: predictor.name,
+    baseTemperature: predictor.weatherDataType === 'HDD'
+      ? predictor.heatingBaseTemperature
+      : predictor.weatherDataType === 'CDD' ? predictor.coolingBaseTemperature : undefined
+  };
+  const station = { ID: predictor.weatherStationId, name: predictor.weatherStationName };
+  return calculateWeatherDefinitionMonths(definition, station, range, hourlyData).map(value => {
+    const reading = getNewIdbPredictorData(predictor);
+    delete reading.id;
+    reading.year = value.month.year;
+    reading.month = value.month.month;
+    reading.amount = value.amount;
+    reading.weatherDataWarning = value.warning;
+    reading.weatherOverride = false;
+    reading.weatherDataChanged = false;
+    return reading;
+  });
+}
+
+function calculateWeatherDefinitionMonths(
+  definition: WeatherPredictorDefinition,
+  station: Pick<WeatherStation, 'ID' | 'name'>,
+  range: WeatherMonthRange,
+  hourlyData: readonly HourlyWeatherReading[]
+): WeatherStationSelectionPreviewPoint[] {
+  const heatingBase = definition.weatherDataType === 'HDD' ? definition.baseTemperature : undefined;
+  const coolingBase = definition.weatherDataType === 'CDD' ? definition.baseTemperature : undefined;
   return enumerateWeatherMonths(range).map(month => {
     const details = getDetailedDataForMonth(
       hourlyData,
       month.month - 1,
       month.year,
-      predictor.heatingBaseTemperature,
-      predictor.coolingBaseTemperature,
-      predictor.weatherStationId,
-      predictor.weatherStationName
+      heatingBase,
+      coolingBase,
+      station.ID,
+      station.name
     );
-    const reading = getNewIdbPredictorData(predictor);
-    delete reading.id;
-    reading.year = month.year;
-    reading.month = month.month;
-    reading.amount = getDegreeDayAmount(details, predictor.weatherDataType);
-    reading.weatherDataWarning = hasWeatherDataWarning(details, predictor.weatherDataType);
-    reading.weatherOverride = false;
-    reading.weatherDataChanged = false;
-    return reading;
+    return {
+      month,
+      monthLabel: formatWeatherMonth(month),
+      amount: getDegreeDayAmount(details, definition.weatherDataType),
+      warning: hasWeatherDataWarning(details, definition.weatherDataType)
+    };
   });
+}
+
+function validateWeatherDefinition(definition: WeatherPredictorDefinition): void {
+  const name = definition.name.trim();
+  if (!name || name.length > 100) {
+    throw new Error('Each weather predictor needs a name of 100 characters or fewer.');
+  }
+  if ((definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD')
+    && !Number.isFinite(definition.baseTemperature)) {
+    throw new Error('Enter the applicable base temperature for each degree-day predictor.');
+  }
 }
 
 function weatherRefreshKeys(

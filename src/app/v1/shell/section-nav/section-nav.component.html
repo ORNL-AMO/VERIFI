@@ -196,7 +196,9 @@
                       <app-ui-icon [name]="item.icon"></app-ui-icon>
                       <span class="v1-nav__item-label">{{ item.label }}</span>
                       @if (facilityPredictorsAttention(); as attention) {
-                        <span class="v1-nav__attention v1-nav__attention--{{ attention.state }}">
+                        <span
+                          class="v1-nav__attention v1-nav__attention--{{ attention.state }}"
+                          [attr.title]="attention.total + ' active status checks across predictors'">
                           <span aria-hidden="true">{{ attention.total }}</span>
                           <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
                         </span>
@@ -220,21 +222,38 @@
                       class="v1-nav__children"
                       [id]="predictorChildrenId()"
                       aria-label="Predictor links">
-                      @for (predictor of predictorItems; track predictor.guid) {
-                        <a
-                          class="v1-nav__child"
-                          [class.active]="isPredictorChildActive(predictor.guid)"
-                          [routerLink]="navigation.facilityPredictorRoute(selectedFacility.guid, predictor.guid, 'settings')"
-                          [attr.aria-current]="isPredictorChildActive(predictor.guid) ? 'page' : null">
-                          <app-ui-icon [name]="predictor.icon"></app-ui-icon>
-                          <span class="v1-nav__item-label">{{ predictor.label }}</span>
-                          @if (predictor.attention; as attention) {
-                            <span class="v1-nav__attention v1-nav__attention--{{ attention.state }}">
-                              <span aria-hidden="true">{{ attention.total }}</span>
-                              <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
-                            </span>
+                      @for (predictor of predictorItems; track predictor.key) {
+                        <div class="v1-nav__predictor-entry">
+                          <a
+                            class="v1-nav__child"
+                            [class.active]="isPredictorChildActive(predictor)"
+                            [routerLink]="predictor.route"
+                            [attr.aria-current]="isPredictorChildActive(predictor) ? 'page' : null"
+                            [attr.title]="predictor.label">
+                            <app-ui-icon [name]="predictor.icon"></app-ui-icon>
+                            <span class="v1-nav__item-label">{{ predictor.label }}</span>
+                            @if (predictor.attention; as attention) {
+                              <span
+                                class="v1-nav__attention v1-nav__attention--{{ attention.state }}"
+                                [attr.title]="attention.total + ' active status checks for ' + predictor.label">
+                                <span aria-hidden="true">{{ attention.total }}</span>
+                                <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                              </span>
+                            }
+                          </a>
+                          @if (predictor.kind === 'weather' && predictor.outputs.length > 0) {
+                            <ul
+                              class="v1-nav__weather-outputs"
+                              [attr.aria-label]="'Predictors at ' + predictor.label">
+                              @for (output of predictor.outputs; track output.guid) {
+                                <li class="v1-nav__weather-output" [attr.title]="output.label">
+                                  <app-ui-icon [name]="output.icon"></app-ui-icon>
+                                  <span>{{ output.label }}</span>
+                                </li>
+                              }
+                            </ul>
                           }
-                        </a>
+                        </div>
                       }
                     </div>
                   }

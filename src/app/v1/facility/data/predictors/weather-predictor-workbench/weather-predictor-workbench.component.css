@@ -1,0 +1,4 @@
+:host { display: block; }
+.weather-workbench__sticky { position: sticky; top: 0; z-index: 3; background: var(--v1-bg); box-shadow: 0 .45rem .9rem color-mix(in srgb, var(--v1-shadow-soft) 45%, transparent); }
+.weather-workbench__header h1 { display: flex; gap: .55rem; align-items: center; margin: 0; }
+.weather-workbench__status-detail { color: var(--v1-muted); }

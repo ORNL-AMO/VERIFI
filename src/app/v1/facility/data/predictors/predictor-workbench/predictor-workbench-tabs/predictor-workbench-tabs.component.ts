@@ -1,6 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { PredictorWorkbenchTab, PredictorWorkbenchTabAttention, PredictorWorkbenchTabId } from '../../models';
+import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import type { StatusAttentionSummary } from '@app/v1/status/status.models';
+
+export interface PredictorWorkbenchDisplayTab {
+  readonly id: string;
+  readonly label: string;
+  readonly icon: IconName;
+}
 
 @Component({
   selector: 'app-predictor-workbench-tabs',
@@ -10,8 +17,8 @@ import { PredictorWorkbenchTab, PredictorWorkbenchTabAttention, PredictorWorkben
   imports: [IconComponent]
 })
 export class PredictorWorkbenchTabsComponent {
-  @Input({ required: true }) tabs: ReadonlyArray<PredictorWorkbenchTab> = [];
-  @Input({ required: true }) activeTab: PredictorWorkbenchTabId = 'settings';
-  @Input() attention: PredictorWorkbenchTabAttention = {};
-  @Output() readonly tabSelected = new EventEmitter<PredictorWorkbenchTabId>();
+  @Input({ required: true }) tabs: ReadonlyArray<PredictorWorkbenchDisplayTab> = [];
+  @Input({ required: true }) activeTab = 'settings';
+  @Input() attention: Readonly<Record<string, StatusAttentionSummary | undefined>> = {};
+  @Output() readonly tabSelected = new EventEmitter<string>();
 }

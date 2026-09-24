@@ -2,14 +2,20 @@
   <div class="weather-station-selector__heading">
     <div>
       <h3 id="weather-station-selector-title">Weather station</h3>
-      <p>Search a location, then choose a nearby station with hourly data.</p>
+      <p>Choose the station used for every weather predictor in this workbench.</p>
     </div>
-    @if (selectedStationName || selectedStationId) {
-      <span class="v1-chip v1-chip--info">
-        <app-ui-icon name="location"></app-ui-icon>
-        {{ selectedStationName || selectedStationId }}
-      </span>
-    }
+    <button #selectorToggle type="button" class="v1-btn v1-btn--secondary" [disabled]="disabled" (click)="openSelector()">
+      <app-ui-icon name="location"></app-ui-icon>
+      {{ selectedStationName || selectedStationId ? 'Change station' : 'Choose station' }}
+    </button>
+  </div>
+
+  <div class="weather-station-selector__selection" [class.weather-station-selector__selection--empty]="!selectedStationName && !selectedStationId">
+    <app-ui-icon [name]="selectedStationName || selectedStationId ? 'cloudRain' : 'location'"></app-ui-icon>
+    <div>
+      <strong>{{ selectedStationName || selectedStationId || 'No station selected' }}</strong>
+      <span>{{ selectedStationName || selectedStationId ? 'Selected weather station' : 'Open the station lookup to continue.' }}</span>
+    </div>
   </div>
 
   @if (checkingCurrentStation()) {
@@ -23,62 +29,138 @@
     </div>
   }
 
-  <form class="weather-station-selector__search" (submit)="$event.preventDefault(); search()">
-    <label for="weather-location-search">Location</label>
-    <div>
-      <input
-        id="weather-location-search"
-        type="search"
-        [value]="query()"
-        [disabled]="disabled || searchingLocations() || searchingStations()"
-        placeholder="City, state, or address"
-        (input)="setQuery($any($event.target).value)">
-      <button type="submit" class="v1-btn v1-btn--secondary" [disabled]="disabled || !query().trim() || searchingLocations() || searchingStations()">
-        <app-ui-icon [name]="searchingLocations() ? 'loading' : 'search'" [spin]="searchingLocations()"></app-ui-icon>
-        Search
-      </button>
-    </div>
-  </form>
-
-  @if (error()) {
-    <div class="v1-alert v1-alert--danger" role="alert">
-      <app-ui-icon name="warning"></app-ui-icon><span>{{ error() }}</span>
-    </div>
-  }
-
-  @if (!searchingLocations() && locations().length > 0) {
-    <div class="weather-station-selector__results" aria-label="Location results">
-      <p>Choose a location</p>
-      <div class="weather-station-selector__choices">
-        @for (location of locations(); track location.place_id) {
-          <button type="button" [disabled]="disabled || searchingStations()" (click)="chooseLocation(location)">
-            <strong>{{ location.display_name }}</strong>
-            <span>{{ location.addresstype }} · {{ location.lat }}, {{ location.lon }}</span>
-          </button>
-        }
-      </div>
-    </div>
-  } @else if (locationSearchComplete() && !error()) {
-    <p class="weather-station-selector__message" role="status">No locations matched this search.</p>
-  }
-
-  @if (searchingStations()) {
-    <p class="weather-station-selector__message" role="status">
-      <app-ui-icon name="loading" spin></app-ui-icon> Finding nearby stations…
-    </p>
-  } @else if (selectedLocation() && stations().length === 0 && !error()) {
-    <p class="weather-station-selector__message" role="status">No stations were found near this location.</p>
-  } @else if (stations().length > 0) {
-    <div class="weather-station-selector__results" aria-label="Weather station results">
-      <p>Choose a station</p>
-      <div class="weather-station-selector__choices weather-station-selector__choices--stations">
-        @for (station of stations(); track station.ID) {
-          <button type="button" [disabled]="disabled" (click)="selectStation(station)">
-            <strong>{{ station.name }}{{ station.state ? ', ' + station.state : '' }}</strong>
-            <span>{{ station.distanceFrom | number:'1.0-1' }} miles away · {{ station.ratingPercent | number:'1.0-1' }}% coverage</span>
-          </button>
-        }
-      </div>
-    </div>
-  }
 </section>
+
+@if (selectorOpen()) {
+  <app-workspace-slideout
+    title="Choose weather station"
+    description="Search for a location, preview a nearby station's predictor data, then confirm your selection."
+    size="large"
+    (closed)="closeSelector()">
+    <div class="weather-station-selector__slideout">
+      <form class="weather-station-selector__search" (submit)="$event.preventDefault(); search()">
+        <label for="weather-location-search">Location</label>
+        <div>
+          <input
+            id="weather-location-search"
+            type="search"
+            [value]="query()"
+            [disabled]="disabled || searchingLocations() || searchingStations()"
+            placeholder="City, state, or address"
+            (input)="setQuery($any($event.target).value)">
+          <button type="submit" class="v1-btn v1-btn--secondary" [disabled]="disabled || !query().trim() || searchingLocations() || searchingStations()">
+            <app-ui-icon [name]="searchingLocations() ? 'loading' : 'search'" [spin]="searchingLocations()"></app-ui-icon>
+            Search
+          </button>
+        </div>
+      </form>
+
+      @if (error()) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon><span>{{ error() }}</span>
+        </div>
+      }
+
+      @if (selectedLocation(); as location) {
+        <div class="weather-station-selector__chosen-location">
+          <app-ui-icon name="location"></app-ui-icon>
+          <div><span>Selected location</span><strong>{{ location.display_name }}</strong></div>
+          <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="searchingStations()" (click)="changeLocation()">Change</button>
+        </div>
+      } @else if (!searchingLocations() && locations().length > 0) {
+        <div class="weather-station-selector__results" aria-label="Location results">
+          <p>Choose a location</p>
+          <div class="weather-station-selector__choices">
+            @for (location of locations(); track location.place_id) {
+              <button type="button" [disabled]="disabled || searchingStations()" (click)="chooseLocation(location)">
+                <app-ui-icon name="location"></app-ui-icon>
+                <span class="weather-station-selector__choice-copy">
+                  <strong>{{ location.display_name }}</strong>
+                  <span>{{ location.addresstype }} · {{ location.lat }}, {{ location.lon }}</span>
+                </span>
+                <app-ui-icon name="chevronRight"></app-ui-icon>
+              </button>
+            }
+          </div>
+        </div>
+      } @else if (locationSearchComplete() && !error()) {
+        <p class="weather-station-selector__message" role="status">No locations matched this search.</p>
+      }
+
+      @if (candidateStation(); as candidate) {
+        <section class="weather-station-selector__preview" aria-labelledby="weather-station-preview-title">
+          <div class="weather-station-selector__chosen-station">
+            <app-ui-icon name="cloudRain"></app-ui-icon>
+            <div>
+              <span>Selected station</span>
+              <strong id="weather-station-preview-title">{{ candidate.name }}{{ candidate.state ? ', ' + candidate.state : '' }}</strong>
+              <small>{{ candidate.distanceFrom | number:'1.0-1' }} miles away · {{ candidate.ratingPercent | number:'1.0-1' }}% coverage</small>
+            </div>
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="workflow.busy()" (click)="changeStation()">Change</button>
+          </div>
+
+          @if (workflow.state().status === 'loading' || workflow.state().status === 'calculating') {
+            <p class="weather-station-selector__preview-loading" role="status">
+              <app-ui-icon name="loading" spin></app-ui-icon> {{ workflow.state().message }}
+            </p>
+          } @else if (workflow.state().error) {
+            <div class="v1-alert v1-alert--danger" role="alert">
+              <app-ui-icon name="warning"></app-ui-icon><span>{{ workflow.state().error }}</span>
+              <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="retryStationPreview()">Try again</button>
+            </div>
+          } @else if (stationPreview(); as preview) {
+            @if (previewChartOption(); as chartOption) {
+              <div
+                class="weather-station-selector__preview-chart"
+                [appV1ECharts]="chartOption"
+                role="img"
+                [attr.aria-label]="'Monthly predictor preview for ' + candidate.name">
+              </div>
+            }
+            <div class="visually-hidden">
+              <table>
+                <caption>Monthly predictor preview for {{ candidate.name }}</caption>
+                <thead><tr><th scope="col">Month</th>@for (series of preview.series; track series.key) { <th scope="col">{{ series.name }} ({{ series.unit }})</th> }</tr></thead>
+                <tbody>
+                  @for (point of preview.series[0].points; track point.monthLabel; let pointIndex = $index) {
+                    <tr><th scope="row">{{ point.monthLabel }}</th>@for (series of preview.series; track series.key) { <td>{{ series.points[pointIndex].amount | number:'1.0-2' }}{{ series.points[pointIndex].warning ? ' — source gap' : '' }}</td> }</tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <p class="weather-station-selector__gap-summary" [class.weather-station-selector__gap-summary--warning]="preview.warningMonths.length > 0">
+              <app-ui-icon [name]="preview.warningMonths.length > 0 ? 'warning' : 'success'"></app-ui-icon>
+              <strong>{{ gapSummary() }}</strong>
+            </p>
+            <footer class="weather-station-selector__preview-actions">
+              <button type="button" class="v1-btn v1-btn--quiet" (click)="changeStation()">Back to stations</button>
+              <button type="button" class="v1-btn v1-btn--action" (click)="confirmStation()"><app-ui-icon name="success"></app-ui-icon> Confirm station</button>
+            </footer>
+          }
+        </section>
+      } @else if (searchingStations()) {
+        <p class="weather-station-selector__message" role="status">
+          <app-ui-icon name="loading" spin></app-ui-icon> Finding nearby stations…
+        </p>
+      } @else if (selectedLocation() && stations().length === 0 && !error()) {
+        <p class="weather-station-selector__message" role="status">No stations were found near this location.</p>
+      } @else if (stations().length > 0) {
+        <div class="weather-station-selector__results" aria-label="Weather station results">
+          <p>Choose a station</p>
+          <div class="weather-station-selector__choices weather-station-selector__choices--stations">
+            @for (station of stations(); track station.ID) {
+              <button type="button" [disabled]="disabled" (click)="selectStation(station)">
+                <app-ui-icon name="cloudRain"></app-ui-icon>
+                <span class="weather-station-selector__choice-copy">
+                  <strong>{{ station.name }}{{ station.state ? ', ' + station.state : '' }}</strong>
+                  <span>{{ station.distanceFrom | number:'1.0-1' }} miles away · {{ station.ratingPercent | number:'1.0-1' }}% coverage</span>
+                </span>
+                <app-ui-icon name="chevronRight"></app-ui-icon>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </app-workspace-slideout>
+}

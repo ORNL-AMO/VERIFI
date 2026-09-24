@@ -170,6 +170,22 @@ describe('WorkspaceNavigationService', () => {
       'predictor-a',
       'quality'
     ]);
+    expect(service.facilityWeatherPredictorCreateRoute('facility-a')).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'new'
+    ]);
+    expect(service.facilityWeatherPredictorRoute('facility-a', 'station:station-a')).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'station:station-a', 'setup'
+    ]);
+    expect(service.facilityWeatherPredictorRoute('facility-a', 'station:station-a', 'readings')).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'station:station-a',
+      'readings'
+    ]);
+    expect(service.facilityWeatherPredictorQualityRoute(
+      'facility-a', 'station:station-a', 'predictor-a'
+    )).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', 'station:station-a',
+      'quality', 'predictor-a'
+    ]);
     expect(service.facilitySettingsRoute('facility-a', 'goals')).toEqual([
       '/v1',
       'workspace',
@@ -412,15 +428,27 @@ describe('WorkspaceNavigationService', () => {
 
     expect(service.activeDetail()).toBe('predictors');
     expect(service.activePredictorGuid()).toBe('predictor a');
+    expect(service.activeWeatherPredictorGroupKey()).toBeUndefined();
     expect(service.activeMeterGuid()).toBeUndefined();
 
     router.events.next(new NavigationEnd(
       8,
+      '/v1/workspace/facility/facility-a/data/predictors/weather/station%3AKORD/readings',
+      '/v1/workspace/facility/facility-a/data/predictors/weather/station%3AKORD/readings'
+    ));
+
+    expect(service.activeDetail()).toBe('predictors');
+    expect(service.activePredictorGuid()).toBeUndefined();
+    expect(service.activeWeatherPredictorGroupKey()).toBe('station:KORD');
+
+    router.events.next(new NavigationEnd(
+      9,
       '/v1/workspace/facility/facility-a/data/predictors',
       '/v1/workspace/facility/facility-a/data/predictors'
     ));
 
     expect(service.activePredictorGuid()).toBeUndefined();
+    expect(service.activeWeatherPredictorGroupKey()).toBeUndefined();
   });
 
   it('shows separate support panel help for Meters and Meter Grouping', () => {

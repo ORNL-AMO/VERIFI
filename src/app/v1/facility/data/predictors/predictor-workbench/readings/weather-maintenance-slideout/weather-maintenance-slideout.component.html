@@ -9,7 +9,7 @@
           <label><span>Start month</span><input type="month" [value]="startMonth()" [disabled]="saving" (change)="startMonth.set($any($event.target).value)"></label>
           <label><span>End month</span><input type="month" [value]="endMonth()" [disabled]="saving" (change)="endMonth.set($any($event.target).value)"></label>
           <label class="weather-maintenance__wide"><span>Check existing calculated entries</span>
-            <select [value]="sourceCheck()" [disabled]="saving" (change)="setSourceCheck($any($event.target).value)">
+            <select class="v1-select" [value]="sourceCheck()" [disabled]="saving" (change)="setSourceCheck($any($event.target).value)">
               <option value="none">Do not check existing entries</option>
               <option value="last-six">Check the latest six entries</option>
               <option value="all">Check all entries</option>

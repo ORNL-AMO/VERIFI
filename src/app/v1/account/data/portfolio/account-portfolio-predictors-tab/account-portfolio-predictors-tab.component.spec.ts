@@ -27,7 +27,7 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
             ]),
             predictors: signal([
               predictor('predictor-production', 'Production', 'facility-a', true),
-              predictor('predictor-weather', 'HDD Generated', 'facility-b', false, 'Weather')
+              predictor('predictor-weather', 'HDD Generated', 'facility-b', false, 'Weather', 'station-a')
             ]),
             predictorData: signal([
               { guid: 'reading-a', predictorId: 'predictor-production', facilityId: 'facility-a', year: 2026, month: 1 }
@@ -39,6 +39,9 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
           useValue: {
             facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab = 'settings') => [
               '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab
+            ],
+            facilityWeatherPredictorRoute: (facilityGuid: string, groupKey: string) => [
+              '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', 'weather', groupKey, 'setup'
             ]
           }
         },
@@ -48,13 +51,13 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
     const fixture = TestBed.createComponent(AccountPortfolioPredictorsTabComponent);
     fixture.detectChanges();
 
-    expect(cardTitles(fixture)).toEqual(['Production', 'HDD Generated']);
+    expect(cardTitles(fixture)).toEqual(['Production', 'Station station-a']);
     expect(fixture.nativeElement.textContent).toContain('Alpha Plant');
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
 
-    (fixture.nativeElement.querySelector('[aria-label="Open HDD Generated settings"]') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('[aria-label="Open Station station-a weather workbench"]') as HTMLButtonElement).click();
     expect(navigate).toHaveBeenCalledWith([
-      '/v1', 'workspace', 'facility', 'facility-b', 'data', 'predictors', 'predictor-weather', 'settings'
+      '/v1', 'workspace', 'facility', 'facility-b', 'data', 'predictors', 'weather', 'station:station-a', 'setup'
     ]);
   });
 });
@@ -73,7 +76,8 @@ function predictor(
   name: string,
   facilityId: string,
   production: boolean,
-  predictorType: 'Standard' | 'Weather' = 'Standard'
+  predictorType: 'Standard' | 'Weather' = 'Standard',
+  weatherStationId?: string
 ): any {
   return {
     guid,
@@ -82,6 +86,8 @@ function predictor(
     name,
     production,
     predictorType,
+    weatherStationId,
+    weatherStationName: weatherStationId ? `Station ${weatherStationId}` : undefined,
     weatherDataType: predictorType === 'Weather' ? 'HDD' : undefined,
     unit: predictorType === 'Weather' ? 'HDD' : 'tons'
   };

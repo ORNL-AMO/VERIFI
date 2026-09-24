@@ -1,0 +1,7 @@
+:host { display: block; }
+.weather-month-editor { display: grid; gap: 1rem; }
+.weather-month-editor label { display: grid; gap: .35rem; font-weight: 800; }
+.weather-month-editor label small { display: block; color: var(--v1-muted); font-weight: 500; }
+.weather-month-editor input { min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
+.weather-month-editor__values { display: grid; gap: .8rem; padding-top: .8rem; border-top: 1px solid var(--v1-border); }
+footer { display: flex; justify-content: flex-end; gap: .55rem; padding-top: .8rem; border-top: 1px solid var(--v1-border); }

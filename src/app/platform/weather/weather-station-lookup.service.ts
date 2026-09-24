@@ -38,7 +38,7 @@ export class WeatherStationLookupService {
       },
       this.textOptions
     ));
-    return parseStations(response);
+    return parseStations(response, true);
   }
 
   async getStation(stationId: string): Promise<WeatherStation | undefined> {
@@ -48,7 +48,7 @@ export class WeatherStationLookupService {
       {},
       this.textOptions
     ));
-    const station = parseStations(response)[0];
+    const station = parseStations(response, false)[0];
     return station ? { ...station, ID: stationId } : undefined;
   }
 }
@@ -58,22 +58,22 @@ export function mapWeatherStation(response: WeatherStationResponse): WeatherStat
     name: response.name,
     country: undefined,
     state: response.state ?? '',
-    lat: response.lat,
-    lon: response.lon,
+    lat: String(response.lat),
+    lon: String(response.lon),
     begin: new Date(response.data_begin_date),
     end: new Date(response.data_end_date),
     USAF: undefined,
     WBAN: undefined,
     ID: response.station_id,
-    distanceFrom: response.distance,
+    distanceFrom: response.distance ?? 0,
     ratingPercent: response.rating_percent
   };
 }
 
-function parseStations(value: string): WeatherStation[] {
+function parseStations(value: string, requireDistance: boolean): WeatherStation[] {
   const parsed = JSON.parse(value) as { stations?: unknown };
   if (!Array.isArray(parsed.stations)) throw new Error('The weather station search returned an invalid response.');
-  return parsed.stations.filter(isWeatherStationResponse).map(mapWeatherStation);
+  return parsed.stations.filter(value => isWeatherStationResponse(value, requireDistance)).map(mapWeatherStation);
 }
 
 function isWeatherLocation(value: unknown): value is WeatherLocation {
@@ -86,16 +86,21 @@ function isWeatherLocation(value: unknown): value is WeatherLocation {
     && typeof candidate.addresstype === 'string';
 }
 
-function isWeatherStationResponse(value: unknown): value is WeatherStationResponse {
+function isWeatherStationResponse(value: unknown, requireDistance: boolean): value is WeatherStationResponse {
   const candidate = value as Partial<WeatherStationResponse> | undefined;
   return !!candidate
     && typeof candidate.station_id === 'string'
     && typeof candidate.name === 'string'
     && typeof candidate.data_begin_date === 'string'
     && typeof candidate.data_end_date === 'string'
-    && typeof candidate.distance === 'number'
+    && (typeof candidate.distance === 'number' || (!requireDistance && candidate.distance === undefined))
     && typeof candidate.rating_percent === 'number'
-    && typeof candidate.lat === 'string'
-    && typeof candidate.lon === 'string'
+    && isCoordinate(candidate.lat)
+    && isCoordinate(candidate.lon)
     && (candidate.state === undefined || typeof candidate.state === 'string');
+}
+
+function isCoordinate(value: unknown): value is string | number {
+  return (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)))
+    || (typeof value === 'number' && Number.isFinite(value));
 }

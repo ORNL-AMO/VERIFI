@@ -18,6 +18,7 @@ export type SectionId = 'home' | 'data' | 'visualization' | 'analysis' | 'report
 export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' | 'monthly' | 'monthly-chart' | 'yearly' | 'quality';
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
 export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
+export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -60,6 +61,7 @@ interface RouteState {
   readonly meterGuid?: string;
   readonly meterGroupGuid?: string;
   readonly predictorGuid?: string;
+  readonly weatherPredictorGroupKey?: string;
   readonly section: SectionId;
   readonly detail: string;
 }
@@ -131,6 +133,7 @@ export class WorkspaceNavigationService {
   readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
+  readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
@@ -307,6 +310,32 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab];
   }
 
+  facilityWeatherPredictorCreateRoute(facilityGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', 'weather', 'new'];
+  }
+
+  facilityWeatherPredictorRoute(
+    facilityGuid: string,
+    groupKey: string,
+    tab: FacilityWeatherPredictorRouteTab = 'setup'
+  ): Array<string> {
+    return [
+      '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors',
+      'weather', groupKey, tab
+    ];
+  }
+
+  facilityWeatherPredictorQualityRoute(
+    facilityGuid: string,
+    groupKey: string,
+    predictorGuid: string
+  ): Array<string> {
+    return [
+      ...this.facilityWeatherPredictorRoute(facilityGuid, groupKey, 'quality'),
+      predictorGuid
+    ];
+  }
+
   facilitySettingsRoute(facilityGuid: string, detail = 'profile'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail];
   }
@@ -478,6 +507,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
   if (routeParts[1] === 'facility') {
     const section = normalizeSection(routeParts[3]);
     const detail = routeParts[4] || DEFAULT_FACILITY_DETAILS[section];
+    const isWeatherPredictorRoute = section === 'data'
+      && detail === 'predictors'
+      && routeParts[5] === 'weather';
     return {
       view: 'workspace',
       contextMode: 'facility',
@@ -490,8 +522,11 @@ export function parseWorkspaceRoute(url: string): RouteState {
       meterGroupGuid: section === 'data' && detail === 'meter-grouping' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,
-      predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5]
+      predictorGuid: section === 'data' && detail === 'predictors' && routeParts[5] && !isWeatherPredictorRoute
         ? safeDecodeRoutePart(routeParts[5])
+        : undefined,
+      weatherPredictorGroupKey: isWeatherPredictorRoute && routeParts[6] && routeParts[6] !== 'new'
+        ? safeDecodeRoutePart(routeParts[6])
         : undefined
     };
   }

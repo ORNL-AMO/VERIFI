@@ -14,6 +14,7 @@ describe('PredictorWorkspaceActionsService', () => {
     predictorType: 'Standard', production: true, productionInAnalysis: true, unit: 'tons'
   } as any;
   const readings = signal<any[]>([reading('reading-a', 20, 2026, 1)]);
+  const predictors = signal<any[]>([existing]);
   const predictorHandler = {
     addPredictor: vi.fn(async (value: any) => ({ ...value, id: 11 })),
     updatePredictor: vi.fn(async (value: any) => value),
@@ -23,7 +24,9 @@ describe('PredictorWorkspaceActionsService', () => {
     updatePredictorData: vi.fn(async (value: any) => value),
     reconcilePredictorData: vi.fn(async () => undefined),
     createWeatherPredictors: vi.fn(async () => undefined),
-    updateWeatherPredictor: vi.fn(async () => undefined)
+    updateWeatherPredictor: vi.fn(async () => undefined),
+    applyWeatherStationGroup: vi.fn(async () => undefined),
+    applyWeatherStationMonth: vi.fn(async () => undefined)
   };
   const analysisHandler = {
     addAnalysisPredictor: vi.fn(async () => undefined),
@@ -34,11 +37,13 @@ describe('PredictorWorkspaceActionsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     readings.set([reading('reading-a', 20, 2026, 1)]);
+    predictors.set([existing]);
     TestBed.configureTestingModule({ providers: [
       PredictorWorkspaceActionsService,
       { provide: AccountWorkspaceStore, useValue: {
         account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }),
-        predictors: signal([existing]), predictorData: readings, facilityAnalyses: signal([]), revision: signal(4)
+        predictors, facilityPredictors: predictors, predictorData: readings, facilityPredictorData: readings,
+        facilityAnalyses: signal([]), revision: signal(4)
       } },
       { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn(async () => 'published') } },
       { provide: WorkspaceCommandBoundary, useValue: {
@@ -79,6 +84,13 @@ describe('PredictorWorkspaceActionsService', () => {
     await TestBed.inject(PredictorWorkspaceActionsService).updatePredictorReading(updated);
 
     expect(predictorHandler.updatePredictorData).toHaveBeenCalledWith(expect.objectContaining({ id: 20, amount: 42 }), 'account-a');
+  });
+
+  it('rejects changing a predictor type after creation', async () => {
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).updatePredictor({
+      ...existing, predictorType: 'Weather'
+    })).rejects.toThrow('cannot be changed');
+    expect(predictorHandler.updatePredictor).not.toHaveBeenCalled();
   });
 
   it('deletes selected readings in one atomic reconciliation command', async () => {
@@ -135,6 +147,54 @@ describe('PredictorWorkspaceActionsService', () => {
     })).rejects.toThrow('changed');
 
     expect(predictorHandler.createWeatherPredictors).not.toHaveBeenCalled();
+  });
+
+  it('commits a reviewed station group through one atomic handler call', async () => {
+    const weather = {
+      ...existing, predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Station A'
+    };
+    predictors.set([weather]);
+    const preview = {
+      workspaceRevision: 4,
+      sourceGroupKey: 'station:station-a',
+      station: { ID: 'station-b', name: 'Station B' },
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 1 } },
+      addPredictors: [],
+      updatePredictors: [{ ...weather, weatherStationId: 'station-b', weatherStationName: 'Station B' }],
+      deletePredictors: [], addReadings: [], updateReadings: [], deleteReadings: [], facilityAnalyses: [], warningMonths: []
+    } as any;
+
+    await TestBed.inject(PredictorWorkspaceActionsService).applyWeatherStationGroup(preview);
+
+    expect(predictorHandler.applyWeatherStationGroup).toHaveBeenCalledWith(expect.objectContaining({
+      updatePredictors: [expect.objectContaining({ weatherStationId: 'station-b' })]
+    }), 'account-a');
+  });
+
+  it('commits one station month command after validating current group membership', async () => {
+    const weatherA = { ...existing, predictorType: 'Weather', weatherStationId: 'station-a' };
+    const weatherB = { ...weatherA, id: 11, guid: 'predictor-b', name: 'Humidity' };
+    predictors.set([weatherA, weatherB]);
+    const currentReading = reading('reading-a', 20, 2026, 1);
+    readings.set([currentReading]);
+
+    await TestBed.inject(PredictorWorkspaceActionsService).applyWeatherStationMonth({
+      workspaceRevision: 4, groupKey: 'station:station-a', predictorGuids: ['predictor-a', 'predictor-b'],
+      year: 2026, month: 1, add: [], update: [{ ...currentReading, amount: 2 }], delete: []
+    });
+
+    expect(predictorHandler.applyWeatherStationMonth).toHaveBeenCalledWith(expect.objectContaining({
+      facilityId: 'facility-a', predictorGuids: ['predictor-a', 'predictor-b'], year: 2026, month: 1
+    }), 'account-a');
+  });
+
+  it('rejects a stale station month without calling the command boundary', async () => {
+    const boundary = TestBed.inject(WorkspaceCommandBoundary) as unknown as { execute: ReturnType<typeof vi.fn> };
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).applyWeatherStationMonth({
+      workspaceRevision: 3, groupKey: 'station:station-a', predictorGuids: [],
+      year: 2026, month: 1, add: [], update: [], delete: []
+    })).rejects.toMatchObject({ code: 'stale-workspace' });
+    expect(boundary.execute).not.toHaveBeenCalled();
   });
 });
 

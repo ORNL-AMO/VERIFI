@@ -2,9 +2,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, HostListener, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { WeatherStation } from '@data/models/degreeDays';
 import { WeatherDataType } from '@data/models/idbModels/predictor';
-import { getWeatherSearchFromFacility } from '@shared/sharedHelperFunctions';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
@@ -15,7 +13,6 @@ import { PredictorWorkspaceActionsService } from '../../predictor-workspace-acti
 import { PredictorSettingsSaveState, WEATHER_DATA_TYPE_OPTIONS } from '../../models';
 import { WeatherMaintenancePreview } from '../../models';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
-import { WeatherStationSelectorComponent } from '../../shared/weather-station-selector/weather-station-selector.component';
 import { ConfirmDeletePredictorModalComponent } from '../../predictors-dashboard/predictor-browse-card/confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
 import { PredictorSettingsForm, PredictorSettingsFormService } from './predictor-settings-form.service';
 import { WeatherMaintenanceSlideoutComponent } from '../readings/weather-maintenance-slideout/weather-maintenance-slideout.component';
@@ -23,7 +20,7 @@ import { WeatherMaintenanceSlideoutComponent } from '../readings/weather-mainten
 @Component({
   selector: 'app-predictor-workbench-settings', templateUrl: './predictor-workbench-settings.component.html',
   styleUrls: ['./predictor-workbench-settings.component.css'], standalone: true,
-  imports: [ReactiveFormsModule, IconComponent, WeatherStationSelectorComponent, ConfirmDeletePredictorModalComponent,
+  imports: [ReactiveFormsModule, IconComponent, ConfirmDeletePredictorModalComponent,
     WeatherMaintenanceSlideoutComponent]
 })
 export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, OnDestroy {
@@ -55,10 +52,6 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     && this.saveState() !== 'saving' && !this.deleting() && this.supportedPredictor());
   readonly canDelete = computed(() => !!this.workspace.selectedPredictor() && this.workspace.canWrite()
     && !this.workspace.hasPending() && this.saveState() !== 'saving' && !this.deleting());
-  readonly initialStationSearch = computed(() => {
-    const facility = this.workspace.facility();
-    return facility ? getWeatherSearchFromFacility(facility) : '';
-  });
 
   private currentPredictorGuid: string | undefined;
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -128,6 +121,13 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     form?.updateValueAndValidity();
     void this.saveNow();
   }
+  toggleNoLongerInUse(): void {
+    const form = this.form();
+    if (!form || !this.canEdit()) return;
+    form.controls.noLongerInUse.setValue(!form.controls.noLongerInUse.value);
+    form.markAsDirty();
+    void this.saveNow();
+  }
   onWeatherDefinitionChange(): void {
     const form = this.form();
     form?.markAsDirty();
@@ -139,15 +139,6 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
       return;
     }
     void this.saveNow();
-  }
-  selectStation(station: WeatherStation): void {
-    const form = this.form();
-    if (!form || !this.canEdit()) return;
-    form.controls.weatherStationId.setValue(station.ID);
-    form.controls.weatherStationName.setValue(station.name);
-    form.markAsDirty();
-    form.updateValueAndValidity();
-    this.onWeatherDefinitionChange();
   }
   setWeatherDataType(value: string): void {
     const form = this.form();
@@ -283,6 +274,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
     if (!form) return;
     if (!this.canEdit()) { form.disable({ emitEvent: false }); return; }
     form.enable({ emitEvent: false });
+    form.controls.predictorType.disable({ emitEvent: false });
     if (this.hasReadings()) {
       form.controls.predictorType.disable({ emitEvent: false });
     }

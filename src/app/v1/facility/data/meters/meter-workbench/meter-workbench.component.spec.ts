@@ -155,7 +155,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(toggle?.querySelector('.v1-meter-workbench-header__facts-symbol')?.textContent?.trim()).toBe('+');
     expect(factsRegion?.hidden).toBe(true);
     expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
-    expect(element.querySelector('.v1-meter-workbench-header__status-notes')?.textContent)
+    expect(element.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('A calendarization method is required.');
     expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
     expect(element.querySelector('app-meter-workbench-tabs')).not.toBeNull();

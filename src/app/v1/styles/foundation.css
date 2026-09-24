@@ -33,6 +33,9 @@
   --v1-link: var(--v1-facility);
   --v1-focus: #246bfe;
   --v1-disabled-opacity: .62;
+  --v1-disabled-control-surface: color-mix(in srgb, var(--v1-control-surface) 68%, var(--v1-muted));
+  --v1-disabled-control-border: color-mix(in srgb, var(--v1-control-border) 58%, var(--v1-muted));
+  --v1-disabled-control-text: color-mix(in srgb, var(--v1-text) 70%, var(--v1-muted));
   --v1-placeholder: color-mix(in srgb, var(--v1-muted) 72%, var(--v1-surface));
   --v1-backdrop: rgba(13, 20, 18, .36);
   --v1-shadow: rgba(23, 35, 31, .12);
@@ -517,6 +520,32 @@
   color: var(--v1-text);
 }
 
+.v1-root .v1-data-workbench-status-notes {
+  display: grid;
+  gap: var(--v1-space-1);
+  margin: 0;
+  padding: 0;
+  color: var(--v1-muted);
+  font-size: .88rem;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.v1-root .v1-data-workbench-status-notes li {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  column-gap: var(--v1-space-1);
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.v1-root .v1-data-workbench-status-notes .v1-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: .08rem;
+  color: inherit;
+}
+
 @media (max-width: 760px) {
   .v1-root .v1-data-workbench-title-row {
     grid-template-columns: 1fr;
@@ -892,6 +921,20 @@
   color: var(--v1-muted);
 }
 
+.v1-btn--deactivate {
+  border-color: color-mix(in srgb, var(--v1-warning) 58%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-warning) 88%, var(--v1-text));
+}
+
+.v1-btn--deactivate:hover,
+.v1-btn--deactivate:focus-visible,
+.v1-btn--deactivate[aria-pressed="true"] {
+  border-color: var(--v1-warning);
+  background: color-mix(in srgb, var(--v1-warning) 18%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-warning) 82%, var(--v1-text));
+}
+
 .v1-btn--sm {
   min-height: var(--v1-control-height-sm);
   padding: .3rem .55rem;
@@ -1203,9 +1246,19 @@
   resize: vertical;
 }
 
-.v1-settings-panel input:disabled,
-.v1-settings-panel select:disabled,
-.v1-settings-panel textarea:disabled,
+.v1-root .v1-settings-panel input:disabled:not([type='checkbox']):not([type='radio']),
+.v1-root .v1-settings-panel select:disabled,
+.v1-root .v1-settings-panel textarea:disabled {
+  cursor: not-allowed;
+  border-color: var(--v1-disabled-control-border) !important;
+  background-color: var(--v1-disabled-control-surface) !important;
+  color: var(--v1-disabled-control-text) !important;
+  -webkit-text-fill-color: var(--v1-disabled-control-text);
+  box-shadow: none;
+  opacity: 1;
+}
+
+.v1-root .v1-settings-panel input:disabled:is([type='checkbox'], [type='radio']),
 .v1-settings-panel button:disabled {
   cursor: not-allowed;
   opacity: var(--v1-disabled-opacity);

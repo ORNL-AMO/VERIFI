@@ -11,7 +11,7 @@
 
     <label>
       <span>Source</span>
-      <select [value]="draft().source" [disabled]="saving" required (change)="setSource($event)">
+      <select class="v1-select" [value]="draft().source" [disabled]="saving" required (change)="setSource($event)">
         @for (source of sources; track source) {
           <option [value]="source">{{ source }}</option>
         }
@@ -20,7 +20,7 @@
 
     <label>
       <span>Group</span>
-      <select [value]="draft().groupId || ''" [disabled]="saving" (change)="setGroup($event)">
+      <select class="v1-select" [value]="draft().groupId || ''" [disabled]="saving" (change)="setGroup($event)">
         <option value="">Ungrouped</option>
         @for (group of groups; track group.guid) {
           <option [value]="group.guid" [disabled]="!isGroupAllowed(group)">

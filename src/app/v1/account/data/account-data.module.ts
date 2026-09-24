@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { MeterBrowseCardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-browse-card/meter-browse-card.component';
 import { PredictorBrowseCardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictor-browse-card/predictor-browse-card.component';
+import { WeatherStationBrowseCardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/weather-station-browse-card/weather-station-browse-card.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { DrawerFocusTrapDirective } from '@app/v1/welcome/shared/drawer-focus-trap.directive';
@@ -58,7 +59,8 @@ import { CreateFacilityDrawerComponent } from './portfolio/create-facility-drawe
     WorkspaceSlideoutComponent,
     DrawerFocusTrapDirective,
     MeterBrowseCardComponent,
-    PredictorBrowseCardComponent
+    PredictorBrowseCardComponent,
+    WeatherStationBrowseCardComponent
   ],
   exports: [
     CustomGridFactorsComponent,

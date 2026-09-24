@@ -98,8 +98,7 @@
     <footer class="meter-settings__footer">
       <button
         type="button"
-        class="v1-btn v1-btn--quiet meter-settings__inactive-toggle"
-        [class.meter-settings__inactive-toggle--active]="form.controls.noLongerInUse.value"
+        class="v1-btn v1-btn--deactivate meter-settings__inactive-toggle"
         [attr.aria-pressed]="form.controls.noLongerInUse.value"
         [disabled]="!canEditForm()"
         (click)="toggleNoLongerInUse()">

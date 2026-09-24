@@ -8,7 +8,8 @@
 .weather-maintenance__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
 .weather-maintenance label { display: grid; gap: .3rem; }
 .weather-maintenance label span { font-size: .82rem; font-weight: 800; }
-.weather-maintenance input, .weather-maintenance select { min-height: var(--v1-control-height); padding: .48rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
+.weather-maintenance input, .weather-maintenance select { min-height: var(--v1-control-height); padding: .48rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background-color: var(--v1-control-surface); color: var(--v1-text); }
+.weather-maintenance select { padding-right: 2.1rem; }
 .weather-maintenance__wide { grid-column: 1 / -1; }
 .weather-maintenance__table-wrap { overflow: auto; border: 1px solid var(--v1-border); }
 .weather-maintenance table { width: 100%; border-collapse: collapse; font-size: .82rem; }

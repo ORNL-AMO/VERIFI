@@ -31,8 +31,8 @@
           @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small class="predictor-settings__error">Enter a name of 100 characters or fewer.</small> }
         </label>
         <label><span>Unit</span><input type="text" maxlength="100" formControlName="unit" (input)="onTextChange()"></label>
-        <label><span>Classification</span><select formControlName="production" (change)="onImmediateChange()"><option [ngValue]="true">Production</option><option [ngValue]="false">Other</option></select></label>
-        <label><span>Type</span><select formControlName="predictorType" (change)="onImmediateChange()"><option value="Standard">Standard</option><option value="Weather">Weather</option></select></label>
+        <label><span>Classification</span><select class="v1-select" formControlName="production" (change)="onImmediateChange()"><option [ngValue]="true">Production</option><option [ngValue]="false">Other</option></select></label>
+        <label><span>Type</span><input type="text" [value]="settingsForm.controls.predictorType.value" disabled></label>
         <label class="predictor-settings__wide"><span>Description</span><textarea rows="3" formControlName="description" (input)="onTextChange()"></textarea></label>
       </div>
     </section>
@@ -41,7 +41,7 @@
       <section class="predictor-settings__section" aria-labelledby="predictor-settings-weather">
         <div class="predictor-settings__heading"><div><p>Source</p><h2 id="predictor-settings-weather">Weather setup</h2></div></div>
         <div class="predictor-settings__grid">
-          <label><span>Weather data type</span><select formControlName="weatherDataType" (change)="setWeatherDataType($any($event.target).value)">
+          <label><span>Weather data type</span><select class="v1-select" formControlName="weatherDataType" (change)="setWeatherDataType($any($event.target).value)">
             @for (option of weatherTypes; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
           </select></label>
           @if (settingsForm.controls.weatherDataType.value === 'HDD') {
@@ -50,23 +50,16 @@
             <label><span>Cooling base temperature (°F)</span><input type="number" formControlName="coolingBaseTemperature" required (change)="onWeatherDefinitionChange()"></label>
           }
         </div>
-        @if (settingsForm.errors?.['weatherStationRequired'] || settingsForm.errors?.['heatingBaseRequired'] || settingsForm.errors?.['coolingBaseRequired']) {
-          <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Select a station and enter the applicable base temperature before saving.</span></div>
+        @if (settingsForm.errors?.['heatingBaseRequired'] || settingsForm.errors?.['coolingBaseRequired']) {
+          <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Enter the applicable base temperature before saving.</span></div>
         }
-        <app-weather-station-selector
-          [selectedStationId]="settingsForm.controls.weatherStationId.value"
-          [selectedStationName]="settingsForm.controls.weatherStationName.value"
-          [initialSearch]="initialStationSearch()"
-          [disabled]="!canEdit()"
-          (stationSelected)="selectStation($event)">
-        </app-weather-station-selector>
+        <div class="v1-alert v1-alert--info"><app-ui-icon name="location"></app-ui-icon><span>Station: {{ settingsForm.controls.weatherStationName.value || settingsForm.controls.weatherStationId.value }}. Change the station from Station setup.</span></div>
       </section>
     }
 
     <section class="predictor-settings__section" aria-labelledby="predictor-settings-status">
       <div class="predictor-settings__heading"><div><p>Validation</p><h2 id="predictor-settings-status">Status settings</h2></div></div>
       <div class="predictor-settings__status-grid">
-        <label class="predictor-settings__check"><input type="checkbox" formControlName="noLongerInUse" (change)="onImmediateChange()"><span>No longer in use</span></label>
         @if (settingsForm.controls.noLongerInUse.value) {
           <label><span>Stop month <small>Optional</small></span><input type="month" formControlName="stopMonth" (change)="onImmediateChange()"></label>
         }
@@ -76,10 +69,23 @@
     </section>
 
     <footer class="predictor-settings__footer">
-      <span>Press Ctrl+S or ⌘S to save pending text changes.</span>
       @if (weatherDefinitionDirty() && hasReadings()) {
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit()" (click)="previewWeatherSettings()"><app-ui-icon name="refresh"></app-ui-icon> Review and Save</button>
       }
+      <button
+        type="button"
+        class="v1-btn v1-btn--deactivate"
+        [attr.aria-pressed]="settingsForm.controls.noLongerInUse.value"
+        [disabled]="!canEdit()"
+        (click)="toggleNoLongerInUse()">
+        @if (settingsForm.controls.noLongerInUse.value) {
+          <app-ui-icon name="refresh"></app-ui-icon>
+          Return predictor to use
+        } @else {
+          <app-ui-icon name="viewHidden"></app-ui-icon>
+          Mark no longer in use
+        }
+      </button>
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDeletePredictor()"><app-ui-icon name="delete"></app-ui-icon> Delete predictor</button>
     </footer>
   </form>

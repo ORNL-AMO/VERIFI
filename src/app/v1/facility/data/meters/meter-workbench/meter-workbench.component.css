@@ -194,32 +194,6 @@
   font-size: .86rem;
 }
 
-.v1-meter-workbench-header__status-notes {
-  display: grid;
-  gap: var(--v1-space-1);
-  margin: 0;
-  padding: 0;
-  color: var(--v1-muted);
-  font-size: .88rem;
-  line-height: 1.35;
-  list-style: none;
-}
-
-.v1-meter-workbench-header__status-notes li {
-  display: grid;
-  grid-template-columns: 1rem minmax(0, 1fr);
-  column-gap: var(--v1-space-1);
-  align-items: flex-start;
-  min-width: 0;
-}
-
-.v1-meter-workbench-header__status-notes .v1-icon {
-  width: 1rem;
-  height: 1rem;
-  margin-top: .08rem;
-  color: inherit;
-}
-
 .v1-meter-workbench-header__status-note-text {
   min-width: 0;
 }

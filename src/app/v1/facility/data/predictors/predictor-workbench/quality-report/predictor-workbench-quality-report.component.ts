@@ -1,5 +1,5 @@
 import { FocusMonitor } from '@angular/cdk/a11y';
-import { Component, ElementRef, Injector, ViewChild, afterNextRender, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Injector, Input, Output, ViewChild, afterNextRender, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   PredictorDataQualityReport,
@@ -12,6 +12,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 
 type PredictorQualityStatisticId = keyof PredictorDataQualityStatistics;
@@ -78,15 +80,36 @@ export class PredictorWorkbenchQualityReportComponent {
 
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
   readonly copyingStatisticsTable = signal(false);
+  private readonly predictorInput = signal<IdbPredictor | undefined>(undefined);
+  private readonly readingsInput = signal<readonly IdbPredictorData[] | undefined>(undefined);
+  private readonly findingsInput = signal<readonly StatusItem[] | undefined>(undefined);
+  private readonly idPrefixInput = signal('predictor-quality');
+  @Input('predictor') set predictorValue(value: IdbPredictor | undefined) { this.predictorInput.set(value); }
+  @Input('readings') set readingsValue(value: readonly IdbPredictorData[] | undefined) { this.readingsInput.set(value); }
+  @Input('findings') set findingsValue(value: readonly StatusItem[] | undefined) { this.findingsInput.set(value); }
+  @Input() set idPrefix(value: string) { this.idPrefixInput.set(value || 'predictor-quality'); }
+  @Input() embedded = false;
+  @Output() readonly readingsRequested = new EventEmitter<void>();
+  @Output() readonly setupRequested = new EventEmitter<void>();
+  readonly predictor = computed(() => this.predictorInput() ?? this.workspace.selectedPredictor());
+  readonly readings = computed(() => this.readingsInput() ?? this.workspace.selectedReadings());
+  readonly ids = computed(() => ({
+    findings: `${this.idPrefixInput()}-findings-heading`,
+    months: `${this.idPrefixInput()}-months-heading`,
+    negative: `${this.idPrefixInput()}-negative-heading`,
+    weather: `${this.idPrefixInput()}-weather-heading`,
+    statistics: `${this.idPrefixInput()}-statistics-heading`,
+    chart: `${this.idPrefixInput()}-chart-heading`
+  }));
 
   @ViewChild('statisticsTable', { static: false }) statisticsTable?: ElementRef<HTMLTableElement>;
   @ViewChild('qualityChart', { static: false, read: EChartsChartDirective }) qualityChart?: EChartsChartDirective;
   @ViewChild('qualityRegion', { read: ElementRef }) private readonly qualityRegion?: ElementRef<HTMLElement>;
 
   readonly report = computed<PredictorDataQualityReport | undefined>(() => {
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.predictor();
     return predictor
-      ? buildPredictorDataQualityReport(this.workspace.selectedReadings(), predictor)
+      ? buildPredictorDataQualityReport(this.readings(), predictor)
       : undefined;
   });
   readonly statisticCells = computed<readonly PredictorQualityStatisticCell[]>(() => {
@@ -103,10 +126,10 @@ export class PredictorWorkbenchQualityReportComponent {
   });
   readonly findings = computed<readonly PredictorQualityFindingView[]>(() => {
     const report = this.report();
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.predictor();
     if (!report || !predictor) return [];
     if (this.status.state() === 'ready') {
-      return this.status.predictorFindings(predictor.guid)
+      return (this.findingsInput() ?? this.status.predictorFindings(predictor.guid))
         .filter(finding => QUALITY_FINDING_CODES.has(finding.code))
         .map(toFindingView);
     }
@@ -147,7 +170,8 @@ export class PredictorWorkbenchQualityReportComponent {
   }
 
   downloadQualityChart(): void {
-    this.qualityChart?.downloadPng('predictor-data-quality-readings');
+    const predictorName = this.predictor()?.name || 'predictor';
+    this.qualityChart?.downloadPng(`${slugify(predictorName)}-data-quality-readings`);
   }
 
   async discardWarning(item: StatusItem): Promise<void> {
@@ -161,12 +185,21 @@ export class PredictorWorkbenchQualityReportComponent {
   }
 
   private openTab(tab: 'settings' | 'readings'): void {
+    if (this.embedded) {
+      if (tab === 'settings') this.setupRequested.emit();
+      else this.readingsRequested.emit();
+      return;
+    }
     const facility = this.workspace.facility();
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.predictor();
     if (facility && predictor) {
       void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictor.guid, tab));
     }
   }
+}
+
+function slugify(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'predictor';
 }
 
 function toFindingView(finding: StatusItem): PredictorQualityFindingView {

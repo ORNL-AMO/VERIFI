@@ -112,6 +112,81 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     expect(await harness.getAll('facilities')).toContainEqual(updatedFacility);
   });
 
+  it('commits weather station membership, readings, and analysis references together', async () => {
+    const newPredictor = {
+      guid: 'weather-new', accountId: accountAFixture.account.guid,
+      facilityId: accountAFixture.facility.guid, predictorType: 'Weather', weatherStationId: 'station-a'
+    };
+    const newReading = {
+      guid: 'weather-reading-new', accountId: accountAFixture.account.guid,
+      facilityId: accountAFixture.facility.guid, predictorId: 'weather-new', year: 2026, month: 1, amount: 10
+    };
+    const updatedAnalysis = { ...accountAFixture.facilityAnalysis, name: 'Weather membership updated' };
+
+    await transactionService.runTransaction(
+      ['predictor', 'predictorData', 'analysisItems'],
+      'readwrite',
+      async transaction => {
+        await transaction.deleteByKey('predictorData', accountAFixture.predictorData.id as number);
+        await transaction.deleteByKey('predictor', accountAFixture.predictor.id as number);
+        await transaction.add('predictor', newPredictor);
+        await transaction.add('predictorData', newReading);
+        await transaction.put('analysisItems', updatedAnalysis);
+      }
+    );
+
+    await harness.reopen();
+    expect(await harness.getAll('predictor')).toContainEqual(expect.objectContaining({ guid: 'weather-new' }));
+    expect(await harness.getAll('predictor')).not.toContainEqual(expect.objectContaining({ guid: accountAFixture.predictor.guid }));
+    expect(await harness.getAll('predictorData')).toContainEqual(expect.objectContaining({ predictorId: 'weather-new' }));
+    expect(await harness.getAll('analysisItems')).toContainEqual(updatedAnalysis);
+  });
+
+  it('rolls back a weather station membership change when a later write fails', async () => {
+    await expect(transactionService.runTransaction(
+      ['predictor', 'predictorData', 'analysisItems'],
+      'readwrite',
+      async transaction => {
+        await transaction.deleteByKey('predictorData', accountAFixture.predictorData.id as number);
+        await transaction.deleteByKey('predictor', accountAFixture.predictor.id as number);
+        await transaction.put('analysisItems', { ...accountAFixture.facilityAnalysis, name: 'Must roll back' });
+        await transaction.add('predictor', accountBFixture.predictor);
+      }
+    )).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('predictor')).toContainEqual(accountAFixture.predictor);
+    expect(await harness.getAll('predictorData')).toContainEqual(accountAFixture.predictorData);
+    expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
+  });
+
+  it('commits or rolls back every output in a weather station month together', async () => {
+    const first = {
+      ...accountAFixture.predictorData, id: undefined, guid: 'station-month-hdd',
+      predictorId: 'weather-hdd', year: 2026, month: 4, amount: 12
+    };
+    const second = {
+      ...accountAFixture.predictorData, id: undefined, guid: 'station-month-humidity',
+      predictorId: 'weather-humidity', year: 2026, month: 4, amount: 55
+    };
+    await transactionService.runTransaction(['predictorData'], 'readwrite', async transaction => {
+      await transaction.add('predictorData', first);
+      await transaction.add('predictorData', second);
+    });
+    const committed = (await harness.getAll('predictorData')).filter((item: any) => item.year === 2026 && item.month === 4);
+    expect(committed).toHaveLength(2);
+
+    await expect(transactionService.runTransaction(['predictorData'], 'readwrite', async transaction => {
+      await transaction.put('predictorData', { ...committed[0], amount: 99 });
+      await transaction.deleteByKey('predictorData', committed[1].id as number);
+      await transaction.add('predictorData', { ...first, id: committed[0].id });
+    })).rejects.toBeDefined();
+
+    await harness.reopen();
+    const afterRollback = (await harness.getAll('predictorData')).filter((item: any) => item.year === 2026 && item.month === 4);
+    expect(afterRollback).toEqual(committed);
+  });
+
   it('rolls back all grid-factor rename records when a later write fails', async () => {
     const updatedGridFactor = { ...accountAFixture.customEmissions, subregion: 'Must Roll Back' };
     const updatedAccount = { ...accountAFixture.account, eGridSubregion: 'Must Roll Back' };

@@ -1,0 +1,50 @@
+@let facility = workspace.facility();
+@let account = workspace.account();
+@let group = workspace.selectedWeatherGroup();
+@let creating = workspace.creatingWeatherGroup();
+@let accountLink = accountPredictorsRoute();
+@let checks = statusChecks();
+
+@if (!facility) {
+  <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing weather predictors.</p></article>
+} @else if (workspace.weatherGroupNotFound()) {
+  <article class="v1-empty-state" role="status"><app-ui-icon name="cloudRain"></app-ui-icon><h1>Weather station not found</h1><p>This weather station is not available in {{ facility.name }}.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="openPredictors()">Back to predictors</button></article>
+} @else if (creating || group) {
+  <div class="weather-workbench__sticky">
+    <header class="v1-data-workbench-header weather-workbench__header">
+      <nav class="v1-data-workbench-breadcrumb" aria-label="Weather predictor breadcrumb"><ol>
+        @if (account && accountLink) { <li><a [routerLink]="accountLink">{{ account.name || 'Account' }}</a></li><li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li> }
+        <li>{{ facility.name || 'Facility' }}</li><li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+        <li><button type="button" (click)="openPredictors()">Predictors</button></li>
+      </ol></nav>
+      <div class="v1-data-workbench-title-row">
+        <div class="v1-data-workbench-title"><h1 id="v1-weather-workbench-title"><app-ui-icon name="cloudRain"></app-ui-icon>{{ creating ? 'New weather predictors' : group?.stationName }}</h1></div>
+        @if (group) {
+          <div class="v1-data-workbench-actions"><span class="v1-chip v1-chip--info">{{ group.predictors.length }} output{{ group.predictors.length === 1 ? '' : 's' }}</span><span class="v1-chip v1-chip--{{ group.statusTone }}">{{ group.statusLabel }}</span></div>
+        }
+      </div>
+      @if (group) {
+        <dl class="v1-data-workbench-facts"><div><dt>Station ID</dt><dd>{{ group.stationId || 'Not set' }}</dd></div><div><dt>Outputs</dt><dd>{{ group.outputSummary }}</dd></div><div><dt>Entries</dt><dd>{{ group.readingCount }}</dd></div><div><dt>Coverage</dt><dd>{{ group.firstReadingLabel }} – {{ group.latestReadingLabel }}</dd></div></dl>
+        @if (checks.length > 0) {
+          <ul class="v1-data-workbench-status-notes" aria-label="Weather station checks needing review">
+            @for (check of checks; track check.id) {
+              <li>
+                <app-ui-icon [name]="check.icon"></app-ui-icon>
+                <span><strong>{{ check.scopeLabel }}:</strong> {{ check.title }} <span class="weather-workbench__status-detail">— {{ check.detail }}</span></span>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </header>
+  </div>
+  @if (group) {
+    <app-predictor-workbench-tabs
+      [tabs]="tabs()"
+      [activeTab]="activeTab()"
+      [attention]="tabAttention()"
+      (tabSelected)="openTab($event)">
+    </app-predictor-workbench-tabs>
+  }
+  <router-outlet></router-outlet>
+}

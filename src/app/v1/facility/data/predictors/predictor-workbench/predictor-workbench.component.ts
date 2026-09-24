@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -44,6 +44,22 @@ export class PredictorWorkbenchComponent {
   });
 
   constructor() {
+    effect(() => {
+      const predictor = this.workspace.selectedPredictor();
+      const facility = this.workspace.facility();
+      if (predictor?.predictorType !== 'Weather' || !facility) return;
+      const group = this.workspace.weatherStationGroups().find(item =>
+        item.predictors.some(groupPredictor => groupPredictor.guid === predictor.guid));
+      if (group) {
+        const activeTab = this.activeTab();
+        const route = activeTab === 'quality'
+          ? this.navigation.facilityWeatherPredictorQualityRoute(facility.guid, group.routeKey, predictor.guid)
+          : this.navigation.facilityWeatherPredictorRoute(
+            facility.guid, group.routeKey, activeTab === 'settings' ? 'setup' : activeTab
+          );
+        void this.router.navigate(route);
+      }
+    });
     this.syncActiveTabFromRoute();
     this.router.events
       .pipe(
@@ -58,7 +74,8 @@ export class PredictorWorkbenchComponent {
     if (facility) void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'predictors'));
   }
 
-  openTab(tab: PredictorWorkbenchTabId): void {
+  openTab(tab: string): void {
+    if (!isPredictorTab(tab)) return;
     const facility = this.workspace.facility();
     const predictor = this.workspace.selectedPredictor();
     if (facility && predictor) {

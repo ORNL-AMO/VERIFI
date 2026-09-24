@@ -13,11 +13,12 @@ describe('PredictorWorkbenchComponent', () => {
   it('renders identity facts, active tab, and preserves that tab when switching predictors', () => {
     const events = new Subject<unknown>();
     const navigate = vi.fn();
-    const selectedPredictor = signal<any>({ guid: 'predictor-a', name: 'Output A', predictorType: 'Weather', weatherStationName: 'Oak Ridge' });
+    const selectedPredictor = signal<any>({ guid: 'predictor-a', name: 'Output A', predictorType: 'Standard' });
     const selectedCard = signal<any>({
-      predictor: selectedPredictor(), typeLabel: 'Weather', classificationLabel: 'Production', unitLabel: 'HDD',
-      icon: 'thermometerSnowflake',
+      predictor: selectedPredictor(), typeLabel: 'Standard', classificationLabel: 'Production', unitLabel: 'tons',
+      icon: 'package',
       statusIcon: 'success', statusTone: 'success', statusLabel: 'Valid',
+      statusActionSummaries: ['Review one incomplete weather month.'],
       readingCount: 4, firstReadingLabel: 'Jan 2025', latestReadingLabel: 'Apr 2025'
     });
     const factsExpanded = signal(true);
@@ -65,7 +66,12 @@ describe('PredictorWorkbenchComponent', () => {
             predictorCards: signal([
               selectedCard(),
               { predictor: { guid: 'predictor-b', name: 'Output B' }, icon: 'package' }
-            ])
+            ]),
+            standardPredictorCards: signal([
+              selectedCard(),
+              { predictor: { guid: 'predictor-b', name: 'Output B' }, icon: 'package' }
+            ]),
+            weatherStationGroups: signal([])
           }
         }
       ]
@@ -74,9 +80,14 @@ describe('PredictorWorkbenchComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.activeTab()).toBe('readings');
-    expect(fixture.nativeElement.textContent).toContain('Oak Ridge');
     expect(fixture.nativeElement.textContent).toContain('Apr 2025');
-    expect(fixture.nativeElement.textContent).toContain('1 issues: 1 errors, 0 warnings');
+    expect(fixture.nativeElement.querySelector('.v1-data-workbench-status-notes')?.textContent)
+      .toContain('Review one incomplete weather month.');
+    expect(fixture.componentInstance.tabAttention().readings).toEqual(expect.objectContaining({
+      total: 1,
+      errorCount: 1,
+      warningCount: 0
+    }));
 
     fixture.componentInstance.switchPredictor('predictor-b');
     expect(navigate).toHaveBeenLastCalledWith(['/predictors', 'predictor-b', 'readings']);
@@ -111,7 +122,9 @@ describe('PredictorWorkbenchComponent', () => {
             selectedPredictor: signal(undefined),
             selectedPredictorCard: signal(undefined),
             predictorNotFound: signal(true),
-            predictorCards: signal([])
+            predictorCards: signal([]),
+            standardPredictorCards: signal([]),
+            weatherStationGroups: signal([])
           }
         }
       ]
@@ -122,5 +135,51 @@ describe('PredictorWorkbenchComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Predictor not found');
     (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
     expect(navigate).toHaveBeenCalledWith(['/facility', 'predictors']);
+  });
+
+  it('redirects legacy weather output links to the station workbench and preserves the tab', () => {
+    const navigate = vi.fn();
+    const weatherPredictor = { guid: 'weather-a', name: 'Cooling days', predictorType: 'Weather' };
+    TestBed.configureTestingModule({
+      imports: [PredictorWorkbenchComponent],
+      providers: [
+        { provide: Router, useValue: { url: '', events: new Subject(), navigate } },
+        { provide: ActivatedRoute, useValue: { firstChild: { snapshot: { data: { predictorTab: 'quality' } } } } },
+        {
+          provide: WorkspaceNavigationService,
+          useValue: {
+            accountDataRoute: () => [],
+            facilityDataRoute: () => [],
+            facilityPredictorRoute: () => [],
+            facilityWeatherPredictorRoute: (_facility: string, group: string, tab: string) =>
+              ['/weather', group, tab],
+            facilityWeatherPredictorQualityRoute: (_facility: string, group: string, predictor: string) =>
+              ['/weather', group, 'quality', predictor]
+          }
+        },
+        { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
+        { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
+        {
+          provide: FacilityPredictorsWorkspaceService,
+          useValue: {
+            account: signal(undefined),
+            facility: signal({ guid: 'facility-a', name: 'Facility A' }),
+            selectedPredictor: signal(weatherPredictor),
+            selectedPredictorCard: signal(undefined),
+            predictorNotFound: signal(false),
+            predictorCards: signal([]),
+            standardPredictorCards: signal([]),
+            weatherStationGroups: signal([{
+              routeKey: 'station:KORD',
+              predictors: [weatherPredictor]
+            }])
+          }
+        }
+      ]
+    });
+
+    TestBed.createComponent(PredictorWorkbenchComponent).detectChanges();
+
+    expect(navigate).toHaveBeenCalledWith(['/weather', 'station:KORD', 'quality', 'weather-a']);
   });
 });

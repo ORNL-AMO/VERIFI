@@ -43,6 +43,10 @@ import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/
 import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
 import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
+import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
+import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
+import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
 import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
 import { FacilitySettingsComponent } from '@app/v1/facility/settings/facility-settings.component';
 import { FacilitySettingsBackupComponent } from '@app/v1/facility/settings/backup/facility-settings-backup.component';
@@ -184,6 +188,45 @@ export const V1Routes: Routes = [
                 component: FacilityPredictorsComponent,
                 children: [
                   { path: '', pathMatch: 'full', component: PredictorsDashboardComponent },
+                  {
+                    path: 'weather',
+                    children: [
+                      {
+                        path: 'new',
+                        component: WeatherPredictorWorkbenchComponent,
+                        children: [
+                          { path: '', pathMatch: 'full', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard] },
+                          { path: '**', redirectTo: '' }
+                        ]
+                      },
+                      {
+                        path: ':weatherGroupKey',
+                        component: WeatherPredictorWorkbenchComponent,
+                        children: [
+                          { path: '', pathMatch: 'full', redirectTo: 'setup' },
+                          { path: 'setup', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'setup' } },
+                          { path: 'readings', component: WeatherPredictorReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'readings' } },
+                          { path: 'quality/:predictorGuid', component: WeatherPredictorQualityComponent, data: { weatherTab: 'quality' } },
+                          { path: 'quality', component: WeatherPredictorQualityComponent, data: { weatherTab: 'quality' } },
+                          {
+                            path: 'outputs/:predictorGuid',
+                            children: [
+                              { path: '', pathMatch: 'full', redirectTo: '../../setup' },
+                              { path: 'settings', pathMatch: 'full', redirectTo: '../../setup' },
+                              { path: 'readings', pathMatch: 'full', redirectTo: '../../readings' },
+                              {
+                                path: 'quality',
+                                pathMatch: 'full',
+                                redirectTo: route => `../../quality/${encodeURIComponent(route.params['predictorGuid'])}`
+                              },
+                              { path: '**', redirectTo: '../../setup' }
+                            ]
+                          },
+                          { path: '**', redirectTo: 'setup' }
+                        ]
+                      }
+                    ]
+                  },
                   {
                     path: ':predictorGuid',
                     component: PredictorWorkbenchComponent,

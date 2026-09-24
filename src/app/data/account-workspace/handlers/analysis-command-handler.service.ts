@@ -221,3 +221,36 @@ export function buildFacilityAnalysisPredictorUpdates(
     }))
   }));
 }
+
+export function buildFacilityAnalysesWithoutPredictors(
+  analyses: readonly IdbAnalysisItem[],
+  predictorGuids: ReadonlySet<string>
+): IdbAnalysisItem[] {
+  if (predictorGuids.size === 0) return analyses.map(analysis => structuredClone(analysis));
+  return analyses.map(analysisItem => ({
+    ...structuredClone(analysisItem),
+    groups: analysisItem.groups.map(group => {
+      const predictorVariables = group.predictorVariables.filter(variable => !predictorGuids.has(variable.id));
+      if (group.analysisType !== 'regression' || !group.models) return { ...group, predictorVariables };
+      const selectedModel = group.models.find(model => model.modelId === group.selectedModelId);
+      const selectedUsesDeleted = selectedModel?.predictorVariables.some(variable => predictorGuids.has(variable.id));
+      if (selectedUsesDeleted) {
+        return {
+          ...group,
+          predictorVariables,
+          models: undefined,
+          selectedModelId: undefined,
+          regressionModelYear: undefined,
+          regressionConstant: undefined,
+          dateModelsGenerated: undefined
+        };
+      }
+      return {
+        ...group,
+        predictorVariables,
+        models: group.models.filter(model =>
+          !model.predictorVariables.some(variable => predictorGuids.has(variable.id)))
+      };
+    })
+  }));
+}

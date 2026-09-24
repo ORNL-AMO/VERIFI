@@ -1,11 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { PredictorCardView, buildPredictorCards } from '@app/v1/facility/data/predictors/models';
+import { PredictorBrowseItem, buildPredictorCards, buildWeatherStationGroups } from '@app/v1/facility/data/predictors/models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
 interface PortfolioPredictorCard {
-  readonly card: PredictorCardView;
+  readonly item: PredictorBrowseItem;
   readonly facility: IdbFacility;
 }
 
@@ -26,13 +26,22 @@ export class AccountPortfolioPredictorsTabComponent {
     return this.workspace.facilities().flatMap(facility => {
       const facilityPredictors = predictors.filter(predictor => predictor.facilityId === facility.guid);
       const facilityPredictorData = predictorData.filter(reading => reading.facilityId === facility.guid);
-      return buildPredictorCards(
+      const cards = buildPredictorCards(
         facilityPredictors,
         facilityPredictorData,
         this.status.items(),
         this.status.state() === 'ready'
-      )
-        .map(card => ({ card, facility }));
+      ).filter(card => card.predictor.predictorType !== 'Weather');
+      const groups = buildWeatherStationGroups(
+        facilityPredictors,
+        facilityPredictorData,
+        this.status.items(),
+        this.status.state() === 'ready'
+      );
+      return [
+        ...cards.map(card => ({ item: { kind: 'standard' as const, card }, facility })),
+        ...groups.map(group => ({ item: { kind: 'weather' as const, group }, facility }))
+      ];
     });
   });
 }

@@ -1,0 +1,30 @@
+<app-workspace-slideout
+  [title]="mode === 'add' ? 'Add weather month' : 'Edit weather month'"
+  description="Enter values for every predictor at this station."
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  <form class="weather-month-editor" (submit)="$event.preventDefault(); save()">
+    <label>
+      <span>Month</span>
+      <input type="month" required [value]="month()" [disabled]="saving || mode === 'edit'" (change)="setMonth($any($event.target).value)">
+    </label>
+    <div class="weather-month-editor__values" aria-label="Weather predictor values">
+      @for (column of columns; track column.predictor.guid) {
+        <label>
+          <span>{{ column.predictor.name }} <small>{{ column.typeLabel }} · {{ column.unit }}</small></span>
+          <input type="number" step="any" required [value]="values()[column.predictor.guid]" [disabled]="saving" (input)="setValue(column.predictor.guid, $any($event.target).value)">
+        </label>
+      }
+    </div>
+    @if (validationError() || error) {
+      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ validationError() || error }}</span></div>
+    }
+    <footer>
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving">
+        <app-ui-icon [name]="saving ? 'loading' : 'check'" [spin]="saving"></app-ui-icon>
+        {{ saving ? 'Saving…' : 'Save month' }}
+      </button>
+    </footer>
+  </form>
+</app-workspace-slideout>

@@ -1,0 +1,18 @@
+<section class="weather-quality" aria-label="Weather predictor quality">
+  @let predictor = selectedPredictor();
+  @if (workspace.selectedWeatherPredictors().length === 0) {
+    <article class="v1-empty-state" role="status"><h3>No included predictors</h3><p>Add a predictor in Setup before reviewing quality.</p></article>
+  } @else if (!predictor) {
+    <article class="v1-empty-state" role="status"><h3>Quality report not found</h3><p>This predictor is not included with the selected weather station.</p></article>
+  } @else {
+    <app-predictor-workbench-quality-report
+      [predictor]="predictor"
+      [readings]="readings()"
+      [findings]="findings()"
+      [idPrefix]="reportIdPrefix()"
+      [embedded]="true"
+      (readingsRequested)="open('readings')"
+      (setupRequested)="open('setup')">
+    </app-predictor-workbench-quality-report>
+  }
+</section>

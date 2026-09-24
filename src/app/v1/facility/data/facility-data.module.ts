@@ -50,6 +50,10 @@ import { PredictorWorkbenchQualityReportComponent } from './predictors/predictor
 import { PredictorWorkbenchReadingsComponent } from './predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from './predictors/predictor-workbench/settings/predictor-workbench-settings.component';
 import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/predictors-dashboard.component';
+import { WeatherPredictorWorkbenchComponent } from './predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorSetupComponent } from './predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
+import { WeatherPredictorReadingsComponent } from './predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
+import { WeatherPredictorQualityComponent } from './predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
 
 @NgModule({
   declarations: [
@@ -103,7 +107,11 @@ import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/
     PredictorWorkbenchComponent,
     PredictorWorkbenchSettingsComponent,
     PredictorWorkbenchReadingsComponent,
-    PredictorWorkbenchQualityReportComponent
+    PredictorWorkbenchQualityReportComponent,
+    WeatherPredictorWorkbenchComponent,
+    WeatherPredictorSetupComponent,
+    WeatherPredictorReadingsComponent,
+    WeatherPredictorQualityComponent
   ],
   exports: [
     FacilityDataPlaceholderComponent,

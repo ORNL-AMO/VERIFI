@@ -1,0 +1,130 @@
+@let selectedStation = station();
+@let busy = workflow.busy() || committing() || deleting();
+
+<section class="weather-setup" aria-label="Weather predictor setup">
+  <div class="weather-setup__top-actions">
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canSubmit()" (click)="saveAndUpdateReadings()">
+      <app-ui-icon [name]="busy ? 'loading' : 'refresh'" [spin]="busy"></app-ui-icon>
+      Save and Update Readings
+    </button>
+  </div>
+
+  <app-weather-station-selector
+    [selectedStationId]="selectedStation?.ID"
+    [selectedStationName]="selectedStation?.name"
+    [initialSearch]="initialStationSearch()"
+    [previewRange]="stationPreviewRange()"
+    [previewDefinitions]="definitions()"
+    [disabled]="busy"
+    (stationSelected)="selectStation($event)">
+  </app-weather-station-selector>
+
+  <div class="weather-setup__range">
+    <label><span>Start month</span><input type="month" required [value]="startMonth()" [disabled]="busy" (change)="setStartMonth($any($event.target).value)"></label>
+    <label><span>End month</span><input type="month" required [value]="endMonth()" [disabled]="busy" (change)="setEndMonth($any($event.target).value)"></label>
+  </div>
+
+  <section class="weather-setup__outputs" aria-labelledby="weather-output-title">
+    <div class="weather-setup__section-heading"><h2 id="weather-output-title">Predictors</h2><button type="button" class="v1-btn v1-btn--secondary" [disabled]="busy" (click)="addDefinition()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button></div>
+    @if (definitions().length === 0) {
+      <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Saving with no predictors will remove this weather station workbench and all of its readings.</span></div>
+    }
+    <div class="weather-setup__definition-list">
+      @for (definition of definitions(); track definition.draftId) {
+        <article class="weather-setup__definition">
+          <div class="weather-setup__definition-grid">
+            <label><span>Weather type</span><select class="v1-select" [value]="definition.weatherDataType" [disabled]="busy" (change)="setDefinitionType(definition.draftId, $any($event.target).value)">@for (option of weatherTypes; track option.value) { <option [value]="option.value" [selected]="option.value === definition.weatherDataType">{{ option.label }}</option> }</select></label>
+            <label><span>Predictor name</span><input type="text" maxlength="100" required [value]="definition.name" [disabled]="busy" (input)="setDefinitionName(definition.draftId, $any($event.target).value)"></label>
+            @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
+              <label><span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span><input type="number" required [value]="definition.baseTemperature" [disabled]="busy" (change)="setDefinitionBase(definition.draftId, $any($event.target).value)"></label>
+            }
+            <div class="weather-setup__unit"><span>Unit</span><strong>{{ unitFor(definition.weatherDataType) }}</strong></div>
+          </div>
+          <button type="button" class="v1-btn v1-btn--danger v1-btn--sm" [disabled]="busy" [attr.aria-label]="'Remove ' + definition.name" (click)="removeDefinition(definition.draftId)"><app-ui-icon name="delete"></app-ui-icon> Remove</button>
+        </article>
+      }
+    </div>
+  </section>
+
+  @if (workflow.state().status === 'loading' || workflow.state().status === 'calculating' || workflow.state().status === 'committing') {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon><span>{{ workflow.state().message }}</span></div>
+  }
+  @if (workflow.state().error || saveError()) {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ workflow.state().error || saveError() }}</span></div>
+  }
+
+  @if (!isCreation()) {
+    <footer class="weather-setup__footer">
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDeleteStation()"><app-ui-icon name="delete"></app-ui-icon> Delete weather station</button>
+    </footer>
+  }
+</section>
+
+<ng-template #saveChangesConfirmModal>
+  @if (preview(); as changePreview) {
+    <div class="v1-modal-layer">
+      <button type="button" class="v1-modal-backdrop" [attr.aria-label]="saveCompleted() ? 'Close weather update summary' : 'Cancel weather update'" [disabled]="committing()" (click)="closeSaveProcess()"></button>
+      <section class="v1-modal weather-setup__save-modal" role="dialog" aria-modal="true" aria-labelledby="weather-save-process-title">
+        <header class="v1-modal__header">
+          <h2 id="weather-save-process-title">{{ saveCompleted() ? 'Weather readings updated' : 'Review reading updates' }}</h2>
+          <button type="button" class="v1-icon-btn" [attr.aria-label]="saveCompleted() ? 'Close weather update summary' : 'Cancel weather update'" [disabled]="committing()" (click)="closeSaveProcess()"><app-ui-icon name="close"></app-ui-icon></button>
+        </header>
+        <div class="v1-modal__body weather-setup__save-body">
+          @if (saveCompleted()) {
+            <div class="v1-alert v1-alert--success" role="status"><app-ui-icon name="success"></app-ui-icon><span>The station setup and its readings were saved together.</span></div>
+          } @else {
+            <p>Saving changes for <strong>{{ changePreview.station.name }}</strong> will update the following stored data.</p>
+          }
+          <dl class="weather-setup__change-summary">
+            <div><dt>Readings added</dt><dd>{{ changePreview.addReadings.length }}</dd></div>
+            <div><dt>Readings updated</dt><dd>{{ changePreview.updateReadings.length }}</dd></div>
+            <div><dt>Readings removed</dt><dd>{{ changePreview.deleteReadings.length }}</dd></div>
+            <div><dt>Warning months</dt><dd>{{ changePreview.warningMonths.length }}</dd></div>
+          </dl>
+          <p class="weather-setup__predictor-summary">
+            Predictors: {{ changePreview.addPredictors.length }} added,
+            {{ changePreview.updatePredictors.length }} updated,
+            {{ changePreview.deletePredictors.length }} removed.
+          </p>
+          @if (changePreview.deleteReadings.length || changePreview.deletePredictors.length) {
+            <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span>Removed predictors, their readings, and their analysis references will be permanently deleted.</span></div>
+          }
+          @if (saveError()) {
+            <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ saveError() }}</span></div>
+          }
+        </div>
+        <footer class="v1-modal__footer">
+          @if (saveCompleted()) {
+            <button type="button" class="v1-btn v1-btn--action" (click)="closeSaveProcess()">Done</button>
+          } @else {
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="committing()" (click)="closeSaveProcess()">Cancel</button>
+            <button type="button" class="v1-btn v1-btn--action" [disabled]="committing()" (click)="confirmSaveAndUpdateReadings()"><app-ui-icon [name]="committing() ? 'loading' : 'refresh'" [spin]="committing()"></app-ui-icon> Save and Update Readings</button>
+          }
+        </footer>
+      </section>
+    </div>
+  }
+</ng-template>
+
+<ng-template #deleteStationConfirmModal>
+  @if (workspace.selectedWeatherGroup(); as group) {
+    <div class="v1-modal-layer">
+      <button type="button" class="v1-modal-backdrop" aria-label="Cancel delete weather station" [disabled]="deleting()" (click)="cancelDeleteStation()"></button>
+      <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="delete-weather-station-title">
+        <header class="v1-modal__header">
+          <h2 id="delete-weather-station-title">Delete {{ group.stationName }}?</h2>
+          <button type="button" class="v1-icon-btn" aria-label="Cancel delete weather station" [disabled]="deleting()" (click)="cancelDeleteStation()"><app-ui-icon name="close"></app-ui-icon></button>
+        </header>
+        <div class="v1-modal__body weather-setup__delete-body">
+          <p>This station setup, its {{ group.predictors.length }} {{ group.predictors.length === 1 ? 'predictor' : 'predictors' }}, all associated readings, and analysis references will be removed.</p>
+          <p><strong>This action cannot be undone.</strong></p>
+          @if (deleteError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ deleteError() }}</span></div> }
+        </div>
+        <footer class="v1-modal__footer">
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="deleting()" (click)="cancelDeleteStation()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--danger" [disabled]="deleting()" (click)="confirmDeleteStation()"><app-ui-icon [name]="deleting() ? 'loading' : 'delete'" [spin]="deleting()"></app-ui-icon> Delete weather station</button>
+        </footer>
+      </section>
+    </div>
+  }
+</ng-template>

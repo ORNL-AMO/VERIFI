@@ -96,8 +96,12 @@
   padding: .45rem .65rem;
   border: 1px solid var(--v1-control-border);
   border-radius: var(--v1-radius-sm);
-  background: var(--v1-control-surface);
+  background-color: var(--v1-control-surface);
   color: var(--v1-text);
+}
+
+.v1-meters-browse__toolbar select {
+  padding-right: 2.1rem;
 }
 
 .v1-meters-browse > .v1-empty-state {

@@ -16,9 +16,9 @@ export interface WeatherStationResponse {
   readonly name: string;
   readonly data_begin_date: string;
   readonly data_end_date: string;
-  readonly distance: number;
+  readonly distance?: number;
   readonly rating_percent: number;
-  readonly lat: string;
-  readonly lon: string;
+  readonly lat: string | number;
+  readonly lon: string | number;
   readonly state?: string;
 }

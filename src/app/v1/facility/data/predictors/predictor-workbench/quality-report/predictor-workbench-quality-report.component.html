@@ -1,4 +1,5 @@
-@let predictor = workspace.selectedPredictor();
+@let predictor = this.predictor();
+@let panelIds = ids();
 @let currentReport = report();
 @let qualityFindings = findings();
 @let statistics = statisticCells();
@@ -41,11 +42,11 @@
     </article>
   } @else if (currentReport) {
     @if (qualityFindings.length > 0) {
-      <section class="predictor-quality__findings" aria-labelledby="predictor-quality-findings-heading">
+      <section class="predictor-quality__findings" [attr.aria-labelledby]="panelIds.findings">
         <div class="predictor-quality__panel-heading">
           <div>
             <p>Review</p>
-            <h2 id="predictor-quality-findings-heading">Data quality findings</h2>
+            <h2 [id]="panelIds.findings">Data quality findings</h2>
           </div>
         </div>
         <ul>
@@ -59,7 +60,7 @@
               <div class="predictor-quality__finding-actions">
                 <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Open Readings</button>
                 @if (finding.settingsAction) {
-                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">Open Settings</button>
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">{{ embedded ? 'Open Setup' : 'Open Settings' }}</button>
                 }
                 @if (finding.item; as statusItem) {
                   @if (statusItem.severity === 'warning') {
@@ -81,11 +82,11 @@
     }
 
     @if (currentReport.duplicateMonths.length > 0 || currentReport.missingMonths.length > 0) {
-      <section class="predictor-quality__panel" aria-labelledby="predictor-quality-months-heading">
+      <section class="predictor-quality__panel" [attr.aria-labelledby]="panelIds.months">
         <div class="predictor-quality__panel-heading">
           <div>
             <p>Reading months</p>
-            <h2 id="predictor-quality-months-heading">Duplicate and missing months</h2>
+            <h2 [id]="panelIds.months">Duplicate and missing months</h2>
           </div>
           <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Review Readings</button>
         </div>
@@ -113,15 +114,15 @@
     }
 
     @if (currentReport.negativeMonths.length > 0) {
-      <section class="predictor-quality__panel" aria-labelledby="predictor-quality-negative-heading">
+      <section class="predictor-quality__panel" [attr.aria-labelledby]="panelIds.negative">
         <div class="predictor-quality__panel-heading">
           <div>
             <p>Value review</p>
-            <h2 id="predictor-quality-negative-heading">Negative values</h2>
+            <h2 [id]="panelIds.negative">Negative values</h2>
           </div>
           <div class="predictor-quality__heading-actions">
             <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Review Readings</button>
-            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">Open Settings</button>
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">{{ embedded ? 'Open Setup' : 'Open Settings' }}</button>
           </div>
         </div>
         <p class="predictor-quality__note">
@@ -140,11 +141,11 @@
     }
 
     @if (currentReport.weatherWarningMonths.length > 0 || currentReport.weatherChangedMonths.length > 0) {
-      <section class="predictor-quality__panel" aria-labelledby="predictor-quality-weather-heading">
+      <section class="predictor-quality__panel" [attr.aria-labelledby]="panelIds.weather">
         <div class="predictor-quality__panel-heading">
           <div>
             <p>Weather source</p>
-            <h2 id="predictor-quality-weather-heading">Weather data review</h2>
+            <h2 [id]="panelIds.weather">Weather data review</h2>
           </div>
           <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Manage Calculated Data</button>
         </div>
@@ -174,9 +175,9 @@
       </section>
     }
 
-    <section class="predictor-quality__panel" aria-labelledby="predictor-quality-statistics-heading">
+    <section class="predictor-quality__panel" [attr.aria-labelledby]="panelIds.statistics">
       <div class="predictor-quality__panel-heading">
-        <h2 id="predictor-quality-statistics-heading">Predictor statistics</h2>
+        <h2 [id]="panelIds.statistics">Predictor statistics</h2>
       </div>
       <div class="predictor-quality__scroller">
         <table #statisticsTable class="predictor-quality__table" [class.copying-table]="copyingStatisticsTable()">
@@ -213,9 +214,9 @@
     </section>
 
     @if (chartOption) {
-      <section class="predictor-quality__panel predictor-quality__chart-panel" aria-labelledby="predictor-quality-chart-heading">
+      <section class="predictor-quality__panel predictor-quality__chart-panel" [attr.aria-labelledby]="panelIds.chart">
         <div class="predictor-quality__panel-heading">
-          <h2 id="predictor-quality-chart-heading">Readings over time</h2>
+          <h2 [id]="panelIds.chart">Readings over time</h2>
           <button type="button" class="v1-icon-btn" title="Download PNG" aria-label="Download Predictor readings chart as PNG" (click)="downloadQualityChart()">
             <app-ui-icon name="download"></app-ui-icon>
           </button>

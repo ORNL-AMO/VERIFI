@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
-import { predictorIcon } from '@app/v1/facility/data/predictors/models';
+import { buildWeatherStationGroups, predictorIcon } from '@app/v1/facility/data/predictors/models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import { StatusAttentionSummary } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -35,9 +35,18 @@ type MeterGroupNavItem = {
 };
 
 type PredictorNavItem = {
-  readonly guid: string;
+  readonly key: string;
+  readonly kind: 'standard' | 'weather';
+  readonly predictorGuid?: string;
+  readonly weatherGroupKey?: string;
   readonly label: string;
   readonly icon: IconName;
+  readonly route: readonly string[];
+  readonly outputs: ReadonlyArray<{
+    readonly guid: string;
+    readonly label: string;
+    readonly icon: IconName;
+  }>;
   readonly attention?: StatusAttentionSummary;
 };
 
@@ -152,16 +161,47 @@ export class SectionNavComponent {
   });
   readonly facilityPredictorItems = computed<ReadonlyArray<PredictorNavItem>>(() => {
     const statusReady = this.status.state() === 'ready';
-    return [...this.workspace.facilityPredictors()]
+    const facility = this.navigation.facility();
+    if (!facility) return [];
+    const predictors = this.workspace.facilityPredictors();
+    const standardItems = predictors
+      .filter(predictor => predictor.predictorType !== 'Weather')
       .map(predictor => {
         const attention = summarizeStatusAttention(statusReady ? this.status.predictorFindings(predictor.guid) : []);
         return {
-          guid: predictor.guid,
+          key: predictor.guid,
+          kind: 'standard' as const,
+          predictorGuid: predictor.guid,
           label: predictor.name || 'Untitled predictor',
           icon: predictorIcon(predictor),
+          route: this.navigation.facilityPredictorRoute(facility.guid, predictor.guid, 'settings'),
+          outputs: [],
           attention: attention.total > 0 ? attention : undefined
         };
-      })
+      });
+    const weatherItems = buildWeatherStationGroups(
+      predictors,
+      this.workspace.facilityPredictorData(),
+      statusReady ? this.status.items() : [],
+      statusReady
+    ).map(group => {
+      const attention = summarizeStatusAttention(group.statusFindings);
+      return {
+        key: group.routeKey,
+        kind: 'weather' as const,
+        weatherGroupKey: group.routeKey,
+        label: group.stationName,
+        icon: 'cloudRain' as const,
+        route: this.navigation.facilityWeatherPredictorRoute(facility.guid, group.routeKey),
+        outputs: group.predictors.map(predictor => ({
+          guid: predictor.guid,
+          label: predictor.name || 'Untitled predictor',
+          icon: predictorIcon(predictor)
+        })),
+        attention: attention.total > 0 ? attention : undefined
+      };
+    });
+    return [...standardItems, ...weatherItems]
       .sort((first, second) => first.label.localeCompare(second.label));
   });
   readonly facilityPredictorsAttention = computed(() => {
@@ -268,7 +308,9 @@ export class SectionNavComponent {
       return this.isFacilityMeterGroupingRoute() && !this.navigation.activeMeterGroupGuid();
     }
     if (item.id === 'predictors') {
-      return this.isFacilityPredictorsRoute() && !this.navigation.activePredictorGuid();
+      return this.isFacilityPredictorsRoute()
+        && !this.navigation.activePredictorGuid()
+        && !this.navigation.activeWeatherPredictorGroupKey();
     }
     if (item.id !== 'meters') {
       return this.navigation.activeDetail() === item.id;
@@ -284,8 +326,10 @@ export class SectionNavComponent {
     return this.navigation.activeMeterGroupGuid() === groupGuid;
   }
 
-  isPredictorChildActive(predictorGuid: string): boolean {
-    return this.navigation.activePredictorGuid() === predictorGuid;
+  isPredictorChildActive(item: PredictorNavItem): boolean {
+    return item.kind === 'weather'
+      ? this.navigation.activeWeatherPredictorGroupKey() === item.weatherGroupKey
+      : this.navigation.activePredictorGuid() === item.predictorGuid;
   }
 
   meterChildrenId(): string {

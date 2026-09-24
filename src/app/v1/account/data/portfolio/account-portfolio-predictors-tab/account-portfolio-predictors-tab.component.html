@@ -9,13 +9,12 @@
     </app-data-empty-state>
   } @else {
     <div class="v1-account-portfolio-predictors__cards" role="list" aria-label="Account predictors">
-      @for (item of cards; track item.card.predictor.guid) {
-        <app-predictor-browse-card
-          [card]="item.card"
-          [portfolioFacility]="item.facility"
-          [showFacilityHeader]="true"
-          [allowMutations]="false">
-        </app-predictor-browse-card>
+      @for (entry of cards; track entry.item.kind === 'standard' ? entry.item.card.predictor.guid : entry.item.group.routeKey) {
+        @if (entry.item.kind === 'standard') {
+          <app-predictor-browse-card [card]="entry.item.card" [portfolioFacility]="entry.facility" [showFacilityHeader]="true" [allowMutations]="false"></app-predictor-browse-card>
+        } @else {
+          <app-weather-station-browse-card [group]="entry.item.group" [portfolioFacility]="entry.facility" [showFacilityHeader]="true"></app-weather-station-browse-card>
+        }
       }
     </div>
   }

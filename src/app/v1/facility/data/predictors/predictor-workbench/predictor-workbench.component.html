@@ -40,7 +40,7 @@
           <div class="v1-data-workbench-switcher" [class.open]="switcherOpen()" (keydown.escape)="onSwitcherEscape()">
             <h1 id="v1-facility-predictors-title" class="v1-predictor-workbench-header__title">
               <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
-              @if (workspace.predictorCards().length > 1) {
+              @if (workspace.standardPredictorCards().length > 1) {
                 <button
                   #predictorSwitcherToggle
                   type="button"
@@ -57,10 +57,10 @@
               }
             </h1>
 
-            @if (workspace.predictorCards().length > 1 && switcherOpen()) {
+            @if (workspace.standardPredictorCards().length > 1 && switcherOpen()) {
               <div class="v1-data-workbench-switcher-backdrop" (click)="closeSwitcher()" aria-hidden="true"></div>
               <div class="v1-data-workbench-switcher-menu" role="menu" aria-label="Switch predictor">
-                @for (card of workspace.predictorCards(); track card.predictor.guid) {
+                @for (card of workspace.standardPredictorCards(); track card.predictor.guid) {
                   <button
                     type="button"
                     class="v1-data-workbench-switcher-item"
@@ -107,6 +107,17 @@
           }
         </dl>
       </div>
+
+      @if (currentCard.statusActionSummaries.length > 0) {
+        <ul class="v1-data-workbench-status-notes">
+          @for (summary of currentCard.statusActionSummaries; track summary) {
+            <li>
+              <app-ui-icon [name]="currentCard.statusIcon" [spin]="currentCard.statusTone === 'info'"></app-ui-icon>
+              <span>{{ summary }}</span>
+            </li>
+          }
+        </ul>
+      }
     </header>
 
     <app-predictor-workbench-tabs

@@ -55,6 +55,11 @@ describe('FacilityPredictorsWorkspaceService', () => {
     events.next(new NavigationEnd(2, '', '/v1/workspace/facility/f/data/predictors/missing/settings'));
     expect(service.selectedPredictor()).toBeUndefined();
     expect(service.predictorNotFound()).toBe(true);
+
+    events.next(new NavigationEnd(3, '', '/v1/workspace/facility/f/data/predictors/weather/predictor%3Az/readings'));
+    expect(service.selectedWeatherGroup()?.routeKey).toBe('predictor:z');
+    expect(service.selectedPredictor()).toBeUndefined();
+    expect(service.selectedWeatherReadings()).toHaveLength(1);
   });
 
   it('does not treat unrelated routes as selected predictors', () => {

@@ -127,4 +127,61 @@ describe('PredictorCommandHandler', () => {
     expect(transaction.add).toHaveBeenCalledWith('predictorData', expect.objectContaining({ guid: 'd-1' }));
     expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
   });
+
+  it('applies a weather station group change in one transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const transaction = { put: vi.fn(async () => undefined), add: vi.fn(async () => undefined), deleteByKey: vi.fn(async () => undefined) };
+    transactions.runTransaction.mockImplementation(async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction));
+    const added = { guid: 'p-new', accountId: ACCOUNT, predictorType: 'Weather' } as IdbPredictor;
+    const updated = { id: 2, guid: 'p-update', accountId: ACCOUNT, predictorType: 'Weather' } as IdbPredictor;
+    const deleted = { id: 3, guid: 'p-delete', accountId: ACCOUNT, predictorType: 'Weather' } as IdbPredictor;
+    const addedReading = { guid: 'd-new', predictorId: 'p-new', accountId: ACCOUNT } as IdbPredictorData;
+    const deletedReading = { id: 4, guid: 'd-delete', predictorId: 'p-delete', accountId: ACCOUNT } as IdbPredictorData;
+    const analysis = { id: 5, guid: 'a-1', accountId: ACCOUNT } as any;
+
+    await handler.applyWeatherStationGroup({
+      addPredictors: [added], updatePredictors: [updated], deletePredictors: [deleted],
+      predictorData: { add: [addedReading], update: [], delete: [deletedReading] },
+      facilityAnalyses: [analysis]
+    }, ACCOUNT);
+
+    expect(transactions.runTransaction).toHaveBeenCalledWith(
+      ['predictor', 'predictorData', 'analysisItems'], 'readwrite', expect.any(Function)
+    );
+    expect(transaction.deleteByKey).toHaveBeenCalledWith('predictor', 3);
+    expect(transaction.deleteByKey).toHaveBeenCalledWith('predictorData', 4);
+    expect(transaction.put).toHaveBeenCalledWith('predictor', expect.objectContaining({ guid: 'p-update' }));
+    expect(transaction.add).toHaveBeenCalledWith('predictor', expect.objectContaining({ guid: 'p-new' }));
+    expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 5 }));
+  });
+
+  it('applies multi-predictor station month changes in one predictor-data transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const transaction = { put: vi.fn(async () => undefined), add: vi.fn(async () => undefined), deleteByKey: vi.fn(async () => undefined) };
+    transactions.runTransaction.mockImplementation(async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction));
+    const shared = { accountId: ACCOUNT, facilityId: 'fac-1', year: 2026, month: 2 };
+    const added = { ...shared, guid: 'new', predictorId: 'p-2' } as IdbPredictorData;
+    const updated = { ...shared, id: 2, guid: 'update', predictorId: 'p-1' } as IdbPredictorData;
+    const deleted = { ...shared, id: 3, guid: 'delete', predictorId: 'p-2' } as IdbPredictorData;
+
+    await handler.applyWeatherStationMonth({
+      facilityId: 'fac-1', predictorGuids: ['p-1', 'p-2'], year: 2026, month: 2,
+      add: [added], update: [updated], delete: [deleted]
+    }, ACCOUNT);
+
+    expect(transactions.runTransaction).toHaveBeenCalledWith(['predictorData'], 'readwrite', expect.any(Function));
+    expect(transaction.deleteByKey).toHaveBeenCalledWith('predictorData', 3);
+    expect(transaction.put).toHaveBeenCalledWith('predictorData', expect.objectContaining({ guid: 'update' }));
+    expect(transaction.add).toHaveBeenCalledWith('predictorData', expect.objectContaining({ guid: 'new' }));
+  });
+
+  it('rejects station month records outside the reviewed month before opening a transaction', async () => {
+    const { handler, transactions } = createHandler();
+    await expect(handler.applyWeatherStationMonth({
+      facilityId: 'fac-1', predictorGuids: ['p-1'], year: 2026, month: 2,
+      add: [{ guid: 'new', predictorId: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1', year: 2026, month: 3 } as IdbPredictorData],
+      update: [], delete: []
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
+  });
 });

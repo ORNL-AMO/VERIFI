@@ -1,7 +1,13 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import {
+  buildFacilityAnalysesWithoutPredictors,
+  buildFacilityAnalysisPredictorUpdates,
+  buildFacilityAnalysesWithPredictors
+} from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { WeatherStation } from '@data/models/degreeDays';
 import { HourlyWeatherDataService } from '@platform/weather/hourly-weather-data.service';
 import { WeatherMonthRange } from '@platform/weather/hourly-weather-data.models';
 import { Subject, firstValueFrom, takeUntil } from 'rxjs';
@@ -11,8 +17,14 @@ import {
   WeatherMaintenanceRequest,
   WeatherPredictorGenerationDraft,
   WeatherPredictorGenerationPreview,
+  WeatherPredictorDefinition,
+  WeatherStationSelectionPreview,
+  WeatherStationGroupDraft,
+  WeatherStationGroupPreview,
   buildWeatherGenerationPreview,
   buildWeatherMaintenancePreview,
+  buildWeatherStationSelectionPreview,
+  buildWeatherStationGroupPreview,
   weatherRangeForReadings
 } from './models';
 import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
@@ -69,6 +81,66 @@ export class PredictorWeatherWorkflowService {
         this.workspace.revision(),
         'maintenance'
       )
+    );
+  }
+
+  async previewStationGroup(
+    draft: WeatherStationGroupDraft,
+    currentPredictors: readonly IdbPredictor[] = [],
+    currentReadings: readonly IdbPredictorData[] = []
+  ): Promise<WeatherStationGroupPreview | undefined> {
+    const account = this.workspace.account();
+    const facility = this.workspace.selectedFacility();
+    if (!account || !facility) {
+      this.fail('Select an account and facility before managing weather predictors.');
+      return undefined;
+    }
+    const currentIds = new Set(currentPredictors.map(predictor => predictor.guid));
+    const conflict = this.workspace.facilityPredictors().find(predictor =>
+      predictor.predictorType === 'Weather'
+      && predictor.weatherStationId === draft.station.ID
+      && !currentIds.has(predictor.guid));
+    if (conflict) {
+      this.fail('That weather station already has a workbench. Open the existing station instead.');
+      return undefined;
+    }
+    if (draft.definitions.length === 0) {
+      return this.withReviewedAnalyses(buildWeatherStationGroupPreview(
+        draft,
+        currentPredictors,
+        currentReadings,
+        [],
+        account.guid,
+        facility.guid,
+        this.workspace.revision()
+      ));
+    }
+    return this.loadPreview(
+      draft.station.ID,
+      draft.range,
+      'Loading hourly weather data for this station…',
+      hourly => this.withReviewedAnalyses(buildWeatherStationGroupPreview(
+        draft,
+        currentPredictors,
+        currentReadings,
+        hourly,
+        account.guid,
+        facility.guid,
+        this.workspace.revision()
+      ))
+    );
+  }
+
+  async previewStationSelection(
+    station: WeatherStation,
+    range: WeatherMonthRange,
+    definitions: readonly WeatherPredictorDefinition[]
+  ): Promise<WeatherStationSelectionPreview | undefined> {
+    return this.loadPreview(
+      station.ID,
+      range,
+      'Loading predictor data for this station…',
+      hourly => buildWeatherStationSelectionPreview(station, range, definitions, hourly)
     );
   }
 
@@ -132,6 +204,10 @@ export class PredictorWeatherWorkflowService {
     await this.commit('Applying calculated reading changes…', () => this.actions.applyWeatherMaintenance(preview));
   }
 
+  async commitStationGroup(preview: WeatherStationGroupPreview): Promise<void> {
+    await this.commit('Saving weather station predictors…', () => this.actions.applyWeatherStationGroup(preview));
+  }
+
   async commitSettings(preview: WeatherMaintenancePreview): Promise<void> {
     await this.commit('Saving settings and recalculated readings…', () => this.actions.applyWeatherSettings(preview));
   }
@@ -193,6 +269,26 @@ export class PredictorWeatherWorkflowService {
       this.fail(error instanceof Error ? error.message : 'Weather changes could not be saved.');
       throw error;
     }
+  }
+
+  private withReviewedAnalyses(preview: WeatherStationGroupPreview): WeatherStationGroupPreview {
+    const facility = this.workspace.selectedFacility();
+    if (!facility) return preview;
+    const current = this.workspace.facilityAnalyses()
+      .filter(analysis => analysis.facilityId === facility.guid);
+    let proposed = buildFacilityAnalysesWithoutPredictors(
+      current,
+      new Set(preview.deletePredictors.map(predictor => predictor.guid))
+    );
+    for (const predictor of preview.updatePredictors) {
+      proposed = buildFacilityAnalysisPredictorUpdates(proposed, predictor);
+    }
+    proposed = buildFacilityAnalysesWithPredictors(proposed, preview.addPredictors);
+    return {
+      ...preview,
+      facilityAnalyses: proposed.filter((analysis, index) =>
+        JSON.stringify(analysis.groups) !== JSON.stringify(current[index]?.groups))
+    };
   }
 
   private cancelActiveRequest(): void {

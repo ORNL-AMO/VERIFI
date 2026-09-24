@@ -178,19 +178,6 @@
   padding-top: 0.25rem;
 }
 
-.meter-settings__inactive-toggle {
-  border-color: color-mix(in srgb, var(--v1-action) 48%, var(--v1-border));
-  color: var(--v1-action);
-}
-
-.meter-settings__inactive-toggle:hover,
-.meter-settings__inactive-toggle:focus-visible,
-.meter-settings__inactive-toggle[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--v1-action) 9%, var(--v1-surface));
-  border-color: var(--v1-action);
-  color: var(--v1-action);
-}
-
 .meter-settings-field input,
 .meter-settings-field select,
 .meter-settings-field textarea {

@@ -6,7 +6,7 @@
   <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
     <label>
       <span>Group</span>
-      <select [value]="selectedTargetId()" [disabled]="saving" required (change)="setTarget($event)">
+      <select class="v1-select" [value]="selectedTargetId()" [disabled]="saving" required (change)="setTarget($event)">
         @for (target of targets; track target.id) {
           <option [value]="target.id" [disabled]="!isTargetAllowed(target)">
             {{ target.label }}{{ target.group ? ' (' + target.group.groupType + ')' : '' }}

@@ -1,141 +1,54 @@
 <app-workspace-slideout
   title="Add predictor"
-  [description]="isWeather() ? 'Generate one or more monthly predictors from hourly weather data.' : 'Create one predictor setup, then continue in its workbench.'"
+  [description]="step() === 'choice' ? 'Choose how this predictor gets its data.' : 'Create a standard predictor, then continue in its workbench.'"
   size="large"
   [saving]="saving"
   (closed)="cancelled.emit()">
-  @let currentDraft = draft();
-  @if (weatherPreview; as preview) {
-    <section class="predictor-draft-form predictor-weather-review" aria-labelledby="weather-review-title">
-      <header>
-        <p>Review</p>
-        <h2 id="weather-review-title">Generated weather predictors</h2>
-        <p>{{ preview.predictors.length }} predictor{{ preview.predictors.length === 1 ? '' : 's' }} and
-          {{ preview.readings.length }} monthly readings are ready to create.</p>
-      </header>
-
-      @if (preview.warningMonths.length > 0) {
-        <div class="v1-alert v1-alert--warning" role="alert">
-          <app-ui-icon name="warning"></app-ui-icon>
-          <span>{{ preview.warningMonths.length }} month{{ preview.warningMonths.length === 1 ? '' : 's' }} contain incomplete source data and will be marked for review.</span>
-        </div>
-      }
-
-      <div class="predictor-weather-review__list">
-        @for (predictor of preview.predictors; track predictor.guid) {
-          <article>
-            <app-ui-icon name="predictor"></app-ui-icon>
-            <div><strong>{{ predictor.name }}</strong><span>{{ predictor.weatherDataType }} · {{ predictor.weatherStationName }}</span></div>
-          </article>
-        }
+  @if (step() === 'choice') {
+    <section class="predictor-type-choice" aria-labelledby="predictor-type-choice-title">
+      <div>
+        <p>Predictor type</p>
+        <h2 id="predictor-type-choice-title">What kind of predictor do you want to create?</h2>
       </div>
-
-      <dl class="predictor-weather-review__facts">
-        <div><dt>Start month</dt><dd>{{ weatherStart() }}</dd></div>
-        <div><dt>End month</dt><dd>{{ weatherEnd() }}</dd></div>
-        <div><dt>Station</dt><dd>{{ currentDraft.weatherStation?.name }}</dd></div>
-      </dl>
-
-      @if (workflowState.error || error) {
-        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ workflowState.error || error }}</span></div>
-      }
-
-      <footer class="predictor-draft-form__footer">
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="backToWeatherSetup()">Back</button>
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="saving" (click)="confirmWeather()">
-          <app-ui-icon [name]="saving ? 'loading' : 'add'" [spin]="saving"></app-ui-icon>
-          Create {{ preview.predictors.length }} predictor{{ preview.predictors.length === 1 ? '' : 's' }}
+      <div class="predictor-type-choice__options">
+        <button type="button" [disabled]="saving" (click)="chooseStandard()">
+          <app-ui-icon name="predictor"></app-ui-icon>
+          <span><strong>Standard predictor</strong><small>Enter and maintain monthly values directly.</small></span>
+          <app-ui-icon name="chevronRight"></app-ui-icon>
         </button>
+        <button type="button" [disabled]="saving" (click)="chooseWeather()">
+          <app-ui-icon name="cloudRain"></app-ui-icon>
+          <span><strong>Weather predictors</strong><small>Choose a station and generate one or more calculated outputs.</small></span>
+          <app-ui-icon name="chevronRight"></app-ui-icon>
+        </button>
+      </div>
+      <footer class="predictor-draft-form__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
       </footer>
     </section>
   } @else {
+    @let currentDraft = draft();
     <form class="predictor-draft-form" (submit)="$event.preventDefault(); submit()">
       <div class="predictor-draft-form__grid">
-        @if (!isWeather()) {
-          <label>
-            <span>Predictor name</span>
-            <input type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName($any($event.target).value)">
-          </label>
-        }
-        <label>
-          <span>Classification</span>
-          <select [value]="currentDraft.production ? 'production' : 'other'" [disabled]="saving" (change)="setProduction($any($event.target).value)">
-            <option value="production">Production</option>
-            <option value="other">Other</option>
+        <label><span>Predictor name</span>
+          <input type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName($any($event.target).value)">
+        </label>
+        <label><span>Classification</span>
+          <select class="v1-select" [value]="currentDraft.production ? 'production' : 'other'" [disabled]="saving" (change)="setProduction($any($event.target).value)">
+            <option value="production">Production</option><option value="other">Other</option>
           </select>
         </label>
-        <label>
-          <span>Type</span>
-          <select [value]="currentDraft.predictorType" [disabled]="saving" (change)="setPredictorType($any($event.target).value)">
-            <option value="Standard">Standard</option>
-            <option value="Weather">Weather</option>
-          </select>
+        <label><span>Unit <small>Optional</small></span>
+          <input type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit($any($event.target).value)">
         </label>
-        @if (!isWeather()) {
-          <label>
-            <span>Unit <small>Optional</small></span>
-            <input type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit($any($event.target).value)">
-          </label>
-        } @else {
-          <label><span>Start month</span><input type="month" required [value]="weatherStart()" [disabled]="saving" (change)="setWeatherStart($any($event.target).value)"></label>
-          <label><span>End month</span><input type="month" required [value]="weatherEnd()" [disabled]="saving" (change)="setWeatherEnd($any($event.target).value)"></label>
-        }
       </div>
-
-      @if (isWeather()) {
-        <section class="predictor-weather-types" aria-labelledby="predictor-weather-types-title">
-          <div><p>Calculated values</p><h3 id="predictor-weather-types-title">Weather data types</h3></div>
-          <div class="predictor-weather-types__options">
-            @for (option of weatherTypes; track option.value) {
-              <label class="predictor-weather-types__option">
-                <input type="checkbox" [checked]="isWeatherTypeSelected(option.value)" [disabled]="saving"
-                  (change)="toggleWeatherType(option.value, $any($event.target).checked)">
-                <span>{{ option.label }}</span>
-              </label>
-            }
-          </div>
-
-          @if (weatherDefinitions().length > 0) {
-            <div class="predictor-weather-types__definitions">
-              @for (definition of weatherDefinitions(); track definition.weatherDataType) {
-                <div class="predictor-weather-types__definition">
-                  <label><span>{{ definition.weatherDataType }} predictor name</span>
-                    <input type="text" maxlength="100" [value]="definition.name" [disabled]="saving"
-                      (input)="setWeatherName(definition.weatherDataType, $any($event.target).value)">
-                  </label>
-                  @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
-                    <label><span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span>
-                      <input type="number" required [value]="definition.baseTemperature" [disabled]="saving"
-                        (change)="setWeatherBaseTemperature(definition.weatherDataType, $any($event.target).value)">
-                    </label>
-                  }
-                </div>
-              }
-            </div>
-          }
-        </section>
-
-        <app-weather-station-selector
-          [selectedStationId]="currentDraft.weatherStation?.ID"
-          [selectedStationName]="currentDraft.weatherStation?.name"
-          [initialSearch]="initialStationSearch"
-          [disabled]="saving"
-          (stationSelected)="selectStation($event)">
-        </app-weather-station-selector>
+      @if (error) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ error }}</span></div>
       }
-
-      @if (workflowState.status === 'loading' || workflowState.status === 'calculating') {
-        <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon><span>{{ workflowState.message }}</span></div>
-      }
-      @if (workflowState.error || error) {
-        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ workflowState.error || error }}</span></div>
-      }
-
       <footer class="predictor-draft-form__footer">
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving && !canCancelWorkflow()" (click)="cancelled.emit()">Cancel</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="back()">Back</button>
         <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
-          <app-ui-icon [name]="saving ? 'loading' : isWeather() ? 'refresh' : 'add'" [spin]="saving"></app-ui-icon>
-          {{ isWeather() ? 'Generate preview' : 'Add predictor' }}
+          <app-ui-icon [name]="saving ? 'loading' : 'add'" [spin]="saving"></app-ui-icon> Add predictor
         </button>
       </footer>
     </form>

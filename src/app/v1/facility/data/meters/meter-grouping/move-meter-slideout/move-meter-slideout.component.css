@@ -12,10 +12,10 @@
 .v1-meter-slideout-form select {
   min-height: var(--v1-control-height);
   width: 100%;
-  padding: .55rem .7rem;
+  padding: .55rem 2.1rem .55rem .7rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius-sm);
-  background: var(--v1-surface);
+  background-color: var(--v1-surface);
   color: var(--v1-text);
 }
 
