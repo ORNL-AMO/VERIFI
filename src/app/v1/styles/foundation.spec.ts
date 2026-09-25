@@ -17,28 +17,28 @@ describe('v1 foundation styles', () => {
     expect(ruleFor('.v1-root .v1-data-workbench-breadcrumb ol')).toContain('display: flex');
   });
 
-  it('anchors the skyline artwork at the bottom of the shared v1 background', () => {
+  it('fills the shared v1 background with bottom-anchored skyline artwork', () => {
     const rule = ruleFor('.v1-background-skyline-rocket,\n.v1-background-skyline-green,\n.v1-background-skyline-neon');
 
-    expect(rule).toContain('background-position: center, center bottom, 0 0, 1.75rem 2.25rem, center');
-    expect(rule).toContain('background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat');
-    expect(rule).toContain('background-size: 100% 100%, var(--v1-skyline-art-size), 7rem 5rem, 11rem 8rem, 100% 100%');
+    expect(rule).toContain('background-position: center, center bottom');
+    expect(rule).toContain('background-repeat: no-repeat');
+    expect(rule).toContain('background-size: 100% 100%, cover');
   });
 
   it('scopes the workspace skyline to the central scroll pane', () => {
     const rule = ruleFor('.v1-root:is(.v1-background-skyline-rocket, .v1-background-skyline-green, .v1-background-skyline-neon) .v1-workspace .v1-workspace__main');
 
     expect(rule).toContain('background-image: var(--v1-skyline-background)');
-    expect(rule).toContain('background-position: center, center bottom, 0 0, 1.75rem 2.25rem, center');
+    expect(rule).toContain('background-position: center, center bottom');
+    expect(rule).toContain('background-size: 100% 100%, cover');
   });
 
-  it('uses the refitted night skyline and continuing star field in dark mode', () => {
+  it('uses the complete night artwork in dark mode without a generated sky layer', () => {
     const rule = ruleFor('.v1-theme-dark.v1-background-skyline-rocket');
 
     expect(rule).toContain("--v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night.png')");
-    expect(rule).toContain('--v1-skyline-sky: linear-gradient(90deg, #021936 0%');
-    expect(rule).toContain('--v1-skyline-stars-primary: radial-gradient');
-    expect(rule).toContain('--v1-skyline-stars-secondary: radial-gradient');
+    expect(rule).not.toContain('--v1-skyline-sky');
+    expect(rule).not.toContain('--v1-skyline-stars');
   });
 
   it('maps the green and neon skyline options to their artwork', () => {
@@ -46,6 +46,13 @@ describe('v1 foundation styles', () => {
       .toContain("url('../../../assets/images/skylines/skyline-green.png')");
     expect(ruleFor('.v1-root.v1-background-skyline-neon'))
       .toContain("url('../../../assets/images/skylines/skyline-neon.png')");
+  });
+
+  it('uses the portrait skyline artwork on narrow screens', () => {
+    expect(foundationCss).toContain("url('../../../assets/images/skylines/skyline-rocket-mobile.png')");
+    expect(foundationCss).toContain("url('../../../assets/images/skylines/skyline-rocket-night-mobile.png')");
+    expect(foundationCss).toContain("url('../../../assets/images/skylines/skyline-green-mobile.png')");
+    expect(foundationCss).toContain("url('../../../assets/images/skylines/skyline-neon-mobile.png')");
   });
 
   function ruleFor(selector: string): string {
