@@ -44,7 +44,7 @@
       @for (definition of definitions(); track definition.draftId) {
         <article class="weather-setup__definition">
           <div class="weather-setup__definition-grid">
-            <label><span>Weather type</span><select class="v1-select" [disabled]="busy" (change)="setDefinitionType(definition.draftId, $any($event.target).value)">@for (option of weatherTypes; track option.value) { <option [value]="option.value" [selected]="option.value === definition.weatherDataType">{{ option.label }}</option> }</select></label>
+            <label><span>Weather type</span><select class="v1-select" [value]="definition.weatherDataType" [disabled]="busy" (change)="setDefinitionType(definition.draftId, $any($event.target).value)">@for (option of weatherTypes; track option.value) { <option [value]="option.value" [attr.selected]="option.value === definition.weatherDataType ? '' : null">{{ option.label }}</option> }</select></label>
             <label><span>Predictor name</span><input type="text" maxlength="100" required [value]="definition.name" [disabled]="busy" (input)="setDefinitionName(definition.draftId, $any($event.target).value)"></label>
             @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
               <label><span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span><input type="number" required [value]="definition.baseTemperature" [disabled]="busy" (change)="setDefinitionBase(definition.draftId, $any($event.target).value)"></label>

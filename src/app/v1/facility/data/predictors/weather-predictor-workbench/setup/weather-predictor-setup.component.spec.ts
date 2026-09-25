@@ -8,6 +8,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
+import { weatherLastTwoYearsRange } from '../../models';
 import { WeatherPredictorSetupComponent } from './weather-predictor-setup.component';
 
 describe('WeatherPredictorSetupComponent', () => {
@@ -91,6 +92,29 @@ describe('WeatherPredictorSetupComponent', () => {
     expect(text).not.toContain('Manage included weather predictors');
   });
 
+  it('uses the last two years when a station is chosen before dates are entered', () => {
+    const fixture = createFixture({ defaultRange: undefined });
+    const component = fixture.componentInstance;
+    const expectedRange = weatherLastTwoYearsRange();
+
+    expect(component.startMonth()).toBe('');
+    expect(component.endMonth()).toBe('');
+    expect(component.stationPreviewRange()).toEqual(expectedRange);
+
+    component.selectStation({ ID: 'station-a', name: 'Station A' } as any);
+
+    expect(component.startMonth()).toBe(monthInput(expectedRange.start));
+    expect(component.endMonth()).toBe(monthInput(expectedRange.end));
+  });
+
+  it('does not replace a partially entered station-preview range', () => {
+    const fixture = createFixture({ defaultRange: undefined });
+    const component = fixture.componentInstance;
+    component.setStartMonth('2025-01');
+
+    expect(component.stationPreviewRange()).toBeUndefined();
+  });
+
   it('removes the date range from saved station setup', () => {
     const savedFixture = createFixture({
       creating: false,
@@ -139,6 +163,7 @@ describe('WeatherPredictorSetupComponent', () => {
   it('allows a future end month and explains that future readings will be zero', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance;
+    component.selectStation({ ID: 'station-a', name: 'Station A' } as any);
     component.setStartMonth(relativeMonthInput(0));
     component.setEndMonth(relativeMonthInput(2));
     fixture.detectChanges();
@@ -189,7 +214,7 @@ describe('WeatherPredictorSetupComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Classification');
   });
 
-  it('renders and updates the selected weather type for each predictor row', () => {
+  it('renders and updates the selected weather type for each predictor row', async () => {
     const group = {
       routeKey: 'station:station-a', stationId: 'station-a', stationName: 'Station A',
       predictors: [{
@@ -198,6 +223,8 @@ describe('WeatherPredictorSetupComponent', () => {
       }]
     };
     const fixture = createFixture({ group, creating: false });
+    await fixture.whenStable();
+    fixture.detectChanges();
     const select = fixture.nativeElement.querySelector('.weather-setup__definition select') as HTMLSelectElement;
 
     expect(select.value).toBe('CDD');
@@ -213,14 +240,22 @@ describe('WeatherPredictorSetupComponent', () => {
   });
 });
 
-function createFixture(options: { group?: any; creating?: boolean; previewStationGroup?: any; commitStationGroup?: any } = {}) {
+function createFixture(options: {
+  group?: any;
+  creating?: boolean;
+  previewStationGroup?: any;
+  commitStationGroup?: any;
+  defaultRange?: any;
+} = {}) {
   const state = signal({ status: 'idle', message: '' });
   TestBed.configureTestingModule({
     imports: [WeatherPredictorSetupComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
         selectedWeatherGroup: signal(options.group), creatingWeatherGroup: signal(options.creating ?? true),
-        defaultWeatherRange: signal({ start: { year: 2026, month: 1 }, end: { year: 2026, month: 3 } }),
+        defaultWeatherRange: signal('defaultRange' in options
+          ? options.defaultRange
+          : { start: { year: 2026, month: 1 }, end: { year: 2026, month: 3 } }),
         facility: signal({ guid: 'facility-a', city: 'Oak Ridge', state: 'TN' }), predictorReadings: signal([]),
         canWrite: signal(true), hasPending: signal(false)
       } },
@@ -245,4 +280,8 @@ function relativeMonthInput(offset: number): string {
   date.setDate(1);
   date.setMonth(date.getMonth() + offset);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function monthInput(month: { year: number; month: number }): string {
+  return `${month.year}-${String(month.month).padStart(2, '0')}`;
 }

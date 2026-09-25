@@ -9,6 +9,7 @@ import {
   defaultWeatherPredictorName,
   validateWeatherMonthRange,
   weatherFutureMonthCount,
+  weatherLastTwoYearsRange,
   weatherSourceRangeThroughPresent
 } from './predictor-weather.models';
 
@@ -16,6 +17,17 @@ describe('predictor weather models', () => {
   it('uses established generated predictor names', () => {
     expect(defaultWeatherPredictorName('HDD', 60)).toBe('HDD Generated (60F)');
     expect(defaultWeatherPredictorName('relativeHumidity')).toBe('Relative Humidity');
+  });
+
+  it('uses 24 inclusive calendar months for the last-two-years range', () => {
+    expect(weatherLastTwoYearsRange(new Date(2026, 8, 25))).toEqual({
+      start: { year: 2024, month: 9 },
+      end: { year: 2026, month: 8 }
+    });
+    expect(weatherLastTwoYearsRange(new Date(2026, 0, 2))).toEqual({
+      start: { year: 2024, month: 1 },
+      end: { year: 2025, month: 12 }
+    });
   });
 
   it('builds distinct station-preview series and counts warning months once', () => {

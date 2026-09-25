@@ -19,6 +19,7 @@ import {
   defaultWeatherPredictorName,
   validateWeatherMonthRange,
   weatherFutureMonthCount,
+  weatherLastTwoYearsRange,
   weatherPredictorUnit,
   weatherRangeForReadings
 } from '../../models';
@@ -50,7 +51,11 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   readonly startMonth = signal('');
   readonly endMonth = signal('');
   readonly definitions = signal<readonly EditableWeatherDefinition[]>([]);
-  readonly stationPreviewRange = computed(() => rangeFromInputs(this.startMonth(), this.endMonth()));
+  readonly stationPreviewRange = computed(() => {
+    const start = this.startMonth();
+    const end = this.endMonth();
+    return rangeFromInputs(start, end) ?? (!start && !end ? weatherLastTwoYearsRange() : undefined);
+  });
   readonly futureMonthCount = computed(() => {
     const range = this.stationPreviewRange();
     return range ? weatherFutureMonthCount(range) : 0;
@@ -121,7 +126,15 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     this.initialize(this.workspace.selectedWeatherGroup(), this.workspace.defaultWeatherRange());
   }
 
-  selectStation(station: WeatherStation): void { this.station.set(station); this.markChanged(); }
+  selectStation(station: WeatherStation): void {
+    const range = this.stationPreviewRange();
+    if (!this.startMonth() && !this.endMonth() && range) {
+      this.startMonth.set(toMonthInput(range.start));
+      this.endMonth.set(toMonthInput(range.end));
+    }
+    this.station.set(station);
+    this.markChanged();
+  }
   setStartMonth(value: string): void { this.startMonth.set(value); this.markChanged(); }
   setEndMonth(value: string): void { this.endMonth.set(value); this.markChanged(); }
 
@@ -317,7 +330,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
 
   private buildDraft(): WeatherStationGroupDraft | undefined {
     const station = this.station();
-    const range = rangeFromInputs(this.startMonth(), this.endMonth());
+    const range = this.stationPreviewRange();
     if (!station || !range) return undefined;
     return {
       sourceGroupKey: this.workspace.selectedWeatherGroup()?.routeKey,

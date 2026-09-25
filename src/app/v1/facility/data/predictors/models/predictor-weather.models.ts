@@ -161,6 +161,16 @@ export function validateWeatherMonthRange(range: WeatherMonthRange): string | un
   return undefined;
 }
 
+export function weatherLastTwoYearsRange(now = new Date()): WeatherMonthRange {
+  const endDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const end = { year: endDate.getFullYear(), month: endDate.getMonth() + 1 };
+  const startDate = new Date(end.year, end.month - 1 - 23, 1);
+  return {
+    start: { year: startDate.getFullYear(), month: startDate.getMonth() + 1 },
+    end
+  };
+}
+
 export function weatherFutureMonthCount(range: WeatherMonthRange, now = new Date()): number {
   const current = currentWeatherMonthValue(now);
   return enumerateWeatherMonths(range).filter(month => weatherMonthValue(month) > current).length;
