@@ -157,7 +157,7 @@ export class ManageAccountsComponent {
     let success: boolean = await this.databaseResetService.resetAndRestart();
     if (!success) {
       this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast('An error occured', 'There was an error when trying to reset the database follow the instructions delete database manually.', undefined, false, 'alert-danger')
+      this.toastNotificationService.showToast('An error occurred', 'There was an error when trying to reset the database follow the instructions delete database manually.', undefined, false, 'alert-danger')
       this.showMoreHelp();
     }
   }
