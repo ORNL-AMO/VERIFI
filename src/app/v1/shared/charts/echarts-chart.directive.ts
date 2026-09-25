@@ -54,6 +54,15 @@ export interface V1EChartsDataZoomRange {
   readonly end: number;
 }
 
+export interface V1EChartsPointClickEvent {
+  readonly componentType?: string;
+  readonly seriesIndex?: number;
+  readonly dataIndex?: number;
+  readonly name?: string;
+  readonly value?: unknown;
+  readonly data?: unknown;
+}
+
 @Directive({
   selector: '[appV1ECharts]',
   standalone: true
@@ -69,6 +78,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
 
   @Input('appV1ECharts') option: V1EChartsOption | undefined;
   @Output() dataZoomChanged = new EventEmitter<V1EChartsDataZoomRange>();
+  @Output() chartPointClicked = new EventEmitter<V1EChartsPointClickEvent>();
 
   downloadPng(fileName: string): void {
     if (!this.chart || typeof document === 'undefined') {
@@ -92,6 +102,7 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
     this.zone.runOutsideAngular(() => {
       this.chart = echarts.init(this.elementRef.nativeElement, undefined, { renderer: 'canvas' });
       this.bindDataZoomEvent();
+      this.bindPointClickEvent();
       this.observeThemeChanges();
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver = new ResizeObserver(() => this.chart?.resize());
@@ -225,6 +236,20 @@ export class EChartsChartDirective implements AfterViewInit, OnChanges, OnDestro
       if (range) {
         this.zone.run(() => this.dataZoomChanged.emit(range));
       }
+    });
+  }
+
+  private bindPointClickEvent(): void {
+    this.chart?.on('click', event => {
+      if (event.componentType !== 'series') return;
+      this.zone.run(() => this.chartPointClicked.emit({
+        componentType: event.componentType,
+        seriesIndex: event.seriesIndex,
+        dataIndex: event.dataIndex,
+        name: event.name,
+        value: event.value,
+        data: event.data
+      }));
     });
   }
 }

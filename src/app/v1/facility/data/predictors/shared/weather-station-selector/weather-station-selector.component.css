@@ -35,15 +35,31 @@
 .weather-station-selector__chosen-station small { color: var(--v1-muted); }
 .weather-station-selector__preview-loading { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 14rem; color: var(--v1-muted); }
 .weather-station-selector__preview-chart { width: 100%; height: 22rem; min-height: 18rem; }
+.weather-station-selector__source-detail { display: grid; gap: var(--v1-space-3); min-width: 0; animation: weather-station-source-detail-enter 160ms ease-out; }
+.weather-station-selector__source-detail-heading { display: flex; flex-wrap: wrap; align-items: center; gap: var(--v1-space-3); padding-bottom: var(--v1-space-3); border-bottom: 1px solid var(--v1-border); }
+.weather-station-selector__source-detail-heading > div { display: grid; gap: .1rem; }
+.weather-station-selector__source-detail-heading span { color: var(--v1-muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.weather-station-selector__source-detail-heading strong { font-size: .95rem; }
 .weather-station-selector__gap-summary { display: flex; align-items: center; gap: .55rem; margin: 0; padding: .8rem; border: 1px solid var(--v1-success); background: color-mix(in srgb, var(--v1-success) 8%, var(--v1-surface)); color: var(--v1-text); }
 .weather-station-selector__gap-summary > app-ui-icon { color: var(--v1-success); }
 .weather-station-selector__gap-summary--warning { border-color: var(--v1-warning); background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface)); }
 .weather-station-selector__gap-summary--warning > app-ui-icon { color: var(--v1-warning); }
+.weather-station-selector__gap-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--v1-space-2); color: var(--v1-muted); font-size: .8rem; font-weight: 800; }
+.weather-station-selector__gap-actions > div { display: flex; flex-wrap: wrap; gap: var(--v1-space-1); }
 .weather-station-selector__preview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; padding-top: .8rem; border-top: 1px solid var(--v1-border); }
+@keyframes weather-station-source-detail-enter {
+  from { opacity: 0; transform: scale(.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .weather-station-selector__source-detail { animation: none; }
+}
 @media (max-width: 34rem) {
   .weather-station-selector__search > div { grid-template-columns: 1fr; }
   .weather-station-selector__chosen-location, .weather-station-selector__chosen-station { grid-template-columns: auto minmax(0, 1fr); }
   .weather-station-selector__chosen-location button, .weather-station-selector__chosen-station button { grid-column: 1 / -1; justify-self: start; }
   .weather-station-selector__preview-chart { height: 18rem; }
+  .weather-station-selector__source-detail-heading { align-items: stretch; }
+  .weather-station-selector__source-detail-heading > button { width: 100%; }
   .weather-station-selector__preview-actions > button { flex: 1 1 100%; }
 }

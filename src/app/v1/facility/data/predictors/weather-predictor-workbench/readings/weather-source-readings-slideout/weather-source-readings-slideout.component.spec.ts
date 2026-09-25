@@ -7,7 +7,9 @@ import { HourlyWeatherDataService } from '@platform/weather/hourly-weather-data.
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import {
   WeatherSourceReadingsSlideoutComponent,
-  buildWeatherSourceReadingChart
+  buildWeatherSourceReadingChart,
+  buildWeatherSourceReadingChartOption,
+  formatSourceReadingTooltip
 } from './weather-source-readings-slideout.component';
 
 describe('WeatherSourceReadingsSlideoutComponent', () => {
@@ -45,6 +47,40 @@ describe('WeatherSourceReadingsSlideoutComponent', () => {
     expect(chart.missingValueCount).toBe(1);
   });
 
+  it('extends the chart through the end of the month for a trailing source-data gap', () => {
+    const chart = buildWeatherSourceReadingChart(
+      predictor('CDD'),
+      { year: 2026, month: 9 },
+      [
+        reading('2026-09-01T00:00:00', { dry_bulb_temp: 74 }),
+        reading('2026-09-05T06:00:00', { dry_bulb_temp: 69 })
+      ]
+    );
+    const option = buildWeatherSourceReadingChartOption(chart) as unknown as {
+      xAxis: { max: number };
+      series: Array<{ markArea: { data: Array<Array<{ xAxis: number }>> } }>;
+    };
+    const monthEnd = new Date(2026, 9, 1).getTime();
+
+    expect(chart.gaps.at(-1)?.end.getTime()).toBe(monthEnd);
+    expect(option.xAxis.max).toBe(monthEnd);
+    expect(option.series[0].markArea.data.at(-1)).toEqual([
+      { xAxis: new Date('2026-09-05T06:00:00').getTime() },
+      { xAxis: monthEnd }
+    ]);
+  });
+
+  it('rounds hourly hover values to one decimal place', () => {
+    const tooltip = formatSourceReadingTooltip({
+      seriesName: 'Dry bulb temperature (°F)',
+      marker: '<span></span>',
+      value: [new Date(2026, 8, 5, 6).getTime(), 69.456]
+    });
+
+    expect(tooltip).toContain('Dry bulb temperature (°F): 69.5');
+    expect(tooltip).not.toContain('69.456');
+  });
+
   it('loads the selected station month and renders the accessible time chart', async () => {
     const load = vi.fn(() => of([
       reading('2026-01-01T00:00:00', { dry_bulb_temp: 40 }),
@@ -70,6 +106,23 @@ describe('WeatherSourceReadingsSlideoutComponent', () => {
     expect(gapDetails).toHaveLength(2);
     expect(normalizedText(gapDetails[0])).toContain('There is a gap from Jan 1, 2026, 12:00 AM to Jan 2, 2026, 2:00 AM.');
     expect(normalizedText(gapDetails[1])).toContain('There is a gap from Jan 2, 2026, 2:00 AM to Feb 1, 2026, 12:00 AM.');
+  });
+
+  it('renders the source detail inline without opening another slideout', async () => {
+    const fixture = setup(vi.fn(() => of([
+      reading('2026-01-01T00:00:00', { dry_bulb_temp: 40 })
+    ])));
+    fixture.componentRef.setInput('embedded', true);
+    fixture.componentRef.setInput('predictor', predictor('HDD'));
+    fixture.componentRef.setInput('month', { year: 2026, month: 1 });
+    fixture.componentRef.setInput('monthLabel', 'Jan 2026');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-workspace-slideout')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.weather-source-readings')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="img"]')).not.toBeNull();
   });
 
   it('shows a retry action when source readings cannot be loaded', async () => {

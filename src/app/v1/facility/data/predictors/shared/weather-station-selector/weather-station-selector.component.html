@@ -109,33 +109,69 @@
               <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="retryStationPreview()">Try again</button>
             </div>
           } @else if (stationPreview(); as preview) {
-            @if (previewChartOption(); as chartOption) {
-              <div
-                class="weather-station-selector__preview-chart"
-                [appV1ECharts]="chartOption"
-                role="img"
-                [attr.aria-label]="'Monthly predictor preview for ' + candidate.name">
+            @if (sourceInspection(); as inspection) {
+              <section class="weather-station-selector__source-detail" aria-labelledby="weather-station-source-detail-title">
+                <header class="weather-station-selector__source-detail-heading">
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="closeSourceInspection()">
+                    <app-ui-icon name="arrowLeft"></app-ui-icon>
+                    Back to monthly preview
+                  </button>
+                  <div>
+                    <span>Hourly source detail</span>
+                    <strong id="weather-station-source-detail-title">{{ inspection.monthLabel }} · {{ inspection.predictor.name }}</strong>
+                  </div>
+                </header>
+                <app-weather-source-readings-slideout
+                  [embedded]="true"
+                  [predictor]="inspection.predictor"
+                  [month]="inspection.month"
+                  [monthLabel]="inspection.monthLabel">
+                </app-weather-source-readings-slideout>
+              </section>
+            } @else {
+              @if (previewChartOption(); as chartOption) {
+                <div
+                  #previewChart
+                  class="weather-station-selector__preview-chart"
+                  tabindex="-1"
+                  [appV1ECharts]="chartOption"
+                  (chartPointClicked)="inspectPreviewPoint($event)"
+                  role="img"
+                  [attr.aria-label]="'Monthly predictor preview for ' + candidate.name + '. Outlined circles identify months with source-data gaps. Select one to inspect its hourly data.'">
+                </div>
+              }
+              <div class="visually-hidden">
+                <table>
+                  <caption>Monthly predictor preview for {{ candidate.name }}</caption>
+                  <thead><tr><th scope="col">Month</th>@for (series of preview.series; track series.key) { <th scope="col">{{ series.name }} ({{ series.unit }})</th> }</tr></thead>
+                  <tbody>
+                    @for (point of preview.series[0].points; track point.monthLabel; let pointIndex = $index) {
+                      <tr><th scope="row">{{ point.monthLabel }}</th>@for (series of preview.series; track series.key) { <td>{{ series.points[pointIndex].amount | number:'1.0-2' }}{{ series.points[pointIndex].warning ? ' — source gap' : '' }}</td> }</tr>
+                    }
+                  </tbody>
+                </table>
               </div>
+              <p class="weather-station-selector__gap-summary" [class.weather-station-selector__gap-summary--warning]="preview.warningMonths.length > 0">
+                <app-ui-icon [name]="preview.warningMonths.length > 0 ? 'warning' : 'success'"></app-ui-icon>
+                <strong>{{ gapSummary() }}</strong>
+              </p>
+              @if (warningMonthChoices().length > 0) {
+                <div class="weather-station-selector__gap-actions" aria-label="Inspect months with source-data gaps">
+                  <span>Inspect hourly gaps</span>
+                  <div>
+                    @for (choice of warningMonthChoices(); track choice.key) {
+                      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="inspectWarningMonth(choice.month)">
+                        {{ choice.label }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              <footer class="weather-station-selector__preview-actions">
+                <button type="button" class="v1-btn v1-btn--quiet" (click)="changeStation()">Back to stations</button>
+                <button type="button" class="v1-btn v1-btn--action" (click)="confirmStation()"><app-ui-icon name="success"></app-ui-icon> Confirm station</button>
+              </footer>
             }
-            <div class="visually-hidden">
-              <table>
-                <caption>Monthly predictor preview for {{ candidate.name }}</caption>
-                <thead><tr><th scope="col">Month</th>@for (series of preview.series; track series.key) { <th scope="col">{{ series.name }} ({{ series.unit }})</th> }</tr></thead>
-                <tbody>
-                  @for (point of preview.series[0].points; track point.monthLabel; let pointIndex = $index) {
-                    <tr><th scope="row">{{ point.monthLabel }}</th>@for (series of preview.series; track series.key) { <td>{{ series.points[pointIndex].amount | number:'1.0-2' }}{{ series.points[pointIndex].warning ? ' — source gap' : '' }}</td> }</tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-            <p class="weather-station-selector__gap-summary" [class.weather-station-selector__gap-summary--warning]="preview.warningMonths.length > 0">
-              <app-ui-icon [name]="preview.warningMonths.length > 0 ? 'warning' : 'success'"></app-ui-icon>
-              <strong>{{ gapSummary() }}</strong>
-            </p>
-            <footer class="weather-station-selector__preview-actions">
-              <button type="button" class="v1-btn v1-btn--quiet" (click)="changeStation()">Back to stations</button>
-              <button type="button" class="v1-btn v1-btn--action" (click)="confirmStation()"><app-ui-icon name="success"></app-ui-icon> Confirm station</button>
-            </footer>
           }
         </section>
       } @else if (searchingStations()) {

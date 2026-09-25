@@ -1,8 +1,16 @@
-<app-workspace-slideout
-  [title]="predictor.name + ' source readings'"
-  [description]="monthLabel + ' · ' + (predictor.weatherStationName || predictor.weatherStationId || 'Saved weather station')"
-  size="large"
-  (closed)="closed.emit()">
+@if (embedded) {
+  <ng-container [ngTemplateOutlet]="sourceReadings"></ng-container>
+} @else {
+  <app-workspace-slideout
+    [title]="predictor.name + ' source readings'"
+    [description]="monthLabel + ' · ' + (predictor.weatherStationName || predictor.weatherStationId || 'Saved weather station')"
+    size="large"
+    (closed)="closed.emit()">
+    <ng-container [ngTemplateOutlet]="sourceReadings"></ng-container>
+  </app-workspace-slideout>
+}
+
+<ng-template #sourceReadings>
   <section class="weather-source-readings">
     @if (loading()) {
       <div class="weather-source-readings__loading" role="status">
@@ -62,4 +70,4 @@
       }
     }
   </section>
-</app-workspace-slideout>
+</ng-template>

@@ -19,6 +19,11 @@ export interface WeatherSourceReadingPoint {
   readonly value: number | null;
 }
 
+export type WeatherSourceReadingPredictor = Pick<
+  IdbPredictor,
+  'name' | 'weatherDataType' | 'weatherStationId' | 'weatherStationName'
+>;
+
 export interface WeatherSourceGapRange {
   readonly start: Date;
   readonly end: Date;
@@ -45,9 +50,10 @@ export class WeatherSourceReadingsSlideoutComponent implements OnChanges, OnDest
   private readonly cancelLoad = new Subject<void>();
   private loadRequest = 0;
 
-  @Input({ required: true }) predictor!: IdbPredictor;
+  @Input({ required: true }) predictor!: WeatherSourceReadingPredictor;
   @Input({ required: true }) month!: WeatherMonth;
   @Input({ required: true }) monthLabel = '';
+  @Input() embedded = false;
   @Output() readonly closed = new EventEmitter<void>();
 
   readonly loading = signal(false);
@@ -145,11 +151,17 @@ export function buildWeatherSourceReadingChart(
 
 export function buildWeatherSourceReadingChartOption(chart: WeatherSourceReadingChart): V1EChartsOption {
   const hasZoom = chart.points.length > 100;
+  const displayedTimes = [
+    ...chart.points.map(point => point.time.getTime()),
+    ...chart.gaps.flatMap(gap => [gap.start.getTime(), gap.end.getTime()])
+  ];
   return {
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', formatter: formatSourceReadingTooltip },
     grid: { top: 28, right: 24, bottom: hasZoom ? 72 : 38, left: 58, containLabel: true },
     xAxis: {
       type: 'time',
+      min: displayedTimes.length > 0 ? Math.min(...displayedTimes) : undefined,
+      max: displayedTimes.length > 0 ? Math.max(...displayedTimes) : undefined,
       axisLabel: { formatter: value => new Date(Number(value)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }
     },
     yAxis: { type: 'value', name: `${chart.sourceLabel} (${chart.unit})` },
@@ -171,6 +183,21 @@ export function buildWeatherSourceReadingChartOption(chart: WeatherSourceReading
       } : undefined
     }]
   } as V1EChartsOption;
+}
+
+export function formatSourceReadingTooltip(params: unknown): string {
+  const entries = (Array.isArray(params) ? params : [params])
+    .map(sourceTooltipEntry)
+    .filter((entry): entry is { timestamp: number; seriesName: string; marker: string; value: number | null } => !!entry);
+  if (entries.length === 0) return '';
+  const dateLabel = new Date(entries[0].timestamp).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
+  });
+  const rows = entries.map(entry => {
+    const value = entry.value === null ? 'Missing' : formatOneDecimal(entry.value);
+    return `<div>${entry.marker}${escapeHtml(entry.seriesName)}: ${escapeHtml(value)}</div>`;
+  }).join('');
+  return `<div>${escapeHtml(dateLabel)}</div>${rows}`;
 }
 
 function findWeatherSourceGaps(
@@ -212,4 +239,32 @@ function weatherSourceMetric(type: WeatherDataType): {
 
 function finiteWeatherValue(value: number | null | undefined): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function sourceTooltipEntry(param: unknown): {
+  timestamp: number;
+  seriesName: string;
+  marker: string;
+  value: number | null;
+} | undefined {
+  if (typeof param !== 'object' || param === null || !('value' in param)) return undefined;
+  const value = (param as { value?: unknown }).value;
+  if (!Array.isArray(value) || value.length < 2) return undefined;
+  const numericValue = typeof value[1] === 'number' && Number.isFinite(value[1]) ? value[1] : null;
+  return {
+    timestamp: Number(value[0]),
+    seriesName: String((param as { seriesName?: unknown }).seriesName ?? ''),
+    marker: String((param as { marker?: unknown }).marker ?? ''),
+    value: numericValue
+  };
+}
+
+function formatOneDecimal(value: number): string {
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[character] ?? character);
 }
