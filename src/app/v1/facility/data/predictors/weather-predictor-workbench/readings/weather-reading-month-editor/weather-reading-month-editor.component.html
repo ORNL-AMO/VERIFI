@@ -1,6 +1,6 @@
 <app-workspace-slideout
   [title]="mode === 'add' ? 'Add weather month' : 'Edit weather month'"
-  description="Enter values for every predictor at this station."
+  [description]="mode === 'add' ? 'Review calculated values or override them before saving.' : 'Edit values for every predictor at this station.'"
   [saving]="saving"
   (closed)="cancelled.emit()">
   <form class="weather-month-editor" (submit)="$event.preventDefault(); save()">
@@ -8,12 +8,60 @@
       <span>Month</span>
       <input type="month" required [value]="month()" [disabled]="saving || mode === 'edit'" (change)="setMonth($any($event.target).value)">
     </label>
+    @if (mode === 'add' && calculating) {
+      <div class="v1-alert v1-alert--info" role="status">
+        <app-ui-icon name="loading" spin></app-ui-icon>
+        <span>Calculating values from station data…</span>
+      </div>
+    }
+    @if (mode === 'add' && gapPredictorNames().length > 0) {
+      <div class="v1-alert v1-alert--warning" role="alert">
+        <app-ui-icon name="cloudRain"></app-ui-icon>
+        <span>
+          The calculated {{ gapPredictorNames().length === 1 ? 'value' : 'values' }} for
+          <strong>{{ gapPredictorNames().join(', ') }}</strong>
+          {{ gapPredictorNames().length === 1 ? 'contains' : 'contain' }} gaps or missing weather source data.
+        </span>
+      </div>
+    }
+    @if (mode === 'add' && calculationError) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>{{ calculationError }} You can override each value manually.</span>
+      </div>
+    }
+    @if (mode === 'add' && monthIsFuture()) {
+      <div class="v1-alert v1-alert--warning" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>Sorry, we cannot predict the future. If you wish, you can try by using the override buttons.</span>
+      </div>
+    }
     <div class="weather-month-editor__values" aria-label="Weather predictor values">
       @for (column of columns; track column.predictor.guid) {
-        <label>
-          <span>{{ column.predictor.name }} <small>{{ column.typeLabel }} · {{ column.unit }}</small></span>
-          <input type="number" step="any" required [value]="values()[column.predictor.guid]" [disabled]="saving" (input)="setValue(column.predictor.guid, $any($event.target).value)">
-        </label>
+        @let overridden = overriddenPredictorGuids().has(column.predictor.guid);
+        <div class="weather-month-editor__field">
+          <label [for]="'weather-month-value-' + $index">
+            <span>{{ column.predictor.name }} <small>{{ column.typeLabel }}</small></span>
+          </label>
+          <div class="input-group weather-month-editor__input-group">
+            <input class="v1-input" [id]="'weather-month-value-' + $index" type="number" step="any" required
+              [placeholder]="calculating ? 'Calculating…' : ''"
+              [value]="values()[column.predictor.guid]"
+              [disabled]="saving || calculating || (mode === 'add' && !overridden)"
+              (input)="setValue(column.predictor.guid, $any($event.target).value)">
+            <span class="input-group-text">{{ column.unit }}</span>
+            @if (mode === 'add') {
+              <button type="button" class="weather-month-editor__override"
+                [attr.aria-pressed]="overridden"
+                [attr.aria-label]="(overridden ? 'Use calculated value for ' : 'Override calculated value for ') + column.predictor.name"
+                [disabled]="saving || calculating || !month()"
+                (click)="toggleOverride(column.predictor.guid, $event)">
+                <app-ui-icon [name]="overridden ? 'refresh' : 'edit'"></app-ui-icon>
+                {{ overridden ? 'Use calculated' : 'Override' }}
+              </button>
+            }
+          </div>
+        </div>
       }
     </div>
     @if (validationError() || error) {
@@ -21,7 +69,7 @@
     }
     <footer>
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
-      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving">
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || calculating">
         <app-ui-icon [name]="saving ? 'loading' : 'check'" [spin]="saving"></app-ui-icon>
         {{ saving ? 'Saving…' : 'Save month' }}
       </button>

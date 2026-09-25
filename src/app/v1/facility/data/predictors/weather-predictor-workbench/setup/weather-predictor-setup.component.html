@@ -19,10 +19,21 @@
     (stationSelected)="selectStation($event)">
   </app-weather-station-selector>
 
-  <div class="weather-setup__range">
-    <label><span>Start month</span><input type="month" required [value]="startMonth()" [disabled]="busy" (change)="setStartMonth($any($event.target).value)"></label>
-    <label><span>End month</span><input type="month" required [value]="endMonth()" [disabled]="busy" (change)="setEndMonth($any($event.target).value)"></label>
-  </div>
+  @if (isCreation()) {
+    <div class="weather-setup__range">
+      <label><span>Start month</span><input type="month" required [value]="startMonth()" [disabled]="busy" (change)="setStartMonth($any($event.target).value)"></label>
+      <label><span>End month</span><input type="month" required [value]="endMonth()" [disabled]="busy" (change)="setEndMonth($any($event.target).value)"></label>
+    </div>
+    @if (futureMonthCount() > 0) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>
+          We can't predict the future. {{ futureMonthCount() }} future {{ futureMonthCount() === 1 ? 'month' : 'months' }} will be saved as 0.
+          Use Save and Update Readings later to replace them when weather data becomes available.
+        </span>
+      </div>
+    }
+  }
 
   <section class="weather-setup__outputs" aria-labelledby="weather-output-title">
     <div class="weather-setup__section-heading"><h2 id="weather-output-title">Predictors</h2><button type="button" class="v1-btn v1-btn--secondary" [disabled]="busy" (click)="addDefinition()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button></div>
@@ -33,7 +44,7 @@
       @for (definition of definitions(); track definition.draftId) {
         <article class="weather-setup__definition">
           <div class="weather-setup__definition-grid">
-            <label><span>Weather type</span><select class="v1-select" [value]="definition.weatherDataType" [disabled]="busy" (change)="setDefinitionType(definition.draftId, $any($event.target).value)">@for (option of weatherTypes; track option.value) { <option [value]="option.value" [selected]="option.value === definition.weatherDataType">{{ option.label }}</option> }</select></label>
+            <label><span>Weather type</span><select class="v1-select" [disabled]="busy" (change)="setDefinitionType(definition.draftId, $any($event.target).value)">@for (option of weatherTypes; track option.value) { <option [value]="option.value" [selected]="option.value === definition.weatherDataType">{{ option.label }}</option> }</select></label>
             <label><span>Predictor name</span><input type="text" maxlength="100" required [value]="definition.name" [disabled]="busy" (input)="setDefinitionName(definition.draftId, $any($event.target).value)"></label>
             @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
               <label><span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span><input type="number" required [value]="definition.baseTemperature" [disabled]="busy" (change)="setDefinitionBase(definition.draftId, $any($event.target).value)"></label>

@@ -77,6 +77,12 @@ export interface WeatherStationSelectionPreview {
   readonly warningMonths: readonly WeatherMonth[];
 }
 
+export interface WeatherStationMonthCalculationValue {
+  readonly predictorGuid: string;
+  readonly amount: number;
+  readonly weatherDataWarning: boolean;
+}
+
 export interface WeatherStationGroupDefinition extends WeatherPredictorDefinition {
   readonly predictorGuid?: string;
   readonly production: boolean;
@@ -152,10 +158,24 @@ export function defaultWeatherPredictorName(type: WeatherDataType, baseTemperatu
 export function validateWeatherMonthRange(range: WeatherMonthRange): string | undefined {
   if (!isValidWeatherMonth(range.start) || !isValidWeatherMonth(range.end)) return 'Enter a valid start and end month.';
   if (weatherMonthValue(range.end) < weatherMonthValue(range.start)) return 'The end month must be on or after the start month.';
-  const now = new Date();
-  const current = weatherMonthValue({ year: now.getFullYear(), month: now.getMonth() + 1 });
-  if (weatherMonthValue(range.end) > current) return 'Weather data cannot be generated for future months.';
   return undefined;
+}
+
+export function weatherFutureMonthCount(range: WeatherMonthRange, now = new Date()): number {
+  const current = currentWeatherMonthValue(now);
+  return enumerateWeatherMonths(range).filter(month => weatherMonthValue(month) > current).length;
+}
+
+export function weatherSourceRangeThroughPresent(
+  range: WeatherMonthRange,
+  now = new Date()
+): WeatherMonthRange | undefined {
+  const current = { year: now.getFullYear(), month: now.getMonth() + 1 };
+  if (weatherMonthValue(range.start) > weatherMonthValue(current)) return undefined;
+  return {
+    start: range.start,
+    end: weatherMonthValue(range.end) > weatherMonthValue(current) ? current : range.end
+  };
 }
 
 export function buildWeatherGenerationPreview(
@@ -215,6 +235,32 @@ export function buildWeatherStationSelectionPreview(
     warningMonths: enumerateWeatherMonths(range)
       .filter(month => warningKeys.has(weatherMonthKey(month.year, month.month)))
   };
+}
+
+export function buildWeatherStationMonthCalculation(
+  predictors: readonly IdbPredictor[],
+  month: WeatherMonth,
+  hourlyData: readonly HourlyWeatherReading[]
+): readonly WeatherStationMonthCalculationValue[] {
+  const range = { start: month, end: month };
+  const rangeError = validateWeatherMonthRange(range);
+  if (rangeError) throw new Error(rangeError);
+  if (predictors.length === 0) throw new Error('This weather station has no predictors to calculate.');
+  const stationId = predictors[0].weatherStationId?.trim();
+  if (!stationId || predictors.some(predictor => predictor.weatherStationId?.trim() !== stationId)) {
+    throw new Error('The weather predictors must belong to the same available station.');
+  }
+  return predictors.map(predictor => {
+    const reading = calculateWeatherReadings(predictor, range, hourlyData)[0];
+    if (!reading || !Number.isFinite(reading.amount)) {
+      throw new Error(`A calculated value is not available for ${predictor.name}.`);
+    }
+    return {
+      predictorGuid: predictor.guid,
+      amount: reading.amount,
+      weatherDataWarning: !!reading.weatherDataWarning
+    };
+  });
 }
 
 export function buildWeatherStationGroupPreview(
@@ -494,6 +540,14 @@ function calculateWeatherDefinitionMonths(
   const heatingBase = definition.weatherDataType === 'HDD' ? definition.baseTemperature : undefined;
   const coolingBase = definition.weatherDataType === 'CDD' ? definition.baseTemperature : undefined;
   return enumerateWeatherMonths(range).map(month => {
+    if (weatherMonthValue(month) > currentWeatherMonthValue()) {
+      return {
+        month,
+        monthLabel: formatWeatherMonth(month),
+        amount: 0,
+        warning: false
+      };
+    }
     const details = getDetailedDataForMonth(
       hourlyData,
       month.month - 1,
@@ -510,6 +564,10 @@ function calculateWeatherDefinitionMonths(
       warning: hasWeatherDataWarning(details, definition.weatherDataType)
     };
   });
+}
+
+function currentWeatherMonthValue(now = new Date()): number {
+  return weatherMonthValue({ year: now.getFullYear(), month: now.getMonth() + 1 });
 }
 
 function validateWeatherDefinition(definition: WeatherPredictorDefinition): void {

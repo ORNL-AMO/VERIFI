@@ -44,6 +44,8 @@ export interface WeatherStationReadingMatrix {
 export interface WeatherStationMonthValue {
   readonly predictorGuid: string;
   readonly amount: number;
+  readonly calculated?: boolean;
+  readonly weatherDataWarning?: boolean;
 }
 
 export interface WeatherStationMonthDraft {
@@ -109,12 +111,12 @@ export function buildWeatherStationMonthChangeSet(
   workspaceRevision: number
 ): WeatherStationMonthChangeSet {
   validateMonth(draft.year, draft.month);
-  const values = new Map<string, number>();
+  const values = new Map<string, WeatherStationMonthValue>();
   for (const entry of draft.values) {
     if (values.has(entry.predictorGuid) || !Number.isFinite(entry.amount)) {
       throw new Error('Enter one finite value for every weather predictor.');
     }
-    values.set(entry.predictorGuid, entry.amount);
+    values.set(entry.predictorGuid, entry);
   }
   if (predictors.length === 0 || predictors.some(predictor => !values.has(predictor.guid))
     || values.size !== predictors.length) {
@@ -135,7 +137,8 @@ export function buildWeatherStationMonthChangeSet(
     if (existing.length > 1) {
       throw new Error(`Resolve duplicate readings for ${predictor.name} before editing this month.`);
     }
-    const amount = values.get(predictor.guid)!;
+    const value = values.get(predictor.guid)!;
+    const amount = value.amount;
     if (existing.length === 0) {
       const reading = getNewIdbPredictorData(predictor);
       delete reading.id;
@@ -143,8 +146,8 @@ export function buildWeatherStationMonthChangeSet(
       reading.month = draft.month;
       reading.amount = amount;
       reading.notes = '';
-      reading.weatherOverride = true;
-      reading.weatherDataWarning = false;
+      reading.weatherOverride = !value.calculated;
+      reading.weatherDataWarning = value.calculated && !!value.weatherDataWarning;
       reading.weatherDataChanged = false;
       add.push(reading);
       continue;

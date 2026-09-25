@@ -69,6 +69,36 @@ describe('PredictorWeatherWorkflowService', () => {
     expect(actions.applyWeatherStationGroup).not.toHaveBeenCalled();
   });
 
+  it('calculates a station month for each included predictor', async () => {
+    const service = createService(of([hourlyReading()]));
+    const values = await service.calculateStationMonth([{
+      guid: 'hdd', name: 'HDD 60', predictorType: 'Weather', weatherDataType: 'HDD',
+      weatherStationId: 'station-a', weatherStationName: 'Oak Ridge', heatingBaseTemperature: 60
+    } as any], { year: 2026, month: 1 });
+
+    expect(values).toEqual([
+      expect.objectContaining({ predictorGuid: 'hdd', weatherDataWarning: true })
+    ]);
+    expect(service.state().status).toBe('preview-ready');
+  });
+
+  it('creates future zeroes without requesting unavailable hourly data', async () => {
+    const service = createService(of([]));
+    const hourlyWeather = TestBed.inject(HourlyWeatherDataService) as any;
+    const future = relativeMonth(1);
+    const preview = await service.previewGeneration({
+      production: false,
+      station: { ID: 'station-a', name: 'Oak Ridge' } as any,
+      range: { start: future, end: future },
+      definitions: [{ weatherDataType: 'HDD', name: 'HDD 60', baseTemperature: 60 }]
+    });
+
+    expect(hourlyWeather.load).not.toHaveBeenCalled();
+    expect(preview?.readings).toEqual([
+      expect.objectContaining({ amount: 0, weatherOverride: false, weatherDataWarning: false })
+    ]);
+  });
+
   it('rejects a station already owned by another weather workbench', async () => {
     const service = createService(of([hourlyReading()]), [{
       guid: 'existing', predictorType: 'Weather', weatherStationId: 'station-a'
@@ -102,4 +132,11 @@ function hourlyReading(): any {
     time: new Date(2026, 0, 1, 0), dry_bulb_temp: 50, humidity: 45,
     dew_point_temp: 40, wet_bulb_temp: 45, precipitation: 0
   };
+}
+
+function relativeMonth(offset: number): { year: number; month: number } {
+  const date = new Date();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + offset);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }

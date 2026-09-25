@@ -1,10 +1,15 @@
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import {
+  buildWeatherGenerationPreview,
   buildWeatherMaintenancePreview,
+  buildWeatherStationMonthCalculation,
   buildWeatherStationSelectionPreview,
   buildWeatherStationGroupPreview,
-  defaultWeatherPredictorName
+  defaultWeatherPredictorName,
+  validateWeatherMonthRange,
+  weatherFutureMonthCount,
+  weatherSourceRangeThroughPresent
 } from './predictor-weather.models';
 
 describe('predictor weather models', () => {
@@ -29,6 +34,56 @@ describe('predictor weather models', () => {
     ]);
     expect(preview.series.every(series => series.points.length === 2)).toBe(true);
     expect(preview.warningMonths).toEqual([{ year: 2026, month: 1 }, { year: 2026, month: 2 }]);
+  });
+
+  it('calculates one month for every predictor and retains source-gap warnings', () => {
+    const hdd = weatherPredictor();
+    const humidity = {
+      ...weatherPredictor(), guid: 'humidity', name: 'Humidity', weatherDataType: 'relativeHumidity' as const
+    };
+    const values = buildWeatherStationMonthCalculation(
+      [hdd, humidity],
+      { year: 2026, month: 1 },
+      [{ time: new Date(2026, 0, 1, 0), dry_bulb_temp: 50, humidity: 45 }]
+    );
+
+    expect(values.map(value => value.predictorGuid)).toEqual(['predictor-a', 'humidity']);
+    expect(values.every(value => Number.isFinite(value.amount))).toBe(true);
+    expect(values.every(value => value.weatherDataWarning)).toBe(true);
+  });
+
+  it('stores future range months as refreshable calculated zeroes without warnings', () => {
+    const firstFuture = relativeMonth(1);
+    const secondFuture = relativeMonth(2);
+    const range = { start: firstFuture, end: secondFuture };
+
+    expect(validateWeatherMonthRange(range)).toBeUndefined();
+    expect(weatherFutureMonthCount(range)).toBe(2);
+    expect(weatherSourceRangeThroughPresent(range)).toBeUndefined();
+
+    const preview = buildWeatherGenerationPreview({
+      production: false,
+      station: { ID: 'station-a', name: 'Station A' } as any,
+      range,
+      definitions: [{ weatherDataType: 'HDD', name: 'HDD 60', baseTemperature: 60 }]
+    }, [], 'account-a', 'facility-a', 3);
+
+    expect(preview.readings).toHaveLength(2);
+    expect(preview.readings).toEqual([
+      expect.objectContaining({ amount: 0, weatherOverride: false, weatherDataWarning: false }),
+      expect.objectContaining({ amount: 0, weatherOverride: false, weatherDataWarning: false })
+    ]);
+    expect(preview.warningMonths).toEqual([]);
+  });
+
+  it('caps source requests at the current month for ranges that extend into the future', () => {
+    expect(weatherSourceRangeThroughPresent({
+      start: { year: 2026, month: 1 },
+      end: { year: 2026, month: 12 }
+    }, new Date(2026, 5, 15))).toEqual({
+      start: { year: 2026, month: 1 },
+      end: { year: 2026, month: 6 }
+    });
   });
 
   it('adds range extensions and preserves manual overrides during source refresh', () => {
@@ -121,4 +176,11 @@ function reading(guid: string, year: number, month: number, amount: number, weat
     weatherOverride,
     weatherDataWarning: false
   };
+}
+
+function relativeMonth(offset: number): { year: number; month: number } {
+  const date = new Date();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + offset);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }

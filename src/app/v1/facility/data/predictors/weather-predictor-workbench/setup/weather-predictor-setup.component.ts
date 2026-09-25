@@ -18,6 +18,7 @@ import {
   WeatherStationGroupPreview,
   defaultWeatherPredictorName,
   validateWeatherMonthRange,
+  weatherFutureMonthCount,
   weatherPredictorUnit,
   weatherRangeForReadings
 } from '../../models';
@@ -50,6 +51,10 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   readonly endMonth = signal('');
   readonly definitions = signal<readonly EditableWeatherDefinition[]>([]);
   readonly stationPreviewRange = computed(() => rangeFromInputs(this.startMonth(), this.endMonth()));
+  readonly futureMonthCount = computed(() => {
+    const range = this.stationPreviewRange();
+    return range ? weatherFutureMonthCount(range) : 0;
+  });
   readonly preview = signal<WeatherStationGroupPreview | undefined>(undefined);
   readonly dirty = signal(false);
   readonly saveError = signal<string | undefined>(undefined);
@@ -72,7 +77,6 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
         && definition.name.trim().length <= 100
         && (!isDegreeDay(definition.weatherDataType) || Number.isFinite(definition.baseTemperature)))
       && !!range && !validateWeatherMonthRange(range)
-      && this.dirty()
       && this.workspace.canWrite()
       && !this.workflow.busy() && !this.committing() && !this.deleting();
   });

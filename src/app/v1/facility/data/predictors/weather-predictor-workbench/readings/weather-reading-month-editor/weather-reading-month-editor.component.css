@@ -2,6 +2,19 @@
 .weather-month-editor { display: grid; gap: 1rem; }
 .weather-month-editor label { display: grid; gap: .35rem; font-weight: 800; }
 .weather-month-editor label small { display: block; color: var(--v1-muted); font-weight: 500; }
+.weather-month-editor__field { display: grid; gap: .35rem; }
 .weather-month-editor input { min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background: var(--v1-control-surface); color: var(--v1-text); }
+.weather-month-editor input:disabled { background: var(--v1-control-addon-surface); color: var(--v1-text); opacity: 1; }
 .weather-month-editor__values { display: grid; gap: .8rem; padding-top: .8rem; border-top: 1px solid var(--v1-border); }
+.weather-month-editor__input-group { display: flex; flex-wrap: nowrap; align-items: stretch; width: 100%; min-width: 0; }
+.weather-month-editor__input-group > .v1-input { width: 1%; min-width: 0; flex: 1 1 auto; border-radius: var(--v1-radius-sm) 0 0 var(--v1-radius-sm); }
+.weather-month-editor__input-group > .input-group-text { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: var(--v1-control-height); padding: .45rem .6rem; border: 1px solid var(--v1-control-border); border-left: 0; background: var(--v1-control-addon-surface); color: var(--v1-muted); font-size: .82rem; font-weight: 900; white-space: nowrap; }
+.weather-month-editor__override { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; min-height: var(--v1-control-height); padding: .4rem .65rem; border: 1px solid var(--v1-control-border); border-left: 0; border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0; background: var(--v1-panel); color: var(--v1-text); font-size: .8rem; font-weight: 800; white-space: nowrap; }
+.weather-month-editor__override:hover:not(:disabled) { border-color: var(--v1-content-control); color: var(--v1-content-control); }
+.weather-month-editor__override[aria-pressed="true"] { background: var(--v1-control-addon-surface); }
+.weather-month-editor__override:disabled { cursor: not-allowed; opacity: .62; }
 footer { display: flex; justify-content: flex-end; gap: .55rem; padding-top: .8rem; border-top: 1px solid var(--v1-border); }
+
+@media (max-width: 520px) {
+  .weather-month-editor__override { padding-inline: .5rem; }
+}

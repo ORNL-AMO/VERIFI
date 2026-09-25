@@ -21,10 +21,13 @@ import {
   WeatherStationSelectionPreview,
   WeatherStationGroupDraft,
   WeatherStationGroupPreview,
+  WeatherStationMonthCalculationValue,
+  buildWeatherStationMonthCalculation,
   buildWeatherGenerationPreview,
   buildWeatherMaintenancePreview,
   buildWeatherStationSelectionPreview,
   buildWeatherStationGroupPreview,
+  weatherSourceRangeThroughPresent,
   weatherRangeForReadings
 } from './models';
 import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
@@ -144,6 +147,23 @@ export class PredictorWeatherWorkflowService {
     );
   }
 
+  async calculateStationMonth(
+    predictors: readonly IdbPredictor[],
+    month: WeatherMonthRange['start']
+  ): Promise<readonly WeatherStationMonthCalculationValue[] | undefined> {
+    const stationId = predictors[0]?.weatherStationId?.trim();
+    if (!stationId) {
+      this.fail('This weather station is unavailable. Choose a station in Setup before adding a month.');
+      return undefined;
+    }
+    return this.loadPreview(
+      stationId,
+      { start: month, end: month },
+      'Calculating values from station data…',
+      hourly => buildWeatherStationMonthCalculation(predictors, month, hourly)
+    );
+  }
+
   async previewSettingsChange(
     currentPredictor: IdbPredictor,
     proposedPredictor: IdbPredictor,
@@ -237,12 +257,15 @@ export class PredictorWeatherWorkflowService {
     this.cancellation = cancellation;
     this.state.set({ status: 'loading', message: loadingMessage });
     try {
-      const hourly = await firstValueFrom(
-        this.hourlyWeather.load({ stationId, range }).pipe(takeUntil(cancellation)),
-        { defaultValue: undefined }
-      );
+      const sourceRange = weatherSourceRangeThroughPresent(range);
+      const hourly = sourceRange
+        ? await firstValueFrom(
+          this.hourlyWeather.load({ stationId, range: sourceRange }).pipe(takeUntil(cancellation)),
+          { defaultValue: undefined }
+        )
+        : [];
       if (token !== this.requestToken || !hourly) return undefined;
-      if (hourly.length === 0) throw new Error('No hourly weather data is available for the requested range.');
+      if (sourceRange && hourly.length === 0) throw new Error('No hourly weather data is available for the requested range.');
       this.state.set({ status: 'calculating', message: 'Calculating monthly weather values…' });
       await Promise.resolve();
       const preview = build(hourly);

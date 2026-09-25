@@ -1,8 +1,10 @@
 @let table = matrix();
 @let visibleRows = displayedRows();
+@let currentRows = filteredRows();
 @let checks = readingChecks();
+@let rangeBusy = updatingRange() || saving() || calculating() || workspace.hasPending();
 <section #readingsRegion class="weather-readings" aria-label="Weather station readings" tabindex="-1">
-  @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() }}</span></div> }
+  @if (actionError() || (rangeError() && !rangePreview())) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() || rangeError() }}</span></div> }
   @if (checks.length > 0) {
     <section class="weather-readings__status" aria-labelledby="weather-readings-status-title">
       <div class="weather-readings__status-heading">
@@ -22,24 +24,64 @@
   }
   @if (table.columns.length === 0) {
     <article class="v1-empty-state" role="status"><app-ui-icon name="predictor"></app-ui-icon><h3>No included predictors</h3><p>Add a predictor in Setup before managing monthly readings.</p></article>
-  } @else if (table.rows.length === 0) {
-    <article class="v1-empty-state" role="status"><app-ui-icon name="table"></app-ui-icon><h3>No weather readings</h3><p>Add the first month for every included predictor.</p><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canAct()" (click)="openAdd($event)">Add month</button></article>
   } @else {
     <div class="weather-readings__action-row" aria-label="Readings table controls">
-      <label class="weather-readings__control">
-        <span>Rows</span>
-        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
-          <option [value]="10">10</option>
-          <option [value]="25">25</option>
-          <option [value]="50">50</option>
-        </select>
-      </label>
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAdd($event)"><app-ui-icon name="add"></app-ui-icon> Add month</button>
+      @if (table.rows.length > 0) {
+        <div class="weather-readings__controls">
+          <label class="weather-readings__control">
+            <span>Rows</span>
+            <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+              <option [value]="12">12</option>
+              <option [value]="24">24</option>
+              <option [value]="36">36</option>
+            </select>
+          </label>
+          <label class="weather-readings__control">
+            <span>Show</span>
+            <select class="v1-select" [value]="rowFilter()" (change)="setRowFilter($event)">
+              <option value="all">All months</option>
+              <option value="attention">Needs attention</option>
+            </select>
+          </label>
+        </div>
+      } @else {
+        <span class="weather-readings__empty-control">No stored months</span>
+      }
+      <div class="weather-readings__range-actions">
+        <label class="weather-readings__range-control">
+          <span>Start month</span>
+          <input type="month" required [value]="startMonth()" [disabled]="rangeBusy" (change)="setStartMonth($any($event.target).value)">
+        </label>
+        <label class="weather-readings__range-control">
+          <span>End month</span>
+          <input type="month" required [value]="endMonth()" [disabled]="rangeBusy" (change)="setEndMonth($any($event.target).value)">
+        </label>
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canUpdateRange()" (click)="reviewRangeUpdate($event)">
+          <app-ui-icon [name]="rangeBusy ? 'loading' : 'refresh'" [spin]="rangeBusy"></app-ui-icon>
+          Save and Update Readings
+        </button>
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAdd($event)"><app-ui-icon name="add"></app-ui-icon> Add month</button>
+      </div>
     </div>
-    <div class="weather-readings__scroller">
-      <table #weatherReadingsTable class="weather-readings__table">
+    @if (futureMonthCount() > 0) {
+      <div class="v1-alert v1-alert--warning weather-readings__future-warning" role="status">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>
+          We can't predict the future. {{ futureMonthCount() }} future {{ futureMonthCount() === 1 ? 'month' : 'months' }} will be saved as 0.
+          Use Save and Update Readings later to replace them when weather data becomes available.
+        </span>
+      </div>
+    }
+    @if (table.rows.length === 0) {
+      <article class="v1-empty-state" role="status"><app-ui-icon name="table"></app-ui-icon><h3>No weather readings</h3><p>Choose a date range above to create calculated readings, or add a month manually.</p></article>
+    } @else {
+      <div class="weather-readings__scroller">
+        <table #weatherReadingsTable class="weather-readings__table">
         <thead><tr><th scope="col">Month</th>@for (column of table.columns; track column.predictor.guid) { <th scope="col"><span>{{ column.predictor.name }}</span><small>{{ column.typeLabel }} · {{ column.unit }}</small></th> }@if (!copyingTable()) { <th scope="col"><span class="visually-hidden">Actions</span></th> }</tr></thead>
         <tbody>
+          @if (visibleRows.length === 0) {
+            <tr><td class="weather-readings__filtered-empty" [attr.colspan]="table.columns.length + 2">No months need attention.</td></tr>
+          }
           @for (row of visibleRows; track row.key) {
             <tr [class.weather-readings__row--attention]="row.hasAttention">
               <th scope="row">{{ row.monthLabel }}</th>
@@ -48,7 +90,16 @@
                   @if (!copyingTable()) {
                     @if (cell.missing) { <app-ui-icon name="gap" title="Missing predictor record"></app-ui-icon><span class="visually-hidden">Missing predictor record</span> }
                     @if (cell.duplicate) { <app-ui-icon name="warning" title="Duplicate predictor records"></app-ui-icon><span class="visually-hidden">Duplicate predictor records</span> }
-                    @if (cell.weatherWarning) { <app-ui-icon name="warning" title="Incomplete source data"></app-ui-icon><span class="visually-hidden">Incomplete source data</span> }
+                    @if (cell.weatherWarning) {
+                      <button
+                        type="button"
+                        class="weather-readings__source-warning"
+                        title="Incomplete source data"
+                        [attr.aria-label]="'View source-data gaps for ' + table.columns[$index].predictor.name + ' in ' + row.monthLabel"
+                        (click)="openSourceReadings(row, cell.predictorGuid, $event)">
+                        <app-ui-icon name="warning"></app-ui-icon>
+                      </button>
+                    }
                     @if (cell.weatherDataChanged) { <app-ui-icon name="refresh" title="Revised source data"></app-ui-icon><span class="visually-hidden">Revised source data</span> }
                     @if (cell.manualOverride) { <app-ui-icon name="edit" title="Manual override"></app-ui-icon><span class="visually-hidden">Manual override</span> }
                   }
@@ -58,18 +109,75 @@
             </tr>
           }
         </tbody>
-      </table>
-    </div>
-    <footer class="weather-readings__footer">
-      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="table.rows.length === 0" (click)="copyTable()"><app-ui-icon name="copy"></app-ui-icon> Copy Table</button>
-      @if (table.rows.length > pageSize()) {
-        <ngb-pagination [collectionSize]="table.rows.length" [pageSize]="pageSize()" [maxSize]="5" [ellipses]="false" [page]="currentPage()" (pageChange)="currentPage.set($event)"></ngb-pagination>
-      }
-    </footer>
+        </table>
+      </div>
+      <footer class="weather-readings__footer">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" [disabled]="currentRows.length === 0" (click)="copyTable()"><app-ui-icon name="copy"></app-ui-icon> Copy Table</button>
+        @if (currentRows.length > pageSize()) {
+          <ngb-pagination [collectionSize]="currentRows.length" [pageSize]="pageSize()" [maxSize]="5" [ellipses]="false" [page]="currentPage()" (pageChange)="currentPage.set($event)"></ngb-pagination>
+        }
+      </footer>
+    }
   }
 </section>
+@if (rangePreview(); as preview) {
+  <app-workspace-slideout
+    [title]="rangeUpdateCompleted() ? 'Weather readings updated' : 'Review reading updates'"
+    description="Confirm the calculated changes for this station."
+    [saving]="updatingRange()"
+    (closed)="closeRangeUpdate()">
+    <div class="weather-readings__range-review">
+      @if (rangeUpdateCompleted()) {
+        <div class="v1-alert v1-alert--success" role="status"><app-ui-icon name="success"></app-ui-icon><span>The date range and readings were saved together.</span></div>
+      } @else {
+        <p>Saving {{ startMonth() }} through {{ endMonth() }} will update the following stored readings.</p>
+      }
+      <dl class="weather-readings__range-summary">
+        <div><dt>Readings added</dt><dd>{{ preview.addReadings.length }}</dd></div>
+        <div><dt>Readings updated</dt><dd>{{ preview.updateReadings.length }}</dd></div>
+        <div><dt>Readings removed</dt><dd>{{ preview.deleteReadings.length }}</dd></div>
+        <div><dt>Warning months</dt><dd>{{ preview.warningMonths.length }}</dd></div>
+      </dl>
+      @if (preview.deleteReadings.length > 0 && !rangeUpdateCompleted()) {
+        <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span>Readings outside the selected range will be permanently removed.</span></div>
+      }
+      @if (rangeError()) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ rangeError() }}</span></div>
+      }
+      <footer>
+        @if (rangeUpdateCompleted()) {
+          <button type="button" class="v1-btn v1-btn--action" (click)="closeRangeUpdate()">Done</button>
+        } @else {
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="updatingRange()" (click)="closeRangeUpdate()">Cancel</button>
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="updatingRange()" (click)="confirmRangeUpdate()"><app-ui-icon [name]="updatingRange() ? 'loading' : 'success'" [spin]="updatingRange()"></app-ui-icon> Confirm update</button>
+        }
+      </footer>
+    </div>
+  </app-workspace-slideout>
+}
 @if (editor(); as panel) {
-  <app-weather-reading-month-editor [mode]="panel.mode" [row]="panel.row" [columns]="matrix().columns" [existingMonthKeys]="existingMonthKeys()" [saving]="saving()" [error]="actionError()" (saved)="saveMonth($event)" (cancelled)="requestCloseEditor()"></app-weather-reading-month-editor>
+  <app-weather-reading-month-editor
+    [mode]="panel.mode"
+    [row]="panel.row"
+    [columns]="matrix().columns"
+    [existingMonthKeys]="existingMonthKeys()"
+    [calculatedValues]="calculatedValues()"
+    [calculating]="calculating()"
+    [calculationError]="calculationError()"
+    [saving]="saving()"
+    [error]="actionError()"
+    (calculationRequested)="calculateMonth($event)"
+    (saved)="saveMonth($event)"
+    (cancelled)="requestCloseEditor()">
+  </app-weather-reading-month-editor>
+}
+@if (sourceReadings(); as inspection) {
+  <app-weather-source-readings-slideout
+    [predictor]="inspection.predictor"
+    [month]="{ year: inspection.row.year, month: inspection.row.month }"
+    [monthLabel]="inspection.row.monthLabel"
+    (closed)="closeSourceReadings()">
+  </app-weather-source-readings-slideout>
 }
 @if (deleteRow(); as row) {
   <app-workspace-slideout [title]="'Delete ' + row.monthLabel + '?'" description="This action removes the whole station month." [saving]="saving()" (closed)="cancelDelete()">

@@ -45,6 +45,22 @@ describe('weather station reading models', () => {
     expect(changes.update).toEqual([expect.objectContaining({ amount: 11, notes: 'keep me', weatherOverride: true, weatherDataChanged: false })]);
   });
 
+  it('adds calculated values with their source warning without marking manual overrides', () => {
+    const changes = buildWeatherStationMonthChangeSet('add', 'station:A', predictors, [], {
+      year: 2026,
+      month: 1,
+      values: [
+        { predictorGuid: 'hdd-55', amount: 10, calculated: true, weatherDataWarning: true },
+        { predictorGuid: 'hdd-65', amount: 20, calculated: false, weatherDataWarning: true }
+      ]
+    }, 7);
+
+    expect(changes.add).toEqual([
+      expect.objectContaining({ predictorId: 'hdd-55', weatherOverride: false, weatherDataWarning: true }),
+      expect.objectContaining({ predictorId: 'hdd-65', weatherOverride: true, weatherDataWarning: false })
+    ]);
+  });
+
   it('deletes every record in the station month, including duplicates', () => {
     const readings = [
       reading(1, 'a', 'hdd-55', 1, 10), reading(2, 'duplicate', 'hdd-55', 1, 11),

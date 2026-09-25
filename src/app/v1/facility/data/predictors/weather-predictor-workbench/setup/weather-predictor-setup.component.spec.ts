@@ -91,6 +91,66 @@ describe('WeatherPredictorSetupComponent', () => {
     expect(text).not.toContain('Manage included weather predictors');
   });
 
+  it('removes the date range from saved station setup', () => {
+    const savedFixture = createFixture({
+      creating: false,
+      group: {
+        routeKey: 'station:station-a', stationId: 'station-a', stationName: 'Station A',
+        predictors: [{ guid: 'weather-a', name: 'HDD', weatherDataType: 'HDD', heatingBaseTemperature: 60 }]
+      }
+    });
+    expect(savedFixture.nativeElement.querySelector('.weather-setup__range')).toBeNull();
+    expect(savedFixture.nativeElement.textContent).not.toContain('Start month');
+    expect(savedFixture.nativeElement.textContent).not.toContain('End month');
+  });
+
+  it('allows an unchanged saved setup to check for reading updates', async () => {
+    const group = {
+      routeKey: 'station:station-a', stationId: 'station-a', stationName: 'Station A',
+      predictors: [{
+        guid: 'weather-a', name: 'HDD', weatherDataType: 'HDD',
+        heatingBaseTemperature: 60, production: false
+      }]
+    };
+    const preview = {
+      workspaceRevision: 1, station: { ID: 'station-a', name: 'Station A' },
+      range: { start: { year: 2026, month: 1 }, end: { year: 2026, month: 3 } },
+      addPredictors: [], updatePredictors: group.predictors, deletePredictors: [],
+      addReadings: [], updateReadings: [], deleteReadings: [], facilityAnalyses: [], warningMonths: []
+    };
+    const previewStationGroup = vi.fn(async () => preview);
+    const fixture = createFixture({ group, creating: false, previewStationGroup });
+    const component = fixture.componentInstance;
+    const saveButton = (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.weather-setup__top-actions button')!;
+
+    expect(component.dirty()).toBe(false);
+    expect(component.canSubmit()).toBe(true);
+    expect(saveButton.disabled).toBe(false);
+
+    await component.saveAndUpdateReadings();
+
+    expect(previewStationGroup).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceGroupKey: group.routeKey }), group.predictors, []
+    );
+    expect(component.preview()).toBe(preview);
+  });
+
+  it('allows a future end month and explains that future readings will be zero', () => {
+    const fixture = createFixture();
+    const component = fixture.componentInstance;
+    component.setStartMonth(relativeMonthInput(0));
+    component.setEndMonth(relativeMonthInput(2));
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    expect(component.canSubmit()).toBe(true);
+    expect(root.querySelector<HTMLButtonElement>('.weather-setup__top-actions button')?.disabled).toBe(false);
+    expect(root.textContent).toContain("We can't predict the future");
+    expect(root.textContent).toContain('future months will be saved as 0');
+    expect(root.textContent).toContain('Use Save and Update Readings later');
+  });
+
   it('deletes an existing station group through the reviewed atomic workflow', async () => {
     const group = {
       routeKey: 'station:station-a', stationId: 'station-a', stationName: 'Station A',
@@ -178,4 +238,11 @@ function createFixture(options: { group?: any; creating?: boolean; previewStatio
   const fixture = TestBed.createComponent(WeatherPredictorSetupComponent);
   fixture.detectChanges();
   return fixture;
+}
+
+function relativeMonthInput(offset: number): string {
+  const date = new Date();
+  date.setDate(1);
+  date.setMonth(date.getMonth() + offset);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }

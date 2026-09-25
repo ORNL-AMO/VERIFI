@@ -1,0 +1,65 @@
+<app-workspace-slideout
+  [title]="predictor.name + ' source readings'"
+  [description]="monthLabel + ' · ' + (predictor.weatherStationName || predictor.weatherStationId || 'Saved weather station')"
+  size="large"
+  (closed)="closed.emit()">
+  <section class="weather-source-readings">
+    @if (loading()) {
+      <div class="weather-source-readings__loading" role="status">
+        <app-ui-icon name="loading" spin></app-ui-icon>
+        <span>Loading hourly source readings…</span>
+      </div>
+    } @else if (error()) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>{{ error() }}</span>
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="retry()">Try again</button>
+      </div>
+    } @else if (chart(); as sourceChart) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>{{ summary() }}</span>
+      </div>
+      @if (sourceChart.gaps.length > 0) {
+        <ul class="weather-source-readings__gap-list" aria-label="Source data gap details">
+          @for (gap of sourceChart.gaps; track $index) {
+            <li>
+              <app-ui-icon name="gap"></app-ui-icon>
+              <span>
+                There is a gap from <strong>{{ gap.start | date:'MMM d, y, h:mm a' }}</strong>
+                to <strong>{{ gap.end | date:'MMM d, y, h:mm a' }}</strong>.
+              </span>
+            </li>
+          }
+        </ul>
+      }
+      @if (sourceChart.readingCount === 0) {
+        <article class="v1-empty-state" role="status">
+          <app-ui-icon name="gap"></app-ui-icon>
+          <h3>No hourly source readings</h3>
+          <p>The weather service did not return any readings for this station and month.</p>
+        </article>
+      } @else if (chartOption(); as option) {
+        <div
+          class="weather-source-readings__chart"
+          [appV1ECharts]="option"
+          role="img"
+          [attr.aria-label]="sourceChart.sourceLabel + ' readings over time for ' + predictor.name + ', ' + monthLabel + '. ' + summary()">
+        </div>
+      }
+      @if (sourceChart.readingCount > 0) {
+        <div class="visually-hidden">
+          <table>
+            <caption>{{ predictor.name }} source readings for {{ monthLabel }}</caption>
+            <thead><tr><th scope="col">Time</th><th scope="col">{{ sourceChart.sourceLabel }} ({{ sourceChart.unit }})</th></tr></thead>
+            <tbody>
+              @for (point of sourceChart.points; track $index) {
+                <tr><th scope="row">{{ point.time | date:'medium' }}</th><td>{{ point.value === null ? 'Missing' : point.value }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+</app-workspace-slideout>
