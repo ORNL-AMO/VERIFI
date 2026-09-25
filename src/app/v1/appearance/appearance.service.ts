@@ -6,7 +6,15 @@ const STORAGE_KEY = 'v1Appearance';
 export type Palette = 'default' | 'steel' | 'blueprint' | 'neon' | 'aurora' | 'forest';
 export type ThemeMode = 'light' | 'dark';
 export type CornerStyle = 'soft' | 'square';
-export type BackgroundPattern = 'blueprint-grid' | 'steel-hatch' | 'neon-grid' | 'aurora-flow' | 'topographic-contours';
+export type BackgroundPattern =
+  | 'skyline-rocket'
+  | 'skyline-green'
+  | 'skyline-neon'
+  | 'blueprint-grid'
+  | 'steel-hatch'
+  | 'neon-grid'
+  | 'aurora-flow'
+  | 'topographic-contours';
 
 export interface AppearanceSettings {
   readonly palette: Palette;
@@ -21,13 +29,16 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   mode: 'light',
   cornerStyle: 'soft',
   highContrast: false,
-  backgroundPattern: 'blueprint-grid'
+  backgroundPattern: 'skyline-rocket'
 };
 
 const VALID_PALETTES: ReadonlyArray<Palette> = ['default', 'steel', 'blueprint', 'neon', 'aurora', 'forest'];
 const VALID_MODES: ReadonlyArray<ThemeMode> = ['light', 'dark'];
 const VALID_CORNER_STYLES: ReadonlyArray<CornerStyle> = ['soft', 'square'];
 const VALID_BACKGROUND_PATTERNS: ReadonlyArray<BackgroundPattern> = [
+  'skyline-rocket',
+  'skyline-green',
+  'skyline-neon',
   'blueprint-grid',
   'steel-hatch',
   'neon-grid',
@@ -35,12 +46,12 @@ const VALID_BACKGROUND_PATTERNS: ReadonlyArray<BackgroundPattern> = [
   'topographic-contours'
 ];
 const PALETTE_BACKGROUND_PATTERNS: Readonly<Record<Palette, BackgroundPattern>> = {
-  default: 'blueprint-grid',
+  default: 'skyline-rocket',
   steel: 'steel-hatch',
   blueprint: 'blueprint-grid',
-  neon: 'neon-grid',
+  neon: 'skyline-neon',
   aurora: 'aurora-flow',
-  forest: 'topographic-contours'
+  forest: 'skyline-green'
 };
 
 @Injectable({ providedIn: 'root' })

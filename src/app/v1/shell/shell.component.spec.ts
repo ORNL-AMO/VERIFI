@@ -30,7 +30,7 @@ describe('ShellComponent', () => {
         mode: 'dark',
         cornerStyle: 'square',
         highContrast: true,
-        backgroundPattern: 'neon-grid'
+        backgroundPattern: 'skyline-rocket'
       }))
     };
     TestBed.configureTestingModule({
@@ -49,9 +49,39 @@ describe('ShellComponent', () => {
 
     expect(root.classList.contains('v1-theme-dark')).toBe(true);
     expect(root.classList.contains('v1-palette-neon')).toBe(true);
-    expect(root.classList.contains('v1-background-neon-grid')).toBe(true);
+    expect(root.classList.contains('v1-background-skyline-rocket')).toBe(true);
     expect(root.classList.contains('v1-contrast-strong')).toBe(true);
     expect(root.classList.contains('v1-corners-square')).toBe(true);
+  });
+
+  it('applies each themed skyline background class', () => {
+    appearance.settings.mockReturnValue({
+      palette: 'forest',
+      mode: 'light',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-green'
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-root').classList.contains('v1-background-skyline-green')).toBe(true);
+
+    appearance.settings.mockReturnValue({
+      palette: 'neon',
+      mode: 'dark',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-neon'
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('.v1-root');
+    expect(root.classList.contains('v1-background-skyline-neon')).toBe(true);
+    expect(root.classList.contains('v1-background-skyline-green')).toBe(false);
   });
 
   it('hosts the shared shell header above routed content', () => {

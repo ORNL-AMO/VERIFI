@@ -787,6 +787,72 @@
   --v1-radius-pill: 2px;
 }
 
+.v1-background-skyline-rocket,
+.v1-background-skyline-green,
+.v1-background-skyline-neon {
+  --v1-skyline-scrim: transparent;
+  --v1-skyline-art-size: 100% auto;
+  --v1-skyline-stars-primary: linear-gradient(transparent, transparent);
+  --v1-skyline-stars-secondary: linear-gradient(transparent, transparent);
+  --v1-skyline-background:
+    linear-gradient(var(--v1-skyline-scrim), var(--v1-skyline-scrim)),
+    var(--v1-skyline-art),
+    var(--v1-skyline-stars-primary),
+    var(--v1-skyline-stars-secondary),
+    var(--v1-skyline-sky);
+
+  background-image: var(--v1-skyline-background);
+  background-position: center, center bottom, 0 0, 1.75rem 2.25rem, center;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat;
+  background-size: 100% 100%, var(--v1-skyline-art-size), 7rem 5rem, 11rem 8rem, 100% 100%;
+}
+
+.v1-root.v1-background-skyline-rocket {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket.png');
+  --v1-skyline-sky: linear-gradient(90deg, #cbb8b4 0%, #97b6be 25%, #76b5c6 50%, #5bb4ce 75%, #51bad6 100%);
+}
+
+.v1-root.v1-background-skyline-green {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-green.png');
+  --v1-skyline-sky: linear-gradient(90deg, #83bcc0 0%, #6fbed0 25%, #67bbcf 50%, #6bbdd2 75%, #6dbaca 100%);
+}
+
+.v1-root.v1-background-skyline-neon {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-neon.png');
+  --v1-skyline-sky: linear-gradient(90deg, #333750 0%, #3b4670 25%, #36415b 50%, #36435a 75%, #303251 100%);
+}
+
+.v1-root:is(.v1-background-skyline-rocket, .v1-background-skyline-green, .v1-background-skyline-neon) .v1-workspace .v1-workspace__main {
+  background-image: var(--v1-skyline-background);
+  background-position: center, center bottom, 0 0, 1.75rem 2.25rem, center;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat;
+  background-size: 100% 100%, var(--v1-skyline-art-size), 7rem 5rem, 11rem 8rem, 100% 100%;
+}
+
+.v1-theme-dark.v1-background-skyline-rocket {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night.png');
+  --v1-skyline-sky: linear-gradient(90deg, #021936 0%, #011836 25%, #001838 50%, #011635 75%, #02193a 100%);
+  --v1-skyline-stars-primary: radial-gradient(circle at 18% 28%, rgba(255, 255, 255, .78) 0 .7px, transparent 1.2px);
+  --v1-skyline-stars-secondary: radial-gradient(circle at 72% 62%, rgba(137, 205, 255, .58) 0 .8px, transparent 1.3px);
+}
+
+.v1-theme-dark.v1-background-skyline-green {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 58%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-neon {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+}
+
+.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-green, .v1-background-skyline-neon) {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 65%, transparent);
+}
+
+.v1-theme-dark.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-neon) {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 35%, transparent);
+}
+
 .v1-background-blueprint-grid {
   background:
     linear-gradient(color-mix(in srgb, var(--v1-facility) 10%, transparent) 1px, transparent 1px),
