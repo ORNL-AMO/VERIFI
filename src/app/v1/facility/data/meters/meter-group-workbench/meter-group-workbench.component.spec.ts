@@ -8,6 +8,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterGroupResultsView, MeterUsageFactsView } from '@app/v1/facility/data/meters/models';
@@ -69,6 +70,49 @@ describe('MeterGroupWorkbenchComponent', () => {
     expect(element.textContent).not.toContain('110 MMBtu');
   });
 
+  it('places the energy basis and facts controls in the header action row', async () => {
+    const fixture = setup();
+
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    const actions = element.querySelector<HTMLElement>('.v1-meter-group-workbench-header__chips');
+    const basisControl = element.querySelector<HTMLElement>('.v1-meter-group-workbench-header__basis-control');
+    const basisButtons = Array.from(basisControl?.querySelectorAll<HTMLButtonElement>('.v1-segmented__btn') ?? []);
+    const factsToggle = element.querySelector<HTMLButtonElement>('.v1-meter-group-workbench-header__facts-toggle');
+    const factsRegion = element.querySelector<HTMLElement>('#v1-meter-group-workbench-facts');
+
+    expect(actions?.contains(basisControl)).toBe(true);
+    expect(basisButtons.map(button => button.textContent?.trim())).toEqual(['Site', 'Source']);
+    expect(basisButtons[0]?.getAttribute('aria-pressed')).toBe('true');
+    expect(basisButtons[1]?.getAttribute('aria-pressed')).toBe('false');
+    expect(actions?.lastElementChild).toBe(factsToggle);
+    expect(element.querySelector('.v1-meter-group-workbench-header__energy-toggle')).toBeNull();
+    expect(factsToggle?.getAttribute('aria-controls')).toBe('v1-meter-group-workbench-facts');
+    expect(factsToggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(factsToggle?.textContent).toContain('Hide facts');
+    expect(factsRegion?.hidden).toBe(false);
+
+    basisButtons[1]?.click();
+    await fixture.whenStable();
+
+    const facilityHandler = TestBed.inject(FacilityCommandHandler) as unknown as { update: ReturnType<typeof vi.fn> };
+    expect(facilityHandler.update).toHaveBeenCalledWith(
+      expect.objectContaining({ guid: 'facility-a', energyIsSource: true }),
+      'account-a'
+    );
+
+    factsToggle?.click();
+    fixture.detectChanges();
+
+    expect(factsToggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(factsToggle?.textContent).toContain('Show facts');
+    expect(factsRegion?.hidden).toBe(true);
+    expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
+    expect(element.querySelector('.v1-meter-group-workbench-header__group-title')?.textContent).toContain('Energy Group');
+    expect(element.querySelector('[aria-label="Meter group workbench sections"]')).not.toBeNull();
+  });
+
   it('shows group switcher menu items as names only', () => {
     const fixture = setup({
       extraGroups: [
@@ -102,6 +146,7 @@ function setup(options: {
 } = {}): ComponentFixture<MeterGroupWorkbenchComponent> {
   const selectedGroup = group({ guid: 'group-energy', name: 'Energy Group', groupType: 'Energy' });
   const routerEvents = new Subject<NavigationEnd>();
+  const factsExpanded = signal(true);
 
   TestBed.configureTestingModule({
     declarations: [
@@ -155,7 +200,17 @@ function setup(options: {
           ]
         }
       },
-      { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn() } },
+      {
+        provide: WorkbenchLayoutService,
+        useValue: {
+          factsExpanded,
+          toggleFacts: () => factsExpanded.update(expanded => !expanded)
+        }
+      },
+      {
+        provide: WorkspaceCommandBoundary,
+        useValue: { execute: vi.fn((_command: unknown, action: () => Promise<unknown>) => action()) }
+      },
       { provide: FacilityCommandHandler, useValue: { update: vi.fn() } },
       { provide: Router, useValue: { navigate: vi.fn(), events: routerEvents } },
       { provide: ActivatedRoute, useValue: { firstChild: { snapshot: { data: { meterGroupTab: 'monthly-table' } } } } }

@@ -28,7 +28,7 @@ export const singleSiteAccountRedirectGuard: CanActivateFn = (_route, state) => 
     return true;
   }
 
-  if (isAccountDataRoute(state)) {
+  if (isAccountDataRoute(state) && !isAccountCustomDataRoute(state)) {
     return true;
   }
 
@@ -45,23 +45,35 @@ export function facilityHomeCommands(facilityGuid: string): Array<string> {
 }
 
 export function singleSiteRedirectCommands(state: RouterStateSnapshot, facilityGuid: string): Array<string> {
-  const path = state.url.split(/[?#]/, 1)[0];
-  const parts = path.split('/').filter(Boolean);
-  const workspaceIndex = parts.indexOf('workspace');
-  const accountRouteParts = workspaceIndex >= 0 ? parts.slice(workspaceIndex) : [];
-  const section = accountRouteParts[3];
-  const detail = accountRouteParts[4];
+  const parts = accountRouteParts(state);
+  const section = parts[3];
+  const detail = parts[4];
 
   if (section === 'settings') {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail || 'profile'];
+  }
+  if (section === 'data' && isCustomDataDetail(detail)) {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
   }
   return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
 }
 
 function isAccountDataRoute(state: RouterStateSnapshot): boolean {
+  return accountRouteParts(state)[3] === 'data';
+}
+
+function isAccountCustomDataRoute(state: RouterStateSnapshot): boolean {
+  const parts = accountRouteParts(state);
+  return parts[3] === 'data' && isCustomDataDetail(parts[4]);
+}
+
+function accountRouteParts(state: RouterStateSnapshot): Array<string> {
   const path = state.url.split(/[?#]/, 1)[0];
   const parts = path.split('/').filter(Boolean);
   const workspaceIndex = parts.indexOf('workspace');
-  const accountRouteParts = workspaceIndex >= 0 ? parts.slice(workspaceIndex) : [];
-  return accountRouteParts[3] === 'data';
+  return workspaceIndex >= 0 ? parts.slice(workspaceIndex) : [];
+}
+
+function isCustomDataDetail(detail: string | undefined): detail is string {
+  return detail === 'custom-grid-factors' || detail === 'custom-fuels' || detail === 'custom-gwps';
 }

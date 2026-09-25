@@ -6,6 +6,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
+import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import {
   METER_GROUP_WORKBENCH_TABS,
   MeterGroupWorkbenchTab,
@@ -35,8 +36,10 @@ export class MeterGroupWorkbenchComponent {
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly activeTab = this.activeTabState.asReadonly();
   readonly groupSwitcherOpen = this.groupSwitcherOpenState.asReadonly();
+  readonly factsExpanded = this.workbenchLayout.factsExpanded;
   readonly results = this.workspace.selectedMeterGroupResults;
   readonly selectedGroup = this.workspace.selectedMeterGroupForWorkbench;
   readonly groupOptions = computed(() => [...this.workspace.meterGroups()].sort((first, second) => first.name.localeCompare(second.name)));
@@ -87,6 +90,10 @@ export class MeterGroupWorkbenchComponent {
 
   toggleGroupSwitcher(): void {
     this.groupSwitcherOpenState.update(open => !open);
+  }
+
+  toggleFacts(): void {
+    this.workbenchLayout.toggleFacts();
   }
 
   closeGroupSwitcher(): void {

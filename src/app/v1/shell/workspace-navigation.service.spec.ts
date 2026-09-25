@@ -130,6 +130,14 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'meter-grouping'
     ]);
+    expect(service.facilityDataRoute('facility-a', 'custom-fuels')).toEqual([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'custom-fuels'
+    ]);
     expect(service.facilityMeterRoute('facility-a', 'meter-a', 'readings')).toEqual([
       '/v1',
       'workspace',
@@ -560,6 +568,25 @@ describe('WorkspaceNavigationService', () => {
       'account-a',
       'settings',
       'financial'
+    ]);
+  });
+
+  it('keeps custom database details when moving them into facility context', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/account/account-a/data/custom-fuels',
+      '/v1/workspace/account/account-a/data/custom-fuels'
+    ));
+
+    service.setContext('facility');
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1',
+      'workspace',
+      'facility',
+      'facility-a',
+      'data',
+      'custom-fuels'
     ]);
   });
 

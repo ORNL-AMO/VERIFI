@@ -13,6 +13,7 @@ export class ConfirmDeleteGroupModalComponent {
   @Input({ required: true }) group!: IdbUtilityMeterGroup;
   @Input() assignedMeterCount = 0;
   @Input() saving = false;
+  @Input() error?: string;
   @Output() confirmed = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 }

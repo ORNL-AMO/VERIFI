@@ -60,7 +60,7 @@ describe('v1 canonical route guards', () => {
     )).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview']);
   });
 
-  it('keeps explicit account data routes reachable for valid single-site accounts', () => {
+  it('redirects single-site custom database routes into the sole facility context', () => {
     workspace.account.mockReturnValue({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);
 
@@ -68,6 +68,22 @@ describe('v1 canonical route guards', () => {
       singleSiteAccountRedirectGuard,
       route({ accountGuid: 'account-a' }),
       { url: '/v1/workspace/account/account-a/data/custom-fuels' }
+    )).toEqual({ commands: ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'custom-fuels'] });
+
+    expect(singleSiteRedirectCommands(
+      { url: '/v1/workspace/account/account-a/data/custom-grid-factors' } as any,
+      'facility-a'
+    )).toEqual(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'custom-grid-factors']);
+  });
+
+  it('keeps explicit account portfolio routes reachable for valid single-site accounts', () => {
+    workspace.account.mockReturnValue({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);
+
+    expect(invoke(
+      singleSiteAccountRedirectGuard,
+      route({ accountGuid: 'account-a' }),
+      { url: '/v1/workspace/account/account-a/data/portfolio' }
     )).toBe(true);
   });
 

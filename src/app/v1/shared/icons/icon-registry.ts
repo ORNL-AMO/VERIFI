@@ -31,7 +31,7 @@ import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
 import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
-import DragDropVerticalIcon from '@hugeicons/core-free-icons/DragDropVerticalIcon';
+import DragDropIcon from '@hugeicons/core-free-icons/DragDropIcon';
 import DropletOffIcon from '@hugeicons/core-free-icons/DropletOffIcon';
 import DropletIcon from '@hugeicons/core-free-icons/DropletIcon';
 import EarthIcon from '@hugeicons/core-free-icons/EarthIcon';
@@ -110,7 +110,7 @@ export const ICON_REGISTRY = {
   database: DatabaseIcon,
   delete: Delete02Icon,
   download: Download04Icon,
-  drag: DragDropVerticalIcon,
+  drag: DragDropIcon,
   droplet: DropletIcon,
   electricity: ElectricPlugsIcon,
   earth: EarthIcon,

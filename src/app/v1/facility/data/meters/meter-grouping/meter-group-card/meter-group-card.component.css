@@ -3,11 +3,11 @@
   gap: var(--v1-space-2);
   align-items: start;
   min-width: 0;
-  padding: var(--v1-space-3);
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius);
   background: var(--v1-surface);
   box-shadow: 0 10px 24px var(--v1-shadow-soft);
+  overflow: hidden;
 }
 
 .v1-meter-group-card__header {
@@ -16,13 +16,11 @@
   align-items: flex-start;
   justify-content: space-between;
   min-width: 0;
+  padding: 0 var(--v1-space-3);
 }
 
 .v1-meter-group-card h3 {
   margin: 0;
-}
-
-.v1-meter-group-card h3 {
   min-width: 0;
 }
 
@@ -51,6 +49,7 @@
   display: grid;
   gap: var(--v1-space-1);
   margin: 0;
+  padding: 0 var(--v1-space-3);
 }
 
 .v1-meter-group-card__facts div {
@@ -101,11 +100,37 @@
   gap: var(--v1-space-1);
   align-items: center;
   margin-top: var(--v1-space-1);
+  padding: 0 var(--v1-space-3) var(--v1-space-3);
 }
 
 .v1-meter-group-card__drag {
-  flex: 0 0 auto;
+  width: 100%;
+  height: 2rem;
+  border: 0;
+  border-bottom: 1px solid var(--v1-border);
+  border-radius: 0;
+  background: var(--v1-panel);
   cursor: grab;
+}
+
+.v1-meter-group-card__drag:hover,
+.v1-meter-group-card__drag:focus-visible {
+  border-color: var(--v1-facility);
+  background: color-mix(in srgb, var(--v1-facility) 8%, var(--v1-surface));
+  color: var(--v1-facility);
+}
+
+.v1-meter-group-card__drag:focus-visible {
+  outline: 3px solid var(--v1-focus);
+  outline-offset: -3px;
+}
+
+.v1-meter-group-card__drag:active {
+  cursor: grabbing;
+}
+
+.v1-meter-group-card__drag:disabled {
+  cursor: not-allowed;
 }
 
 .v1-meter-group-card__move {
