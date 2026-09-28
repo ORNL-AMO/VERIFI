@@ -129,6 +129,13 @@ export class AnalysisCommandHandler {
   }
 
   async upsertAnalysisPredictors(predictors: readonly IdbPredictor[]): Promise<void> {
+    const facilityAnalysisItems = this.buildUpsertedAnalysisPredictors(predictors);
+    for (const analysisItem of facilityAnalysisItems) {
+      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+    }
+  }
+
+  buildUpsertedAnalysisPredictors(predictors: readonly IdbPredictor[]): IdbAnalysisItem[] {
     const predictorsByFacility = new Map<string, readonly IdbPredictor[]>();
     for (const predictor of predictors) {
       const facilityPredictors = predictorsByFacility.get(predictor.facilityId) ?? [];
@@ -138,10 +145,10 @@ export class AnalysisCommandHandler {
     const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
       .filter(item => predictorsByFacility.has(item.facilityId));
 
-    for (const analysisItem of facilityAnalysisItems) {
+    return facilityAnalysisItems.map(analysisItem => {
       const facilityPredictors = predictorsByFacility.get(analysisItem.facilityId) ?? [];
       const predictorByGuid = new Map(facilityPredictors.map(predictor => [predictor.guid, predictor]));
-      const updated = {
+      return {
         ...analysisItem,
         groups: analysisItem.groups.map(group => {
           const existingById = new Set(group.predictorVariables.map(variable => variable.id));
@@ -177,8 +184,7 @@ export class AnalysisCommandHandler {
           };
         })
       };
-      await firstValueFrom(this.analysisDb.updateWithObservable(updated));
-    }
+    });
   }
 
   /**

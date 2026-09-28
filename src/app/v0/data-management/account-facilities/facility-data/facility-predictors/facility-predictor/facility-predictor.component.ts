@@ -80,8 +80,16 @@ export class FacilityPredictorComponent {
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
-        this.addOrEdit = this.dataManagementService.isPredictorDraft(predictorId) ? 'add' : 'edit';
         this.setPredictor(predictorId);
+        const hasDraftMarker = this.dataManagementService.isPredictorDraft(predictorId);
+        const isValidDraft = hasDraftMarker
+          && this.predictor?.guid === predictorId
+          && this.predictor.accountId === this.facility.accountId
+          && this.predictor.facilityId === this.facility.guid;
+        this.addOrEdit = isValidDraft ? 'add' : 'edit';
+        if (hasDraftMarker && !isValidDraft) {
+          this.dataManagementService.completePredictorDraft(predictorId);
+        }
         this.setLastMeterReading();
       } else {
         //route to manage predictors
@@ -224,13 +232,17 @@ export class FacilityPredictorComponent {
   }
 
   canDeactivate(): Observable<boolean> {
-    if (this.predictorForm && this.predictorForm.dirty) {
+    const isDraft = !!this.predictor && this.dataManagementService.isPredictorDraft(this.predictor.guid);
+    if (this.predictorForm && (this.predictorForm.dirty || isDraft)) {
       this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
           return from(this.saveChanges()).pipe(map(() => true));
         } else if (action == 'discard') {
+          if (isDraft) {
+            return from(this.discardDraft());
+          }
           return of(true);
         }
         return of(false);
@@ -248,15 +260,33 @@ export class FacilityPredictorComponent {
     this.showDeletePredictor = false;
   }
 
-  async confirmDelete() {
-    this.showDeletePredictor = false;
-    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+  private async discardDraft(): Promise<boolean> {
+    this.loadingService.setLoadingMessage('Discarding Predictor...');
     this.loadingService.setLoadingStatus(true);
+    try {
+      await this.deletePredictorAndReferences('Discard Predictor Draft');
+      this.predictorForm.markAsPristine();
+      return true;
+    } catch {
+      this.toastNotificationService.showToast(
+        'Unable to discard predictor',
+        'The draft predictor was not fully removed. Please try again.',
+        10000,
+        false,
+        'alert-danger'
+      );
+      return false;
+    } finally {
+      this.loadingService.setLoadingStatus(false);
+    }
+  }
+
+  private async deletePredictorAndReferences(label: string): Promise<void> {
     const predictor = this.predictor;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
     await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'delete', entityGuid: predictor.guid, label: 'Delete Predictor' },
+      { entityKind: 'predictor', changeKind: 'delete', entityGuid: predictor.guid, label },
       async () => {
         await this.predictorHandler.deletePredictor(predictor, accountGuid);
         for (const data of predictorData) {
@@ -266,6 +296,14 @@ export class FacilityPredictorComponent {
       }
     );
     this.dataManagementService.completePredictorDraft(predictor.guid);
+  }
+
+  async confirmDelete() {
+    this.showDeletePredictor = false;
+    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+    this.loadingService.setLoadingStatus(true);
+    const predictor = this.predictor;
+    await this.deletePredictorAndReferences('Delete Predictor');
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.goToManagePredictors();

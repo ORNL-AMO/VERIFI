@@ -71,6 +71,9 @@ export class EditPredictorFormComponent implements OnChanges {
     if (this.predictorForm && (changes.predictorForm || changes.addOrEdit)) {
       this.applyFormMode();
     }
+    if (this.predictorForm && (changes.firstMeterReading || changes.latestMeterReading)) {
+      this.setWeatherPredictorDates();
+    }
   }
 
   private applyFormMode() {
@@ -86,10 +89,16 @@ export class EditPredictorFormComponent implements OnChanges {
 
     const fallBackPredictorData = this.accountWorkspaceQuery.getFacilityPredictorData(this.facility?.guid);
     const sourceData = predictorData.length ? predictorData : fallBackPredictorData;
-    this.facilityPredictorData = sourceData;
+    this.facilityPredictorData = [...sourceData];
     if (!this.facilityPredictorData.length) {
+      const useMeterRange = this.addOrEdit === 'add' && this.firstMeterReading && this.latestMeterReading;
       this.predictorForm.patchValue(
-        { startMonth: null, startYear: null, endMonth: null, endYear: null },
+        {
+          startMonth: useMeterRange ? this.firstMeterReading.getMonth() : null,
+          startYear: useMeterRange ? this.firstMeterReading.getFullYear() : null,
+          endMonth: useMeterRange ? this.latestMeterReading.getMonth() : null,
+          endYear: useMeterRange ? this.latestMeterReading.getFullYear() : null
+        },
         { emitEvent: false }
       );
       return;

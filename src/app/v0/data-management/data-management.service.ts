@@ -3,6 +3,8 @@ import { BehaviorSubject } from 'rxjs';
 import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
 import { LocalStorageService } from 'ngx-webstorage';
 
+const predictorDraftStorageKey = 'dataManagementPredictorDraftGuids';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,10 +15,11 @@ export class DataManagementService {
   helpPanelOpen: BehaviorSubject<boolean>;
   helpWidth: number = 200;
   sidebarWidth: number = 200;
-  draftPredictorGuids = new Set<string>();
+  draftPredictorGuids: Set<string>;
   
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
+    this.draftPredictorGuids = new Set(this.getStoredPredictorDraftGuids());
 
     this.helpWidth = this.localStorageService.retrieve("helpWidth");
     if (!this.helpWidth) {
@@ -45,6 +48,7 @@ export class DataManagementService {
 
   markPredictorDraft(predictorGuid: string) {
     this.draftPredictorGuids.add(predictorGuid);
+    this.persistPredictorDraftGuids();
   }
 
   isPredictorDraft(predictorGuid: string): boolean {
@@ -52,7 +56,25 @@ export class DataManagementService {
   }
 
   completePredictorDraft(predictorGuid: string) {
-    this.draftPredictorGuids.delete(predictorGuid);
+    if (this.draftPredictorGuids.delete(predictorGuid)) {
+      this.persistPredictorDraftGuids();
+    }
+  }
+
+  private getStoredPredictorDraftGuids(): Array<string> {
+    const stored = this.localStorageService.retrieve(predictorDraftStorageKey);
+    if (!Array.isArray(stored)) {
+      return [];
+    }
+    return stored.filter((guid): guid is string => typeof guid === 'string' && guid.length > 0);
+  }
+
+  private persistPredictorDraftGuids() {
+    if (this.draftPredictorGuids.size === 0) {
+      this.localStorageService.clear(predictorDraftStorageKey);
+      return;
+    }
+    this.localStorageService.store(predictorDraftStorageKey, [...this.draftPredictorGuids]);
   }
 
   setHelpWidth(val: number) {

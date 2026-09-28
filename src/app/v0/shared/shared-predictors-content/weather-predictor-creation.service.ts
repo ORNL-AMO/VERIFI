@@ -23,6 +23,12 @@ export interface WeatherPredictorCreationOptions {
   shouldStop?: () => boolean;
 }
 
+interface WeatherDataRange {
+  startDate: Date;
+  endDate: Date;
+  readings: Array<WeatherDataReading>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WeatherPredictorCreationService {
   constructor(
@@ -36,7 +42,11 @@ export class WeatherPredictorCreationService {
 
   async createFromForm(options: WeatherPredictorCreationOptions): Promise<Array<IdbPredictor>> {
     const selectedTypes = this.editPredictorFormService.getSelectedWeatherTypes(options.predictorForm);
-    const persistedPredictors: Array<IdbPredictor> = [];
+    const predictors: Array<IdbPredictor> = [];
+    const predictorData: Array<IdbPredictorData> = [];
+    const weatherDataRange = selectedTypes.length > 0
+      ? await this.getWeatherDataRange(options)
+      : undefined;
 
     for (let index = 0; index < selectedTypes.length; index++) {
       const type = selectedTypes[index];
@@ -52,17 +62,17 @@ export class WeatherPredictorCreationService {
         options.weatherStationName
       );
 
-      const persistedPredictor = usesExistingPredictor
-        ? await this.predictorHandler.updatePredictor(predictor, options.activeAccountGuid)
-        : await this.predictorHandler.addPredictor(predictor, options.activeAccountGuid);
-
-      persistedPredictors.push(persistedPredictor);
-      await this.addWeatherDataForPredictor(persistedPredictor, options);
+      predictors.push(predictor);
+      predictorData.push(...this.buildWeatherDataForPredictor(predictor, options, weatherDataRange));
     }
 
-    await this.analysisHandler.upsertAnalysisPredictors(persistedPredictors);
+    const facilityAnalyses = this.analysisHandler.buildUpsertedAnalysisPredictors(predictors);
+    await this.predictorHandler.createWeatherPredictors(
+      { predictors, predictorData, facilityAnalyses },
+      options.activeAccountGuid
+    );
 
-    return persistedPredictors;
+    return predictors;
   }
 
   private setWeatherPredictorFromForm(
@@ -83,37 +93,18 @@ export class WeatherPredictorCreationService {
     predictor.coolingBaseTemperature = predictorForm.controls.coolingBaseTemperature.value;
   }
 
-  private async addWeatherDataForPredictor(
+  private buildWeatherDataForPredictor(
     targetPredictor: IdbPredictor,
-    options: WeatherPredictorCreationOptions
-  ) {
-    const predictorForm = options.predictorForm;
-    const startMonth = predictorForm.controls.startMonth.value;
-    const startYear = predictorForm.controls.startYear.value;
-    const endMonth = predictorForm.controls.endMonth.value;
-    const endYear = predictorForm.controls.endYear.value;
-
-    if (startMonth == null || !startYear || endMonth == null || !endYear) {
-      return;
+    options: WeatherPredictorCreationOptions,
+    weatherDataRange: WeatherDataRange | undefined
+  ): Array<IdbPredictorData> {
+    if (!weatherDataRange) {
+      return [];
     }
 
-    const startDate = new Date(startYear, startMonth, 1);
-    const endDate = new Date(endYear, endMonth, 1);
-    if (startDate > endDate) {
-      return;
-    }
-
-    const parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(
-      targetPredictor.weatherStationId,
-      startDate,
-      endDate,
-      []
-    );
-
-    if (parsedData === 'error') {
-      this.toastNotificationService.weatherDataErrorToast();
-      return;
-    }
+    const predictorData: Array<IdbPredictorData> = [];
+    const startDate = new Date(weatherDataRange.startDate);
+    const endDate = weatherDataRange.endDate;
 
     while (startDate <= endDate) {
       if (options.shouldStop?.()) {
@@ -125,7 +116,7 @@ export class WeatherPredictorCreationService {
       this.loadingService.setLoadingMessage(`Adding Weather Predictors: ${month.abbreviation}, ${entryDate.getFullYear()}`);
 
       const degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(
-        parsedData,
+        weatherDataRange.readings,
         entryDate.getMonth(),
         entryDate.getFullYear(),
         targetPredictor.heatingBaseTemperature,
@@ -140,8 +131,42 @@ export class WeatherPredictorCreationService {
       newPredictorData.amount = getDegreeDayAmount(degreeDays, targetPredictor.weatherDataType);
       newPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, targetPredictor.weatherDataType);
 
-      await this.predictorHandler.addPredictorData(newPredictorData, options.activeAccountGuid);
+      predictorData.push(newPredictorData);
       startDate.setMonth(startDate.getMonth() + 1);
     }
+
+    return predictorData;
+  }
+
+  private async getWeatherDataRange(options: WeatherPredictorCreationOptions): Promise<WeatherDataRange | undefined> {
+    const predictorForm = options.predictorForm;
+    const startMonth = predictorForm.controls.startMonth.value;
+    const startYear = predictorForm.controls.startYear.value;
+    const endMonth = predictorForm.controls.endMonth.value;
+    const endYear = predictorForm.controls.endYear.value;
+
+    if (startMonth == null || !startYear || endMonth == null || !endYear) {
+      return undefined;
+    }
+
+    const startDate = new Date(startYear, startMonth, 1);
+    const endDate = new Date(endYear, endMonth, 1);
+    if (startDate > endDate) {
+      return undefined;
+    }
+
+    const readings: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(
+      predictorForm.controls.weatherStationId.value,
+      startDate,
+      endDate,
+      []
+    );
+
+    if (readings === 'error') {
+      this.toastNotificationService.weatherDataErrorToast();
+      throw new Error('Weather data could not be retrieved for predictor creation.');
+    }
+
+    return { startDate, endDate, readings };
   }
 }
