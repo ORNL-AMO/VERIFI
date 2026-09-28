@@ -27,20 +27,15 @@ import {
   PredictorReadingEditorMode,
   PredictorReadingSaveRequest,
   PredictorReadingsConfirmation,
-  WeatherMaintenanceMode,
-  WeatherMaintenancePreview,
-  WeatherMaintenanceRequest,
   buildPredictorReadingTableView,
   createPredictorReading,
-  findMissingPredictorMonths,
-  weatherRangeForReadings
+  findMissingPredictorMonths
 } from '../../models';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
-import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
+import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorReadingEditorComponent } from './predictor-reading-editor/predictor-reading-editor.component';
 import { PredictorReadingsConfirmationModalComponent } from './predictor-readings-confirmation-modal/predictor-readings-confirmation-modal.component';
 import { PredictorReadingsTableComponent } from './predictor-readings-table/predictor-readings-table.component';
-import { WeatherMaintenanceSlideoutComponent } from './weather-maintenance-slideout/weather-maintenance-slideout.component';
 
 interface PredictorReadingPanelState {
   readonly mode: PredictorReadingEditorMode;
@@ -56,19 +51,18 @@ interface PredictorReadingPanelState {
     IconComponent,
     PredictorReadingEditorComponent,
     PredictorReadingsConfirmationModalComponent,
-    PredictorReadingsTableComponent,
-    WeatherMaintenanceSlideoutComponent
+    PredictorReadingsTableComponent
   ]
 })
 export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, OnDestroy {
   private readonly actions = inject(PredictorWorkspaceActionsService);
-  readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly injector = inject(Injector);
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  readonly context = inject(PredictorWorkbenchContextService);
   readonly status = inject(WorkspaceStatusService);
 
   readonly editorPanel = signal<PredictorReadingPanelState | undefined>(undefined);
@@ -76,23 +70,14 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly actionStatus = signal('');
-  readonly weatherPanelMode = signal<WeatherMaintenanceMode | undefined>(undefined);
-  readonly weatherPreview = signal<WeatherMaintenancePreview | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly tableView = computed(() => buildPredictorReadingTableView(
-    this.workspace.selectedPredictor(),
-    this.workspace.selectedReadings()
+    this.context.predictor(),
+    this.context.readings()
   ));
-  readonly missingMonths = computed(() => findMissingPredictorMonths(this.workspace.selectedReadings()));
-  readonly findings = computed(() => {
-    const predictor = this.workspace.selectedPredictor();
-    return predictor
-      ? this.status.predictorFindings(predictor.guid).filter(finding =>
-        finding.destination.kind === 'predictor-tab' && finding.destination.tab === 'readings')
-      : [];
-  });
-  readonly weatherRange = computed(() => weatherRangeForReadings(this.workspace.selectedReadings())
-    ?? this.workspace.defaultWeatherRange());
+  readonly missingMonths = computed(() => findMissingPredictorMonths(this.context.readings()));
+  readonly findings = computed(() => this.context.findings().filter(finding =>
+    finding.destination.kind === 'predictor-tab' && finding.destination.tab === 'readings'));
 
   private confirmationModalOpen = false;
   private returnFocusTarget?: HTMLElement;
@@ -101,13 +86,12 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
     () => this.closeEditor(true),
     () => this.isNavigationBlocked()
   );
-  private readonly selectedPredictorGuid = computed(() => this.workspace.selectedPredictor()?.guid);
+  private readonly selectedPredictorGuid = computed(() => this.context.predictor()?.guid);
   private readonly resetOnPredictorChange = effect(() => {
     this.selectedPredictorGuid();
     untracked(() => {
       this.editorPanel.set(undefined);
       this.confirmation.set(undefined);
-      this.resetWeatherPanel();
       this.hideConfirmationModal();
       this.actionError.set(undefined);
     });
@@ -142,12 +126,12 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   }
 
   openAddReading(): void {
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.context.predictor();
     if (!predictor || !this.canAct()) return;
     this.captureFocus();
     this.editorPanel.set({
       mode: 'add',
-      reading: createPredictorReading(predictor, this.workspace.selectedReadings())
+      reading: createPredictorReading(predictor, this.context.readings())
     });
     this.actionError.set(undefined);
   }
@@ -169,10 +153,10 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   }
 
   async saveReading(request: PredictorReadingSaveRequest): Promise<void> {
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.context.predictor();
     const panel = this.editorPanel();
     if (!predictor || !panel || !this.canAct()) return;
-    if (this.workspace.selectedReadings().some(reading => reading.guid !== request.reading.guid
+    if (this.context.readings().some(reading => reading.guid !== request.reading.guid
       && reading.year === request.reading.year && reading.month === request.reading.month)) {
       this.actionError.set('A reading already exists for this month.');
       return;
@@ -182,7 +166,7 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
         ? await this.actions.addPredictorReading(request.reading)
         : await this.actions.updatePredictorReading(request.reading);
       if (panel.mode === 'add' && request.addAnother) {
-        const readings = [...this.workspace.selectedReadings().filter(reading => reading.guid !== saved.guid), saved];
+        const readings = [...this.context.readings().filter(reading => reading.guid !== saved.guid), saved];
         this.editorPanel.set({ mode: 'add', reading: createPredictorReading(predictor, readings) });
       } else {
         this.closeEditor(true);
@@ -222,7 +206,7 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
 
   async confirmPendingAction(): Promise<void> {
     const confirmation = this.confirmation();
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.context.predictor();
     if (!confirmation || !predictor) return;
     switch (confirmation.kind) {
       case 'delete-one':
@@ -252,53 +236,6 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   showAttentionEntries(): void {
     this.table?.filter.set('attention');
     this.table?.currentPage.set(1);
-  }
-
-  openWeatherMaintenance(): void {
-    if (this.workspace.selectedPredictor()?.predictorType !== 'Weather' || !this.canAct()) return;
-    this.captureFocus();
-    this.weatherWorkflow.reset();
-    this.weatherPreview.set(undefined);
-    this.weatherPanelMode.set('maintenance');
-  }
-
-  async previewWeatherMaintenance(request: WeatherMaintenanceRequest): Promise<void> {
-    const predictor = this.workspace.selectedPredictor();
-    if (!predictor || predictor.predictorType !== 'Weather') return;
-    const preview = await this.weatherWorkflow.previewMaintenance(predictor, this.workspace.selectedReadings(), request);
-    this.weatherPreview.set(preview);
-  }
-
-  async requestRestoreCalculated(reading: IdbPredictorData): Promise<void> {
-    const predictor = this.workspace.selectedPredictor();
-    if (!predictor || predictor.predictorType !== 'Weather' || !this.canAct()) return;
-    this.captureFocus();
-    this.weatherWorkflow.reset();
-    this.weatherPanelMode.set('restore');
-    this.weatherPreview.set(undefined);
-    this.weatherPreview.set(await this.weatherWorkflow.previewRestore(predictor, reading));
-  }
-
-  async applyWeatherPreview(): Promise<void> {
-    const preview = this.weatherPreview();
-    if (!preview || this.saving()) return;
-    await this.runAction('Calculated weather readings could not be updated.', async () => {
-      await this.weatherWorkflow.commitMaintenance(preview);
-      this.closeWeatherPanel();
-      this.actionStatus.set(preview.mode === 'restore' ? 'Calculated value restored.' : 'Weather readings updated.');
-    });
-  }
-
-  closeWeatherPanel(): void {
-    this.resetWeatherPanel();
-    this.restoreFocus();
-  }
-
-  private resetWeatherPanel(): void {
-    if (this.weatherWorkflow.busy()) this.weatherWorkflow.cancel();
-    else this.weatherWorkflow.reset();
-    this.weatherPanelMode.set(undefined);
-    this.weatherPreview.set(undefined);
   }
 
   private async runAction(errorMessage: string, action: () => Promise<void>): Promise<void> {

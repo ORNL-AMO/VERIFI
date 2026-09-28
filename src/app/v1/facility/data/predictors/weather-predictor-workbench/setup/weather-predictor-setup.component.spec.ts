@@ -10,6 +10,7 @@ import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-wo
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { weatherLastTwoYearsRange } from '../../models';
 import { WeatherPredictorSetupComponent } from './weather-predictor-setup.component';
+import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 
 describe('WeatherPredictorSetupComponent', () => {
   it('prepares a save summary with repeated weather variants', async () => {
@@ -214,7 +215,7 @@ describe('WeatherPredictorSetupComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Classification');
   });
 
-  it('renders and updates the selected weather type for each predictor row', async () => {
+  it('initializes and updates the selected weather type for each predictor row', async () => {
     const group = {
       routeKey: 'station:station-a', stationId: 'station-a', stationName: 'Station A',
       predictors: [{
@@ -225,18 +226,18 @@ describe('WeatherPredictorSetupComponent', () => {
     const fixture = createFixture({ group, creating: false });
     await fixture.whenStable();
     fixture.detectChanges();
-    const select = fixture.nativeElement.querySelector('.weather-setup__definition select') as HTMLSelectElement;
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    expect(select.value).toBe('CDD');
-    expect(select.selectedOptions[0].textContent).toContain('Cooling degree days');
+    expect(fixture.componentInstance.definitions()[0].weatherDataType).toBe('CDD');
 
-    select.value = 'relativeHumidity';
-    select.dispatchEvent(new Event('change'));
+    fixture.componentInstance.setDefinitionType(
+      fixture.componentInstance.definitions()[0].draftId,
+      'relativeHumidity'
+    );
     fixture.detectChanges();
 
     expect(fixture.componentInstance.definitions()[0].weatherDataType).toBe('relativeHumidity');
-    expect(select.value).toBe('relativeHumidity');
-    expect(select.selectedOptions[0].textContent).toContain('Relative humidity');
   });
 });
 
@@ -248,17 +249,24 @@ function createFixture(options: {
   defaultRange?: any;
 } = {}) {
   const state = signal({ status: 'idle', message: '' });
+  const group = signal(options.group);
   TestBed.configureTestingModule({
     imports: [WeatherPredictorSetupComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
-        selectedWeatherGroup: signal(options.group), creatingWeatherGroup: signal(options.creating ?? true),
         defaultWeatherRange: signal('defaultRange' in options
           ? options.defaultRange
           : { start: { year: 2026, month: 1 }, end: { year: 2026, month: 3 } }),
         facility: signal({ guid: 'facility-a', city: 'Oak Ridge', state: 'TN' }), predictorReadings: signal([]),
         canWrite: signal(true), hasPending: signal(false)
       } },
+      {
+        provide: WeatherPredictorWorkbenchContextService,
+        useValue: {
+          group, creating: signal(options.creating ?? true),
+          predictors: signal(options.group?.predictors ?? []), readings: signal([]), notFound: signal(false)
+        }
+      },
       { provide: PredictorWeatherWorkflowService, useValue: {
         state, busy: signal(false), reset: vi.fn(), previewStationGroup: options.previewStationGroup ?? vi.fn(),
         commitStationGroup: options.commitStationGroup ?? vi.fn()

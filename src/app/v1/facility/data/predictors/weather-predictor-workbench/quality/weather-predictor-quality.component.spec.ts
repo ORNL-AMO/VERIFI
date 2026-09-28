@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkbenchQualityReportComponent } from '../../predictor-workbench/quality-report/predictor-workbench-quality-report.component';
+import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 import { WeatherPredictorQualityComponent } from './weather-predictor-quality.component';
 
 @Component({
@@ -49,10 +50,15 @@ describe('WeatherPredictorQualityComponent', () => {
         {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {
-            facility: signal({ guid: 'facility-a' }),
-            selectedWeatherGroup: signal({ routeKey: 'station:KORD', statusFindings: [] }),
-            selectedWeatherPredictors: signal(predictors),
-            selectedWeatherReadings: signal([
+            facility: signal({ guid: 'facility-a' })
+          }
+        },
+        {
+          provide: WeatherPredictorWorkbenchContextService,
+          useValue: {
+            group: signal({ routeKey: 'station:KORD', statusFindings: [] }),
+            predictors: signal(predictors),
+            readings: signal([
               { guid: 'reading-a', predictorId: 'weather-a' },
               { guid: 'reading-b', predictorId: 'weather-b' }
             ])

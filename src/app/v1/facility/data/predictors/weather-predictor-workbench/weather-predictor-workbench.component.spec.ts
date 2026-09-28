@@ -8,6 +8,7 @@ import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
+import { WeatherPredictorWorkbenchContextService } from './weather-predictor-workbench-context.service';
 import { WeatherPredictorWorkbenchComponent } from './weather-predictor-workbench.component';
 
 describe('WeatherPredictorWorkbenchComponent', () => {
@@ -84,6 +85,13 @@ describe('WeatherPredictorWorkbenchComponent', () => {
           }
         },
         { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
+        {
+          provide: WeatherPredictorWorkbenchContextService,
+          useValue: {
+            creating: signal(false), group, predictors: signal(group().predictors),
+            readings: signal([]), notFound: signal(false)
+          }
+        },
         {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {

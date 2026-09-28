@@ -39,11 +39,13 @@ import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-group
 import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
 import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
+import { PredictorWorkbenchContextService } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench-context.service';
 import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
 import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
 import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
 import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorWorkbenchContextService } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench-context.service';
 import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
 import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
 import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
@@ -61,6 +63,7 @@ import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard, singleSiteAccoun
 import { ShellComponent } from '@app/v1/shell/shell.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
+import { predictorCanonicalRouteGuard } from '@app/v1/facility/data/predictors/predictor-canonical-route.guard';
 
 export const V1Routes: Routes = [
   {
@@ -194,6 +197,7 @@ export const V1Routes: Routes = [
                       {
                         path: 'new',
                         component: WeatherPredictorWorkbenchComponent,
+                        providers: [WeatherPredictorWorkbenchContextService],
                         children: [
                           { path: '', pathMatch: 'full', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard] },
                           { path: '**', redirectTo: '' }
@@ -202,6 +206,7 @@ export const V1Routes: Routes = [
                       {
                         path: ':weatherGroupKey',
                         component: WeatherPredictorWorkbenchComponent,
+                        providers: [WeatherPredictorWorkbenchContextService],
                         children: [
                           { path: '', pathMatch: 'full', redirectTo: 'setup' },
                           { path: 'setup', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'setup' } },
@@ -230,6 +235,8 @@ export const V1Routes: Routes = [
                   {
                     path: ':predictorGuid',
                     component: PredictorWorkbenchComponent,
+                    canActivate: [predictorCanonicalRouteGuard],
+                    providers: [PredictorWorkbenchContextService],
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'settings' } },

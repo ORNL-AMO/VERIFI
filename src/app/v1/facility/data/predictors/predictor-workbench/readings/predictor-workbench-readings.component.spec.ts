@@ -10,6 +10,7 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
+import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorReadingEditorComponent } from './predictor-reading-editor/predictor-reading-editor.component';
 import { PredictorWorkbenchReadingsComponent } from './predictor-workbench-readings.component';
 
@@ -41,25 +42,6 @@ describe('PredictorWorkbenchReadingsComponent', () => {
     expect(root.textContent).toContain('Add predictor reading');
     expect(fixture.componentInstance.editorPanel()?.mode).toBe('add');
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
-  });
-
-  it('creates new Weather entries as manual overrides', () => {
-    const fixture = createFixture({ predictorType: 'Weather' });
-
-    fixture.componentInstance.openAddReading();
-
-    expect(fixture.componentInstance.editorPanel()?.reading.weatherOverride).toBe(true);
-  });
-
-  it('keeps weather maintenance open while a preview is loading', () => {
-    const fixture = createFixture({ predictorType: 'Weather' });
-    const workflow = TestBed.inject(PredictorWeatherWorkflowService) as any;
-    fixture.componentInstance.openWeatherMaintenance();
-
-    workflow.busy.set(true);
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.weatherPanelMode()).toBe('maintenance');
   });
 
   it('saves through workspace actions and closes the editor', async () => {
@@ -153,13 +135,26 @@ function createFixture(
     unit: 'tons', predictorType: 'Standard', canBeNegative: false, ...predictorOverrides
   } as any;
   const selectedReadings = signal<any[]>([]);
+  const selectedPredictor = signal(predictor);
   TestBed.configureTestingModule({
     imports: [PredictorWorkbenchReadingsComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
-        selectedPredictor: signal(predictor), selectedReadings, canWrite: signal(true), hasPending: signal(false),
+        canWrite: signal(true), hasPending: signal(false),
         isLoading: signal(false), defaultWeatherRange: signal(undefined)
       } },
+      {
+        provide: PredictorWorkbenchContextService,
+        useValue: {
+          predictor: selectedPredictor,
+          readings: selectedReadings,
+          findings: signal(
+            typeof statusOverrides['predictorFindings'] === 'function'
+              ? statusOverrides['predictorFindings']()
+              : []
+          )
+        }
+      },
       { provide: PredictorWeatherWorkflowService, useValue: {
         state: signal({ status: 'idle', message: '' }), busy: signal(false), reset: vi.fn(), cancel: vi.fn(),
         previewMaintenance: vi.fn(), previewRestore: vi.fn(), commitMaintenance: vi.fn()

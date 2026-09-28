@@ -15,6 +15,7 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
+import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 
 type PredictorQualityStatisticId = keyof PredictorDataQualityStatistics;
 
@@ -79,6 +80,7 @@ export class PredictorWorkbenchQualityReportComponent {
   readonly status = inject(WorkspaceStatusService);
 
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  private readonly context = inject(PredictorWorkbenchContextService, { optional: true });
   readonly copyingStatisticsTable = signal(false);
   private readonly predictorInput = signal<IdbPredictor | undefined>(undefined);
   private readonly readingsInput = signal<readonly IdbPredictorData[] | undefined>(undefined);
@@ -91,8 +93,8 @@ export class PredictorWorkbenchQualityReportComponent {
   @Input() embedded = false;
   @Output() readonly readingsRequested = new EventEmitter<void>();
   @Output() readonly setupRequested = new EventEmitter<void>();
-  readonly predictor = computed(() => this.predictorInput() ?? this.workspace.selectedPredictor());
-  readonly readings = computed(() => this.readingsInput() ?? this.workspace.selectedReadings());
+  readonly predictor = computed(() => this.predictorInput() ?? this.context?.predictor());
+  readonly readings = computed(() => this.readingsInput() ?? this.context?.readings() ?? []);
   readonly ids = computed(() => ({
     findings: `${this.idPrefixInput()}-findings-heading`,
     months: `${this.idPrefixInput()}-months-heading`,

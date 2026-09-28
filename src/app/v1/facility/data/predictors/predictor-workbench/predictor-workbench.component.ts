@@ -1,14 +1,14 @@
-import { Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PREDICTOR_WORKBENCH_TABS, PredictorWorkbenchTabId, buildPredictorWorkbenchTabAttention } from '../models';
 import { PredictorWorkbenchTabsComponent } from './predictor-workbench-tabs/predictor-workbench-tabs.component';
+import { PredictorWorkbenchContextService } from './predictor-workbench-context.service';
 
 @Component({
   selector: 'app-predictor-workbench',
@@ -27,7 +27,7 @@ export class PredictorWorkbenchComponent {
   @ViewChild('predictorSwitcherToggle') private readonly switcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
-  private readonly status = inject(WorkspaceStatusService);
+  readonly context = inject(PredictorWorkbenchContextService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly tabs = PREDICTOR_WORKBENCH_TABS;
@@ -37,8 +37,7 @@ export class PredictorWorkbenchComponent {
     this.workspace.standardPredictorCards().length + this.workspace.weatherStationGroups().length > 1);
   readonly factsExpanded = this.workbenchLayout.factsExpanded;
   readonly tabAttention = computed(() => {
-    const predictor = this.workspace.selectedPredictor();
-    return buildPredictorWorkbenchTabAttention(predictor ? this.status.predictorFindings(predictor.guid) : []);
+    return buildPredictorWorkbenchTabAttention(this.context.findings());
   });
   readonly accountPredictorsRoute = computed(() => {
     const account = this.workspace.account();
@@ -46,22 +45,6 @@ export class PredictorWorkbenchComponent {
   });
 
   constructor() {
-    effect(() => {
-      const predictor = this.workspace.selectedPredictor();
-      const facility = this.workspace.facility();
-      if (predictor?.predictorType !== 'Weather' || !facility) return;
-      const group = this.workspace.weatherStationGroups().find(item =>
-        item.predictors.some(groupPredictor => groupPredictor.guid === predictor.guid));
-      if (group) {
-        const activeTab = this.activeTab();
-        const route = activeTab === 'quality'
-          ? this.navigation.facilityWeatherPredictorQualityRoute(facility.guid, group.routeKey, predictor.guid)
-          : this.navigation.facilityWeatherPredictorRoute(
-            facility.guid, group.routeKey, activeTab === 'settings' ? 'setup' : activeTab
-          );
-        void this.router.navigate(route);
-      }
-    });
     this.syncActiveTabFromRoute();
     this.router.events
       .pipe(
@@ -79,7 +62,7 @@ export class PredictorWorkbenchComponent {
   openTab(tab: string): void {
     if (!isPredictorTab(tab)) return;
     const facility = this.workspace.facility();
-    const predictor = this.workspace.selectedPredictor();
+    const predictor = this.context.predictor();
     if (facility && predictor) {
       void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictor.guid, tab));
     }

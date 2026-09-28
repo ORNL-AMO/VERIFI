@@ -1,20 +1,17 @@
 @let settingsForm = form();
-@let predictor = workspace.selectedPredictor();
+@let predictor = context.predictor();
 
 @if (predictor && !supportedPredictor()) {
   <section class="v1-settings-panel predictor-settings">
     <div class="v1-alert v1-alert--warning" role="alert">
       <app-ui-icon name="warning"></app-ui-icon>
-      <span>{{ predictor.predictorType }} predictors are preserved but cannot be edited in the v1 workspace. Standard and Weather predictors are supported.</span>
+      <span>{{ predictor.predictorType }} predictors are preserved but cannot be edited in the standard predictor workbench.</span>
     </div>
   </section>
 } @else if (predictor && settingsForm) {
   <form class="v1-settings-panel predictor-settings" [formGroup]="settingsForm" aria-label="Predictor settings">
     @if (!workspace.canWrite()) {
       <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
-    }
-    @if (predictor.predictorType === 'Weather' && hasReadings()) {
-      <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span><strong>Readings exist for this predictor.</strong> Changing its weather source or calculation settings requires reviewing the recalculated values before saving.</span></div>
     }
 
     <section class="predictor-settings__section">
@@ -35,26 +32,6 @@
       </div>
     </section>
 
-    @if (settingsForm.controls.predictorType.value === 'Weather') {
-      <section class="predictor-settings__section" aria-labelledby="predictor-settings-weather">
-        <div class="predictor-settings__heading"><div><p>Source</p><h2 id="predictor-settings-weather">Weather setup</h2></div></div>
-        <div class="predictor-settings__grid">
-          <label><span>Weather data type</span><select class="v1-select" formControlName="weatherDataType" (change)="setWeatherDataType($any($event.target).value)">
-            @for (option of weatherTypes; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
-          </select></label>
-          @if (settingsForm.controls.weatherDataType.value === 'HDD') {
-            <label><span>Heating base temperature (°F)</span><input type="number" formControlName="heatingBaseTemperature" required (change)="onWeatherDefinitionChange()"></label>
-          } @else if (settingsForm.controls.weatherDataType.value === 'CDD') {
-            <label><span>Cooling base temperature (°F)</span><input type="number" formControlName="coolingBaseTemperature" required (change)="onWeatherDefinitionChange()"></label>
-          }
-        </div>
-        @if (settingsForm.errors?.['heatingBaseRequired'] || settingsForm.errors?.['coolingBaseRequired']) {
-          <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Enter the applicable base temperature before saving.</span></div>
-        }
-        <div class="v1-alert v1-alert--info"><app-ui-icon name="location"></app-ui-icon><span>Station: {{ settingsForm.controls.weatherStationName.value || settingsForm.controls.weatherStationId.value }}. Change the station from Station setup.</span></div>
-      </section>
-    }
-
     <section class="predictor-settings__section" aria-labelledby="predictor-settings-status">
       <div class="predictor-settings__heading"><div><p>Validation</p><h2 id="predictor-settings-status">Status settings</h2></div></div>
       <div class="predictor-settings__status-grid">
@@ -67,9 +44,6 @@
     </section>
 
     <footer class="predictor-settings__footer">
-      @if (weatherDefinitionDirty() && hasReadings()) {
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canEdit()" (click)="previewWeatherSettings()"><app-ui-icon name="refresh"></app-ui-icon> Review and Save</button>
-      }
       <button
         type="button"
         class="v1-btn v1-btn--deactivate"
@@ -91,19 +65,8 @@
   <section class="v1-settings-panel predictor-settings"><div class="v1-alert v1-alert--info"><app-ui-icon name="info"></app-ui-icon><span>Select a predictor to edit its settings.</span></div></section>
 }
 
-@if (weatherPreviewOpen()) {
-  <app-weather-maintenance-slideout
-    mode="settings"
-    [preview]="weatherPreview()"
-    [workflowState]="weatherWorkflow.state()"
-    [saving]="saveState() === 'saving' || weatherWorkflow.busy()"
-    (confirmed)="confirmWeatherSettings()"
-    (cancelled)="closeWeatherPreview()">
-  </app-weather-maintenance-slideout>
-}
-
 <ng-template #deletePredictorConfirmModal>
-  @if (workspace.selectedPredictorCard(); as card) {
+  @if (context.card(); as card) {
     <app-confirm-delete-predictor-modal [card]="card" [saving]="deleting()" [error]="deleteError()" (confirmed)="confirmDeletePredictor()" (cancelled)="cancelDeletePredictor()"></app-confirm-delete-predictor-modal>
   }
 </ng-template>

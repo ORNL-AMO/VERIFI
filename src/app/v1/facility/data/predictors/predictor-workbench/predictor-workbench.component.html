@@ -1,7 +1,7 @@
 @let currentFacility = workspace.facility();
 @let currentAccount = workspace.account();
-@let currentPredictor = workspace.selectedPredictor();
-@let currentCard = workspace.selectedPredictorCard();
+@let currentPredictor = context.predictor();
+@let currentCard = context.card();
 @let accountPredictorsLink = accountPredictorsRoute();
 
 @if (!currentFacility) {
@@ -10,7 +10,7 @@
     <h1>No facility selected</h1>
     <p>Select a facility before reviewing predictors and predictor data.</p>
   </article>
-} @else if (workspace.predictorNotFound()) {
+} @else if (context.notFound()) {
   <article class="v1-empty-state" role="status">
     <app-ui-icon name="predictor"></app-ui-icon>
     <h1>Predictor not found</h1>

@@ -13,6 +13,7 @@ import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-wo
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherPredictorReadingsComponent } from './weather-predictor-readings.component';
+import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 import { WeatherSourceReadingsSlideoutComponent } from './weather-source-readings-slideout/weather-source-readings-slideout.component';
 
 describe('WeatherPredictorReadingsComponent', () => {
@@ -244,17 +245,23 @@ function setup(
   statusFindings: any[] = [],
   workflowOverrides: Record<string, unknown> = {}
 ) {
+  const group = signal({
+    routeKey: 'station:A', stationId: 'station-a', stationName: 'Station A', predictors, statusFindings
+  });
   TestBed.configureTestingModule({
     imports: [WeatherPredictorReadingsComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
         canWrite: signal(true), hasPending: signal(false), revision: signal(1),
-        selectedWeatherGroup: signal({
-          routeKey: 'station:A', stationId: 'station-a', stationName: 'Station A', predictors, statusFindings
-        }),
-        selectedWeatherPredictors: signal(predictors), selectedWeatherReadings: signal(readings),
         defaultWeatherRange: signal({ start: { year: 2025, month: 1 }, end: { year: 2025, month: 12 } })
       } },
+      {
+        provide: WeatherPredictorWorkbenchContextService,
+        useValue: {
+          group, predictors: signal(predictors), readings: signal(readings),
+          creating: signal(false), notFound: signal(false)
+        }
+      },
       { provide: PredictorWorkspaceActionsService, useValue: { applyWeatherStationMonth: vi.fn() } },
       { provide: PredictorWeatherWorkflowService, useValue: {
         calculateStationMonth: vi.fn(), previewStationGroup: vi.fn(), commitStationGroup: vi.fn(),

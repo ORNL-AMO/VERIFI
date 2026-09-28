@@ -11,6 +11,7 @@ import {
   PredictorWorkbenchDisplayTab,
   PredictorWorkbenchTabsComponent
 } from '../predictor-workbench/predictor-workbench-tabs/predictor-workbench-tabs.component';
+import { WeatherPredictorWorkbenchContextService } from './weather-predictor-workbench-context.service';
 
 @Component({
   selector: 'app-weather-predictor-workbench',
@@ -29,6 +30,7 @@ export class WeatherPredictorWorkbenchComponent {
   @ViewChild('weatherSwitcherToggle') private readonly switcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  readonly context = inject(WeatherPredictorWorkbenchContextService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly switcherOpen = this.switcherOpenState.asReadonly();
   readonly canSwitchResources = computed(() =>
@@ -36,7 +38,7 @@ export class WeatherPredictorWorkbenchComponent {
   readonly tabs = computed<ReadonlyArray<PredictorWorkbenchDisplayTab>>(() => [
     { id: 'settings', label: 'Setup', icon: 'settings' },
     { id: 'readings', label: 'Readings', icon: 'table' },
-    ...this.workspace.selectedWeatherPredictors().map(predictor => ({
+    ...this.context.predictors().map(predictor => ({
       id: qualityTabId(predictor.guid),
       label: `${predictor.name || 'Weather predictor'} Quality`,
       icon: 'checklist' as const
@@ -45,18 +47,18 @@ export class WeatherPredictorWorkbenchComponent {
   readonly activeTab = computed(() => {
     const activeTab = this.activeTabState();
     if (activeTab !== 'quality') return activeTab;
-    const firstPredictor = this.workspace.selectedWeatherPredictors()[0];
+    const firstPredictor = this.context.predictors()[0];
     return firstPredictor ? qualityTabId(firstPredictor.guid) : 'settings';
   });
   readonly tabAttention = computed(() => {
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     const findings = group?.statusFindings ?? [];
     const aggregate = buildPredictorWorkbenchTabAttention(findings);
     const attention: Record<string, StatusAttentionSummary | undefined> = {
       settings: aggregate.settings,
       readings: aggregate.readings
     };
-    this.workspace.selectedWeatherPredictors().forEach(predictor => {
+    this.context.predictors().forEach(predictor => {
       attention[qualityTabId(predictor.guid)] = buildPredictorWorkbenchTabAttention(
         findings.filter(finding => finding.entity.kind === 'predictor' && finding.entity.guid === predictor.guid)
       ).quality;
@@ -64,7 +66,7 @@ export class WeatherPredictorWorkbenchComponent {
     return attention;
   });
   readonly statusChecks = computed(() => {
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     return group ? buildWeatherStationStatusChecks(group.predictors, group.statusFindings) : [];
   });
   readonly accountPredictorsRoute = computed(() => {
@@ -98,7 +100,7 @@ export class WeatherPredictorWorkbenchComponent {
 
   switchWeatherStation(groupKey: string): void {
     const facility = this.workspace.facility();
-    const currentGroup = this.workspace.selectedWeatherGroup();
+    const currentGroup = this.context.group();
     if (!facility) return;
     this.closeSwitcher();
     if (groupKey === currentGroup?.routeKey) return;
@@ -117,7 +119,7 @@ export class WeatherPredictorWorkbenchComponent {
 
   openTab(tab: string): void {
     const facility = this.workspace.facility();
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     if (!facility || !group) return;
     const qualityPredictorGuid = qualityPredictorGuidFromTab(tab);
     if (qualityPredictorGuid && group.predictors.some(predictor => predictor.guid === qualityPredictorGuid)) {

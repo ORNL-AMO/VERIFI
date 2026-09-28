@@ -1,13 +1,13 @@
 @let facility = workspace.facility();
 @let account = workspace.account();
-@let group = workspace.selectedWeatherGroup();
-@let creating = workspace.creatingWeatherGroup();
+@let group = context.group();
+@let creating = context.creating();
 @let accountLink = accountPredictorsRoute();
 @let checks = statusChecks();
 
 @if (!facility) {
   <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing weather predictors.</p></article>
-} @else if (workspace.weatherGroupNotFound()) {
+} @else if (context.notFound()) {
   <article class="v1-empty-state" role="status"><app-ui-icon name="cloudRain"></app-ui-icon><h1>Weather station not found</h1><p>This weather station is not available in {{ facility.name }}.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="openPredictors()">Back to predictors</button></article>
 } @else if (creating || group) {
   <div class="weather-workbench__sticky">

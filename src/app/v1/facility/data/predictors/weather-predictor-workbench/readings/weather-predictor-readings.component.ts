@@ -31,6 +31,7 @@ import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflo
 import { WeatherReadingDeleteConfirmationModalComponent } from './weather-reading-delete-confirmation-modal/weather-reading-delete-confirmation-modal.component';
 import { WeatherReadingMonthEditorComponent } from './weather-reading-month-editor/weather-reading-month-editor.component';
 import { WeatherSourceReadingsSlideoutComponent } from './weather-source-readings-slideout/weather-source-readings-slideout.component';
+import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 
 @Component({
   selector: 'app-weather-predictor-readings',
@@ -56,11 +57,12 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly injector = inject(Injector);
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  readonly context = inject(WeatherPredictorWorkbenchContextService);
   readonly matrix = computed(() => buildWeatherStationReadingMatrix(
-    this.workspace.selectedWeatherPredictors(), this.workspace.selectedWeatherReadings()
+    this.context.predictors(), this.context.readings()
   ));
   readonly readingChecks = computed(() => {
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     return group
       ? buildWeatherStationStatusChecks(group.predictors, group.statusFindings ?? [])
         .filter(check => check.section === 'readings')
@@ -111,7 +113,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   readonly canAct = computed(() => this.workspace.canWrite()
     && !this.workspace.hasPending() && !this.saving() && !this.updatingRange());
   readonly canUpdateRange = computed(() => {
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     const range = this.selectedRange();
     return !!group?.stationId
       && !!range
@@ -126,7 +128,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     () => this.hasUnsavedChanges(), () => this.discardChanges(), () => this.isNavigationBlocked()
   );
   private readonly clampCurrentPage = effect(() => {
-    const groupKey = this.workspace.selectedWeatherGroup()?.routeKey;
+    const groupKey = this.context.group()?.routeKey;
     const maxPage = this.maxPage();
     if (groupKey !== this.paginationGroupKey) {
       this.paginationGroupKey = groupKey;
@@ -136,8 +138,8 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     }
   });
   private readonly synchronizeRange = effect(() => {
-    const group = this.workspace.selectedWeatherGroup();
-    const readings = this.workspace.selectedWeatherReadings();
+    const group = this.context.group();
+    const readings = this.context.readings();
     const range = weatherRangeForReadings(readings) ?? this.workspace.defaultWeatherRange();
     if (!group || this.rangeDirty() || this.rangePreview()) return;
     untracked(() => {
@@ -171,7 +173,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   }
 
   async reviewRangeUpdate(event?: Event): Promise<void> {
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     const range = this.selectedRange();
     if (!group?.stationId || !range || !this.canUpdateRange()) return;
     this.captureFocus(event);
@@ -192,7 +194,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
             : predictor.weatherDataType === 'CDD' ? predictor.coolingBaseTemperature : undefined,
           production: !!predictor.production
         }))
-      }, group.predictors, this.workspace.selectedWeatherReadings());
+      }, group.predictors, this.context.readings());
       if (preview) this.rangePreview.set(preview);
       else this.rangeError.set(this.weatherWorkflow.state().error || 'The reading update could not be prepared.');
     } catch (error) {
@@ -253,7 +255,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     this.showDeleteModal();
   }
   openSourceReadings(row: WeatherStationReadingRow, predictorGuid: string, event?: Event): void {
-    const predictor = this.workspace.selectedWeatherPredictors()
+    const predictor = this.context.predictors()
       .find(candidate => candidate.guid === predictorGuid);
     if (!predictor) return;
     this.captureFocus(event);
@@ -273,7 +275,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
       this.calculating.set(false);
       return;
     }
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     if (!group) return;
     this.calculating.set(true);
     const values = await this.weatherWorkflow.calculateStationMonth(group.predictors, month);
@@ -288,11 +290,11 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
 
   async saveMonth(draft: WeatherStationMonthDraft): Promise<void> {
     const panel = this.editor();
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     if (!panel || !group || !this.canAct()) return;
     try {
       const changes = buildWeatherStationMonthChangeSet(
-        panel.mode, group.routeKey, group.predictors, this.workspace.selectedWeatherReadings(), draft, this.workspace.revision()
+        panel.mode, group.routeKey, group.predictors, this.context.readings(), draft, this.workspace.revision()
       );
       this.saving.set(true);
       await this.actions.applyWeatherStationMonth(changes);
@@ -304,12 +306,12 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
 
   async confirmDelete(): Promise<void> {
     const row = this.deleteRow();
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     if (!row || !group || !this.canAct()) return;
     try {
       this.saving.set(true);
       await this.actions.applyWeatherStationMonth(buildWeatherStationMonthDeleteChangeSet(
-        group.routeKey, group.predictors, this.workspace.selectedWeatherReadings(), row.year, row.month, this.workspace.revision()
+        group.routeKey, group.predictors, this.context.readings(), row.year, row.month, this.workspace.revision()
       ));
       this.closeDelete();
     } catch (error) {

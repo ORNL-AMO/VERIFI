@@ -7,6 +7,7 @@ import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layou
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
+import { PredictorWorkbenchContextService } from './predictor-workbench-context.service';
 import { PredictorWorkbenchComponent } from './predictor-workbench.component';
 
 describe('PredictorWorkbenchComponent', () => {
@@ -56,6 +57,18 @@ describe('PredictorWorkbenchComponent', () => {
           }
         },
         { provide: WorkbenchLayoutService, useValue: { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) } },
+        {
+          provide: PredictorWorkbenchContextService,
+          useValue: {
+            predictor: selectedPredictor,
+            card: selectedCard,
+            findings: signal([{
+              id: 'gap', severity: 'error',
+              destination: { kind: 'predictor-tab', facilityGuid: 'facility-a', predictorGuid: 'predictor-a', tab: 'readings' }
+            }]),
+            notFound: signal(false)
+          }
+        },
         {
           provide: WorkspaceStatusService,
           useValue: {
@@ -150,6 +163,12 @@ describe('PredictorWorkbenchComponent', () => {
           }
         },
         { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
+        {
+          provide: PredictorWorkbenchContextService,
+          useValue: {
+            predictor: signal(undefined), card: signal(undefined), findings: signal([]), notFound: signal(true)
+          }
+        },
         { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
         {
           provide: FacilityPredictorsWorkspaceService,
@@ -174,49 +193,4 @@ describe('PredictorWorkbenchComponent', () => {
     expect(navigate).toHaveBeenCalledWith(['/facility', 'predictors']);
   });
 
-  it('redirects legacy weather output links to the station workbench and preserves the tab', () => {
-    const navigate = vi.fn();
-    const weatherPredictor = { guid: 'weather-a', name: 'Cooling days', predictorType: 'Weather' };
-    TestBed.configureTestingModule({
-      imports: [PredictorWorkbenchComponent],
-      providers: [
-        { provide: Router, useValue: { url: '', events: new Subject(), navigate } },
-        { provide: ActivatedRoute, useValue: { firstChild: { snapshot: { data: { predictorTab: 'quality' } } } } },
-        {
-          provide: WorkspaceNavigationService,
-          useValue: {
-            accountDataRoute: () => [],
-            facilityDataRoute: () => [],
-            facilityPredictorRoute: () => [],
-            facilityWeatherPredictorRoute: (_facility: string, group: string, tab: string) =>
-              ['/weather', group, tab],
-            facilityWeatherPredictorQualityRoute: (_facility: string, group: string, predictor: string) =>
-              ['/weather', group, 'quality', predictor]
-          }
-        },
-        { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
-        { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
-        {
-          provide: FacilityPredictorsWorkspaceService,
-          useValue: {
-            account: signal(undefined),
-            facility: signal({ guid: 'facility-a', name: 'Facility A' }),
-            selectedPredictor: signal(weatherPredictor),
-            selectedPredictorCard: signal(undefined),
-            predictorNotFound: signal(false),
-            predictorCards: signal([]),
-            standardPredictorCards: signal([]),
-            weatherStationGroups: signal([{
-              routeKey: 'station:KORD',
-              predictors: [weatherPredictor]
-            }])
-          }
-        }
-      ]
-    });
-
-    TestBed.createComponent(PredictorWorkbenchComponent).detectChanges();
-
-    expect(navigate).toHaveBeenCalledWith(['/weather', 'station:KORD', 'quality', 'weather-a']);
-  });
 });

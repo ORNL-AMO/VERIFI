@@ -12,6 +12,7 @@ import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
+import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorWorkbenchQualityReportComponent } from './predictor-workbench-quality-report.component';
 
 describe('PredictorWorkbenchQualityReportComponent', () => {
@@ -172,10 +173,12 @@ function setup(options: {
       {
         provide: FacilityPredictorsWorkspaceService,
         useValue: {
-          facility: signal({ guid: 'facility-a', name: 'Facility A' }),
-          selectedPredictor: signal(selectedPredictor),
-          selectedReadings: signal(readings)
+          facility: signal({ guid: 'facility-a', name: 'Facility A' })
         }
+      },
+      {
+        provide: PredictorWorkbenchContextService,
+        useValue: { predictor: signal(selectedPredictor), readings: signal(readings) }
       },
       { provide: CopyTableService, useValue: { copyTable: options.copyTable ?? vi.fn() } },
       { provide: Router, useValue: { navigate: vi.fn() } },

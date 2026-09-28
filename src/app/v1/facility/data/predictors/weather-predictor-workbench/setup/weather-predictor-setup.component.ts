@@ -25,6 +25,7 @@ import {
 } from '../../models';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherStationSelectorComponent } from '../../shared/weather-station-selector/weather-station-selector.component';
+import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 
 interface EditableWeatherDefinition extends WeatherStationGroupDefinition {
   readonly draftId: string;
@@ -44,6 +45,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  readonly context = inject(WeatherPredictorWorkbenchContextService);
   readonly workflow = inject(PredictorWeatherWorkflowService);
   readonly navigation = inject(WorkspaceNavigationService);
 
@@ -83,13 +85,13 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     const facility = this.workspace.facility();
     return facility ? getWeatherSearchFromFacility(facility) : '';
   });
-  readonly isCreation = this.workspace.creatingWeatherGroup;
+  readonly isCreation = this.context.creating;
   readonly canSubmit = computed(() => {
     const station = this.station();
     const range = this.stationPreviewRange();
     const definitions = this.definitions();
     return !!station
-      && (!!this.workspace.selectedWeatherGroup() || definitions.length > 0)
+      && (!!this.context.group() || definitions.length > 0)
       && definitions.every(definition => definition.name.trim().length > 0
         && definition.name.trim().length <= 100
         && (!isDegreeDay(definition.weatherDataType) || Number.isFinite(definition.baseTemperature)))
@@ -97,7 +99,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       && this.workspace.canWrite()
       && !this.workflow.busy() && !this.committing() && !this.deleting();
   });
-  readonly canDelete = computed(() => !!this.workspace.selectedWeatherGroup()
+  readonly canDelete = computed(() => !!this.context.group()
     && this.workspace.canWrite()
     && !this.workspace.hasPending()
     && !this.committing()
@@ -116,8 +118,8 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     () => this.isNavigationBlocked()
   );
   private readonly initializeEffect = effect(() => {
-    const group = this.workspace.selectedWeatherGroup();
-    const creation = this.workspace.creatingWeatherGroup();
+    const group = this.context.group();
+    const creation = this.context.creating();
     const defaultRange = this.workspace.defaultWeatherRange();
     const context = creation ? 'new' : group?.routeKey;
     if (!context || context === this.initializedContext) return;
@@ -135,7 +137,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   hasUnsavedChanges(): boolean { return this.dirty(); }
   isNavigationBlocked(): boolean { return this.workflow.busy() || this.committing() || this.deleting(); }
   discardChanges(): void {
-    this.initialize(this.workspace.selectedWeatherGroup(), this.workspace.defaultWeatherRange());
+    this.initialize(this.context.group(), this.workspace.defaultWeatherRange());
   }
 
   selectStation(station: WeatherStation): void {
@@ -204,9 +206,8 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     this.postSaveRoute = undefined;
     this.saveError.set(undefined);
     this.committing.set(true);
-    const group = this.workspace.selectedWeatherGroup();
-    const currentIds = new Set(group?.predictors.map(predictor => predictor.guid) ?? []);
-    const readings = this.workspace.predictorReadings().filter(reading => currentIds.has(reading.predictorId));
+    const group = this.context.group();
+    const readings = this.context.readings();
     const facility = this.workspace.facility();
     if (!facility) {
       this.committing.set(false);
@@ -274,7 +275,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   }
 
   async confirmDeleteStation(): Promise<void> {
-    const group = this.workspace.selectedWeatherGroup();
+    const group = this.context.group();
     const facility = this.workspace.facility();
     if (!group || !facility || !this.canDelete()) return;
     const currentIds = new Set(group.predictors.map(predictor => predictor.guid));
@@ -308,7 +309,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     }
   }
 
-  private initialize(group = this.workspace.selectedWeatherGroup(), defaultRange = this.workspace.defaultWeatherRange()): void {
+  private initialize(group = this.context.group(), defaultRange = this.workspace.defaultWeatherRange()): void {
     const groupIds = new Set(group?.predictors.map(predictor => predictor.guid) ?? []);
     const groupRange = weatherRangeForReadings(
       this.workspace.predictorReadings().filter(reading => groupIds.has(reading.predictorId))
@@ -344,7 +345,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     const range = this.stationPreviewRange();
     if (!station || !range) return undefined;
     return {
-      sourceGroupKey: this.workspace.selectedWeatherGroup()?.routeKey,
+      sourceGroupKey: this.context.group()?.routeKey,
       station,
       range,
       definitions: this.definitions().map(({ draftId: _draftId, ...definition }) => definition)

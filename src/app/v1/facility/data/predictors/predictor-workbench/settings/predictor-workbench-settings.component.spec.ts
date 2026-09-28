@@ -9,6 +9,7 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
+import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorWorkbenchSettingsComponent } from './predictor-workbench-settings.component';
 
 describe('PredictorWorkbenchSettingsComponent', () => {
@@ -28,30 +29,6 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(updatePredictor).toHaveBeenCalledWith(expect.objectContaining({ name: 'Updated production' }));
     expect(form.pristine).toBe(true);
     expect(fixture.componentInstance.saveState()).toBe('saved');
-  });
-
-  it('keeps the predictor type locked while allowing reviewed weather-setting changes', () => {
-    const fixture = createFixture({
-      readings: [{ guid: 'reading-a' }],
-      predictor: predictor({ predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Oak Ridge', heatingBaseTemperature: 60 })
-    });
-    const form = fixture.componentInstance.form()!;
-    expect(form.controls.predictorType.disabled).toBe(true);
-    expect(form.controls.weatherDataType.enabled).toBe(true);
-    expect(form.controls.weatherStationId.enabled).toBe(true);
-    expect(form.controls.name.enabled).toBe(true);
-  });
-
-  it('styles weather form selects as selects and omits the manual-save footer note', () => {
-    const fixture = createFixture({
-      predictor: predictor({ predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Oak Ridge' })
-    });
-    const element = fixture.nativeElement as HTMLElement;
-    const selects = Array.from(element.querySelectorAll<HTMLSelectElement>('select'));
-
-    expect(selects.length).toBeGreaterThan(0);
-    expect(selects.every(select => select.classList.contains('v1-select'))).toBe(true);
-    expect(element.textContent).not.toContain('Press Ctrl+S or ⌘S');
   });
 
   it('renders Is Production as a checkbox and immediately saves its boolean value', async () => {
@@ -89,35 +66,22 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(button.textContent).toContain('Return predictor to use');
   });
 
-  it('previews recalculated readings before saving weather-defining changes', async () => {
-    const fixture = createFixture({
-      readings: [{ guid: 'reading-a', year: 2026, month: 1 }],
-      predictor: predictor({ predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Oak Ridge', heatingBaseTemperature: 60 })
-    });
-    const workflow = TestBed.inject(PredictorWeatherWorkflowService) as any;
-    const form = fixture.componentInstance.form()!;
-    form.controls.heatingBaseTemperature.setValue(65);
-
-    fixture.componentInstance.onWeatherDefinitionChange();
-    await fixture.componentInstance.saveNow();
-
-    expect(workflow.previewSettingsChange).toHaveBeenCalledWith(
-      expect.objectContaining({ heatingBaseTemperature: 60 }),
-      expect.objectContaining({ heatingBaseTemperature: 65 }),
-      expect.any(Array)
-    );
-  });
 });
 
 function createFixture(options: { updatePredictor?: any; readings?: any[]; predictor?: any } = {}) {
+  const selectedPredictor = signal(options.predictor ?? predictor());
+  const selectedReadings = signal(options.readings ?? []);
   TestBed.configureTestingModule({
     imports: [PredictorWorkbenchSettingsComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
-        selectedPredictor: signal(options.predictor ?? predictor()), selectedReadings: signal(options.readings ?? []),
-        selectedPredictorCard: signal(undefined), account: signal({ guid: 'account-a' }), facility: signal({ guid: 'facility-a' }),
+        account: signal({ guid: 'account-a' }), facility: signal({ guid: 'facility-a' }),
         canWrite: signal(true), hasPending: signal(false)
       } },
+      {
+        provide: PredictorWorkbenchContextService,
+        useValue: { predictor: selectedPredictor, readings: selectedReadings, card: signal(undefined) }
+      },
       { provide: PredictorWorkspaceActionsService, useValue: {
         updatePredictor: options.updatePredictor ?? vi.fn(async (value: any) => value), deletePredictor: vi.fn()
       } },

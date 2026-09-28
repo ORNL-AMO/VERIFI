@@ -72,11 +72,14 @@
               <span>Weather type</span>
               <select
                 class="v1-select"
-                [value]="definition.weatherDataType"
                 [disabled]="busy"
                 (change)="setDefinitionType(definition.draftId, $any($event.target).value)">
                 @for (option of weatherTypes; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
+                  <option
+                    [attr.value]="option.value"
+                    [selected]="option.value === definition.weatherDataType">
+                    {{ option.label }}
+                  </option>
                 }
               </select>
             </label>
@@ -184,7 +187,7 @@
 </ng-template>
 
 <ng-template #deleteStationConfirmModal>
-  @if (workspace.selectedWeatherGroup(); as group) {
+  @if (context.group(); as group) {
     <div class="v1-modal-layer">
       <button type="button" class="v1-modal-backdrop" aria-label="Cancel delete weather station" [disabled]="deleting()" (click)="cancelDeleteStation()"></button>
       <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="delete-weather-station-title">
