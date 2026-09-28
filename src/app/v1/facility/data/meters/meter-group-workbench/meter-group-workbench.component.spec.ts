@@ -10,6 +10,8 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
+import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MeterGroupResultsView, MeterUsageFactsView } from '@app/v1/facility/data/meters/models';
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
@@ -86,7 +88,7 @@ describe('MeterGroupWorkbenchComponent', () => {
     expect(basisButtons.map(button => button.textContent?.trim())).toEqual(['Site', 'Source']);
     expect(basisButtons[0]?.getAttribute('aria-pressed')).toBe('true');
     expect(basisButtons[1]?.getAttribute('aria-pressed')).toBe('false');
-    expect(actions?.lastElementChild).toBe(factsToggle);
+    expect(actions?.lastElementChild?.contains(factsToggle ?? null)).toBe(true);
     expect(element.querySelector('.v1-meter-group-workbench-header__energy-toggle')).toBeNull();
     expect(factsToggle?.getAttribute('aria-controls')).toBe('v1-meter-group-workbench-facts');
     expect(factsToggle?.getAttribute('aria-expanded')).toBe('true');
@@ -153,7 +155,13 @@ function setup(options: {
       MeterGroupWorkbenchComponent,
       RouterOutletStubDirective
     ],
-    imports: [CommonModule, IconComponent, RouterModule],
+    imports: [
+      CommonModule,
+      DataWorkbenchFactsToggleComponent,
+      DataWorkbenchResourceSwitcherComponent,
+      IconComponent,
+      RouterModule
+    ],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

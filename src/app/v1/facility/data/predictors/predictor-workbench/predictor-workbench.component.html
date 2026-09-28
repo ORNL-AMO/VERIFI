@@ -37,55 +37,17 @@
 
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title">
-          <div class="v1-data-workbench-switcher" [class.open]="switcherOpen()" (keydown.escape)="onSwitcherEscape()">
-            <h1 id="v1-facility-predictors-title" class="v1-predictor-workbench-header__title">
-              <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
-              @if (canSwitchResources()) {
-                <button
-                  #predictorSwitcherToggle
-                  type="button"
-                  class="v1-data-workbench-switcher-toggle v1-predictor-workbench-header__toggle"
-                  aria-haspopup="menu"
-                  [attr.aria-expanded]="switcherOpen()"
-                  [attr.aria-label]="'Switch predictor, current predictor ' + currentPredictor.name"
-                  (click)="toggleSwitcher()">
-                  <span class="v1-data-workbench-switcher-label">{{ currentPredictor.name }}</span>
-                  <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon"></app-ui-icon>
-                </button>
-              } @else {
-                <span>{{ currentPredictor.name }}</span>
-              }
-            </h1>
-
-            @if (canSwitchResources() && switcherOpen()) {
-              <div class="v1-data-workbench-switcher-backdrop" (click)="closeSwitcher()" aria-hidden="true"></div>
-              <div class="v1-data-workbench-switcher-menu" role="menu" aria-label="Switch predictor">
-                @for (card of workspace.standardPredictorCards(); track card.predictor.guid) {
-                  <button
-                    type="button"
-                    class="v1-data-workbench-switcher-item"
-                    role="menuitemradio"
-                    [class.active]="card.predictor.guid === currentPredictor.guid"
-                    [attr.aria-checked]="card.predictor.guid === currentPredictor.guid"
-                    (click)="switchPredictor(card.predictor.guid)">
-                    <app-ui-icon [name]="card.icon"></app-ui-icon>
-                    <span class="v1-data-workbench-switcher-item-text">{{ card.predictor.name }}</span>
-                  </button>
-                }
-                @for (weatherGroup of workspace.weatherStationGroups(); track weatherGroup.routeKey) {
-                  <button
-                    type="button"
-                    class="v1-data-workbench-switcher-item"
-                    role="menuitemradio"
-                    aria-checked="false"
-                    (click)="switchWeatherStation(weatherGroup.routeKey)">
-                    <app-ui-icon name="cloudRain"></app-ui-icon>
-                    <span class="v1-data-workbench-switcher-item-text">{{ weatherGroup.stationName }}</span>
-                  </button>
-                }
-              </div>
-            }
-          </div>
+          <h1 id="v1-facility-predictors-title" class="v1-predictor-workbench-header__title">
+            <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
+            <app-data-workbench-resource-switcher
+              [resources]="resources()"
+              [selectedId]="'predictor:' + currentPredictor.guid"
+              [currentLabel]="currentPredictor.name"
+              ariaLabel="Switch predictor"
+              toggleClass="v1-predictor-workbench-header__toggle"
+              (resourceSelected)="switchResource($event)">
+            </app-data-workbench-resource-switcher>
+          </h1>
         </div>
 
         <div class="v1-data-workbench-actions" aria-label="Predictor summary and controls">
@@ -99,19 +61,15 @@
               {{ currentCard.statusLabel }}
             </span>
           </div>
-          <button
-            type="button"
-            class="v1-btn v1-btn--quiet v1-btn--sm v1-predictor-workbench-header__facts-toggle"
-            aria-controls="v1-predictor-workbench-facts"
-            [attr.aria-expanded]="factsExpanded()"
-            (click)="toggleFacts()">
-            <span aria-hidden="true">{{ factsExpanded() ? '−' : '+' }}</span>
-            {{ factsExpanded() ? 'Hide facts' : 'Show facts' }}
-          </button>
+          <app-data-workbench-facts-toggle
+            #factsToggle
+            controls="v1-predictor-workbench-facts"
+            buttonClass="v1-predictor-workbench-header__facts-toggle">
+          </app-data-workbench-facts-toggle>
         </div>
       </div>
 
-      <div id="v1-predictor-workbench-facts" class="v1-predictor-workbench-header__facts-region" [hidden]="!factsExpanded()">
+      <div id="v1-predictor-workbench-facts" class="v1-predictor-workbench-header__facts-region" [hidden]="!factsToggle.expanded()">
         <dl class="v1-data-workbench-facts">
           <div><dt>Unit</dt><dd>{{ currentCard.unitLabel }}</dd></div>
           <div><dt>Entries</dt><dd>{{ currentCard.readingCount }}</dd></div>
@@ -157,12 +115,13 @@
       }
     </header>
 
-    <app-predictor-workbench-tabs
+    <app-data-workbench-tabs
       [tabs]="tabs"
       [activeTab]="activeTab()"
+      ariaLabel="Predictor workbench sections"
       [attention]="tabAttention()"
       (tabSelected)="openTab($event)">
-    </app-predictor-workbench-tabs>
+    </app-data-workbench-tabs>
   </div>
 
   <router-outlet></router-outlet>

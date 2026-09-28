@@ -1,13 +1,17 @@
-import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
+import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
+import {
+  DataWorkbenchResource,
+  DataWorkbenchResourceSwitcherComponent
+} from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PREDICTOR_WORKBENCH_TABS, PredictorWorkbenchTabId, buildPredictorWorkbenchTabAttention } from '../models';
-import { PredictorWorkbenchTabsComponent } from './predictor-workbench-tabs/predictor-workbench-tabs.component';
 import { PredictorWorkbenchContextService } from './predictor-workbench-context.service';
 
 @Component({
@@ -15,27 +19,38 @@ import { PredictorWorkbenchContextService } from './predictor-workbench-context.
   templateUrl: './predictor-workbench.component.html',
   styleUrls: ['./predictor-workbench.component.css'],
   standalone: true,
-  imports: [IconComponent, PredictorWorkbenchTabsComponent, RouterLink, RouterOutlet]
+  imports: [
+    DataWorkbenchFactsToggleComponent,
+    DataWorkbenchResourceSwitcherComponent,
+    DataWorkbenchTabsComponent,
+    IconComponent,
+    RouterLink,
+    RouterOutlet
+  ]
 })
 export class PredictorWorkbenchComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly activeTabState = signal<PredictorWorkbenchTabId>('settings');
-  private readonly switcherOpenState = signal(false);
-
-  @ViewChild('predictorSwitcherToggle') private readonly switcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
   readonly context = inject(PredictorWorkbenchContextService);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly tabs = PREDICTOR_WORKBENCH_TABS;
   readonly activeTab = this.activeTabState.asReadonly();
-  readonly switcherOpen = this.switcherOpenState.asReadonly();
-  readonly canSwitchResources = computed(() =>
-    this.workspace.standardPredictorCards().length + this.workspace.weatherStationGroups().length > 1);
-  readonly factsExpanded = this.workbenchLayout.factsExpanded;
+  readonly resources = computed<readonly DataWorkbenchResource[]>(() => [
+    ...this.workspace.standardPredictorCards().map(card => ({
+      id: `predictor:${card.predictor.guid}`,
+      label: card.predictor.name,
+      icon: card.icon
+    })),
+    ...this.workspace.weatherStationGroups().map(group => ({
+      id: `weather:${group.routeKey}`,
+      label: group.stationName,
+      icon: 'cloudRain' as const
+    }))
+  ]);
   readonly tabAttention = computed(() => {
     return buildPredictorWorkbenchTabAttention(this.context.findings());
   });
@@ -71,26 +86,19 @@ export class PredictorWorkbenchComponent {
   switchPredictor(predictorGuid: string): void {
     const facility = this.workspace.facility();
     if (!facility) return;
-    this.closeSwitcher();
     void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictorGuid, this.activeTab()));
   }
 
   switchWeatherStation(groupKey: string): void {
     const facility = this.workspace.facility();
     if (!facility) return;
-    this.closeSwitcher();
     const tab = this.activeTab() === 'readings' ? 'readings' : 'setup';
     void this.router.navigate(this.navigation.facilityWeatherPredictorRoute(facility.guid, groupKey, tab));
   }
 
-  toggleSwitcher(): void { this.switcherOpenState.update(open => !open); }
-  closeSwitcher(): void { this.switcherOpenState.set(false); }
-  toggleFacts(): void { this.workbenchLayout.toggleFacts(); }
-
-  onSwitcherEscape(): void {
-    if (!this.switcherOpen()) return;
-    this.closeSwitcher();
-    this.switcherToggle?.nativeElement.focus();
+  switchResource(resourceId: string): void {
+    if (resourceId.startsWith('predictor:')) this.switchPredictor(resourceId.slice('predictor:'.length));
+    else if (resourceId.startsWith('weather:')) this.switchWeatherStation(resourceId.slice('weather:'.length));
   }
 
   private syncActiveTabFromRoute(): void {

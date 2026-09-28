@@ -7,6 +7,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { WeatherPredictorWorkbenchContextService } from './weather-predictor-workbench-context.service';
 import { WeatherPredictorWorkbenchComponent } from './weather-predictor-workbench.component';
@@ -85,6 +86,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
           }
         },
         { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
+        { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
         {
           provide: WeatherPredictorWorkbenchContextService,
           useValue: {
@@ -117,6 +119,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
       'Setup', 'Readings', 'HDD 65 Quality', 'CDD 70 Quality'
     ]);
     expect(fixture.nativeElement.querySelectorAll('.v1-data-tabs__tab')).toHaveLength(4);
+    expect(fixture.nativeElement.querySelector('.weather-workbench__sticky app-data-workbench-tabs')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-current="page"]')?.textContent).toContain('CDD 70 Quality');
     expect(fixture.nativeElement.querySelector('.weather-workbench__predictors')?.textContent).toContain('HDD 65');
     expect(fixture.nativeElement.querySelector('.weather-workbench__predictors')?.textContent).toContain('CDD 70');
@@ -130,7 +133,8 @@ describe('WeatherPredictorWorkbenchComponent', () => {
     expect(fixture.componentInstance.tabAttention().readings?.total).toBe(2);
     expect(fixture.componentInstance.tabAttention()['quality:weather-b']?.total).toBe(1);
 
-    fixture.componentInstance.toggleSwitcher();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.v1-data-workbench-switcher-menu')?.textContent)
       .toContain('Production');

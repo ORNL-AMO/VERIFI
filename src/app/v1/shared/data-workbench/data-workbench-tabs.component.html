@@ -1,4 +1,4 @@
-<nav class="v1-data-tabs v1-data-tabs--connected" aria-label="Predictor workbench sections">
+<nav class="v1-data-tabs v1-data-tabs--connected" [attr.aria-label]="ariaLabel">
   @for (tab of tabs; track tab.id) {
     @let tabAttention = attention[tab.id];
     <button
@@ -14,7 +14,10 @@
           class="v1-data-tabs__attention v1-data-tabs__attention--{{ tabAttention.state }}"
           [attr.title]="tabAttention.total + ' active status checks in ' + tab.label">
           <span aria-hidden="true">{{ tabAttention.total }}</span>
-          <span class="visually-hidden">{{ tabAttention.total }} issues: {{ tabAttention.errorCount }} errors, {{ tabAttention.warningCount }} warnings</span>
+          <span class="visually-hidden">
+            {{ tabAttention.total }} issues: {{ tabAttention.errorCount }} errors,
+            {{ tabAttention.warningCount }} warnings
+          </span>
         </span>
       }
     </button>

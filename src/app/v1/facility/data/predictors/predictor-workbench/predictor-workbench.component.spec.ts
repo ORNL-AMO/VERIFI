@@ -136,7 +136,7 @@ describe('PredictorWorkbenchComponent', () => {
     fixture.componentInstance.switchPredictor('predictor-b');
     expect(navigate).toHaveBeenLastCalledWith(['/predictors', 'predictor-b', 'readings']);
 
-    fixture.componentInstance.toggleSwitcher();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
     expect(element.querySelector('.v1-data-workbench-switcher-menu')?.textContent).toContain('Chicago O’Hare');
     fixture.componentInstance.switchWeatherStation('station:KORD');
