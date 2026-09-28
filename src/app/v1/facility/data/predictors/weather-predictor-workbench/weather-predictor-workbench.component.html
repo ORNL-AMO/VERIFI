@@ -18,13 +18,80 @@
         <li><button type="button" (click)="openPredictors()">Predictors</button></li>
       </ol></nav>
       <div class="v1-data-workbench-title-row">
-        <div class="v1-data-workbench-title"><h1 id="v1-weather-workbench-title"><app-ui-icon name="cloudRain"></app-ui-icon>{{ creating ? 'New weather predictors' : group?.stationName }}</h1></div>
+        <div class="v1-data-workbench-title">
+          <div class="v1-data-workbench-switcher" [class.open]="switcherOpen()" (keydown.escape)="onSwitcherEscape()">
+            <h1 id="v1-weather-workbench-title">
+              <app-ui-icon name="cloudRain"></app-ui-icon>
+              @if (group && canSwitchResources()) {
+                <button
+                  #weatherSwitcherToggle
+                  type="button"
+                  class="v1-data-workbench-switcher-toggle weather-workbench__switcher-toggle"
+                  aria-haspopup="menu"
+                  [attr.aria-expanded]="switcherOpen()"
+                  [attr.aria-label]="'Switch predictor, current weather station ' + group.stationName"
+                  (click)="toggleSwitcher()">
+                  <span class="v1-data-workbench-switcher-label">{{ group.stationName }}</span>
+                  <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon"></app-ui-icon>
+                </button>
+              } @else {
+                <span>{{ creating ? 'New weather predictors' : group?.stationName }}</span>
+              }
+            </h1>
+
+            @if (group && canSwitchResources() && switcherOpen()) {
+              <div class="v1-data-workbench-switcher-backdrop" (click)="closeSwitcher()" aria-hidden="true"></div>
+              <div class="v1-data-workbench-switcher-menu" role="menu" aria-label="Switch predictor">
+                @for (card of workspace.standardPredictorCards(); track card.predictor.guid) {
+                  <button
+                    type="button"
+                    class="v1-data-workbench-switcher-item"
+                    role="menuitemradio"
+                    aria-checked="false"
+                    (click)="switchStandardPredictor(card.predictor.guid)">
+                    <app-ui-icon [name]="card.icon"></app-ui-icon>
+                    <span class="v1-data-workbench-switcher-item-text">{{ card.predictor.name }}</span>
+                  </button>
+                }
+                @for (weatherGroup of workspace.weatherStationGroups(); track weatherGroup.routeKey) {
+                  <button
+                    type="button"
+                    class="v1-data-workbench-switcher-item"
+                    role="menuitemradio"
+                    [class.active]="weatherGroup.routeKey === group.routeKey"
+                    [attr.aria-checked]="weatherGroup.routeKey === group.routeKey"
+                    (click)="switchWeatherStation(weatherGroup.routeKey)">
+                    <app-ui-icon name="cloudRain"></app-ui-icon>
+                    <span class="v1-data-workbench-switcher-item-text">{{ weatherGroup.stationName }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
         @if (group) {
-          <div class="v1-data-workbench-actions"><span class="v1-chip v1-chip--info">{{ group.predictors.length }} output{{ group.predictors.length === 1 ? '' : 's' }}</span><span class="v1-chip v1-chip--{{ group.statusTone }}">{{ group.statusLabel }}</span></div>
+          <div class="v1-data-workbench-actions"><span class="v1-chip v1-chip--{{ group.statusTone }}">{{ group.statusLabel }}</span></div>
         }
       </div>
       @if (group) {
-        <dl class="v1-data-workbench-facts"><div><dt>Station ID</dt><dd>{{ group.stationId || 'Not set' }}</dd></div><div><dt>Outputs</dt><dd>{{ group.outputSummary }}</dd></div><div><dt>Entries</dt><dd>{{ group.readingCount }}</dd></div><div><dt>Coverage</dt><dd>{{ group.firstReadingLabel }} – {{ group.latestReadingLabel }}</dd></div></dl>
+        <section class="weather-workbench__predictors" aria-label="Predictors associated with this weather station">
+          <h2>Predictors</h2>
+          <ul>
+            @for (card of group.predictorCards; track card.predictor.guid) {
+              <li>
+                <app-ui-icon [name]="card.icon"></app-ui-icon>
+                <span>
+                  <strong>{{ card.predictor.name || 'Weather predictor' }}</strong>
+                  <small>
+                    {{ card.weatherTypeLabel || 'Weather predictor' }}
+                    @if (card.baseTemperatureLabel) { · {{ card.baseTemperatureLabel }} }
+                  </small>
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+        <dl class="v1-data-workbench-facts"><div><dt>Station ID</dt><dd>{{ group.stationId || 'Not set' }}</dd></div><div><dt>Entries</dt><dd>{{ group.readingCount }}</dd></div><div><dt>Coverage</dt><dd>{{ group.firstReadingLabel }} – {{ group.latestReadingLabel }}</dd></div></dl>
         @if (checks.length > 0) {
           <ul class="v1-data-workbench-status-notes" aria-label="Weather station checks needing review">
             @for (check of checks; track check.id) {

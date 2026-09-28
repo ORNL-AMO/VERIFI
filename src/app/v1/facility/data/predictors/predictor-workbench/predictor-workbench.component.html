@@ -40,7 +40,7 @@
           <div class="v1-data-workbench-switcher" [class.open]="switcherOpen()" (keydown.escape)="onSwitcherEscape()">
             <h1 id="v1-facility-predictors-title" class="v1-predictor-workbench-header__title">
               <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
-              @if (workspace.standardPredictorCards().length > 1) {
+              @if (canSwitchResources()) {
                 <button
                   #predictorSwitcherToggle
                   type="button"
@@ -57,7 +57,7 @@
               }
             </h1>
 
-            @if (workspace.standardPredictorCards().length > 1 && switcherOpen()) {
+            @if (canSwitchResources() && switcherOpen()) {
               <div class="v1-data-workbench-switcher-backdrop" (click)="closeSwitcher()" aria-hidden="true"></div>
               <div class="v1-data-workbench-switcher-menu" role="menu" aria-label="Switch predictor">
                 @for (card of workspace.standardPredictorCards(); track card.predictor.guid) {
@@ -70,6 +70,17 @@
                     (click)="switchPredictor(card.predictor.guid)">
                     <app-ui-icon [name]="card.icon"></app-ui-icon>
                     <span class="v1-data-workbench-switcher-item-text">{{ card.predictor.name }}</span>
+                  </button>
+                }
+                @for (weatherGroup of workspace.weatherStationGroups(); track weatherGroup.routeKey) {
+                  <button
+                    type="button"
+                    class="v1-data-workbench-switcher-item"
+                    role="menuitemradio"
+                    aria-checked="false"
+                    (click)="switchWeatherStation(weatherGroup.routeKey)">
+                    <app-ui-icon name="cloudRain"></app-ui-icon>
+                    <span class="v1-data-workbench-switcher-item-text">{{ weatherGroup.stationName }}</span>
                   </button>
                 }
               </div>

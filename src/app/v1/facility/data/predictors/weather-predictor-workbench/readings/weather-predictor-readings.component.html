@@ -56,7 +56,7 @@
           <span>End month</span>
           <input type="month" required [value]="endMonth()" [disabled]="rangeBusy" (change)="setEndMonth($any($event.target).value)">
         </label>
-        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canUpdateRange()" (click)="reviewRangeUpdate($event)">
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canUpdateRange()" (click)="reviewRangeUpdate($event)">
           <app-ui-icon [name]="rangeBusy ? 'loading' : 'refresh'" [spin]="rangeBusy"></app-ui-icon>
           Save and Update Readings
         </button>
@@ -179,11 +179,14 @@
     (closed)="closeSourceReadings()">
   </app-weather-source-readings-slideout>
 }
-@if (deleteRow(); as row) {
-  <app-workspace-slideout [title]="'Delete ' + row.monthLabel + '?'" description="This action removes the whole station month." [saving]="saving()" (closed)="cancelDelete()">
-    <div class="weather-readings__delete-confirmation" role="alert">
-      <p>This deletes every stored record for all predictors at this station in that month, including duplicates.</p>
-      <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="cancelDelete()">Cancel</button><button type="button" class="v1-btn v1-btn--danger" [disabled]="saving()" (click)="confirmDelete()"><app-ui-icon [name]="saving() ? 'loading' : 'delete'" [spin]="saving()"></app-ui-icon> Delete month</button></footer>
-    </div>
-  </app-workspace-slideout>
-}
+<ng-template #weatherReadingDeleteModal>
+  @if (deleteRow(); as row) {
+    <app-weather-reading-delete-confirmation-modal
+      [monthLabel]="row.monthLabel"
+      [saving]="saving()"
+      [error]="actionError()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()">
+    </app-weather-reading-delete-confirmation-modal>
+  }
+</ng-template>

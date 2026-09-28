@@ -6,6 +6,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { WeatherMonth } from '@platform/weather/hourly-weather-data.models';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
@@ -164,6 +165,22 @@ describe('WeatherPredictorReadingsComponent', () => {
     expect(fixture.nativeElement.querySelector('app-weather-source-readings-slideout')).toBeNull();
   });
 
+  it('opens and cancels month deletion through the modal portal', () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(1)]);
+    const modalPortal = TestBed.inject(ModalPortalService) as any;
+    const row = fixture.componentInstance.matrix().rows[0];
+
+    fixture.componentInstance.requestDelete(row);
+
+    expect(fixture.componentInstance.deleteRow()).toBe(row);
+    expect(modalPortal.show).toHaveBeenCalledOnce();
+
+    fixture.componentInstance.cancelDelete();
+
+    expect(fixture.componentInstance.deleteRow()).toBeUndefined();
+    expect(modalPortal.hide).toHaveBeenCalledOnce();
+  });
+
   it('shows the stored reading range beside the add month action', () => {
     const fixture = setup([weatherPredictor()], [weatherReading(2), weatherReading(5)]);
     const root = fixture.nativeElement as HTMLElement;
@@ -245,6 +262,7 @@ function setup(
         ...workflowOverrides
       } },
       { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()), confirmDiscard: vi.fn() } },
+      { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
       { provide: CopyTableService, useValue: { copyTable } }
     ]
   });

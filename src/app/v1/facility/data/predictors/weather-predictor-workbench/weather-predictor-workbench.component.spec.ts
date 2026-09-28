@@ -25,7 +25,17 @@ describe('WeatherPredictorWorkbenchComponent', () => {
         { guid: 'weather-a', name: 'HDD 65', predictorType: 'Weather' },
         { guid: 'weather-b', name: 'CDD 70', predictorType: 'Weather' }
       ],
-      outputSummary: 'Heating degree days, Cooling degree days',
+      predictorCards: [
+        {
+          predictor: { guid: 'weather-a', name: 'HDD 65' }, icon: 'thermometerSnowflake',
+          weatherTypeLabel: 'Heating degree days', baseTemperatureLabel: '65°F heating base'
+        },
+        {
+          predictor: { guid: 'weather-b', name: 'CDD 70' }, icon: 'thermometerSun',
+          weatherTypeLabel: 'Cooling degree days', baseTemperatureLabel: '70°F cooling base'
+        }
+      ],
+      predictorSummary: 'Heating degree days, Cooling degree days',
       readingCount: 24,
       firstReadingLabel: 'Jan 2025',
       latestReadingLabel: 'Dec 2026',
@@ -66,6 +76,8 @@ describe('WeatherPredictorWorkbenchComponent', () => {
           useValue: {
             accountDataRoute: () => ['/account', 'data'],
             facilityDataRoute: () => ['/facility', 'predictors'],
+            facilityPredictorRoute: (_facility: string, predictor: string, tab: string) =>
+              ['/predictors', predictor, tab],
             facilityWeatherPredictorRoute: (_facility: string, key: string, tab = 'setup') => ['/weather', key, tab],
             facilityWeatherPredictorQualityRoute: (_facility: string, key: string, predictor: string) =>
               ['/weather', key, 'quality', predictor]
@@ -80,6 +92,10 @@ describe('WeatherPredictorWorkbenchComponent', () => {
             creatingWeatherGroup: signal(false),
             selectedWeatherGroup: group,
             selectedWeatherPredictors: signal(group().predictors),
+            standardPredictorCards: signal([{
+              predictor: { guid: 'standard-a', name: 'Production' }, icon: 'package'
+            }]),
+            weatherStationGroups: signal([group()]),
             weatherGroupNotFound: signal(false)
           }
         }
@@ -94,12 +110,24 @@ describe('WeatherPredictorWorkbenchComponent', () => {
     ]);
     expect(fixture.nativeElement.querySelectorAll('.v1-data-tabs__tab')).toHaveLength(4);
     expect(fixture.nativeElement.querySelector('[aria-current="page"]')?.textContent).toContain('CDD 70 Quality');
+    expect(fixture.nativeElement.querySelector('.weather-workbench__predictors')?.textContent).toContain('HDD 65');
+    expect(fixture.nativeElement.querySelector('.weather-workbench__predictors')?.textContent).toContain('CDD 70');
+    expect(fixture.nativeElement.querySelectorAll('.v1-data-workbench-actions .v1-chip')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.v1-data-workbench-actions')?.textContent).toContain('Needs review');
+    expect(fixture.nativeElement.textContent).not.toContain('output');
     expect(fixture.nativeElement.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('Readings: Review weather data — 2 predictors: CDD 70, HDD 65');
     expect(fixture.nativeElement.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('CDD 70 Quality: Review predictor outliers');
     expect(fixture.componentInstance.tabAttention().readings?.total).toBe(2);
     expect(fixture.componentInstance.tabAttention()['quality:weather-b']?.total).toBe(1);
+
+    fixture.componentInstance.toggleSwitcher();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.v1-data-workbench-switcher-menu')?.textContent)
+      .toContain('Production');
+    fixture.componentInstance.switchStandardPredictor('standard-a');
+    expect(navigate).toHaveBeenLastCalledWith(['/predictors', 'standard-a', 'quality']);
 
     fixture.componentInstance.openTab('quality:weather-a');
     expect(navigate).toHaveBeenLastCalledWith(['/weather', 'station:KORD', 'quality', 'weather-a']);

@@ -55,6 +55,8 @@
       </div>
     }
 
+    <ng-content select="[resource-card-feature]"></ng-content>
+
     @for (section of view.factSections || []; track section.id) {
       <section
         class="v1-resource-browse-card__fact-section"

@@ -13,7 +13,7 @@ describe('weather station groups', () => {
     expect(groups).toHaveLength(1);
     expect(groups[0].routeKey).toBe('station:station-a');
     expect(groups[0].predictors.map(item => item.guid)).toEqual(['hdd-55', 'hdd-65', 'humidity']);
-    expect(groups[0].outputSummary).toContain('Heating degree days');
+    expect(groups[0].predictorSummary).toContain('Heating degree days');
   });
 
   it('keeps missing-station predictors as singleton repair groups', () => {

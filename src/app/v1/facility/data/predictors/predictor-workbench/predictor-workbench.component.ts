@@ -33,6 +33,8 @@ export class PredictorWorkbenchComponent {
   readonly tabs = PREDICTOR_WORKBENCH_TABS;
   readonly activeTab = this.activeTabState.asReadonly();
   readonly switcherOpen = this.switcherOpenState.asReadonly();
+  readonly canSwitchResources = computed(() =>
+    this.workspace.standardPredictorCards().length + this.workspace.weatherStationGroups().length > 1);
   readonly factsExpanded = this.workbenchLayout.factsExpanded;
   readonly tabAttention = computed(() => {
     const predictor = this.workspace.selectedPredictor();
@@ -88,6 +90,14 @@ export class PredictorWorkbenchComponent {
     if (!facility) return;
     this.closeSwitcher();
     void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictorGuid, this.activeTab()));
+  }
+
+  switchWeatherStation(groupKey: string): void {
+    const facility = this.workspace.facility();
+    if (!facility) return;
+    this.closeSwitcher();
+    const tab = this.activeTab() === 'readings' ? 'readings' : 'setup';
+    void this.router.navigate(this.navigation.facilityWeatherPredictorRoute(facility.guid, groupKey, tab));
   }
 
   toggleSwitcher(): void { this.switcherOpenState.update(open => !open); }

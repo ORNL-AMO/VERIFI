@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -24,8 +24,15 @@ export class WeatherPredictorWorkbenchComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly activeTabState = signal('settings');
+  private readonly switcherOpenState = signal(false);
+
+  @ViewChild('weatherSwitcherToggle') private readonly switcherToggle?: ElementRef<HTMLButtonElement>;
+
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly switcherOpen = this.switcherOpenState.asReadonly();
+  readonly canSwitchResources = computed(() =>
+    this.workspace.standardPredictorCards().length + this.workspace.weatherStationGroups().length > 1);
   readonly tabs = computed<ReadonlyArray<PredictorWorkbenchDisplayTab>>(() => [
     { id: 'settings', label: 'Setup', icon: 'settings' },
     { id: 'readings', label: 'Readings', icon: 'table' },
@@ -78,6 +85,34 @@ export class WeatherPredictorWorkbenchComponent {
   openPredictors(): void {
     const facility = this.workspace.facility();
     if (facility) void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, 'predictors'));
+  }
+
+  switchStandardPredictor(predictorGuid: string): void {
+    const facility = this.workspace.facility();
+    if (!facility) return;
+    this.closeSwitcher();
+    const activeTab = this.activeTab();
+    const tab = activeTab === 'readings' ? 'readings' : activeTab.startsWith('quality:') ? 'quality' : 'settings';
+    void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictorGuid, tab));
+  }
+
+  switchWeatherStation(groupKey: string): void {
+    const facility = this.workspace.facility();
+    const currentGroup = this.workspace.selectedWeatherGroup();
+    if (!facility) return;
+    this.closeSwitcher();
+    if (groupKey === currentGroup?.routeKey) return;
+    const tab = this.activeTab() === 'readings' ? 'readings' : 'setup';
+    void this.router.navigate(this.navigation.facilityWeatherPredictorRoute(facility.guid, groupKey, tab));
+  }
+
+  toggleSwitcher(): void { this.switcherOpenState.update(open => !open); }
+  closeSwitcher(): void { this.switcherOpenState.set(false); }
+
+  onSwitcherEscape(): void {
+    if (!this.switcherOpen()) return;
+    this.closeSwitcher();
+    this.switcherToggle?.nativeElement.focus();
   }
 
   openTab(tab: string): void {

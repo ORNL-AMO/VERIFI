@@ -402,7 +402,7 @@ export class PredictorWorkspaceActionsService {
     const currentGuids = new Set(groupPredictors.map(predictor => predictor.guid));
     if (currentGuids.size !== changes.predictorGuids.length
       || changes.predictorGuids.some(guid => !currentGuids.has(guid))) {
-      throw new WorkspaceWriteError('stale-workspace', 'The weather station outputs changed. Review the latest readings and try again.');
+      throw new WorkspaceWriteError('stale-workspace', 'The weather station predictors changed. Review the latest readings and try again.');
     }
     const currentRecords = new Map(this.workspace.facilityPredictorData().map(reading => [reading.guid, reading]));
     const currentMonthRecords = this.workspace.facilityPredictorData().filter(reading =>

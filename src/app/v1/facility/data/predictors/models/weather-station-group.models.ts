@@ -19,7 +19,7 @@ export interface WeatherStationGroupView {
   readonly firstReadingLabel: string;
   readonly latestReadingLabel: string;
   readonly latestReadingSortValue: number;
-  readonly outputSummary: string;
+  readonly predictorSummary: string;
   readonly statusFindings: readonly StatusItem[];
   readonly statusLabel: string;
   readonly statusTone: PredictorCardStatusTone;
@@ -94,7 +94,7 @@ function buildWeatherStationGroup(
       : hasConflictingStationNames ? 'Station names differ'
         : statusTone === 'danger' ? 'Action needed'
           : statusTone === 'warning' ? 'Needs review' : 'Valid';
-  const outputSummary = orderedPredictors
+  const predictorSummary = orderedPredictors
     .map(predictor => weatherDataTypeLabel(predictor.weatherDataType))
     .join(', ');
 
@@ -110,14 +110,14 @@ function buildWeatherStationGroup(
     latestReadingSortValue: groupReadings.at(-1)
       ? groupReadings.at(-1)!.year * 12 + groupReadings.at(-1)!.month
       : Number.NEGATIVE_INFINITY,
-    outputSummary,
+    predictorSummary,
     statusFindings: groupFindings,
     statusLabel,
     statusTone,
     hasConflictingStationNames,
     needsStationRepair,
     searchText: [
-      stationNames.join(' '), stationId, outputSummary, statusLabel,
+      stationNames.join(' '), stationId, predictorSummary, statusLabel,
       ...orderedPredictors.flatMap(predictor => [predictor.name, predictor.unit]),
       ...groupFindings.map(finding => `${finding.title} ${finding.description}`)
     ].filter(Boolean).join(' ').toLowerCase()

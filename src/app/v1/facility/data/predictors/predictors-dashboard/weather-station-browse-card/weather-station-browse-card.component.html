@@ -1,1 +1,19 @@
-<app-resource-browse-card [view]="resourceView" [actions]="[]" (opened)="open()"></app-resource-browse-card>
+<app-resource-browse-card [view]="resourceView" [actions]="[]" (opened)="open()">
+  <section resource-card-feature class="weather-station-card__predictors" aria-label="Predictors associated with this weather station">
+    <h3>Predictors</h3>
+    <ul>
+      @for (card of group.predictorCards; track card.predictor.guid) {
+        <li>
+          <app-ui-icon [name]="card.icon"></app-ui-icon>
+          <span>
+            <strong>{{ card.predictor.name || 'Weather predictor' }}</strong>
+            <small>
+              {{ card.weatherTypeLabel || 'Weather predictor' }}
+              @if (card.baseTemperatureLabel) { · {{ card.baseTemperatureLabel }} }
+            </small>
+          </span>
+        </li>
+      }
+    </ul>
+  </section>
+</app-resource-browse-card>

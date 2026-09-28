@@ -51,7 +51,8 @@ describe('PredictorWorkbenchComponent', () => {
           useValue: {
             accountDataRoute: () => ['/account', 'portfolio'],
             facilityDataRoute: () => ['/facility', 'predictors'],
-            facilityPredictorRoute: (_facility: string, predictor: string, tab: string) => ['/predictors', predictor, tab]
+            facilityPredictorRoute: (_facility: string, predictor: string, tab: string) => ['/predictors', predictor, tab],
+            facilityWeatherPredictorRoute: (_facility: string, group: string, tab: string) => ['/weather', group, tab]
           }
         },
         { provide: WorkbenchLayoutService, useValue: { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) } },
@@ -80,7 +81,9 @@ describe('PredictorWorkbenchComponent', () => {
               selectedCard(),
               { predictor: { guid: 'predictor-b', name: 'Output B' }, icon: 'package' }
             ]),
-            weatherStationGroups: signal([])
+            weatherStationGroups: signal([{
+              routeKey: 'station:KORD', stationName: 'Chicago O’Hare'
+            }])
           }
         }
       ]
@@ -119,6 +122,12 @@ describe('PredictorWorkbenchComponent', () => {
 
     fixture.componentInstance.switchPredictor('predictor-b');
     expect(navigate).toHaveBeenLastCalledWith(['/predictors', 'predictor-b', 'readings']);
+
+    fixture.componentInstance.toggleSwitcher();
+    fixture.detectChanges();
+    expect(element.querySelector('.v1-data-workbench-switcher-menu')?.textContent).toContain('Chicago O’Hare');
+    fixture.componentInstance.switchWeatherStation('station:KORD');
+    expect(navigate).toHaveBeenLastCalledWith(['/weather', 'station:KORD', 'readings']);
 
     route.firstChild.snapshot.data.predictorTab = 'quality';
     events.next(new NavigationEnd(1, '', '/predictors/predictor-a/quality'));

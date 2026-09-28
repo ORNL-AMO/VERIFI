@@ -1,10 +1,12 @@
 import { FocusMonitor } from '@angular/cdk/a11y';
-import { Component, ElementRef, Injector, OnDestroy, ViewChild, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Component, ElementRef, Injector, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
@@ -26,6 +28,7 @@ import {
 } from '../../models';
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
+import { WeatherReadingDeleteConfirmationModalComponent } from './weather-reading-delete-confirmation-modal/weather-reading-delete-confirmation-modal.component';
 import { WeatherReadingMonthEditorComponent } from './weather-reading-month-editor/weather-reading-month-editor.component';
 import { WeatherSourceReadingsSlideoutComponent } from './weather-source-readings-slideout/weather-source-readings-slideout.component';
 
@@ -38,6 +41,7 @@ import { WeatherSourceReadingsSlideoutComponent } from './weather-source-reading
     NgbPaginationModule,
     IconComponent,
     WorkspaceSlideoutComponent,
+    WeatherReadingDeleteConfirmationModalComponent,
     WeatherReadingMonthEditorComponent,
     WeatherSourceReadingsSlideoutComponent
   ]
@@ -47,6 +51,8 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   private readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   private readonly copyTableService = inject(CopyTableService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
+  private readonly modalPortal = inject(ModalPortalService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly injector = inject(Injector);
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
@@ -113,6 +119,7 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
       && this.canAct();
   });
   private calculationRequest = 0;
+  private deleteModalOpen = false;
   private returnFocus?: HTMLElement;
   private paginationGroupKey?: string;
   private readonly unregisterUnsavedChanges = this.unsavedChanges.register(
@@ -139,12 +146,14 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     });
   });
   @ViewChild(WeatherReadingMonthEditorComponent) private readonly monthEditor?: WeatherReadingMonthEditorComponent;
+  @ViewChild('weatherReadingDeleteModal') private readonly weatherReadingDeleteModal?: TemplateRef<unknown>;
   @ViewChild('readingsRegion', { read: ElementRef }) private readonly readingsRegion?: ElementRef<HTMLElement>;
   @ViewChild('weatherReadingsTable', { read: ElementRef }) private readonly weatherReadingsTable?: ElementRef<HTMLTableElement>;
 
   ngOnDestroy(): void {
     this.resetCalculation();
     this.unregisterUnsavedChanges();
+    this.hideDeleteModal();
   }
   hasUnsavedChanges(): boolean { return this.rangeDirty() || !!this.monthEditor?.dirty(); }
   isNavigationBlocked(): boolean {
@@ -237,7 +246,11 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     else this.unsavedChanges.confirmDiscard();
   }
   requestDelete(row: WeatherStationReadingRow, event?: Event): void {
-    if (this.canAct()) { this.captureFocus(event); this.deleteRow.set(row); this.actionError.set(undefined); }
+    if (!this.canAct()) return;
+    this.captureFocus(event);
+    this.deleteRow.set(row);
+    this.actionError.set(undefined);
+    this.showDeleteModal();
   }
   openSourceReadings(row: WeatherStationReadingRow, predictorGuid: string, event?: Event): void {
     const predictor = this.workspace.selectedWeatherPredictors()
@@ -298,14 +311,13 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
       await this.actions.applyWeatherStationMonth(buildWeatherStationMonthDeleteChangeSet(
         group.routeKey, group.predictors, this.workspace.selectedWeatherReadings(), row.year, row.month, this.workspace.revision()
       ));
-      this.deleteRow.set(undefined);
-      this.restoreFocus();
+      this.closeDelete();
     } catch (error) {
       this.actionError.set(error instanceof Error ? error.message : 'The station month could not be deleted.');
     } finally { this.saving.set(false); }
   }
 
-  cancelDelete(): void { if (!this.saving()) { this.deleteRow.set(undefined); this.restoreFocus(); } }
+  cancelDelete(): void { if (!this.saving()) this.closeDelete(); }
   rowHasDuplicates(row: WeatherStationReadingRow): boolean { return row.cells.some(cell => cell.duplicate); }
 
   setPageSize(event: Event): void {
@@ -357,6 +369,21 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     this.calculatedValues.set([]);
     this.calculationError.set(undefined);
     this.weatherWorkflow.reset();
+  }
+  private showDeleteModal(): void {
+    if (!this.weatherReadingDeleteModal) return;
+    this.deleteModalOpen = true;
+    this.modalPortal.show(new TemplatePortal(this.weatherReadingDeleteModal, this.viewContainerRef));
+  }
+  private hideDeleteModal(): void {
+    if (!this.deleteModalOpen) return;
+    this.deleteModalOpen = false;
+    this.modalPortal.hide();
+  }
+  private closeDelete(): void {
+    this.deleteRow.set(undefined);
+    this.hideDeleteModal();
+    this.restoreFocus();
   }
   private captureFocus(event?: Event): void { this.returnFocus = event?.currentTarget as HTMLElement | undefined; }
   private restoreFocus(): void {
