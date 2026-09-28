@@ -104,6 +104,23 @@ describe('V1Routes facility data meters routes', () => {
     });
   });
 
+  it('routes custom database editors in facility context with unsaved-change protection', () => {
+    const children = facilityDataRoute().children ?? [];
+
+    expect(children.find(child => child.path === 'custom-grid-factors')).toMatchObject({
+      component: CustomGridFactorsComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+    expect(children.find(child => child.path === 'custom-fuels')).toMatchObject({
+      component: CustomFuelsComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+    expect(children.find(child => child.path === 'custom-gwps')).toMatchObject({
+      component: CustomGwpsComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+  });
+
   it('routes Meters to the landing page and deep-linked workbench tabs', () => {
     const metersRoute = metersRouteConfig();
     const meterRoute = meterGuidRoute();

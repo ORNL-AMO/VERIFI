@@ -78,7 +78,7 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Workflow:** v1 account and facility Data section navigation, issue #2642.
 - **Existing v0 entry point:** Account custom data lives under `/data-management/:id/account-custom-data`; facility meters, predictors, and energy uses live under `/data-management/:id/facilities/:facilityGuid`.
 - **Decision:** Establish v1 Data routes and secondary navigation with placeholder destinations. Rebuild migrated content one workflow at a time.
-- **Parity:** Account Data keeps Portfolio and account-level custom database destinations; Facility Data exposes Meters, Predictors, and Energy Uses. Events remain deferred until a persisted event model is approved.
+- **Parity:** Account Data keeps Portfolio and account-level custom database destinations for portfolio accounts. Valid single-facility accounts expose those custom database destinations inside their sole Facility Data context alongside Meters, Predictors, and Energy Uses. Events remain deferred until a persisted event model is approved.
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused v1 route helper, single-site redirect, and section navigation specs; validation planner decides parent checks.
 
@@ -86,7 +86,7 @@ If the workflow needs current-state detail, add a short current-state note using
 
 - **Workflow:** v1 Account Data > Custom Fuels, Custom Grid Factors, and Custom Global Warming Potentials, issue #2650.
 - **Existing v0 entry point:** Account custom database items are managed under the account custom-data routes in Data Management and Data Evaluation.
-- **Decision:** Rebuild all three custom-data inventories as type-specific v1 card grids with reusable empty states, large workspace slideout editors, visible usage impact, guarded deletion, and unsaved-change protection. Reuse presentation primitives without introducing a config-driven CRUD framework.
+- **Decision:** Rebuild all three custom-data inventories as type-specific v1 card grids with reusable empty states, large workspace slideout editors, visible usage impact, guarded deletion, and unsaved-change protection. Keep portfolio accounts on account-level routes, while valid single-facility accounts use equivalent facility-context routes for the same account-owned data. Reuse presentation primitives without introducing a config-driven CRUD framework.
 - **Parity:** Preserve custom-fuel defaults and normalized storage; grid-factor location and residual year series and units; and custom GWP identifiers and AR values. Referenced fuel and grid-factor renames update their dependent records atomically. Editing a custom GWP applies one selected value to AR4, AR5, and AR6 by design.
 - **Shared contracts:** No IndexedDB schema, data-version, backup, import/export, calculation, Worker, report, or Electron contract changes.
 - **Tests:** Focused feature model, form, inventory, command, unsaved-change guard, route, and IndexedDB transaction specs; validation planner decides parent checks.

@@ -244,7 +244,7 @@
                 @for (item of accountCustomDataItems(); track item.id) {
                   <a
                     [class.active]="navigation.activeDetail() === item.id"
-                    [routerLink]="navigation.accountDataRoute(account.guid, item.id)"
+                    [routerLink]="navigation.facilityDataRoute(selectedFacility.guid, item.id)"
                     [attr.aria-current]="navigation.activeDetail() === item.id ? 'page' : null">
                     <app-ui-icon [name]="item.icon"></app-ui-icon>
                     {{ item.label }}

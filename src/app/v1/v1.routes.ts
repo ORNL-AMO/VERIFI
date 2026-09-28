@@ -198,6 +198,9 @@ export const V1Routes: Routes = [
                 ]
               },
               { path: 'energy-uses', component: FacilityDataPlaceholderComponent, data: { title: 'Energy Uses' } },
+              { path: 'custom-grid-factors', component: CustomGridFactorsComponent, canDeactivate: [unsavedChangesGuard] },
+              { path: 'custom-fuels', component: CustomFuelsComponent, canDeactivate: [unsavedChangesGuard] },
+              { path: 'custom-gwps', component: CustomGwpsComponent, canDeactivate: [unsavedChangesGuard] },
               { path: '**', redirectTo: 'meters' }
             ]
           },

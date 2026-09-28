@@ -458,7 +458,7 @@ describe('SectionNavComponent', () => {
     expect(element.textContent).not.toContain('Grid Factors');
     expect(element.textContent).not.toContain('Global Warming Potentials');
     const fuelLink = element.querySelector<HTMLAnchorElement>('a[href$="/data/custom-fuels"]');
-    expect(fuelLink?.getAttribute('href')).toBe('/v1/workspace/account/account-a/data/custom-fuels');
+    expect(fuelLink?.getAttribute('href')).toBe('/v1/workspace/facility/facility-a/data/custom-fuels');
     expect(fuelLink?.classList.contains('active')).toBe(false);
     expect(fuelLink?.hasAttribute('aria-current')).toBe(false);
 
@@ -493,9 +493,9 @@ describe('SectionNavComponent', () => {
       'Global Warming Potentials'
     ]);
     expect(links.map(link => link.getAttribute('href'))).toEqual([
-      '/v1/workspace/account/account-a/data/custom-grid-factors',
-      '/v1/workspace/account/account-a/data/custom-fuels',
-      '/v1/workspace/account/account-a/data/custom-gwps'
+      '/v1/workspace/facility/facility-a/data/custom-grid-factors',
+      '/v1/workspace/facility/facility-a/data/custom-fuels',
+      '/v1/workspace/facility/facility-a/data/custom-gwps'
     ]);
   });
 

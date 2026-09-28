@@ -12,6 +12,12 @@
         This group will be removed. {{ assignedMeterCount }}
         {{ assignedMeterCount === 1 ? 'meter' : 'meters' }} will move to Ungrouped.
       </p>
+      @if (error) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ error }}</span>
+        </div>
+      }
     </div>
     <footer class="v1-modal__footer">
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>

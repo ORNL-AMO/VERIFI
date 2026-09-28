@@ -97,7 +97,15 @@ const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
   data: 'meters'
 };
 const ACCOUNT_DATA_DETAILS = new Set(['portfolio', 'custom-grid-factors', 'custom-fuels', 'custom-gwps']);
-const FACILITY_DATA_DETAILS = new Set(['meters', 'meter-grouping', 'predictors', 'energy-uses']);
+const FACILITY_DATA_DETAILS = new Set([
+  'meters',
+  'meter-grouping',
+  'predictors',
+  'energy-uses',
+  'custom-grid-factors',
+  'custom-fuels',
+  'custom-gwps'
+]);
 const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete']);
 const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete']);
 
