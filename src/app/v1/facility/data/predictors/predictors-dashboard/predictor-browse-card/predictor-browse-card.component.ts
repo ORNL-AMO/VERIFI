@@ -7,7 +7,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
 import { ResourceBrowseCardAction, ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorCardView, PredictorWorkbenchTabId } from '../../models';
 import { ConfirmDeletePredictorModalComponent } from './confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
 import { buildPredictorResourceView } from './predictor-browse-card.view';
@@ -21,7 +21,7 @@ import { buildPredictorResourceView } from './predictor-browse-card.view';
 export class PredictorBrowseCardComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly workspace = inject(FacilityPredictorsWorkspaceService);
-  private readonly actions = inject(PredictorWorkspaceActionsService);
+  private readonly actions = inject(StandardPredictorActionsService);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);

@@ -7,7 +7,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorWorkbenchSettingsComponent } from './predictor-workbench-settings.component';
@@ -82,7 +82,7 @@ function createFixture(options: { updatePredictor?: any; readings?: any[]; predi
         provide: PredictorWorkbenchContextService,
         useValue: { predictor: selectedPredictor, readings: selectedReadings, card: signal(undefined) }
       },
-      { provide: PredictorWorkspaceActionsService, useValue: {
+      { provide: StandardPredictorActionsService, useValue: {
         updatePredictor: options.updatePredictor ?? vi.fn(async (value: any) => value), deletePredictor: vi.fn()
       } },
       { provide: PredictorWeatherWorkflowService, useValue: {

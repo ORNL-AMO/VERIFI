@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { buildPredictorCard } from '../../models';
 import { PredictorBrowseCardComponent } from './predictor-browse-card.component';
 
@@ -25,7 +25,7 @@ describe('PredictorBrowseCardComponent', () => {
             hasPending: signal(false)
           }
         },
-        { provide: PredictorWorkspaceActionsService, useValue: {} },
+        { provide: StandardPredictorActionsService, useValue: {} },
         {
           provide: WorkspaceNavigationService,
           useValue: {

@@ -72,12 +72,11 @@
               <span>Weather type</span>
               <select
                 class="v1-select"
+                [value]="definition.weatherDataType"
                 [disabled]="busy"
                 (change)="setDefinitionType(definition.draftId, $any($event.target).value)">
                 @for (option of weatherTypes; track option.value) {
-                  <option
-                    [attr.value]="option.value"
-                    [selected]="option.value === definition.weatherDataType">
+                  <option [attr.value]="option.value">
                     {{ option.label }}
                   </option>
                 }

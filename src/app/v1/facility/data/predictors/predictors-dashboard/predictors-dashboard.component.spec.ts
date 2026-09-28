@@ -7,7 +7,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../standard-predictor-actions.service';
 import { buildPredictorCard, buildWeatherStationGroups } from '../models';
 import { PredictorsDashboardComponent } from './predictors-dashboard.component';
 
@@ -44,7 +44,7 @@ describe('PredictorsDashboardComponent', () => {
           }
         },
         { provide: ActivatedRoute, useValue: {} },
-        { provide: PredictorWorkspaceActionsService, useValue: { createPredictor: vi.fn() } },
+        { provide: StandardPredictorActionsService, useValue: { createPredictor: vi.fn() } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         {
           provide: WorkspaceNavigationService,
@@ -99,7 +99,7 @@ describe('PredictorsDashboardComponent', () => {
       providers: [
         { provide: Router, useValue: { navigate: vi.fn(), events: { subscribe: vi.fn() } } },
         { provide: ActivatedRoute, useValue: {} },
-        { provide: PredictorWorkspaceActionsService, useValue: { createPredictor: vi.fn() } },
+        { provide: StandardPredictorActionsService, useValue: { createPredictor: vi.fn() } },
         { provide: WorkspaceNavigationService, useValue: { accountDataRoute: () => [] } },
         {
           provide: FacilityPredictorsWorkspaceService,

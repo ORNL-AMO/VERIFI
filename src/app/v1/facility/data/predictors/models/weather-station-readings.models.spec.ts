@@ -69,6 +69,16 @@ describe('weather station reading models', () => {
     const changes = buildWeatherStationMonthDeleteChangeSet('station:A', predictors, readings, 2026, 1, 2);
     expect(changes.delete.map(item => item.guid)).toEqual(['a', 'duplicate', 'b']);
   });
+
+  it('precomputes duplicate state for each month row', () => {
+    const matrix = buildWeatherStationReadingMatrix(predictors, [
+      reading(1, 'a', 'hdd-55', 1, 10),
+      reading(2, 'duplicate', 'hdd-55', 1, 11),
+      reading(3, 'b', 'hdd-65', 1, 20)
+    ]);
+
+    expect(matrix.rows[0].hasDuplicates).toBe(true);
+  });
 });
 
 function predictor(guid: string, name: string, weatherDataType: IdbPredictor['weatherDataType']): IdbPredictor {

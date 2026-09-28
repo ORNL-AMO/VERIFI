@@ -105,7 +105,7 @@
                   }
                 </span></td>
               }
-              @if (!copyingTable()) { <td class="weather-readings__actions"><button type="button" class="v1-icon-btn" title="Edit month" [attr.aria-label]="'Edit ' + row.monthLabel" [disabled]="!canAct() || rowHasDuplicates(row)" (click)="openEdit(row, $event)"><app-ui-icon name="edit"></app-ui-icon></button><button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete month" [attr.aria-label]="'Delete ' + row.monthLabel" [disabled]="!canAct()" (click)="requestDelete(row, $event)"><app-ui-icon name="delete"></app-ui-icon></button></td> }
+              @if (!copyingTable()) { <td class="weather-readings__actions"><button type="button" class="v1-icon-btn" title="Edit month" [attr.aria-label]="'Edit ' + row.monthLabel" [disabled]="!canAct() || row.hasDuplicates" (click)="openEdit(row, $event)"><app-ui-icon name="edit"></app-ui-icon></button><button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete month" [attr.aria-label]="'Delete ' + row.monthLabel" [disabled]="!canAct()" (click)="requestDelete(row, $event)"><app-ui-icon name="delete"></app-ui-icon></button></td> }
             </tr>
           }
         </tbody>

@@ -32,6 +32,7 @@ export interface WeatherStationReadingRow {
   readonly monthSortValue: number;
   readonly cells: readonly WeatherStationReadingCell[];
   readonly readings: readonly IdbPredictorData[];
+  readonly hasDuplicates: boolean;
   readonly hasAttention: boolean;
 }
 
@@ -96,6 +97,7 @@ export function buildWeatherStationReadingMatrix(
       monthSortValue: value,
       cells,
       readings: cells.flatMap(cell => cell.readings),
+      hasDuplicates: cells.some(cell => cell.duplicate),
       hasAttention: cells.some(cell => cell.hasAttention)
     };
   });

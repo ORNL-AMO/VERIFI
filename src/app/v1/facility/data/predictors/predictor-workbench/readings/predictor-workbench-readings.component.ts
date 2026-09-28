@@ -31,7 +31,7 @@ import {
   createPredictorReading,
   findMissingPredictorMonths
 } from '../../models';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorReadingEditorComponent } from './predictor-reading-editor/predictor-reading-editor.component';
 import { PredictorReadingsConfirmationModalComponent } from './predictor-readings-confirmation-modal/predictor-readings-confirmation-modal.component';
@@ -55,7 +55,7 @@ interface PredictorReadingPanelState {
   ]
 })
 export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, OnDestroy {
-  private readonly actions = inject(PredictorWorkspaceActionsService);
+  private readonly actions = inject(StandardPredictorActionsService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);

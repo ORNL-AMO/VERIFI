@@ -8,7 +8,7 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 import { PredictorReadingEditorComponent } from './predictor-reading-editor/predictor-reading-editor.component';
@@ -163,7 +163,7 @@ function createFixture(
         state: signal('ready'), predictorFindings: vi.fn(() => []), warningActionError: signal(undefined),
         canManageWarnings: signal(true), discardWarning: vi.fn(async () => true), ...statusOverrides
       } },
-      { provide: PredictorWorkspaceActionsService, useValue: {
+      { provide: StandardPredictorActionsService, useValue: {
         addPredictorReading: vi.fn(async (value: any) => ({ ...value, id: 10 })),
         updatePredictorReading: vi.fn(async (value: any) => value), deletePredictorReading: vi.fn(),
         deletePredictorReadings: vi.fn(), fillMissingPredictorMonths: vi.fn(async () => []), ...actionOverrides

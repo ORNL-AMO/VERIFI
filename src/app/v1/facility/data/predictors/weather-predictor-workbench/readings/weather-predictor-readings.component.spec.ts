@@ -10,7 +10,7 @@ import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { WeatherPredictorActionsService } from '../../weather-predictor-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherPredictorReadingsComponent } from './weather-predictor-readings.component';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
@@ -262,7 +262,7 @@ function setup(
           creating: signal(false), notFound: signal(false)
         }
       },
-      { provide: PredictorWorkspaceActionsService, useValue: { applyWeatherStationMonth: vi.fn() } },
+      { provide: WeatherPredictorActionsService, useValue: { applyWeatherStationMonth: vi.fn() } },
       { provide: PredictorWeatherWorkflowService, useValue: {
         calculateStationMonth: vi.fn(), previewStationGroup: vi.fn(), commitStationGroup: vi.fn(),
         cancel: vi.fn(), reset: vi.fn(), busy: signal(false), state: signal({ status: 'idle', message: '' }),

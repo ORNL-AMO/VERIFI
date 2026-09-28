@@ -4,7 +4,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataEmptyStateComponent } from '@app/v1/shared/data-empty-state/data-empty-state.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../standard-predictor-actions.service';
 import {
   FacilityPredictorSort,
   FacilityPredictorStatusFilter,
@@ -26,7 +26,7 @@ import { WeatherStationBrowseCardComponent } from './weather-station-browse-card
 })
 export class PredictorsDashboardComponent {
   private readonly router = inject(Router);
-  private readonly actions = inject(PredictorWorkspaceActionsService);
+  private readonly actions = inject(StandardPredictorActionsService);
   readonly workspace = inject(FacilityPredictorsWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly addPredictorOpen = signal(false);

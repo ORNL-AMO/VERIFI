@@ -2,16 +2,20 @@ import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import {
   buildWeatherGenerationPreview,
-  buildWeatherMaintenancePreview,
   buildWeatherStationMonthCalculation,
-  buildWeatherStationSelectionPreview,
-  buildWeatherStationGroupPreview,
-  defaultWeatherPredictorName,
+  buildWeatherStationSelectionPreview
+} from './weather-generation.models';
+import {
   validateWeatherMonthRange,
   weatherFutureMonthCount,
   weatherLastTwoYearsRange,
   weatherSourceRangeThroughPresent
-} from './predictor-weather.models';
+} from './weather-range.models';
+import {
+  buildWeatherMaintenancePreview,
+  buildWeatherStationGroupPreview
+} from './weather-reconciliation.models';
+import { defaultWeatherPredictorName } from './weather-presentation.models';
 
 describe('predictor weather models', () => {
   it('uses established generated predictor names', () => {

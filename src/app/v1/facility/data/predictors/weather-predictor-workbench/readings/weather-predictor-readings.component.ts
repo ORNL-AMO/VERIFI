@@ -26,8 +26,8 @@ import {
   weatherFutureMonthCount,
   weatherRangeForReadings
 } from '../../models';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
+import { WeatherPredictorActionsService } from '../../weather-predictor-actions.service';
 import { WeatherReadingDeleteConfirmationModalComponent } from './weather-reading-delete-confirmation-modal/weather-reading-delete-confirmation-modal.component';
 import { WeatherReadingMonthEditorComponent } from './weather-reading-month-editor/weather-reading-month-editor.component';
 import { WeatherSourceReadingsSlideoutComponent } from '../../shared/weather-source-readings/weather-source-readings-slideout.component';
@@ -48,7 +48,7 @@ import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-wo
   ]
 })
 export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnDestroy {
-  private readonly actions = inject(PredictorWorkspaceActionsService);
+  private readonly actions = inject(WeatherPredictorActionsService);
   private readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
   private readonly copyTableService = inject(CopyTableService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
@@ -320,8 +320,6 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   }
 
   cancelDelete(): void { if (!this.saving()) this.closeDelete(); }
-  rowHasDuplicates(row: WeatherStationReadingRow): boolean { return row.cells.some(cell => cell.duplicate); }
-
   setPageSize(event: Event): void {
     this.pageSize.set(Number((event.target as HTMLSelectElement).value));
     this.currentPage.set(1);

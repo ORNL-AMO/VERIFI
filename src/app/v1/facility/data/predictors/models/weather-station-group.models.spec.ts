@@ -36,6 +36,19 @@ describe('weather station groups', () => {
     expect(groups[0].hasConflictingStationNames).toBe(true);
     expect(groups[0].statusLabel).toBe('Station names differ');
   });
+
+  it('produces the same station groups when predictors are reordered', () => {
+    const predictors = [
+      predictor('hdd-65', 'station-a', 'Oak Ridge', 'HDD', 65),
+      predictor('humidity', 'station-a', 'Oak Ridge', 'relativeHumidity'),
+      predictor('cdd-65', 'station-b', 'Knoxville', 'CDD', 65)
+    ];
+
+    const expected = buildWeatherStationGroups(predictors, [], [], true);
+    const reordered = buildWeatherStationGroups([...predictors].reverse(), [], [], true);
+
+    expect(reordered).toEqual(expected);
+  });
 });
 
 function predictor(

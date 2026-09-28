@@ -8,7 +8,7 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
+import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorSettingsSaveState } from '../../models';
 import { ConfirmDeletePredictorModalComponent } from '../../predictors-dashboard/predictor-browse-card/confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
 import { PredictorSettingsForm, PredictorSettingsFormService } from './predictor-settings-form.service';
@@ -21,7 +21,7 @@ import { PredictorWorkbenchContextService } from '../predictor-workbench-context
 })
 export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, OnDestroy {
   private readonly formService = inject(PredictorSettingsFormService);
-  private readonly actions = inject(PredictorWorkspaceActionsService);
+  private readonly actions = inject(StandardPredictorActionsService);
   private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);

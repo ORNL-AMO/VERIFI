@@ -22,6 +22,7 @@ import {
   WeatherStationGroupDraft,
   WeatherStationGroupPreview,
   WeatherStationMonthCalculationValue,
+  changedAnalysesByGuid,
   buildWeatherStationMonthCalculation,
   buildWeatherGenerationPreview,
   buildWeatherMaintenancePreview,
@@ -30,13 +31,13 @@ import {
   weatherSourceRangeThroughPresent,
   weatherRangeForReadings
 } from './models';
-import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
+import { WeatherPredictorActionsService } from './weather-predictor-actions.service';
 
 @Injectable()
 export class PredictorWeatherWorkflowService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly hourlyWeather = inject(HourlyWeatherDataService);
-  private readonly actions = inject(PredictorWorkspaceActionsService);
+  private readonly actions = inject(WeatherPredictorActionsService);
 
   readonly state = signal<PredictorWeatherWorkflowState>({ status: 'idle', message: '' });
   readonly busy = computed(() => ['loading', 'calculating', 'committing'].includes(this.state().status));
@@ -309,8 +310,7 @@ export class PredictorWeatherWorkflowService {
     proposed = buildFacilityAnalysesWithPredictors(proposed, preview.addPredictors);
     return {
       ...preview,
-      facilityAnalyses: proposed.filter((analysis, index) =>
-        JSON.stringify(analysis.groups) !== JSON.stringify(current[index]?.groups))
+      facilityAnalyses: changedAnalysesByGuid(current, proposed)
     };
   }
 

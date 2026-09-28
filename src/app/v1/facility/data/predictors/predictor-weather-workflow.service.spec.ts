@@ -4,7 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { HourlyWeatherDataService } from '@platform/weather/hourly-weather-data.service';
 import { Observable, Subject, of } from 'rxjs';
 import { vi } from 'vitest';
-import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
+import { WeatherPredictorActionsService } from './weather-predictor-actions.service';
 import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.service';
 
 const actions = {
@@ -122,7 +122,7 @@ function createService(response: Observable<any[]> | Subject<any[]>, predictors:
       facilityPredictors: signal(predictors), facilityAnalyses: signal([])
     } },
     { provide: HourlyWeatherDataService, useValue: { load: vi.fn(() => response) } },
-    { provide: PredictorWorkspaceActionsService, useValue: actions }
+    { provide: WeatherPredictorActionsService, useValue: actions }
   ] });
   return TestBed.inject(PredictorWeatherWorkflowService);
 }
