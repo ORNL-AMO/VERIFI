@@ -23,6 +23,8 @@ import { RouterGuardService } from '@shared/shared-router-guard-modal/router-gua
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { DataManagementService } from '@v0/data-management/data-management.service';
+import { WeatherPredictorCreationService } from '@v0/shared/shared-predictors-content/weather-predictor-creation.service';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -43,6 +45,7 @@ export class FacilityPredictorComponent {
   destroyed: boolean = false;
   latestMeterReading: Date;
   firstMeterReading: Date;
+  addOrEdit: 'add' | 'edit' = 'edit';
 
   showDeletePredictor: boolean = false;
 
@@ -66,7 +69,9 @@ export class FacilityPredictorComponent {
     private loadingService: LoadingService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
-    private routerGuardService: RouterGuardService
+    private routerGuardService: RouterGuardService,
+    private dataManagementService: DataManagementService,
+    private weatherPredictorCreationService: WeatherPredictorCreationService
   ) {
   }
 
@@ -75,8 +80,8 @@ export class FacilityPredictorComponent {
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
+        this.addOrEdit = this.dataManagementService.isPredictorDraft(predictorId) ? 'add' : 'edit';
         this.setPredictor(predictorId);
-        this.setPredictorForm();
         this.setLastMeterReading();
       } else {
         //route to manage predictors
@@ -111,21 +116,55 @@ export class FacilityPredictorComponent {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.editPredictorFormService.setPredictorDataFromForm(this.predictor, this.predictorForm);
-    this.predictorForm.markAsPristine();
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const predictor = this.predictor;
-    await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Predictor' },
-      async () => {
-        await this.predictorHandler.updatePredictor(predictor, accountGuid);
-        if (predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
-          await this.updateWeatherData();
-        }
-        await this.analysisHandler.updateAnalysisPredictor(predictor);
+    const isDraft = this.addOrEdit === 'add';
+
+    try {
+      if (isDraft && predictor.predictorType === 'Weather') {
+        await this.commandBoundary.execute(
+          { entityKind: 'predictor', changeKind: 'bulk', entityGuid: predictor.guid, label: 'Create Weather Predictors' },
+          () => this.weatherPredictorCreationService.createFromForm({
+            predictorForm: this.predictorForm,
+            facility: this.facility,
+            activeAccountGuid: accountGuid,
+            weatherStationName: predictor.weatherStationName,
+            existingPredictor: predictor,
+            shouldStop: () => this.destroyed
+          })
+        );
+      } else {
+        await this.commandBoundary.execute(
+          { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Predictor' },
+          async () => {
+            await this.predictorHandler.updatePredictor(predictor, accountGuid);
+            if (predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
+              await this.updateWeatherData();
+            }
+            await this.analysisHandler.updateAnalysisPredictor(predictor);
+          }
+        );
       }
-    );
+    } catch (error) {
+      this.loadingService.setLoadingStatus(false);
+      throw error;
+    }
+
+    this.predictorForm.markAsPristine();
+    if (isDraft) {
+      this.dataManagementService.completePredictorDraft(predictor.guid);
+    }
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
+    this.toastNotificationService.showToast(
+      isDraft && predictor.predictorType === 'Weather' ? 'Weather Predictors Created!' : 'Predictor Entries Updated!',
+      undefined,
+      undefined,
+      false,
+      'alert-success'
+    );
+    if (isDraft) {
+      this.goToManagePredictors();
+    }
   }
 
   setLastMeterReading() {
@@ -226,6 +265,7 @@ export class FacilityPredictorComponent {
         await this.analysisHandler.deleteAnalysisPredictor(predictor);
       }
     );
+    this.dataManagementService.completePredictorDraft(predictor.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.goToManagePredictors();

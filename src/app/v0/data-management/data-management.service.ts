@@ -13,6 +13,8 @@ export class DataManagementService {
   helpPanelOpen: BehaviorSubject<boolean>;
   helpWidth: number = 200;
   sidebarWidth: number = 200;
+  draftPredictorGuids = new Set<string>();
+  
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
 
@@ -39,6 +41,18 @@ export class DataManagementService {
 
   getFileReferenceById(id: string): FileReference {
     return this.fileReferences.getValue().find(ref => { return ref.id == id });
+  }
+
+  markPredictorDraft(predictorGuid: string) {
+    this.draftPredictorGuids.add(predictorGuid);
+  }
+
+  isPredictorDraft(predictorGuid: string): boolean {
+    return this.draftPredictorGuids.has(predictorGuid);
+  }
+
+  completePredictorDraft(predictorGuid: string) {
+    this.draftPredictorGuids.delete(predictorGuid);
   }
 
   setHelpWidth(val: number) {

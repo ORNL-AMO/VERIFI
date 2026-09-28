@@ -41,7 +41,6 @@ export class EditPredictorFormService {
       'startYear': [null],
       'endMonth': [null],
       'endYear': [null],
-      'createPredictorData': [true],
       //status settings
       'noLongerInUse': [predictor.noLongerInUse || false],
       'noLongerInUseMonth': [predictor.noLongerInUseMonth],
