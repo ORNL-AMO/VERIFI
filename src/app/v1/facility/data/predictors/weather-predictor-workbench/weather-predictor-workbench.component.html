@@ -6,17 +6,34 @@
 @let checks = statusChecks();
 
 @if (!facility) {
-  <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing weather predictors.</p></article>
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="accountIssue"></app-ui-icon>
+    <h1>No facility selected</h1>
+    <p>Select a facility before managing weather predictors.</p>
+  </article>
 } @else if (context.notFound()) {
-  <article class="v1-empty-state" role="status"><app-ui-icon name="cloudRain"></app-ui-icon><h1>Weather station not found</h1><p>This weather station is not available in {{ facility.name }}.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="openPredictors()">Back to predictors</button></article>
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="cloudRain"></app-ui-icon>
+    <h1>Weather station not found</h1>
+    <p>This weather station is not available in {{ facility.name }}.</p>
+    <button type="button" class="v1-btn v1-btn--secondary" (click)="openPredictors()">
+      Back to predictors
+    </button>
+  </article>
 } @else if (creating || group) {
   <div class="v1-data-workbench-sticky weather-workbench__sticky">
     <header class="v1-data-workbench-header weather-workbench__header">
-      <nav class="v1-data-workbench-breadcrumb" aria-label="Weather predictor breadcrumb"><ol>
-        @if (account && accountLink) { <li><a [routerLink]="accountLink">{{ account.name || 'Account' }}</a></li><li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li> }
-        <li>{{ facility.name || 'Facility' }}</li><li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-        <li><button type="button" (click)="openPredictors()">Predictors</button></li>
-      </ol></nav>
+      <nav class="v1-data-workbench-breadcrumb" aria-label="Weather predictor breadcrumb">
+        <ol>
+          @if (account && accountLink) {
+            <li><a [routerLink]="accountLink">{{ account.name || 'Account' }}</a></li>
+            <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          }
+          <li>{{ facility.name || 'Facility' }}</li>
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          <li><button type="button" (click)="openPredictors()">Predictors</button></li>
+        </ol>
+      </nav>
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title">
           <h1 id="v1-weather-workbench-title">
@@ -64,13 +81,23 @@
               }
             </ul>
           </section>
-          <dl class="v1-data-workbench-facts"><div><dt>Station ID</dt><dd>{{ group.stationId || 'Not set' }}</dd></div><div><dt>Entries</dt><dd>{{ group.readingCount }}</dd></div><div><dt>Coverage</dt><dd>{{ group.firstReadingLabel }} – {{ group.latestReadingLabel }}</dd></div></dl>
+          <dl class="v1-data-workbench-facts">
+            <div><dt>Station ID</dt><dd>{{ group.stationId || 'Not set' }}</dd></div>
+            <div><dt>Entries</dt><dd>{{ group.readingCount }}</dd></div>
+            <div>
+              <dt>Coverage</dt>
+              <dd>{{ group.firstReadingLabel }} – {{ group.latestReadingLabel }}</dd>
+            </div>
+          </dl>
           @if (checks.length > 0) {
             <ul class="v1-data-workbench-status-notes" aria-label="Weather station checks needing review">
               @for (check of checks; track check.id) {
                 <li>
                   <app-ui-icon [name]="check.icon"></app-ui-icon>
-                  <span><strong>{{ check.scopeLabel }}:</strong> {{ check.title }} <span class="weather-workbench__status-detail">— {{ check.detail }}</span></span>
+                  <span>
+                    <strong>{{ check.scopeLabel }}:</strong> {{ check.title }}
+                    <span class="weather-workbench__status-detail">— {{ check.detail }}</span>
+                  </span>
                 </li>
               }
             </ul>

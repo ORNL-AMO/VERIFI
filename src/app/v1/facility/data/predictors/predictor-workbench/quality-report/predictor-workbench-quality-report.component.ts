@@ -187,21 +187,47 @@ function toFindingView(finding: StatusItem): PredictorQualityFindingView {
 function localFindings(report: PredictorDataQualityReport): PredictorQualityFindingView[] {
   const findings: PredictorQualityFindingView[] = [];
   if (report.duplicateMonths.length > 0) {
-    findings.push(localFinding('predictor.data.duplicate-month', 'Resolve duplicate predictor data', `${report.duplicateMonths.length} month(s) contain duplicate entries.`, 'error'));
+    findings.push(localFinding(
+      'predictor.data.duplicate-month',
+      'Resolve duplicate predictor data',
+      `${report.duplicateMonths.length} month(s) contain duplicate entries.`,
+      'error'
+    ));
   }
   if (report.missingMonths.length > 0) {
-    findings.push(localFinding('predictor.data.gap', 'Fill missing predictor data', `${report.missingMonths.length} month(s) are missing between the first and last entry.`, 'error'));
+    findings.push(localFinding(
+      'predictor.data.gap',
+      'Fill missing predictor data',
+      `${report.missingMonths.length} month(s) are missing between the first and last entry.`,
+      'error'
+    ));
   }
   if (!report.predictor.canBeNegative && report.negativeMonths.length > 0) {
-    findings.push(localFinding('predictor.data.negative', 'Review negative predictor data', `${report.negativeMonths.length} month(s) contain negative values that are not allowed.`, 'error', true));
+    findings.push(localFinding(
+      'predictor.data.negative',
+      'Review negative predictor data',
+      `${report.negativeMonths.length} month(s) contain negative values that are not allowed.`,
+      'error',
+      true
+    ));
   }
   if (report.predictor.predictorType === 'Weather'
     && !report.predictor.ignoreWeatherDataWarning
     && (report.weatherWarningMonths.length > 0 || report.weatherChangedMonths.length > 0)) {
-    findings.push(localFinding('predictor.weather.warning', 'Review weather data', 'Some weather entries contain incomplete or revised source data.', 'warning'));
+    findings.push(localFinding(
+      'predictor.weather.warning',
+      'Review weather data',
+      'Some weather entries contain incomplete or revised source data.',
+      'warning'
+    ));
   }
   if (report.outlierCount > 0) {
-    findings.push(localFinding('predictor.quality.outlier', 'Review predictor outliers', `${report.outlierCount} predictor value(s) fall outside the expected range.`, 'warning'));
+    findings.push(localFinding(
+      'predictor.quality.outlier',
+      'Review predictor outliers',
+      `${report.outlierCount} predictor value(s) fall outside the expected range.`,
+      'warning'
+    ));
   }
   return findings;
 }
