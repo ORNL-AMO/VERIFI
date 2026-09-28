@@ -101,7 +101,7 @@ export class BetterPlantsReportComponent implements OnInit {
       };
       this.calculating = true;
       this.worker.postMessage({
-        baselineYear: this.selectedReport.baselineYear,
+        baselineYear: this.selectedAnalysisItem.baselineYear,
         reportYear: this.selectedReport.reportYear,
         selectedAnalysisItem: this.selectedAnalysisItem,
         accountPredictorEntries: accountPredictorEntries,
@@ -117,9 +117,9 @@ export class BetterPlantsReportComponent implements OnInit {
       // Web Workers are not supported in this environment.
       this.betterPlantsSummaries = new Array();
       let reportYear: number = this.selectedReport.reportYear;
-      while (reportYear > this.selectedReport.baselineYear) {
+      while (reportYear > this.selectedAnalysisItem.baselineYear) {
         let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
-          this.selectedReport.baselineYear,
+          this.selectedAnalysisItem.baselineYear,
           reportYear,
           this.selectedAnalysisItem,
           accountPredictorEntries,
@@ -135,7 +135,7 @@ export class BetterPlantsReportComponent implements OnInit {
         if (this.selectedReport.betterPlantsReportSetup.includeAllYears) {
           reportYear--;
         } else {
-          reportYear = this.selectedReport.baselineYear;
+          reportYear = this.selectedAnalysisItem.baselineYear;
         }
       }
       this.calculating = false;
