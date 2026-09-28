@@ -89,7 +89,7 @@
           }
         </div>
       </div>
-      <div class="v1-data-workbench-actions v1-meter-group-workbench-header__chips" aria-label="Meter group summary">
+      <div class="v1-data-workbench-actions v1-meter-group-workbench-header__chips" aria-label="Meter group summary and controls">
         <span class="v1-meter-group-workbench-header__type-chip">
           <app-ui-icon name="meterGroupItem"></app-ui-icon>
           {{ currentGroup.groupType }}
@@ -105,90 +105,105 @@
             Results unavailable
           </span>
         }
+        @if (currentGroup.groupType === 'Energy') {
+          <div class="v1-meter-group-workbench-header__basis-control">
+            <div class="v1-segmented" role="group" aria-label="Displayed energy basis">
+              <button
+                type="button"
+                class="v1-segmented__btn"
+                [attr.aria-pressed]="currentFacility.energyIsSource === false"
+                [disabled]="!canSetEnergySource()"
+                (click)="setFacilityEnergyIsSource(false)">
+                Site
+              </button>
+              <button
+                type="button"
+                class="v1-segmented__btn"
+                [attr.aria-pressed]="currentFacility.energyIsSource === true"
+                [disabled]="!canSetEnergySource()"
+                (click)="setFacilityEnergyIsSource(true)">
+                Source
+              </button>
+            </div>
+          </div>
+        }
+        <button
+          type="button"
+          class="v1-btn v1-btn--quiet v1-btn--sm v1-meter-group-workbench-header__facts-toggle"
+          aria-controls="v1-meter-group-workbench-facts"
+          [attr.aria-expanded]="factsExpanded()"
+          (click)="toggleFacts()">
+          <span class="v1-meter-group-workbench-header__facts-symbol" aria-hidden="true">
+            {{ factsExpanded() ? '−' : '+' }}
+          </span>
+          {{ factsExpanded() ? 'Hide facts' : 'Show facts' }}
+        </button>
       </div>
     </div>
 
-    <dl class="v1-data-workbench-facts v1-meter-group-workbench-header__facts">
-      <div>
-        <dt>Assigned meters</dt>
-        <dd>{{ currentResults.summary.assignedMeterCount }}</dd>
-      </div>
-      <div>
-        <dt>Meters</dt>
-        <dd class="v1-meter-group-workbench-header__meter-list">
-          @for (assignedMeter of currentResults.assignedMeters; track assignedMeter.meter.guid) {
-            <span>{{ assignedMeter.meter.name }}</span>
-          } @empty {
-            No meters assigned
-          }
-        </dd>
-      </div>
-      <div>
-        <dt>First data</dt>
-        <dd>{{ currentResults.summary.firstDataLabel }}</dd>
-      </div>
-      <div>
-        <dt>Latest data</dt>
-        <dd>{{ currentResults.summary.latestDataLabel }}</dd>
-      </div>
-    </dl>
-
-    @if (currentResults.usageFacts.unitLabel) {
-      <p class="v1-data-workbench-facts-note">Usage values shown in {{ currentResults.usageFacts.basisLabel ? currentResults.usageFacts.basisLabel + ' ' : '' }}{{ currentResults.usageFacts.unitLabel }}/month</p>
-    }
-
-    <dl class="v1-data-workbench-facts v1-data-workbench-facts--usage v1-meter-group-workbench-header__facts" aria-label="Meter group usage facts">
-      @for (fact of currentResults.usageFacts.facts; track fact.id) {
+    <div
+      id="v1-meter-group-workbench-facts"
+      class="v1-meter-group-workbench-header__facts-region"
+      [hidden]="!factsExpanded()">
+      <dl class="v1-data-workbench-facts v1-meter-group-workbench-header__facts">
         <div>
-          <dt>{{ fact.label }}</dt>
-          <dd
-            class="v1-data-workbench-fact-value"
-            [class.v1-data-workbench-fact-value--unavailable]="fact.unavailable">
-            @if (isLoading()) {
-              <span class="placeholder-glow w-100" aria-hidden="true">
-                <span class="placeholder col-9"></span>
-                <span class="placeholder col-6"></span>
-              </span>
-              <span class="visually-hidden">Calculating {{ fact.label }}</span>
-            } @else {
-              <span class="v1-data-workbench-fact-value__primary">{{ fact.valueLabel }}</span>
-              @if (fact.periodLabel) {
-                <span class="v1-data-workbench-fact-value__meta">{{ fact.periodLabel }}</span>
-              }
-              @if (fact.changeLabel) {
-                <span
-                  class="v1-data-workbench-fact-value__change v1-data-workbench-fact-value__change--{{ fact.changeTone || 'unavailable' }}">
-                  {{ fact.changeLabel }}
-                </span>
-              }
+          <dt>Assigned meters</dt>
+          <dd>{{ currentResults.summary.assignedMeterCount }}</dd>
+        </div>
+        <div>
+          <dt>Meters</dt>
+          <dd class="v1-meter-group-workbench-header__meter-list">
+            @for (assignedMeter of currentResults.assignedMeters; track assignedMeter.meter.guid) {
+              <span>{{ assignedMeter.meter.name }}</span>
+            } @empty {
+              No meters assigned
             }
           </dd>
         </div>
-      }
-    </dl>
+        <div>
+          <dt>First data</dt>
+          <dd>{{ currentResults.summary.firstDataLabel }}</dd>
+        </div>
+        <div>
+          <dt>Latest data</dt>
+          <dd>{{ currentResults.summary.latestDataLabel }}</dd>
+        </div>
+      </dl>
 
-    @if (currentGroup.groupType === 'Energy') {
-      <div class="v1-data-workbench-actions v1-meter-group-workbench-header__energy-toggle" aria-label="Energy basis">
-        <button
-          type="button"
-          class="v1-btn v1-btn--sm"
-          [class.v1-btn--action]="currentFacility.energyIsSource === true"
-          [class.v1-btn--quiet]="currentFacility.energyIsSource !== true"
-          [disabled]="!canSetEnergySource() || currentFacility.energyIsSource === true"
-          (click)="setFacilityEnergyIsSource(true)">
-          Source Energy
-        </button>
-        <button
-          type="button"
-          class="v1-btn v1-btn--sm"
-          [class.v1-btn--action]="currentFacility.energyIsSource === false"
-          [class.v1-btn--quiet]="currentFacility.energyIsSource !== false"
-          [disabled]="!canSetEnergySource() || currentFacility.energyIsSource === false"
-          (click)="setFacilityEnergyIsSource(false)">
-          Site Energy
-        </button>
-      </div>
-    }
+      @if (currentResults.usageFacts.unitLabel) {
+        <p class="v1-data-workbench-facts-note">Usage values shown in {{ currentResults.usageFacts.basisLabel ? currentResults.usageFacts.basisLabel + ' ' : '' }}{{ currentResults.usageFacts.unitLabel }}/month</p>
+      }
+
+      <dl class="v1-data-workbench-facts v1-data-workbench-facts--usage v1-meter-group-workbench-header__facts" aria-label="Meter group usage facts">
+        @for (fact of currentResults.usageFacts.facts; track fact.id) {
+          <div>
+            <dt>{{ fact.label }}</dt>
+            <dd
+              class="v1-data-workbench-fact-value"
+              [class.v1-data-workbench-fact-value--unavailable]="fact.unavailable">
+              @if (isLoading()) {
+                <span class="placeholder-glow w-100" aria-hidden="true">
+                  <span class="placeholder col-9"></span>
+                  <span class="placeholder col-6"></span>
+                </span>
+                <span class="visually-hidden">Calculating {{ fact.label }}</span>
+              } @else {
+                <span class="v1-data-workbench-fact-value__primary">{{ fact.valueLabel }}</span>
+                @if (fact.periodLabel) {
+                  <span class="v1-data-workbench-fact-value__meta">{{ fact.periodLabel }}</span>
+                }
+                @if (fact.changeLabel) {
+                  <span
+                    class="v1-data-workbench-fact-value__change v1-data-workbench-fact-value__change--{{ fact.changeTone || 'unavailable' }}">
+                    {{ fact.changeLabel }}
+                  </span>
+                }
+              }
+            </dd>
+          </div>
+        }
+      </dl>
+    </div>
   </header>
 
   @if (actionError()) {

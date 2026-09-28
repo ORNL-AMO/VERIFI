@@ -11,6 +11,7 @@ describe('ConfirmDeleteGroupModalComponent', () => {
     const cancelled: void[] = [];
     fixture.componentInstance.group = group({ guid: 'group-energy', name: 'Electricity' });
     fixture.componentInstance.assignedMeterCount = 2;
+    fixture.componentInstance.error = 'Group deletion failed.';
     fixture.componentInstance.confirmed.subscribe(() => confirmed.push(undefined));
     fixture.componentInstance.cancelled.subscribe(() => cancelled.push(undefined));
 
@@ -19,6 +20,7 @@ describe('ConfirmDeleteGroupModalComponent', () => {
     clickButton(fixture, 'Cancel');
 
     expect(fixture.nativeElement.querySelector('input')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('Group deletion failed.');
     expect(confirmed.length).toBe(1);
     expect(cancelled.length).toBe(1);
   });

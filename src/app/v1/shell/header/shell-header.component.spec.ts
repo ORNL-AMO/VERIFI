@@ -8,7 +8,7 @@ import { ShellHeaderComponent } from './shell-header.component';
 
 describe('ShellHeaderComponent', () => {
   it('shows brand and appearance controls on the welcome screen', () => {
-    const { fixture } = setup(false);
+    const { fixture, appearance } = setup(false);
 
     expect(fixture.nativeElement.querySelector('.v1-workspace__brand')?.textContent).toContain('VERIFI');
     expect(fixture.nativeElement.querySelector('.v1-workspace__account-menu')).toBeNull();
@@ -24,7 +24,22 @@ describe('ShellHeaderComponent', () => {
     expect(menuText).toContain('Aurora');
     expect(menuText).toContain('High contrast');
     expect(menuText).toContain('Background');
+    expect(menuText).toContain('Skyline rocket');
+    expect(menuText).toContain('Night skyline rocket');
+    expect(menuText).toContain('Green skyline');
+    expect(menuText).toContain('Neon skyline');
+    expect(menuText).toContain('Aurora skyline');
+    expect(menuText).toContain('Blueprint skyline');
+    expect(menuText).toContain('Steel skyline');
+    expect(menuText).toContain('Blueprint grid');
+    expect(menuText).toContain('Machined hatch');
     expect(menuText).toContain('Topographic contours');
+
+    const backgroundSelect: HTMLSelectElement = fixture.nativeElement.querySelector('[aria-label="Background pattern"]');
+    backgroundSelect.value = 'skyline-rocket-night';
+    backgroundSelect.dispatchEvent(new Event('change'));
+
+    expect(appearance.setBackgroundPattern).toHaveBeenCalledWith('skyline-rocket-night');
   });
 
   it('shows the account dropdown and support panel control on workspace routes', () => {
@@ -85,6 +100,7 @@ describe('ShellHeaderComponent', () => {
 
 function setup(isWorkspaceRoute: boolean): {
   fixture: ComponentFixture<ShellHeaderComponent>;
+  appearance: any;
   navigation: any;
 } {
   const appearance = {
@@ -130,5 +146,5 @@ function setup(isWorkspaceRoute: boolean): {
   });
   const fixture = TestBed.createComponent(ShellHeaderComponent);
   fixture.detectChanges();
-  return { fixture, navigation };
+  return { fixture, appearance, navigation };
 }

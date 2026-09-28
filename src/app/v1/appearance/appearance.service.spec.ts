@@ -40,7 +40,7 @@ describe('AppearanceService', () => {
       mode: 'light',
       cornerStyle: 'soft',
       highContrast: false,
-      backgroundPattern: 'blueprint-grid'
+      backgroundPattern: 'skyline-rocket'
     });
 
     service.setPalette('forest');
@@ -72,8 +72,16 @@ describe('AppearanceService', () => {
       mode: 'light',
       cornerStyle: 'soft',
       highContrast: false,
-      backgroundPattern: 'blueprint-grid'
+      backgroundPattern: 'skyline-rocket'
     });
+  });
+
+  it('preserves legacy generated backgrounds and new skyline selections', () => {
+    const legacyService = new AppearanceService(createStorage({ backgroundPattern: 'blueprint-grid' }) as any);
+    const nightService = new AppearanceService(createStorage({ backgroundPattern: 'skyline-rocket-night' }) as any);
+
+    expect(legacyService.settings().backgroundPattern).toBe('blueprint-grid');
+    expect(nightService.settings().backgroundPattern).toBe('skyline-rocket-night');
   });
 
   it('updates the matched background pattern when the palette changes', () => {
@@ -81,13 +89,44 @@ describe('AppearanceService', () => {
     const service = new AppearanceService(storage as any);
 
     service.setPalette('neon');
-    expect(service.settings().backgroundPattern).toBe('neon-grid');
+    expect(service.settings().backgroundPattern).toBe('skyline-neon');
 
     service.setPalette('aurora');
-    expect(service.settings().backgroundPattern).toBe('aurora-flow');
+    expect(service.settings().backgroundPattern).toBe('skyline-aurora');
 
     service.setPalette('steel');
-    expect(service.settings().backgroundPattern).toBe('steel-hatch');
+    expect(service.settings().backgroundPattern).toBe('skyline-steel');
+
+    service.setPalette('blueprint');
+    expect(service.settings().backgroundPattern).toBe('skyline-blueprint');
+
+    service.setPalette('forest');
+    expect(service.settings().backgroundPattern).toBe('skyline-green');
+
+    service.setPalette('default');
+    expect(service.settings().backgroundPattern).toBe('skyline-rocket');
+  });
+
+  it('resets every appearance setting to the skyline background default', () => {
+    const storage = createStorage({
+      palette: 'forest',
+      mode: 'dark',
+      cornerStyle: 'square',
+      highContrast: true,
+      backgroundPattern: 'topographic-contours'
+    });
+    const service = new AppearanceService(storage as any);
+
+    service.reset();
+
+    expect(service.settings().backgroundPattern).toBe('skyline-rocket');
+    expect(storage.store).toHaveBeenLastCalledWith('v1Appearance', {
+      palette: 'default',
+      mode: 'light',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-rocket'
+    });
   });
 });
 

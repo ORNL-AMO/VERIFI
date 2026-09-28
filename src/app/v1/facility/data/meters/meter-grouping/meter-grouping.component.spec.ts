@@ -8,6 +8,7 @@ import { buildMeterGroupSections } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { MeterGroupingComponent } from './meter-grouping.component';
 
 describe('MeterGroupingComponent', () => {
@@ -112,11 +113,13 @@ describe('MeterGroupingComponent', () => {
       throw new Error('Ungrouped meter card was not created.');
     }
     const target = { id: energyGroup.guid, label: energyGroup.name, group: energyGroup };
+    const modalPortal = TestBed.inject(ModalPortalService) as unknown as { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
     await fixture.componentInstance.saveGroupDraft({ name: 'Steam', groupType: 'Energy' });
     fixture.componentInstance.openEditGroup({ group: energyGroup });
     await fixture.componentInstance.saveGroupDraft({ name: 'Electricity', groupType: 'Energy' });
     await fixture.componentInstance.moveMeter(card, target);
+    fixture.detectChanges();
     fixture.componentInstance.requestDeleteGroup(energyGroup);
     await fixture.componentInstance.confirmDeleteGroup();
 
@@ -125,6 +128,8 @@ describe('MeterGroupingComponent', () => {
     expect(actions.updateGroup).toHaveBeenCalledWith(energyGroup, { name: 'Electricity', groupType: 'Energy' });
     expect(actions.reassignMeter).toHaveBeenCalledWith(electricMeter, target);
     expect(actions.deleteGroup).toHaveBeenCalledWith(energyGroup);
+    expect(modalPortal.show).toHaveBeenCalledOnce();
+    expect(modalPortal.hide).toHaveBeenCalledOnce();
   });
 
   it('renders grouping slideouts and confirmation modal from grouping actions', () => {
@@ -149,8 +154,10 @@ describe('MeterGroupingComponent', () => {
 
     fixture.componentInstance.requestDeleteGroup(energyGroup);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Delete group');
-    expect(fixture.nativeElement.textContent).toContain('2 meters will move to Ungrouped.');
+    const modalPortal = TestBed.inject(ModalPortalService) as unknown as { show: ReturnType<typeof vi.fn> };
+    expect(modalPortal.show).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.groupToDeleteAssignedMeterCount()).toBe(2);
+    expect(fixture.nativeElement.querySelector('app-confirm-delete-group-modal')).toBeNull();
   });
 
   it('disables grouping actions while read-only or pending', () => {
@@ -230,6 +237,13 @@ function setup(options: {
             meterGuid,
             tab
           ]
+        }
+      },
+      {
+        provide: ModalPortalService,
+        useValue: {
+          show: vi.fn(),
+          hide: vi.fn()
         }
       },
       { provide: MetersDashboardActionsService, useValue: actions }

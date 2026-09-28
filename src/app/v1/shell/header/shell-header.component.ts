@@ -50,6 +50,13 @@ export class ShellHeaderComponent {
   ];
 
   readonly patternOptions: Array<PatternOption> = [
+    { id: 'skyline-rocket', label: 'Skyline rocket' },
+    { id: 'skyline-rocket-night', label: 'Night skyline rocket' },
+    { id: 'skyline-green', label: 'Green skyline' },
+    { id: 'skyline-neon', label: 'Neon skyline' },
+    { id: 'skyline-aurora', label: 'Aurora skyline' },
+    { id: 'skyline-blueprint', label: 'Blueprint skyline' },
+    { id: 'skyline-steel', label: 'Steel skyline' },
     { id: 'blueprint-grid', label: 'Blueprint grid' },
     { id: 'steel-hatch', label: 'Machined hatch' },
     { id: 'neon-grid', label: 'Neon grid' },

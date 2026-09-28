@@ -98,13 +98,17 @@
     }
   }
 
+</section>
+
+<ng-template #deleteGroupConfirmModal>
   @if (groupToDelete(); as group) {
     <app-confirm-delete-group-modal
       [group]="group"
       [assignedMeterCount]="groupToDeleteAssignedMeterCount()"
       [saving]="saving()"
+      [error]="actionError()"
       (confirmed)="confirmDeleteGroup()"
       (cancelled)="cancelDeleteGroup()">
     </app-confirm-delete-group-modal>
   }
-</section>
+</ng-template>

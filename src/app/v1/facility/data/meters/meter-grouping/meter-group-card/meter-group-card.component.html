@@ -5,6 +5,16 @@
   cdkDragPreviewContainer="parent"
   [cdkDragData]="card"
   [cdkDragDisabled]="!canMove">
+  <button
+    type="button"
+    class="v1-icon-btn v1-meter-group-card__drag"
+    title="Drag meter"
+    aria-label="Drag meter"
+    cdkDragHandle
+    [disabled]="!canMove">
+    <app-ui-icon name="drag"></app-ui-icon>
+  </button>
+
   <header class="v1-meter-group-card__header">
     <h3>
       <span class="v1-meter-group-card__title">
@@ -40,9 +50,6 @@
   </dl>
 
   <footer class="v1-meter-group-card__actions" aria-label="Meter organization actions">
-    <button type="button" class="v1-icon-btn v1-meter-group-card__drag" title="Drag meter" aria-label="Drag meter" cdkDragHandle [disabled]="!canMove">
-      <app-ui-icon name="drag"></app-ui-icon>
-    </button>
     <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet v1-meter-group-card__move" [disabled]="!canMove" (click)="moveRequested.emit(card)">
       <app-ui-icon name="transfer"></app-ui-icon>
       Move meter

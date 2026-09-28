@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -20,6 +21,7 @@ import { MoveMeterSlideoutComponent } from './move-meter-slideout/move-meter-sli
 import { ConfirmDeleteGroupModalComponent } from './confirm-delete-group-modal/confirm-delete-group-modal.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataEmptyStateComponent } from '@app/v1/shared/data-empty-state/data-empty-state.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -36,9 +38,14 @@ import { DataEmptyStateComponent } from '@app/v1/shared/data-empty-state/data-em
     RouterLink
   ]
 })
-export class MeterGroupingComponent {
+export class MeterGroupingComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly actions = inject(MetersDashboardActionsService);
+  private readonly modalPortal = inject(ModalPortalService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+  private deleteModalOpen = false;
+
+  @ViewChild('deleteGroupConfirmModal') private readonly deleteGroupConfirmModal?: TemplateRef<unknown>;
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
@@ -68,6 +75,10 @@ export class MeterGroupingComponent {
   });
   readonly canDrop = (card: MeterCardView, target: MeterGroupDropTarget): boolean =>
     this.canAct() && this.actions.canAssignMeterToTarget(card.meter, target);
+
+  ngOnDestroy(): void {
+    this.hideDeleteModal();
+  }
 
   openMeter(meter: IdbUtilityMeter): void {
     const facility = this.workspace.facility();
@@ -113,14 +124,22 @@ export class MeterGroupingComponent {
   }
 
   requestDeleteGroup(group: IdbUtilityMeterGroup): void {
+    const template = this.deleteGroupConfirmModal;
+    if (!this.canAct() || !template) {
+      return;
+    }
     this.groupToDelete.set(group);
     this.slideout.set(undefined);
     this.actionError.set(undefined);
+    this.deleteModalOpen = true;
+    this.modalPortal.show(new TemplatePortal(template, this.viewContainerRef));
   }
 
   cancelDeleteGroup(): void {
     if (!this.saving()) {
       this.groupToDelete.set(undefined);
+      this.hideDeleteModal();
+      this.actionError.set(undefined);
     }
   }
 
@@ -144,6 +163,7 @@ export class MeterGroupingComponent {
     await this.runAction(async () => {
       await this.actions.deleteGroup(group);
       this.groupToDelete.set(undefined);
+      this.hideDeleteModal();
     });
   }
 
@@ -168,6 +188,13 @@ export class MeterGroupingComponent {
     if (this.canAct()) {
       this.slideout.set(slideout);
       this.actionError.set(undefined);
+    }
+  }
+
+  private hideDeleteModal(): void {
+    if (this.deleteModalOpen) {
+      this.deleteModalOpen = false;
+      this.modalPortal.hide();
     }
   }
 
