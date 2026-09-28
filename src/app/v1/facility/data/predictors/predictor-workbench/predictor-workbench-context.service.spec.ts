@@ -1,9 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PredictorWorkbenchContextService } from './predictor-workbench-context.service';
 
@@ -20,6 +21,7 @@ describe('PredictorWorkbenchContextService', () => {
     ]);
     const cards = signal<any[]>(predictors().map(predictor => ({ predictor })));
     const predictorFindings = vi.fn((guid: string) => [{ id: `finding-${guid}` }]);
+    const navigate = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         PredictorWorkbenchContextService,
@@ -27,9 +29,20 @@ describe('PredictorWorkbenchContextService', () => {
           provide: ActivatedRoute,
           useValue: { paramMap: parameters, snapshot: { paramMap: parameters.value } }
         },
+        { provide: Router, useValue: { navigate } },
+        {
+          provide: WorkspaceNavigationService,
+          useValue: {
+            facilityPredictorRoute: (_facility: string, predictor: string, tab: string) =>
+              ['/predictors', predictor, tab]
+          }
+        },
         {
           provide: FacilityPredictorsWorkspaceService,
-          useValue: { predictors, predictorReadings: readings, predictorCards: cards }
+          useValue: {
+            facility: signal({ guid: 'facility-a' }), predictors,
+            predictorReadings: readings, predictorCards: cards
+          }
         },
         { provide: WorkspaceStatusService, useValue: { predictorFindings } }
       ]
@@ -40,6 +53,9 @@ describe('PredictorWorkbenchContextService', () => {
     expect(context.readings().map(reading => reading.guid)).toEqual(['reading-a']);
     expect(context.card()?.predictor.guid).toBe('predictor-a');
     expect(context.findings()).toEqual([{ id: 'finding-predictor-a' }]);
+    expect(context.settingsLabel).toBe('Open Settings');
+    context.openReadings();
+    expect(navigate).toHaveBeenCalledWith(['/predictors', 'predictor-a', 'readings']);
 
     parameters.next(convertToParamMap({ predictorGuid: 'predictor-b' }));
     expect(context.predictor()?.guid).toBe('predictor-b');

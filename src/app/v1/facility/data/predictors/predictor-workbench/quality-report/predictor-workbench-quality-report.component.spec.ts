@@ -1,9 +1,7 @@
 import { Directive, EventEmitter, Input, Output, forwardRef, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router } from '@angular/router';
 import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
-import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -11,8 +9,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { vi } from 'vitest';
-import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
+import { PREDICTOR_QUALITY_CONTEXT } from '../../predictor-quality-context';
 import { PredictorWorkbenchQualityReportComponent } from './predictor-workbench-quality-report.component';
 
 describe('PredictorWorkbenchQualityReportComponent', () => {
@@ -22,9 +19,7 @@ describe('PredictorWorkbenchQualityReportComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('No readings found');
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.v1-btn')?.click();
-    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith([
-      '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'predictor-a', 'readings'
-    ]);
+    expect(TestBed.inject(PREDICTOR_QUALITY_CONTEXT).openReadings).toHaveBeenCalled();
   });
 
   it('renders findings, month details, statistics, chart annotations, copy, and download actions', () => {
@@ -171,25 +166,18 @@ function setup(options: {
     imports: [PredictorWorkbenchQualityReportComponent, EChartsStubDirective],
     providers: [
       {
-        provide: FacilityPredictorsWorkspaceService,
+        provide: PREDICTOR_QUALITY_CONTEXT,
         useValue: {
-          facility: signal({ guid: 'facility-a', name: 'Facility A' })
+          predictor: signal(selectedPredictor),
+          readings: signal(readings),
+          findings: signal(statusFindings),
+          idPrefix: signal('predictor-quality'),
+          settingsLabel: 'Open Settings',
+          openReadings: vi.fn(),
+          openSettings: vi.fn()
         }
-      },
-      {
-        provide: PredictorWorkbenchContextService,
-        useValue: { predictor: signal(selectedPredictor), readings: signal(readings) }
       },
       { provide: CopyTableService, useValue: { copyTable: options.copyTable ?? vi.fn() } },
-      { provide: Router, useValue: { navigate: vi.fn() } },
-      {
-        provide: WorkspaceNavigationService,
-        useValue: {
-          facilityPredictorRoute: (facilityGuid: string, predictorGuid: string, tab: string) => [
-            '/v1', 'workspace', 'facility', facilityGuid, 'data', 'predictors', predictorGuid, tab
-          ]
-        }
-      },
       {
         provide: WorkspaceStatusService,
         useValue: {

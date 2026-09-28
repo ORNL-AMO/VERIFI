@@ -64,6 +64,8 @@ import { ShellComponent } from '@app/v1/shell/shell.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
 import { predictorCanonicalRouteGuard } from '@app/v1/facility/data/predictors/predictor-canonical-route.guard';
+import { PREDICTOR_QUALITY_CONTEXT } from '@app/v1/facility/data/predictors/predictor-quality-context';
+import { WeatherPredictorQualityContextService } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality-context.service';
 
 export const V1Routes: Routes = [
   {
@@ -211,8 +213,24 @@ export const V1Routes: Routes = [
                           { path: '', pathMatch: 'full', redirectTo: 'setup' },
                           { path: 'setup', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'setup' } },
                           { path: 'readings', component: WeatherPredictorReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'readings' } },
-                          { path: 'quality/:predictorGuid', component: WeatherPredictorQualityComponent, data: { weatherTab: 'quality' } },
-                          { path: 'quality', component: WeatherPredictorQualityComponent, data: { weatherTab: 'quality' } },
+                          {
+                            path: 'quality/:predictorGuid',
+                            component: WeatherPredictorQualityComponent,
+                            providers: [
+                              WeatherPredictorQualityContextService,
+                              { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: WeatherPredictorQualityContextService }
+                            ],
+                            data: { weatherTab: 'quality' }
+                          },
+                          {
+                            path: 'quality',
+                            component: WeatherPredictorQualityComponent,
+                            providers: [
+                              WeatherPredictorQualityContextService,
+                              { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: WeatherPredictorQualityContextService }
+                            ],
+                            data: { weatherTab: 'quality' }
+                          },
                           {
                             path: 'outputs/:predictorGuid',
                             children: [
@@ -241,7 +259,14 @@ export const V1Routes: Routes = [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'settings' } },
                       { path: 'readings', component: PredictorWorkbenchReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'readings' } },
-                      { path: 'quality', component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } },
+                      {
+                        path: 'quality',
+                        component: PredictorWorkbenchQualityReportComponent,
+                        providers: [
+                          { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: PredictorWorkbenchContextService }
+                        ],
+                        data: { predictorTab: 'quality' }
+                      },
                       { path: '**', redirectTo: 'settings' }
                     ]
                   }

@@ -1,6 +1,5 @@
 import { FocusMonitor } from '@angular/cdk/a11y';
-import { Component, ElementRef, EventEmitter, Injector, Input, Output, ViewChild, afterNextRender, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, Injector, ViewChild, afterNextRender, computed, inject, signal } from '@angular/core';
 import {
   PredictorDataQualityReport,
   PredictorDataQualityStatistics,
@@ -9,13 +8,9 @@ import {
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { IdbPredictor } from '@data/models/idbModels/predictor';
-import { IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
-import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
+import { PREDICTOR_QUALITY_CONTEXT } from '../../predictor-quality-context';
 
 type PredictorQualityStatisticId = keyof PredictorDataQualityStatistics;
 
@@ -73,35 +68,20 @@ const QUALITY_FINDING_CODES = new Set([
 })
 export class PredictorWorkbenchQualityReportComponent {
   private readonly copyTableService = inject(CopyTableService);
-  private readonly router = inject(Router);
-  private readonly navigation = inject(WorkspaceNavigationService);
   private readonly focusMonitor = inject(FocusMonitor);
   private readonly injector = inject(Injector);
   readonly status = inject(WorkspaceStatusService);
-
-  readonly workspace = inject(FacilityPredictorsWorkspaceService);
-  private readonly context = inject(PredictorWorkbenchContextService, { optional: true });
+  readonly context = inject(PREDICTOR_QUALITY_CONTEXT);
   readonly copyingStatisticsTable = signal(false);
-  private readonly predictorInput = signal<IdbPredictor | undefined>(undefined);
-  private readonly readingsInput = signal<readonly IdbPredictorData[] | undefined>(undefined);
-  private readonly findingsInput = signal<readonly StatusItem[] | undefined>(undefined);
-  private readonly idPrefixInput = signal('predictor-quality');
-  @Input('predictor') set predictorValue(value: IdbPredictor | undefined) { this.predictorInput.set(value); }
-  @Input('readings') set readingsValue(value: readonly IdbPredictorData[] | undefined) { this.readingsInput.set(value); }
-  @Input('findings') set findingsValue(value: readonly StatusItem[] | undefined) { this.findingsInput.set(value); }
-  @Input() set idPrefix(value: string) { this.idPrefixInput.set(value || 'predictor-quality'); }
-  @Input() embedded = false;
-  @Output() readonly readingsRequested = new EventEmitter<void>();
-  @Output() readonly setupRequested = new EventEmitter<void>();
-  readonly predictor = computed(() => this.predictorInput() ?? this.context?.predictor());
-  readonly readings = computed(() => this.readingsInput() ?? this.context?.readings() ?? []);
+  readonly predictor = this.context.predictor;
+  readonly readings = this.context.readings;
   readonly ids = computed(() => ({
-    findings: `${this.idPrefixInput()}-findings-heading`,
-    months: `${this.idPrefixInput()}-months-heading`,
-    negative: `${this.idPrefixInput()}-negative-heading`,
-    weather: `${this.idPrefixInput()}-weather-heading`,
-    statistics: `${this.idPrefixInput()}-statistics-heading`,
-    chart: `${this.idPrefixInput()}-chart-heading`
+    findings: `${this.context.idPrefix()}-findings-heading`,
+    months: `${this.context.idPrefix()}-months-heading`,
+    negative: `${this.context.idPrefix()}-negative-heading`,
+    weather: `${this.context.idPrefix()}-weather-heading`,
+    statistics: `${this.context.idPrefix()}-statistics-heading`,
+    chart: `${this.context.idPrefix()}-chart-heading`
   }));
 
   @ViewChild('statisticsTable', { static: false }) statisticsTable?: ElementRef<HTMLTableElement>;
@@ -131,7 +111,7 @@ export class PredictorWorkbenchQualityReportComponent {
     const predictor = this.predictor();
     if (!report || !predictor) return [];
     if (this.status.state() === 'ready') {
-      return (this.findingsInput() ?? this.status.predictorFindings(predictor.guid))
+      return this.context.findings()
         .filter(finding => QUALITY_FINDING_CODES.has(finding.code))
         .map(toFindingView);
     }
@@ -155,11 +135,11 @@ export class PredictorWorkbenchQualityReportComponent {
   );
 
   openReadings(): void {
-    this.openTab('readings');
+    this.context.openReadings();
   }
 
   openSettings(): void {
-    this.openTab('settings');
+    this.context.openSettings();
   }
 
   copyStatisticsTable(): void {
@@ -186,18 +166,6 @@ export class PredictorWorkbenchQualityReportComponent {
     }
   }
 
-  private openTab(tab: 'settings' | 'readings'): void {
-    if (this.embedded) {
-      if (tab === 'settings') this.setupRequested.emit();
-      else this.readingsRequested.emit();
-      return;
-    }
-    const facility = this.workspace.facility();
-    const predictor = this.predictor();
-    if (facility && predictor) {
-      void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictor.guid, tab));
-    }
-  }
 }
 
 function slugify(value: string): string {

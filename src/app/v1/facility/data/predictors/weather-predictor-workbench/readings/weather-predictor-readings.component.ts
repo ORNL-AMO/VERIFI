@@ -30,7 +30,7 @@ import { PredictorWorkspaceActionsService } from '../../predictor-workspace-acti
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherReadingDeleteConfirmationModalComponent } from './weather-reading-delete-confirmation-modal/weather-reading-delete-confirmation-modal.component';
 import { WeatherReadingMonthEditorComponent } from './weather-reading-month-editor/weather-reading-month-editor.component';
-import { WeatherSourceReadingsSlideoutComponent } from './weather-source-readings-slideout/weather-source-readings-slideout.component';
+import { WeatherSourceReadingsSlideoutComponent } from '../../shared/weather-source-readings/weather-source-readings-slideout.component';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
 
 @Component({

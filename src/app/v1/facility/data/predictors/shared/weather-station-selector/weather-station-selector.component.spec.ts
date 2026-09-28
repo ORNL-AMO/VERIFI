@@ -11,7 +11,7 @@ import {
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WeatherStationSelectionPreview } from '../../models';
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
-import { WeatherSourceReadingsSlideoutComponent } from '../../weather-predictor-workbench/readings/weather-source-readings-slideout/weather-source-readings-slideout.component';
+import { WeatherSourceReadingsSlideoutComponent } from '../weather-source-readings/weather-source-readings-slideout.component';
 import {
   WeatherStationSelectorComponent,
   buildStationPreviewChartOption,

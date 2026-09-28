@@ -34,7 +34,7 @@ import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflo
 import {
   WeatherSourceReadingPredictor,
   WeatherSourceReadingsSlideoutComponent
-} from '../../weather-predictor-workbench/readings/weather-source-readings-slideout/weather-source-readings-slideout.component';
+} from '../weather-source-readings/weather-source-readings-slideout.component';
 
 interface WeatherPreviewSourceInspection {
   readonly predictor: WeatherSourceReadingPredictor;

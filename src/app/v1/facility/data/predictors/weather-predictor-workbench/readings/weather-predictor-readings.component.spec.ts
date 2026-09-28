@@ -14,7 +14,7 @@ import { PredictorWorkspaceActionsService } from '../../predictor-workspace-acti
 import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflow.service';
 import { WeatherPredictorReadingsComponent } from './weather-predictor-readings.component';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
-import { WeatherSourceReadingsSlideoutComponent } from './weather-source-readings-slideout/weather-source-readings-slideout.component';
+import { WeatherSourceReadingsSlideoutComponent } from '../../shared/weather-source-readings/weather-source-readings-slideout.component';
 
 describe('WeatherPredictorReadingsComponent', () => {
   it('renders dynamic predictor columns with status icons beside their values', () => {

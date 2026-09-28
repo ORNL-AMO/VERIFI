@@ -60,7 +60,7 @@
               <div class="predictor-quality__finding-actions">
                 <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Open Readings</button>
                 @if (finding.settingsAction) {
-                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">{{ embedded ? 'Open Setup' : 'Open Settings' }}</button>
+                  <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">{{ context.settingsLabel }}</button>
                 }
                 @if (finding.item; as statusItem) {
                   @if (statusItem.severity === 'warning') {
@@ -122,7 +122,7 @@
           </div>
           <div class="predictor-quality__heading-actions">
             <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openReadings()">Review Readings</button>
-            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">{{ embedded ? 'Open Setup' : 'Open Settings' }}</button>
+            <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="openSettings()">{{ context.settingsLabel }}</button>
           </div>
         </div>
         <p class="predictor-quality__note">
