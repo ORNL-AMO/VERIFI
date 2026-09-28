@@ -1,5 +1,7 @@
 import { firstValueFrom } from 'rxjs';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
+import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
 import { dbConfig } from './_dbConfig';
 import { IndexedDbTransactionService } from './indexed-db-transaction.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
@@ -203,15 +205,67 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
   });
 
+  it('rolls back compound meter deletion when a later reading deletion fails', async () => {
+    const handler = new MeterCommandHandler({} as any, {} as any, {} as any, transactionService);
+    const meter = accountAFixture.meter as any;
+    const meterData = accountAFixture.meterData as any;
+
+    await expect(handler.deleteMeterWithData({
+      meter,
+      meterData: [meterData, { ...meterData, guid: 'invalid-key', id: BigInt(1) as any }]
+    }, accountAFixture.account.guid as string)).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('utilityMeter')).toContainEqual(accountAFixture.meter);
+    expect(await harness.getAll('utilityMeterData')).toContainEqual(accountAFixture.meterData);
+  });
+
+  it('rolls back meter-group creation when a related analysis write fails', async () => {
+    const invalidAnalysis = {
+      ...accountAFixture.facilityAnalysis,
+      id: BigInt(1) as any,
+      analysisCategory: 'energy',
+      groups: []
+    };
+    const workspace = {
+      facilityAnalyses: () => [invalidAnalysis],
+      accountReports: () => [],
+      predictors: () => []
+    };
+    const handler = new MeterGroupCommandHandler(
+      {} as any,
+      {} as any,
+      workspace as any,
+      {} as any,
+      transactionService
+    );
+    const group = {
+      guid: 'group-create-rollback',
+      accountId: accountAFixture.account.guid,
+      facilityId: accountAFixture.facility.guid,
+      groupType: 'Energy'
+    } as any;
+
+    await expect(handler.createMeterGroup(group, accountAFixture.account.guid as string)).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('utilityMeterGroups')).not.toContainEqual(
+      expect.objectContaining({ guid: group.guid })
+    );
+    expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
+  });
+
   it('commits or rolls back every output in a weather station month together', async () => {
     const first = {
-      ...accountAFixture.predictorData, id: undefined, guid: 'station-month-hdd',
+      ...accountAFixture.predictorData, guid: 'station-month-hdd',
       predictorId: 'weather-hdd', year: 2026, month: 4, amount: 12
     };
+    delete first.id;
     const second = {
-      ...accountAFixture.predictorData, id: undefined, guid: 'station-month-humidity',
+      ...accountAFixture.predictorData, guid: 'station-month-humidity',
       predictorId: 'weather-humidity', year: 2026, month: 4, amount: 55
     };
+    delete second.id;
     await transactionService.runTransaction(['predictorData'], 'readwrite', async transaction => {
       await transaction.add('predictorData', first);
       await transaction.add('predictorData', second);
