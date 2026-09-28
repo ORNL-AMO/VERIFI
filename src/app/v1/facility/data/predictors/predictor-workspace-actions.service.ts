@@ -3,8 +3,8 @@ import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-wo
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import {
-  AnalysisCommandHandler,
   buildFacilityAnalysisPredictorUpdates,
+  buildFacilityAnalysesWithoutPredictors,
   buildFacilityAnalysesWithPredictors
 } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
@@ -32,7 +32,6 @@ export class PredictorWorkspaceActionsService {
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly predictorHandler = inject(PredictorCommandHandler);
-  private readonly analysisHandler = inject(AnalysisCommandHandler);
 
   async createPredictor(draft: PredictorDraft): Promise<IdbPredictor> {
     const account = this.requireAccount();
@@ -46,11 +45,13 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor added', successMessage: predictor.name },
           publication: { mode: 'reload' }
         },
-        async () => {
-          const added = await this.predictorHandler.addPredictor(predictor, account.guid);
-          await this.analysisHandler.addAnalysisPredictor(added);
-          return added;
-        }
+        () => this.predictorHandler.createStandardPredictor({
+          predictor,
+          facilityAnalyses: buildFacilityAnalysesWithPredictors(
+            this.facilityAnalyses(predictor.facilityId),
+            [predictor]
+          )
+        }, account.guid)
       );
       return result.value;
     });
@@ -72,11 +73,13 @@ export class PredictorWorkspaceActionsService {
           notification: { suppressSuccessToast: true },
           publication: { mode: 'reload' }
         },
-        async () => {
-          const saved = await this.predictorHandler.updatePredictor(updated, account.guid);
-          await this.analysisHandler.updateAnalysisPredictor(saved);
-          return saved;
-        }
+        () => this.predictorHandler.updateStandardPredictor({
+          predictor: updated,
+          facilityAnalyses: buildFacilityAnalysisPredictorUpdates(
+            this.facilityAnalyses(updated.facilityId),
+            updated
+          )
+        }, account.guid)
       );
       return result.value;
     });
@@ -97,11 +100,13 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor copied', successMessage: copy.name },
           publication: { mode: 'reload' }
         },
-        async () => {
-          const added = await this.predictorHandler.addPredictor(copy, account.guid);
-          await this.analysisHandler.addAnalysisPredictor(added);
-          return added;
-        }
+        () => this.predictorHandler.createStandardPredictor({
+          predictor: copy,
+          facilityAnalyses: buildFacilityAnalysesWithPredictors(
+            this.facilityAnalyses(copy.facilityId),
+            [copy]
+          )
+        }, account.guid)
       );
       return result.value;
     });
@@ -123,13 +128,14 @@ export class PredictorWorkspaceActionsService {
           notification: { successTitle: 'Predictor deleted', successMessage: current.name },
           publication: { mode: 'reload' }
         },
-        async () => {
-          for (const reading of readings) {
-            await this.predictorHandler.deletePredictorData(reading.id!);
-          }
-          await this.analysisHandler.deleteAnalysisPredictor(current);
-          await this.predictorHandler.deletePredictor(current, account.guid);
-        }
+        () => this.predictorHandler.deleteStandardPredictor({
+          predictor: current,
+          predictorData: readings,
+          facilityAnalyses: buildFacilityAnalysesWithoutPredictors(
+            this.facilityAnalyses(current.facilityId),
+            new Set([current.guid])
+          )
+        }, account.guid)
       );
     });
   }
@@ -499,6 +505,10 @@ export class PredictorWorkspaceActionsService {
     const reading = this.workspace.predictorData().find(item => item.guid === guid && item.predictorId === predictorGuid);
     if (!reading) throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer available.');
     return structuredClone(reading);
+  }
+
+  private facilityAnalyses(facilityGuid: string) {
+    return this.workspace.facilityAnalyses().filter(analysis => analysis.facilityId === facilityGuid);
   }
 
   private requireAccount() {

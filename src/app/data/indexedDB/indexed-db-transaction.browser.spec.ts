@@ -1,4 +1,5 @@
 import { firstValueFrom } from 'rxjs';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { dbConfig } from './_dbConfig';
 import { IndexedDbTransactionService } from './indexed-db-transaction.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
@@ -154,6 +155,48 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
       }
     )).rejects.toBeDefined();
 
+    await harness.reopen();
+    expect(await harness.getAll('predictor')).toContainEqual(accountAFixture.predictor);
+    expect(await harness.getAll('predictorData')).toContainEqual(accountAFixture.predictorData);
+    expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
+  });
+
+  it('rolls back compound standard predictor create, update, and delete commands', async () => {
+    const handler = new PredictorCommandHandler({} as any, {} as any, transactionService);
+    const accountGuid = accountAFixture.account.guid as string;
+    const currentPredictor = {
+      ...accountAFixture.predictor,
+      predictorType: 'Standard'
+    } as any;
+    const invalidAnalysis = {
+      ...accountAFixture.facilityAnalysis,
+      unsupportedValue: () => 'cannot be cloned'
+    } as any;
+    const createdPredictor = {
+      ...currentPredictor,
+      id: undefined,
+      guid: 'standard-create-rollback'
+    };
+
+    await expect(handler.createStandardPredictor({
+      predictor: createdPredictor,
+      facilityAnalyses: [invalidAnalysis]
+    }, accountGuid)).rejects.toBeDefined();
+    expect(await harness.getAll('predictor')).not.toContainEqual(
+      expect.objectContaining({ guid: createdPredictor.guid })
+    );
+
+    await expect(handler.updateStandardPredictor({
+      predictor: { ...currentPredictor, name: 'Must roll back' },
+      facilityAnalyses: [invalidAnalysis]
+    }, accountGuid)).rejects.toBeDefined();
+    expect(await harness.getAll('predictor')).toContainEqual(accountAFixture.predictor);
+
+    await expect(handler.deleteStandardPredictor({
+      predictor: currentPredictor,
+      predictorData: [accountAFixture.predictorData as any],
+      facilityAnalyses: [invalidAnalysis]
+    }, accountGuid)).rejects.toBeDefined();
     await harness.reopen();
     expect(await harness.getAll('predictor')).toContainEqual(accountAFixture.predictor);
     expect(await harness.getAll('predictorData')).toContainEqual(accountAFixture.predictorData);

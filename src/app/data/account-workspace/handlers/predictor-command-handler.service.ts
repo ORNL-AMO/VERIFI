@@ -1,7 +1,7 @@
 /**
  * Persistence-only handler for predictor and predictor-data commands.
  *
- * Compound weather operations use the transaction methods in this handler so
+ * Compound predictor operations use the transaction methods in this handler so
  * predictor settings, monthly data, and analysis references commit together.
  */
 import { Injectable } from '@angular/core';
@@ -18,6 +18,19 @@ export interface PredictorDataBatchChanges {
   readonly add: readonly IdbPredictorData[];
   readonly update: readonly IdbPredictorData[];
   readonly delete: readonly IdbPredictorData[];
+}
+
+export interface StandardPredictorCreationChanges {
+  readonly predictor: IdbPredictor;
+  readonly facilityAnalyses: readonly IdbAnalysisItem[];
+}
+
+export interface StandardPredictorUpdateChanges extends StandardPredictorCreationChanges { }
+
+export interface StandardPredictorDeletionChanges {
+  readonly predictor: IdbPredictor;
+  readonly predictorData: readonly IdbPredictorData[];
+  readonly facilityAnalyses: readonly IdbAnalysisItem[];
 }
 
 export interface WeatherPredictorCreationChanges {
@@ -73,6 +86,65 @@ export class PredictorCommandHandler {
     this.assertOwnership(predictor.accountId, activeAccountGuid, 'predictor');
     await firstValueFrom(this.predictorDb.deleteWithObservable(predictor.id));
     return predictor.id;
+  }
+
+  async createStandardPredictor(
+    changes: StandardPredictorCreationChanges,
+    activeAccountGuid: string
+  ): Promise<IdbPredictor> {
+    this.assertStandardPredictor(changes.predictor, activeAccountGuid, false);
+    this.assertPersistableAnalyses(changes.facilityAnalyses, activeAccountGuid);
+    let predictorId: IDBValidKey | undefined;
+    await this.transactions.runTransaction(['predictor', 'analysisItems'], 'readwrite', async transaction => {
+      predictorId = await transaction.add('predictor', { ...changes.predictor });
+      for (const analysis of changes.facilityAnalyses) {
+        await transaction.put('analysisItems', { ...analysis, modifiedDate: new Date() });
+      }
+    });
+    return { ...changes.predictor, id: Number(predictorId) };
+  }
+
+  async updateStandardPredictor(
+    changes: StandardPredictorUpdateChanges,
+    activeAccountGuid: string
+  ): Promise<IdbPredictor> {
+    this.assertStandardPredictor(changes.predictor, activeAccountGuid, true);
+    this.assertPersistableAnalyses(changes.facilityAnalyses, activeAccountGuid);
+    const updated = { ...changes.predictor, modifiedDate: new Date() };
+    await this.transactions.runTransaction(['predictor', 'analysisItems'], 'readwrite', async transaction => {
+      await transaction.put('predictor', updated);
+      for (const analysis of changes.facilityAnalyses) {
+        await transaction.put('analysisItems', { ...analysis, modifiedDate: new Date() });
+      }
+    });
+    return updated;
+  }
+
+  async deleteStandardPredictor(
+    changes: StandardPredictorDeletionChanges,
+    activeAccountGuid: string
+  ): Promise<void> {
+    this.assertStandardPredictor(changes.predictor, activeAccountGuid, true);
+    changes.predictorData.forEach(entry => {
+      this.assertPredictorData(entry, changes.predictor.guid, activeAccountGuid);
+      if (entry.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'Predictor data is missing its IndexedDB id.');
+      }
+    });
+    this.assertPersistableAnalyses(changes.facilityAnalyses, activeAccountGuid);
+    await this.transactions.runTransaction(
+      ['predictor', 'predictorData', 'analysisItems'],
+      'readwrite',
+      async transaction => {
+        for (const entry of changes.predictorData) {
+          await transaction.deleteByKey('predictorData', entry.id!);
+        }
+        await transaction.deleteByKey('predictor', changes.predictor.id!);
+        for (const analysis of changes.facilityAnalyses) {
+          await transaction.put('analysisItems', { ...analysis, modifiedDate: new Date() });
+        }
+      }
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -354,6 +426,29 @@ export class PredictorCommandHandler {
     if (predictor.predictorType !== 'Weather' || (requireId && predictor.id === undefined)) {
       throw new WorkspaceWriteError('validation-failed', 'The station group contains an invalid weather predictor.');
     }
+  }
+
+  private assertStandardPredictor(
+    predictor: IdbPredictor,
+    activeAccountGuid: string,
+    requireId: boolean
+  ): void {
+    this.assertOwnership(predictor.accountId, activeAccountGuid, 'standard predictor');
+    if (predictor.predictorType !== 'Standard' || (requireId && predictor.id === undefined)) {
+      throw new WorkspaceWriteError('validation-failed', 'The command contains an invalid standard predictor.');
+    }
+  }
+
+  private assertPersistableAnalyses(
+    analyses: readonly IdbAnalysisItem[],
+    activeAccountGuid: string
+  ): void {
+    analyses.forEach(analysis => {
+      this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
+      if (analysis.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'Facility analysis is missing its IndexedDB id.');
+      }
+    });
   }
 
   private assertPredictorData(

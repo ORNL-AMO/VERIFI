@@ -3,7 +3,6 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorWorkspaceActionsService } from './predictor-workspace-actions.service';
@@ -16,6 +15,9 @@ describe('PredictorWorkspaceActionsService', () => {
   const readings = signal<any[]>([reading('reading-a', 20, 2026, 1)]);
   const predictors = signal<any[]>([existing]);
   const predictorHandler = {
+    createStandardPredictor: vi.fn(async ({ predictor }: any) => ({ ...predictor, id: 11 })),
+    updateStandardPredictor: vi.fn(async ({ predictor }: any) => predictor),
+    deleteStandardPredictor: vi.fn(async () => undefined),
     addPredictor: vi.fn(async (value: any) => ({ ...value, id: 11 })),
     updatePredictor: vi.fn(async (value: any) => value),
     deletePredictor: vi.fn(async () => 10),
@@ -28,12 +30,6 @@ describe('PredictorWorkspaceActionsService', () => {
     applyWeatherStationGroup: vi.fn(async () => undefined),
     applyWeatherStationMonth: vi.fn(async () => undefined)
   };
-  const analysisHandler = {
-    addAnalysisPredictor: vi.fn(async () => undefined),
-    updateAnalysisPredictor: vi.fn(async () => undefined),
-    deleteAnalysisPredictor: vi.fn(async () => undefined)
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
     readings.set([reading('reading-a', 20, 2026, 1)]);
@@ -50,7 +46,6 @@ describe('PredictorWorkspaceActionsService', () => {
         execute: vi.fn(async (options: any, persist: () => Promise<unknown>) => ({ value: await persist(), change: options }))
       } },
       { provide: PredictorCommandHandler, useValue: predictorHandler },
-      { provide: AnalysisCommandHandler, useValue: analysisHandler }
     ] });
   });
 
@@ -58,22 +53,25 @@ describe('PredictorWorkspaceActionsService', () => {
     const copy = await TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing);
     expect(copy.guid).not.toBe(existing.guid);
     expect(copy.name).toBe('Production (copy)');
-    expect(predictorHandler.addPredictor).toHaveBeenCalledOnce();
-    expect(analysisHandler.addAnalysisPredictor).toHaveBeenCalledOnce();
+    expect(predictorHandler.createStandardPredictor).toHaveBeenCalledWith(
+      expect.objectContaining({ predictor: expect.objectContaining({ guid: copy.guid }) }),
+      'account-a'
+    );
   });
 
-  it('deletes readings and analysis references before deleting the predictor', async () => {
+  it('deletes readings, analysis references, and the predictor in one command', async () => {
     await TestBed.inject(PredictorWorkspaceActionsService).deletePredictor(existing);
-    expect(predictorHandler.deletePredictorData).toHaveBeenCalledWith(20);
-    expect(analysisHandler.deleteAnalysisPredictor).toHaveBeenCalledWith(expect.objectContaining({ guid: 'predictor-a' }));
-    expect(predictorHandler.deletePredictor).toHaveBeenCalledWith(expect.objectContaining({ id: 10 }), 'account-a');
+    expect(predictorHandler.deleteStandardPredictor).toHaveBeenCalledWith(expect.objectContaining({
+      predictor: expect.objectContaining({ id: 10 }),
+      predictorData: [expect.objectContaining({ id: 20 })]
+    }), 'account-a');
   });
 
-  it('reloads authoritative workspace state after a partial command failure', async () => {
-    analysisHandler.addAnalysisPredictor.mockRejectedValueOnce(new Error('analysis failed'));
+  it('reloads authoritative workspace state after an atomic command failure', async () => {
+    predictorHandler.createStandardPredictor.mockRejectedValueOnce(new Error('transaction failed'));
     const workspaceService = TestBed.inject(AccountWorkspaceService) as unknown as { reloadActiveWorkspace: ReturnType<typeof vi.fn> };
 
-    await expect(TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing)).rejects.toThrow('analysis failed');
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing)).rejects.toThrow('transaction failed');
 
     expect(workspaceService.reloadActiveWorkspace).toHaveBeenCalledWith(true);
   });

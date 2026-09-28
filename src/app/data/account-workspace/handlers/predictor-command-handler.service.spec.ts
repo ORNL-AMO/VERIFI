@@ -59,6 +59,69 @@ describe('PredictorCommandHandler', () => {
     expect(predictorDb.deleteWithObservable).not.toHaveBeenCalled();
   });
 
+  it('creates a standard predictor and its analysis references in one transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const transaction = {
+      add: vi.fn(async () => 12), put: vi.fn(async () => 4), deleteByKey: vi.fn(async () => undefined)
+    };
+    transactions.runTransaction.mockImplementation(
+      async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
+    );
+    const predictor = { guid: 'p-1', accountId: ACCOUNT, predictorType: 'Standard' } as IdbPredictor;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+
+    const result = await handler.createStandardPredictor({ predictor, facilityAnalyses: [analysis] }, ACCOUNT);
+
+    expect(result.id).toBe(12);
+    expect(transactions.runTransaction).toHaveBeenCalledWith(
+      ['predictor', 'analysisItems'], 'readwrite', expect.any(Function)
+    );
+    expect(transaction.add).toHaveBeenCalledWith('predictor', predictor);
+    expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
+  });
+
+  it('updates a standard predictor and its analysis references in one transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const transaction = {
+      add: vi.fn(async () => 12), put: vi.fn(async () => 4), deleteByKey: vi.fn(async () => undefined)
+    };
+    transactions.runTransaction.mockImplementation(
+      async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
+    );
+    const predictor = { id: 3, guid: 'p-1', accountId: ACCOUNT, predictorType: 'Standard' } as IdbPredictor;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+
+    await handler.updateStandardPredictor({ predictor, facilityAnalyses: [analysis] }, ACCOUNT);
+
+    expect(transactions.runTransaction).toHaveBeenCalledWith(
+      ['predictor', 'analysisItems'], 'readwrite', expect.any(Function)
+    );
+    expect(transaction.put).toHaveBeenCalledWith('predictor', expect.objectContaining({ id: 3 }));
+    expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
+  });
+
+  it('deletes a standard predictor, its readings, and analysis references in one transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const transaction = {
+      add: vi.fn(async () => 12), put: vi.fn(async () => 4), deleteByKey: vi.fn(async () => undefined)
+    };
+    transactions.runTransaction.mockImplementation(
+      async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
+    );
+    const predictor = { id: 3, guid: 'p-1', accountId: ACCOUNT, predictorType: 'Standard' } as IdbPredictor;
+    const predictorData = { id: 7, guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT } as IdbPredictorData;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+
+    await handler.deleteStandardPredictor({ predictor, predictorData: [predictorData], facilityAnalyses: [analysis] }, ACCOUNT);
+
+    expect(transactions.runTransaction).toHaveBeenCalledWith(
+      ['predictor', 'predictorData', 'analysisItems'], 'readwrite', expect.any(Function)
+    );
+    expect(transaction.deleteByKey).toHaveBeenCalledWith('predictorData', 7);
+    expect(transaction.deleteByKey).toHaveBeenCalledWith('predictor', 3);
+    expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
+  });
+
   it('replaceFacilityPredictorData deletes existing then inserts new entries', async () => {
     const { handler, predictorDataDb } = createHandler();
     predictorDataDb.deleteAllFacilityPredictorData.mockResolvedValue(undefined);
