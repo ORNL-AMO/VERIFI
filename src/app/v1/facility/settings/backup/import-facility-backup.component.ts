@@ -3,14 +3,14 @@ import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.
 import { FutureBackupVersionError, PreparedBackupFile } from '@data/backup/backup-preparation.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { DrawerFocusTrapDirective } from '@app/v1/welcome/shared/drawer-focus-trap.directive';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-import-facility-backup-panel',
   templateUrl: './import-facility-backup.component.html',
   styleUrls: ['../../../welcome/import-account-backup/import-account-backup.component.css'],
-  imports: [DrawerFocusTrapDirective, IconComponent],
+  imports: [ModalFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class ImportFacilityBackupComponent {

@@ -19,11 +19,6 @@
 .weather-setup__unit { display: grid; gap: .3rem; padding-bottom: .55rem; }
 .weather-setup__unit span { font-size: .82rem; font-weight: 800; }
 .weather-setup__footer { display: flex; justify-content: flex-end; gap: .55rem; padding-top: .8rem; border-top: 1px solid var(--v1-border); }
-.weather-setup__delete-body { display: grid; gap: var(--v1-space-2); }
-.weather-setup__delete-body p { margin: 0; }
-.weather-setup__save-modal { width: min(42rem, calc(100vw - 2rem)); }
-.weather-setup__save-body { display: grid; gap: var(--v1-space-3); }
-.weather-setup__save-body > p { margin: 0; }
 .weather-setup__change-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--v1-space-2); margin: 0; }
 .weather-setup__change-summary div { padding: var(--v1-space-3); border: 1px solid var(--v1-border); background: var(--v1-surface-subtle); }
 .weather-setup__change-summary dt { color: var(--v1-muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }

@@ -1,31 +1,19 @@
-<div class="v1-modal-layer">
-  <button type="button" class="v1-modal-backdrop" aria-label="Cancel copy meter" [disabled]="saving" (click)="cancelled.emit()"></button>
-  <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-copy-meter-title">
-    <header class="v1-modal__header">
-      <h2 id="v1-copy-meter-title">Copy {{ card.meter.name }}?</h2>
-      <button type="button" class="v1-icon-btn" aria-label="Cancel copy meter" [disabled]="saving" (click)="cancelled.emit()">
-        <app-ui-icon name="close"></app-ui-icon>
-      </button>
-    </header>
-    <div class="v1-modal__body">
-      <p>A new meter will be created with the same setup. Readings will not be copied.</p>
-      @if (error) {
-        <div class="v1-alert v1-alert--danger" role="alert">
-          <app-ui-icon name="warning"></app-ui-icon>
-          <span>{{ error }}</span>
-        </div>
-      }
+<app-confirmation-dialog
+  [title]="'Copy ' + card.meter.name + '?'"
+  titleId="v1-copy-meter-title"
+  cancelAriaLabel="Cancel copy meter"
+  confirmLabel="Copy meter"
+  confirmClass="v1-btn--action"
+  confirmIcon="copy"
+  [busy]="saving"
+  [disabled]="saving"
+  (confirmed)="confirmed.emit()"
+  (cancelled)="cancelled.emit()">
+  <p>A new meter will be created with the same setup. Readings will not be copied.</p>
+  @if (error) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ error }}</span>
     </div>
-    <footer class="v1-modal__footer">
-      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
-      <button type="button" class="v1-btn v1-btn--action" [disabled]="saving" (click)="confirmed.emit()">
-        @if (saving) {
-          <app-ui-icon name="loading" spin></app-ui-icon>
-        } @else {
-          <app-ui-icon name="copy"></app-ui-icon>
-        }
-        Copy meter
-      </button>
-    </footer>
-  </section>
-</div>
+  }
+</app-confirmation-dialog>

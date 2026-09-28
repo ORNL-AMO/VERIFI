@@ -6,6 +6,7 @@ import { WeatherDataType } from '@data/models/idbModels/predictor';
 import { getWeatherSearchFromFacility } from '@shared/sharedHelperFunctions';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -37,7 +38,7 @@ interface EditableWeatherDefinition extends WeatherStationGroupDefinition {
   templateUrl: './weather-predictor-setup.component.html',
   styleUrls: ['./weather-predictor-setup.component.css'],
   standalone: true,
-  imports: [IconComponent, WeatherStationSelectorComponent]
+  imports: [ConfirmationDialogComponent, IconComponent, WeatherStationSelectorComponent]
 })
 export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDestroy {
   private readonly router = inject(Router);

@@ -142,69 +142,63 @@
 
 <ng-template #saveChangesConfirmModal>
   @if (preview(); as changePreview) {
-    <div class="v1-modal-layer">
-      <button type="button" class="v1-modal-backdrop" [attr.aria-label]="saveCompleted() ? 'Close weather update summary' : 'Cancel weather update'" [disabled]="committing()" (click)="closeSaveProcess()"></button>
-      <section class="v1-modal weather-setup__save-modal" role="dialog" aria-modal="true" aria-labelledby="weather-save-process-title">
-        <header class="v1-modal__header">
-          <h2 id="weather-save-process-title">{{ saveCompleted() ? 'Weather readings updated' : 'Review reading updates' }}</h2>
-          <button type="button" class="v1-icon-btn" [attr.aria-label]="saveCompleted() ? 'Close weather update summary' : 'Cancel weather update'" [disabled]="committing()" (click)="closeSaveProcess()"><app-ui-icon name="close"></app-ui-icon></button>
-        </header>
-        <div class="v1-modal__body weather-setup__save-body">
-          @if (saveCompleted()) {
-            <div class="v1-alert v1-alert--success" role="status"><app-ui-icon name="success"></app-ui-icon><span>The station setup and its readings were saved together.</span></div>
-          } @else {
-            <p>Saving changes for <strong>{{ changePreview.station.name }}</strong> will update the following stored data.</p>
-          }
-          <dl class="weather-setup__change-summary">
-            <div><dt>Readings added</dt><dd>{{ changePreview.addReadings.length }}</dd></div>
-            <div><dt>Readings updated</dt><dd>{{ changePreview.updateReadings.length }}</dd></div>
-            <div><dt>Readings removed</dt><dd>{{ changePreview.deleteReadings.length }}</dd></div>
-            <div><dt>Warning months</dt><dd>{{ changePreview.warningMonths.length }}</dd></div>
-          </dl>
-          <p class="weather-setup__predictor-summary">
-            Predictors: {{ changePreview.addPredictors.length }} added,
-            {{ changePreview.updatePredictors.length }} updated,
-            {{ changePreview.deletePredictors.length }} removed.
-          </p>
-          @if (changePreview.deleteReadings.length || changePreview.deletePredictors.length) {
-            <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span>Removed predictors, their readings, and their analysis references will be permanently deleted.</span></div>
-          }
-          @if (saveError()) {
-            <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ saveError() }}</span></div>
-          }
-        </div>
-        <footer class="v1-modal__footer">
-          @if (saveCompleted()) {
-            <button type="button" class="v1-btn v1-btn--action" (click)="closeSaveProcess()">Done</button>
-          } @else {
-            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="committing()" (click)="closeSaveProcess()">Cancel</button>
-            <button type="button" class="v1-btn v1-btn--action" [disabled]="committing()" (click)="confirmSaveAndUpdateReadings()"><app-ui-icon [name]="committing() ? 'loading' : 'refresh'" [spin]="committing()"></app-ui-icon> Save and Update Readings</button>
-          }
-        </footer>
-      </section>
-    </div>
+    <app-confirmation-dialog
+      [title]="saveCompleted() ? 'Weather readings updated' : 'Review reading updates'"
+      titleId="weather-save-process-title"
+      [cancelAriaLabel]="saveCompleted() ? 'Close weather update summary' : 'Cancel weather update'"
+      [confirmLabel]="saveCompleted() ? 'Done' : 'Save and Update Readings'"
+      confirmClass="v1-btn--action"
+      [confirmIcon]="saveCompleted() ? undefined : 'refresh'"
+      size="wide"
+      bodySpacing="spacious"
+      [hideCancel]="saveCompleted()"
+      [busy]="committing()"
+      [disabled]="committing()"
+      (confirmed)="saveCompleted() ? closeSaveProcess() : confirmSaveAndUpdateReadings()"
+      (cancelled)="closeSaveProcess()">
+      @if (saveCompleted()) {
+        <div class="v1-alert v1-alert--success" role="status"><app-ui-icon name="success"></app-ui-icon><span>The station setup and its readings were saved together.</span></div>
+      } @else {
+        <p>Saving changes for <strong>{{ changePreview.station.name }}</strong> will update the following stored data.</p>
+      }
+      <dl class="weather-setup__change-summary">
+        <div><dt>Readings added</dt><dd>{{ changePreview.addReadings.length }}</dd></div>
+        <div><dt>Readings updated</dt><dd>{{ changePreview.updateReadings.length }}</dd></div>
+        <div><dt>Readings removed</dt><dd>{{ changePreview.deleteReadings.length }}</dd></div>
+        <div><dt>Warning months</dt><dd>{{ changePreview.warningMonths.length }}</dd></div>
+      </dl>
+      <p class="weather-setup__predictor-summary">
+        Predictors: {{ changePreview.addPredictors.length }} added,
+        {{ changePreview.updatePredictors.length }} updated,
+        {{ changePreview.deletePredictors.length }} removed.
+      </p>
+      @if (changePreview.deleteReadings.length || changePreview.deletePredictors.length) {
+        <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span>Removed predictors, their readings, and their analysis references will be permanently deleted.</span></div>
+      }
+      @if (saveError()) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ saveError() }}</span></div>
+      }
+    </app-confirmation-dialog>
   }
 </ng-template>
 
 <ng-template #deleteStationConfirmModal>
   @if (context.group(); as group) {
-    <div class="v1-modal-layer">
-      <button type="button" class="v1-modal-backdrop" aria-label="Cancel delete weather station" [disabled]="deleting()" (click)="cancelDeleteStation()"></button>
-      <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="delete-weather-station-title">
-        <header class="v1-modal__header">
-          <h2 id="delete-weather-station-title">Delete {{ group.stationName }}?</h2>
-          <button type="button" class="v1-icon-btn" aria-label="Cancel delete weather station" [disabled]="deleting()" (click)="cancelDeleteStation()"><app-ui-icon name="close"></app-ui-icon></button>
-        </header>
-        <div class="v1-modal__body weather-setup__delete-body">
-          <p>This station setup, its {{ group.predictors.length }} {{ group.predictors.length === 1 ? 'predictor' : 'predictors' }}, all associated readings, and analysis references will be removed.</p>
-          <p><strong>This action cannot be undone.</strong></p>
-          @if (deleteError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ deleteError() }}</span></div> }
-        </div>
-        <footer class="v1-modal__footer">
-          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="deleting()" (click)="cancelDeleteStation()">Cancel</button>
-          <button type="button" class="v1-btn v1-btn--danger" [disabled]="deleting()" (click)="confirmDeleteStation()"><app-ui-icon [name]="deleting() ? 'loading' : 'delete'" [spin]="deleting()"></app-ui-icon> Delete weather station</button>
-        </footer>
-      </section>
-    </div>
+    <app-confirmation-dialog
+      [title]="'Delete ' + group.stationName + '?'"
+      titleId="delete-weather-station-title"
+      cancelAriaLabel="Cancel delete weather station"
+      confirmLabel="Delete weather station"
+      confirmIcon="delete"
+      [busy]="deleting()"
+      [disabled]="deleting()"
+      (confirmed)="confirmDeleteStation()"
+      (cancelled)="cancelDeleteStation()">
+      <p>This station setup, its {{ group.predictors.length }} {{ group.predictors.length === 1 ? 'predictor' : 'predictors' }}, all associated readings, and analysis references will be removed.</p>
+      <p><strong>This action cannot be undone.</strong></p>
+      @if (deleteError()) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ deleteError() }}</span></div>
+      }
+    </app-confirmation-dialog>
   }
 </ng-template>

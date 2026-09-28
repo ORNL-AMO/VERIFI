@@ -1,0 +1,12 @@
+:host { display: contents; }
+
+.confirmation-dialog--wide { width: min(42rem, calc(100vw - 2rem)); }
+
+.confirmation-dialog__body {
+  display: grid;
+  gap: var(--v1-space-2);
+}
+
+.confirmation-dialog__body--spacious { gap: var(--v1-space-3); }
+
+:host ::ng-deep .confirmation-dialog__body > p { margin: 0; }

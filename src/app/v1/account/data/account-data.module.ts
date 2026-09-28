@@ -8,7 +8,7 @@ import { PredictorBrowseCardComponent } from '@app/v1/facility/data/predictors/p
 import { WeatherStationBrowseCardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/weather-station-browse-card/weather-station-browse-card.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
-import { DrawerFocusTrapDirective } from '@app/v1/welcome/shared/drawer-focus-trap.directive';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 
 import { CustomGridFactorFormComponent } from './custom-grid-factors/custom-grid-factor-form/custom-grid-factor-form.component';
 import { CustomGridFactorsComponent } from './custom-grid-factors/custom-grid-factors.component';
@@ -57,7 +57,7 @@ import { CreateFacilityDrawerComponent } from './portfolio/create-facility-drawe
     RouterModule,
     DataEmptyStateModule,
     WorkspaceSlideoutComponent,
-    DrawerFocusTrapDirective,
+    ModalFocusTrapDirective,
     MeterBrowseCardComponent,
     PredictorBrowseCardComponent,
     WeatherStationBrowseCardComponent

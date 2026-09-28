@@ -6,7 +6,7 @@ import { FacilityCommandHandler } from '@data/account-workspace/handlers/facilit
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { getNewIdbAccount, IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
-import { DrawerFocusTrapDirective } from '../shared/drawer-focus-trap.directive';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { CREATE_ACCOUNT_CHOICES, CreateAccountPath, CreateAccountResult } from '../welcome.models';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
@@ -14,7 +14,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
   selector: 'app-create-account-panel',
   templateUrl: './create-account.component.html',
   styleUrls: ['./create-account.component.css'],
-  imports: [FormsModule, DrawerFocusTrapDirective, IconComponent],
+  imports: [FormsModule, ModalFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class CreateAccountComponent {
