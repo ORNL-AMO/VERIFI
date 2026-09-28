@@ -51,7 +51,7 @@ export class UtilityMetersTableComponent {
 
   context = input<MeterTableContext>('data-evaluation');
 
-  itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
+  itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 12 });
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
   meters: Signal<Array<IdbUtilityMeter>> = computed(() => [...this.accountWorkspaceStore.facilityMeters()]);
   facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);

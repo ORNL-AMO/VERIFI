@@ -15,11 +15,20 @@ describe('PredictorWorkbenchComponent', () => {
     const navigate = vi.fn();
     const selectedPredictor = signal<any>({ guid: 'predictor-a', name: 'Output A', predictorType: 'Standard' });
     const selectedCard = signal<any>({
-      predictor: selectedPredictor(), typeLabel: 'Standard', classificationLabel: 'Production', unitLabel: 'tons',
+      predictor: selectedPredictor(), typeLabel: 'Standard', productionLabel: 'Production', unitLabel: 'tons',
       icon: 'package',
       statusIcon: 'success', statusTone: 'success', statusLabel: 'Valid',
       statusActionSummaries: ['Review one incomplete weather month.'],
-      readingCount: 4, firstReadingLabel: 'Jan 2025', latestReadingLabel: 'Apr 2025'
+      readingCount: 4, firstReadingLabel: 'Jan 2025', latestReadingLabel: 'Apr 2025',
+      statistics: {
+        unitLabel: 'tons',
+        facts: [
+          { id: 'latest', label: 'Latest value', valueLabel: '40', periodLabel: 'Apr 2025', unavailable: false },
+          { id: 'same-month-last-year', label: 'Same month last year', valueLabel: '10', periodLabel: 'Apr 2024', unavailable: false },
+          { id: 'latest-twelve-month-average', label: 'Latest 12-mo avg', valueLabel: '22', unavailable: false },
+          { id: 'previous-twelve-month-average', label: 'Previous 12-mo avg', valueLabel: 'Not available', unavailable: true }
+        ]
+      }
     });
     const factsExpanded = signal(true);
     const route = { firstChild: { snapshot: { data: { predictorTab: 'readings' } } } };
@@ -78,16 +87,35 @@ describe('PredictorWorkbenchComponent', () => {
     });
     const fixture = TestBed.createComponent(PredictorWorkbenchComponent);
     fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
 
     expect(fixture.componentInstance.activeTab()).toBe('readings');
-    expect(fixture.nativeElement.textContent).toContain('Apr 2025');
-    expect(fixture.nativeElement.querySelector('.v1-data-workbench-status-notes')?.textContent)
+    expect(element.textContent).toContain('Apr 2025');
+    const chips = Array.from(element.querySelectorAll<HTMLElement>('.v1-data-workbench-actions .v1-chip'))
+      .map(chip => chip.textContent?.trim());
+    expect(chips).toEqual(['Production', 'Valid']);
+    const statistics = element.querySelector<HTMLElement>('[aria-label="Predictor statistics"]')!;
+    expect(statistics.textContent).toContain('Latest value');
+    expect(statistics.textContent).toContain('40');
+    expect(statistics.textContent).toContain('Same month last year');
+    expect(statistics.textContent).toContain('Apr 2024');
+    expect(statistics.textContent).toContain('Latest 12-mo avg');
+    expect(statistics.textContent).toContain('Previous 12-mo avg');
+    expect(statistics.textContent).toContain('Not available');
+    expect(element.querySelector('.v1-data-workbench-facts-note')?.textContent).toContain('tons');
+    expect(element.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('Review one incomplete weather month.');
     expect(fixture.componentInstance.tabAttention().readings).toEqual(expect.objectContaining({
       total: 1,
       errorCount: 1,
       warningCount: 0
     }));
+
+    const factsRegion = element.querySelector<HTMLElement>('#v1-predictor-workbench-facts')!;
+    const factsToggle = element.querySelector<HTMLButtonElement>('[aria-controls="v1-predictor-workbench-facts"]')!;
+    factsToggle.click();
+    fixture.detectChanges();
+    expect(factsRegion.hidden).toBe(true);
 
     fixture.componentInstance.switchPredictor('predictor-b');
     expect(navigate).toHaveBeenLastCalledWith(['/predictors', 'predictor-b', 'readings']);

@@ -78,12 +78,16 @@
         </div>
 
         <div class="v1-data-workbench-actions" aria-label="Predictor summary and controls">
-          <span class="v1-chip v1-chip--info">{{ currentCard.typeLabel }}</span>
-          <span class="v1-chip v1-chip--neutral">{{ currentCard.classificationLabel }}</span>
-          <span class="v1-chip v1-chip--{{ currentCard.statusTone }}">
-            <app-ui-icon [name]="currentCard.statusIcon" [spin]="currentCard.statusTone === 'info'"></app-ui-icon>
-            {{ currentCard.statusLabel }}
-          </span>
+          <div class="v1-predictor-workbench-header__chips">
+            <span class="v1-chip v1-predictor-workbench-header__chip v1-predictor-workbench-header__chip--production">
+              <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
+              {{ currentCard.productionLabel }}
+            </span>
+            <span class="v1-chip v1-chip--{{ currentCard.statusTone }} v1-predictor-workbench-header__chip">
+              <app-ui-icon [name]="currentCard.statusIcon" [spin]="currentCard.statusTone === 'info'"></app-ui-icon>
+              {{ currentCard.statusLabel }}
+            </span>
+          </div>
           <button
             type="button"
             class="v1-btn v1-btn--quiet v1-btn--sm v1-predictor-workbench-header__facts-toggle"
@@ -96,7 +100,7 @@
         </div>
       </div>
 
-      <div id="v1-predictor-workbench-facts" [hidden]="!factsExpanded()">
+      <div id="v1-predictor-workbench-facts" class="v1-predictor-workbench-header__facts-region" [hidden]="!factsExpanded()">
         <dl class="v1-data-workbench-facts">
           <div><dt>Unit</dt><dd>{{ currentCard.unitLabel }}</dd></div>
           <div><dt>Entries</dt><dd>{{ currentCard.readingCount }}</dd></div>
@@ -106,6 +110,28 @@
             <div><dt>Weather station</dt><dd>{{ currentPredictor.weatherStationName || 'Not set' }}</dd></div>
           }
         </dl>
+
+        <div class="v1-predictor-workbench-header__statistics">
+          @if (currentCard.statistics.unitLabel) {
+            <p class="v1-data-workbench-facts-note">Values shown in {{ currentCard.statistics.unitLabel }}</p>
+          }
+
+          <dl class="v1-data-workbench-facts v1-data-workbench-facts--usage" aria-label="Predictor statistics">
+            @for (fact of currentCard.statistics.facts; track fact.id) {
+              <div>
+                <dt>{{ fact.label }}</dt>
+                <dd
+                  class="v1-data-workbench-fact-value"
+                  [class.v1-data-workbench-fact-value--unavailable]="fact.unavailable">
+                  <span class="v1-data-workbench-fact-value__primary">{{ fact.valueLabel }}</span>
+                  @if (fact.periodLabel) {
+                    <span class="v1-data-workbench-fact-value__meta">{{ fact.periodLabel }}</span>
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+        </div>
       </div>
 
       @if (currentCard.statusActionSummaries.length > 0) {

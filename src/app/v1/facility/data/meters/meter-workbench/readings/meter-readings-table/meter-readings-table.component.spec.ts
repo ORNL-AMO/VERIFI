@@ -106,7 +106,7 @@ describe('MeterReadingsTableComponent', () => {
     fixture.detectChanges();
 
     const pageSize = root.querySelector<HTMLSelectElement>('select') as HTMLSelectElement;
-    pageSize.value = '25';
+    pageSize.value = '24';
     pageSize.dispatchEvent(new Event('change'));
     fixture.detectChanges();
 

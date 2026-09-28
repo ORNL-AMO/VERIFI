@@ -1,7 +1,7 @@
 import { buildPredictorCards, buildPredictorStatistics } from './predictor-card.models';
 
 describe('predictor card models', () => {
-  it('sorts predictors and builds deterministic classification and reading facts', () => {
+  it('sorts predictors and builds deterministic production and reading facts', () => {
     const cards = buildPredictorCards([
       predictor({ guid: 'b', name: 'Zulu', production: false, predictorType: 'Weather', weatherDataType: 'CDD', unit: 'deg F' }),
       predictor({ guid: 'a', name: 'Alpha', production: true, predictorType: 'Standard', unit: 'tons' })
@@ -13,14 +13,14 @@ describe('predictor card models', () => {
     expect(cards.map(card => card.predictor.name)).toEqual(['Alpha', 'Zulu']);
     expect(cards[0]).toMatchObject({
       typeLabel: 'Standard',
-      classificationLabel: 'Production',
+      productionLabel: 'Production',
       unitLabel: 'tons',
       readingCount: 2,
       firstReadingLabel: 'Jan 2024',
       latestReadingLabel: 'Dec 2025'
     });
     expect(cards[1]).toMatchObject({
-      classificationLabel: 'Other',
+      productionLabel: 'Other',
       readingCount: 0,
       firstReadingLabel: 'No data',
       latestReadingLabel: 'No data'

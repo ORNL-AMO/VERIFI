@@ -4,8 +4,10 @@
 .predictor-draft-form label { display: grid; gap: .3rem; min-width: 0; }
 .predictor-draft-form label > span { font-size: .82rem; font-weight: 800; }
 .predictor-draft-form label small { color: var(--v1-muted); font-weight: 500; }
-.predictor-draft-form input, .predictor-draft-form select { width: 100%; min-width: 0; min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background-color: var(--v1-control-surface); color: var(--v1-text); }
+.predictor-draft-form input:not([type='checkbox']), .predictor-draft-form select { width: 100%; min-width: 0; min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background-color: var(--v1-control-surface); color: var(--v1-text); }
 .predictor-draft-form select { padding-right: 2.1rem; }
+.predictor-draft-form__check { display: flex !important; flex-direction: row; gap: .55rem !important; align-items: center; min-height: var(--v1-control-height); padding: .65rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); }
+.predictor-draft-form__check input { inline-size: 1rem; block-size: 1rem; }
 .predictor-draft-form__footer { display: flex; gap: .5rem; justify-content: flex-end; padding-top: .75rem; border-top: 1px solid var(--v1-border); }
 .predictor-type-choice > div:first-child p { margin: 0; color: var(--v1-muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
 .predictor-type-choice h2 { margin: .2rem 0 0; font-size: 1.15rem; }

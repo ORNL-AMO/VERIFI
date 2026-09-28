@@ -14,6 +14,21 @@ import { PredictorReadingEditorComponent } from './predictor-reading-editor/pred
 import { PredictorWorkbenchReadingsComponent } from './predictor-workbench-readings.component';
 
 describe('PredictorWorkbenchReadingsComponent', () => {
+  it('does not move focus into the readings region during initialization', async () => {
+    const focusTarget = document.createElement('button');
+    document.body.appendChild(focusTarget);
+    focusTarget.focus();
+
+    const fixture = createFixture();
+    try {
+      await fixture.whenStable();
+      expect(document.activeElement).toBe(focusTarget);
+    } finally {
+      fixture.destroy();
+      focusTarget.remove();
+    }
+  });
+
   it('renders the empty state and opens an add-reading editor', () => {
     const fixture = createFixture();
     const root = fixture.nativeElement as HTMLElement;

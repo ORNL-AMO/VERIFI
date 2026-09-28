@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
   PredictorReadingFilter,
@@ -38,7 +39,8 @@ export class PredictorReadingsTableComponent {
   @Output() restoreRequested = new EventEmitter<IdbPredictorData>();
 
   readonly currentPage = signal(1);
-  readonly pageSize = signal(10);
+  readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
+  readonly pageSize = signal(DEFAULT_TIME_PERIOD_PAGE_SIZE);
   readonly filter = signal<PredictorReadingFilter>('all');
   readonly sortColumn = signal<PredictorReadingSortColumn>('month');
   readonly sortDirection = signal<PredictorReadingSortDirection>('desc');

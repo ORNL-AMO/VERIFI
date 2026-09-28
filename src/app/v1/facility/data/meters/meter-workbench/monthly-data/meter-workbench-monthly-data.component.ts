@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, computed, effect, inject, signal } fr
 import { Router } from '@angular/router';
 import { MonthlyData } from '@data/models/calanderization';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
+import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import {
@@ -32,7 +33,8 @@ export class MeterWorkbenchMonthlyDataComponent {
   readonly meter = this.workspace.selectedMeter;
   readonly facility = this.workspace.facility;
   readonly currentPage = signal(1);
-  readonly pageSize = signal(10);
+  readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
+  readonly pageSize = signal(DEFAULT_TIME_PERIOD_PAGE_SIZE);
   readonly copyingTable = signal(false);
   readonly sortColumn = signal<MeterDataColumnId>('date');
   readonly sortDirection = signal<MonthlyDataSortDirection>('desc');

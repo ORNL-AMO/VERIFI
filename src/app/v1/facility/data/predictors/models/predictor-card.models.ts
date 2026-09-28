@@ -25,7 +25,7 @@ export interface PredictorCardView {
   readonly predictor: IdbPredictor;
   readonly icon: IconName;
   readonly typeLabel: string;
-  readonly classificationLabel: 'Production' | 'Other';
+  readonly productionLabel: 'Production' | 'Other';
   readonly unitLabel: string;
   readonly readingCount: number;
   readonly firstReadingLabel: string;
@@ -76,7 +76,7 @@ export function buildPredictorCard(
   const baseTemperatureLabel = predictor.predictorType === 'Weather'
     ? predictorBaseTemperatureLabel(predictor)
     : undefined;
-  const classificationLabel = predictor.production ? 'Production' : 'Other';
+  const productionLabel = predictor.production ? 'Production' : 'Other';
   const unitLabel = predictor.unit || 'Not set';
   const statistics = buildPredictorStatistics(sortedReadings, predictor.unit);
 
@@ -84,7 +84,7 @@ export function buildPredictorCard(
     predictor,
     icon: predictorIcon(predictor),
     typeLabel: predictor.predictorType || 'Standard',
-    classificationLabel,
+    productionLabel,
     unitLabel,
     readingCount: sortedReadings.length,
     firstReadingLabel: formatPredictorReadingMonth(sortedReadings[0]),
@@ -100,7 +100,7 @@ export function buildPredictorCard(
     statusActionSummaries: statusFindings.slice(0, 2).map(finding => finding.description),
     statistics,
     searchText: [
-      predictor.name, predictor.unit, predictor.predictorType, classificationLabel,
+      predictor.name, predictor.unit, predictor.predictorType, productionLabel,
       weatherStationLabel, weatherTypeLabel, baseTemperatureLabel, statusLabel,
       ...statusFindings.map(finding => `${finding.title} ${finding.description}`)
     ].filter(Boolean).join(' ').toLowerCase()

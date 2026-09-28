@@ -33,10 +33,9 @@
         <label><span>Predictor name</span>
           <input type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName($any($event.target).value)">
         </label>
-        <label><span>Classification</span>
-          <select class="v1-select" [value]="currentDraft.production ? 'production' : 'other'" [disabled]="saving" (change)="setProduction($any($event.target).value)">
-            <option value="production">Production</option><option value="other">Other</option>
-          </select>
+        <label class="predictor-draft-form__check">
+          <input type="checkbox" [checked]="currentDraft.production" [disabled]="saving" (change)="setProduction($any($event.target).checked)">
+          <span>Is Production?</span>
         </label>
         <label><span>Unit <small>Optional</small></span>
           <input type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit($any($event.target).value)">

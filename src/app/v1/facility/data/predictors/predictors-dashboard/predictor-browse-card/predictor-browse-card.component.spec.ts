@@ -9,7 +9,7 @@ import { buildPredictorCard } from '../../models';
 import { PredictorBrowseCardComponent } from './predictor-browse-card.component';
 
 describe('PredictorBrowseCardComponent', () => {
-  it('renders basic facts and opens Settings and Readings without mutation controls', () => {
+  it('renders the production and status chips with basic facts and opens the workbench', () => {
     const navigate = vi.fn();
     TestBed.configureTestingModule({
       imports: [PredictorBrowseCardComponent],
@@ -39,8 +39,7 @@ describe('PredictorBrowseCardComponent', () => {
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
 
-    expect(element.textContent).toContain('Standard');
-    expect(element.textContent).toContain('Production');
+    expect(chipLabels(element)).toEqual(['Production', 'Valid']);
     expect(element.textContent).toContain('tons');
     expect(element.textContent).toContain('Jan 2025');
     expect(element.querySelector('[aria-label="Copy predictor"]')).toBeNull();
@@ -55,5 +54,18 @@ describe('PredictorBrowseCardComponent', () => {
     expect(navigate).toHaveBeenLastCalledWith([
       '/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'predictor-a', 'readings'
     ]);
+
+    fixture.componentRef.setInput('card', buildPredictorCard(
+      { guid: 'predictor-b', name: 'Schedule', predictorType: 'Standard', production: false } as any,
+      [], [], true
+    ));
+    fixture.detectChanges();
+
+    expect(chipLabels(element)).toEqual(['Other', 'Valid']);
   });
 });
+
+function chipLabels(element: HTMLElement): string[] {
+  return Array.from(element.querySelectorAll<HTMLElement>('.v1-resource-browse-card__chip'))
+    .map(chip => chip.textContent?.trim() || '');
+}

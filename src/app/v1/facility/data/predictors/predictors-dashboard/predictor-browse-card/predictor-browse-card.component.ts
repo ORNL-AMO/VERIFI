@@ -45,8 +45,7 @@ export class PredictorBrowseCardComponent implements OnDestroy {
       statusTone: this.card.statusTone,
       owner: this.showFacilityHeader && this.portfolioFacility ? { label: this.portfolioFacility.name, icon: 'facility' } : undefined,
       chips: [
-        { id: 'type', label: this.card.typeLabel, icon: this.card.icon, accentColor: 'var(--v1-facility)' },
-        { id: 'classification', label: this.card.classificationLabel, tone: 'neutral' },
+        { id: 'production', label: this.card.productionLabel, icon: this.card.icon, accentColor: 'var(--v1-facility)' },
         { id: 'status', label: this.card.statusLabel, icon: this.card.statusIcon, tone: this.card.statusTone, loading: this.card.statusTone === 'info' }
       ],
       factSections: [

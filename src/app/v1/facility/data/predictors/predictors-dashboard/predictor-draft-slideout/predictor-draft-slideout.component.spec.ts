@@ -17,20 +17,34 @@ describe('PredictorDraftSlideoutComponent', () => {
     expect(fixture.componentInstance.step()).toBe('choice');
   });
 
-  it('collects a valid standard draft before emitting it', () => {
+  it('collects checked and unchecked production values in a valid standard draft', () => {
     TestBed.configureTestingModule({ imports: [PredictorDraftSlideoutComponent] });
     const fixture = TestBed.createComponent(PredictorDraftSlideoutComponent);
     const submitted = vi.fn();
     fixture.componentInstance.submitted.subscribe(submitted);
     fixture.componentInstance.chooseStandard();
     fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
 
     fixture.componentInstance.submit();
     expect(submitted).not.toHaveBeenCalled();
 
     fixture.componentInstance.setName('Production');
     fixture.componentInstance.setUnit('tons');
-    fixture.componentInstance.setProduction('production');
+    fixture.componentInstance.submit();
+
+    expect(submitted).toHaveBeenCalledWith(expect.objectContaining({
+      name: 'Production', unit: 'tons', production: false, predictorType: 'Standard'
+    }));
+
+    submitted.mockClear();
+    const productionCheckbox = element.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(productionCheckbox.checked).toBe(false);
+    expect(productionCheckbox.parentElement?.textContent).toContain('Is Production?');
+    expect(Array.from(element.querySelectorAll<HTMLElement>('.predictor-draft-form__grid label > span'))
+      .map(label => label.textContent?.replace(/\s+/g, ' ').trim()))
+      .toEqual(['Predictor name', 'Is Production?', 'Unit Optional']);
+    productionCheckbox.click();
     fixture.componentInstance.submit();
 
     expect(submitted).toHaveBeenCalledWith(expect.objectContaining({

@@ -6,6 +6,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
+import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { WeatherStation } from '@data/models/degreeDays';
 import { WeatherMonth, WeatherMonthRange } from '@platform/weather/hourly-weather-data.models';
@@ -65,7 +66,8 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
     this.readingChecks().flatMap(check => check.predictorGuids)
   ).size);
   readonly currentPage = signal(1);
-  readonly pageSize = signal(12);
+  readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
+  readonly pageSize = signal(DEFAULT_TIME_PERIOD_PAGE_SIZE);
   readonly rowFilter = signal<'all' | 'attention'>('all');
   readonly copyingTable = signal(false);
   readonly startMonth = signal('');

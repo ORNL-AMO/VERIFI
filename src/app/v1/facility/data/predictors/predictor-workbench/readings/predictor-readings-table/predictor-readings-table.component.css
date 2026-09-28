@@ -31,8 +31,7 @@
 
 .predictor-readings-table__controls,
 .predictor-readings-table__actions-bar,
-.predictor-readings-table__markers,
-.predictor-readings-table__row-actions {
+.predictor-readings-table__row-action-buttons {
   display: flex;
   align-items: center;
   gap: var(--v1-space-2);
@@ -54,8 +53,17 @@
 .predictor-readings-table__select { width: 2.75rem; text-align: center !important; }
 .predictor-readings-table__number { text-align: right !important; font-variant-numeric: tabular-nums; }
 .predictor-readings-table__notes { min-width: 12rem; max-width: 28rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.predictor-readings-table__row-actions { justify-content: flex-end; width: 6.5rem; }
-.predictor-readings-table__row--attention { background: color-mix(in srgb, var(--v1-warning, #b26a00) 8%, var(--v1-surface)); }
+.predictor-readings-table__row-actions { width: 7.5rem; text-align: right !important; white-space: nowrap; }
+.predictor-readings-table__row-action-buttons { justify-content: flex-end; }
+.predictor-readings-table table tbody tr:hover > td {
+  background: color-mix(in srgb, var(--v1-content-control) 5%, var(--v1-surface));
+}
+.predictor-readings-table table tbody tr.predictor-readings-table__row--attention > td {
+  background: color-mix(in srgb, var(--v1-warning, #b26a00) 8%, var(--v1-surface));
+}
+.predictor-readings-table table tbody tr.predictor-readings-table__row--attention:hover > td {
+  background: color-mix(in srgb, var(--v1-warning, #b26a00) 12%, var(--v1-surface));
+}
 
 .predictor-readings-table__sort {
   display: inline-flex;
@@ -73,8 +81,6 @@
 .predictor-readings-table__sort.active app-ui-icon,
 .predictor-readings-table__sort:focus-visible app-ui-icon { opacity: 1; }
 
-.predictor-readings-table__markers app-ui-icon { color: var(--v1-warning, #9b5d00); }
-.predictor-readings-table__clear { color: var(--v1-muted); font-size: .82rem; }
 .predictor-readings-table__no-results { display: flex; justify-content: center; gap: var(--v1-space-2); padding: var(--v1-space-5); color: var(--v1-muted); }
 .predictor-readings-table__footer { display: flex; justify-content: flex-end; padding: var(--v1-space-3); }
 

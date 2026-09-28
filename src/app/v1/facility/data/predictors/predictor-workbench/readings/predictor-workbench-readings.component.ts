@@ -107,7 +107,7 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
     untracked(() => {
       this.editorPanel.set(undefined);
       this.confirmation.set(undefined);
-      this.closeWeatherPanel();
+      this.resetWeatherPanel();
       this.hideConfirmationModal();
       this.actionError.set(undefined);
     });
@@ -290,11 +290,15 @@ export class PredictorWorkbenchReadingsComponent implements HasUnsavedChanges, O
   }
 
   closeWeatherPanel(): void {
+    this.resetWeatherPanel();
+    this.restoreFocus();
+  }
+
+  private resetWeatherPanel(): void {
     if (this.weatherWorkflow.busy()) this.weatherWorkflow.cancel();
     else this.weatherWorkflow.reset();
     this.weatherPanelMode.set(undefined);
     this.weatherPreview.set(undefined);
-    this.restoreFocus();
   }
 
   private async runAction(errorMessage: string, action: () => Promise<void>): Promise<void> {

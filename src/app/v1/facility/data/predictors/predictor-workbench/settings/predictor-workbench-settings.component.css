@@ -3,6 +3,7 @@
 .predictor-settings > .v1-alert { margin: 1rem 1rem 0; }
 .predictor-settings__section { display: grid; gap: 1rem; padding: 1.1rem; border-bottom: 1px solid var(--v1-border); }
 .predictor-settings__heading { display: flex; flex-wrap: wrap; gap: 1rem; align-items: start; justify-content: space-between; }
+.predictor-settings__heading--save-state { justify-content: flex-end; }
 .predictor-settings__heading p, .predictor-settings__heading h2 { margin: 0; }
 .predictor-settings__heading > div > p { color: var(--v1-muted); font-size: .74rem; font-weight: 800; text-transform: uppercase; }
 .predictor-settings__heading h2 { font-size: 1rem; font-weight: 900; }

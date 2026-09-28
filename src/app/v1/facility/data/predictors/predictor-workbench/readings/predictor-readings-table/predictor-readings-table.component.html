@@ -19,9 +19,9 @@
         <label>
           <span>Rows</span>
           <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
-            <option [value]="10">10</option>
-            <option [value]="25">25</option>
-            <option [value]="50">50</option>
+            @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
+              <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
+            }
           </select>
         </label>
         <label>
@@ -73,8 +73,7 @@
                 </button>
               </th>
               <th>Notes</th>
-              <th>Status</th>
-              <th class="predictor-readings-table__row-actions" aria-label="Reading actions"></th>
+              <th class="predictor-readings-table__row-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -88,46 +87,23 @@
                 <td>{{ row.monthLabel }}</td>
                 <td class="predictor-readings-table__number">{{ row.amountLabel }}</td>
                 <td class="predictor-readings-table__notes">{{ row.reading.notes || '—' }}</td>
-                <td>
-                  <div class="predictor-readings-table__markers">
-                    @if (row.attention.invalidDate || row.attention.invalidValue) {
-                      <app-ui-icon name="danger" [decorative]="false" label="Invalid reading" title="Invalid reading"></app-ui-icon>
-                    }
-                    @if (row.attention.duplicateMonth) {
-                      <app-ui-icon name="warning" [decorative]="false" label="Duplicate month" title="Duplicate month"></app-ui-icon>
-                    }
-                    @if (row.attention.negativeValue) {
-                      <app-ui-icon name="warning" [decorative]="false" label="Negative value is not allowed" title="Negative value is not allowed"></app-ui-icon>
-                    }
-                    @if (row.reading.weatherDataWarning) {
-                      <app-ui-icon name="cloudRain" [decorative]="false" label="Weather source warning" title="Weather source warning"></app-ui-icon>
-                    }
-                    @if (row.reading.weatherDataChanged) {
-                      <app-ui-icon name="refresh" [decorative]="false" label="Updated weather source data is available" title="Updated weather source data is available"></app-ui-icon>
-                    }
-                    @if (row.reading.weatherOverride) {
-                      <app-ui-icon name="edit" [decorative]="false" label="Manual weather override" title="Manual weather override"></app-ui-icon>
-                    }
-                    @if (!row.attention.hasAttention && !row.reading.weatherOverride && !row.reading.weatherDataWarning) {
-                      <span class="predictor-readings-table__clear">Clear</span>
-                    }
-                  </div>
-                </td>
                 <td class="predictor-readings-table__row-actions">
-                  <button type="button" class="v1-icon-btn" title="Edit reading" aria-label="Edit reading"
-                    [disabled]="!canAct" (click)="editRequested.emit(row.reading)">
-                    <app-ui-icon name="edit"></app-ui-icon>
-                  </button>
-                  @if (isWeather && row.reading.weatherOverride) {
-                    <button type="button" class="v1-icon-btn" title="Restore calculated value" aria-label="Restore calculated value"
-                      [disabled]="!canAct" (click)="restoreRequested.emit(row.reading)">
-                      <app-ui-icon name="refresh"></app-ui-icon>
+                  <div class="predictor-readings-table__row-action-buttons">
+                    <button type="button" class="v1-icon-btn" title="Edit reading" aria-label="Edit reading"
+                      [disabled]="!canAct" (click)="editRequested.emit(row.reading)">
+                      <app-ui-icon name="edit"></app-ui-icon>
                     </button>
-                  }
-                  <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete reading" aria-label="Delete reading"
-                    [disabled]="!canAct" (click)="deleteRequested.emit(row.reading)">
-                    <app-ui-icon name="delete"></app-ui-icon>
-                  </button>
+                    @if (isWeather && row.reading.weatherOverride) {
+                      <button type="button" class="v1-icon-btn" title="Restore calculated value" aria-label="Restore calculated value"
+                        [disabled]="!canAct" (click)="restoreRequested.emit(row.reading)">
+                        <app-ui-icon name="refresh"></app-ui-icon>
+                      </button>
+                    }
+                    <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Delete reading" aria-label="Delete reading"
+                      [disabled]="!canAct" (click)="deleteRequested.emit(row.reading)">
+                      <app-ui-icon name="delete"></app-ui-icon>
+                    </button>
+                  </div>
                 </td>
               </tr>
             }

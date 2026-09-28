@@ -31,9 +31,9 @@
           <label class="weather-readings__control">
             <span>Rows</span>
             <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
-              <option [value]="12">12</option>
-              <option [value]="24">24</option>
-              <option [value]="36">36</option>
+              @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
+                <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
+              }
             </select>
           </label>
           <label class="weather-readings__control">

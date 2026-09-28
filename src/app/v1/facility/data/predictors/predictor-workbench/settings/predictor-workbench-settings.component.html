@@ -13,13 +13,12 @@
     @if (!workspace.canWrite()) {
       <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
     }
-    @if (hasReadings()) {
+    @if (predictor.predictorType === 'Weather' && hasReadings()) {
       <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span><strong>Readings exist for this predictor.</strong> Changing its weather source or calculation settings requires reviewing the recalculated values before saving.</span></div>
     }
 
-    <section class="predictor-settings__section" aria-labelledby="predictor-settings-identity">
-      <div class="predictor-settings__heading">
-        <div><p>Settings</p><h2 id="predictor-settings-identity">Predictor identity</h2></div>
+    <section class="predictor-settings__section">
+      <div class="predictor-settings__heading predictor-settings__heading--save-state">
         <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState() === 'error' || saveState() === 'invalid'">
           @if (saveState() === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> }
           {{ saveMessage() }}
@@ -31,8 +30,7 @@
           @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small class="predictor-settings__error">Enter a name of 100 characters or fewer.</small> }
         </label>
         <label><span>Unit</span><input type="text" maxlength="100" formControlName="unit" (input)="onTextChange()"></label>
-        <label><span>Classification</span><select class="v1-select" formControlName="production" (change)="onImmediateChange()"><option [ngValue]="true">Production</option><option [ngValue]="false">Other</option></select></label>
-        <label><span>Type</span><input type="text" [value]="settingsForm.controls.predictorType.value" disabled></label>
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="production" (change)="onImmediateChange()"><span>Is Production?</span></label>
         <label class="predictor-settings__wide"><span>Description</span><textarea rows="3" formControlName="description" (input)="onTextChange()"></textarea></label>
       </div>
     </section>

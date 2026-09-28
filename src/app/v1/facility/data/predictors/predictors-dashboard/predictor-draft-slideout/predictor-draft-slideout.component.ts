@@ -35,7 +35,7 @@ export class PredictorDraftSlideoutComponent {
   back(): void { if (!this.saving) this.step.set('choice'); }
   setName(value: string): void { this.patch({ name: value }); }
   setUnit(value: string): void { this.patch({ unit: value }); }
-  setProduction(value: string): void { this.patch({ production: value === 'production' }); }
+  setProduction(production: boolean): void { this.patch({ production }); }
 
   submit(): void {
     if (this.isValid() && !this.saving) this.submitted.emit(this.draft());

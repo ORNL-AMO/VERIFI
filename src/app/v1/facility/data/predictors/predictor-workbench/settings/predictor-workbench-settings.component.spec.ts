@@ -42,14 +42,36 @@ describe('PredictorWorkbenchSettingsComponent', () => {
     expect(form.controls.name.enabled).toBe(true);
   });
 
-  it('styles form selects as selects and omits the manual-save footer note', () => {
-    const fixture = createFixture();
+  it('styles weather form selects as selects and omits the manual-save footer note', () => {
+    const fixture = createFixture({
+      predictor: predictor({ predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Oak Ridge' })
+    });
     const element = fixture.nativeElement as HTMLElement;
     const selects = Array.from(element.querySelectorAll<HTMLSelectElement>('select'));
 
     expect(selects.length).toBeGreaterThan(0);
     expect(selects.every(select => select.classList.contains('v1-select'))).toBe(true);
     expect(element.textContent).not.toContain('Press Ctrl+S or ⌘S');
+  });
+
+  it('renders Is Production as a checkbox and immediately saves its boolean value', async () => {
+    const updatePredictor = vi.fn(async (value: any) => value);
+    const fixture = createFixture({ updatePredictor, readings: [{ guid: 'reading-a' }] });
+    const element = fixture.nativeElement as HTMLElement;
+    const checkbox = element.querySelector<HTMLInputElement>('input[formControlName="production"]')!;
+    const fieldLabels = Array.from(element.querySelectorAll('label > span')).map(label => label.textContent?.trim());
+
+    expect(checkbox.type).toBe('checkbox');
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.parentElement?.textContent).toContain('Is Production?');
+    expect(fieldLabels).not.toContain('Type');
+    expect(element.textContent).not.toContain('Predictor identity');
+    expect(element.textContent).not.toContain('Readings exist for this predictor.');
+
+    checkbox.click();
+    await fixture.whenStable();
+
+    expect(updatePredictor).toHaveBeenCalledWith(expect.objectContaining({ production: false }));
   });
 
   it('toggles no longer in use from the footer and saves the predictor', async () => {
