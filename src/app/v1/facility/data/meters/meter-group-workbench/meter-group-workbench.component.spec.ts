@@ -124,11 +124,11 @@ describe('MeterGroupWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
-    element.querySelector<HTMLButtonElement>('.v1-meter-group-workbench-header__group-toggle')?.click();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
 
-    const menu = element.querySelector<HTMLElement>('.v1-meter-group-workbench-header__group-menu');
-    const menuItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-group-workbench-header__group-item'));
+    const menu = element.querySelector<HTMLElement>('.v1-data-workbench-switcher-menu');
+    const menuItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'));
     expect(menu).not.toBeNull();
     expect(menu?.querySelector('app-ui-icon')).toBeNull();
     expect(menuItems.map(item => item.textContent?.trim())).toEqual(['Energy Group', 'Water Group']);

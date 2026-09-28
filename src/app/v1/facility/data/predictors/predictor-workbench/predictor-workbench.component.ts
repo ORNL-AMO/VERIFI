@@ -12,6 +12,7 @@ import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityPredictorsWorkspaceService } from '../facility-predictors-workspace.service';
 import { PREDICTOR_WORKBENCH_TABS, PredictorWorkbenchTabId, buildPredictorWorkbenchTabAttention } from '../models';
+import { PREDICTOR_QUALITY_CONTEXT } from '../predictor-quality-context';
 import { PredictorWorkbenchContextService } from './predictor-workbench-context.service';
 
 @Component({
@@ -19,6 +20,10 @@ import { PredictorWorkbenchContextService } from './predictor-workbench-context.
   templateUrl: './predictor-workbench.component.html',
   styleUrls: ['./predictor-workbench.component.css'],
   standalone: true,
+  providers: [
+    PredictorWorkbenchContextService,
+    { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: PredictorWorkbenchContextService }
+  ],
   imports: [
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,

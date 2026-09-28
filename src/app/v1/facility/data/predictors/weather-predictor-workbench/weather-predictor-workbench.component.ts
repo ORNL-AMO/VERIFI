@@ -24,6 +24,7 @@ import { WeatherPredictorWorkbenchContextService } from './weather-predictor-wor
   templateUrl: './weather-predictor-workbench.component.html',
   styleUrls: ['./weather-predictor-workbench.component.css'],
   standalone: true,
+  providers: [WeatherPredictorWorkbenchContextService],
   imports: [
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,

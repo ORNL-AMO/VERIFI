@@ -38,14 +38,13 @@ import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter
 import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
+import { FACILITY_PREDICTORS_WORKSPACE_PROVIDERS } from '@app/v1/facility/data/predictors/facility-predictors.providers';
 import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
-import { PredictorWorkbenchContextService } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench-context.service';
 import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
 import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
 import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
 import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
-import { WeatherPredictorWorkbenchContextService } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench-context.service';
 import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
 import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
 import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
@@ -64,8 +63,6 @@ import { ShellComponent } from '@app/v1/shell/shell.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
 import { predictorCanonicalRouteGuard } from '@app/v1/facility/data/predictors/predictor-canonical-route.guard';
-import { PREDICTOR_QUALITY_CONTEXT } from '@app/v1/facility/data/predictors/predictor-quality-context';
-import { WeatherPredictorQualityContextService } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality-context.service';
 
 export const V1Routes: Routes = [
   {
@@ -191,6 +188,7 @@ export const V1Routes: Routes = [
               {
                 path: 'predictors',
                 component: FacilityPredictorsComponent,
+                providers: FACILITY_PREDICTORS_WORKSPACE_PROVIDERS,
                 children: [
                   { path: '', pathMatch: 'full', component: PredictorsDashboardComponent },
                   {
@@ -199,7 +197,6 @@ export const V1Routes: Routes = [
                       {
                         path: 'new',
                         component: WeatherPredictorWorkbenchComponent,
-                        providers: [WeatherPredictorWorkbenchContextService],
                         children: [
                           { path: '', pathMatch: 'full', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard] },
                           { path: '**', redirectTo: '' }
@@ -208,7 +205,6 @@ export const V1Routes: Routes = [
                       {
                         path: ':weatherGroupKey',
                         component: WeatherPredictorWorkbenchComponent,
-                        providers: [WeatherPredictorWorkbenchContextService],
                         children: [
                           { path: '', pathMatch: 'full', redirectTo: 'setup' },
                           { path: 'setup', component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'setup' } },
@@ -216,19 +212,11 @@ export const V1Routes: Routes = [
                           {
                             path: 'quality/:predictorGuid',
                             component: WeatherPredictorQualityComponent,
-                            providers: [
-                              WeatherPredictorQualityContextService,
-                              { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: WeatherPredictorQualityContextService }
-                            ],
                             data: { weatherTab: 'quality' }
                           },
                           {
                             path: 'quality',
                             component: WeatherPredictorQualityComponent,
-                            providers: [
-                              WeatherPredictorQualityContextService,
-                              { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: WeatherPredictorQualityContextService }
-                            ],
                             data: { weatherTab: 'quality' }
                           },
                           {
@@ -254,7 +242,6 @@ export const V1Routes: Routes = [
                     path: ':predictorGuid',
                     component: PredictorWorkbenchComponent,
                     canActivate: [predictorCanonicalRouteGuard],
-                    providers: [PredictorWorkbenchContextService],
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'settings' },
                       { path: 'settings', component: PredictorWorkbenchSettingsComponent, canDeactivate: [unsavedChangesGuard], data: { predictorTab: 'settings' } },
@@ -262,9 +249,6 @@ export const V1Routes: Routes = [
                       {
                         path: 'quality',
                         component: PredictorWorkbenchQualityReportComponent,
-                        providers: [
-                          { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: PredictorWorkbenchContextService }
-                        ],
                         data: { predictorTab: 'quality' }
                       },
                       { path: '**', redirectTo: 'settings' }

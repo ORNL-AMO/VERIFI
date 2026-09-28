@@ -60,6 +60,10 @@ describe('WeatherPredictorWorkbenchComponent', () => {
       data: {},
       firstChild: { data: {}, firstChild: qualitySnapshot }
     };
+    const context = {
+      creating: signal(false), group, predictors: signal(group().predictors),
+      readings: signal([]), notFound: signal(false)
+    };
     TestBed.configureTestingModule({
       imports: [WeatherPredictorWorkbenchComponent],
       providers: [
@@ -89,10 +93,7 @@ describe('WeatherPredictorWorkbenchComponent', () => {
         { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
         {
           provide: WeatherPredictorWorkbenchContextService,
-          useValue: {
-            creating: signal(false), group, predictors: signal(group().predictors),
-            readings: signal([]), notFound: signal(false)
-          }
+          useValue: context
         },
         {
           provide: FacilityPredictorsWorkspaceService,
@@ -110,6 +111,9 @@ describe('WeatherPredictorWorkbenchComponent', () => {
           }
         }
       ]
+    });
+    TestBed.overrideComponent(WeatherPredictorWorkbenchComponent, {
+      set: { providers: [{ provide: WeatherPredictorWorkbenchContextService, useValue: context }] }
     });
     const fixture = TestBed.createComponent(WeatherPredictorWorkbenchComponent);
     fixture.detectChanges();

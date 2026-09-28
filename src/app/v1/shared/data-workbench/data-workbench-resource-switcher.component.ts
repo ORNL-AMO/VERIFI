@@ -35,12 +35,6 @@ export class DataWorkbenchResourceSwitcherComponent {
   @Input({ required: true }) selectedId = '';
   @Input({ required: true }) currentLabel = '';
   @Input({ required: true }) ariaLabel = 'Switch resource';
-  @Input() toggleClass = '';
-  @Input() labelClass = '';
-  @Input() backdropClass = '';
-  @Input() menuClass = '';
-  @Input() itemClass = '';
-  @Input() itemTextClass = '';
   @Output() readonly resourceSelected = new EventEmitter<string>();
 
   @ViewChild('toggleButton') private readonly toggleButton?: ElementRef<HTMLButtonElement>;

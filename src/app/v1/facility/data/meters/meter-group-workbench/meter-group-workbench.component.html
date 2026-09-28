@@ -53,12 +53,6 @@
             [selectedId]="currentGroup.guid"
             [currentLabel]="currentGroup.name"
             ariaLabel="Switch meter group"
-            toggleClass="v1-meter-group-workbench-header__group-toggle"
-            labelClass="v1-meter-group-workbench-header__group-toggle-label"
-            backdropClass="v1-meter-group-workbench-header__group-backdrop"
-            menuClass="v1-meter-group-workbench-header__group-menu"
-            itemClass="v1-meter-group-workbench-header__group-item"
-            itemTextClass="v1-meter-group-workbench-header__group-item-text"
             (resourceSelected)="switchGroup($event)">
           </app-data-workbench-resource-switcher>
         </h1>

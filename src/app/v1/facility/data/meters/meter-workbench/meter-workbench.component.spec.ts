@@ -349,12 +349,12 @@ describe('MeterWorkbenchComponent', () => {
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('[aria-label="Meter breadcrumb"]')?.textContent).not.toContain('Electric Main');
-    expect(element.querySelector('.v1-meter-workbench-header__meter-title .v1-meter-workbench-header__meter-toggle')).not.toBeNull();
-    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    expect(element.querySelector('.v1-meter-workbench-header__meter-title .v1-data-workbench-switcher-toggle')).not.toBeNull();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
 
-    const menu = element.querySelector<HTMLElement>('.v1-meter-workbench-header__meter-menu');
-    const meterItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'));
+    const menu = element.querySelector<HTMLElement>('.v1-data-workbench-switcher-menu');
+    const meterItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'));
     expect(menu).not.toBeNull();
     expect(meterItems.map(item => item.textContent?.trim())).toEqual(['Electric Main', 'Gas Backup']);
     expect(meterItems[0].getAttribute('aria-checked')).toBe('true');
@@ -456,9 +456,9 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
-    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'))[1].click();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'))[1].click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -500,9 +500,9 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
-    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'))[1].click();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'))[1].click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',

@@ -3,13 +3,13 @@
     <button
       #toggleButton
       type="button"
-      class="v1-data-workbench-switcher-toggle {{ toggleClass }}"
+      class="v1-data-workbench-switcher-toggle"
       aria-haspopup="menu"
       [attr.aria-expanded]="open()"
       [attr.aria-label]="ariaLabel + ', current ' + currentLabel"
       (click)="toggle()"
       (keydown)="onToggleKeydown($event)">
-      <span class="v1-data-workbench-switcher-label {{ labelClass }}">{{ currentLabel }}</span>
+      <span class="v1-data-workbench-switcher-label">{{ currentLabel }}</span>
       <app-ui-icon name="chevronDown" class="v1-data-workbench-switcher-icon"></app-ui-icon>
     </button>
   } @else {
@@ -17,20 +17,20 @@
   }
 
   @if (resources.length > 1 && open()) {
-    <div class="v1-data-workbench-switcher-backdrop {{ backdropClass }}" (click)="close(true)" aria-hidden="true"></div>
-    <div class="v1-data-workbench-switcher-menu {{ menuClass }}" role="menu" [attr.aria-label]="ariaLabel" (keydown)="onMenuKeydown($event)">
+    <div class="v1-data-workbench-switcher-backdrop" (click)="close(true)" aria-hidden="true"></div>
+    <div class="v1-data-workbench-switcher-menu" role="menu" [attr.aria-label]="ariaLabel" (keydown)="onMenuKeydown($event)">
       @for (resource of resources; track resource.id) {
         <button
           #resourceItem
           type="button"
-          class="v1-data-workbench-switcher-item {{ itemClass }}"
+          class="v1-data-workbench-switcher-item"
           role="menuitemradio"
           [class.active]="resource.id === selectedId"
           [attr.aria-checked]="resource.id === selectedId"
           [attr.data-resource-id]="resource.id"
           (click)="select(resource.id)">
           @if (resource.icon) { <app-ui-icon [name]="resource.icon"></app-ui-icon> }
-          <span class="v1-data-workbench-switcher-item-text {{ itemTextClass }}">{{ resource.label }}</span>
+          <span class="v1-data-workbench-switcher-item-text">{{ resource.label }}</span>
         </button>
       }
     </div>

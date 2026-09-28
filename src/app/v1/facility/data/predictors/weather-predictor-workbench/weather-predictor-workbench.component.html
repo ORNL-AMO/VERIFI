@@ -44,7 +44,6 @@
                 [selectedId]="'weather:' + group.routeKey"
                 [currentLabel]="group.stationName"
                 ariaLabel="Switch predictor"
-                toggleClass="weather-workbench__switcher-toggle"
                 (resourceSelected)="switchResource($event)">
               </app-data-workbench-resource-switcher>
             } @else {

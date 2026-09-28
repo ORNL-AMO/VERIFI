@@ -30,6 +30,7 @@ import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter
 import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
+import { FacilityPredictorsWorkspaceService } from '@app/v1/facility/data/predictors/facility-predictors-workspace.service';
 import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
 import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
 import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
@@ -210,6 +211,7 @@ describe('V1Routes facility data meters routes', () => {
     const children = predictorRoute?.children ?? [];
 
     expect(predictorsRoute.component).toBe(FacilityPredictorsComponent);
+    expect(predictorsRoute.providers).toContain(FacilityPredictorsWorkspaceService);
     expect(predictorsRoute.children?.find(child => child.path === '')).toMatchObject({
       path: '',
       pathMatch: 'full',

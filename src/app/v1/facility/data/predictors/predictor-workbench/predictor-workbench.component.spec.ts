@@ -33,6 +33,15 @@ describe('PredictorWorkbenchComponent', () => {
     });
     const factsExpanded = signal(true);
     const route = { firstChild: { snapshot: { data: { predictorTab: 'readings' } } } };
+    const context = {
+      predictor: selectedPredictor,
+      card: selectedCard,
+      findings: signal([{
+        id: 'gap', severity: 'error',
+        destination: { kind: 'predictor-tab', facilityGuid: 'facility-a', predictorGuid: 'predictor-a', tab: 'readings' }
+      }]),
+      notFound: signal(false)
+    };
     TestBed.configureTestingModule({
       imports: [PredictorWorkbenchComponent],
       providers: [
@@ -59,15 +68,7 @@ describe('PredictorWorkbenchComponent', () => {
         { provide: WorkbenchLayoutService, useValue: { factsExpanded, toggleFacts: () => factsExpanded.update(value => !value) } },
         {
           provide: PredictorWorkbenchContextService,
-          useValue: {
-            predictor: selectedPredictor,
-            card: selectedCard,
-            findings: signal([{
-              id: 'gap', severity: 'error',
-              destination: { kind: 'predictor-tab', facilityGuid: 'facility-a', predictorGuid: 'predictor-a', tab: 'readings' }
-            }]),
-            notFound: signal(false)
-          }
+          useValue: context
         },
         {
           provide: WorkspaceStatusService,
@@ -100,6 +101,9 @@ describe('PredictorWorkbenchComponent', () => {
           }
         }
       ]
+    });
+    TestBed.overrideComponent(PredictorWorkbenchComponent, {
+      set: { providers: [{ provide: PredictorWorkbenchContextService, useValue: context }] }
     });
     const fixture = TestBed.createComponent(PredictorWorkbenchComponent);
     fixture.detectChanges();
@@ -149,6 +153,9 @@ describe('PredictorWorkbenchComponent', () => {
 
   it('shows a not-found state with a dashboard action', () => {
     const navigate = vi.fn();
+    const context = {
+      predictor: signal(undefined), card: signal(undefined), findings: signal([]), notFound: signal(true)
+    };
     TestBed.configureTestingModule({
       imports: [PredictorWorkbenchComponent],
       providers: [
@@ -165,9 +172,7 @@ describe('PredictorWorkbenchComponent', () => {
         { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(true), toggleFacts: vi.fn() } },
         {
           provide: PredictorWorkbenchContextService,
-          useValue: {
-            predictor: signal(undefined), card: signal(undefined), findings: signal([]), notFound: signal(true)
-          }
+          useValue: context
         },
         { provide: WorkspaceStatusService, useValue: { predictorFindings: vi.fn(() => []) } },
         {
@@ -184,6 +189,9 @@ describe('PredictorWorkbenchComponent', () => {
           }
         }
       ]
+    });
+    TestBed.overrideComponent(PredictorWorkbenchComponent, {
+      set: { providers: [{ provide: PredictorWorkbenchContextService, useValue: context }] }
     });
     const fixture = TestBed.createComponent(PredictorWorkbenchComponent);
     fixture.detectChanges();

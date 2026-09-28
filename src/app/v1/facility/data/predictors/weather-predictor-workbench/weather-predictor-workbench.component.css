@@ -10,22 +10,6 @@
   margin: 0;
 }
 
-.weather-workbench__switcher-toggle {
-  max-width: min(36rem, 74vw);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.weather-workbench__switcher-toggle:hover,
-.weather-workbench__switcher-toggle:focus-visible {
-  color: var(--v1-link);
-}
-
 .weather-workbench__predictors {
   display: grid;
   gap: var(--v1-space-2);
