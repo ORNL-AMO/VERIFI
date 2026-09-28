@@ -519,8 +519,8 @@ describe('WorkspaceNavigationService', () => {
   it('keeps the active rail section when toggling between account and facility contexts', () => {
     router.events.next(new NavigationEnd(
       1,
-      '/v1/workspace/account/account-a/data/custom-fuels',
-      '/v1/workspace/account/account-a/data/custom-fuels'
+      '/v1/workspace/account/account-a/data/portfolio',
+      '/v1/workspace/account/account-a/data/portfolio'
     ));
 
     service.setContext('facility');
