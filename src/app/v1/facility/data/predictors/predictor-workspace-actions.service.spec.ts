@@ -14,6 +14,9 @@ describe('PredictorWorkspaceActionsService', () => {
   } as any;
   const readings = signal<any[]>([reading('reading-a', 20, 2026, 1)]);
   const predictors = signal<any[]>([existing]);
+  const facilityPredictors = signal<any[]>([existing]);
+  const canWrite = signal(true);
+  const hasPending = signal(false);
   const predictorHandler = {
     createStandardPredictor: vi.fn(async ({ predictor }: any) => ({ ...predictor, id: 11 })),
     updateStandardPredictor: vi.fn(async ({ predictor }: any) => predictor),
@@ -34,12 +37,15 @@ describe('PredictorWorkspaceActionsService', () => {
     vi.clearAllMocks();
     readings.set([reading('reading-a', 20, 2026, 1)]);
     predictors.set([existing]);
+    facilityPredictors.set([existing]);
+    canWrite.set(true);
+    hasPending.set(false);
     TestBed.configureTestingModule({ providers: [
       PredictorWorkspaceActionsService,
       { provide: AccountWorkspaceStore, useValue: {
         account: signal({ guid: 'account-a' }), selectedFacility: signal({ guid: 'facility-a' }),
-        predictors, facilityPredictors: predictors, predictorData: readings, facilityPredictorData: readings,
-        facilityAnalyses: signal([]), revision: signal(4)
+        predictors, facilityPredictors, predictorData: readings, facilityPredictorData: readings,
+        facilityAnalyses: signal([]), revision: signal(4), canWrite, hasPending
       } },
       { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: vi.fn(async () => 'published') } },
       { provide: WorkspaceCommandBoundary, useValue: {
@@ -91,6 +97,34 @@ describe('PredictorWorkspaceActionsService', () => {
     expect(predictorHandler.updatePredictor).not.toHaveBeenCalled();
   });
 
+  it('rejects writes while the workspace is read-only or pending', async () => {
+    canWrite.set(false);
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing))
+      .rejects.toMatchObject({ code: 'workspace-not-ready' });
+    canWrite.set(true);
+    hasPending.set(true);
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing))
+      .rejects.toMatchObject({ code: 'workspace-not-ready' });
+    expect(predictorHandler.createStandardPredictor).not.toHaveBeenCalled();
+  });
+
+  it('rejects a predictor outside the selected facility', async () => {
+    facilityPredictors.set([]);
+
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).copyPredictor(existing))
+      .rejects.toThrow('selected facility');
+    expect(predictorHandler.createStandardPredictor).not.toHaveBeenCalled();
+  });
+
+  it('rejects a new reading assigned to another facility', async () => {
+    await expect(TestBed.inject(PredictorWorkspaceActionsService).addPredictorReading({
+      ...reading('reading-new', 30, 2026, 2),
+      id: undefined,
+      facilityId: 'facility-b'
+    })).rejects.toThrow('active facility');
+    expect(predictorHandler.addPredictorData).not.toHaveBeenCalled();
+  });
+
   it('deletes selected readings in one atomic reconciliation command', async () => {
     readings.set([reading('reading-a', 20, 2026, 1), reading('reading-b', 21, 2026, 2)]);
 
@@ -106,7 +140,8 @@ describe('PredictorWorkspaceActionsService', () => {
   it('rechecks gaps and fills Weather months as manual overrides', async () => {
     readings.set([reading('reading-a', 20, 2026, 1), reading('reading-c', 22, 2026, 3)]);
     const weather = { ...existing, predictorType: 'Weather' };
-    (TestBed.inject(AccountWorkspaceStore) as any).predictors.set([weather]);
+    predictors.set([weather]);
+    facilityPredictors.set([weather]);
 
     const added = await TestBed.inject(PredictorWorkspaceActionsService).fillMissingPredictorMonths(
       'predictor-a',
@@ -152,6 +187,7 @@ describe('PredictorWorkspaceActionsService', () => {
       ...existing, predictorType: 'Weather', weatherStationId: 'station-a', weatherStationName: 'Station A'
     };
     predictors.set([weather]);
+    facilityPredictors.set([weather]);
     const preview = {
       workspaceRevision: 4,
       sourceGroupKey: 'station:station-a',
@@ -173,6 +209,7 @@ describe('PredictorWorkspaceActionsService', () => {
     const weatherA = { ...existing, predictorType: 'Weather', weatherStationId: 'station-a' };
     const weatherB = { ...weatherA, id: 11, guid: 'predictor-b', name: 'Humidity' };
     predictors.set([weatherA, weatherB]);
+    facilityPredictors.set([weatherA, weatherB]);
     const currentReading = reading('reading-a', 20, 2026, 1);
     readings.set([currentReading]);
 

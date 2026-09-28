@@ -118,7 +118,7 @@ export class PredictorWorkspaceActionsService {
     if (current.id === undefined) {
       throw new WorkspaceWriteError('validation-failed', 'Predictor is missing its IndexedDB id.');
     }
-    const readings = this.workspace.predictorData().filter(reading => reading.predictorId === current.guid);
+    const readings = this.workspace.facilityPredictorData().filter(reading => reading.predictorId === current.guid);
     this.requireReadingIds(readings);
     await this.executeWithRecovery(async () => {
       await this.commandBoundary.execute(
@@ -142,7 +142,10 @@ export class PredictorWorkspaceActionsService {
 
   async addPredictorReading(reading: IdbPredictorData): Promise<IdbPredictorData> {
     const account = this.requireAccount();
-    this.requirePredictor(reading.predictorId);
+    const predictor = this.requirePredictor(reading.predictorId);
+    if (reading.accountId !== account.guid || reading.facilityId !== predictor.facilityId) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor reading does not belong to the active facility.');
+    }
     const newReading = structuredClone(reading);
     delete newReading.id;
     return this.executeWithRecovery(async () => {
@@ -162,6 +165,9 @@ export class PredictorWorkspaceActionsService {
   async updatePredictorReading(reading: IdbPredictorData): Promise<IdbPredictorData> {
     const account = this.requireAccount();
     const current = this.requireReading(reading.guid, reading.predictorId);
+    if (reading.accountId !== current.accountId || reading.facilityId !== current.facilityId) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor reading does not belong to the active facility.');
+    }
     const updated = { ...structuredClone(reading), id: current.id };
     return this.executeWithRecovery(async () => {
       const result = await this.commandBoundary.execute(
@@ -178,6 +184,7 @@ export class PredictorWorkspaceActionsService {
   }
 
   async deletePredictorReading(reading: IdbPredictorData): Promise<void> {
+    this.requireAccount();
     const current = this.requireReading(reading.guid, reading.predictorId);
     this.requireReadingIds([current]);
     await this.executeWithRecovery(async () => {
@@ -197,7 +204,7 @@ export class PredictorWorkspaceActionsService {
     const account = this.requireAccount();
     this.requirePredictor(predictorGuid);
     const selectedGuids = new Set(readings.map(reading => reading.guid));
-    const current = this.workspace.predictorData()
+    const current = this.workspace.facilityPredictorData()
       .filter(reading => reading.predictorId === predictorGuid && selectedGuids.has(reading.guid));
     this.requireReadingIds(current);
     if (current.length === 0) return;
@@ -227,7 +234,8 @@ export class PredictorWorkspaceActionsService {
   ): Promise<readonly IdbPredictorData[]> {
     const account = this.requireAccount();
     const predictor = this.requirePredictor(predictorGuid);
-    const currentReadings = this.workspace.predictorData().filter(reading => reading.predictorId === predictorGuid);
+    const currentReadings = this.workspace.facilityPredictorData()
+      .filter(reading => reading.predictorId === predictorGuid);
     const requestedKeys = new Set(requestedMonths.map(month => month.key));
     const currentMissing = findMissingPredictorMonths(currentReadings).filter(month => requestedKeys.has(month.key));
     if (currentMissing.length === 0) return [];
@@ -495,14 +503,17 @@ export class PredictorWorkspaceActionsService {
   }
 
   private requirePredictor(guid: string): IdbPredictor {
-    const predictor = this.workspace.predictors().find(item => item.guid === guid);
-    if (!predictor) throw new WorkspaceWriteError('validation-failed', 'The predictor is no longer available.');
+    const predictor = this.workspace.facilityPredictors().find(item => item.guid === guid);
+    if (!predictor) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor is not part of the selected facility.');
+    }
     return structuredClone(predictor);
   }
 
   private requireReading(guid: string, predictorGuid: string): IdbPredictorData {
     this.requirePredictor(predictorGuid);
-    const reading = this.workspace.predictorData().find(item => item.guid === guid && item.predictorId === predictorGuid);
+    const reading = this.workspace.facilityPredictorData()
+      .find(item => item.guid === guid && item.predictorId === predictorGuid);
     if (!reading) throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer available.');
     return structuredClone(reading);
   }
@@ -513,7 +524,9 @@ export class PredictorWorkspaceActionsService {
 
   private requireAccount() {
     const account = this.workspace.account();
-    if (!account) throw new WorkspaceWriteError('workspace-not-ready', 'Select an account before changing predictors.');
+    if (!account || !this.workspace.canWrite() || this.workspace.hasPending()) {
+      throw new WorkspaceWriteError('workspace-not-ready', 'The workspace is not ready for predictor changes.');
+    }
     return account;
   }
 

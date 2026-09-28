@@ -67,8 +67,10 @@ describe('PredictorCommandHandler', () => {
     transactions.runTransaction.mockImplementation(
       async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
     );
-    const predictor = { guid: 'p-1', accountId: ACCOUNT, predictorType: 'Standard' } as IdbPredictor;
-    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+    const predictor = {
+      guid: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1', predictorType: 'Standard'
+    } as IdbPredictor;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-1' } as any;
 
     const result = await handler.createStandardPredictor({ predictor, facilityAnalyses: [analysis] }, ACCOUNT);
 
@@ -80,6 +82,18 @@ describe('PredictorCommandHandler', () => {
     expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
   });
 
+  it('rejects standard predictor analysis changes from another facility', async () => {
+    const { handler, transactions } = createHandler();
+    const predictor = {
+      guid: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1', predictorType: 'Standard'
+    } as IdbPredictor;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-2' } as any;
+
+    await expect(handler.createStandardPredictor({ predictor, facilityAnalyses: [analysis] }, ACCOUNT))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
+  });
+
   it('updates a standard predictor and its analysis references in one transaction', async () => {
     const { handler, transactions } = createHandler();
     const transaction = {
@@ -88,8 +102,10 @@ describe('PredictorCommandHandler', () => {
     transactions.runTransaction.mockImplementation(
       async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
     );
-    const predictor = { id: 3, guid: 'p-1', accountId: ACCOUNT, predictorType: 'Standard' } as IdbPredictor;
-    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+    const predictor = {
+      id: 3, guid: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1', predictorType: 'Standard'
+    } as IdbPredictor;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-1' } as any;
 
     await handler.updateStandardPredictor({ predictor, facilityAnalyses: [analysis] }, ACCOUNT);
 
@@ -108,9 +124,13 @@ describe('PredictorCommandHandler', () => {
     transactions.runTransaction.mockImplementation(
       async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
     );
-    const predictor = { id: 3, guid: 'p-1', accountId: ACCOUNT, predictorType: 'Standard' } as IdbPredictor;
-    const predictorData = { id: 7, guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT } as IdbPredictorData;
-    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+    const predictor = {
+      id: 3, guid: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1', predictorType: 'Standard'
+    } as IdbPredictor;
+    const predictorData = {
+      id: 7, guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1'
+    } as IdbPredictorData;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-1' } as any;
 
     await handler.deleteStandardPredictor({ predictor, predictorData: [predictorData], facilityAnalyses: [analysis] }, ACCOUNT);
 

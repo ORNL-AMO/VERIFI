@@ -94,6 +94,7 @@ export class PredictorCommandHandler {
   ): Promise<IdbPredictor> {
     this.assertStandardPredictor(changes.predictor, activeAccountGuid, false);
     this.assertPersistableAnalyses(changes.facilityAnalyses, activeAccountGuid);
+    this.assertAnalysisFacility(changes.facilityAnalyses, changes.predictor.facilityId);
     let predictorId: IDBValidKey | undefined;
     await this.transactions.runTransaction(['predictor', 'analysisItems'], 'readwrite', async transaction => {
       predictorId = await transaction.add('predictor', { ...changes.predictor });
@@ -110,6 +111,7 @@ export class PredictorCommandHandler {
   ): Promise<IdbPredictor> {
     this.assertStandardPredictor(changes.predictor, activeAccountGuid, true);
     this.assertPersistableAnalyses(changes.facilityAnalyses, activeAccountGuid);
+    this.assertAnalysisFacility(changes.facilityAnalyses, changes.predictor.facilityId);
     const updated = { ...changes.predictor, modifiedDate: new Date() };
     await this.transactions.runTransaction(['predictor', 'analysisItems'], 'readwrite', async transaction => {
       await transaction.put('predictor', updated);
@@ -130,8 +132,12 @@ export class PredictorCommandHandler {
       if (entry.id === undefined) {
         throw new WorkspaceWriteError('validation-failed', 'Predictor data is missing its IndexedDB id.');
       }
+      if (entry.facilityId !== changes.predictor.facilityId) {
+        throw new WorkspaceWriteError('validation-failed', 'Predictor data belongs to another facility.');
+      }
     });
     this.assertPersistableAnalyses(changes.facilityAnalyses, activeAccountGuid);
+    this.assertAnalysisFacility(changes.facilityAnalyses, changes.predictor.facilityId);
     await this.transactions.runTransaction(
       ['predictor', 'predictorData', 'analysisItems'],
       'readwrite',
@@ -449,6 +455,15 @@ export class PredictorCommandHandler {
         throw new WorkspaceWriteError('validation-failed', 'Facility analysis is missing its IndexedDB id.');
       }
     });
+  }
+
+  private assertAnalysisFacility(
+    analyses: readonly IdbAnalysisItem[],
+    facilityGuid: string
+  ): void {
+    if (analyses.some(analysis => analysis.facilityId !== facilityGuid)) {
+      throw new WorkspaceWriteError('validation-failed', 'A facility analysis belongs to another facility.');
+    }
   }
 
   private assertPredictorData(
