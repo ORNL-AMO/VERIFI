@@ -76,6 +76,14 @@ describe('AppearanceService', () => {
     });
   });
 
+  it('preserves legacy generated backgrounds and new skyline selections', () => {
+    const legacyService = new AppearanceService(createStorage({ backgroundPattern: 'blueprint-grid' }) as any);
+    const nightService = new AppearanceService(createStorage({ backgroundPattern: 'skyline-rocket-night' }) as any);
+
+    expect(legacyService.settings().backgroundPattern).toBe('blueprint-grid');
+    expect(nightService.settings().backgroundPattern).toBe('skyline-rocket-night');
+  });
+
   it('updates the matched background pattern when the palette changes', () => {
     const storage = createStorage({});
     const service = new AppearanceService(storage as any);
@@ -84,10 +92,13 @@ describe('AppearanceService', () => {
     expect(service.settings().backgroundPattern).toBe('skyline-neon');
 
     service.setPalette('aurora');
-    expect(service.settings().backgroundPattern).toBe('aurora-flow');
+    expect(service.settings().backgroundPattern).toBe('skyline-aurora');
 
     service.setPalette('steel');
-    expect(service.settings().backgroundPattern).toBe('steel-hatch');
+    expect(service.settings().backgroundPattern).toBe('skyline-steel');
+
+    service.setPalette('blueprint');
+    expect(service.settings().backgroundPattern).toBe('skyline-blueprint');
 
     service.setPalette('forest');
     expect(service.settings().backgroundPattern).toBe('skyline-green');

@@ -25,15 +25,21 @@ describe('ShellHeaderComponent', () => {
     expect(menuText).toContain('High contrast');
     expect(menuText).toContain('Background');
     expect(menuText).toContain('Skyline rocket');
+    expect(menuText).toContain('Night skyline rocket');
     expect(menuText).toContain('Green skyline');
     expect(menuText).toContain('Neon skyline');
+    expect(menuText).toContain('Aurora skyline');
+    expect(menuText).toContain('Blueprint skyline');
+    expect(menuText).toContain('Steel skyline');
+    expect(menuText).toContain('Blueprint grid');
+    expect(menuText).toContain('Machined hatch');
     expect(menuText).toContain('Topographic contours');
 
     const backgroundSelect: HTMLSelectElement = fixture.nativeElement.querySelector('[aria-label="Background pattern"]');
-    backgroundSelect.value = 'skyline-neon';
+    backgroundSelect.value = 'skyline-rocket-night';
     backgroundSelect.dispatchEvent(new Event('change'));
 
-    expect(appearance.setBackgroundPattern).toHaveBeenCalledWith('skyline-neon');
+    expect(appearance.setBackgroundPattern).toHaveBeenCalledWith('skyline-rocket-night');
   });
 
   it('shows the account dropdown and support panel control on workspace routes', () => {

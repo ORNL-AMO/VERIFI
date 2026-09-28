@@ -788,8 +788,12 @@
 }
 
 .v1-background-skyline-rocket,
+.v1-background-skyline-rocket-night,
 .v1-background-skyline-green,
-.v1-background-skyline-neon {
+.v1-background-skyline-neon,
+.v1-background-skyline-aurora,
+.v1-background-skyline-blueprint,
+.v1-background-skyline-steel {
   --v1-skyline-scrim: transparent;
   --v1-skyline-background:
     linear-gradient(var(--v1-skyline-scrim), var(--v1-skyline-scrim)),
@@ -805,6 +809,11 @@
   --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket.png');
 }
 
+.v1-root.v1-background-skyline-rocket-night {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night.png');
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 28%, transparent);
+}
+
 .v1-root.v1-background-skyline-green {
   --v1-skyline-art: url('../../../assets/images/skylines/skyline-green.png');
 }
@@ -813,7 +822,21 @@
   --v1-skyline-art: url('../../../assets/images/skylines/skyline-neon.png');
 }
 
-.v1-root:is(.v1-background-skyline-rocket, .v1-background-skyline-green, .v1-background-skyline-neon) .v1-workspace .v1-workspace__main {
+.v1-root.v1-background-skyline-aurora {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-aurora.png');
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 24%, transparent);
+}
+
+.v1-root.v1-background-skyline-blueprint {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-engineering-sketch.png');
+}
+
+.v1-root.v1-background-skyline-steel {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-steel-cnc.png');
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 18%, transparent);
+}
+
+.v1-root:is(.v1-background-skyline-rocket, .v1-background-skyline-rocket-night, .v1-background-skyline-green, .v1-background-skyline-neon, .v1-background-skyline-aurora, .v1-background-skyline-blueprint, .v1-background-skyline-steel) .v1-workspace .v1-workspace__main {
   background-image: var(--v1-skyline-background);
   background-position: center, center bottom;
   background-repeat: no-repeat;
@@ -825,6 +848,10 @@
   --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night.png');
 }
 
+.v1-theme-dark.v1-background-skyline-rocket-night {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+}
+
 @media (max-width: 760px) {
   .v1-root.v1-background-skyline-rocket {
     --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-mobile.png');
@@ -834,12 +861,28 @@
     --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night-mobile.png');
   }
 
+  .v1-root.v1-background-skyline-rocket-night {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night-mobile.png');
+  }
+
   .v1-root.v1-background-skyline-green {
     --v1-skyline-art: url('../../../assets/images/skylines/skyline-green-mobile.png');
   }
 
   .v1-root.v1-background-skyline-neon {
     --v1-skyline-art: url('../../../assets/images/skylines/skyline-neon-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-aurora {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-aurora-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-blueprint {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-engineering-sketch-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-steel {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-steel-cnc-mobile.png');
   }
 }
 
@@ -851,11 +894,23 @@
   --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
 }
 
-.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-green, .v1-background-skyline-neon) {
+.v1-theme-dark.v1-background-skyline-aurora {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-blueprint {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 68%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-steel {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 34%, transparent);
+}
+
+.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-rocket-night, .v1-background-skyline-green, .v1-background-skyline-neon, .v1-background-skyline-aurora, .v1-background-skyline-blueprint, .v1-background-skyline-steel) {
   --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 65%, transparent);
 }
 
-.v1-theme-dark.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-neon) {
+.v1-theme-dark.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-rocket-night, .v1-background-skyline-neon, .v1-background-skyline-aurora) {
   --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 35%, transparent);
 }
 

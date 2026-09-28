@@ -8,8 +8,12 @@ export type ThemeMode = 'light' | 'dark';
 export type CornerStyle = 'soft' | 'square';
 export type BackgroundPattern =
   | 'skyline-rocket'
+  | 'skyline-rocket-night'
   | 'skyline-green'
   | 'skyline-neon'
+  | 'skyline-aurora'
+  | 'skyline-blueprint'
+  | 'skyline-steel'
   | 'blueprint-grid'
   | 'steel-hatch'
   | 'neon-grid'
@@ -37,8 +41,12 @@ const VALID_MODES: ReadonlyArray<ThemeMode> = ['light', 'dark'];
 const VALID_CORNER_STYLES: ReadonlyArray<CornerStyle> = ['soft', 'square'];
 const VALID_BACKGROUND_PATTERNS: ReadonlyArray<BackgroundPattern> = [
   'skyline-rocket',
+  'skyline-rocket-night',
   'skyline-green',
   'skyline-neon',
+  'skyline-aurora',
+  'skyline-blueprint',
+  'skyline-steel',
   'blueprint-grid',
   'steel-hatch',
   'neon-grid',
@@ -47,10 +55,10 @@ const VALID_BACKGROUND_PATTERNS: ReadonlyArray<BackgroundPattern> = [
 ];
 const PALETTE_BACKGROUND_PATTERNS: Readonly<Record<Palette, BackgroundPattern>> = {
   default: 'skyline-rocket',
-  steel: 'steel-hatch',
-  blueprint: 'blueprint-grid',
+  steel: 'skyline-steel',
+  blueprint: 'skyline-blueprint',
   neon: 'skyline-neon',
-  aurora: 'aurora-flow',
+  aurora: 'skyline-aurora',
   forest: 'skyline-green'
 };
 

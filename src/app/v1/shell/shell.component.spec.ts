@@ -82,6 +82,58 @@ describe('ShellComponent', () => {
     const root = fixture.nativeElement.querySelector('.v1-root');
     expect(root.classList.contains('v1-background-skyline-neon')).toBe(true);
     expect(root.classList.contains('v1-background-skyline-green')).toBe(false);
+
+    appearance.settings.mockReturnValue({
+      palette: 'blueprint',
+      mode: 'light',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-blueprint'
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-root').classList.contains('v1-background-skyline-blueprint')).toBe(true);
+
+    appearance.settings.mockReturnValue({
+      palette: 'steel',
+      mode: 'dark',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-steel'
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-root').classList.contains('v1-background-skyline-steel')).toBe(true);
+
+    appearance.settings.mockReturnValue({
+      palette: 'aurora',
+      mode: 'dark',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-aurora'
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-root').classList.contains('v1-background-skyline-aurora')).toBe(true);
+
+    appearance.settings.mockReturnValue({
+      palette: 'default',
+      mode: 'light',
+      cornerStyle: 'soft',
+      highContrast: false,
+      backgroundPattern: 'skyline-rocket-night'
+    });
+    fixture.destroy();
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-root').classList.contains('v1-background-skyline-rocket-night')).toBe(true);
   });
 
   it('hosts the shared shell header above routed content', () => {
