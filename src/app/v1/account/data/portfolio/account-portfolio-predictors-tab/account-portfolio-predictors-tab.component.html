@@ -8,13 +8,13 @@
       description="Predictors will appear here after you add or import them for a facility.">
     </app-data-empty-state>
   } @else {
-    <div class="v1-account-portfolio-predictors__cards" role="list" aria-label="Account predictors">
+    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-predictors__cards" role="list" aria-label="Account predictors">
       @for (entry of cards; track entry.item.kind === 'standard' ? entry.item.card.predictor.guid : entry.item.group.routeKey) {
-        @if (entry.item.kind === 'standard') {
-          <app-predictor-browse-card [card]="entry.item.card" [portfolioFacility]="entry.facility" [showFacilityHeader]="true" [allowMutations]="false"></app-predictor-browse-card>
-        } @else {
-          <app-weather-station-browse-card [group]="entry.item.group" [portfolioFacility]="entry.facility" [showFacilityHeader]="true"></app-weather-station-browse-card>
-        }
+        <app-resource-browse-card
+          [view]="entry.view"
+          [capabilities]="cardCapabilities"
+          (opened)="open(entry)">
+        </app-resource-browse-card>
       }
     </div>
   }

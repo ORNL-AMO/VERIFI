@@ -1,11 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildMeterCards, MeterCardView } from '@app/v1/facility/data/meters/models';
-import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import {
+  ResourceBrowseCardCapabilities,
+  ResourceBrowseCardView
+} from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
+import { buildMeterResourceView } from '@app/v1/facility/data/meters/meters-dashboard/meter-browse-card/meter-browse-card.view';
 
 type PortfolioMeterStatusFilter = 'all' | 'attention' | 'noReadings' | 'missingGroup' | 'valid';
 type PortfolioMeterSort = 'attention' | 'meterName' | 'facilityName' | 'latestReading';
@@ -13,6 +18,7 @@ type PortfolioMeterSort = 'attention' | 'meterName' | 'facilityName' | 'latestRe
 interface PortfolioMeterCard {
   readonly card: MeterCardView;
   readonly facility: IdbFacility;
+  readonly view: ResourceBrowseCardView;
   readonly latestReadingSortValue: number;
   readonly attentionRank: number;
   readonly noReadings: boolean;
@@ -25,23 +31,14 @@ interface PortfolioMeterCard {
   selector: 'app-account-portfolio-meters-tab',
   templateUrl: './account-portfolio-meters-tab.component.html',
   styleUrls: ['./account-portfolio-meters-tab.component.css'],
-  standalone: false,
-  providers: [
-    MetersDashboardActionsService,
-    {
-      provide: FacilityMetersWorkspaceService,
-      deps: [AccountWorkspaceStore],
-      useFactory: (workspace: AccountWorkspaceStore) => ({
-        facility: signal<IdbFacility | undefined>(undefined),
-        canWrite: workspace.canWrite,
-        hasPending: workspace.hasPending
-      })
-    }
-  ]
+  standalone: false
 })
 export class AccountPortfolioMetersTabComponent {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
+  private readonly router = inject(Router);
+  private readonly navigation = inject(WorkspaceNavigationService);
+  readonly cardCapabilities: ResourceBrowseCardCapabilities = { canOpen: true, canAct: false };
 
   readonly search = signal('');
   readonly statusFilter = signal<PortfolioMeterStatusFilter>('all');
@@ -101,6 +98,7 @@ export class AccountPortfolioMetersTabComponent {
     return {
       card,
       facility,
+      view: buildMeterResourceView(card, { facility }),
       latestReadingSortValue: this.latestReadingSortValue(meterReadings),
       attentionRank: this.attentionRank(card, noReadings, missingGroup),
       noReadings,
@@ -108,6 +106,14 @@ export class AccountPortfolioMetersTabComponent {
       valid,
       needsAttention
     };
+  }
+
+  openMeter(item: PortfolioMeterCard): void {
+    void this.router.navigate(this.navigation.facilityMeterRoute(
+      item.facility.guid,
+      item.card.meter.guid,
+      'settings'
+    ));
   }
 
   private matchesSearch(item: PortfolioMeterCard, search: string): boolean {

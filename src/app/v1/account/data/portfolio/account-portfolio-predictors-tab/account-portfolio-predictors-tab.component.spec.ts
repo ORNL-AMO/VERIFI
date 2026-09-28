@@ -5,7 +5,6 @@ import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { AccountDataModule } from '../../account-data.module';
 import { AccountPortfolioPredictorsTabComponent } from './account-portfolio-predictors-tab.component';
@@ -17,7 +16,6 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
       imports: [AccountDataModule],
       providers: [
         { provide: WorkspaceStatusService, useValue: { items: signal([]), state: signal('ready') } },
-        { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         {
           provide: AccountWorkspaceStore,
           useValue: {
@@ -54,6 +52,7 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
     expect(cardTitles(fixture)).toEqual(['Production', 'Station station-a']);
     expect(fixture.nativeElement.textContent).toContain('Alpha Plant');
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
+    expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__actions')).toHaveLength(0);
 
     (fixture.nativeElement.querySelector('[aria-label="Open Station station-a weather workbench"]') as HTMLButtonElement).click();
     expect(navigate).toHaveBeenCalledWith([

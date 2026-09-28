@@ -6,7 +6,6 @@ import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-di
 @Component({
   selector: 'app-confirm-delete-meter-modal',
   templateUrl: './confirm-delete-meter-modal.component.html',
-  styleUrls: ['./confirm-delete-meter-modal.component.css'],
   standalone: true,
   imports: [ConfirmationDialogComponent, IconComponent]
 })

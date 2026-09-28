@@ -1,8 +1,8 @@
 @let summaries = filteredSummaries();
 
 <section class="v1-account-portfolio-tab" aria-label="Portfolio facilities">
-  <form class="v1-account-portfolio-tab__toolbar" aria-label="Facility filters">
-    <div class="v1-account-portfolio-tab__search">
+  <form class="v1-data-browse-toolbar v1-account-portfolio-tab__toolbar" aria-label="Facility filters">
+    <div class="v1-data-browse-search v1-account-portfolio-tab__search">
       <span class="input-group-text">
         <app-ui-icon name="search"></app-ui-icon>
       </span>
@@ -49,7 +49,7 @@
       <p>Adjust the search or filter controls to return to the full portfolio.</p>
     </article>
   } @else {
-    <div class="v1-account-portfolio-tab__cards" role="list" aria-label="Facilities">
+    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-tab__cards" role="list" aria-label="Facilities">
       @for (summary of summaries; track summary.facility.guid) {
         <article class="v1-facility-card" [ngClass]="'v1-facility-card--' + summary.statusTone" role="listitem">
           <header class="v1-facility-card__header">

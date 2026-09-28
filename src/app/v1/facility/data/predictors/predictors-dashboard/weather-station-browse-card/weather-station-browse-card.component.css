@@ -1,5 +1,3 @@
-:host { display: block; min-width: 0; height: 100%; }
-
 .weather-station-card__predictors {
   display: grid;
   gap: var(--v1-space-2);

@@ -75,4 +75,24 @@ describe('ResourceBrowseCardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Calculating Latest');
     expect(fixture.nativeElement.querySelector('.v1-resource-browse-card__fact-value--unavailable')).not.toBeNull();
   });
+
+  it('keeps read-only cards navigable while hiding mutation capabilities', () => {
+    fixture.componentRef.setInput('view', {
+      title: 'Resource A', openLabel: 'Open Resource A', icon: 'chartLine'
+    });
+    fixture.componentRef.setInput('actions', [
+      { id: 'delete', label: 'Delete resource', icon: 'delete', tone: 'danger' }
+    ]);
+    fixture.componentRef.setInput('capabilities', { canOpen: true, canAct: false });
+    const opened = vi.fn();
+    fixture.componentInstance.opened.subscribe(opened);
+    fixture.detectChanges();
+
+    const openButton = fixture.nativeElement.querySelector('[aria-label="Open Resource A"]') as HTMLButtonElement;
+    openButton.click();
+
+    expect(openButton.disabled).toBe(false);
+    expect(opened).toHaveBeenCalledOnce();
+    expect(fixture.nativeElement.querySelector('[aria-label="Delete resource"]')).toBeNull();
+  });
 });

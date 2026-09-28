@@ -45,12 +45,12 @@
     </div>
   }
 
-  <div class="v1-predictor-dashboard-workspace"><div class="v1-predictors-browse" aria-label="Facility predictors">
+  <div class="v1-data-dashboard-workspace v1-predictor-dashboard-workspace"><div class="v1-data-browse v1-predictors-browse" aria-label="Facility predictors">
     @if (actionError()) {
       <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() }}</span></div>
     }
-    <form class="v1-predictors-browse__toolbar" aria-label="Predictor filters">
-      <div class="v1-predictors-browse__search">
+    <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four v1-predictors-browse__toolbar" aria-label="Predictor filters">
+      <div class="v1-data-browse-search v1-predictors-browse__search">
         <span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span>
         <input type="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status" [value]="search()" (input)="setSearch($any($event.target).value)">
       </div>
@@ -72,7 +72,7 @@
     } @else if (visibleBrowseItems.length === 0) {
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No predictors match these filters</h2><p>Adjust the search or filter controls to return to the full predictor list.</p></article>
     } @else {
-      <div class="v1-predictors-browse__grid" role="list" aria-label="Facility predictors">
+      <div class="v1-data-browse-grid v1-predictors-browse__grid" role="list" aria-label="Facility predictors">
         @for (item of visibleBrowseItems; track item.kind === 'standard' ? item.card.predictor.guid : item.group.routeKey) {
           @if (item.kind === 'standard') {
             <app-predictor-browse-card [card]="item.card"></app-predictor-browse-card>

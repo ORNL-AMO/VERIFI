@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
+import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { buildPredictorCard } from '../../models';
 import { PredictorBrowseCardComponent } from './predictor-browse-card.component';
 
@@ -16,7 +17,15 @@ describe('PredictorBrowseCardComponent', () => {
       providers: [
         { provide: Router, useValue: { navigate } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
-        { provide: FacilityPredictorsWorkspaceService, useValue: { facility: signal({ guid: 'facility-a' }) } },
+        {
+          provide: FacilityPredictorsWorkspaceService,
+          useValue: {
+            facility: signal({ guid: 'facility-a' }),
+            canWrite: signal(true),
+            hasPending: signal(false)
+          }
+        },
+        { provide: PredictorWorkspaceActionsService, useValue: {} },
         {
           provide: WorkspaceNavigationService,
           useValue: {
@@ -42,8 +51,8 @@ describe('PredictorBrowseCardComponent', () => {
     expect(chipLabels(element)).toEqual(['Production', 'Valid']);
     expect(element.textContent).toContain('tons');
     expect(element.textContent).toContain('Jan 2025');
-    expect(element.querySelector('[aria-label="Copy predictor"]')).toBeNull();
-    expect(element.querySelector('[aria-label="Delete predictor"]')).toBeNull();
+    expect(element.querySelector('[aria-label="Copy predictor"]')).not.toBeNull();
+    expect(element.querySelector('[aria-label="Delete predictor"]')).not.toBeNull();
 
     (element.querySelector('[aria-label="Open Production settings"]') as HTMLButtonElement).click();
     expect(navigate).toHaveBeenLastCalledWith([

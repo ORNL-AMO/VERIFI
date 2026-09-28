@@ -16,6 +16,7 @@
       type="button"
       class="v1-resource-browse-card__title"
       [attr.aria-label]="view.openLabel"
+      [disabled]="!capabilities.canOpen"
       (click)="opened.emit()">
       <app-ui-icon [name]="view.icon" [style.color]="view.iconColor || null"></app-ui-icon>
       <span class="v1-resource-browse-card__title-text">{{ view.title }}</span>
@@ -108,7 +109,7 @@
     }
   </div>
 
-  @if (view.footerTag || actions.length > 0) {
+  @if (view.footerTag || (capabilities.canAct && actions.length > 0)) {
     <footer class="v1-resource-browse-card__footer">
       @if (view.footerTag; as footerTag) {
         <span class="v1-resource-browse-card__footer-tag">
@@ -118,7 +119,7 @@
           {{ footerTag.label }}
         </span>
       }
-      @if (actions.length > 0) {
+      @if (capabilities.canAct && actions.length > 0) {
         <div class="v1-resource-browse-card__actions" aria-label="Resource actions">
           @for (action of actions; track action.id) {
             <button

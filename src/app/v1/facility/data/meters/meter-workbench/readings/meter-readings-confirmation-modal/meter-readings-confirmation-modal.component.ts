@@ -5,7 +5,6 @@ import { MeterReadingsConfirmation } from '../meter-workbench-readings.models';
 @Component({
   selector: 'app-meter-readings-confirmation-modal',
   templateUrl: './meter-readings-confirmation-modal.component.html',
-  styleUrls: ['./meter-readings-confirmation-modal.component.css'],
   standalone: true,
   imports: [ConfirmationDialogComponent]
 })

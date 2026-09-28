@@ -10,16 +10,18 @@ import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-wo
 import { PredictorWorkspaceActionsService } from '../../predictor-workspace-actions.service';
 import { PredictorCardView, PredictorWorkbenchTabId } from '../../models';
 import { ConfirmDeletePredictorModalComponent } from './confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
+import { buildPredictorResourceView } from './predictor-browse-card.view';
 
 @Component({
   selector: 'app-predictor-browse-card', templateUrl: './predictor-browse-card.component.html',
+  host: { class: 'v1-resource-browse-card-host' },
   styleUrls: ['./predictor-browse-card.component.css'], standalone: true,
   imports: [ResourceBrowseCardComponent, ConfirmDeletePredictorModalComponent]
 })
 export class PredictorBrowseCardComponent implements OnDestroy {
   private readonly router = inject(Router);
-  private readonly workspace = inject(FacilityPredictorsWorkspaceService, { optional: true });
-  private readonly actions = inject(PredictorWorkspaceActionsService, { optional: true });
+  private readonly workspace = inject(FacilityPredictorsWorkspaceService);
+  private readonly actions = inject(PredictorWorkspaceActionsService);
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -34,43 +36,18 @@ export class PredictorBrowseCardComponent implements OnDestroy {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly deleting = signal(false);
-  readonly canAct = computed(() => !!this.actions && this.allowMutations && !!this.workspace?.canWrite()
-    && !this.workspace?.hasPending() && !this.saving());
+  readonly canAct = computed(() => this.allowMutations && this.workspace.canWrite()
+    && !this.workspace.hasPending() && !this.saving());
 
   get resourceView(): ResourceBrowseCardView {
-    return {
-      title: this.card.predictor.name || 'Untitled predictor',
-      openLabel: `Open ${this.card.predictor.name || 'untitled predictor'} settings`,
-      icon: this.card.icon,
-      statusTone: this.card.statusTone,
-      owner: this.showFacilityHeader && this.portfolioFacility ? { label: this.portfolioFacility.name, icon: 'facility' } : undefined,
-      chips: [
-        { id: 'production', label: this.card.productionLabel, icon: this.card.icon, accentColor: 'var(--v1-facility)' },
-        { id: 'status', label: this.card.statusLabel, icon: this.card.statusIcon, tone: this.card.statusTone, loading: this.card.statusTone === 'info' }
-      ],
-      factSections: [
-        { id: 'summary', facts: [
-          { id: 'unit', label: 'Unit', valueLabel: this.card.unitLabel },
-          { id: 'entries', label: 'Entries', valueLabel: String(this.card.readingCount) },
-          { id: 'first-reading', label: 'First reading', valueLabel: this.card.firstReadingLabel },
-          { id: 'latest-reading', label: 'Latest', valueLabel: this.card.latestReadingLabel },
-          ...(this.card.weatherStationLabel ? [{ id: 'station', label: 'Station', valueLabel: this.card.weatherStationLabel }] : []),
-          ...(this.card.baseTemperatureLabel ? [{ id: 'base-temperature', label: 'Weather setup', valueLabel: this.card.baseTemperatureLabel }] : [])
-        ] },
-        { id: 'statistics', ariaLabel: 'Predictor statistics', emphasis: 'secondary',
-          note: this.card.statistics.unitLabel ? `Values shown in ${this.card.statistics.unitLabel}` : undefined,
-          facts: this.card.statistics.facts.map(fact => ({ ...fact, metaLabel: fact.periodLabel })) }
-      ],
-      notes: this.card.statusActionSummaries.map((summary, index) => ({ id: `status-${index}`, label: summary, icon: this.card.statusIcon })),
-      footerTag: this.card.weatherTypeLabel ? { label: this.card.weatherTypeLabel, icon: this.card.icon } : undefined,
-      errorMessage: this.actionError()
-    };
+    const owner = this.showFacilityHeader ? this.portfolioFacility : undefined;
+    return buildPredictorResourceView(this.card, owner, this.actionError());
   }
 
   get resourceActions(): ReadonlyArray<ResourceBrowseCardAction> {
     return [
       { id: 'readings', label: 'Open readings', icon: 'table' },
-      ...(this.allowMutations && this.actions ? [
+      ...(this.allowMutations ? [
         { id: 'copy', label: 'Copy predictor', icon: 'copy' as const, disabled: !this.canAct(), loading: this.saving() },
         { id: 'delete', label: 'Delete predictor', icon: 'delete' as const, tone: 'danger' as const, disabled: !this.canAct() }
       ] : [])
@@ -85,9 +62,9 @@ export class PredictorBrowseCardComponent implements OnDestroy {
     if (actionId === 'delete') this.requestDeletePredictor();
   }
   async copyPredictor(): Promise<void> {
-    if (!this.canAct() || !this.actions) return;
+    if (!this.canAct()) return;
     await this.runAction(async () => {
-      const copy = await this.actions!.copyPredictor(this.card.predictor);
+      const copy = await this.actions.copyPredictor(this.card.predictor);
       this.openTab('settings', copy.guid);
     });
   }
@@ -103,16 +80,16 @@ export class PredictorBrowseCardComponent implements OnDestroy {
     if (!this.saving()) { this.deleting.set(false); this.actionError.set(undefined); this.hideDeleteModal(); }
   }
   async confirmDeletePredictor(): Promise<void> {
-    if (!this.canAct() || !this.actions) return;
+    if (!this.canAct()) return;
     await this.runAction(async () => {
-      await this.actions!.deletePredictor(this.card.predictor);
+      await this.actions.deletePredictor(this.card.predictor);
       this.deleting.set(false);
       this.hideDeleteModal();
     });
   }
 
   private openTab(tab: PredictorWorkbenchTabId, predictorGuid = this.card.predictor.guid): void {
-    const facility = this.portfolioFacility ?? this.workspace?.facility();
+    const facility = this.portfolioFacility ?? this.workspace.facility();
     if (facility) void this.router.navigate(this.navigation.facilityPredictorRoute(facility.guid, predictorGuid, tab));
   }
   private async runAction(action: () => Promise<void>): Promise<void> {

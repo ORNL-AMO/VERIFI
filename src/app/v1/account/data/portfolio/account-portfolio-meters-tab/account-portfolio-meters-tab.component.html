@@ -2,8 +2,8 @@
 @let visibleCards = filteredMeterCards();
 
 <section class="v1-account-portfolio-meters" aria-label="Portfolio meters">
-  <form class="v1-account-portfolio-meters__toolbar" aria-label="Meter filters">
-    <div class="v1-account-portfolio-meters__search">
+  <form class="v1-data-browse-toolbar v1-account-portfolio-meters__toolbar" aria-label="Meter filters">
+    <div class="v1-data-browse-search v1-account-portfolio-meters__search">
       <span class="input-group-text">
         <app-ui-icon name="search"></app-ui-icon>
       </span>
@@ -51,13 +51,13 @@
       <p>Adjust the search or filter controls to return to the full meter list.</p>
     </article>
   } @else {
-    <div class="v1-account-portfolio-meters__cards" role="list" aria-label="Account meters">
+    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-meters__cards" role="list" aria-label="Account meters">
       @for (item of visibleCards; track item.card.meter.guid) {
-        <app-meter-browse-card
-          [card]="item.card"
-          [portfolioFacility]="item.facility"
-          [showFacilityHeader]="true">
-        </app-meter-browse-card>
+        <app-resource-browse-card
+          [view]="item.view"
+          [capabilities]="cardCapabilities"
+          (opened)="openMeter(item)">
+        </app-resource-browse-card>
       }
     </div>
   }

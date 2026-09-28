@@ -6,7 +6,6 @@ import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-di
 @Component({
   selector: 'app-confirm-copy-meter-modal',
   templateUrl: './confirm-copy-meter-modal.component.html',
-  styleUrls: ['./confirm-copy-meter-modal.component.css'],
   standalone: true,
   imports: [ConfirmationDialogComponent, IconComponent]
 })
