@@ -7,6 +7,7 @@
 .weather-setup label { display: grid; gap: .3rem; min-width: 0; }
 .weather-setup label > span { font-size: .82rem; font-weight: 800; }
 .weather-setup label small { color: var(--v1-muted); }
+.weather-setup__field-error { margin: 0; color: var(--v1-danger); font-size: .78rem; font-weight: 700; }
 .weather-setup input, .weather-setup select { width: 100%; min-width: 0; min-height: var(--v1-control-height); padding: .45rem .65rem; border: 1px solid var(--v1-control-border); border-radius: var(--v1-radius-sm); background-color: var(--v1-control-surface); color: var(--v1-text); }
 .weather-setup select { padding-right: 2.1rem; }
 .weather-setup__predictors { display: grid; gap: .45rem; }

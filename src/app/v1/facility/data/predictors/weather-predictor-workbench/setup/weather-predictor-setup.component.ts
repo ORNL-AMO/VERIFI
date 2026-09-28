@@ -28,6 +28,7 @@ import { WeatherStationSelectorComponent } from '../../shared/weather-station-se
 
 interface EditableWeatherDefinition extends WeatherStationGroupDefinition {
   readonly draftId: string;
+  readonly unit: string;
 }
 
 @Component({
@@ -51,6 +52,10 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   readonly startMonth = signal('');
   readonly endMonth = signal('');
   readonly definitions = signal<readonly EditableWeatherDefinition[]>([]);
+  readonly definitionErrors = computed(() => new Map(this.definitions().map(definition => [definition.draftId, {
+    name: !definition.name.trim() || definition.name.trim().length > 100,
+    base: isDegreeDay(definition.weatherDataType) && !Number.isFinite(definition.baseTemperature)
+  }])));
   readonly stationPreviewRange = computed(() => {
     const start = this.startMonth();
     const end = this.endMonth();
@@ -59,6 +64,13 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   readonly futureMonthCount = computed(() => {
     const range = this.stationPreviewRange();
     return range ? weatherFutureMonthCount(range) : 0;
+  });
+  readonly rangeError = computed(() => {
+    const start = this.startMonth();
+    const end = this.endMonth();
+    if (!start || !end) return 'Enter both a start and end month.';
+    const range = rangeFromInputs(start, end);
+    return range ? validateWeatherMonthRange(range) : 'Enter a valid start and end month.';
   });
   readonly preview = signal<WeatherStationGroupPreview | undefined>(undefined);
   readonly dirty = signal(false);
@@ -144,6 +156,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       draftId: this.newDraftId(),
       weatherDataType: type,
       name: defaultWeatherPredictorName(type, baseTemperature),
+      unit: weatherPredictorUnit(type),
       baseTemperature,
       production: false
     }]);
@@ -181,8 +194,6 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
         : current.name
     });
   }
-
-  unitFor(type: WeatherDataType): string { return weatherPredictorUnit(type); }
 
   async saveAndUpdateReadings(): Promise<void> {
     const draft = this.buildDraft();
@@ -318,7 +329,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       production: !!predictor.production
     })) ?? [{
       draftId: this.newDraftId(), weatherDataType: 'HDD', name: defaultWeatherPredictorName('HDD', 60),
-      baseTemperature: 60, production: false
+      unit: weatherPredictorUnit('HDD'), baseTemperature: 60, production: false
     }]);
     this.preview.set(undefined);
     this.saveCompleted.set(false);
