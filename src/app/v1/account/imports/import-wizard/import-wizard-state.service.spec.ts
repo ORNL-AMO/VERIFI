@@ -6,8 +6,9 @@ import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
 import { getEmptyFileReference, ImportFileDraft } from '@data/import/spreadsheet-import.models';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { ImportSessionService } from '../import-session.service';
 import { ImportWizardStateService } from './import-wizard-state.service';
 
@@ -19,11 +20,13 @@ describe('ImportWizardStateService', () => {
   };
   let workspaceMeters: ReturnType<typeof signal<IdbUtilityMeter[]>>;
   let workspaceMeterGroups: ReturnType<typeof signal<IdbUtilityMeterGroup[]>>;
+  let workspaceMeterData: ReturnType<typeof signal<IdbUtilityMeterData[]>>;
 
   beforeEach(() => {
     draftService = { materializeGeneralRecords: vi.fn(), replaceMeter: vi.fn() };
     workspaceMeters = signal([]);
     workspaceMeterGroups = signal([]);
+    workspaceMeterData = signal([]);
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
@@ -51,7 +54,7 @@ describe('ImportWizardStateService', () => {
             facilities: () => [],
             meters: workspaceMeters,
             meterGroups: workspaceMeterGroups,
-            meterData: () => [],
+            meterData: workspaceMeterData,
             customFuels: () => [],
             customGWPs: () => []
           }
@@ -202,6 +205,98 @@ describe('ImportWizardStateService', () => {
       expect.objectContaining({ groupId: undefined })
     );
   });
+
+  it('prepares per-meter reading summaries from included draft and workspace readings', () => {
+    const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a', startingUnit: 'kWh' });
+    const current = reading({ guid: 'current', meterId: selectedMeter.guid, year: 2026, month: 1, day: 1, totalEnergyUse: 10 });
+    const overlap = reading({ guid: 'overlap', meterId: selectedMeter.guid, year: 2026, month: 1, day: 1, totalEnergyUse: 12 });
+    const added = reading({ guid: 'added', meterId: selectedMeter.guid, year: 2026, month: 2, day: 1, totalEnergyUse: 15 });
+    workspaceMeterData.set([current]);
+    service.initialize(templateDraft({ meters: [selectedMeter], meterData: [overlap, added] }));
+
+    expect(service.importedMeterReadingCount()).toBe(2);
+    expect(service.meterReadingRows()[0]).toMatchObject({
+      newReadings: { count: 1 },
+      existingReadings: { count: 1 },
+      invalidReadings: { count: 0 },
+      primaryUnitLabel: 'kWh'
+    });
+    expect(service.meterReadingRows()[0].comparisons[0].difference).toBe(2);
+  });
+
+  it('synchronizes keep-current decisions and invalidates final review', () => {
+    const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a' });
+    const imported = reading({ guid: 'imported', meterId: selectedMeter.guid, year: 2026, month: 1, day: 1 });
+    workspaceMeterData.set([reading({ guid: 'current', meterId: selectedMeter.guid, year: 2026, month: 1, day: 1 })]);
+    const draft = templateDraft({
+      meters: [selectedMeter],
+      meterData: [imported],
+      skipExistingReadingsMeterIds: ['stale-meter'],
+      completedSteps: ['facilities', 'meters', 'meter-readings', 'review']
+    });
+    service.initialize(draft);
+
+    service.setSkipExistingMeterReadings(selectedMeter.guid, true);
+    expect(draft.skipExistingReadingsMeterIds).toEqual([selectedMeter.guid]);
+    expect(draft.completedSteps).not.toContain('review');
+
+    service.setAllSkipExistingMeterReadings(false);
+    expect(draft.skipExistingReadingsMeterIds).toEqual([]);
+  });
+
+  it('clears meter-reading completion only while invalid exclusions are unresolved', () => {
+    const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a' });
+    const invalid = reading({ guid: 'invalid', meterId: selectedMeter.guid, month: 13 });
+    const draft = templateDraft({
+      meters: [selectedMeter],
+      meterData: [invalid],
+      completedSteps: ['facilities', 'meters', 'meter-readings', 'review']
+    });
+    service.initialize(draft);
+    service.activateStep('meter-readings');
+
+    expect(service.completeCurrentStep()).toBeUndefined();
+    expect(service.error()).toContain('Exclude every invalid meter reading');
+
+    service.toggleExcludedReading(0, true);
+    expect(draft.completedSteps).not.toContain('meter-readings');
+    expect(draft.completedSteps).not.toContain('review');
+
+    draft.completedSteps = ['facilities', 'meters', 'meter-readings', 'review'];
+    service.setInvalidMeterReadingsAcknowledged(true);
+    expect(draft.completedSteps).toContain('meter-readings');
+    expect(draft.completedSteps).not.toContain('review');
+    expect(service.completeCurrentStep()).toBe('predictors');
+  });
+
+  it('does not block meter reading review for an invalid reading owned by a skipped meter', () => {
+    const skippedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a', skipImport: true });
+    const draft = templateDraft({
+      meters: [skippedMeter],
+      meterData: [reading({ guid: 'invalid', meterId: skippedMeter.guid, month: 13 })]
+    });
+    service.initialize(draft);
+    service.activateStep('meter-readings');
+
+    expect(service.completeCurrentStep()).toBe('predictors');
+  });
+
+  it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'general-workbook'])(
+    'prepares the same meter-reading review contract for %s drafts',
+    kind => {
+      const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a' });
+      service.initialize({
+        ...templateDraft({
+          meters: [selectedMeter],
+          meterData: [reading({ guid: 'reading-a', meterId: selectedMeter.guid })]
+        }),
+        kind
+      });
+
+      expect(service.meterReadingRows()[0].newReadings.count).toBe(1);
+      expect(service.meterReadingRows()[0].facilityName).toBeTruthy();
+    }
+  );
 });
 
 function generalDraft(): ImportFileDraft {

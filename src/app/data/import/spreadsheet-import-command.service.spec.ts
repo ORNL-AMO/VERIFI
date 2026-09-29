@@ -3,10 +3,10 @@ import { SpreadsheetImportCommandService } from './spreadsheet-import-command.se
 import { ImportCommitRequest } from './spreadsheet-import.models';
 
 describe('SpreadsheetImportCommandService', () => {
-  function setup(failStore?: string) {
+  function setup(failStore?: string, existingByStore: Record<string, any[]> = {}) {
     const writes: Array<{ store: string; value: any }> = [];
     const context = {
-      getAll: vi.fn(async () => []),
+      getAll: vi.fn(async (store: string) => structuredClone(existingByStore[store] ?? [])),
       add: vi.fn(async (store: string, value: any) => {
         if (store === failStore) throw new Error('forced write failure');
         writes.push({ store, value });
@@ -60,6 +60,47 @@ describe('SpreadsheetImportCommandService', () => {
     const invalid = request();
     invalid.meterReadings.push({ ...invalid.meterReadings[0], guid: 'reading-b' });
     await expect(service.commit(invalid)).rejects.toMatchObject({ code: 'validation-failed' });
+    expect(writes).toHaveLength(0);
+  });
+
+  it('keeps same-date workspace readings while still importing new dates', async () => {
+    const imported = request();
+    const current = { ...structuredClone(imported.meterReadings[0]), guid: 'current-reading', id: 12 };
+    imported.meterReadings.push({
+      ...structuredClone(imported.meterReadings[0]),
+      guid: 'new-date',
+      id: undefined,
+      month: 2
+    });
+    imported.skipExistingReadingsMeterIds = ['meter-a'];
+    const { service, writes } = setup(undefined, { utilityMeterData: [current] });
+
+    const summary = await service.commit(imported);
+
+    const readingWrites = writes.filter(write => write.store === 'utilityMeterData');
+    expect(readingWrites.map(write => write.value.guid)).toEqual(['new-date']);
+    expect(summary.skippedMeterReadings).toBe(1);
+  });
+
+  it('excludes an acknowledged invalid reading using the shared validation contract', async () => {
+    const imported = request();
+    imported.meterReadings[0].month = 13;
+    imported.excludedMeterReadingIds = [imported.meterReadings[0].guid];
+    imported.invalidMeterReadingsAcknowledged = true;
+    const { service, writes } = setup();
+
+    const summary = await service.commit(imported);
+
+    expect(writes.filter(write => write.store === 'utilityMeterData')).toHaveLength(0);
+    expect(summary.excludedInvalidMeterReadings).toBe(1);
+  });
+
+  it('rejects an invalid reading that has not been excluded and acknowledged', async () => {
+    const imported = request();
+    imported.meterReadings[0].month = 13;
+    const { service, writes } = setup();
+
+    await expect(service.commit(imported)).rejects.toMatchObject({ code: 'validation-failed' });
     expect(writes).toHaveLength(0);
   });
 

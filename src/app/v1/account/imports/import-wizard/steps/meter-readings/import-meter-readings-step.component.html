@@ -1,33 +1,152 @@
-<p>{{ state.draft().meterData.length }} readings found; {{ state.invalidReadingCount() }} need attention.</p>
-@if (state.invalidReadingCount()) {
-  <div class="v1-alert v1-alert--warning">
-    <strong>Invalid readings are never silently imported.</strong>
-    <ul>
-      @for (reading of state.draft().meterData; track reading.guid; let index = $index) {
-        @if (state.readingInvalid(index)) {
-          <li>
-            <label>
-              <input type="checkbox" [checked]="state.isReadingExcluded(index)" (change)="state.toggleExcludedReading(index, $any($event.target).checked)">
-              Exclude {{ reading.year }}-{{ reading.month }}-{{ reading.day }} for meter {{ reading.meterId }}
-            </label>
-          </li>
-        }
-      }
-    </ul>
-    <label>
-      <input type="checkbox" [(ngModel)]="state.draft().invalidMeterReadingsAcknowledged" (ngModelChange)="state.notifyChanged()">
-      I acknowledge that excluded readings will not be imported.
-    </label>
+@let rows = state.meterReadingRows();
+
+@if (!rows.length) {
+  <div class="v1-alert v1-alert--info" role="status">No meters are included in this workbook.</div>
+} @else if (!state.importedMeterReadingCount()) {
+  <div class="v1-alert v1-alert--info" role="status">No meter readings were found for the included meters.</div>
+} @else {
+  <div class="meter-reading-summary" aria-live="polite">
+    <span>{{ state.importedMeterReadingCount() }} reading{{ state.importedMeterReadingCount() === 1 ? '' : 's' }} found</span>
+    <span>{{ state.invalidReadingCount() }} need{{ state.invalidReadingCount() === 1 ? 's' : '' }} attention</span>
   </div>
-}
-<fieldset>
-  <legend>Existing reading decisions</legend>
-  @for (meter of state.draft().meters; track meter.guid) {
-    @if (meter.id) {
-      <label class="check-row">
-        <input type="checkbox" [checked]="state.draft().skipExistingReadingsMeterIds.includes(meter.guid)" (change)="state.setSkipExistingMeterReadings(meter.guid, $any($event.target).checked)">
-        Keep existing readings for {{ meter.name }}
+
+  <div class="table-wrap meter-reading-table-wrap">
+    <table class="meter-reading-table">
+      <colgroup>
+        <col class="meter-reading-column--facility">
+        <col class="meter-reading-column--meter">
+        <col class="meter-reading-column--new">
+        <col class="meter-reading-column--invalid">
+        <col class="meter-reading-column--existing">
+        <col class="meter-reading-column--decision">
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Facility</th>
+          <th scope="col">Meter</th>
+          <th scope="col">New readings</th>
+          <th scope="col">Invalid readings</th>
+          <th scope="col">
+            <div class="meter-reading-heading">
+              <span>Existing readings</span>
+              <app-ui-tooltip
+                label="About existing reading comparisons"
+                text="Compare imported values with readings already in VERIFI for the same meter and date."
+                placement="bottom">
+              </app-ui-tooltip>
+            </div>
+          </th>
+          <th scope="col">
+            <div class="meter-reading-heading meter-reading-heading--decision">
+              <label class="meter-reading-bulk-control">
+                <input
+                  type="checkbox"
+                  class="meter-reading-checkbox"
+                  [checked]="state.allExistingMeterReadingsKept()"
+                  [indeterminate]="state.someExistingMeterReadingsKept() && !state.allExistingMeterReadingsKept()"
+                  [disabled]="!state.hasExistingMeterReadings()"
+                  (change)="state.setAllSkipExistingMeterReadings($any($event.target).checked)">
+                <span>Keep current readings?</span>
+              </label>
+              <app-ui-tooltip
+                label="About keeping current readings"
+                text="Select this to keep readings already in VERIFI when an imported reading has the same date. Readings for new dates will still be imported."
+                placement="bottom">
+              </app-ui-tooltip>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.meter.guid) {
+          <tr [class.meter-reading-row--kept]="row.keepExisting">
+            <td>{{ row.facilityName }}</td>
+            <td>{{ row.meter.name || 'Unnamed meter' }}</td>
+            <td>
+              <strong>{{ row.newReadings.count }}</strong>
+              @if (row.newReadings.start) {
+                <span class="meter-reading-range">
+                  {{ row.newReadings.start | date:'mediumDate' }} – {{ row.newReadings.end | date:'mediumDate' }}
+                </span>
+              }
+            </td>
+            <td>
+              @if (row.invalidReadings.count) {
+                <button type="button" class="meter-reading-action" (click)="openReview(row.meter.guid, 'invalid')">
+                  {{ row.invalidReadings.count }} needs attention
+                </button>
+                @if (row.invalidReadings.start) {
+                  <span class="meter-reading-range">
+                    {{ row.invalidReadings.start | date:'mediumDate' }} – {{ row.invalidReadings.end | date:'mediumDate' }}
+                  </span>
+                }
+              } @else {
+                <strong>0</strong>
+              }
+            </td>
+            <td>
+              <strong>{{ row.existingReadings.count }}</strong>
+              @if (row.existingReadings.start) {
+                <span class="meter-reading-range">
+                  {{ row.existingReadings.start | date:'mediumDate' }} – {{ row.existingReadings.end | date:'mediumDate' }}
+                </span>
+              }
+              @if (row.comparisons.length) {
+                <button type="button" class="meter-reading-action meter-reading-action--comparison" (click)="openReview(row.meter.guid, 'comparisons')">
+                  Compare changes
+                </button>
+              } @else if (row.existingReadings.count) {
+                <span class="meter-reading-status">No value changes</span>
+              }
+              @if (row.keepExisting) {
+                <span class="meter-reading-status meter-reading-status--kept">Current readings will be kept</span>
+              }
+            </td>
+            <td class="meter-reading-keep">
+              @if (row.existingReadings.count) {
+                <label class="meter-reading-checkbox-control">
+                  <input
+                    type="checkbox"
+                    class="meter-reading-checkbox"
+                    [checked]="row.keepExisting"
+                    (change)="state.setSkipExistingMeterReadings(row.meter.guid, $any($event.target).checked)">
+                  <span class="visually-hidden">Keep current readings for {{ row.meter.name }}</span>
+                </label>
+              } @else {
+                <span aria-label="No existing readings">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (state.invalidReadingCount()) {
+    <div class="v1-alert v1-alert--warning meter-reading-acknowledgement">
+      <div>
+        <strong>Invalid readings are never silently imported.</strong>
+        <p>Open each needs-attention count and exclude every invalid reading before continuing.</p>
+      </div>
+      <label class="meter-reading-acknowledgement__control">
+        <input
+          type="checkbox"
+          class="meter-reading-checkbox"
+          [checked]="state.draft().invalidMeterReadingsAcknowledged"
+          (change)="state.setInvalidMeterReadingsAcknowledged($any($event.target).checked)">
+        <span>I acknowledge that excluded readings will not be imported.</span>
       </label>
-    }
+    </div>
   }
-</fieldset>
+}
+
+@if (activeReview(); as review) {
+  @if (activeRow(); as row) {
+    <app-import-meter-reading-review-slideout
+      [row]="row"
+      [mode]="review.mode"
+      (exclusionChanged)="state.toggleExcludedReading($event.index, $event.excluded)"
+      (closed)="closeReview()">
+    </app-import-meter-reading-review-slideout>
+  }
+}

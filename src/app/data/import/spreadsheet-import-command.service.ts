@@ -7,6 +7,7 @@ import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
 import { IdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { isImportMeterReadingValid, sameMeterReadingPeriod } from './meter-reading-import-review';
 import {
   ImportCommitRequest,
   ImportCommitSummary,
@@ -63,7 +64,7 @@ export class SpreadsheetImportCommandService {
     this.validateRelationships(request, existing);
 
     const excludedIds = new Set(request.excludedMeterReadingIds.map(String));
-    const invalidReadings = request.meterReadings.filter(reading => !this.validMeterReading(reading));
+    const invalidReadings = request.meterReadings.filter(reading => !isImportMeterReadingValid(reading));
     const unacknowledgedInvalid = invalidReadings.filter(reading => !excludedIds.has(this.entityKey(reading)));
     if (unacknowledgedInvalid.length > 0 || (invalidReadings.length > 0 && !request.invalidMeterReadingsAcknowledged)) {
       throw new WorkspaceWriteError(
@@ -88,9 +89,9 @@ export class SpreadsheetImportCommandService {
     })), existing.meters, summary);
 
     const meterReadings = request.meterReadings.filter(reading => {
-      if (excludedIds.has(this.entityKey(reading)) || !this.validMeterReading(reading)) return false;
+      if (excludedIds.has(this.entityKey(reading)) || !isImportMeterReadingValid(reading)) return false;
       if (!request.skipExistingReadingsMeterIds.includes(reading.meterId)) return true;
-      const exists = existing.meterReadings.some(candidate => this.sameMeterReading(candidate, reading));
+      const exists = existing.meterReadings.some(candidate => sameMeterReadingPeriod(candidate, reading));
       if (exists) summary.skippedMeterReadings++;
       return !exists;
     });
@@ -223,20 +224,6 @@ export class SpreadsheetImportCommandService {
         summary.added[countName]++;
       }
     }
-  }
-
-  private validMeterReading(reading: IdbUtilityMeterData): boolean {
-    const dateValid = Number.isInteger(reading.year) && reading.year > 1900 &&
-      Number.isInteger(reading.month) && reading.month >= 1 && reading.month <= 12 &&
-      Number.isInteger(reading.day) && reading.day >= 1 && reading.day <= 31;
-    const values = [reading.totalEnergyUse, reading.totalVolume, reading.totalImportConsumption]
-      .filter(value => value !== undefined && value !== null);
-    return dateValid && values.every(value => Number.isFinite(Number(value)));
-  }
-
-  private sameMeterReading(left: IdbUtilityMeterData, right: IdbUtilityMeterData): boolean {
-    return left.meterId === right.meterId && left.year === right.year &&
-      left.month === right.month && left.day === right.day;
   }
 
   private samePredictorReading(left: IdbPredictorData, right: IdbPredictorData): boolean {

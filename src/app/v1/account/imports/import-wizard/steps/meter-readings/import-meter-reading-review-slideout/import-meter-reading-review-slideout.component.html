@@ -1,0 +1,100 @@
+<app-workspace-slideout
+  [title]="title()"
+  [description]="description()"
+  size="large"
+  (closed)="closed.emit()">
+  @if (mode() === 'comparisons') {
+    <div class="reading-review-table-wrap">
+      <table class="reading-review-table reading-review-table--comparisons">
+        <thead>
+          <tr>
+            <th scope="col" [attr.aria-sort]="ariaSort().date">
+              <button type="button" class="reading-review-sort" (click)="changeSort('date')">Read date</button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort().current">
+              <button type="button" class="reading-review-sort" (click)="changeSort('current')">
+                Current usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort().imported">
+              <button type="button" class="reading-review-sort" (click)="changeSort('imported')">
+                Imported usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort().difference">
+              <button type="button" class="reading-review-sort" (click)="changeSort('difference')">
+                Difference @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
+              </button>
+            </th>
+            <th scope="col" [attr.aria-sort]="ariaSort().percentage">
+              <button type="button" class="reading-review-sort" (click)="changeSort('percentage')">% difference</button>
+            </th>
+            <th scope="col">Other fields with differences</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (comparison of sortedComparisons(); track comparison.importedReading.guid) {
+            <tr>
+              <td>{{ comparison.readDate | date:'mediumDate' }}</td>
+              <td class="reading-review-number">
+                {{ comparison.currentValue === undefined ? '—' : (comparison.currentValue | number:'1.0-4') }}
+              </td>
+              <td class="reading-review-number">
+                {{ comparison.importedValue === undefined ? '—' : (comparison.importedValue | number:'1.0-4') }}
+              </td>
+              <td class="reading-review-number">
+                {{ comparison.difference === undefined ? '—' : (comparison.difference | number:'1.0-4') }}
+              </td>
+              <td class="reading-review-number">
+                {{ comparison.percentageDifference === undefined ? 'Not available' : ((comparison.percentageDifference | number:'1.0-2') + '%') }}
+              </td>
+              <td>{{ comparison.changedFields.length ? comparison.changedFields.join(', ') : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="reading-review-table-wrap">
+      <table class="reading-review-table reading-review-table--invalid">
+        <thead>
+          <tr>
+            <th scope="col">Read date</th>
+            <th scope="col">
+              Imported usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
+            </th>
+            <th scope="col">Needs attention</th>
+            <th scope="col">Exclude</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (detail of row().invalidReadingDetails; track detail.key) {
+            <tr>
+              <td>{{ detail.dateLabel }}</td>
+              <td class="reading-review-number">
+                {{ detail.primaryValue === undefined ? '—' : (detail.primaryValue | number:'1.0-4') }}
+              </td>
+              <td>
+                <ul class="reading-review-issues">
+                  @for (message of detail.messages; track message) {
+                    <li>{{ message }}</li>
+                  }
+                </ul>
+              </td>
+              <td class="reading-review-exclude">
+                <label class="reading-review-checkbox-control">
+                  <input
+                    type="checkbox"
+                    class="reading-review-checkbox"
+                    [checked]="detail.excluded"
+                    (change)="exclusionChanged.emit({ index: detail.index, excluded: $any($event.target).checked })">
+                  <span class="visually-hidden">Exclude the invalid reading dated {{ detail.dateLabel }}</span>
+                </label>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</app-workspace-slideout>

@@ -1,6 +1,7 @@
 import { computed, signal, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { buildImportMeterReadingReview } from '@data/import/meter-reading-import-review';
 import { ImportWizardStateService } from '../import-wizard-state.service';
 
 export function createImportWizardStateStub() {
@@ -40,6 +41,7 @@ export function createImportWizardStateStub() {
       utilityData: [{ energySource: 'Natural Gas' }]
     }]
   });
+  const workspaceMeterData = signal<any[]>([]);
   const meterInvalid = vi.fn((_index: number) => false);
   const state: any = {
     draft,
@@ -57,7 +59,7 @@ export function createImportWizardStateStub() {
       }]),
       meters: signal([]),
       meterGroups: signal([]),
-      meterData: signal([]),
+      meterData: workspaceMeterData,
       customFuels: signal([]),
       customGWPs: signal([])
     },
@@ -65,7 +67,6 @@ export function createImportWizardStateStub() {
     worksheetNames: signal(['Visible']),
     allColumns: signal([{ id: 'column-1', value: 'Date' }]),
     dateRange: signal('1/1/2026 – 1/1/2026'),
-    invalidReadingCount: signal(0),
     columnTarget: vi.fn(() => 'Date'),
     mappingItems: vi.fn(() => [{ id: 'column-2', value: 'Electricity', facilityId: '' }]),
     selectWorksheet: vi.fn(),
@@ -85,6 +86,8 @@ export function createImportWizardStateStub() {
     isReadingExcluded: vi.fn(() => false),
     toggleExcludedReading: vi.fn(),
     setSkipExistingMeterReadings: vi.fn(),
+    setAllSkipExistingMeterReadings: vi.fn(),
+    setInvalidMeterReadingsAcknowledged: vi.fn(),
     togglePredictorIncluded: vi.fn(),
     setPredictorProduction: vi.fn(),
     setSkipExistingPredictorReadings: vi.fn(),
@@ -101,6 +104,25 @@ export function createImportWizardStateStub() {
     unitLabel: meter.scope === 2 ? meter.vehicleCollectionUnit : meter.startingUnit,
     groups: []
   })));
+  state.meterReadingRows = computed(() => buildImportMeterReadingReview({
+    meters: draft().meters,
+    readings: draft().meterData,
+    facilities: draft().importFacilities,
+    currentReadings: workspaceMeterData(),
+    excludedReadingIds: draft().excludedMeterReadingIds,
+    skipExistingMeterIds: draft().skipExistingReadingsMeterIds
+  }).map(row => ({ ...row, primaryUnitLabel: row.primaryUnit })));
+  state.importedMeterReadingCount = computed(() => state.meterReadingRows().reduce((total: number, row: any) =>
+    total + row.newReadings.count + row.invalidReadings.count + row.existingReadings.count, 0));
+  state.invalidReadingCount = computed(() => state.meterReadingRows().reduce((total: number, row: any) =>
+    total + row.invalidReadings.count, 0));
+  state.hasExistingMeterReadings = computed(() => state.meterReadingRows().some((row: any) => row.existingReadings.count > 0));
+  state.allExistingMeterReadingsKept = computed(() => {
+    const eligible = state.meterReadingRows().filter((row: any) => row.existingReadings.count > 0);
+    return eligible.length > 0 && eligible.every((row: any) => row.keepExisting);
+  });
+  state.someExistingMeterReadingsKept = computed(() => state.meterReadingRows()
+    .some((row: any) => row.existingReadings.count > 0 && row.keepExisting));
   return state;
 }
 

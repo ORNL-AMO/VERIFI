@@ -4,6 +4,13 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import-command.service';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
 import { ImportCommitRequest, ImportFileDraft } from '@data/import/spreadsheet-import.models';
+import {
+  buildImportMeterReadingReview,
+  getImportMeterReadingIssues,
+  ImportMeterReadingSummaryRow,
+  isImportMeterReadingValid,
+  meterReadingEntityKey
+} from '@data/import/meter-reading-import-review';
 import { isMeterInvalid } from '@domain/calculations/status-check-calculations/validation/meterValidation';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -21,6 +28,10 @@ export interface ImportMeterRow {
   readonly valid: boolean;
   readonly unitLabel: string;
   readonly groups: readonly IdbUtilityMeterGroup[];
+}
+
+export interface ImportMeterReadingRow extends ImportMeterReadingSummaryRow {
+  readonly primaryUnitLabel: string;
 }
 
 @Injectable()
@@ -55,8 +66,6 @@ export class ImportWizardStateService {
   readonly worksheetNames = computed(() => this.draft()
     ? this.drafts.visibleWorksheetNames(this.draft().workbook)
     : []);
-  readonly invalidReadingCount = computed(() => this.draft()?.meterData
-    .filter((_, index) => this.readingInvalid(index)).length ?? 0);
   readonly dateRange = computed(() => {
     const dateColumn = this.groupItems('Date')[0]?.value;
     const dates = dateColumn
@@ -79,6 +88,34 @@ export class ImportWizardStateService {
       groups: this.compatibleGroupsForMeter(meter)
     }));
   });
+  readonly meterReadingRows = computed<ImportMeterReadingRow[]>(() => {
+    this.draftRevision();
+    const draft = this.draft();
+    if (!draft) return [];
+    return buildImportMeterReadingReview({
+      meters: draft.meters,
+      readings: draft.meterData,
+      facilities: draft.importFacilities,
+      currentReadings: this.workspace.meterData(),
+      excludedReadingIds: draft.excludedMeterReadingIds,
+      skipExistingMeterIds: draft.skipExistingReadingsMeterIds
+    }).map(row => ({
+      ...row,
+      primaryUnitLabel: this.meterSettings.getUnitLabel(row.primaryUnit)
+    }));
+  });
+  readonly importedMeterReadingCount = computed(() => this.meterReadingRows().reduce((total, row) =>
+    total + row.newReadings.count + row.invalidReadings.count + row.existingReadings.count, 0));
+  readonly invalidReadingCount = computed(() => this.meterReadingRows().reduce((total, row) =>
+    total + row.invalidReadings.count, 0));
+  readonly hasExistingMeterReadings = computed(() => this.meterReadingRows()
+    .some(row => row.existingReadings.count > 0));
+  readonly allExistingMeterReadingsKept = computed(() => {
+    const eligible = this.meterReadingRows().filter(row => row.existingReadings.count > 0);
+    return eligible.length > 0 && eligible.every(row => row.keepExisting);
+  });
+  readonly someExistingMeterReadingsKept = computed(() => this.meterReadingRows()
+    .some(row => row.existingReadings.count > 0 && row.keepExisting));
 
   initialize(draft: ImportFileDraft): void {
     this.draft.set(draft);
@@ -321,6 +358,8 @@ export class ImportWizardStateService {
     const exclusions = this.draft().excludedMeterReadingIds;
     if (excluded && !exclusions.map(String).includes(String(key))) exclusions.push(key);
     if (!excluded) this.draft().excludedMeterReadingIds = exclusions.filter(value => String(value) !== String(key));
+    this.invalidateReview();
+    if (!this.invalidReadingGateSatisfied()) this.invalidateMeterReadings();
     this.changed();
   }
 
@@ -330,17 +369,40 @@ export class ImportWizardStateService {
   }
 
   readingInvalid(index: number): boolean {
-    const reading = this.draft().meterData[index];
-    return !(Number.isInteger(reading.year) && reading.year > 1900 &&
-      Number.isInteger(reading.month) && reading.month >= 1 && reading.month <= 12 &&
-      Number.isInteger(reading.day) && reading.day >= 1 && reading.day <= 31 &&
-      [reading.totalEnergyUse, reading.totalVolume, reading.totalImportConsumption]
-        .filter(value => value !== undefined && value !== null)
-        .every(value => Number.isFinite(Number(value))));
+    return !isImportMeterReadingValid(this.draft().meterData[index]);
+  }
+
+  readingIssues(index: number): readonly string[] {
+    return getImportMeterReadingIssues(this.draft().meterData[index]);
   }
 
   setSkipExistingMeterReadings(meterId: string, skip: boolean): void {
-    this.setStringDecision(this.draft().skipExistingReadingsMeterIds, meterId, skip);
+    const eligibleIds = new Set(this.meterReadingRows()
+      .filter(row => row.existingReadings.count > 0)
+      .map(row => row.meter.guid));
+    if (skip && !eligibleIds.has(meterId)) return;
+    const selected = new Set(this.draft().skipExistingReadingsMeterIds.filter(id => eligibleIds.has(id)));
+    if (skip) selected.add(meterId);
+    else selected.delete(meterId);
+    this.draft().skipExistingReadingsMeterIds = [...selected];
+    this.invalidateReview();
+    this.changed();
+  }
+
+  setAllSkipExistingMeterReadings(skip: boolean): void {
+    const eligibleIds = this.meterReadingRows()
+      .filter(row => row.existingReadings.count > 0)
+      .map(row => row.meter.guid);
+    this.draft().skipExistingReadingsMeterIds = skip ? [...new Set(eligibleIds)] : [];
+    this.invalidateReview();
+    this.changed();
+  }
+
+  setInvalidMeterReadingsAcknowledged(acknowledged: boolean): void {
+    this.draft().invalidMeterReadingsAcknowledged = acknowledged;
+    this.invalidateReview();
+    if (!this.invalidReadingGateSatisfied()) this.invalidateMeterReadings();
+    this.changed();
   }
 
   setSkipExistingPredictorReadings(facilityId: string, skip: boolean): void {
@@ -390,7 +452,8 @@ export class ImportWizardStateService {
     }
     if (step === 'predictors' && draft.predictors.some(predictor => !predictor.skipImport && !predictor.name?.trim())) return 'Fix or skip every invalid predictor before continuing.';
     if ((step === 'meter-readings' || step === 'review') && this.invalidReadingCount()) {
-      const excludedInvalid = draft.meterData.filter((_, index) => this.readingInvalid(index) && this.isReadingExcluded(index)).length;
+      const excludedInvalid = this.meterReadingRows().reduce((total, row) =>
+        total + row.invalidReadingDetails.filter(reading => reading.excluded).length, 0);
       if (excludedInvalid !== this.invalidReadingCount() || !draft.invalidMeterReadingsAcknowledged) {
         return 'Exclude every invalid meter reading and acknowledge the exclusion before continuing.';
       }
@@ -499,6 +562,20 @@ export class ImportWizardStateService {
 
   private invalidateReview(): void {
     this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'review');
+  }
+
+  private invalidateMeterReadings(): void {
+    this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'meter-readings');
+  }
+
+  private invalidReadingGateSatisfied(): boolean {
+    const draft = this.draft();
+    const includedMeterIds = new Set(draft.meters.filter(meter => !meter.skipImport).map(meter => meter.guid));
+    const invalidReadings = draft.meterData
+      .filter(reading => includedMeterIds.has(reading.meterId) && !isImportMeterReadingValid(reading));
+    const exclusions = new Set(draft.excludedMeterReadingIds.map(String));
+    return invalidReadings.length === 0 ||
+      (invalidReadings.every(reading => exclusions.has(meterReadingEntityKey(reading))) && draft.invalidMeterReadingsAcknowledged);
   }
 
   private invalidateMeterReviewSteps(): void {
