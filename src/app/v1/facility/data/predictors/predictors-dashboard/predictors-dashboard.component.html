@@ -29,7 +29,7 @@
       </h1>
     </div>
     <div class="v1-facility-predictors__header-actions">
-      <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: currentFacility.guid, returnUrl: '/v1/workspace/facility/' + currentFacility.guid + '/data/predictors' }"><app-ui-icon name="fileImport"></app-ui-icon>Import data</a>
+      <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: currentFacility.guid, returnUrl: '/v1/workspace/facility/' + currentFacility.guid + '/data/predictors' }"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddPredictor()">
         <app-ui-icon name="add"></app-ui-icon> Add predictor
       </button>
@@ -67,7 +67,7 @@
     </form>
 
     @if (allBrowseItems.length === 0) {
-      <app-data-empty-state icon="predictor" context="facility" title="No predictors" description="Add or import a predictor to get started.">
+      <app-data-empty-state icon="predictor" context="facility" title="No predictors" description="Add or upload a predictor to get started.">
         <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddPredictor()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button>
       </app-data-empty-state>
     } @else if (visibleBrowseItems.length === 0) {

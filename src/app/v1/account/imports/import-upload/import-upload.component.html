@@ -47,7 +47,13 @@
       (dragover)="dragOver($event)"
       (dragleave)="dragLeft($event)"
       (drop)="filesDropped($event)">
-      <span class="file-drop__icon"><app-ui-icon name="uploadData" [size]="32"></app-ui-icon></span>
+      <span class="file-drop__icon">
+        @if (readingFiles()) {
+          <app-ui-icon name="loading" spin [size]="32"></app-ui-icon>
+        } @else {
+          <app-ui-icon name="uploadData" [size]="32"></app-ui-icon>
+        }
+      </span>
       <strong role="status" aria-live="polite" aria-atomic="true">
         {{ readingFiles() ? 'Reading files…' : (dragActive() ? 'Drop files to add them' : 'Drag and drop Excel files here') }}
       </strong>

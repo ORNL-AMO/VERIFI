@@ -6,7 +6,7 @@
   @if (mode() === 'comparisons') {
     @if (row().predictor.predictorType === 'Weather') {
       <div class="v1-alert v1-alert--info predictor-reading-review-weather" role="status">
-        Imported Weather values will be stored as manual overrides so future station refreshes preserve them.
+        Uploaded Weather values will be stored as manual overrides so future station refreshes preserve them.
       </div>
     }
     <div class="predictor-reading-review-table-wrap">
@@ -23,7 +23,7 @@
             </th>
             <th scope="col" [attr.aria-sort]="ariaSort().imported">
               <button type="button" class="predictor-reading-review-sort" (click)="changeSort('imported')">
-                Imported value @if (row().unit) { ({{ row().unit }}) }
+                Uploaded value @if (row().unit) { ({{ row().unit }}) }
               </button>
             </th>
             <th scope="col" [attr.aria-sort]="ariaSort().difference">
@@ -57,7 +57,7 @@
         <thead>
           <tr>
             <th scope="col">Month</th>
-            <th scope="col">Imported value @if (row().unit) { ({{ row().unit }}) }</th>
+            <th scope="col">Uploaded value @if (row().unit) { ({{ row().unit }}) }</th>
             <th scope="col">Needs attention</th>
             <th scope="col">Exclude</th>
           </tr>

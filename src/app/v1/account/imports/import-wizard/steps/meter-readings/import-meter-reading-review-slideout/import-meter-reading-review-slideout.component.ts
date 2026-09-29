@@ -27,8 +27,8 @@ export class ImportMeterReadingReviewSlideoutComponent {
     ? `Compare meter readings: ${this.row().meter.name}`
     : `Review invalid readings: ${this.row().meter.name}`);
   readonly description = computed(() => this.mode() === 'comparisons'
-    ? 'Compare imported values with the readings currently saved for the same dates.'
-    : 'Invalid readings must be excluded before this import can continue.');
+    ? 'Compare uploaded values with the readings currently saved for the same dates.'
+    : 'Invalid readings must be excluded before this upload can continue.');
   readonly ariaSort = computed<Record<ComparisonSortField, 'none' | 'ascending' | 'descending'>>(() => {
     const result: Record<ComparisonSortField, 'none' | 'ascending' | 'descending'> = {
       date: 'none', current: 'none', imported: 'none', difference: 'none', percentage: 'none'

@@ -503,7 +503,7 @@ describe('Facility settings routed components', () => {
     buttonByText(fixture, 'Import backup').click();
     fixture.detectChanges(false);
 
-    expect(fixture.nativeElement.textContent).toContain('Upload Facility Backup');
+    expect(fixture.nativeElement.textContent).toContain('Import Facility Backup');
   });
 
   it('requires a facility name before converting a single-facility account', async () => {

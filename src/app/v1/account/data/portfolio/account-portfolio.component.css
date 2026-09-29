@@ -14,6 +14,13 @@
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
+.v1-account-portfolio__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  justify-content: flex-end;
+}
+
 .v1-account-portfolio__selectors {
   display: grid;
   gap: .75rem;
@@ -88,6 +95,10 @@
 @media (max-width: 48rem) {
   .v1-account-portfolio__header {
     grid-template-columns: 1fr;
+  }
+
+  .v1-account-portfolio__header-actions {
+    justify-content: flex-start;
   }
 
   .v1-account-portfolio__selectors {

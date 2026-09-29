@@ -28,8 +28,8 @@ describe('ImportMeterReadingsStepComponent', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain('1 needs attention');
-    expect(element.textContent).toContain('Invalid readings are never silently imported');
-    expect(element.textContent).toContain('I acknowledge that excluded readings will not be imported');
+    expect(element.textContent).toContain('Invalid readings are never silently uploaded');
+    expect(element.textContent).toContain('I acknowledge that excluded readings will not be uploaded');
 
     element.querySelector<HTMLButtonElement>('.meter-reading-action')?.click();
     fixture.detectChanges();
@@ -69,12 +69,12 @@ describe('ImportMeterReadingsStepComponent', () => {
     expect(element.querySelector('.v1-workspace-slideout--large')).not.toBeNull();
     expect(element.textContent).toContain('Compare meter readings: Electricity');
     expect(element.textContent).toContain('Current usage');
-    expect(element.textContent).toContain('Imported usage');
+    expect(element.textContent).toContain('Uploaded usage');
     expect(element.textContent).toContain('Total cost');
     expect(element.querySelector('th[aria-sort="descending"]')?.textContent).toContain('Read date');
 
     const importedSort = [...element.querySelectorAll<HTMLButtonElement>('.reading-review-sort')]
-      .find(button => button.textContent?.includes('Imported usage'));
+      .find(button => button.textContent?.includes('Uploaded usage'));
     importedSort?.click();
     fixture.detectChanges();
     expect(importedSort?.closest('th')?.getAttribute('aria-sort')).toBe('ascending');

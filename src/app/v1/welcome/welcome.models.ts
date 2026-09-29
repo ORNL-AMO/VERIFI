@@ -73,13 +73,13 @@ export const WELCOME_ACTIONS: ReadonlyArray<WelcomeAction> = [
     action: 'create'
   },
   {
-    title: 'Upload Account Backup',
+    title: 'Import Account Backup',
     tileLabel: 'Import Backup',
     tileHint: 'Use backup .json file',
     summary: 'Restore or share an existing VERIFI account backup file from another system.',
     icon: 'upload',
     tone: 'secondary',
-    cta: 'Upload backup',
+    cta: 'Import backup',
     action: 'import'
   },
   {

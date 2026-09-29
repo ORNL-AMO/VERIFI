@@ -27,8 +27,8 @@ export class ImportPredictorReadingReviewSlideoutComponent {
     ? `Compare predictor readings: ${this.row().predictor.name}`
     : `Review invalid readings: ${this.row().predictor.name}`);
   readonly description = computed(() => this.mode() === 'comparisons'
-    ? 'Compare imported values with the readings currently saved for the same months.'
-    : 'Invalid readings must be excluded before this import can continue.');
+    ? 'Compare uploaded values with the readings currently saved for the same months.'
+    : 'Invalid readings must be excluded before this upload can continue.');
   readonly ariaSort = computed<Record<ComparisonSortField, 'none' | 'ascending' | 'descending'>>(() => {
     const result: Record<ComparisonSortField, 'none' | 'ascending' | 'descending'> = {
       month: 'none', current: 'none', imported: 'none', difference: 'none', percentage: 'none'

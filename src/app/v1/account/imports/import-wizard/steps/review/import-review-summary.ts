@@ -9,7 +9,7 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 
 export type ImportReviewRecordStatus = 'New' | 'Existing';
-export type ImportReviewFacilityStatus = ImportReviewRecordStatus | 'Import destination';
+export type ImportReviewFacilityStatus = ImportReviewRecordStatus | 'Upload destination';
 
 export interface ImportReviewReadingActivity {
   readonly kind: 'new' | 'update';
@@ -122,7 +122,7 @@ export function buildImportReviewSummary(options: BuildImportReviewSummaryOption
     return {
       facility,
       status: options.kind === 'footprint-tool'
-        ? 'Import destination' as const
+        ? 'Upload destination' as const
         : recordStatus(facility),
       meters,
       predictors,

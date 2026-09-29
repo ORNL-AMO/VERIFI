@@ -295,7 +295,7 @@ describe('Account settings routed components', () => {
     buttonByText(fixture, 'Import backup').click();
     fixture.detectChanges(false);
 
-    expect(fixture.nativeElement.textContent).toContain('Upload Account Backup');
+    expect(fixture.nativeElement.textContent).toContain('Import Account Backup');
   });
 
   it('keeps automatic backup visible in web and enabled when the desktop gateway is available', () => {

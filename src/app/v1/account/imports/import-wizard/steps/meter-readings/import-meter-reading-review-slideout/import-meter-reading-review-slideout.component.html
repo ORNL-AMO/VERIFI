@@ -18,7 +18,7 @@
             </th>
             <th scope="col" [attr.aria-sort]="ariaSort().imported">
               <button type="button" class="reading-review-sort" (click)="changeSort('imported')">
-                Imported usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
+                Uploaded usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
               </button>
             </th>
             <th scope="col" [attr.aria-sort]="ariaSort().difference">
@@ -61,7 +61,7 @@
           <tr>
             <th scope="col">Read date</th>
             <th scope="col">
-              Imported usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
+              Uploaded usage @if (row().primaryUnitLabel) { (<span [innerHTML]="row().primaryUnitLabel"></span>) }
             </th>
             <th scope="col">Needs attention</th>
             <th scope="col">Exclude</th>

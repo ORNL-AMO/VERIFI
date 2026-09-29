@@ -176,7 +176,7 @@ describe('MetersDashboardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No meters');
-    expect(fixture.nativeElement.textContent).toContain('Add or import a meter to get started.');
+    expect(fixture.nativeElement.textContent).toContain('Add or upload a meter to get started.');
   });
 
   it('renders a filtered empty state without replacing the no-meter state', () => {

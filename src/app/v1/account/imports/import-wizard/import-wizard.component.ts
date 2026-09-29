@@ -4,6 +4,7 @@ import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/ro
 import { filter, Subscription } from 'rxjs';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
 import { ImportWizardStateService } from './import-wizard-state.service';
@@ -11,7 +12,7 @@ import { ImportWizardStateService } from './import-wizard-state.service';
 @Component({
   selector: 'app-import-wizard',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, IconComponent],
   providers: [ImportWizardStateService],
   templateUrl: './import-wizard.component.html',
   styleUrls: ['./import-wizard.component.css'],

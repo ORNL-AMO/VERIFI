@@ -1,16 +1,16 @@
 <app-workspace-slideout
   [title]="'Edit ' + (workingPredictor?.name || 'predictor')"
-  description="Review predictor setup before importing. Changes are not saved to the workspace until the import is completed."
+  description="Review predictor setup before uploading. Changes are not saved to the workspace until the upload is completed."
   size="large"
   (closed)="cancelled.emit()">
   <form class="import-predictor-editor" (submit)="$event.preventDefault(); save()">
     @if (predictor.id == null) {
       <section class="import-predictor-editor__existing" aria-labelledby="import-existing-predictor-label">
         <div class="import-predictor-editor__existing-label">
-          <label id="import-existing-predictor-label" for="import-existing-predictor">Match this import to an existing predictor</label>
+          <label id="import-existing-predictor-label" for="import-existing-predictor">Match this upload to an existing predictor</label>
           <app-ui-tooltip
             label="Why match an existing predictor?"
-            text="Use this when the imported predictor is the same as one already in VERIFI but has a different or mistyped name. Imported readings will be assigned to the selected predictor."
+            text="Use this when the uploaded predictor is the same as one already in VERIFI but has a different or mistyped name. Uploaded readings will be assigned to the selected predictor."
             placement="bottom">
           </app-ui-tooltip>
         </div>
@@ -32,7 +32,7 @@
 
     @if (workingPredictor.predictorType === 'Weather') {
       <div class="v1-alert v1-alert--info" role="status">
-        This import will use the selected predictor's existing weather-station setup. Imported readings will be saved as manual overrides so station refreshes preserve them.
+        This upload will use the selected predictor's existing weather-station setup. Uploaded readings will be saved as manual overrides so station refreshes preserve them.
       </div>
       <section class="import-predictor-editor__weather" aria-labelledby="import-weather-summary">
         <div class="import-predictor-editor__section-heading">
@@ -50,7 +50,7 @@
     } @else if (form; as settingsForm) {
       @if (predictor.id == null && workingPredictor.guid === predictor.guid) {
         <div class="v1-alert v1-alert--info">
-          Spreadsheet predictors are created as Standard predictors. Create new Weather predictors from Facility Data, or match this import to an existing Weather predictor above.
+          Spreadsheet predictors are created as Standard predictors. Create new Weather predictors from Facility Data, or match this upload to an existing Weather predictor above.
         </div>
       }
       <app-predictor-settings-form

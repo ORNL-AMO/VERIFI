@@ -1,16 +1,16 @@
 <app-workspace-slideout
   [title]="'Edit ' + workingMeter?.name"
-  description="Review meter setup before importing. Changes are not saved to the workspace until the import is completed."
+  description="Review meter setup before uploading. Changes are not saved to the workspace until the upload is completed."
   size="large"
   (closed)="cancelled.emit()">
   <form class="import-meter-editor" [formGroup]="form" (submit)="$event.preventDefault(); save()">
     @if (meter.id == null) {
       <div class="import-meter-editor__existing">
         <div class="import-meter-editor__existing-label">
-          <label for="import-existing-meter">Match this import to an existing meter</label>
+          <label for="import-existing-meter">Match this upload to an existing meter</label>
           <app-ui-tooltip
             label="Why match an existing meter?"
-            text="Use this when the imported meter is the same as one already in VERIFI but has a different or mistyped name. Imported readings will be assigned to the selected meter."
+            text="Use this when the uploaded meter is the same as one already in VERIFI but has a different or mistyped name. Uploaded readings will be assigned to the selected meter."
             placement="bottom">
           </app-ui-tooltip>
         </div>

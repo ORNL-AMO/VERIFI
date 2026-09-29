@@ -109,7 +109,7 @@ describe('buildImportReviewSummary', () => {
     expect(summary.facilities).toHaveLength(1);
     expect(summary.facilities[0]).toMatchObject({
       facility: selected,
-      status: 'Import destination',
+      status: 'Upload destination',
       energyUseGroups: [{
         name: 'Process heating',
         status: 'Existing',

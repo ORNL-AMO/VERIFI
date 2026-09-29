@@ -31,7 +31,7 @@
               <span>Existing readings</span>
               <app-ui-tooltip
                 label="About existing predictor reading comparisons"
-                text="Compare imported values with readings already in VERIFI for the same predictor and month."
+                text="Compare uploaded values with readings already in VERIFI for the same predictor and month."
                 placement="bottom">
               </app-ui-tooltip>
             </div>
@@ -50,7 +50,7 @@
               </label>
               <app-ui-tooltip
                 label="About keeping current predictor readings"
-                text="Select this to keep readings already in VERIFI when an imported reading has the same month. Readings for new months will still be imported."
+                text="Select this to keep readings already in VERIFI when an uploaded reading has the same month. Readings for new months will still be uploaded."
                 placement="bottom">
               </app-ui-tooltip>
             </div>
@@ -131,7 +131,7 @@
   @if (state.invalidPredictorReadingCount()) {
     <div class="v1-alert v1-alert--warning predictor-reading-acknowledgement">
       <div>
-        <strong>Invalid predictor readings are never silently imported.</strong>
+        <strong>Invalid predictor readings are never silently uploaded.</strong>
         <p>Open each needs-attention count and exclude every invalid reading before continuing.</p>
       </div>
       <label class="predictor-reading-acknowledgement__control">
@@ -140,7 +140,7 @@
           class="predictor-reading-checkbox"
           [checked]="state.draft().invalidPredictorReadingsAcknowledged"
           (change)="state.setInvalidPredictorReadingsAcknowledged($any($event.target).checked)">
-        <span>I acknowledge that excluded predictor readings will not be imported.</span>
+        <span>I acknowledge that excluded predictor readings will not be uploaded.</span>
       </label>
     </div>
   }

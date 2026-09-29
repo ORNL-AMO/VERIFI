@@ -8,7 +8,7 @@ describe('ImportReviewStepComponent', () => {
     const card = element.querySelector('[role="listitem"]');
 
     expect(element.querySelector('table')).toBeNull();
-    expect(element.querySelector('[aria-label="Import totals"]')?.textContent).toContain('Facilities affected');
+    expect(element.querySelector('[aria-label="Upload totals"]')?.textContent).toContain('Facilities affected');
     expect(card?.textContent).toContain('Main Plant');
     expect(card?.textContent).toContain('Electricity');
     expect(card?.textContent).toContain('kWh');
@@ -68,7 +68,7 @@ describe('ImportReviewStepComponent', () => {
     const { fixture } = renderImportStep(ImportReviewStepComponent, state);
     const text = fixture.nativeElement.textContent;
 
-    expect(text).toContain('Import destination');
+    expect(text).toContain('Upload destination');
     expect(text).toContain('Process heating');
     expect(text).toContain('Boiler');
   });
@@ -89,7 +89,7 @@ describe('ImportReviewStepComponent', () => {
     const { fixture } = renderImportStep(ImportReviewStepComponent, state);
     const status = fixture.nativeElement.querySelector('[role="status"]');
 
-    expect(status?.textContent).toContain('Nothing is selected to import');
-    expect(fixture.nativeElement.querySelector('[aria-label="Import summary by facility"]')).toBeNull();
+    expect(status?.textContent).toContain('Nothing is selected to upload');
+    expect(fixture.nativeElement.querySelector('[aria-label="Upload summary by facility"]')).toBeNull();
   });
 });

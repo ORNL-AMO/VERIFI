@@ -46,7 +46,7 @@ export class ImportPredictorEditorComponent implements OnChanges {
   form: PredictorSettingsForm | undefined;
   workingPredictor: IdbPredictor;
   existingOptions: readonly ExistingPredictorOption[] = [];
-  saveMessage = 'Changes are applied to this import when you save.';
+  saveMessage = 'Changes are applied to this upload when you save.';
   private originalGuid: string;
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,7 +100,7 @@ export class ImportPredictorEditorComponent implements OnChanges {
     this.form = this.workingPredictor.predictorType === 'Standard'
       ? this.formService.build(this.workingPredictor)
       : undefined;
-    this.saveMessage = 'Changes are applied to this import when you save.';
+    this.saveMessage = 'Changes are applied to this upload when you save.';
   }
 
   private prepareExistingOptions(): void {

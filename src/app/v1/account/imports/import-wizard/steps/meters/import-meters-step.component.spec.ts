@@ -60,7 +60,7 @@ describe('ImportMetersStepComponent', () => {
 
     expect(fixture.nativeElement.querySelector('app-import-meter-editor')).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Edit Electricity');
-    expect(fixture.nativeElement.textContent).toContain('Match this import to an existing meter');
+    expect(fixture.nativeElement.textContent).toContain('Match this upload to an existing meter');
     const matchTooltip = element.querySelector<HTMLElement>('.import-meter-editor__existing app-ui-tooltip');
     expect(matchTooltip).not.toBeNull();
     expect(matchTooltip?.querySelector('button')?.getAttribute('aria-label')).toBe('Why match an existing meter?');

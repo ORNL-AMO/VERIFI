@@ -1,11 +1,11 @@
 @if (state.reviewSummary(); as review) {
   <header class="import-review-intro">
-    <h2>Ready to import</h2>
+    <h2>Ready to upload</h2>
     <p>Confirm the records and readings that will be saved. Only nonzero reading activity is shown.</p>
   </header>
 
   @if (review.overview.length) {
-    <dl class="import-review-overview" aria-label="Import totals">
+    <dl class="import-review-overview" aria-label="Upload totals">
       @for (item of review.overview; track item.key) {
         <div class="import-review-overview__item">
           <dt>
@@ -21,11 +21,11 @@
   @if (!review.facilities.length) {
     <section class="v1-empty-state import-review-empty" role="status">
       <app-ui-icon name="checklist"></app-ui-icon>
-      <h3>Nothing is selected to import</h3>
-      <p>Return to the completed review steps and include at least one record before importing this file.</p>
+      <h3>Nothing is selected to upload</h3>
+      <p>Return to the completed review steps and include at least one record before uploading this file.</p>
     </section>
   } @else {
-    <div class="import-review-facilities" role="list" aria-label="Import summary by facility">
+    <div class="import-review-facilities" role="list" aria-label="Upload summary by facility">
       @for (facilitySummary of review.facilities; track facilitySummary.facility.guid) {
         <article
           class="v1-card import-review-facility"
@@ -188,7 +188,7 @@
             <footer class="import-review-omissions">
               <div class="import-review-omissions__heading">
                 <app-ui-icon name="info"></app-ui-icon>
-                <strong>Not imported by your review choices</strong>
+                <strong>Not uploaded based on your review choices</strong>
               </div>
               <ul>
                 @if (facilitySummary.omissions.keptMeterReadings) {

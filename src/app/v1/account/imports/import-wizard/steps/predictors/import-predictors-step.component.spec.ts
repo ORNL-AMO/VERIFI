@@ -39,7 +39,7 @@ describe('ImportPredictorsStepComponent', () => {
     element.querySelector<HTMLButtonElement>('.predictor-review-name')!.click();
     fixture.detectChanges();
 
-    expect(element.textContent).toContain('Match this import to an existing predictor');
+    expect(element.textContent).toContain('Match this upload to an existing predictor');
     expect(element.textContent).toContain('Spreadsheet predictors are created as Standard predictors');
     const tooltip = element.querySelector<HTMLElement>('.import-predictor-editor__existing app-ui-tooltip');
     expect(tooltip?.querySelector('button')?.getAttribute('aria-label')).toBe('Why match an existing predictor?');

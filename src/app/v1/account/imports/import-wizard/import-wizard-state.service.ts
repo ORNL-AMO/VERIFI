@@ -602,7 +602,7 @@ export class ImportWizardStateService {
   private validationMessage(): string | undefined {
     const draft = this.draft();
     const step = this.currentStepId();
-    if (!draft) return 'The import session is no longer available.';
+    if (!draft) return 'The upload session is no longer available.';
     if (step === 'worksheet' && !draft.selectedWorksheetData.length) return 'Choose a non-empty worksheet.';
     if (step === 'columns') {
       if (this.groupItems('Date').length !== 1) return 'Identify exactly one usable date column.';
@@ -610,7 +610,7 @@ export class ImportWizardStateService {
     }
     if (step === 'map-meters' && this.unmappedCount('meter')) return 'Assign every meter column to a facility or return it to worksheet columns.';
     if (step === 'map-predictors' && this.unmappedCount('predictor')) return 'Assign every predictor column to a facility or return it to worksheet columns.';
-    if (step === 'facility' && !draft.selectedFacilityId) return 'Select a facility for this footprint import.';
+    if (step === 'facility' && !draft.selectedFacilityId) return 'Select a facility for this footprint upload.';
     if (step === 'meters' && draft.meters.some((meter, index) => !meter.skipImport && this.meterInvalid(index))) {
       return 'Fix or skip every invalid meter before continuing.';
     }

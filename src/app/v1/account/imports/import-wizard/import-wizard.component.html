@@ -20,11 +20,11 @@
 
     @if (state.committed()) {
       <article class="import-panel import-success" role="status">
-        <h2>Import complete</h2>
+        <h2>Upload complete</h2>
         <p>The workbook was saved in one transaction. {{ session.summary()?.affectedFacilityGuids?.length || 0 }} facilities were affected.</p>
         <div class="button-row">
-          <button type="button" class="v1-btn v1-btn--action" (click)="state.viewImportedData()">View imported data</button>
-          <button type="button" class="v1-btn v1-btn--secondary" (click)="state.importAnother()">Import another file</button>
+          <button type="button" class="v1-btn v1-btn--action" (click)="state.viewImportedData()">View uploaded data</button>
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="state.importAnother()">Upload another file</button>
         </div>
       </article>
     } @else {
@@ -33,19 +33,26 @@
       </article>
 
       <footer class="wizard-actions">
-        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="back()">Back</button>
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="back()">
+          <app-ui-icon name="chevronLeft"></app-ui-icon>
+          Back
+        </button>
         @if (state.currentStepId() === 'review') {
           <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="commit()">
-            {{ session.pending() ? 'Importing…' : 'Import data' }}
+            {{ session.pending() ? 'Uploading…' : 'Upload data' }}
           </button>
         } @else {
-          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="continue()">Continue</button>
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="continue()">
+            Continue
+            <app-ui-icon name="chevronRight"></app-ui-icon>
+          </button>
         }
       </footer>
 
       @if (session.pending()) {
         <div class="commit-overlay" role="status" aria-live="assertive">
-          <strong>Importing data…</strong>
+          <app-ui-icon name="loading" spin [size]="28"></app-ui-icon>
+          <strong>Uploading data…</strong>
           <span>Validating, saving, and refreshing the workspace. Do not close this window.</span>
         </div>
       }

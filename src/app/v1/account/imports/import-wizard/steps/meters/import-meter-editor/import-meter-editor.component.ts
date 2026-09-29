@@ -43,7 +43,7 @@ export class ImportMeterEditorComponent implements OnChanges {
 
   form: FormGroup;
   viewModel: MeterSettingsViewModel;
-  saveMessage = 'Changes are applied to this import when you save.';
+  saveMessage = 'Changes are applied to this upload when you save.';
   setupUnlocked = false;
   private originalGuid: string;
   workingMeter: IdbUtilityMeter;
@@ -108,7 +108,7 @@ export class ImportMeterEditorComponent implements OnChanges {
     this.form = this.formService.buildMeterSettingsForm(this.workingMeter);
     this.refreshViewModel();
     this.applyEnabledState();
-    this.saveMessage = 'Changes are applied to this import when you save.';
+    this.saveMessage = 'Changes are applied to this upload when you save.';
   }
 
   private refreshViewModel(): void {

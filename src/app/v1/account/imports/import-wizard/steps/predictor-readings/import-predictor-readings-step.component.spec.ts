@@ -44,12 +44,12 @@ describe('ImportPredictorReadingsStepComponent', () => {
     expect(element.querySelector('.v1-workspace-slideout--large')).not.toBeNull();
     expect(element.textContent).toContain('Compare predictor readings: Production');
     expect(element.textContent).toContain('Current value');
-    expect(element.textContent).toContain('Imported value');
+    expect(element.textContent).toContain('Uploaded value');
     expect(element.textContent).toContain('manual overrides');
     expect(element.querySelector('th[aria-sort="descending"]')?.textContent).toContain('Month');
 
     const importedSort = [...element.querySelectorAll<HTMLButtonElement>('.predictor-reading-review-sort')]
-      .find(button => button.textContent?.includes('Imported value'));
+      .find(button => button.textContent?.includes('Uploaded value'));
     importedSort?.click();
     fixture.detectChanges();
     expect(importedSort?.closest('th')?.getAttribute('aria-sort')).toBe('ascending');
@@ -66,8 +66,8 @@ describe('ImportPredictorReadingsStepComponent', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain('1 needs attention');
-    expect(element.textContent).toContain('Invalid predictor readings are never silently imported');
-    expect(element.textContent).toContain('excluded predictor readings will not be imported');
+    expect(element.textContent).toContain('Invalid predictor readings are never silently uploaded');
+    expect(element.textContent).toContain('excluded predictor readings will not be uploaded');
 
     element.querySelector<HTMLButtonElement>('.predictor-reading-action')?.click();
     fixture.detectChanges();
