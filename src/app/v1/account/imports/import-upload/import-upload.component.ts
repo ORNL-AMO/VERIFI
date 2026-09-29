@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterStateSnapshot } from '@angular/router';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
@@ -47,6 +47,11 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
 
   hasUnsavedChanges(): boolean { return this.session.hasUnsavedChanges(); }
   isNavigationBlocked(): boolean { return this.session.pending() || this.readingFiles(); }
+
+  canNavigateWithoutDiscard(nextState: RouterStateSnapshot): boolean {
+    const accountGuid = this.workspace.account()?.guid;
+    return !!accountGuid && nextState.url.startsWith(`/v1/workspace/account/${accountGuid}/imports/file/`);
+  }
 
   @HostListener('window:beforeunload', ['$event'])
   beforeUnload(event: BeforeUnloadEvent): void {
