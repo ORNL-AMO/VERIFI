@@ -173,11 +173,20 @@ describe('PredictorCommandHandler', () => {
     const { handler, transactions } = createHandler();
     const transaction = { put: vi.fn(async () => undefined), add: vi.fn(async () => undefined), deleteByKey: vi.fn(async () => undefined) };
     transactions.runTransaction.mockImplementation(async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction));
-    const predictor = { id: 1, guid: 'p-1', accountId: ACCOUNT } as IdbPredictor;
-    const updated = { id: 2, guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT } as IdbPredictorData;
-    const added = { guid: 'd-2', predictorId: 'p-1', accountId: ACCOUNT } as IdbPredictorData;
-    const deleted = { id: 3, guid: 'd-3', predictorId: 'p-1', accountId: ACCOUNT } as IdbPredictorData;
-    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
+    const predictor = {
+      id: 1, guid: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1',
+      predictorType: 'Weather', weatherStationId: 'station-a'
+    } as IdbPredictor;
+    const updated = {
+      id: 2, guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1'
+    } as IdbPredictorData;
+    const added = {
+      guid: 'd-2', predictorId: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1'
+    } as IdbPredictorData;
+    const deleted = {
+      id: 3, guid: 'd-3', predictorId: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1'
+    } as IdbPredictorData;
+    const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-1' } as any;
 
     await handler.updateWeatherPredictor({
       predictor,
@@ -191,6 +200,25 @@ describe('PredictorCommandHandler', () => {
     expect(transaction.deleteByKey).toHaveBeenCalledWith('predictorData', 3);
     expect(transaction.add).toHaveBeenCalledWith('predictorData', expect.objectContaining({ guid: 'd-2' }));
     expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
+  });
+
+  it('rejects weather settings records from another facility before opening a transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const predictor = {
+      id: 1, guid: 'p-1', accountId: ACCOUNT, facilityId: 'fac-1',
+      predictorType: 'Weather', weatherStationId: 'station-a'
+    } as IdbPredictor;
+    const entry = {
+      guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT, facilityId: 'fac-2'
+    } as IdbPredictorData;
+
+    await expect(handler.updateWeatherPredictor({
+      predictor,
+      predictorData: { add: [entry], update: [], delete: [] },
+      facilityAnalyses: []
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
   });
 
   it('creates weather predictors, readings, and analysis references in one transaction', async () => {
@@ -215,14 +243,20 @@ describe('PredictorCommandHandler', () => {
     const { handler, transactions } = createHandler();
     const transaction = { put: vi.fn(async () => undefined), add: vi.fn(async () => undefined), deleteByKey: vi.fn(async () => undefined) };
     transactions.runTransaction.mockImplementation(async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction));
-    const added = { guid: 'p-new', accountId: ACCOUNT, predictorType: 'Weather' } as IdbPredictor;
-    const updated = { id: 2, guid: 'p-update', accountId: ACCOUNT, predictorType: 'Weather' } as IdbPredictor;
-    const deleted = { id: 3, guid: 'p-delete', accountId: ACCOUNT, predictorType: 'Weather' } as IdbPredictor;
-    const addedReading = { guid: 'd-new', predictorId: 'p-new', accountId: ACCOUNT } as IdbPredictorData;
-    const deletedReading = { id: 4, guid: 'd-delete', predictorId: 'p-delete', accountId: ACCOUNT } as IdbPredictorData;
-    const analysis = { id: 5, guid: 'a-1', accountId: ACCOUNT } as any;
+    const station = { accountId: ACCOUNT, facilityId: 'fac-1', predictorType: 'Weather', weatherStationId: 'station-a' };
+    const added = { ...station, guid: 'p-new' } as IdbPredictor;
+    const updated = { ...station, id: 2, guid: 'p-update' } as IdbPredictor;
+    const deleted = { ...station, id: 3, guid: 'p-delete' } as IdbPredictor;
+    const addedReading = {
+      guid: 'd-new', predictorId: 'p-new', accountId: ACCOUNT, facilityId: 'fac-1'
+    } as IdbPredictorData;
+    const deletedReading = {
+      id: 4, guid: 'd-delete', predictorId: 'p-delete', accountId: ACCOUNT, facilityId: 'fac-1'
+    } as IdbPredictorData;
+    const analysis = { id: 5, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-1' } as any;
 
     await handler.applyWeatherStationGroup({
+      facilityId: 'fac-1', weatherStationId: 'station-a', sourceWeatherStationId: 'station-a',
       addPredictors: [added], updatePredictors: [updated], deletePredictors: [deleted],
       predictorData: { add: [addedReading], update: [], delete: [deletedReading] },
       facilityAnalyses: [analysis]
@@ -236,6 +270,74 @@ describe('PredictorCommandHandler', () => {
     expect(transaction.put).toHaveBeenCalledWith('predictor', expect.objectContaining({ guid: 'p-update' }));
     expect(transaction.add).toHaveBeenCalledWith('predictor', expect.objectContaining({ guid: 'p-new' }));
     expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 5 }));
+  });
+
+  it('rejects a weather station predictor from another facility before opening a transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const predictor = {
+      guid: 'p-new', accountId: ACCOUNT, facilityId: 'fac-2',
+      predictorType: 'Weather', weatherStationId: 'station-a'
+    } as IdbPredictor;
+
+    await expect(handler.applyWeatherStationGroup({
+      facilityId: 'fac-1', weatherStationId: 'station-a', sourceWeatherStationId: undefined,
+      addPredictors: [predictor], updatePredictors: [], deletePredictors: [],
+      predictorData: { add: [], update: [], delete: [] }, facilityAnalyses: []
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects weather station data and analyses from another facility before opening a transaction', async () => {
+    const { handler, transactions } = createHandler();
+    const predictor = {
+      guid: 'p-new', accountId: ACCOUNT, facilityId: 'fac-1',
+      predictorType: 'Weather', weatherStationId: 'station-a'
+    } as IdbPredictor;
+    const reading = {
+      guid: 'd-new', predictorId: 'p-new', accountId: ACCOUNT, facilityId: 'fac-2'
+    } as IdbPredictorData;
+    const analysis = {
+      id: 5, guid: 'a-1', accountId: ACCOUNT, facilityId: 'fac-2'
+    } as any;
+
+    await expect(handler.applyWeatherStationGroup({
+      facilityId: 'fac-1', weatherStationId: 'station-a', sourceWeatherStationId: undefined,
+      addPredictors: [predictor], updatePredictors: [], deletePredictors: [],
+      predictorData: { add: [reading], update: [], delete: [] }, facilityAnalyses: []
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(handler.applyWeatherStationGroup({
+      facilityId: 'fac-1', weatherStationId: 'station-a', sourceWeatherStationId: undefined,
+      addPredictors: [predictor], updatePredictors: [], deletePredictors: [],
+      predictorData: { add: [], update: [], delete: [] }, facilityAnalyses: [analysis]
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects predictors outside the reviewed target or source weather station', async () => {
+    const { handler, transactions } = createHandler();
+    const added = {
+      guid: 'p-new', accountId: ACCOUNT, facilityId: 'fac-1',
+      predictorType: 'Weather', weatherStationId: 'station-b'
+    } as IdbPredictor;
+    const deleted = {
+      id: 2, guid: 'p-old', accountId: ACCOUNT, facilityId: 'fac-1',
+      predictorType: 'Weather', weatherStationId: 'station-c'
+    } as IdbPredictor;
+
+    await expect(handler.applyWeatherStationGroup({
+      facilityId: 'fac-1', weatherStationId: 'station-a', sourceWeatherStationId: 'station-old',
+      addPredictors: [added], updatePredictors: [], deletePredictors: [],
+      predictorData: { add: [], update: [], delete: [] }, facilityAnalyses: []
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(handler.applyWeatherStationGroup({
+      facilityId: 'fac-1', weatherStationId: 'station-a', sourceWeatherStationId: 'station-old',
+      addPredictors: [], updatePredictors: [], deletePredictors: [deleted],
+      predictorData: { add: [], update: [], delete: [] }, facilityAnalyses: []
+    }, ACCOUNT)).rejects.toMatchObject({ code: 'validation-failed' });
+
+    expect(transactions.runTransaction).not.toHaveBeenCalled();
   });
 
   it('applies multi-predictor station month changes in one predictor-data transaction', async () => {

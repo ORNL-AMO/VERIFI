@@ -177,11 +177,13 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   }
 
   setStartMonth(value: string): void {
+    if (!this.canAct()) return;
     this.startMonth.set(value);
     this.markRangeChanged();
   }
 
   setEndMonth(value: string): void {
+    if (!this.canAct()) return;
     this.endMonth.set(value);
     this.markRangeChanged();
   }

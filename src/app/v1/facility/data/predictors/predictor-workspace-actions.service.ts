@@ -357,11 +357,16 @@ export class PredictorWorkspaceActionsService {
       ...preview.updatePredictors.map(predictor => predictor.guid),
       ...preview.deletePredictors.map(predictor => predictor.guid)
     ]);
+    const sourceStationIds = new Set<string | undefined>();
     for (const predictor of [...preview.updatePredictors, ...preview.deletePredictors]) {
       const current = this.requirePredictor(predictor.guid);
       if (current.facilityId !== facility.guid || current.predictorType !== 'Weather') {
         throw new WorkspaceWriteError('validation-failed', 'The weather station group is no longer available.');
       }
+      sourceStationIds.add(current.weatherStationId);
+    }
+    if (sourceStationIds.size > 1) {
+      throw new WorkspaceWriteError('validation-failed', 'The reviewed predictors do not share one source station.');
     }
     if (this.workspace.facilityPredictors().some(predictor => predictor.predictorType === 'Weather'
       && predictor.weatherStationId === preview.station.ID && !changedIds.has(predictor.guid))) {
@@ -392,6 +397,9 @@ export class PredictorWorkspaceActionsService {
           publication: { mode: 'reload' }
         },
         () => this.predictorHandler.applyWeatherStationGroup({
+          facilityId: facility.guid,
+          weatherStationId: preview.station.ID,
+          sourceWeatherStationId: sourceStationIds.values().next().value,
           addPredictors: preview.addPredictors,
           updatePredictors: preview.updatePredictors,
           deletePredictors: preview.deletePredictors,

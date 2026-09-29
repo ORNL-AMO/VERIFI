@@ -62,6 +62,10 @@ export class MeterGroupCommandHandler {
     activeAccountGuid: string
   ): Promise<void> {
     this.assertGroup(group, activeAccountGuid, true);
+    metersToAdd.forEach(meter =>
+      this.assertMeterGroupRelationship(meter, group, undefined, activeAccountGuid));
+    metersToRemove.forEach(meter =>
+      this.assertMeterGroupRelationship(meter, group, group.guid, activeAccountGuid));
     const analyses = groupTypeChanged ? this.buildTypeChangedAnalyses(group, oldGroupType) : [];
     const updatedMeters = [
       ...metersToAdd.map(meter => ({ ...structuredClone(meter), groupId: group.guid })),
@@ -85,6 +89,8 @@ export class MeterGroupCommandHandler {
     activeAccountGuid: string
   ): Promise<void> {
     this.assertGroup(group, activeAccountGuid, true);
+    metersToClear.forEach(meter =>
+      this.assertMeterGroupRelationship(meter, group, group.guid, activeAccountGuid));
     const analyses = this.buildDeletedGroupAnalyses(group);
     const reports = this.buildGroupReports(group, 'delete');
     const updatedMeters = metersToClear.map(meter => ({ ...structuredClone(meter), groupId: undefined }));
@@ -354,6 +360,26 @@ export class MeterGroupCommandHandler {
       if (record.id === undefined) {
         throw new WorkspaceWriteError('validation-failed', 'A related meter-group record is missing its IndexedDB id.');
       }
+    }
+  }
+
+  private assertMeterGroupRelationship(
+    meter: IdbUtilityMeter,
+    group: IdbUtilityMeterGroup,
+    expectedGroupId: string | undefined,
+    activeAccountGuid: string
+  ): void {
+    if (meter.accountId && meter.accountId !== activeAccountGuid) {
+      throw new WorkspaceWriteError('cross-account-entity', 'A related meter-group record belongs to another account.');
+    }
+    if (meter.id === undefined) {
+      throw new WorkspaceWriteError('validation-failed', 'A related meter-group record is missing its IndexedDB id.');
+    }
+    if (meter.facilityId !== group.facilityId) {
+      throw new WorkspaceWriteError('validation-failed', 'A meter belongs to another facility.');
+    }
+    if (meter.groupId !== expectedGroupId) {
+      throw new WorkspaceWriteError('validation-failed', 'A meter is not in the expected meter group.');
     }
   }
 }

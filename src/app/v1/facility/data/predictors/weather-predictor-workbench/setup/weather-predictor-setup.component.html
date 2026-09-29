@@ -1,5 +1,6 @@
 @let selectedStation = station();
 @let busy = workflow.busy() || committing() || deleting();
+@let canEditSetup = canEdit();
 
 <section class="weather-setup" aria-label="Weather predictor setup">
   <div class="weather-setup__top-actions">
@@ -15,7 +16,7 @@
     [initialSearch]="initialStationSearch()"
     [previewRange]="stationPreviewRange()"
     [previewDefinitions]="definitions()"
-    [disabled]="busy"
+    [disabled]="!canEditSetup"
     (stationSelected)="selectStation($event)">
   </app-weather-station-selector>
 
@@ -27,7 +28,7 @@
           type="month"
           required
           [value]="startMonth()"
-          [disabled]="busy"
+          [disabled]="!canEditSetup"
           [attr.aria-invalid]="rangeError() ? 'true' : null"
           [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
           (change)="setStartMonth($any($event.target).value)">
@@ -38,7 +39,7 @@
           type="month"
           required
           [value]="endMonth()"
-          [disabled]="busy"
+          [disabled]="!canEditSetup"
           [attr.aria-invalid]="rangeError() ? 'true' : null"
           [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
           (change)="setEndMonth($any($event.target).value)">
@@ -59,7 +60,7 @@
   }
 
   <section class="weather-setup__predictors" aria-labelledby="weather-predictors-title">
-    <div class="weather-setup__section-heading"><h2 id="weather-predictors-title">Predictors</h2><button type="button" class="v1-btn v1-btn--secondary" [disabled]="busy" (click)="addDefinition()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button></div>
+    <div class="weather-setup__section-heading"><h2 id="weather-predictors-title">Predictors</h2><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canEditSetup" (click)="addDefinition()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button></div>
     @if (definitions().length === 0) {
       <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Saving with no predictors will remove this weather station workbench and all of its readings.</span></div>
     }
@@ -73,7 +74,7 @@
               <select
                 class="v1-select"
                 [value]="definition.weatherDataType"
-                [disabled]="busy"
+                [disabled]="!canEditSetup"
                 (change)="setDefinitionType(definition.draftId, $any($event.target).value)">
                 @for (option of weatherTypes; track option.value) {
                   <option [attr.value]="option.value">
@@ -89,7 +90,7 @@
                 maxlength="100"
                 required
                 [value]="definition.name"
-                [disabled]="busy"
+                [disabled]="!canEditSetup"
                 [attr.aria-invalid]="errors?.name ? 'true' : null"
                 [attr.aria-describedby]="errors?.name ? definition.draftId + '-name-error' : null"
                 (input)="setDefinitionName(definition.draftId, $any($event.target).value)">
@@ -106,7 +107,7 @@
                   type="number"
                   required
                   [value]="definition.baseTemperature"
-                  [disabled]="busy"
+                  [disabled]="!canEditSetup"
                   [attr.aria-invalid]="errors?.base ? 'true' : null"
                   [attr.aria-describedby]="errors?.base ? definition.draftId + '-base-error' : null"
                   (change)="setDefinitionBase(definition.draftId, $any($event.target).value)">
@@ -119,7 +120,7 @@
             }
             <div class="weather-setup__unit"><span>Unit</span><strong>{{ definition.unit }}</strong></div>
           </div>
-          <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Remove predictor" [disabled]="busy" [attr.aria-label]="'Remove ' + definition.name" (click)="removeDefinition(definition.draftId)"><app-ui-icon name="delete"></app-ui-icon></button>
+          <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Remove predictor" [disabled]="!canEditSetup" [attr.aria-label]="'Remove ' + definition.name" (click)="removeDefinition(definition.draftId)"><app-ui-icon name="delete"></app-ui-icon></button>
         </article>
       }
     </div>

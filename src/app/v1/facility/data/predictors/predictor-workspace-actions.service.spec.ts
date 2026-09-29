@@ -201,6 +201,9 @@ describe('PredictorWorkspaceActionsService', () => {
     await TestBed.inject(PredictorWorkspaceActionsService).applyWeatherStationGroup(preview);
 
     expect(predictorHandler.applyWeatherStationGroup).toHaveBeenCalledWith(expect.objectContaining({
+      facilityId: 'facility-a',
+      weatherStationId: 'station-b',
+      sourceWeatherStationId: 'station-a',
       updatePredictors: [expect.objectContaining({ weatherStationId: 'station-b' })]
     }), 'account-a');
   });

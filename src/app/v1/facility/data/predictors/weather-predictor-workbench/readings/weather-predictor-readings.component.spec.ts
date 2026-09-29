@@ -194,6 +194,23 @@ describe('WeatherPredictorReadingsComponent', () => {
     expect(rangeActions.textContent).toContain('Add month');
   });
 
+  it('keeps range controls inert when the workspace is read-only', () => {
+    const fixture = setup([weatherPredictor()], [weatherReading(2), weatherReading(5)], vi.fn(), [], {}, {
+      canWrite: false
+    });
+    const component = fixture.componentInstance;
+    const inputs = (fixture.nativeElement as HTMLElement)
+      .querySelectorAll<HTMLInputElement>('.weather-readings__range-control input');
+    const initialStart = component.startMonth();
+
+    expect(Array.from(inputs).every(input => input.disabled)).toBe(true);
+    inputs[0].value = '2024-01';
+    inputs[0].dispatchEvent(new Event('change'));
+
+    expect(component.startMonth()).toBe(initialStart);
+    expect(component.rangeDirty()).toBe(false);
+  });
+
   it('reviews and commits a date-range reading update for the station', async () => {
     const preview = {
       workspaceRevision: 1,
@@ -243,7 +260,8 @@ function setup(
   readings: any[],
   copyTable = vi.fn(),
   statusFindings: any[] = [],
-  workflowOverrides: Record<string, unknown> = {}
+  workflowOverrides: Record<string, unknown> = {},
+  workspaceOverrides: { canWrite?: boolean; hasPending?: boolean } = {}
 ) {
   const group = signal({
     routeKey: 'station:A', stationId: 'station-a', stationName: 'Station A', predictors, statusFindings
@@ -252,7 +270,9 @@ function setup(
     imports: [WeatherPredictorReadingsComponent],
     providers: [
       { provide: FacilityPredictorsWorkspaceService, useValue: {
-        canWrite: signal(true), hasPending: signal(false), revision: signal(1),
+        canWrite: signal(workspaceOverrides.canWrite ?? true),
+        hasPending: signal(workspaceOverrides.hasPending ?? false),
+        revision: signal(1),
         defaultWeatherRange: signal({ start: { year: 2025, month: 1 }, end: { year: 2025, month: 12 } })
       } },
       {

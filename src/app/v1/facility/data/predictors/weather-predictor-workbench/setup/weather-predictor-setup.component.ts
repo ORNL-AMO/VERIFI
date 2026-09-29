@@ -87,6 +87,11 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     return facility ? getWeatherSearchFromFacility(facility) : '';
   });
   readonly isCreation = this.context.creating;
+  readonly canEdit = computed(() => this.workspace.canWrite()
+    && !this.workspace.hasPending()
+    && !this.workflow.busy()
+    && !this.committing()
+    && !this.deleting());
   readonly canSubmit = computed(() => {
     const station = this.station();
     const range = this.stationPreviewRange();
@@ -97,14 +102,10 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
         && definition.name.trim().length <= 100
         && (!isDegreeDay(definition.weatherDataType) || Number.isFinite(definition.baseTemperature)))
       && !!range && !validateWeatherMonthRange(range)
-      && this.workspace.canWrite()
-      && !this.workflow.busy() && !this.committing() && !this.deleting();
+      && this.canEdit();
   });
   readonly canDelete = computed(() => !!this.context.group()
-    && this.workspace.canWrite()
-    && !this.workspace.hasPending()
-    && !this.committing()
-    && !this.deleting());
+    && this.canEdit());
 
   private initializedContext: string | undefined;
   private nextDraftId = 0;
@@ -142,6 +143,7 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   }
 
   selectStation(station: WeatherStation): void {
+    if (!this.canEdit()) return;
     const range = this.stationPreviewRange();
     if (!this.startMonth() && !this.endMonth() && range) {
       this.startMonth.set(toMonthInput(range.start));
@@ -150,10 +152,19 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
     this.station.set(station);
     this.markChanged();
   }
-  setStartMonth(value: string): void { this.startMonth.set(value); this.markChanged(); }
-  setEndMonth(value: string): void { this.endMonth.set(value); this.markChanged(); }
+  setStartMonth(value: string): void {
+    if (!this.canEdit()) return;
+    this.startMonth.set(value);
+    this.markChanged();
+  }
+  setEndMonth(value: string): void {
+    if (!this.canEdit()) return;
+    this.endMonth.set(value);
+    this.markChanged();
+  }
 
   addDefinition(type: WeatherDataType = 'HDD'): void {
+    if (!this.canEdit()) return;
     const baseTemperature = isDegreeDay(type) ? 60 : undefined;
     this.definitions.update(definitions => [...definitions, {
       draftId: this.newDraftId(),
@@ -167,11 +178,13 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
   }
 
   removeDefinition(draftId: string): void {
+    if (!this.canEdit()) return;
     this.definitions.update(definitions => definitions.filter(definition => definition.draftId !== draftId));
     this.markChanged();
   }
 
   setDefinitionType(draftId: string, value: string): void {
+    if (!this.canEdit()) return;
     const type = value as WeatherDataType;
     const current = this.definitions().find(definition => definition.draftId === draftId);
     if (!current) return;
@@ -184,8 +197,12 @@ export class WeatherPredictorSetupComponent implements HasUnsavedChanges, OnDest
       name: current.name === previousDefault ? defaultWeatherPredictorName(type, baseTemperature) : current.name
     });
   }
-  setDefinitionName(draftId: string, name: string): void { this.updateDefinition(draftId, { name }); }
+  setDefinitionName(draftId: string, name: string): void {
+    if (!this.canEdit()) return;
+    this.updateDefinition(draftId, { name });
+  }
   setDefinitionBase(draftId: string, value: string): void {
+    if (!this.canEdit()) return;
     const current = this.definitions().find(definition => definition.draftId === draftId);
     if (!current) return;
     const nextBase = value === '' ? undefined : Number(value);

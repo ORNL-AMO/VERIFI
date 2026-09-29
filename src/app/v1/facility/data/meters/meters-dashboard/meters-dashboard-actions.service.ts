@@ -197,10 +197,7 @@ export class MetersDashboardActionsService {
     }
     const metersToClear = this.workspace.facilityMeters()
       .filter(meter => meter.groupId === current.guid)
-      .map(meter => ({
-        ...structuredClone(meter),
-        groupId: undefined
-      }));
+      .map(meter => structuredClone(meter));
 
     await this.commandBoundary.execute(
       {

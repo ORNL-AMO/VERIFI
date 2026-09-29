@@ -231,7 +231,9 @@ describe('MeterGroupCommandHandler', () => {
         analysisCategory: 'energy', groups: [{ idbGroupId: 'g-1' }]
       };
       const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
-      const assignedMeter = { id: 5, guid: 'meter', accountId: ACCOUNT, groupId: 'g-1' } as IdbUtilityMeter;
+      const assignedMeter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: 'g-1'
+      } as IdbUtilityMeter;
       const { handler, transactions, transaction } = createHandler([analysis]);
 
       await handler.deleteMeterGroupAtomic(group, [assignedMeter], ACCOUNT);
@@ -243,6 +245,58 @@ describe('MeterGroupCommandHandler', () => {
       );
       expect(transaction.deleteByKey).toHaveBeenCalledWith('utilityMeterGroups', 2);
       expect(transaction.put).toHaveBeenCalledWith('utilityMeter', expect.objectContaining({ id: 5, groupId: undefined }));
+    });
+
+    it('rejects adding a meter from another facility before opening a transaction', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: 'fac-2', groupId: undefined
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.updateMeterGroupAtomic(group, false, 'Energy', [meter], [], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects adding a meter that already belongs to another group', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: 'g-2'
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.updateMeterGroupAtomic(group, false, 'Energy', [meter], [], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects removing a meter that is not currently in the group', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: undefined
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.updateMeterGroupAtomic(group, false, 'Energy', [], [meter], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects clearing a meter that is not currently in the deleted group', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: 'g-2'
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.deleteMeterGroupAtomic(group, [meter], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
     });
   });
 });

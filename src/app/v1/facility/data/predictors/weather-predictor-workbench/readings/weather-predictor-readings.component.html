@@ -2,7 +2,7 @@
 @let visibleRows = displayedRows();
 @let currentRows = filteredRows();
 @let checks = readingChecks();
-@let rangeBusy = updatingRange() || saving() || calculating() || workspace.hasPending();
+@let rangeBusy = updatingRange() || saving() || calculating() || workspace.hasPending() || !workspace.canWrite();
 <section #readingsRegion class="weather-readings" aria-label="Weather station readings" tabindex="-1">
   @if (actionError() || (rangeError() && !rangePreview())) {
     <div class="v1-alert v1-alert--danger" role="alert">

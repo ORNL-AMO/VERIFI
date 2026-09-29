@@ -65,7 +65,7 @@ describe('MetersDashboardActionsService', () => {
     );
     expect(meterGroupHandler.deleteMeterGroupAtomic).toHaveBeenCalledWith(
       expect.objectContaining({ guid: existingGroup.guid }),
-      [expect.objectContaining({ guid: groupedMeter.guid, groupId: undefined })],
+      [expect.objectContaining({ guid: groupedMeter.guid, groupId: existingGroup.guid })],
       'account-a'
     );
     expect(groupedMeter.groupId).toBe(existingGroup.guid);

@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WeatherStationLookupService } from '@platform/weather/weather-station-lookup.service';
@@ -11,6 +12,7 @@ import { PredictorWeatherWorkflowService } from '../../predictor-weather-workflo
 import { weatherLastTwoYearsRange } from '../../models';
 import { WeatherPredictorSetupComponent } from './weather-predictor-setup.component';
 import { WeatherPredictorWorkbenchContextService } from '../weather-predictor-workbench-context.service';
+import { WeatherStationSelectorComponent } from '../../shared/weather-station-selector/weather-station-selector.component';
 
 describe('WeatherPredictorSetupComponent', () => {
   it('prepares a save summary with repeated weather variants', async () => {
@@ -91,6 +93,46 @@ describe('WeatherPredictorSetupComponent', () => {
     expect(text).not.toContain('Included predictors');
     expect(text).not.toContain('Generate preview');
     expect(text).not.toContain('Manage included weather predictors');
+  });
+
+  it('disables setup editing without write permission and ignores attempted changes', () => {
+    const fixture = createFixture({ canWrite: false });
+    const component = fixture.componentInstance;
+    const initialStart = component.startMonth();
+    const initialDefinitions = component.definitions();
+
+    expect(component.canEdit()).toBe(false);
+    expect(component.canSubmit()).toBe(false);
+    expect(fixture.debugElement.query(By.directive(WeatherStationSelectorComponent)).componentInstance.disabled).toBe(true);
+    expect(Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(
+      '.weather-setup input, .weather-setup select, .weather-setup button'
+    )).every(control => control.disabled)).toBe(true);
+
+    component.setStartMonth('2025-01');
+    component.addDefinition();
+
+    expect(component.startMonth()).toBe(initialStart);
+    expect(component.definitions()).toEqual(initialDefinitions);
+    expect(component.dirty()).toBe(false);
+  });
+
+  it('disables setup submission and editing while a workspace command is pending', () => {
+    const fixture = createFixture({
+      creating: false,
+      hasPending: true,
+      group: {
+        routeKey: 'station:station-a', stationId: 'station-a', stationName: 'Station A',
+        predictors: [{
+          guid: 'weather-a', name: 'HDD', weatherDataType: 'HDD',
+          heatingBaseTemperature: 60, production: false
+        }]
+      }
+    });
+
+    expect(fixture.componentInstance.canEdit()).toBe(false);
+    expect(fixture.componentInstance.canSubmit()).toBe(false);
+    expect((fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.weather-setup__top-actions button')?.disabled).toBe(true);
   });
 
   it('uses the last two years when a station is chosen before dates are entered', () => {
@@ -247,6 +289,8 @@ function createFixture(options: {
   previewStationGroup?: any;
   commitStationGroup?: any;
   defaultRange?: any;
+  canWrite?: boolean;
+  hasPending?: boolean;
 } = {}) {
   const state = signal({ status: 'idle', message: '' });
   const group = signal(options.group);
@@ -258,7 +302,7 @@ function createFixture(options: {
           ? options.defaultRange
           : { start: { year: 2026, month: 1 }, end: { year: 2026, month: 3 } }),
         facility: signal({ guid: 'facility-a', city: 'Oak Ridge', state: 'TN' }), predictorReadings: signal([]),
-        canWrite: signal(true), hasPending: signal(false)
+        canWrite: signal(options.canWrite ?? true), hasPending: signal(options.hasPending ?? false)
       } },
       {
         provide: WeatherPredictorWorkbenchContextService,
