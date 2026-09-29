@@ -1,1 +1,314 @@
-:host { display: block; }
+:host {
+  display: block;
+}
+
+.import-review-intro {
+  display: grid;
+  gap: .25rem;
+  margin-bottom: 1rem;
+}
+
+.import-review-intro h2,
+.import-review-intro p,
+.import-review-facility h3,
+.import-review-section h4,
+.import-review-record p {
+  margin: 0;
+}
+
+.import-review-intro p,
+.import-review-record__metadata {
+  color: var(--v1-muted);
+}
+
+.import-review-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: .65rem;
+  margin: 0 0 1rem;
+}
+
+.import-review-overview__item {
+  display: grid;
+  gap: .4rem;
+  min-width: 0;
+  padding: .7rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-content-block);
+}
+
+.import-review-overview dt {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--v1-muted);
+  font-size: .72rem;
+  font-weight: 850;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.import-review-overview dt .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-facility);
+}
+
+.import-review-overview dd {
+  margin: 0;
+  color: var(--v1-text);
+  font-size: 1.45rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.import-review-facilities {
+  display: grid;
+  gap: 1rem;
+}
+
+.import-review-facility {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border-inline-start: 4px solid var(--import-review-facility-color, var(--v1-facility));
+}
+
+.import-review-facility__header,
+.import-review-record__heading,
+.import-review-equipment li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.import-review-facility__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  min-width: 0;
+}
+
+.import-review-facility__identity > .v1-icon {
+  flex: 0 0 auto;
+  margin-top: .15rem;
+  color: var(--v1-facility);
+  font-size: 1.25rem;
+}
+
+.import-review-facility__identity h3 {
+  overflow-wrap: anywhere;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.import-review-facility__sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(21rem, 100%), 1fr));
+  align-items: start;
+  gap: .75rem;
+}
+
+.import-review-section {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-panel);
+}
+
+.import-review-section--energy-use {
+  grid-column: 1 / -1;
+}
+
+.import-review-section h4 {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .6rem .7rem;
+  border-bottom: 1px solid var(--v1-border);
+  background: var(--v1-content-block);
+  font-size: .82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.import-review-section h4 .v1-icon {
+  color: var(--v1-facility);
+}
+
+.import-review-section h4 span {
+  margin-inline-start: auto;
+  color: var(--v1-muted);
+}
+
+.import-review-records,
+.import-review-activity,
+.import-review-equipment,
+.import-review-omissions ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.import-review-record {
+  display: grid;
+  gap: .45rem;
+  min-width: 0;
+  padding: .7rem;
+  background: var(--v1-surface);
+}
+
+.import-review-record + .import-review-record {
+  border-top: 1px solid var(--v1-divider);
+}
+
+.import-review-record__heading strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.import-review-record__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .25rem;
+  overflow-wrap: anywhere;
+  font-size: .78rem;
+}
+
+.import-review-record__production {
+  padding: .12rem .35rem;
+  border-radius: var(--v1-radius-pill);
+  background: color-mix(in srgb, var(--v1-info) 10%, var(--v1-surface));
+  color: var(--v1-info);
+  font-size: .68rem;
+  font-weight: 850;
+}
+
+.import-review-activity {
+  display: grid;
+  gap: .3rem;
+}
+
+.import-review-activity li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .25rem .75rem;
+  padding: .35rem .45rem;
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-content-block);
+  font-size: .76rem;
+}
+
+.import-review-activity li span {
+  color: var(--v1-muted);
+}
+
+.import-review-energy-group {
+  gap: .6rem;
+}
+
+.import-review-equipment {
+  display: grid;
+  gap: .35rem;
+  padding-inline-start: .5rem;
+  border-inline-start: 2px solid var(--v1-divider);
+}
+
+.import-review-equipment li {
+  align-items: center;
+  padding: .35rem .45rem;
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-content-block);
+}
+
+.import-review-equipment li > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.import-review-equipment .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-facility);
+}
+
+.import-review-omissions {
+  display: grid;
+  gap: .45rem;
+  padding: .7rem .8rem;
+  border: 1px solid color-mix(in srgb, var(--v1-warning) 42%, var(--v1-border));
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--v1-warning) 7%, var(--v1-surface));
+}
+
+.import-review-omissions__heading {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.import-review-omissions__heading .v1-icon {
+  color: var(--v1-warning);
+}
+
+.import-review-omissions ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem 1.25rem;
+  color: var(--v1-muted);
+  font-size: .8rem;
+}
+
+.import-review-omissions li::before {
+  content: '•';
+  margin-inline-end: .35rem;
+}
+
+.import-review-empty {
+  justify-items: start;
+  padding: 1.25rem;
+  border: 1px dashed var(--v1-border);
+  border-radius: var(--v1-radius);
+}
+
+.import-review-empty h3,
+.import-review-empty p {
+  margin: 0;
+}
+
+.import-review-empty > .v1-icon {
+  color: var(--v1-facility);
+  font-size: 1.4rem;
+}
+
+.import-review-empty p {
+  max-width: 42rem;
+  color: var(--v1-muted);
+}
+
+@media (max-width: 40rem) {
+  .import-review-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .import-review-facility__header,
+  .import-review-record__heading {
+    align-items: flex-start;
+  }
+
+  .import-review-facility__sections {
+    grid-template-columns: 1fr;
+  }
+
+  .import-review-activity li {
+    display: grid;
+  }
+}

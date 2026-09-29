@@ -29,6 +29,7 @@ import {
 } from '@data/import/predictor-reading-import-review';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
+import { buildImportReviewSummary } from './steps/review/import-review-summary';
 
 export type ImportMappingType = 'meter' | 'predictor';
 
@@ -189,6 +190,22 @@ export class ImportWizardStateService {
   });
   readonly someExistingPredictorReadingsKept = computed(() => this.predictorReadingRows()
     .some(row => row.existingReadings.count > 0 && row.keepExisting));
+  readonly reviewSummary = computed(() => {
+    this.draftRevision();
+    const draft = this.draft();
+    if (!draft) return undefined;
+    return buildImportReviewSummary({
+      kind: draft.kind,
+      selectedFacilityId: draft.selectedFacilityId,
+      facilities: draft.importFacilities,
+      meterRows: this.meterRows(),
+      meterReadingRows: this.meterReadingRows(),
+      predictorRows: this.predictorRows(),
+      predictorReadingRows: this.predictorReadingRows(),
+      energyUseGroups: draft.facilityEnergyUseGroups,
+      equipment: draft.facilityEnergyUseEquipment
+    });
+  });
 
   initialize(draft: ImportFileDraft): void {
     this.draft.set(draft);

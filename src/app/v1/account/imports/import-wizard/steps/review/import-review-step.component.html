@@ -1,10 +1,213 @@
-<h2>Ready to import</h2>
-<dl class="summary">
-  <div><dt>Facilities</dt><dd>{{ state.draft().importFacilities.length }}</dd></div>
-  <div><dt>Meters</dt><dd>{{ state.draft().meters.length }}</dd></div>
-  <div><dt>Meter readings</dt><dd>{{ state.draft().meterData.length - state.draft().excludedMeterReadingIds.length }}</dd></div>
-  <div><dt>Predictors</dt><dd>{{ state.draft().predictors.length }}</dd></div>
-  <div><dt>Predictor readings</dt><dd>{{ state.predictorReadingsToImportCount() }}</dd></div>
-  <div><dt>Energy-use groups</dt><dd>{{ state.draft().facilityEnergyUseGroups.length }}</dd></div>
-  <div><dt>Equipment</dt><dd>{{ state.draft().facilityEnergyUseEquipment.length }}</dd></div>
-</dl>
+@if (state.reviewSummary(); as review) {
+  <header class="import-review-intro">
+    <h2>Ready to import</h2>
+    <p>Confirm the records and readings that will be saved. Only nonzero reading activity is shown.</p>
+  </header>
+
+  @if (review.overview.length) {
+    <dl class="import-review-overview" aria-label="Import totals">
+      @for (item of review.overview; track item.key) {
+        <div class="import-review-overview__item">
+          <dt>
+            <app-ui-icon [name]="item.icon"></app-ui-icon>
+            {{ item.label }}
+          </dt>
+          <dd>{{ item.count }}</dd>
+        </div>
+      }
+    </dl>
+  }
+
+  @if (!review.facilities.length) {
+    <section class="v1-empty-state import-review-empty" role="status">
+      <app-ui-icon name="checklist"></app-ui-icon>
+      <h3>Nothing is selected to import</h3>
+      <p>Return to the completed review steps and include at least one record before importing this file.</p>
+    </section>
+  } @else {
+    <div class="import-review-facilities" role="list" aria-label="Import summary by facility">
+      @for (facilitySummary of review.facilities; track facilitySummary.facility.guid) {
+        <article
+          class="v1-card import-review-facility"
+          role="listitem"
+          [style.--import-review-facility-color]="facilitySummary.facility.color || null">
+          <header class="import-review-facility__header">
+            <div class="import-review-facility__identity">
+              <app-ui-icon name="facility"></app-ui-icon>
+              <div>
+                <p class="v1-eyebrow">Facility</p>
+                <h3>{{ facilitySummary.facility.name || 'Unnamed facility' }}</h3>
+              </div>
+            </div>
+            <span class="v1-chip" [class.v1-chip--info]="facilitySummary.status === 'New'">
+              {{ facilitySummary.status }}
+            </span>
+          </header>
+
+          <div class="import-review-facility__sections">
+            @if (facilitySummary.meters.length) {
+              <section class="import-review-section" [attr.aria-labelledby]="'review-meters-' + facilitySummary.facility.guid">
+                <h4 [id]="'review-meters-' + facilitySummary.facility.guid">
+                  <app-ui-icon name="meter"></app-ui-icon>
+                  Meters
+                  <span>{{ facilitySummary.meters.length }}</span>
+                </h4>
+                <ul class="import-review-records">
+                  @for (meter of facilitySummary.meters; track meter.guid) {
+                    <li class="import-review-record">
+                      <div class="import-review-record__heading">
+                        <strong>{{ meter.name }}</strong>
+                        <span class="v1-chip" [class.v1-chip--info]="meter.status === 'New'">{{ meter.status }}</span>
+                      </div>
+                      <p class="import-review-record__metadata">
+                        <span>{{ meter.source }}</span>
+                        <span aria-hidden="true">·</span>
+                        <span [innerHTML]="meter.unitLabel"></span>
+                      </p>
+                      @if (meter.readingActivity.length) {
+                        <ul class="import-review-activity">
+                          @for (activity of meter.readingActivity; track activity.kind) {
+                            <li>
+                              <strong>
+                                {{ activity.count }}
+                                {{ activity.kind === 'new' ? 'new' : 'existing' }}
+                                reading{{ activity.count === 1 ? '' : 's' }}
+                                {{ activity.kind === 'update' ? 'updated' : '' }}
+                              </strong>
+                              @if (activity.start) {
+                                <span>
+                                  {{ activity.start | date:activity.dateFormat }}
+                                  @if (!activity.singlePeriod) {
+                                    – {{ activity.end | date:activity.dateFormat }}
+                                  }
+                                </span>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+
+            @if (facilitySummary.predictors.length) {
+              <section class="import-review-section" [attr.aria-labelledby]="'review-predictors-' + facilitySummary.facility.guid">
+                <h4 [id]="'review-predictors-' + facilitySummary.facility.guid">
+                  <app-ui-icon name="predictor"></app-ui-icon>
+                  Predictors
+                  <span>{{ facilitySummary.predictors.length }}</span>
+                </h4>
+                <ul class="import-review-records">
+                  @for (predictor of facilitySummary.predictors; track predictor.guid) {
+                    <li class="import-review-record">
+                      <div class="import-review-record__heading">
+                        <strong>{{ predictor.name }}</strong>
+                        <span class="v1-chip" [class.v1-chip--info]="predictor.status === 'New'">{{ predictor.status }}</span>
+                      </div>
+                      <p class="import-review-record__metadata">
+                        <span>{{ predictor.typeLabel }}</span>
+                        @if (predictor.typeDetail) {
+                          <span aria-hidden="true">·</span>
+                          <span>{{ predictor.typeDetail }}</span>
+                        }
+                        @if (predictor.unit) {
+                          <span aria-hidden="true">·</span>
+                          <span>{{ predictor.unit }}</span>
+                        }
+                        @if (predictor.production) {
+                          <span class="import-review-record__production">Production</span>
+                        }
+                      </p>
+                      @if (predictor.readingActivity.length) {
+                        <ul class="import-review-activity">
+                          @for (activity of predictor.readingActivity; track activity.kind) {
+                            <li>
+                              <strong>
+                                {{ activity.count }}
+                                {{ activity.kind === 'new' ? 'new' : 'existing' }}
+                                reading{{ activity.count === 1 ? '' : 's' }}
+                                {{ activity.kind === 'update' ? 'updated' : '' }}
+                              </strong>
+                              @if (activity.start) {
+                                <span>
+                                  {{ activity.start | date:activity.dateFormat }}
+                                  @if (!activity.singlePeriod) {
+                                    – {{ activity.end | date:activity.dateFormat }}
+                                  }
+                                </span>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+
+            @if (facilitySummary.energyUseGroups.length) {
+              <section
+                class="import-review-section import-review-section--energy-use"
+                [attr.aria-labelledby]="'review-energy-use-' + facilitySummary.facility.guid">
+                <h4 [id]="'review-energy-use-' + facilitySummary.facility.guid">
+                  <app-ui-icon name="meterGroup"></app-ui-icon>
+                  Energy-use groups
+                  <span>{{ facilitySummary.energyUseGroups.length }}</span>
+                </h4>
+                <ul class="import-review-records">
+                  @for (group of facilitySummary.energyUseGroups; track group.guid) {
+                    <li class="import-review-record import-review-energy-group">
+                      <div class="import-review-record__heading">
+                        <strong>{{ group.name }}</strong>
+                        <span class="v1-chip" [class.v1-chip--info]="group.status === 'New'">{{ group.status }}</span>
+                      </div>
+                      @if (group.equipment.length) {
+                        <ul class="import-review-equipment" [attr.aria-label]="'Equipment in ' + group.name">
+                          @for (equipment of group.equipment; track equipment.guid) {
+                            <li>
+                              <span>
+                                <app-ui-icon name="tools"></app-ui-icon>
+                                {{ equipment.name }}
+                              </span>
+                              <span class="v1-chip" [class.v1-chip--info]="equipment.status === 'New'">{{ equipment.status }}</span>
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+          </div>
+
+          @if (facilitySummary.omissions.hasItems) {
+            <footer class="import-review-omissions">
+              <div class="import-review-omissions__heading">
+                <app-ui-icon name="info"></app-ui-icon>
+                <strong>Not imported by your review choices</strong>
+              </div>
+              <ul>
+                @if (facilitySummary.omissions.keptMeterReadings) {
+                  <li>{{ facilitySummary.omissions.keptMeterReadings }} current meter reading{{ facilitySummary.omissions.keptMeterReadings === 1 ? '' : 's' }} kept</li>
+                }
+                @if (facilitySummary.omissions.excludedMeterReadings) {
+                  <li>{{ facilitySummary.omissions.excludedMeterReadings }} invalid meter reading{{ facilitySummary.omissions.excludedMeterReadings === 1 ? '' : 's' }} excluded</li>
+                }
+                @if (facilitySummary.omissions.keptPredictorReadings) {
+                  <li>{{ facilitySummary.omissions.keptPredictorReadings }} current predictor reading{{ facilitySummary.omissions.keptPredictorReadings === 1 ? '' : 's' }} kept</li>
+                }
+                @if (facilitySummary.omissions.excludedPredictorReadings) {
+                  <li>{{ facilitySummary.omissions.excludedPredictorReadings }} invalid predictor reading{{ facilitySummary.omissions.excludedPredictorReadings === 1 ? '' : 's' }} excluded</li>
+                }
+              </ul>
+            </footer>
+          }
+        </article>
+      }
+    </div>
+  }
+}

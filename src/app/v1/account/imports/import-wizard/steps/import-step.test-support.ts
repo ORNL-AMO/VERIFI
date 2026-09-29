@@ -5,14 +5,16 @@ import { buildImportMeterReadingReview } from '@data/import/meter-reading-import
 import { getImportPredictorIssues, isImportPredictorValid } from '@data/import/predictor-import-review';
 import { buildImportPredictorReadingReview } from '@data/import/predictor-reading-import-review';
 import { ImportWizardStateService } from '../import-wizard-state.service';
+import { buildImportReviewSummary } from './review/import-review-summary';
 
 export function createImportWizardStateStub() {
   const draft = signal<any>({
     name: 'sample.xlsx',
+    kind: 'verifi-v3',
     selectedWorksheetName: 'Visible',
     selectedWorksheetData: [['Date', 'Electricity'], ['2026-01-01', 12]],
     headerMap: [{ Date: '2026-01-01', Electricity: 12 }],
-    importFacilities: [{ id: undefined, guid: 'facility-1', name: 'Main Plant' }],
+    importFacilities: [{ id: undefined, guid: 'facility-1', name: 'Main Plant', color: '#1f77b4' }],
     meters: [{
       id: undefined,
       guid: 'meter-1',
@@ -54,10 +56,19 @@ export function createImportWizardStateStub() {
     excludedPredictorReadingIds: [],
     invalidPredictorReadingsAcknowledged: false,
     selectedFacilityId: '',
-    facilityEnergyUseGroups: [{ guid: 'use-group-1' }],
+    facilityEnergyUseGroups: [{
+      id: undefined,
+      guid: 'use-group-1',
+      facilityId: 'facility-1',
+      accountId: 'account-1',
+      name: 'Process heating'
+    }],
     facilityEnergyUseEquipment: [{
       id: undefined,
       guid: 'equipment-1',
+      facilityId: 'facility-1',
+      accountId: 'account-1',
+      energyUseGroupId: 'use-group-1',
       name: 'Boiler',
       utilityMeterGroupIds: [],
       utilityData: [{ energySource: 'Natural Gas' }]
@@ -192,6 +203,17 @@ export function createImportWizardStateStub() {
   });
   state.someExistingPredictorReadingsKept = computed(() => state.predictorReadingRows()
     .some((row: any) => row.existingReadings.count > 0 && row.keepExisting));
+  state.reviewSummary = computed(() => buildImportReviewSummary({
+    kind: draft().kind,
+    selectedFacilityId: draft().selectedFacilityId,
+    facilities: draft().importFacilities,
+    meterRows: state.meterRows(),
+    meterReadingRows: state.meterReadingRows(),
+    predictorRows: state.predictorRows(),
+    predictorReadingRows: state.predictorReadingRows(),
+    energyUseGroups: draft().facilityEnergyUseGroups,
+    equipment: draft().facilityEnergyUseEquipment
+  }));
   return state;
 }
 

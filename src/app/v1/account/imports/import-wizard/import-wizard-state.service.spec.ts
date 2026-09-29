@@ -439,6 +439,32 @@ describe('ImportWizardStateService', () => {
     }));
   });
 
+  it('prepares the facility review from included records and current reading decisions', () => {
+    const selectedMeter = meter({ guid: 'meter-a', facilityId: 'facility-a', name: 'Electricity' });
+    const current = reading({ guid: 'current', meterId: selectedMeter.guid, totalEnergyUse: 10 });
+    const overlap = reading({ guid: 'overlap', meterId: selectedMeter.guid, totalEnergyUse: 12 });
+    const added = reading({ guid: 'added', meterId: selectedMeter.guid, month: 2, totalEnergyUse: 15 });
+    workspaceMeterData.set([current]);
+    const draft = templateDraft({
+      meters: [selectedMeter],
+      meterData: [overlap, added],
+      skipExistingReadingsMeterIds: [selectedMeter.guid]
+    });
+    service.initialize(draft);
+
+    const summary = service.reviewSummary();
+
+    expect(summary?.facilities[0]).toMatchObject({
+      facility: expect.objectContaining({ guid: 'facility-a' }),
+      meters: [{
+        name: 'Electricity',
+        readingActivity: [expect.objectContaining({ kind: 'new', count: 1 })]
+      }],
+      omissions: expect.objectContaining({ keptMeterReadings: 1 })
+    });
+    expect(summary?.overview.find(item => item.key === 'meterReadings')?.count).toBe(1);
+  });
+
   it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'energy-treasure-hunt', 'general-workbook'])(
     'prepares the same predictor-reading review contract for %s drafts',
     kind => {
