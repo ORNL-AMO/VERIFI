@@ -2,7 +2,7 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
-import { FileReference, ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference, ParsedTemplate } from '@data/import/spreadsheet-import.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacilityEnergyUseEquipment, IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { getNewIdbFacilityEnergyUseGroup, IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';

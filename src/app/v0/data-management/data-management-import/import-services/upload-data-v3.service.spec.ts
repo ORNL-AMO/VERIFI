@@ -8,8 +8,8 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-to-excel-template-v3.service';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
-import { UploadDataV3Service } from '@v0/data-management/data-management-import/import-services/upload-data-v3.service';
+import { UploadDataSharedFunctionsService } from '@data/import/parsers/upload-data-shared-functions.service';
+import { UploadDataV3Service } from '@data/import/parsers/upload-data-v3.service';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as ExcelJS from 'exceljs';

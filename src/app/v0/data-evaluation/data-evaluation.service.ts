@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { LocalStorageService } from 'ngx-webstorage';
 
 @Injectable({

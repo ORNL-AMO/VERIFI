@@ -2,16 +2,16 @@ import { AccountWorkspaceQueryService } from '@data/account-workspace/account-wo
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
-import { ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { ParsedTemplate } from '@data/import/spreadsheet-import.models';
 import * as _ from 'lodash';
-import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from '@data/import/upload-helper-functions';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SubRegionData } from '@data/models/eGridEmissions';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
 import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@shared/sharedHelperFunctions';
-import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
-import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { UploadDataSharedFunctionsService } from '@data/import/parsers/upload-data-shared-functions.service';
+import { applyMeterMultipliers, getDefaultMeterScope } from '@data/import/meter-import-defaults';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
 import { IdbAccount } from '@data/models/idbModels/account';
@@ -31,8 +31,7 @@ export class UploadDataV2Service {
 
   constructor(
     private eGridService: EGridService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
-    private editMeterFormService: EditMeterFormService
+    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService
   ) { }
 
 
@@ -110,7 +109,7 @@ export class UploadDataV2Service {
           meter.source = getMeterSource(excelMeter['Source']);
           meter.scope = getScope(excelMeter['Scope']);
           if (meter.scope == undefined) {
-            meter.scope = this.editMeterFormService.getDefaultScope(meter.source);
+            meter.scope = getDefaultMeterScope(meter.source);
           }
 
           meter.name = excelMeter['Meter Name (Display)'];
@@ -231,7 +230,7 @@ export class UploadDataV2Service {
           }
 
           meter.meterReadingDataApplication = this.getMeterReadingDataApplicationV2(excelMeter['Calendarize Data?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           importMeters.push(meter);
         }
       }

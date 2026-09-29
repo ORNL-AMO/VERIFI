@@ -2,10 +2,10 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, inject } from '@angular/core';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { UploadDataFootprintToolService } from '@v0/data-management/data-management-import/import-services/upload-data-footprint-tool.service';
+import { UploadDataFootprintToolService } from '@data/import/parsers/upload-data-footprint-tool.service';
 
 @Component({
   selector: 'app-footprint-upload-select-facility',

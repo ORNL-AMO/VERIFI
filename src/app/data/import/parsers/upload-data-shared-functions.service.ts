@@ -8,7 +8,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '@data/import/upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'

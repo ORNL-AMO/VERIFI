@@ -1,7 +1,7 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject, computed, Injector } from '@angular/core';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { ActivatedRoute } from '@angular/router';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { Subscription } from 'rxjs';

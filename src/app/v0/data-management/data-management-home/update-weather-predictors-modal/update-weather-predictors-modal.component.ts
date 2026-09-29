@@ -6,7 +6,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { WeatherPredictorManagementService } from '@v0/weather-data/weather-predictor-management.service';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { getEarliestMeterDataDate, getEarliestPredictorDataDate, getLatestMeterDataDate, getLatestPredictorDataDate } from '@shared/dateHelperFunctions';
 
 @Component({

@@ -1,7 +1,7 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
-import { ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { ParsedTemplate } from '@data/import/spreadsheet-import.models';
 import * as _ from 'lodash';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
@@ -9,7 +9,7 @@ import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/u
 import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { getCountryCode, getState, getZip } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { getCountryCode, getState, getZip } from '@data/import/upload-helper-functions';
 import { SubRegionData } from '@data/models/eGridEmissions';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 

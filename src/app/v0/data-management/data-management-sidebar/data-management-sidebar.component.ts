@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, EventEmitter, Output, inject, computed, Injector } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';

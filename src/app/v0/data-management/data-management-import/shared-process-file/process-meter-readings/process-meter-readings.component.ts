@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
-import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference, getEmptyFileReference } from '@data/import/spreadsheet-import.models';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '@v0/shared/shared-meter-content/utility-meter-data.service';

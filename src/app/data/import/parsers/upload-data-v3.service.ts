@@ -9,16 +9,16 @@ import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterCharge, MeterReadingDataAp
 import { checkSameDate, getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import * as XLSX from 'xlsx';
-import { ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { ParsedTemplate } from '@data/import/spreadsheet-import.models';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameMonthPredictorData, getAgreementType, getCountryCode, getFuelEnum, getState, getYesNoBool, getZip, parseNAICs } from '@data/import/upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { SubRegionData } from '@data/models/eGridEmissions';
-import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { applyMeterMultipliers } from '@data/import/meter-import-defaults';
 import { getGUID, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@shared/sharedHelperFunctions';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
-import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
+import { UploadDataSharedFunctionsService } from '@data/import/parsers/upload-data-shared-functions.service';
 import { MeterChargeType } from '@data/models/meter-charges-options';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
@@ -33,7 +33,6 @@ export class UploadDataV3Service {
 
   constructor(
     private eGridService: EGridService,
-    private editMeterFormService: EditMeterFormService,
     private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService
 
   ) { }
@@ -178,7 +177,7 @@ export class UploadDataV3Service {
           }
 
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
 
           this.addCharges(excelMeter, meter);
           meters.push(meter);
@@ -241,7 +240,7 @@ export class UploadDataV3Service {
 
           meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, false);
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           this.addCharges(excelMeter, meter);
           meters.push(meter);
         }
@@ -298,7 +297,7 @@ export class UploadDataV3Service {
             meter.groupId = groupData.group.guid;
           }
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           this.addCharges(excelMeter, meter);
           meters.push(meter);
         }
@@ -353,7 +352,7 @@ export class UploadDataV3Service {
             meter.groupId = groupData.group.guid;
           }
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           this.addCharges(excelMeter, meter);
           meters.push(meter);
         }
@@ -411,7 +410,7 @@ export class UploadDataV3Service {
             meter.groupId = groupData.group.guid;
           }
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           this.addCharges(excelMeter, meter);
           meters.push(meter);
         }
@@ -465,7 +464,7 @@ export class UploadDataV3Service {
             meter.groupId = groupData.group.guid;
           }
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(excelMeter['Calendarize Readings?']);
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           this.addCharges(excelMeter, meter);
           meters.push(meter);
         }

@@ -3,7 +3,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from '@data/import/spreadsheet-import.models';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbPredictor } from '@data/models/idbModels/predictor';

@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Injectable, inject } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
-import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { applyMeterMultipliers, getDefaultMeterScope } from '@data/import/meter-import-defaults';
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '@shared/sharedHelperFunctions';
@@ -12,9 +12,9 @@ import { SubRegionData } from '@data/models/eGridEmissions';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
-import { ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
-import { UploadDataSharedFunctionsService } from '@v0/data-management/data-management-import/import-services/upload-data-shared-functions.service';
+import { ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from '@data/import/spreadsheet-import.models';
+import { checkImportCellNumber, checkImportStartingUnit, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from '@data/import/upload-helper-functions';
+import { UploadDataSharedFunctionsService } from '@data/import/parsers/upload-data-shared-functions.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -32,7 +32,6 @@ export class UploadDataV1Service {
 
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService,
-    private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
     private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService
   ) { }
@@ -126,7 +125,7 @@ export class UploadDataV1Service {
           meter.siteToSource = meterData['Site To Source'];
           meter.scope = getScope(meterData['Scope']);
           if (meter.scope == undefined) {
-            meter.scope = this.editMeterFormService.getDefaultScope(meter.source);
+            meter.scope = getDefaultMeterScope(meter.source);
           }
           meter.agreementType = getAgreementType(meterData['Agreement Type']);
           if (meter.agreementType == undefined && meter.source == 'Electricity') {
@@ -175,7 +174,7 @@ export class UploadDataV1Service {
           }
           meter.meterReadingDataApplication = getMeterReadingDataApplication(meterData['Calendarize Data?']);
 
-          meter = this.editMeterFormService.setMultipliers(meter);
+          meter = applyMeterMultipliers(meter);
           importMeters.push(meter);
         }
       }
@@ -438,7 +437,7 @@ export class UploadDataV1Service {
     newMeter.meterNumber = selectedFacility.name.replace(' ', '_') + '_' + newMeter.source.replace(' ', '_') + '_' + Math.random().toString(36).substr(2, 3);
 
     //set emissions mulitpliers
-    newMeter = this.editMeterFormService.setMultipliers(newMeter);
+    newMeter = applyMeterMultipliers(newMeter);
     return newMeter;
   }
 }

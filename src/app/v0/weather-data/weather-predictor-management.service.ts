@@ -11,7 +11,7 @@ import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels
 import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
 import { PredictorCommandHandler, PredictorDataBatchChanges } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { LoadingService } from '@app/core-components/loading/loading.service';
-import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '@data/import/upload-helper-functions';
 import { Month, Months } from '@shared/form-data/months';
 import { CalanderizationService } from '@shared/helper-services/calanderization.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';

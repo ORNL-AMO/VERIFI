@@ -103,3 +103,70 @@ export interface ParsedTemplate {
 }
 
 export type TemplateVersion = "V1" | "V2" | "V3" | "ETH" | "Non-template" | "Footprint-tool";
+
+export type ImportFileKind = 'verifi-v1' | 'verifi-v2' | 'verifi-v3' |
+  'energy-treasure-hunt' | 'general-workbook' | 'footprint-tool';
+
+export type ImportFileStatus = 'queued' | 'ready' | 'invalid' | 'importing' | 'completed';
+
+export type ImportFindingSeverity = 'error' | 'warning' | 'info';
+
+export interface ImportValidationFinding {
+  severity: ImportFindingSeverity;
+  message: string;
+  action?: string;
+  sheet?: string;
+  row?: number;
+  field?: string;
+}
+
+export interface ImportOriginContext {
+  facilityGuid?: string;
+  returnUrl?: string;
+}
+
+export interface ImportFileDraft extends FileReference {
+  kind: ImportFileKind;
+  status: ImportFileStatus;
+  findings: ImportValidationFinding[];
+  completedSteps: string[];
+  invalidMeterReadingsAcknowledged: boolean;
+  excludedMeterReadingIds: Array<number | string>;
+}
+
+export interface ImportCommitRequest {
+  accountGuid: string;
+  draftId: string;
+  kind: ImportFileKind;
+  facilities: IdbFacility[];
+  meterGroups: IdbUtilityMeterGroup[];
+  meters: IdbUtilityMeter[];
+  meterReadings: IdbUtilityMeterData[];
+  predictors: IdbPredictor[];
+  predictorReadings: IdbPredictorData[];
+  energyUseGroups: IdbFacilityEnergyUseGroup[];
+  energyUseEquipment: IdbFacilityEnergyUseEquipment[];
+  skipExistingReadingsMeterIds: string[];
+  skipExistingPredictorFacilityIds: string[];
+  excludedMeterReadingIds: Array<number | string>;
+  invalidMeterReadingsAcknowledged: boolean;
+}
+
+export interface ImportCommitSummary {
+  affectedFacilityGuids: string[];
+  added: ImportEntityCounts;
+  updated: ImportEntityCounts;
+  skippedMeterReadings: number;
+  excludedInvalidMeterReadings: number;
+}
+
+export interface ImportEntityCounts {
+  facilities: number;
+  meterGroups: number;
+  meters: number;
+  meterReadings: number;
+  predictors: number;
+  predictorReadings: number;
+  energyUseGroups: number;
+  energyUseEquipment: number;
+}

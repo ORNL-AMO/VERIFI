@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
-import { ColumnItem, FacilityGroup, FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { ColumnItem, FacilityGroup, FileReference } from '@data/import/spreadsheet-import.models';
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
 
 @Component({

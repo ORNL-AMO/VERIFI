@@ -1,7 +1,7 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { IdbAccount } from '@data/models/idbModels/account';
 
 @Injectable({
