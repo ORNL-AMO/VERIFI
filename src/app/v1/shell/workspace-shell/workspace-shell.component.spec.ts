@@ -100,6 +100,15 @@ describe('WorkspaceShellComponent', () => {
     expect(fixture.nativeElement.querySelector('app-support-panel')).not.toBeNull();
   });
 
+  it('presents spreadsheet imports as Upload with the upload icon', () => {
+    const uploadButton = fixture.debugElement.queryAll(By.css('.v1-rail button'))
+      .find(button => button.nativeElement.textContent?.trim() === 'Upload');
+    const uploadIcon = uploadButton?.query(By.directive(IconComponent)).componentInstance as IconComponent | undefined;
+
+    expect(uploadButton).toBeDefined();
+    expect(uploadIcon?.name).toBe('uploadData');
+  });
+
   it('mounts notification toasts in the main workspace grid area', () => {
     const region = fixture.nativeElement.querySelector('.v1-workspace__notifications');
 

@@ -1,20 +1,19 @@
 :host { display: block; }
 
 .import-page { display: grid; gap: var(--v1-space-4, 1rem); width: 100%; max-width: 78rem; margin: 0 auto; padding: var(--v1-space-4, 1rem); }
+.upload-header { align-items: start; grid-template-columns: minmax(0, 1fr) auto; }
 .upload-header p:last-child { max-width: 46rem; margin: .35rem 0 0; color: var(--v1-muted); }
+.template-link { align-self: start; }
 
-.upload-options { display: grid; gap: .75rem; }
-.upload-options h2, .upload-panel h2 { margin: 0; font-size: 1.05rem; }
+.upload-options { display: grid; }
+.upload-panel h2 { margin: 0; font-size: 1.05rem; }
 .upload-options__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
-.upload-option { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .6rem; align-content: start; padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-surface); }
+.upload-option { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .6rem; align-content: start; padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); }
 .upload-option > app-ui-icon { grid-row: 1 / span 2; color: var(--v1-content-control); }
-.upload-option h3, .upload-option p { margin: 0; }
-.upload-option h3 { font-size: 1rem; }
+.upload-option h2, .upload-option p { margin: 0; }
+.upload-option h2 { font-size: 1rem; }
 .upload-option p { color: var(--v1-muted); font-size: .9rem; line-height: 1.45; }
-.template-link { grid-column: 2; display: inline-flex; gap: .4rem; align-items: center; width: fit-content; margin-top: .3rem; color: var(--v1-content-control); font-size: .88rem; font-weight: 800; }
-.upload-options__note { margin: 0; color: var(--v1-muted); font-size: .88rem; }
-
-.upload-panel { display: grid; gap: .85rem; padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.upload-panel { display: grid; gap: .85rem; padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); }
 .file-drop { display: grid; justify-items: center; gap: .45rem; min-height: 15rem; place-content: center; padding: 2rem 1rem; border: 2px dashed color-mix(in srgb, var(--v1-action) 72%, var(--v1-border)); border-radius: var(--v1-radius-sm); background: color-mix(in srgb, var(--v1-action) 5%, var(--v1-surface)); text-align: center; }
 .file-drop__icon { display: grid; width: 3.25rem; height: 3.25rem; margin-bottom: .2rem; place-items: center; border-radius: var(--v1-radius-sm); background: color-mix(in srgb, var(--v1-action) 12%, var(--v1-surface)); color: var(--v1-action); }
 .file-drop > span:not(.file-drop__icon), .file-drop small { color: var(--v1-muted); }
@@ -30,7 +29,7 @@
 .queue-list li strong { overflow-wrap: anywhere; }
 .queue-list span { color: var(--v1-muted); font-size: .88rem; }
 
-.backup-import { display: flex; flex-wrap: wrap; gap: .65rem 1rem; align-items: center; justify-content: center; padding-top: .5rem; color: var(--v1-muted); font-size: .9rem; }
+.backup-import { display: flex; flex-wrap: wrap; gap: .65rem 1rem; align-items: center; justify-content: center; padding: .75rem 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); color: var(--v1-muted); font-size: .9rem; }
 
 @media (max-width: 60rem) {
   .upload-options__grid { grid-template-columns: 1fr; }
@@ -38,6 +37,8 @@
 
 @media (max-width: 40rem) {
   .import-page { padding: .75rem; }
+  .upload-header { grid-template-columns: 1fr; }
+  .template-link { justify-self: start; }
   .file-drop { min-height: 13rem; }
   .queue-list li { align-items: stretch; flex-direction: column; }
   .queue-list .v1-btn { width: 100%; }

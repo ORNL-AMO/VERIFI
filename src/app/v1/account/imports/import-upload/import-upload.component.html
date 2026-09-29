@@ -3,8 +3,12 @@
     <div>
       <p class="v1-eyebrow">Data upload</p>
       <h1 id="upload-title">Upload spreadsheet data</h1>
-      <p>Upload one or more Excel files. We’ll identify the format and guide you through review.</p>
+      <p>Upload one or more Excel files. We’ll identify the format and guide you through each step.</p>
     </div>
+    <a class="v1-btn v1-btn--secondary template-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx" download>
+      <app-ui-icon name="download"></app-ui-icon>
+      Download VERIFI Excel template
+    </a>
   </header>
 
   @if (sessionLost()) {
@@ -13,30 +17,24 @@
     </div>
   }
 
-  <section class="upload-options" aria-labelledby="upload-options-title">
-    <h2 id="upload-options-title">What you can upload</h2>
+  <section class="upload-options" aria-label="Supported spreadsheet formats">
     <div class="upload-options__grid">
       <article class="upload-option">
         <app-ui-icon name="file" [size]="22"></app-ui-icon>
-        <h3>VERIFI template</h3>
+        <h2>VERIFI Template</h2>
         <p>Facilities, meters, readings, and predictors in the standard format.</p>
-        <a class="template-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx" download>
-          <app-ui-icon name="download"></app-ui-icon>
-          Download VERIFI Excel template
-        </a>
+      </article>
+      <article class="upload-option">
+        <app-ui-icon name="spreadsheetColumns" [size]="22"></app-ui-icon>
+        <h2>Spread Sheet Columns</h2>
+        <p>Dates, meters, and predictors from an existing worksheet.</p>
       </article>
       <article class="upload-option">
         <app-ui-icon name="energy" [size]="22"></app-ui-icon>
-        <h3>Footprint workbook</h3>
-        <p>Energy-use groups, equipment, and operating details.</p>
-      </article>
-      <article class="upload-option">
-        <app-ui-icon name="tableColumns" [size]="22"></app-ui-icon>
-        <h3>Spreadsheet columns</h3>
-        <p>Dates, meters, and predictors from an existing worksheet.</p>
+        <h2>Other</h2>
+        <p>Energy Footprint Tool and Energy Treasure Hunt workbooks are also supported.</p>
       </article>
     </div>
-    <p class="upload-options__note">Energy Treasure Hunt workbooks are also supported.</p>
   </section>
 
   <section class="upload-panel" aria-labelledby="add-files-title">
@@ -82,7 +80,7 @@
               <span>{{ formatLabels[draft.kind] }} · {{ statusLabels[draft.status] }}</span>
             </div>
             <button type="button" class="v1-btn v1-btn--action" [disabled]="draft.status === 'completed' || draft.status === 'invalid'" (click)="openDraft(draft.id)">
-              {{ draft.completedSteps.length ? 'Continue review' : 'Start review' }}
+              Process Upload
             </button>
           </li>
         }

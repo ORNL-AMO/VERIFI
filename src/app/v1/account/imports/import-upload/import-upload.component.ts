@@ -31,16 +31,16 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   readonly dragActive = signal(false);
   readonly sessionLost = signal(false);
   readonly formatLabels: Record<ImportFileKind, string> = {
-    'verifi-v1': 'VERIFI template',
-    'verifi-v2': 'VERIFI template',
-    'verifi-v3': 'VERIFI template',
+    'verifi-v1': 'VERIFI Template',
+    'verifi-v2': 'VERIFI Template',
+    'verifi-v3': 'VERIFI Template',
     'energy-treasure-hunt': 'Energy Treasure Hunt',
-    'general-workbook': 'Spreadsheet columns',
-    'footprint-tool': 'Footprint workbook'
+    'general-workbook': 'Spread Sheet Columns',
+    'footprint-tool': 'Energy Footprint Tool'
   };
   readonly statusLabels: Record<ImportFileStatus, string> = {
     queued: 'Queued',
-    ready: 'Ready for review',
+    ready: 'Ready to process',
     invalid: 'Needs attention',
     importing: 'Saving data',
     completed: 'Uploaded'

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
 import Upload03Icon from '@hugeicons/core-free-icons/Upload03Icon';
 import { IconComponent } from './icon.component';
 import { ICON_REGISTRY } from './icon-registry';
@@ -60,5 +61,9 @@ describe('IconComponent', () => {
 
   it('maps the spreadsheet upload icon to Upload03Icon', () => {
     expect(ICON_REGISTRY.uploadData).toBe(Upload03Icon);
+  });
+
+  it('maps the spreadsheet columns icon to LayoutTable01Icon', () => {
+    expect(ICON_REGISTRY.spreadsheetColumns).toBe(LayoutTable01Icon);
   });
 });

@@ -73,7 +73,7 @@ export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
   { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'barChart', enabled: false },
   { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
   { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
-  { id: 'imports', label: 'Imports & Backup', shortLabel: 'Imports', icon: 'fileImport', enabled: true }
+  { id: 'imports', label: 'Upload', shortLabel: 'Upload', icon: 'uploadData', enabled: true }
 ];
 
 export const SUPPORT_PANEL_TABS: ReadonlyArray<PanelTab> = [

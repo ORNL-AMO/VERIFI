@@ -66,12 +66,12 @@ describe('ImportUploadComponent', () => {
     component = TestBed.runInInjectionContext(() => new ImportUploadComponent());
   });
 
-  it('transfers an unsaved upload session to its review route without discard confirmation', () => {
+  it('transfers an unsaved upload session to its processing route without discard confirmation', () => {
     expect(component.hasUnsavedChanges()).toBe(true);
     expect(component.canNavigateWithoutDiscard(state('/v1/workspace/account/account-1/imports/file/draft-1/facilities'))).toBe(true);
   });
 
-  it('builds Start review with separate imports and file route segments', () => {
+  it('builds Process Upload with separate imports and file route segments', () => {
     component.openDraft('draft-1');
 
     expect(router.navigate).toHaveBeenCalledWith([
@@ -130,15 +130,22 @@ describe('ImportUploadComponent', () => {
     const element: HTMLElement = fixture.nativeElement;
 
     expect(element.querySelector('h1')?.textContent).toContain('Upload spreadsheet data');
-    expect([...element.querySelectorAll('.upload-option h3')].map(node => node.textContent?.trim())).toEqual([
-      'VERIFI template', 'Footprint workbook', 'Spreadsheet columns'
+    expect([...element.querySelectorAll('.upload-option h2')].map(node => node.textContent?.trim())).toEqual([
+      'VERIFI Template', 'Spread Sheet Columns', 'Other'
     ]);
+    expect(element.querySelector('.upload-options')?.textContent).toContain('Energy Footprint Tool');
+    expect(element.querySelector('.upload-options')?.textContent).toContain('Energy Treasure Hunt');
+    expect(element.textContent).not.toContain('What you can upload');
     const templateLink = element.querySelector<HTMLAnchorElement>('.template-link');
     expect(templateLink?.getAttribute('href')).toBe('assets/csv_templates/VERIFI-Import-Data.xlsx');
     expect(templateLink?.hasAttribute('download')).toBe(true);
+    expect(templateLink?.closest('.upload-header')).not.toBeNull();
+    expect(templateLink?.closest('.upload-option')).toBeNull();
     expect(element.querySelector('app-ui-icon[name="uploadData"]')).not.toBeNull();
-    expect(element.querySelector('.queue-list')?.textContent).toContain('VERIFI template · Ready for review');
+    expect(element.querySelector('.queue-list')?.textContent).toContain('VERIFI Template · Ready to process');
     expect(element.querySelector('.queue-list')?.textContent).not.toContain('verifi-v3');
+    expect(element.querySelector('.queue-list button')?.textContent).toContain('Process Upload');
+    expect(element.textContent?.toLowerCase()).not.toContain('review');
     const backupLink = element.querySelector<HTMLAnchorElement>('.backup-import a');
     expect(backupLink?.textContent).toContain('Import a VERIFI backup (.json)');
     expect(backupLink?.getAttribute('href')).toBe('/v1/workspace/account/account-1/settings/backup');

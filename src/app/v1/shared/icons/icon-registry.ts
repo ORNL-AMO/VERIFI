@@ -55,6 +55,7 @@ import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
 import HumidityIcon from '@hugeicons/core-free-icons/HumidityIcon';
 import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon';
 import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
+import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
 import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
 import LockIcon from '@hugeicons/core-free-icons/LockIcon';
 import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
@@ -154,6 +155,7 @@ export const ICON_REGISTRY = {
   settingsSliders: SlidersHorizontalIcon,
   sortAsc: ArrowUpWideNarrowIcon,
   sortDesc: ArrowDownWideNarrowIcon,
+  spreadsheetColumns: LayoutTable01Icon,
   square: SquareIcon,
   success: CheckmarkCircle02Icon,
   table: TableIcon,
