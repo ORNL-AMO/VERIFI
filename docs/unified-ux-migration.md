@@ -46,6 +46,15 @@ When a workflow enters v1 planning or implementation, record only the decisions 
 
 If the workflow needs current-state detail, add a short current-state note using the template in the [current-state notes guide](unified-ux-current-state.md). Do not create a full application inventory as a prerequisite for v1 work.
 
+### Spreadsheet Data Import Workflow
+
+- **Workflow:** v1 spreadsheet import, issue #2643. See the [V1 Data Import Workflow Plan](agents/v1-data-import-workflow-plan.md).
+- **Existing v0 entry point:** `/data-management/:account/import-data/upload-files` and its template, general-workbook, and footprint child routes.
+- **Decision:** Rebuild the stepped presentation under account-level v1 Imports & Backup while moving parsers and mapping contracts to `src/app/data/import/` for direct use by both versions. Keep v0 public routes operational.
+- **Parity:** Preserve V1/V2/V3, Energy Treasure Hunt, general-workbook, and footprint behavior, including existing-record matching, skip/overwrite choices, operating conditions, and current spreadsheet formats. JSON backups remain in Settings > Backup.
+- **Shared contracts:** One file commits through one account-level command and native multi-store transaction. No IndexedDB schema/version, backup shape, Worker, or Electron IPC change.
+- **Tests:** Parser compatibility and round trip; v1 queue, step, route, validation, and navigation protection; browser File API, IndexedDB add/update, GUID relationships, single publication, and rollback.
+
 ### Single-Facility Setup Workflow
 
 - **Workflow:** v1 composite single-facility setup, issue #2637.

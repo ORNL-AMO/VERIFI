@@ -112,7 +112,9 @@ Reports are assembled in account and facility report features under `src/app/v0/
 
 ## Imports, exports, and backups
 
-Spreadsheet upload begins in [`data-management-import`](src/app/v0/data-management/data-management-import). The upload component reads workbooks with SheetJS, then routes known templates to version-specific parsers and other workbooks through mapping workflows. Template versions and external formats are compatibility boundaries, not redundant code to consolidate casually.
+Spreadsheet parsing and mapping contracts live under [`src/app/data/import/`](src/app/data/import). Both the v0 import routes and the account-scoped v1 Imports & Backup workflow use these files directly. SheetJS detection routes V1, both V2 signatures, V3, Energy Treasure Hunt, general workbooks, and footprint-tool files through their established parsers and mapping rules. Template versions and external formats are compatibility boundaries, not redundant code to consolidate casually.
+
+V1 keeps workbook drafts and its multi-file queue in memory. One reviewed file becomes one account-level bulk command through `WorkspaceCommandBoundary`. [`SpreadsheetImportCommandService`](src/app/data/import/spreadsheet-import-command.service.ts) validates account ownership, GUID relationships, explicit skip/overwrite decisions, and invalid-reading exclusions, then writes every participating import store in one native IndexedDB transaction. A failure aborts the complete file import; a success triggers one committed workspace reload and notification. This boundary does not add an IndexedDB store or change the database version, backup shape, Worker contracts, or Electron IPC.
 
 Excel exports primarily use ExcelJS. [`export-to-excel-template-v3.service.ts`](src/app/shared/helper-services/export-to-excel-template-v3.service.ts) writes the current VERIFI data template, while report-specific writers produce program and analysis workbooks. Template spreadsheets under `src/assets/csv_templates/` are binary source artifacts whose sheet names, headers, types, formulas, and ordering may be part of the import contract.
 
