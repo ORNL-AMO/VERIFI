@@ -1,0 +1,70 @@
+<app-workspace-slideout
+  [title]="'Edit ' + (workingPredictor?.name || 'predictor')"
+  description="Review predictor setup before importing. Changes are not saved to the workspace until the import is completed."
+  size="large"
+  (closed)="cancelled.emit()">
+  <form class="import-predictor-editor" (submit)="$event.preventDefault(); save()">
+    @if (predictor.id == null) {
+      <section class="import-predictor-editor__existing" aria-labelledby="import-existing-predictor-label">
+        <div class="import-predictor-editor__existing-label">
+          <label id="import-existing-predictor-label" for="import-existing-predictor">Match this import to an existing predictor</label>
+          <app-ui-tooltip
+            label="Why match an existing predictor?"
+            text="Use this when the imported predictor is the same as one already in VERIFI but has a different or mistyped name. Imported readings will be assigned to the selected predictor."
+            placement="bottom">
+          </app-ui-tooltip>
+        </div>
+        <select
+          id="import-existing-predictor"
+          class="v1-select"
+          [value]="workingPredictor.guid === predictor.guid ? '' : workingPredictor.guid"
+          (change)="selectExisting($event)">
+          <option value="">Keep as a new Standard predictor</option>
+          @for (option of existingOptions; track option.predictor.guid) {
+            <option [value]="option.predictor.guid">{{ option.label }}</option>
+          }
+        </select>
+        @if (!existingOptions.length) {
+          <small>No unused existing predictors are available for this facility.</small>
+        }
+      </section>
+    }
+
+    @if (workingPredictor.predictorType === 'Weather') {
+      <div class="v1-alert v1-alert--info" role="status">
+        This import will use the selected predictor's existing weather-station setup. Imported readings will be saved as manual overrides so station refreshes preserve them.
+      </div>
+      <section class="import-predictor-editor__weather" aria-labelledby="import-weather-summary">
+        <div class="import-predictor-editor__section-heading">
+          <p>Existing Weather predictor</p>
+          <h2 id="import-weather-summary">Weather-station setup</h2>
+        </div>
+        <dl>
+          <div><dt>Predictor</dt><dd>{{ workingPredictor.name }}</dd></div>
+          <div><dt>Weather station</dt><dd>{{ workingPredictor.weatherStationName }} ({{ workingPredictor.weatherStationId }})</dd></div>
+          <div><dt>Weather metric</dt><dd>{{ weatherMetricLabel(workingPredictor.weatherDataType) }}</dd></div>
+          <div><dt>Base temperature</dt><dd>{{ weatherBaseLabel(workingPredictor) }}</dd></div>
+          <div><dt>Unit</dt><dd>{{ workingPredictor.unit || 'Not specified' }}</dd></div>
+        </dl>
+      </section>
+    } @else if (form; as settingsForm) {
+      @if (predictor.id == null && workingPredictor.guid === predictor.guid) {
+        <div class="v1-alert v1-alert--info">
+          Spreadsheet predictors are created as Standard predictors. Create new Weather predictors from Facility Data, or match this import to an existing Weather predictor above.
+        </div>
+      }
+      <app-predictor-settings-form
+        [form]="settingsForm"
+        saveState="idle"
+        [saveMessage]="saveMessage"
+        (textChange)="settingsForm.markAsDirty()"
+        (immediateChange)="settingsForm.markAsDirty()">
+      </app-predictor-settings-form>
+    }
+
+    <footer class="import-predictor-editor__actions">
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="cancelled.emit()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action">Save predictor</button>
+    </footer>
+  </form>
+</app-workspace-slideout>

@@ -7,7 +7,9 @@ import { VerifiStoreName } from '@data/indexedDB/indexed-db-schema';
 import { IdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { isImportMeterReadingValid, sameMeterReadingPeriod } from './meter-reading-import-review';
+import { isImportPredictorValid } from './predictor-import-review';
 import {
   ImportCommitRequest,
   ImportCommitSummary,
@@ -62,6 +64,7 @@ export class SpreadsheetImportCommandService {
 
     const existing = await this.loadExisting(transaction);
     this.validateRelationships(request, existing);
+    this.validatePredictors(request, existing.predictors);
 
     const excludedIds = new Set(request.excludedMeterReadingIds.map(String));
     const invalidReadings = request.meterReadings.filter(reading => !isImportMeterReadingValid(reading));
@@ -120,6 +123,40 @@ export class SpreadsheetImportCommandService {
     ];
     if (accountCollections.some(entity => entity.accountId !== request.accountGuid)) {
       throw new WorkspaceWriteError('cross-account-entity', 'The import contains data for another account.');
+    }
+  }
+
+  private validatePredictors(request: ImportCommitRequest, existingPredictors: readonly IdbPredictor[]): void {
+    if (request.predictors.some(predictor => !isImportPredictorValid(predictor))) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Imported predictors must have valid settings before importing.'
+      );
+    }
+    const weatherPredictorIds = new Set(request.predictors
+      .filter(predictor => predictor.predictorType === 'Weather')
+      .map(predictor => predictor.guid));
+    const existingPredictorsByGuid = new Map(existingPredictors.map(predictor => [predictor.guid, predictor]));
+    if ([...weatherPredictorIds].some(guid => !existingPredictorsByGuid.has(guid))) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Weather predictors must be matched to an existing predictor before importing.'
+      );
+    }
+    if (request.predictors.some(predictor =>
+      predictor.predictorType === 'Weather'
+      && existingPredictorsByGuid.get(predictor.guid)?.facilityId !== predictor.facilityId)) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Weather predictors must be matched to an existing predictor in the same facility.'
+      );
+    }
+    if (request.predictorReadings.some(reading =>
+      weatherPredictorIds.has(reading.predictorId) && !reading.weatherOverride)) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Imported Weather predictor readings must be preserved as manual overrides.'
+      );
     }
   }
 

@@ -16,12 +16,17 @@ describe('PredictorSettingsFormService', () => {
     expect(form.valid).toBe(true);
   });
 
-  it('maps a stop month to the existing zero-based persisted month', () => {
+  it('maps production and a stop month to the persisted predictor fields', () => {
     const value = predictor({ noLongerInUse: true });
     const form = service.build(value);
+    form.controls.production.setValue(false);
     form.controls.stopMonth.setValue('2026-03');
     const updated = service.updatePredictor(value, form);
-    expect(updated).toMatchObject({ noLongerInUseYear: 2026, noLongerInUseMonth: 2 });
+    expect(updated).toMatchObject({
+      production: false,
+      noLongerInUseYear: 2026,
+      noLongerInUseMonth: 2
+    });
   });
 });
 

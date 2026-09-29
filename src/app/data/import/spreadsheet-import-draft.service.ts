@@ -34,6 +34,7 @@ import {
   TemplateVersion
 } from './spreadsheet-import.models';
 import { checkSameMonthPredictorData } from './upload-helper-functions';
+import { applyImportedWeatherReadingSemantics } from './predictor-import-review';
 
 @Injectable({ providedIn: 'root' })
 export class SpreadsheetImportDraftService {
@@ -83,7 +84,7 @@ export class SpreadsheetImportDraftService {
         importWizardName: meter.importWizardName ?? meter.meterNumber
       })),
       meterData: parsed.meterData,
-      predictors: parsed.predictors,
+      predictors: this.normalizeImportedPredictors(parsed.predictors),
       predictorData: parsed.predictorData,
       skipExistingReadingsMeterIds: [],
       skipExistingPredictorFacilityIds: [],
@@ -98,6 +99,7 @@ export class SpreadsheetImportDraftService {
       invalidMeterReadingsAcknowledged: false,
       excludedMeterReadingIds: []
     };
+    this.applyImportedWeatherSemantics(draft);
     if (version === 'Non-template') this.selectWorksheet(draft, selectedWorksheetName);
     if (version === 'Footprint-tool' && draft.selectedFacilityId) this.footprintParser.setSelectedFacility(draft);
     return draft;
@@ -201,8 +203,9 @@ export class SpreadsheetImportDraftService {
 
   materializeGeneralPredictors(draft: ImportFileDraft): void {
     const predictorResult = this.parsePredictors(draft);
-    draft.predictors = predictorResult.predictors;
+    draft.predictors = this.normalizeImportedPredictors(predictorResult.predictors);
     draft.predictorData = predictorResult.readings;
+    this.applyImportedWeatherSemantics(draft);
   }
 
   replaceMeter(draft: ImportFileDraft, originalGuid: string, replacement: IdbUtilityMeter): void {
@@ -223,6 +226,41 @@ export class SpreadsheetImportDraftService {
       .map(guid => guid === originalGuid ? updated.guid : guid)
       .filter((guid, index, values) => values.indexOf(guid) === index);
     this.rebuildMeterReadings(draft);
+  }
+
+  replacePredictor(draft: ImportFileDraft, originalGuid: string, replacement: IdbPredictor): void {
+    const predictorIndex = draft.predictors.findIndex(predictor => predictor.guid === originalGuid);
+    if (predictorIndex < 0) return;
+
+    const original = draft.predictors[predictorIndex];
+    const updated: IdbPredictor = {
+      ...structuredClone(replacement),
+      importWizardName: original.importWizardName ?? original.name,
+      skipImport: original.skipImport,
+      productionInAnalysis: replacement.production
+    };
+    draft.predictors[predictorIndex] = updated;
+
+    const existingReadings = this.store.predictorData()
+      .filter(reading => reading.predictorId === updated.guid);
+    draft.predictorData = draft.predictorData.map(reading => {
+      if (reading.predictorId !== originalGuid) return reading;
+      const existing = existingReadings.find(candidate =>
+        candidate.year === reading.year && candidate.month === reading.month);
+      const remapped: IdbPredictorData = {
+        ...reading,
+        predictorId: updated.guid,
+        facilityId: updated.facilityId,
+        accountId: updated.accountId
+      };
+      if (existing) {
+        remapped.id = existing.id;
+        remapped.guid = existing.guid;
+      } else {
+        delete remapped.id;
+      }
+      return applyImportedWeatherReadingSemantics(remapped, updated);
+    });
   }
 
   rebuildMeterReadings(draft: ImportFileDraft): void {
@@ -377,7 +415,8 @@ export class SpreadsheetImportDraftService {
     draft.predictorFacilityGroups.filter(group => !group.facilityName.startsWith('Unmapped')).forEach(group => group.groupItems.forEach(item => {
       const predictor = existingPredictors.find(value => value.facilityId === group.facilityId && value.name === item.value)
         ?? Object.assign(getNewIdbPredictor(this.store.account().guid, group.facilityId), { name: item.value });
-      predictors.push({ ...predictor });
+      const importedPredictor = { ...predictor, importWizardName: item.value };
+      predictors.push(importedPredictor);
       draft.headerMap.forEach(row => {
         const date = new Date(row[dateColumn] as any);
         if (isNaN(date.valueOf())) return;
@@ -388,6 +427,23 @@ export class SpreadsheetImportDraftService {
       });
     }));
     return { predictors, readings };
+  }
+
+  private normalizeImportedPredictors(predictors: readonly IdbPredictor[]): IdbPredictor[] {
+    return predictors.map(predictor => ({
+      ...predictor,
+      importWizardName: predictor.importWizardName ?? predictor.name,
+      predictorType: predictor.id == null ? 'Standard' : predictor.predictorType,
+      productionInAnalysis: predictor.production
+    }));
+  }
+
+  private applyImportedWeatherSemantics(draft: ImportFileDraft): void {
+    const predictors = new Map(draft.predictors.map(predictor => [predictor.guid, predictor]));
+    draft.predictorData = draft.predictorData.map(reading => {
+      const predictor = predictors.get(reading.predictorId);
+      return predictor ? applyImportedWeatherReadingSemantics(reading, predictor) : reading;
+    });
   }
 
   private mappingGroups(draft: ImportFileDraft, label: string, unmappedLabel: string): FacilityGroup[] {

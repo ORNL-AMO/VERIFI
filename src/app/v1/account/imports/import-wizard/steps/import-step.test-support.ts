@@ -2,6 +2,7 @@ import { computed, signal, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { buildImportMeterReadingReview } from '@data/import/meter-reading-import-review';
+import { getImportPredictorIssues, isImportPredictorValid } from '@data/import/predictor-import-review';
 import { ImportWizardStateService } from '../import-wizard-state.service';
 
 export function createImportWizardStateStub() {
@@ -25,7 +26,21 @@ export function createImportWizardStateStub() {
       skipImport: false
     }],
     meterData: [{ guid: 'reading-1', meterId: 'meter-1', year: 2026, month: 1, day: 1, totalEnergyUse: 12 }],
-    predictors: [{ id: 1, guid: 'predictor-1', name: 'Production', unit: 'units', production: true, skipImport: false }],
+    predictors: [{
+      id: 1,
+      guid: 'predictor-1',
+      accountId: 'account-1',
+      facilityId: 'facility-1',
+      name: 'Production',
+      importWizardName: 'Production',
+      unit: 'units',
+      description: '',
+      production: true,
+      productionInAnalysis: true,
+      predictorType: 'Standard',
+      weatherDataType: 'HDD',
+      skipImport: false
+    }],
     predictorData: [{ guid: 'predictor-reading-1', predictorId: 'predictor-1' }],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
@@ -60,6 +75,8 @@ export function createImportWizardStateStub() {
       meters: signal([]),
       meterGroups: signal([]),
       meterData: workspaceMeterData,
+      predictors: signal([]),
+      predictorData: signal([]),
       customFuels: signal([]),
       customGWPs: signal([])
     },
@@ -89,7 +106,10 @@ export function createImportWizardStateStub() {
     setAllSkipExistingMeterReadings: vi.fn(),
     setInvalidMeterReadingsAcknowledged: vi.fn(),
     togglePredictorIncluded: vi.fn(),
+    setAllPredictorsIncluded: vi.fn(),
     setPredictorProduction: vi.fn(),
+    availableExistingPredictors: vi.fn(() => []),
+    savePredictor: vi.fn(),
     setSkipExistingPredictorReadings: vi.fn(),
     setFootprintFacility: vi.fn(),
     compatibleMeterGroups: vi.fn(() => [{ guid: 'group-1', name: 'Natural Gas Meters' }]),
@@ -123,6 +143,21 @@ export function createImportWizardStateStub() {
   });
   state.someExistingMeterReadingsKept = computed(() => state.meterReadingRows()
     .some((row: any) => row.existingReadings.count > 0 && row.keepExisting));
+  state.predictorRows = computed(() => draft().predictors.map((predictor: any, index: number) => ({
+    index,
+    predictor,
+    facilityName: draft().importFacilities.find((facility: any) => facility.guid === predictor.facilityId)?.name ?? 'Unknown facility',
+    valid: isImportPredictorValid(predictor),
+    issues: getImportPredictorIssues(predictor),
+    typeLabel: predictor.predictorType === 'Weather' ? 'Weather' : 'Standard',
+    typeDetail: predictor.predictorType === 'Weather'
+      ? `${predictor.weatherStationName || predictor.weatherStationId} · ${predictor.weatherDataType}`
+      : undefined
+  })));
+  state.allPredictorsIncluded = computed(() => state.predictorRows().length > 0
+    && state.predictorRows().every((row: any) => !row.predictor.skipImport));
+  state.somePredictorsIncluded = computed(() => state.predictorRows()
+    .some((row: any) => !row.predictor.skipImport));
   return state;
 }
 

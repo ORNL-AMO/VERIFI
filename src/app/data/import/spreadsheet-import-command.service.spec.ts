@@ -104,6 +104,77 @@ describe('SpreadsheetImportCommandService', () => {
     expect(writes).toHaveLength(0);
   });
 
+  it('rejects incomplete Weather predictor mappings before writing', async () => {
+    const imported = request();
+    imported.predictors = [predictor({ predictorType: 'Weather' })];
+    const { service, writes } = setup();
+
+    await expect(service.commit(imported)).rejects.toMatchObject({ code: 'validation-failed' });
+    expect(writes).toHaveLength(0);
+  });
+
+  it('requires imported Weather readings to be manual overrides', async () => {
+    const imported = request();
+    imported.predictors = [predictor({
+      predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare',
+      weatherDataType: 'HDD', heatingBaseTemperature: 60
+    })];
+    imported.predictorReadings = [{
+      guid: 'predictor-reading-a', predictorId: 'predictor-a', facilityId: 'facility-a', accountId: 'account-a',
+      year: 2026, month: 1, amount: 12, weatherOverride: false
+    } as any];
+    const { service, writes } = setup(undefined, { predictors: [structuredClone(imported.predictors[0])] });
+
+    await expect(service.commit(imported)).rejects.toMatchObject({ code: 'validation-failed' });
+    expect(writes).toHaveLength(0);
+  });
+
+  it('rejects a new Weather predictor even when its station settings are complete', async () => {
+    const imported = request();
+    imported.predictors = [predictor({
+      predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare',
+      weatherDataType: 'HDD', heatingBaseTemperature: 60
+    })];
+    const { service, writes } = setup();
+
+    await expect(service.commit(imported)).rejects.toThrow('matched to an existing predictor');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('rejects a Weather predictor matched from another facility', async () => {
+    const imported = request();
+    imported.predictors = [predictor({
+      predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare',
+      weatherDataType: 'HDD', heatingBaseTemperature: 60
+    })];
+    const persisted = predictor({ facilityId: 'facility-b' });
+    const { service, writes } = setup(undefined, { predictors: [persisted] });
+
+    await expect(service.commit(imported)).rejects.toThrow('same facility');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('persists an existing Weather match when imported readings are overrides', async () => {
+    const imported = request();
+    const weather = predictor({
+      id: 7, predictorType: 'Weather', weatherStationId: 'KORD', weatherStationName: 'Chicago O’Hare',
+      weatherDataType: 'HDD', heatingBaseTemperature: 60
+    });
+    imported.predictors = [weather];
+    imported.predictorReadings = [{
+      guid: 'predictor-reading-a', predictorId: 'predictor-a', facilityId: 'facility-a', accountId: 'account-a',
+      year: 2026, month: 1, amount: 12, weatherOverride: true
+    } as any];
+    const { service, writes } = setup(undefined, { predictors: [structuredClone(weather)] });
+
+    await service.commit(imported);
+
+    expect(writes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ store: 'predictors' }),
+      expect.objectContaining({ store: 'predictorData', value: expect.objectContaining({ weatherOverride: true }) })
+    ]));
+  });
+
   function request(): ImportCommitRequest {
     const timestamp = new Date('2025-01-01T00:00:00Z');
     return {
@@ -115,6 +186,14 @@ describe('SpreadsheetImportCommandService', () => {
       predictors: [], predictorReadings: [], energyUseGroups: [], energyUseEquipment: [],
       skipExistingReadingsMeterIds: [], skipExistingPredictorFacilityIds: [],
       excludedMeterReadingIds: [], invalidMeterReadingsAcknowledged: false
+    };
+  }
+
+  function predictor(overrides: Record<string, unknown> = {}): any {
+    return {
+      guid: 'predictor-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Production', unit: 'tons',
+      predictorType: 'Standard', weatherDataType: 'HDD', weatherStationId: '', weatherStationName: '',
+      ...overrides
     };
   }
 });

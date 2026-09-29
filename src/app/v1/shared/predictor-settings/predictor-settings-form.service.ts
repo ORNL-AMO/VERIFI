@@ -1,14 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { IdbPredictor, WeatherDataType } from '@data/models/idbModels/predictor';
-import { SupportedPredictorType } from '../../models';
+import { IdbPredictor, PredictorType, WeatherDataType } from '@data/models/idbModels/predictor';
+
+export type PredictorSettingsPredictorType = Extract<PredictorType, 'Standard' | 'Weather'>;
 
 export interface PredictorSettingsFormControls {
   name: FormControl<string>;
   unit: FormControl<string>;
   description: FormControl<string>;
   production: FormControl<boolean>;
-  predictorType: FormControl<SupportedPredictorType>;
+  predictorType: FormControl<PredictorSettingsPredictorType>;
   weatherDataType: FormControl<WeatherDataType>;
   weatherStationId: FormControl<string>;
   weatherStationName: FormControl<string>;
@@ -82,7 +83,7 @@ function weatherSettingsValidator(): ValidatorFn {
   };
 }
 
-function asSupportedType(value: IdbPredictor['predictorType']): SupportedPredictorType {
+function asSupportedType(value: IdbPredictor['predictorType']): PredictorSettingsPredictorType {
   return value === 'Weather' ? 'Weather' : 'Standard';
 }
 function clean(value: string): string | undefined { return value.trim() || undefined; }

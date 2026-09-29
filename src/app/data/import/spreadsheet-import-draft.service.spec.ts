@@ -2,6 +2,8 @@ import * as XLSX from 'xlsx';
 import { getEmptyFileReference, ImportFileDraft } from './spreadsheet-import.models';
 import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { SpreadsheetImportDraftService } from './spreadsheet-import-draft.service';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 
 describe('SpreadsheetImportDraftService', () => {
   const service = new SpreadsheetImportDraftService(
@@ -99,6 +101,86 @@ describe('SpreadsheetImportDraftService', () => {
 
     expect(draft.meters).toEqual([reviewedMeter]);
   });
+
+  it('replaces a predictor and remaps imported readings to existing Weather data as overrides', () => {
+    const existingReading = predictorReading({
+      id: 42, guid: 'existing-reading', predictorId: 'weather-a', year: 2026, month: 1
+    });
+    const draftService = new SpreadsheetImportDraftService(
+      { predictorData: () => [existingReading] } as any,
+      {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any
+    );
+    const original = predictor({ guid: 'import-a', importWizardName: 'HDD workbook column' });
+    const weather = predictor({
+      id: 7, guid: 'weather-a', predictorType: 'Weather', weatherStationId: 'KORD',
+      weatherStationName: 'Chicago O’Hare', heatingBaseTemperature: 60
+    });
+    const draft = importDraft('verifi-v3', {
+      predictors: [original],
+      predictorData: [predictorReading({ predictorId: original.guid, year: 2026, month: 1, amount: 18 })]
+    });
+
+    draftService.replacePredictor(draft, original.guid, weather);
+
+    expect(draft.predictors[0]).toEqual(expect.objectContaining({
+      id: 7,
+      guid: weather.guid,
+      importWizardName: original.importWizardName
+    }));
+    expect(draft.predictorData[0]).toEqual(expect.objectContaining({
+      id: existingReading.id,
+      guid: existingReading.guid,
+      predictorId: weather.guid,
+      amount: 18,
+      weatherOverride: true,
+      weatherDataWarning: false,
+      weatherDataChanged: false
+    }));
+  });
+
+  it('preserves an automatically matched Weather predictor and treats workbook values as overrides', () => {
+    const weather = predictor({
+      id: 7, guid: 'weather-a', name: 'HDD 60', predictorType: 'Weather', weatherStationId: 'KORD',
+      weatherStationName: 'Chicago O’Hare', heatingBaseTemperature: 60
+    });
+    const existingReading = predictorReading({
+      id: 42, guid: 'existing-reading', predictorId: weather.guid, year: 2026, month: 1, amount: 10
+    });
+    const draftService = new SpreadsheetImportDraftService(
+      {
+        account: () => ({ guid: 'account-a' }),
+        predictors: () => [weather],
+        predictorData: () => [existingReading]
+      } as any,
+      {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any
+    );
+    const draft = importDraft('general-workbook', {
+      importFacilities: [{ guid: 'facility-a', accountId: 'account-a', name: 'Plant' } as any],
+      columnGroups: [{
+        id: 'date-group', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }]
+      }],
+      predictorFacilityGroups: [{
+        facilityId: 'facility-a', facilityName: 'Plant', color: '',
+        groupItems: [{ id: 'predictor-column', index: 1, value: 'HDD 60' }]
+      }],
+      headerMap: [{ Date: '2026-01-01', 'HDD 60': 18 }]
+    });
+
+    draftService.materializeGeneralPredictors(draft);
+
+    expect(draft.predictors[0]).toEqual(expect.objectContaining({
+      guid: weather.guid,
+      predictorType: 'Weather',
+      importWizardName: 'HDD 60'
+    }));
+    expect(draft.predictorData[0]).toEqual(expect.objectContaining({
+      guid: existingReading.guid,
+      amount: 18,
+      weatherOverride: true,
+      weatherDataWarning: false,
+      weatherDataChanged: false
+    }));
+  });
 });
 
 function importDraft(kind: ImportFileDraft['kind'], values: Partial<ImportFileDraft> = {}): ImportFileDraft {
@@ -115,4 +197,21 @@ function importDraft(kind: ImportFileDraft['kind'], values: Partial<ImportFileDr
     excludedMeterReadingIds: [],
     ...values
   };
+}
+
+function predictor(overrides: Partial<IdbPredictor> = {}): IdbPredictor {
+  return {
+    guid: 'predictor-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Production', unit: 'tons',
+    description: '', importWizardName: 'Production', production: false, productionInAnalysis: false,
+    predictorType: 'Standard', weatherDataType: 'HDD', weatherStationId: '', weatherStationName: '',
+    ...overrides
+  } as IdbPredictor;
+}
+
+function predictorReading(overrides: Partial<IdbPredictorData> = {}): IdbPredictorData {
+  return {
+    guid: 'predictor-reading-a', accountId: 'account-a', facilityId: 'facility-a', predictorId: 'predictor-a',
+    year: 2026, month: 1, amount: 10, weatherOverride: false, weatherDataWarning: true,
+    weatherDataChanged: true, ...overrides
+  } as IdbPredictorData;
 }

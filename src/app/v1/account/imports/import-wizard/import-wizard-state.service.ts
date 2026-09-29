@@ -16,6 +16,12 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { canAssignMeterSourceToGroup } from '@domain/meters/meter-group-compatibility';
 import { MeterSettingsFormService } from '@app/v1/shared/meter-settings/meter-settings-form.service';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import {
+  getImportPredictorIssues,
+  isImportPredictorValid,
+  isSelectableExistingImportPredictor
+} from '@data/import/predictor-import-review';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
 
@@ -32,6 +38,16 @@ export interface ImportMeterRow {
 
 export interface ImportMeterReadingRow extends ImportMeterReadingSummaryRow {
   readonly primaryUnitLabel: string;
+}
+
+export interface ImportPredictorRow {
+  readonly index: number;
+  readonly predictor: IdbPredictor;
+  readonly facilityName: string;
+  readonly valid: boolean;
+  readonly issues: readonly string[];
+  readonly typeLabel: string;
+  readonly typeDetail?: string;
 }
 
 @Injectable()
@@ -116,6 +132,27 @@ export class ImportWizardStateService {
   });
   readonly someExistingMeterReadingsKept = computed(() => this.meterReadingRows()
     .some(row => row.existingReadings.count > 0 && row.keepExisting));
+  readonly predictorRows = computed<ImportPredictorRow[]>(() => {
+    this.draftRevision();
+    const draft = this.draft();
+    if (!draft) return [];
+    return draft.predictors.map((predictor, index) => ({
+      index,
+      predictor,
+      facilityName: draft.importFacilities.find(facility => facility.guid === predictor.facilityId)?.name ?? 'Unknown facility',
+      valid: isImportPredictorValid(predictor),
+      issues: getImportPredictorIssues(predictor),
+      typeLabel: predictor.predictorType === 'Weather' ? 'Weather' : 'Standard',
+      typeDetail: predictor.predictorType === 'Weather'
+        ? [predictor.weatherStationName || predictor.weatherStationId, weatherMetricLabel(predictor)]
+          .filter(Boolean).join(' · ')
+        : undefined
+    }));
+  });
+  readonly allPredictorsIncluded = computed(() => this.predictorRows().length > 0
+    && this.predictorRows().every(row => !row.predictor.skipImport));
+  readonly somePredictorsIncluded = computed(() => this.predictorRows()
+    .some(row => !row.predictor.skipImport));
 
   initialize(draft: ImportFileDraft): void {
     this.draft.set(draft);
@@ -342,6 +379,13 @@ export class ImportWizardStateService {
 
   togglePredictorIncluded(index: number, included: boolean): void {
     this.draft().predictors[index].skipImport = !included;
+    this.invalidatePredictorReviewSteps();
+    this.changed();
+  }
+
+  setAllPredictorsIncluded(included: boolean): void {
+    this.draft().predictors.forEach(predictor => predictor.skipImport = !included);
+    this.invalidatePredictorReviewSteps();
     this.changed();
   }
 
@@ -349,6 +393,27 @@ export class ImportWizardStateService {
     const predictor = this.draft().predictors[index];
     predictor.production = production;
     predictor.productionInAnalysis = production;
+    this.invalidateReview();
+    this.changed();
+  }
+
+  availableExistingPredictors(index: number): IdbPredictor[] {
+    const predictor = this.draft().predictors[index];
+    const used = new Set(this.draft().predictors
+      .filter((_, candidateIndex) => candidateIndex !== index)
+      .map(candidate => candidate.guid));
+    return this.workspace.predictors()
+      .filter(candidate => candidate.facilityId === predictor.facilityId
+        && !used.has(candidate.guid)
+        && isSelectableExistingImportPredictor(candidate))
+      .sort((left, right) => left.name.localeCompare(right.name))
+      .map(candidate => structuredClone(candidate));
+  }
+
+  savePredictor(originalGuid: string, predictor: IdbPredictor): void {
+    if (!this.draft().predictors.some(candidate => candidate.guid === originalGuid)) return;
+    this.drafts.replacePredictor(this.draft(), originalGuid, predictor);
+    this.invalidatePredictorReviewSteps();
     this.changed();
   }
 
@@ -450,7 +515,9 @@ export class ImportWizardStateService {
     if (step === 'meters' && draft.meters.some((meter, index) => !meter.skipImport && this.meterInvalid(index))) {
       return 'Fix or skip every invalid meter before continuing.';
     }
-    if (step === 'predictors' && draft.predictors.some(predictor => !predictor.skipImport && !predictor.name?.trim())) return 'Fix or skip every invalid predictor before continuing.';
+    if (step === 'predictors' && draft.predictors.some(predictor => !predictor.skipImport && !isImportPredictorValid(predictor))) {
+      return 'Fix or skip every invalid predictor before continuing.';
+    }
     if ((step === 'meter-readings' || step === 'review') && this.invalidReadingCount()) {
       const excludedInvalid = this.meterReadingRows().reduce((total, row) =>
         total + row.invalidReadingDetails.filter(reading => reading.excluded).length, 0);
@@ -582,4 +649,22 @@ export class ImportWizardStateService {
     this.draft().completedSteps = this.draft().completedSteps
       .filter(step => step !== 'meter-readings' && step !== 'review');
   }
+
+  private invalidatePredictorReviewSteps(): void {
+    this.draft().completedSteps = this.draft().completedSteps
+      .filter(step => step !== 'predictor-readings' && step !== 'review');
+  }
+}
+
+function weatherMetricLabel(predictor: IdbPredictor): string {
+  const labels: Record<IdbPredictor['weatherDataType'], string> = {
+    HDD: 'Heating degree days',
+    CDD: 'Cooling degree days',
+    relativeHumidity: 'Relative humidity',
+    dryBulbTemp: 'Dry bulb temperature',
+    wetBulbTemp: 'Wet bulb temperature',
+    dewPointTemp: 'Dew point temperature',
+    precipitation: 'Precipitation'
+  };
+  return labels[predictor.weatherDataType];
 }

@@ -8,6 +8,7 @@ import { getEmptyFileReference, ImportFileDraft } from '@data/import/spreadsheet
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { ImportSessionService } from '../import-session.service';
 import { ImportWizardStateService } from './import-wizard-state.service';
@@ -17,16 +18,19 @@ describe('ImportWizardStateService', () => {
   let draftService: {
     materializeGeneralRecords: ReturnType<typeof vi.fn>;
     replaceMeter: ReturnType<typeof vi.fn>;
+    replacePredictor: ReturnType<typeof vi.fn>;
   };
   let workspaceMeters: ReturnType<typeof signal<IdbUtilityMeter[]>>;
   let workspaceMeterGroups: ReturnType<typeof signal<IdbUtilityMeterGroup[]>>;
   let workspaceMeterData: ReturnType<typeof signal<IdbUtilityMeterData[]>>;
+  let workspacePredictors: ReturnType<typeof signal<IdbPredictor[]>>;
 
   beforeEach(() => {
-    draftService = { materializeGeneralRecords: vi.fn(), replaceMeter: vi.fn() };
+    draftService = { materializeGeneralRecords: vi.fn(), replaceMeter: vi.fn(), replacePredictor: vi.fn() };
     workspaceMeters = signal([]);
     workspaceMeterGroups = signal([]);
     workspaceMeterData = signal([]);
+    workspacePredictors = signal([]);
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
@@ -42,7 +46,8 @@ describe('ImportWizardStateService', () => {
             mapColumnToFacility: vi.fn(),
             addGeneralFacility: vi.fn(),
             applyFootprintFacility: vi.fn(),
-            replaceMeter: draftService.replaceMeter
+            replaceMeter: draftService.replaceMeter,
+            replacePredictor: draftService.replacePredictor
           }
         },
         { provide: SpreadsheetImportCommandService, useValue: { commit: vi.fn() } },
@@ -55,6 +60,8 @@ describe('ImportWizardStateService', () => {
             meters: workspaceMeters,
             meterGroups: workspaceMeterGroups,
             meterData: workspaceMeterData,
+            predictors: workspacePredictors,
+            predictorData: () => [],
             customFuels: () => [],
             customGWPs: () => []
           }
@@ -297,6 +304,51 @@ describe('ImportWizardStateService', () => {
       expect(service.meterReadingRows()[0].facilityName).toBeTruthy();
     }
   );
+
+  it('offers unused same-facility Standard and valid Weather predictor matches', () => {
+    const standard = predictor({ id: 1, guid: 'standard-a' });
+    const weather = predictor({
+      id: 2, guid: 'weather-a', predictorType: 'Weather', weatherStationId: 'KORD',
+      weatherStationName: 'Chicago O’Hare', weatherDataType: 'HDD', heatingBaseTemperature: 60
+    });
+    const invalidWeather = predictor({ id: 3, guid: 'weather-invalid', predictorType: 'Weather' });
+    const used = predictor({ id: 4, guid: 'used-a' });
+    const otherFacility = predictor({ id: 5, guid: 'other-a', facilityId: 'facility-b' });
+    workspacePredictors.set([standard, weather, invalidWeather, used, otherFacility]);
+    const draft = templateDraft({ predictors: [predictor({ guid: 'import-a' }), used] });
+    service.initialize(draft);
+
+    expect(service.availableExistingPredictors(0).map(value => value.guid)).toEqual(['standard-a', 'weather-a']);
+  });
+
+  it('delegates predictor replacement and invalidates predictor-reading and review completion', () => {
+    const original = predictor({ guid: 'import-a', importWizardName: 'Workbook output' });
+    const replacement = predictor({ id: 7, guid: 'existing-a' });
+    const draft = templateDraft({
+      predictors: [original],
+      completedSteps: ['facilities', 'meters', 'meter-readings', 'predictors', 'predictor-readings', 'review']
+    });
+    service.initialize(draft);
+
+    service.savePredictor(original.guid, replacement);
+
+    expect(draftService.replacePredictor).toHaveBeenCalledWith(draft, original.guid, replacement);
+    expect(draft.completedSteps).toEqual(['facilities', 'meters', 'meter-readings', 'predictors']);
+  });
+
+  it('bulk inclusion invalidates predictor readings while production invalidates only review', () => {
+    const completed = ['facilities', 'meters', 'meter-readings', 'predictors', 'predictor-readings', 'review'];
+    const draft = templateDraft({ predictors: [predictor()], completedSteps: [...completed] });
+    service.initialize(draft);
+
+    service.setPredictorProduction(0, true);
+    expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'review'));
+
+    draft.completedSteps = [...completed];
+    service.setAllPredictorsIncluded(false);
+    expect(draft.predictors[0].skipImport).toBe(true);
+    expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'predictor-readings' && step !== 'review'));
+  });
 });
 
 function generalDraft(): ImportFileDraft {
@@ -320,4 +372,13 @@ function templateDraft(values: Partial<ImportFileDraft> = {}): ImportFileDraft {
     importFacilities: [facility({ guid: 'facility-a', accountId: 'account-1' })],
     ...values
   };
+}
+
+function predictor(overrides: Partial<IdbPredictor> = {}): IdbPredictor {
+  return {
+    guid: 'predictor-a', accountId: 'account-1', facilityId: 'facility-a', name: 'Production', unit: 'tons',
+    description: '', importWizardName: 'Production', production: false, productionInAnalysis: false,
+    predictorType: 'Standard', weatherDataType: 'HDD', weatherStationId: '', weatherStationName: '',
+    skipImport: false, ...overrides
+  } as IdbPredictor;
 }

@@ -1,0 +1,61 @@
+<section class="v1-settings-panel predictor-settings" [class.predictor-settings--embedded]="embedded" [formGroup]="form">
+  <section class="predictor-settings__section">
+    @if (showSaveStatus && saveMessage) {
+      <div class="predictor-settings__heading predictor-settings__heading--save-state">
+        <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState === 'error' || saveState === 'invalid'">
+          @if (saveState === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> }
+          {{ saveMessage }}
+          @if (saveState === 'error') {
+            <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" (click)="retryRequested.emit()">Retry</button>
+          }
+        </p>
+      </div>
+    }
+    <div class="predictor-settings__grid">
+      <label>
+        <span>Name</span>
+        <input type="text" maxlength="100" formControlName="name" required (input)="textChange.emit()">
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="predictor-settings__error">Enter a name of 100 characters or fewer.</small>
+        }
+      </label>
+      <label>
+        <span>Unit</span>
+        <input type="text" maxlength="100" formControlName="unit" (input)="textChange.emit()">
+        @if (form.controls.unit.touched && form.controls.unit.invalid) {
+          <small class="predictor-settings__error">Enter a unit of 100 characters or fewer.</small>
+        }
+      </label>
+      <label class="predictor-settings__check">
+        <input type="checkbox" formControlName="production" (change)="immediateChange.emit()">
+        <span>Is Production?</span>
+      </label>
+      <label class="predictor-settings__wide">
+        <span>Description</span>
+        <textarea rows="3" formControlName="description" (input)="textChange.emit()"></textarea>
+      </label>
+    </div>
+  </section>
+
+  <section class="predictor-settings__section" aria-labelledby="predictor-settings-status">
+    <div class="predictor-settings__heading">
+      <div><p>Validation</p><h2 id="predictor-settings-status">Status settings</h2></div>
+    </div>
+    <div class="predictor-settings__status-grid">
+      @if (form.controls.noLongerInUse.value) {
+        <label>
+          <span>Stop month <small>Optional</small></span>
+          <input type="month" formControlName="stopMonth" (change)="immediateChange.emit()">
+        </label>
+      }
+      <label class="predictor-settings__check">
+        <input type="checkbox" formControlName="canBeNegative" (change)="immediateChange.emit()">
+        <span>Allow negative values</span>
+      </label>
+      <label class="predictor-settings__check">
+        <input type="checkbox" formControlName="ignoreDateStatusChecks" (change)="immediateChange.emit()">
+        <span>Ignore date status checks</span>
+      </label>
+    </div>
+  </section>
+</section>
