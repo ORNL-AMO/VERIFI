@@ -13,6 +13,8 @@ import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
+import { ExportReportPdfService } from '@app/v0/shared/pdf-report/services/export-report-pdf.service';
+import { FacilityEmissionFactorsReportAdapter } from '@v0/data-evaluation/facility/facility-reports/report-results/facility-emission-factors-report-results/facility-emission-factors-report.adapter';
 
 @Component({
   selector: 'app-facility-emission-factors-report-results',
@@ -41,7 +43,9 @@ export class FacilityEmissionFactorsReportResultsComponent {
   constructor(
     private dataEvaluationService: DataEvaluationService,
     private eGridService: EGridService,
-    private injector: Injector
+    private injector: Injector,
+    private facilityEmissionFactorsReportAdapter: FacilityEmissionFactorsReportAdapter,
+    private exportReportPdfService: ExportReportPdfService
   ) {
   }
 
@@ -129,6 +133,17 @@ export class FacilityEmissionFactorsReportResultsComponent {
         });
       }
     });
+  }
+  
+  onExportPdf() {
+    const document = this.facilityEmissionFactorsReportAdapter.buildDocument({
+      facilityReport: this.facilityReport,
+      facility: this.facility,
+      emissionDataElectricity: this.emissionDataElectricity,
+      emissionData: this.emissionData,
+      electricityMeters: this.electricityMeters
+    });
+    this.exportReportPdfService.export(document, `${this.facilityReport.name} - Emission Factors Report`);
   }
 }
 
