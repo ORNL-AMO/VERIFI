@@ -117,7 +117,9 @@ describe('SpreadsheetImportDraftService', () => {
     });
     const draft = importDraft('verifi-v3', {
       predictors: [original],
-      predictorData: [predictorReading({ predictorId: original.guid, year: 2026, month: 1, amount: 18 })]
+      predictorData: [predictorReading({ predictorId: original.guid, year: 2026, month: 1, amount: 18 })],
+      skipExistingPredictorIds: [original.guid],
+      excludedPredictorReadingIds: ['predictor-reading-a']
     });
 
     draftService.replacePredictor(draft, original.guid, weather);
@@ -136,6 +138,8 @@ describe('SpreadsheetImportDraftService', () => {
       weatherDataWarning: false,
       weatherDataChanged: false
     }));
+    expect(draft.skipExistingPredictorIds).toEqual([weather.guid]);
+    expect(draft.excludedPredictorReadingIds).toEqual([`${existingReading.id}:0`]);
   });
 
   it('preserves an automatically matched Weather predictor and treats workbook values as overrides', () => {
@@ -195,6 +199,9 @@ function importDraft(kind: ImportFileDraft['kind'], values: Partial<ImportFileDr
     completedSteps: [],
     invalidMeterReadingsAcknowledged: false,
     excludedMeterReadingIds: [],
+    skipExistingPredictorIds: [],
+    invalidPredictorReadingsAcknowledged: false,
+    excludedPredictorReadingIds: [],
     ...values
   };
 }

@@ -9,6 +9,7 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { ImportSessionService } from '../import-session.service';
 import { ImportWizardStateService } from './import-wizard-state.service';
@@ -24,6 +25,8 @@ describe('ImportWizardStateService', () => {
   let workspaceMeterGroups: ReturnType<typeof signal<IdbUtilityMeterGroup[]>>;
   let workspaceMeterData: ReturnType<typeof signal<IdbUtilityMeterData[]>>;
   let workspacePredictors: ReturnType<typeof signal<IdbPredictor[]>>;
+  let workspacePredictorData: ReturnType<typeof signal<IdbPredictorData[]>>;
+  let commandCommit: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     draftService = { materializeGeneralRecords: vi.fn(), replaceMeter: vi.fn(), replacePredictor: vi.fn() };
@@ -31,6 +34,8 @@ describe('ImportWizardStateService', () => {
     workspaceMeterGroups = signal([]);
     workspaceMeterData = signal([]);
     workspacePredictors = signal([]);
+    workspacePredictorData = signal([]);
+    commandCommit = vi.fn(async () => ({ affectedFacilityGuids: [] }));
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
@@ -50,7 +55,7 @@ describe('ImportWizardStateService', () => {
             replacePredictor: draftService.replacePredictor
           }
         },
-        { provide: SpreadsheetImportCommandService, useValue: { commit: vi.fn() } },
+        { provide: SpreadsheetImportCommandService, useValue: { commit: commandCommit } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         {
           provide: AccountWorkspaceStore,
@@ -61,7 +66,7 @@ describe('ImportWizardStateService', () => {
             meterGroups: workspaceMeterGroups,
             meterData: workspaceMeterData,
             predictors: workspacePredictors,
-            predictorData: () => [],
+            predictorData: workspacePredictorData,
             customFuels: () => [],
             customGWPs: () => []
           }
@@ -349,6 +354,103 @@ describe('ImportWizardStateService', () => {
     expect(draft.predictors[0].skipImport).toBe(true);
     expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'predictor-readings' && step !== 'review'));
   });
+
+  it('prepares predictor reading summaries and synchronizes per-predictor keep-current decisions', () => {
+    const selected = predictor({ guid: 'predictor-a' });
+    const current = predictorReading({ guid: 'current', amount: 10 });
+    const overlap = predictorReading({ guid: 'overlap', amount: 12 });
+    const added = predictorReading({ guid: 'added', month: 2, amount: 15 });
+    workspacePredictorData.set([current]);
+    const draft = templateDraft({
+      predictors: [selected], predictorData: [overlap, added], skipExistingPredictorIds: ['stale-predictor'],
+      completedSteps: ['facilities', 'predictors', 'predictor-readings', 'review']
+    });
+    service.initialize(draft);
+
+    expect(service.predictorReadingRows()[0]).toMatchObject({
+      newReadings: { count: 1 }, existingReadings: { count: 1 }, invalidReadings: { count: 0 }
+    });
+    expect(service.predictorReadingRows()[0].comparisons[0].difference).toBe(2);
+
+    service.setSkipExistingPredictorReadings(selected.guid, true);
+    expect(draft.skipExistingPredictorIds).toEqual([selected.guid]);
+    expect(draft.completedSteps).not.toContain('review');
+    service.setAllSkipExistingPredictorReadings(false);
+    expect(draft.skipExistingPredictorIds).toEqual([]);
+  });
+
+  it('blocks predictor readings until invalid values are excluded and acknowledged', () => {
+    const draft = templateDraft({
+      predictors: [predictor()],
+      predictorData: [predictorReading({ amount: -1 })],
+      completedSteps: ['facilities', 'predictors', 'predictor-readings', 'review']
+    });
+    service.initialize(draft);
+    service.activateStep('predictor-readings');
+
+    expect(service.completeCurrentStep()).toBeUndefined();
+    expect(service.error()).toContain('Exclude every invalid predictor reading');
+
+    service.toggleExcludedPredictorReading(0, true);
+    expect(draft.completedSteps).not.toContain('predictor-readings');
+    expect(draft.completedSteps).not.toContain('review');
+
+    draft.completedSteps = ['facilities', 'predictors', 'predictor-readings', 'review'];
+    service.setInvalidPredictorReadingsAcknowledged(true);
+    expect(draft.completedSteps).toContain('predictor-readings');
+    expect(draft.completedSteps).not.toContain('review');
+    expect(service.completeCurrentStep()).toBe('review');
+  });
+
+  it('clears stale predictor reading decisions when a predictor is skipped', () => {
+    const imported = predictorReading();
+    const draft = templateDraft({
+      predictors: [predictor()], predictorData: [imported],
+      skipExistingPredictorIds: ['predictor-a'],
+      excludedPredictorReadingIds: [imported.guid],
+      invalidPredictorReadingsAcknowledged: true
+    });
+    service.initialize(draft);
+
+    service.togglePredictorIncluded(0, false);
+
+    expect(draft.skipExistingPredictorIds).toEqual([]);
+    expect(draft.excludedPredictorReadingIds).toEqual([]);
+    expect(draft.invalidPredictorReadingsAcknowledged).toBe(false);
+  });
+
+  it('remaps index-qualified exclusions after skipped predictors are removed from the commit request', async () => {
+    const skipped = predictor({ guid: 'skipped', skipImport: true });
+    const included = predictor({ guid: 'included' });
+    const skippedReading = predictorReading({ guid: 'skipped-reading', predictorId: skipped.guid });
+    const invalidReading = predictorReading({ guid: 'included-reading', predictorId: included.guid, month: 13 });
+    const draft = templateDraft({
+      predictors: [skipped, included], predictorData: [skippedReading, invalidReading],
+      excludedPredictorReadingIds: ['included-reading:1'], invalidPredictorReadingsAcknowledged: true
+    });
+    service.initialize(draft);
+    service.activateStep('review');
+
+    await service.commit();
+
+    expect(commandCommit).toHaveBeenCalledWith(expect.objectContaining({
+      predictorReadings: [invalidReading],
+      excludedPredictorReadingIds: ['included-reading:0']
+    }));
+  });
+
+  it.each<ImportFileDraft['kind']>(['verifi-v1', 'verifi-v2', 'verifi-v3', 'energy-treasure-hunt', 'general-workbook'])(
+    'prepares the same predictor-reading review contract for %s drafts',
+    kind => {
+      service.initialize({
+        ...templateDraft({ predictors: [predictor()], predictorData: [predictorReading()] }),
+        kind
+      });
+
+      expect(service.predictorReadingRows()[0].newReadings.count).toBe(1);
+      expect(service.predictorReadingRows()[0].facilityName).toBeTruthy();
+    }
+  );
 });
 
 function generalDraft(): ImportFileDraft {
@@ -361,7 +463,10 @@ function generalDraft(): ImportFileDraft {
     findings: [],
     completedSteps: [],
     invalidMeterReadingsAcknowledged: false,
-    excludedMeterReadingIds: []
+    excludedMeterReadingIds: [],
+    skipExistingPredictorIds: [],
+    invalidPredictorReadingsAcknowledged: false,
+    excludedPredictorReadingIds: []
   };
 }
 
@@ -381,4 +486,11 @@ function predictor(overrides: Partial<IdbPredictor> = {}): IdbPredictor {
     predictorType: 'Standard', weatherDataType: 'HDD', weatherStationId: '', weatherStationName: '',
     skipImport: false, ...overrides
   } as IdbPredictor;
+}
+
+function predictorReading(overrides: Partial<IdbPredictorData> = {}): IdbPredictorData {
+  return {
+    guid: 'predictor-reading-a', accountId: 'account-1', facilityId: 'facility-a', predictorId: 'predictor-a',
+    year: 2026, month: 1, amount: 10, weatherDataWarning: false, weatherOverride: false, ...overrides
+  } as IdbPredictorData;
 }

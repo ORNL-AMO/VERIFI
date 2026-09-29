@@ -35,6 +35,7 @@ import {
 } from './spreadsheet-import.models';
 import { checkSameMonthPredictorData } from './upload-helper-functions';
 import { applyImportedWeatherReadingSemantics } from './predictor-import-review';
+import { predictorReadingEntityKey } from './predictor-reading-import-review';
 
 @Injectable({ providedIn: 'root' })
 export class SpreadsheetImportDraftService {
@@ -97,7 +98,10 @@ export class SpreadsheetImportDraftService {
       findings: [],
       completedSteps: [],
       invalidMeterReadingsAcknowledged: false,
-      excludedMeterReadingIds: []
+      excludedMeterReadingIds: [],
+      skipExistingPredictorIds: [],
+      invalidPredictorReadingsAcknowledged: false,
+      excludedPredictorReadingIds: []
     };
     this.applyImportedWeatherSemantics(draft);
     if (version === 'Non-template') this.selectWorksheet(draft, selectedWorksheetName);
@@ -206,6 +210,10 @@ export class SpreadsheetImportDraftService {
     draft.predictors = this.normalizeImportedPredictors(predictorResult.predictors);
     draft.predictorData = predictorResult.readings;
     this.applyImportedWeatherSemantics(draft);
+    const predictorIds = new Set(draft.predictors.map(predictor => predictor.guid));
+    draft.skipExistingPredictorIds = draft.skipExistingPredictorIds.filter(id => predictorIds.has(id));
+    draft.excludedPredictorReadingIds = [];
+    draft.invalidPredictorReadingsAcknowledged = false;
   }
 
   replaceMeter(draft: ImportFileDraft, originalGuid: string, replacement: IdbUtilityMeter): void {
@@ -241,10 +249,14 @@ export class SpreadsheetImportDraftService {
     };
     draft.predictors[predictorIndex] = updated;
 
+    const excludedReadingIds = new Set(draft.excludedPredictorReadingIds.map(String));
+    const updatedExclusions: Array<number | string> = [];
     const existingReadings = this.store.predictorData()
       .filter(reading => reading.predictorId === updated.guid);
-    draft.predictorData = draft.predictorData.map(reading => {
+    draft.predictorData = draft.predictorData.map((reading, index) => {
       if (reading.predictorId !== originalGuid) return reading;
+      const wasExcluded = excludedReadingIds.has(predictorReadingEntityKey(reading, index))
+        || excludedReadingIds.has(predictorReadingEntityKey(reading));
       const existing = existingReadings.find(candidate =>
         candidate.year === reading.year && candidate.month === reading.month);
       const remapped: IdbPredictorData = {
@@ -259,8 +271,24 @@ export class SpreadsheetImportDraftService {
       } else {
         delete remapped.id;
       }
-      return applyImportedWeatherReadingSemantics(remapped, updated);
+      const normalized = applyImportedWeatherReadingSemantics(remapped, updated);
+      if (wasExcluded) updatedExclusions.push(predictorReadingEntityKey(normalized, index));
+      return normalized;
     });
+    const predictorIds = new Set(draft.predictors.map(predictor => predictor.guid));
+    const keepExisting = draft.skipExistingPredictorIds.includes(originalGuid);
+    draft.skipExistingPredictorIds = draft.skipExistingPredictorIds
+      .filter(guid => guid !== originalGuid && predictorIds.has(guid));
+    if (keepExisting && !draft.skipExistingPredictorIds.includes(updated.guid)) {
+      draft.skipExistingPredictorIds.push(updated.guid);
+    }
+    const readingKeys = new Set(draft.predictorData.flatMap((reading, index) => [
+      predictorReadingEntityKey(reading, index), predictorReadingEntityKey(reading)
+    ]));
+    draft.excludedPredictorReadingIds = [
+      ...draft.excludedPredictorReadingIds.filter(key => readingKeys.has(String(key))),
+      ...updatedExclusions
+    ].filter((key, index, values) => values.findIndex(candidate => String(candidate) === String(key)) === index);
   }
 
   rebuildMeterReadings(draft: ImportFileDraft): void {

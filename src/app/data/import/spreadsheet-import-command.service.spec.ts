@@ -175,6 +175,58 @@ describe('SpreadsheetImportCommandService', () => {
     ]));
   });
 
+  it('keeps same-month predictor readings while still importing new months', async () => {
+    const imported = request();
+    const selectedPredictor = predictor({ id: 7 });
+    const overlap = predictorReading({ guid: 'overlap', amount: 12 });
+    const added = predictorReading({ guid: 'new-month', month: 2, amount: 15 });
+    imported.predictors = [selectedPredictor];
+    imported.predictorReadings = [overlap, added];
+    imported.skipExistingPredictorIds = [selectedPredictor.guid];
+    const current = predictorReading({ id: 22, guid: 'current', amount: 10 });
+    const { service, writes } = setup(undefined, { predictors: [selectedPredictor], predictorData: [current] });
+
+    const summary = await service.commit(imported);
+
+    expect(writes.filter(write => write.store === 'predictorData').map(write => write.value.guid)).toEqual(['new-month']);
+    expect(summary.skippedPredictorReadings).toBe(1);
+  });
+
+  it('excludes acknowledged invalid predictor readings and rejects unresolved values', async () => {
+    const imported = request();
+    imported.predictors = [predictor()];
+    imported.predictorReadings = [predictorReading({ month: 13 })];
+    imported.excludedPredictorReadingIds = ['predictor-reading-a'];
+    imported.invalidPredictorReadingsAcknowledged = true;
+    const { service, writes } = setup();
+
+    const summary = await service.commit(imported);
+
+    expect(writes.filter(write => write.store === 'predictorData')).toHaveLength(0);
+    expect(summary.excludedInvalidPredictorReadings).toBe(1);
+
+    imported.excludedPredictorReadingIds = [];
+    const unresolved = setup();
+    await expect(unresolved.service.commit(imported)).rejects.toThrow('Invalid predictor readings');
+    expect(unresolved.writes).toHaveLength(0);
+  });
+
+  it('allows one duplicate predictor month when the other reading is explicitly excluded', async () => {
+    const imported = request();
+    imported.predictors = [predictor()];
+    imported.predictorReadings = [
+      predictorReading({ id: 22, guid: 'shared-existing-reading', amount: 10 }),
+      predictorReading({ id: 22, guid: 'shared-existing-reading', amount: 12 })
+    ];
+    imported.excludedPredictorReadingIds = ['22:1'];
+    imported.invalidPredictorReadingsAcknowledged = true;
+    const { service, writes } = setup();
+
+    await service.commit(imported);
+
+    expect(writes.filter(write => write.store === 'predictorData').map(write => write.value.guid)).toEqual(['shared-existing-reading']);
+  });
+
   function request(): ImportCommitRequest {
     const timestamp = new Date('2025-01-01T00:00:00Z');
     return {
@@ -184,8 +236,9 @@ describe('SpreadsheetImportCommandService', () => {
       meters: [{ id: undefined, guid: 'meter-a', facilityId: 'facility-a', accountId: 'account-a', name: 'Electricity', createdDate: timestamp, modifiedDate: timestamp } as any],
       meterReadings: [{ id: undefined, guid: 'reading-a', meterId: 'meter-a', facilityId: 'facility-a', accountId: 'account-a', year: 2025, month: 1, day: 1, totalEnergyUse: 10, createdDate: timestamp, modifiedDate: timestamp } as any],
       predictors: [], predictorReadings: [], energyUseGroups: [], energyUseEquipment: [],
-      skipExistingReadingsMeterIds: [], skipExistingPredictorFacilityIds: [],
-      excludedMeterReadingIds: [], invalidMeterReadingsAcknowledged: false
+      skipExistingReadingsMeterIds: [], skipExistingPredictorIds: [],
+      excludedMeterReadingIds: [], invalidMeterReadingsAcknowledged: false,
+      excludedPredictorReadingIds: [], invalidPredictorReadingsAcknowledged: false
     };
   }
 
@@ -193,6 +246,14 @@ describe('SpreadsheetImportCommandService', () => {
     return {
       guid: 'predictor-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Production', unit: 'tons',
       predictorType: 'Standard', weatherDataType: 'HDD', weatherStationId: '', weatherStationName: '',
+      ...overrides
+    };
+  }
+
+  function predictorReading(overrides: Record<string, unknown> = {}): any {
+    return {
+      guid: 'predictor-reading-a', accountId: 'account-a', facilityId: 'facility-a', predictorId: 'predictor-a',
+      year: 2026, month: 1, amount: 10, weatherOverride: false, weatherDataWarning: false,
       ...overrides
     };
   }

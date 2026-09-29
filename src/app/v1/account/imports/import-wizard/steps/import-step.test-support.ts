@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { buildImportMeterReadingReview } from '@data/import/meter-reading-import-review';
 import { getImportPredictorIssues, isImportPredictorValid } from '@data/import/predictor-import-review';
+import { buildImportPredictorReadingReview } from '@data/import/predictor-reading-import-review';
 import { ImportWizardStateService } from '../import-wizard-state.service';
 
 export function createImportWizardStateStub() {
@@ -41,11 +42,17 @@ export function createImportWizardStateStub() {
       weatherDataType: 'HDD',
       skipImport: false
     }],
-    predictorData: [{ guid: 'predictor-reading-1', predictorId: 'predictor-1' }],
+    predictorData: [{
+      guid: 'predictor-reading-1', predictorId: 'predictor-1', accountId: 'account-1', facilityId: 'facility-1',
+      year: 2026, month: 1, amount: 12, weatherOverride: false, weatherDataWarning: false
+    }],
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
+    skipExistingPredictorIds: [],
     excludedMeterReadingIds: [],
     invalidMeterReadingsAcknowledged: false,
+    excludedPredictorReadingIds: [],
+    invalidPredictorReadingsAcknowledged: false,
     selectedFacilityId: '',
     facilityEnergyUseGroups: [{ guid: 'use-group-1' }],
     facilityEnergyUseEquipment: [{
@@ -57,6 +64,7 @@ export function createImportWizardStateStub() {
     }]
   });
   const workspaceMeterData = signal<any[]>([]);
+  const workspacePredictorData = signal<any[]>([]);
   const meterInvalid = vi.fn((_index: number) => false);
   const state: any = {
     draft,
@@ -76,7 +84,7 @@ export function createImportWizardStateStub() {
       meterGroups: signal([]),
       meterData: workspaceMeterData,
       predictors: signal([]),
-      predictorData: signal([]),
+      predictorData: workspacePredictorData,
       customFuels: signal([]),
       customGWPs: signal([])
     },
@@ -111,6 +119,9 @@ export function createImportWizardStateStub() {
     availableExistingPredictors: vi.fn(() => []),
     savePredictor: vi.fn(),
     setSkipExistingPredictorReadings: vi.fn(),
+    setAllSkipExistingPredictorReadings: vi.fn(),
+    toggleExcludedPredictorReading: vi.fn(),
+    setInvalidPredictorReadingsAcknowledged: vi.fn(),
     setFootprintFacility: vi.fn(),
     compatibleMeterGroups: vi.fn(() => [{ guid: 'group-1', name: 'Natural Gas Meters' }]),
     meterGroupSourceConflict: vi.fn(() => false),
@@ -158,6 +169,29 @@ export function createImportWizardStateStub() {
     && state.predictorRows().every((row: any) => !row.predictor.skipImport));
   state.somePredictorsIncluded = computed(() => state.predictorRows()
     .some((row: any) => !row.predictor.skipImport));
+  state.predictorReadingRows = computed(() => buildImportPredictorReadingReview({
+    predictors: draft().predictors,
+    readings: draft().predictorData,
+    facilities: draft().importFacilities,
+    currentReadings: workspacePredictorData(),
+    excludedReadingIds: draft().excludedPredictorReadingIds,
+    skipExistingPredictorIds: draft().skipExistingPredictorIds
+  }));
+  state.importedPredictorReadingCount = computed(() => state.predictorReadingRows().reduce((total: number, row: any) =>
+    total + row.newReadings.count + row.invalidReadings.count + row.existingReadings.count, 0));
+  state.invalidPredictorReadingCount = computed(() => state.predictorReadingRows().reduce((total: number, row: any) =>
+    total + row.invalidReadings.count, 0));
+  state.predictorReadingsToImportCount = computed(() => state.predictorReadingRows().reduce((total: number, row: any) =>
+    total + row.newReadings.count + (row.keepExisting ? 0 : row.existingReadings.count)
+      + row.invalidReadingDetails.filter((reading: any) => !reading.excluded).length, 0));
+  state.hasExistingPredictorReadings = computed(() => state.predictorReadingRows()
+    .some((row: any) => row.existingReadings.count > 0));
+  state.allExistingPredictorReadingsKept = computed(() => {
+    const eligible = state.predictorReadingRows().filter((row: any) => row.existingReadings.count > 0);
+    return eligible.length > 0 && eligible.every((row: any) => row.keepExisting);
+  });
+  state.someExistingPredictorReadingsKept = computed(() => state.predictorReadingRows()
+    .some((row: any) => row.existingReadings.count > 0 && row.keepExisting));
   return state;
 }
 

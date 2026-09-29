@@ -132,6 +132,9 @@ export interface ImportFileDraft extends FileReference {
   completedSteps: string[];
   invalidMeterReadingsAcknowledged: boolean;
   excludedMeterReadingIds: Array<number | string>;
+  skipExistingPredictorIds: string[];
+  invalidPredictorReadingsAcknowledged: boolean;
+  excludedPredictorReadingIds: Array<number | string>;
 }
 
 export interface ImportCommitRequest {
@@ -147,9 +150,11 @@ export interface ImportCommitRequest {
   energyUseGroups: IdbFacilityEnergyUseGroup[];
   energyUseEquipment: IdbFacilityEnergyUseEquipment[];
   skipExistingReadingsMeterIds: string[];
-  skipExistingPredictorFacilityIds: string[];
+  skipExistingPredictorIds: string[];
   excludedMeterReadingIds: Array<number | string>;
   invalidMeterReadingsAcknowledged: boolean;
+  excludedPredictorReadingIds: Array<number | string>;
+  invalidPredictorReadingsAcknowledged: boolean;
 }
 
 export interface ImportCommitSummary {
@@ -158,6 +163,8 @@ export interface ImportCommitSummary {
   updated: ImportEntityCounts;
   skippedMeterReadings: number;
   excludedInvalidMeterReadings: number;
+  skippedPredictorReadings: number;
+  excludedInvalidPredictorReadings: number;
 }
 
 export interface ImportEntityCounts {

@@ -4,7 +4,7 @@
   <div><dt>Meters</dt><dd>{{ state.draft().meters.length }}</dd></div>
   <div><dt>Meter readings</dt><dd>{{ state.draft().meterData.length - state.draft().excludedMeterReadingIds.length }}</dd></div>
   <div><dt>Predictors</dt><dd>{{ state.draft().predictors.length }}</dd></div>
-  <div><dt>Predictor readings</dt><dd>{{ state.draft().predictorData.length }}</dd></div>
+  <div><dt>Predictor readings</dt><dd>{{ state.predictorReadingsToImportCount() }}</dd></div>
   <div><dt>Energy-use groups</dt><dd>{{ state.draft().facilityEnergyUseGroups.length }}</dd></div>
   <div><dt>Equipment</dt><dd>{{ state.draft().facilityEnergyUseEquipment.length }}</dd></div>
 </dl>

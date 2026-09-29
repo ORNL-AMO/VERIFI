@@ -11,6 +11,11 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { isImportMeterReadingValid, sameMeterReadingPeriod } from './meter-reading-import-review';
 import { isImportPredictorValid } from './predictor-import-review';
 import {
+  buildImportPredictorReadingReview,
+  predictorReadingEntityKey,
+  samePredictorReadingPeriod
+} from './predictor-reading-import-review';
+import {
   ImportCommitRequest,
   ImportCommitSummary,
   ImportEntityCounts
@@ -75,13 +80,32 @@ export class SpreadsheetImportCommandService {
         'Invalid meter readings must be explicitly excluded before importing.'
       );
     }
+    const excludedPredictorReadingIds = new Set(request.excludedPredictorReadingIds.map(String));
+    const predictorReadingReview = buildImportPredictorReadingReview({
+      predictors: request.predictors,
+      readings: request.predictorReadings,
+      facilities: request.facilities,
+      currentReadings: existing.predictorReadings,
+      excludedReadingIds: request.excludedPredictorReadingIds,
+      skipExistingPredictorIds: request.skipExistingPredictorIds
+    });
+    const invalidPredictorReadings = predictorReadingReview.flatMap(row => row.invalidReadingDetails);
+    if (invalidPredictorReadings.some(reading => !reading.excluded)
+      || (invalidPredictorReadings.length > 0 && !request.invalidPredictorReadingsAcknowledged)) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Invalid predictor readings must be explicitly excluded before importing.'
+      );
+    }
 
     const summary: ImportCommitSummary = {
       affectedFacilityGuids: this.affectedFacilityGuids(request),
       added: this.emptyCounts(),
       updated: this.emptyCounts(),
       skippedMeterReadings: 0,
-      excludedInvalidMeterReadings: invalidReadings.length
+      excludedInvalidMeterReadings: invalidReadings.length,
+      skippedPredictorReadings: 0,
+      excludedInvalidPredictorReadings: invalidPredictorReadings.length
     };
 
     await this.writeEntities(transaction, 'facilities', 'facilities', request.facilities, existing.facilities, summary);
@@ -101,9 +125,13 @@ export class SpreadsheetImportCommandService {
     await this.writeEntities(transaction, 'utilityMeterData', 'meterReadings', meterReadings, existing.meterReadings, summary);
 
     await this.writeEntities(transaction, 'predictors', 'predictors', request.predictors, existing.predictors, summary);
-    const predictorReadings = request.predictorReadings.filter(reading => {
-      if (!request.skipExistingPredictorFacilityIds.includes(reading.facilityId)) return true;
-      return !existing.predictorReadings.some(candidate => this.samePredictorReading(candidate, reading));
+    const predictorReadings = request.predictorReadings.filter((reading, index) => {
+      if (excludedPredictorReadingIds.has(predictorReadingEntityKey(reading, index))
+        || excludedPredictorReadingIds.has(predictorReadingEntityKey(reading))) return false;
+      if (!request.skipExistingPredictorIds.includes(reading.predictorId)) return true;
+      const exists = existing.predictorReadings.some(candidate => samePredictorReadingPeriod(candidate, reading));
+      if (exists) summary.skippedPredictorReadings++;
+      return !exists;
     });
     await this.writeEntities(transaction, 'predictorData', 'predictorReadings', predictorReadings, existing.predictorReadings, summary);
     await this.writeEntities(transaction, 'facilityEnergyUseGroups', 'energyUseGroups', request.energyUseGroups, existing.energyUseGroups, summary);
@@ -161,6 +189,11 @@ export class SpreadsheetImportCommandService {
   }
 
   private validateRelationships(request: ImportCommitRequest, existing: ExistingImportData): void {
+    const excludedPredictorReadingIds = new Set(request.excludedPredictorReadingIds.map(String));
+    const activePredictorReadings = request.predictorReadings
+      .map((value, index) => ({ value, index }))
+      .filter(entry => !excludedPredictorReadingIds.has(predictorReadingEntityKey(entry.value, entry.index))
+        && !excludedPredictorReadingIds.has(predictorReadingEntityKey(entry.value)));
     const unique = (label: string, values: Array<string>) => {
       const populated = values.filter(Boolean);
       if (new Set(populated).size !== populated.length) {
@@ -172,11 +205,12 @@ export class SpreadsheetImportCommandService {
     unique('meter', request.meters.map(value => value.guid));
     unique('meter reading', request.meterReadings.map(value => value.guid));
     unique('predictor', request.predictors.map(value => value.guid));
-    unique('predictor reading', request.predictorReadings.map(value => value.guid));
+    unique('predictor reading', activePredictorReadings.map(entry => entry.value.guid));
     unique('energy-use group', request.energyUseGroups.map(value => value.guid));
     unique('equipment', request.energyUseEquipment.map(value => value.guid));
     unique('meter reading date', request.meterReadings.map(value => `${value.meterId}:${value.year}:${value.month}:${value.day}`));
-    unique('predictor reading month', request.predictorReadings.map(value => `${value.predictorId}:${value.year}:${value.month}`));
+    unique('predictor reading month', activePredictorReadings
+      .map(entry => `${entry.value.predictorId}:${entry.value.year}:${entry.value.month}`));
 
     const requestedGuids = [
       ...request.facilities, ...request.meterGroups, ...request.meters, ...request.meterReadings,
@@ -261,10 +295,6 @@ export class SpreadsheetImportCommandService {
         summary.added[countName]++;
       }
     }
-  }
-
-  private samePredictorReading(left: IdbPredictorData, right: IdbPredictorData): boolean {
-    return left.predictorId === right.predictorId && left.year === right.year && left.month === right.month;
   }
 
   private entityKey(value: IdbEntry): string {

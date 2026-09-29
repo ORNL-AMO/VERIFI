@@ -83,8 +83,9 @@ describe('spreadsheet import browser boundaries', () => {
       meters: [{ guid: 'meter-import', facilityId: 'facility-import', accountId: 'account-import', name: 'Electricity', createdDate: timestamp, modifiedDate: timestamp } as any],
       meterReadings: [{ guid: 'reading-import', meterId: 'meter-import', facilityId: 'facility-import', accountId: 'account-import', year: 2025, month: 1, day: 1, totalEnergyUse: 100, createdDate: timestamp, modifiedDate: timestamp } as any],
       predictors: [], predictorReadings: [], energyUseGroups: [], energyUseEquipment: [],
-      skipExistingReadingsMeterIds: [], skipExistingPredictorFacilityIds: [],
-      excludedMeterReadingIds: [], invalidMeterReadingsAcknowledged: false
+      skipExistingReadingsMeterIds: [], skipExistingPredictorIds: [],
+      excludedMeterReadingIds: [], invalidMeterReadingsAcknowledged: false,
+      excludedPredictorReadingIds: [], invalidPredictorReadingsAcknowledged: false
     };
   }
 });

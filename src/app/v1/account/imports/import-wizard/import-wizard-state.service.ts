@@ -22,6 +22,11 @@ import {
   isImportPredictorValid,
   isSelectableExistingImportPredictor
 } from '@data/import/predictor-import-review';
+import {
+  buildImportPredictorReadingReview,
+  ImportPredictorReadingSummaryRow,
+  predictorReadingEntityKey
+} from '@data/import/predictor-reading-import-review';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
 
@@ -49,6 +54,8 @@ export interface ImportPredictorRow {
   readonly typeLabel: string;
   readonly typeDetail?: string;
 }
+
+export type ImportPredictorReadingRow = ImportPredictorReadingSummaryRow;
 
 @Injectable()
 export class ImportWizardStateService {
@@ -153,6 +160,35 @@ export class ImportWizardStateService {
     && this.predictorRows().every(row => !row.predictor.skipImport));
   readonly somePredictorsIncluded = computed(() => this.predictorRows()
     .some(row => !row.predictor.skipImport));
+  readonly predictorReadingRows = computed<ImportPredictorReadingRow[]>(() => {
+    this.draftRevision();
+    const draft = this.draft();
+    if (!draft) return [];
+    return buildImportPredictorReadingReview({
+      predictors: draft.predictors,
+      readings: draft.predictorData,
+      facilities: draft.importFacilities,
+      currentReadings: this.workspace.predictorData(),
+      excludedReadingIds: draft.excludedPredictorReadingIds,
+      skipExistingPredictorIds: draft.skipExistingPredictorIds
+    });
+  });
+  readonly importedPredictorReadingCount = computed(() => this.predictorReadingRows().reduce((total, row) =>
+    total + row.newReadings.count + row.invalidReadings.count + row.existingReadings.count, 0));
+  readonly invalidPredictorReadingCount = computed(() => this.predictorReadingRows().reduce((total, row) =>
+    total + row.invalidReadings.count, 0));
+  readonly predictorReadingsToImportCount = computed(() => this.predictorReadingRows().reduce((total, row) =>
+    total + row.newReadings.count
+      + (row.keepExisting ? 0 : row.existingReadings.count)
+      + row.invalidReadingDetails.filter(reading => !reading.excluded).length, 0));
+  readonly hasExistingPredictorReadings = computed(() => this.predictorReadingRows()
+    .some(row => row.existingReadings.count > 0));
+  readonly allExistingPredictorReadingsKept = computed(() => {
+    const eligible = this.predictorReadingRows().filter(row => row.existingReadings.count > 0);
+    return eligible.length > 0 && eligible.every(row => row.keepExisting);
+  });
+  readonly someExistingPredictorReadingsKept = computed(() => this.predictorReadingRows()
+    .some(row => row.existingReadings.count > 0 && row.keepExisting));
 
   initialize(draft: ImportFileDraft): void {
     this.draft.set(draft);
@@ -378,13 +414,20 @@ export class ImportWizardStateService {
   }
 
   togglePredictorIncluded(index: number, included: boolean): void {
-    this.draft().predictors[index].skipImport = !included;
+    const predictor = this.draft().predictors[index];
+    predictor.skipImport = !included;
+    if (!included) this.clearPredictorReadingDecisions(predictor.guid);
     this.invalidatePredictorReviewSteps();
     this.changed();
   }
 
   setAllPredictorsIncluded(included: boolean): void {
     this.draft().predictors.forEach(predictor => predictor.skipImport = !included);
+    if (!included) {
+      this.draft().skipExistingPredictorIds = [];
+      this.draft().excludedPredictorReadingIds = [];
+      this.draft().invalidPredictorReadingsAcknowledged = false;
+    }
     this.invalidatePredictorReviewSteps();
     this.changed();
   }
@@ -470,8 +513,47 @@ export class ImportWizardStateService {
     this.changed();
   }
 
-  setSkipExistingPredictorReadings(facilityId: string, skip: boolean): void {
-    this.setStringDecision(this.draft().skipExistingPredictorFacilityIds, facilityId, skip);
+  setSkipExistingPredictorReadings(predictorId: string, skip: boolean): void {
+    const eligibleIds = new Set(this.predictorReadingRows()
+      .filter(row => row.existingReadings.count > 0)
+      .map(row => row.predictor.guid));
+    if (skip && !eligibleIds.has(predictorId)) return;
+    const selected = new Set(this.draft().skipExistingPredictorIds.filter(id => eligibleIds.has(id)));
+    if (skip) selected.add(predictorId);
+    else selected.delete(predictorId);
+    this.draft().skipExistingPredictorIds = [...selected];
+    this.invalidateReview();
+    this.changed();
+  }
+
+  setAllSkipExistingPredictorReadings(skip: boolean): void {
+    const eligibleIds = this.predictorReadingRows()
+      .filter(row => row.existingReadings.count > 0)
+      .map(row => row.predictor.guid);
+    this.draft().skipExistingPredictorIds = skip ? [...new Set(eligibleIds)] : [];
+    this.invalidateReview();
+    this.changed();
+  }
+
+  toggleExcludedPredictorReading(index: number, excluded: boolean): void {
+    const reading = this.draft().predictorData[index];
+    if (!reading) return;
+    const key = predictorReadingEntityKey(reading, index);
+    const exclusions = this.draft().excludedPredictorReadingIds;
+    if (excluded && !exclusions.map(String).includes(String(key))) exclusions.push(key);
+    if (!excluded) {
+      this.draft().excludedPredictorReadingIds = exclusions.filter(value => String(value) !== String(key));
+    }
+    this.invalidateReview();
+    if (!this.invalidPredictorReadingGateSatisfied()) this.invalidatePredictorReadings();
+    this.changed();
+  }
+
+  setInvalidPredictorReadingsAcknowledged(acknowledged: boolean): void {
+    this.draft().invalidPredictorReadingsAcknowledged = acknowledged;
+    this.invalidateReview();
+    if (!this.invalidPredictorReadingGateSatisfied()) this.invalidatePredictorReadings();
+    this.changed();
   }
 
   hasUnsavedChanges(): boolean {
@@ -525,6 +607,13 @@ export class ImportWizardStateService {
         return 'Exclude every invalid meter reading and acknowledge the exclusion before continuing.';
       }
     }
+    if ((step === 'predictor-readings' || step === 'review') && this.invalidPredictorReadingCount()) {
+      const excludedInvalid = this.predictorReadingRows().reduce((total, row) =>
+        total + row.invalidReadingDetails.filter(reading => reading.excluded).length, 0);
+      if (excludedInvalid !== this.invalidPredictorReadingCount() || !draft.invalidPredictorReadingsAcknowledged) {
+        return 'Exclude every invalid predictor reading and acknowledge the exclusion before continuing.';
+      }
+    }
     return undefined;
   }
 
@@ -537,12 +626,6 @@ export class ImportWizardStateService {
     return this.draft()?.columnGroups.find(group => group.groupLabel === label)?.groupItems ?? [];
   }
 
-  private setStringDecision(values: string[], id: string, selected: boolean): void {
-    if (selected && !values.includes(id)) values.push(id);
-    if (!selected) values.splice(values.indexOf(id), values.includes(id) ? 1 : 0);
-    this.changed();
-  }
-
   private changed(): void {
     this.draftRevision.update(value => value + 1);
     this.session.notifyChanged();
@@ -553,6 +636,17 @@ export class ImportWizardStateService {
     const predictors = draft.predictors.filter(predictor => !predictor.skipImport);
     const meterIds = new Set(meters.map(meter => meter.guid));
     const predictorIds = new Set(predictors.map(predictor => predictor.guid));
+    const predictorReadingExclusions = new Set(draft.excludedPredictorReadingIds.map(String));
+    const predictorReadingEntries = draft.predictorData
+      .map((reading, index) => ({ reading, index }))
+      .filter(entry => predictorIds.has(entry.reading.predictorId));
+    const excludedPredictorReadingIds = predictorReadingEntries.reduce<Array<number | string>>((keys, entry, index) => {
+      if (predictorReadingExclusions.has(predictorReadingEntityKey(entry.reading, entry.index))
+        || predictorReadingExclusions.has(predictorReadingEntityKey(entry.reading))) {
+        keys.push(predictorReadingEntityKey(entry.reading, index));
+      }
+      return keys;
+    }, []);
     const affectedFacilities = new Set([
       ...meters.map(meter => meter.facilityId), ...predictors.map(predictor => predictor.facilityId),
       ...draft.facilityEnergyUseGroups.map(group => group.facilityId)
@@ -571,13 +665,15 @@ export class ImportWizardStateService {
       meters,
       meterReadings: draft.meterData.filter(reading => meterIds.has(reading.meterId)),
       predictors,
-      predictorReadings: draft.predictorData.filter(reading => predictorIds.has(reading.predictorId)),
+      predictorReadings: predictorReadingEntries.map(entry => entry.reading),
       energyUseGroups: draft.facilityEnergyUseGroups,
       energyUseEquipment: draft.facilityEnergyUseEquipment,
       skipExistingReadingsMeterIds: draft.skipExistingReadingsMeterIds,
-      skipExistingPredictorFacilityIds: draft.skipExistingPredictorFacilityIds,
+      skipExistingPredictorIds: draft.skipExistingPredictorIds,
       excludedMeterReadingIds: draft.excludedMeterReadingIds,
-      invalidMeterReadingsAcknowledged: draft.invalidMeterReadingsAcknowledged
+      invalidMeterReadingsAcknowledged: draft.invalidMeterReadingsAcknowledged,
+      excludedPredictorReadingIds,
+      invalidPredictorReadingsAcknowledged: draft.invalidPredictorReadingsAcknowledged
     };
   }
 
@@ -635,6 +731,10 @@ export class ImportWizardStateService {
     this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'meter-readings');
   }
 
+  private invalidatePredictorReadings(): void {
+    this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'predictor-readings');
+  }
+
   private invalidReadingGateSatisfied(): boolean {
     const draft = this.draft();
     const includedMeterIds = new Set(draft.meters.filter(meter => !meter.skipImport).map(meter => meter.guid));
@@ -643,6 +743,38 @@ export class ImportWizardStateService {
     const exclusions = new Set(draft.excludedMeterReadingIds.map(String));
     return invalidReadings.length === 0 ||
       (invalidReadings.every(reading => exclusions.has(meterReadingEntityKey(reading))) && draft.invalidMeterReadingsAcknowledged);
+  }
+
+  private invalidPredictorReadingGateSatisfied(): boolean {
+    const draft = this.draft();
+    const rows = buildImportPredictorReadingReview({
+      predictors: draft.predictors,
+      readings: draft.predictorData,
+      facilities: draft.importFacilities,
+      currentReadings: this.workspace.predictorData(),
+      excludedReadingIds: draft.excludedPredictorReadingIds,
+      skipExistingPredictorIds: draft.skipExistingPredictorIds
+    });
+    const invalidReadings = rows.flatMap(row => row.invalidReadingDetails);
+    return invalidReadings.length === 0 ||
+      (invalidReadings.every(reading => reading.excluded) && draft.invalidPredictorReadingsAcknowledged);
+  }
+
+  private clearPredictorReadingDecisions(predictorId: string): void {
+    this.draft().skipExistingPredictorIds = this.draft().skipExistingPredictorIds
+      .filter(id => id !== predictorId);
+    const readingKeys = new Set(this.draft().predictorData
+      .map((reading, index) => ({ reading, index }))
+      .filter(entry => entry.reading.predictorId === predictorId)
+      .flatMap(entry => [
+        predictorReadingEntityKey(entry.reading, entry.index),
+        predictorReadingEntityKey(entry.reading)
+      ]));
+    this.draft().excludedPredictorReadingIds = this.draft().excludedPredictorReadingIds
+      .filter(key => !readingKeys.has(String(key)));
+    if (!this.draft().excludedPredictorReadingIds.length) {
+      this.draft().invalidPredictorReadingsAcknowledged = false;
+    }
   }
 
   private invalidateMeterReviewSteps(): void {
