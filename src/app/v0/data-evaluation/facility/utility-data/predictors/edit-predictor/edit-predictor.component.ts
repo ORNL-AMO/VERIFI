@@ -3,7 +3,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { Component, inject } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, map, Observable, of, switchAll, take } from 'rxjs';
+import { from, map, Observable, of, switchAll, take } from 'rxjs';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
@@ -12,7 +12,7 @@ import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysi
 import { DetailDegreeDay } from '@data/models/degreeDays';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
-import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 // import { DegreeDaysService } from '@shared/helper-services/degree-days.service';
 import { PredictorDataHelperService } from '@shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from '@v0/shared/shared-predictors-content/edit-predictor-form.service';
@@ -21,8 +21,8 @@ import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather
 import * as _ from 'lodash';
 import { getDetailedDataForMonth, hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
-import { Month, Months } from '@shared/form-data/months';
 import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
+import { WeatherPredictorCreationService } from '@v0/shared/shared-predictors-content/weather-predictor-creation.service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -65,7 +65,8 @@ export class EditPredictorComponent {
     private loadingService: LoadingService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
-    private routerGuardService: RouterGuardService
+    private routerGuardService: RouterGuardService,
+    private weatherPredictorCreationService: WeatherPredictorCreationService
 
   ) {
   }
@@ -115,85 +116,78 @@ export class EditPredictorComponent {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.editPredictorFormService.setPredictorDataFromForm(this.predictor, this.predictorForm);
-    this.predictorForm.markAsPristine();
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
 
     if (this.addOrEdit == 'add' && this.predictorForm.controls.predictorType.value === 'Weather') {
-      const selectedTypes = this.editPredictorFormService.getSelectedWeatherTypes(this.predictorForm);
-
-      await this.commandBoundary.execute(
-        { entityKind: 'predictor', changeKind: 'bulk', label: 'Create Weather Predictor' },
-        async () => {
-          const predictors: Array<IdbPredictor> = [];
-          for (const type of selectedTypes) {
-            const newPredictor = getNewIdbPredictor(this.facility.accountId, this.facility.guid);
-            newPredictor.name = this.editPredictorFormService.getWeatherNameForType(type, this.predictorForm);
-            newPredictor.unit = this.predictorForm.controls.unit.value;
-            newPredictor.description = this.predictorForm.controls.description.value;
-            newPredictor.production = this.predictorForm.controls.production.value;
-            newPredictor.predictorType = 'Weather';
-            newPredictor.weatherStationId = this.predictorForm.controls.weatherStationId.value;
-            newPredictor.weatherStationName = this.predictor.weatherStationName;
-
-            newPredictor.weatherDataType = type;
-            newPredictor.heatingBaseTemperature = this.predictorForm.controls.heatingBaseTemperature.value;
-            newPredictor.coolingBaseTemperature = this.predictorForm.controls.coolingBaseTemperature.value;
-
-            const addedPredictor = await this.predictorHandler.addPredictor(newPredictor, activeAccountGuid);
-            predictors.push(addedPredictor);
-
-            await this.addWeatherDataForPredictor(addedPredictor, activeAccountGuid);
-          }
-          await this.analysisHandler.addAnalysisPredictors(predictors);
-        }
-      );
+      try {
+        await this.commandBoundary.execute(
+          { entityKind: 'predictor', changeKind: 'bulk', label: 'Create Weather Predictor' },
+          () => this.weatherPredictorCreationService.createFromForm({
+            predictorForm: this.predictorForm,
+            facility: this.facility,
+            activeAccountGuid,
+            weatherStationName: this.predictor.weatherStationName,
+            shouldStop: () => this.destroyed
+          })
+        );
+      } catch (error) {
+        this.loadingService.setLoadingStatus(false);
+        throw error;
+      }
+      this.predictorForm.markAsPristine();
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('Weather Predictors Created!', undefined, undefined, false, 'alert-success');
       this.cancel();
       return;
     }
 
-    await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', entityGuid: this.predictor.guid, label: 'Saving predictor' },
-      async () => {
-        if (this.addOrEdit == 'add') {
-          await this.predictorHandler.addPredictor(this.predictor, this.accountWorkspaceStore.account()?.guid);
-          await this.analysisHandler.addAnalysisPredictor(this.predictor);
-        } else {
-          await this.predictorHandler.updatePredictor(this.predictor, activeAccountGuid);
+    try {
+      await this.commandBoundary.execute(
+        { entityKind: 'predictor', changeKind: this.addOrEdit === 'add' ? 'add' : 'update', entityGuid: this.predictor.guid, label: 'Saving predictor' },
+        async () => {
+          if (this.addOrEdit == 'add') {
+            await this.predictorHandler.addPredictor(this.predictor, this.accountWorkspaceStore.account()?.guid);
+            await this.analysisHandler.addAnalysisPredictor(this.predictor);
+          } else {
+            await this.predictorHandler.updatePredictor(this.predictor, activeAccountGuid);
 
-          if (this.predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
-            let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
-            if (!predictorData || predictorData.length == 0) {
-              await this.analysisHandler.updateAnalysisPredictor(this.predictor);
-              return;
-            }
-            let predictorDates: Array<Date> = predictorData.map(pData => { return getDateFromPredictorData(pData) });
-            let minDate: Date = _.min(predictorDates);
-            let maxDate: Date = _.max(predictorDates);
-            let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, minDate, maxDate, ['humidity']);
-            if (parsedData != 'error') {
-              for (let i = 0; i < predictorData.length; i++) {
-                if (!predictorData[i].weatherOverride) {
-                  this.loadingService.setLoadingMessage('Updating Weather Predictors: (' + i + '/' + predictorData.length + ')');
-                  let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, predictorData[i].month - 1, predictorData[i].year, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
-                  const updated: IdbPredictorData = {
-                    ...predictorData[i],
-                    amount: getDegreeDayAmount(degreeDays, this.predictor.weatherDataType),
-                    weatherDataWarning: hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType),
-                    weatherDataChanged: false
-                  };
-                  await this.predictorHandler.updatePredictorData(updated, activeAccountGuid);
-                }
+            if (this.predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
+              let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
+              if (!predictorData || predictorData.length == 0) {
+                await this.analysisHandler.updateAnalysisPredictor(this.predictor);
+                return;
               }
-            } else {
-              this.toastNotificationService.weatherDataErrorToast();
+              let predictorDates: Array<Date> = predictorData.map(pData => { return getDateFromPredictorData(pData) });
+              let minDate: Date = _.min(predictorDates);
+              let maxDate: Date = _.max(predictorDates);
+              let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, minDate, maxDate, ['humidity']);
+              if (parsedData != 'error') {
+                for (let i = 0; i < predictorData.length; i++) {
+                  if (!predictorData[i].weatherOverride) {
+                    this.loadingService.setLoadingMessage('Updating Weather Predictors: (' + i + '/' + predictorData.length + ')');
+                    let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, predictorData[i].month - 1, predictorData[i].year, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
+                    const updated: IdbPredictorData = {
+                      ...predictorData[i],
+                      amount: getDegreeDayAmount(degreeDays, this.predictor.weatherDataType),
+                      weatherDataWarning: hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType),
+                      weatherDataChanged: false
+                    };
+                    await this.predictorHandler.updatePredictorData(updated, activeAccountGuid);
+                  }
+                }
+              } else {
+                this.toastNotificationService.weatherDataErrorToast();
+              }
             }
+            await this.analysisHandler.updateAnalysisPredictor(this.predictor);
           }
-          await this.analysisHandler.updateAnalysisPredictor(this.predictor);
         }
-      }
-    );
+      );
+    } catch (error) {
+      this.loadingService.setLoadingStatus(false);
+      throw error;
+    }
+    this.predictorForm.markAsPristine();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
@@ -221,51 +215,4 @@ export class EditPredictorComponent {
     return of(true);
   }
 
-  async addWeatherDataForPredictor(targetPredictor: IdbPredictor, activeAccountGuid: string) {
-    let startDate: Date = new Date(this.predictorForm.controls.startYear.value, this.predictorForm.controls.startMonth.value, 1);
-    let endDate: Date = new Date(this.predictorForm.controls.endYear.value, this.predictorForm.controls.endMonth.value, 1);
-
-    if (startDate && endDate && startDate <= endDate) {
-      let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(
-        targetPredictor.weatherStationId,
-        startDate,
-        endDate,
-        []
-      );
-
-      if (parsedData != 'error') {
-        while (startDate <= endDate) {
-          if (this.destroyed) {
-            break;
-          }
-
-          let newDate: Date = new Date(startDate);
-          let month: Month = Months.find(m => m.monthNumValue == newDate.getMonth());
-          let dateString = month.abbreviation + ', ' + newDate.getFullYear();
-          this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
-
-          let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(
-            parsedData,
-            newDate.getMonth(),
-            newDate.getFullYear(),
-            targetPredictor.heatingBaseTemperature,
-            targetPredictor.coolingBaseTemperature,
-            targetPredictor.weatherStationId,
-            targetPredictor.weatherStationName
-          );
-
-          let newPredictorData: IdbPredictorData = getNewIdbPredictorData(targetPredictor);
-          newPredictorData.year = newDate.getFullYear();
-          newPredictorData.month = newDate.getMonth() + 1;
-          newPredictorData.amount = getDegreeDayAmount(degreeDays, targetPredictor.weatherDataType);
-          newPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, targetPredictor.weatherDataType);
-
-          await this.predictorHandler.addPredictorData(newPredictorData, activeAccountGuid);
-          startDate.setMonth(startDate.getMonth() + 1);
-        }
-      } else {
-        this.toastNotificationService.weatherDataErrorToast();
-      }
-    }
-  }
 }

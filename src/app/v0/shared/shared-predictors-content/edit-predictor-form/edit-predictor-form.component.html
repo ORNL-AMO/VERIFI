@@ -264,20 +264,6 @@
     }
     <!--weather-->
     @if (predictorForm.controls.predictorType.value == 'Weather') {
-    @if (addOrEdit == 'add' && firstMeterReading && latestMeterReading) {
-    <div class="col-lg-6 col-md-12 col-sm-12">
-      <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
-      <app-label-with-tooltip [field]="'createPredictorData'" [labelId]="'createPredictorData'" [isBold]="true"
-        [label]="'Create Predictor Entries'"></app-label-with-tooltip>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" name="createPredictorData" id="createPredictorData"
-          formControlName="createPredictorData">
-        <label class="form-check-label" for="createPredictorData">
-          {{firstMeterReading| date:'MMM, yyyy'}}&mdash;{{latestMeterReading|
-          date:'MMM, yyyy'}}</label>
-      </div>
-    </div>
-    }
     <div class="col-12 mt-2">
       <div class="alert alert-info">
         Heating and cooling degree days will be calculated using the dry bulb
