@@ -1,0 +1,19 @@
+<label class="field">
+  <span>Worksheet</span>
+  <select [ngModel]="state.draft().selectedWorksheetName" (ngModelChange)="state.selectWorksheet($event)">
+    @for (name of state.worksheetNames(); track name) {
+      <option [value]="name">{{ name }}</option>
+    }
+  </select>
+</label>
+<p>{{ state.draft().headerMap.length }} data rows found. Hidden worksheets are not shown.</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr>@for (header of state.draft().selectedWorksheetData[0]; track $index) { <th>{{ header }}</th> }</tr></thead>
+    <tbody>
+      @for (row of state.draft().selectedWorksheetData.slice(1, 6); track $index) {
+        <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr>
+      }
+    </tbody>
+  </table>
+</div>

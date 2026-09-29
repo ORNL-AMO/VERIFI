@@ -43,6 +43,17 @@ import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predicto
 import { V1Routes } from './v1.routes';
 import { ImportUploadComponent } from '@app/v1/account/imports/import-upload/import-upload.component';
 import { ImportWizardComponent } from '@app/v1/account/imports/import-wizard/import-wizard.component';
+import { ImportColumnsStepComponent } from '@app/v1/account/imports/import-wizard/steps/columns/import-columns-step.component';
+import { ImportEquipmentStepComponent } from '@app/v1/account/imports/import-wizard/steps/equipment/import-equipment-step.component';
+import { ImportFacilitiesStepComponent } from '@app/v1/account/imports/import-wizard/steps/facilities/import-facilities-step.component';
+import { ImportFootprintFacilityStepComponent } from '@app/v1/account/imports/import-wizard/steps/footprint-facility/import-footprint-facility-step.component';
+import { ImportMappingStepComponent } from '@app/v1/account/imports/import-wizard/steps/mapping/import-mapping-step.component';
+import { ImportMeterReadingsStepComponent } from '@app/v1/account/imports/import-wizard/steps/meter-readings/import-meter-readings-step.component';
+import { ImportMetersStepComponent } from '@app/v1/account/imports/import-wizard/steps/meters/import-meters-step.component';
+import { ImportPredictorReadingsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictor-readings/import-predictor-readings-step.component';
+import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictors/import-predictors-step.component';
+import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
+import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
 
 describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
@@ -96,10 +107,26 @@ describe('V1Routes facility data meters routes', () => {
       component: ImportUploadComponent,
       canDeactivate: [unsavedChangesGuard]
     });
-    expect(children.find(child => child.path === 'file/:fileId/:step')).toMatchObject({
+    const wizardRoute = children.find(child => child.path === 'file/:fileId');
+    expect(wizardRoute).toMatchObject({
       component: ImportWizardComponent,
       canDeactivate: [unsavedChangesGuard]
     });
+    const steps = wizardRoute?.children ?? [];
+    expect(steps).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: 'facilities', component: ImportFacilitiesStepComponent, data: { importStep: 'facilities' } }),
+      expect.objectContaining({ path: 'worksheet', component: ImportWorksheetStepComponent, data: { importStep: 'worksheet' } }),
+      expect.objectContaining({ path: 'columns', component: ImportColumnsStepComponent, data: { importStep: 'columns' } }),
+      expect.objectContaining({ path: 'map-meters', component: ImportMappingStepComponent, data: { importStep: 'map-meters', mappingType: 'meter' } }),
+      expect.objectContaining({ path: 'meters', component: ImportMetersStepComponent, data: { importStep: 'meters' } }),
+      expect.objectContaining({ path: 'meter-readings', component: ImportMeterReadingsStepComponent, data: { importStep: 'meter-readings' } }),
+      expect.objectContaining({ path: 'map-predictors', component: ImportMappingStepComponent, data: { importStep: 'map-predictors', mappingType: 'predictor' } }),
+      expect.objectContaining({ path: 'predictors', component: ImportPredictorsStepComponent, data: { importStep: 'predictors' } }),
+      expect.objectContaining({ path: 'predictor-readings', component: ImportPredictorReadingsStepComponent, data: { importStep: 'predictor-readings' } }),
+      expect.objectContaining({ path: 'facility', component: ImportFootprintFacilityStepComponent, data: { importStep: 'facility' } }),
+      expect.objectContaining({ path: 'equipment', component: ImportEquipmentStepComponent, data: { importStep: 'equipment' } }),
+      expect.objectContaining({ path: 'review', component: ImportReviewStepComponent, data: { importStep: 'review' } })
+    ]));
   });
 
   it('routes Custom Fuels through the v1 editor with unsaved-change protection', () => {

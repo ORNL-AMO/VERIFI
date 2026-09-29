@@ -1,78 +1,58 @@
-@if (draft(); as file) {
+@if (state.draft(); as file) {
   <section class="import-page" aria-labelledby="import-wizard-title">
     <header class="v1-section-header">
-      <div><p class="v1-eyebrow">Imports &amp; Backup · {{ file.name }}</p><h1 id="import-wizard-title">{{ currentStep()?.label }}</h1></div>
-      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="openUpload()">Import queue</button>
+      <div>
+        <p class="v1-eyebrow">Imports &amp; Backup · {{ file.name }}</p>
+        <h1 id="import-wizard-title">{{ state.currentStep()?.label }}</h1>
+      </div>
+      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="openUpload()">
+        Import queue
+      </button>
     </header>
 
-    <app-import-stepper [steps]="steps()" [currentStep]="currentStepId()" [completedSteps]="file.completedSteps" (stepSelected)="openCompletedStep($event)"></app-import-stepper>
+    <app-import-stepper
+      [steps]="state.steps()"
+      [currentStep]="state.currentStepId()"
+      [completedSteps]="file.completedSteps"
+      (stepSelected)="openCompletedStep($event)">
+    </app-import-stepper>
 
-    <div class="v1-alert v1-alert--info" role="note">{{ currentStep()?.help }}</div>
-    @if (error()) { <div class="v1-alert v1-alert--danger" role="alert" tabindex="-1">{{ error() }}</div> }
+    <div class="v1-alert v1-alert--info" role="note">{{ state.currentStep()?.help }}</div>
+    @if (state.error()) {
+      <div class="v1-alert v1-alert--danger" role="alert" tabindex="-1">{{ state.error() }}</div>
+    }
 
-    @if (committed()) {
+    @if (state.committed()) {
       <article class="import-panel import-success" role="status">
         <h2>Import complete</h2>
         <p>The workbook was saved in one transaction. {{ session.summary()?.affectedFacilityGuids?.length || 0 }} facilities were affected.</p>
-        <div class="button-row"><button type="button" class="v1-btn v1-btn--action" (click)="viewImportedData()">View imported data</button><button type="button" class="v1-btn v1-btn--secondary" (click)="importAnother()">Import another file</button></div>
+        <div class="button-row">
+          <button type="button" class="v1-btn v1-btn--action" (click)="state.viewImportedData()">View imported data</button>
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="state.importAnother()">Import another file</button>
+        </div>
       </article>
     } @else {
       <article class="import-panel">
-        @switch (currentStepId()) {
-          @case ('worksheet') {
-            <label class="field"><span>Worksheet</span><select [ngModel]="file.selectedWorksheetName" (ngModelChange)="selectWorksheet($event)">@for (name of worksheetNames(); track name) { <option [value]="name">{{ name }}</option> }</select></label>
-            <p>{{ file.headerMap.length }} data rows found. Hidden worksheets are not shown.</p>
-            <div class="table-wrap"><table><thead><tr>@for (header of file.selectedWorksheetData[0]; track $index) { <th>{{ header }}</th> }</tr></thead><tbody>@for (row of file.selectedWorksheetData.slice(1, 6); track $index) { <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr> }</tbody></table></div>
-          }
-          @case ('columns') {
-            <p><strong>Date range:</strong> {{ dateRange() }}</p>
-            <table><thead><tr><th>Column</th><th>Use as</th></tr></thead><tbody>@for (column of allColumns(); track column.id) { <tr><td>{{ column.value }}</td><td><select [ngModel]="columnTarget(column.id)" (ngModelChange)="assignColumn(column.id, $event)"><option>Worksheet Columns</option><option>Meters</option><option>Predictors</option><option>Date</option></select></td></tr> }</tbody></table>
-          }
-          @case ('map-meters') {
-            <div class="add-facility"><label class="field"><span>New facility name</span><input [ngModel]="newFacilityName()" (ngModelChange)="newFacilityName.set($event)"></label><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!newFacilityName().trim()" (click)="addFacility()">Add facility</button></div>
-            @if (!meterColumns().length) { <p>No meter columns were selected. You can continue to predictors.</p> }
-            @for (item of mappingItems('meter'); track item.id) { <label class="field"><span>{{ item.value }}</span><select [ngModel]="item.facilityId" (ngModelChange)="mapColumn('meter', item.id, $event)"><option value="">Unmapped</option>@for (facility of file.importFacilities; track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select></label> }
-          }
-          @case ('map-predictors') {
-            <div class="add-facility"><label class="field"><span>New facility name</span><input [ngModel]="newFacilityName()" (ngModelChange)="newFacilityName.set($event)"></label><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!newFacilityName().trim()" (click)="addFacility()">Add facility</button></div>
-            @if (!predictorColumns().length) { <p>No predictor columns were selected.</p> }
-            @for (item of mappingItems('predictor'); track item.id) { <label class="field"><span>{{ item.value }}</span><select [ngModel]="item.facilityId" (ngModelChange)="mapColumn('predictor', item.id, $event)"><option value="">Unmapped</option>@for (facility of file.importFacilities; track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select></label> }
-          }
-          @case ('facilities') {
-            <h2>Facilities found</h2><ul class="review-list">@for (facility of file.importFacilities; track facility.guid) { <li><strong>{{ facility.name }}</strong><span>{{ facility.id ? 'Update existing facility' : 'Create facility' }}</span></li> }</ul>
-          }
-          @case ('facility') {
-            <label class="field"><span>Import energy uses into</span><select [ngModel]="file.selectedFacilityId" (ngModelChange)="setFootprintFacility($event)"><option value="">Select a facility</option>@for (facility of workspace.facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select></label>
-          }
-          @case ('meters') {
-            @if (!file.meters.length) { <p>No meters are included.</p> }
-            <div class="table-wrap"><table><thead><tr><th>Include</th><th>Name</th><th>Source</th><th>Starting unit</th><th>Status</th></tr></thead><tbody>@for (meter of file.meters; track meter.guid) { <tr [class.invalid-row]="!meter.skipImport && isMeterInvalid(meter)"><td><input type="checkbox" [ngModel]="!meter.skipImport" (ngModelChange)="meter.skipImport = !$event; session.notifyChanged()" [attr.aria-label]="'Include ' + meter.name"></td><td><input [(ngModel)]="meter.name" (ngModelChange)="session.notifyChanged()"></td><td><input [(ngModel)]="meter.source" (ngModelChange)="session.notifyChanged()"></td><td><input [(ngModel)]="meter.startingUnit" (ngModelChange)="session.notifyChanged()"></td><td>{{ meter.skipImport ? 'Skipped' : (isMeterInvalid(meter) ? 'Needs attention' : (meter.id ? 'Update' : 'New')) }}</td></tr> }</tbody></table></div>
-          }
-          @case ('meter-readings') {
-            <p>{{ file.meterData.length }} readings found; {{ invalidReadingCount() }} need attention.</p>
-            @if (invalidReadingCount()) {
-              <div class="v1-alert v1-alert--warning"><strong>Invalid readings are never silently imported.</strong><ul>@for (reading of file.meterData; track reading.guid; let index = $index) { @if (readingInvalid(index)) { <li><label><input type="checkbox" [checked]="isReadingExcluded(index)" (change)="toggleExcludedReading(index, $any($event.target).checked)"> Exclude {{ reading.year }}-{{ reading.month }}-{{ reading.day }} for meter {{ reading.meterId }}</label></li> } }</ul><label><input type="checkbox" [(ngModel)]="file.invalidMeterReadingsAcknowledged" (ngModelChange)="session.notifyChanged()"> I acknowledge that excluded readings will not be imported.</label></div>
-            }
-            <fieldset><legend>Existing reading decisions</legend>@for (meter of file.meters; track meter.guid) { @if (meter.id) { <label class="check-row"><input type="checkbox" [checked]="file.skipExistingReadingsMeterIds.includes(meter.guid)" (change)="$any($event.target).checked ? file.skipExistingReadingsMeterIds.push(meter.guid) : file.skipExistingReadingsMeterIds.splice(file.skipExistingReadingsMeterIds.indexOf(meter.guid), 1); session.notifyChanged()"> Keep existing readings for {{ meter.name }}</label> } }</fieldset>
-          }
-          @case ('predictors') {
-            @if (!file.predictors.length) { <p>No predictors are included.</p> }
-            <div class="table-wrap"><table><thead><tr><th>Include</th><th>Name</th><th>Unit</th><th>Production</th><th>Status</th></tr></thead><tbody>@for (predictor of file.predictors; track predictor.guid) { <tr [class.invalid-row]="!predictor.skipImport && !predictor.name"><td><input type="checkbox" [ngModel]="!predictor.skipImport" (ngModelChange)="predictor.skipImport = !$event; session.notifyChanged()"></td><td><input [(ngModel)]="predictor.name" (ngModelChange)="session.notifyChanged()"></td><td><input [(ngModel)]="predictor.unit" (ngModelChange)="session.notifyChanged()"></td><td><input type="checkbox" [(ngModel)]="predictor.production" (ngModelChange)="predictor.productionInAnalysis = $event; session.notifyChanged()"></td><td>{{ predictor.skipImport ? 'Skipped' : (predictor.id ? 'Update' : 'New') }}</td></tr> }</tbody></table></div>
-          }
-          @case ('predictor-readings') {
-            <p>{{ file.predictorData.length }} predictor readings found.</p><fieldset><legend>Existing predictor decisions</legend>@for (facility of file.importFacilities; track facility.guid) { <label class="check-row"><input type="checkbox" [checked]="file.skipExistingPredictorFacilityIds.includes(facility.guid)" (change)="$any($event.target).checked ? file.skipExistingPredictorFacilityIds.push(facility.guid) : file.skipExistingPredictorFacilityIds.splice(file.skipExistingPredictorFacilityIds.indexOf(facility.guid), 1); session.notifyChanged()"> Keep existing predictor readings for {{ facility.name }}</label> }</fieldset>
-          }
-          @case ('equipment') {
-            <p>Review name-matched equipment updates and choose source-compatible meter groups. A piece of equipment can use only one meter group for each energy source.</p>@for (equipment of file.facilityEnergyUseEquipment; track equipment.guid; let equipmentIndex = $index) { <section class="equipment"><h3>{{ equipment.name }} <small>{{ equipment.id ? 'Update' : 'New' }}</small></h3>@for (group of compatibleMeterGroups(equipmentIndex); track group.guid) { <label class="check-row"><input type="checkbox" [checked]="equipment.utilityMeterGroupIds.includes(group.guid)" [disabled]="meterGroupSourceConflict(equipmentIndex, group.guid)" (change)="toggleEquipmentMeterGroup(equipmentIndex, group.guid, $any($event.target).checked)"> {{ group.name }} @if (meterGroupSourceConflict(equipmentIndex, group.guid)) { <span>— source already linked</span> }</label> }</section> }
-          }
-          @case ('review') {
-            <h2>Ready to import</h2><dl class="summary"><div><dt>Facilities</dt><dd>{{ file.importFacilities.length }}</dd></div><div><dt>Meters</dt><dd>{{ file.meters.length }}</dd></div><div><dt>Meter readings</dt><dd>{{ file.meterData.length - file.excludedMeterReadingIds.length }}</dd></div><div><dt>Predictors</dt><dd>{{ file.predictors.length }}</dd></div><div><dt>Predictor readings</dt><dd>{{ file.predictorData.length }}</dd></div><div><dt>Energy-use groups</dt><dd>{{ file.facilityEnergyUseGroups.length }}</dd></div><div><dt>Equipment</dt><dd>{{ file.facilityEnergyUseEquipment.length }}</dd></div></dl>
-          }
-        }
+        <router-outlet></router-outlet>
       </article>
 
-      <footer class="wizard-actions"><button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="back()">Back</button>@if (currentStepId() === 'review') { <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="commit()">{{ session.pending() ? 'Importing…' : 'Import data' }}</button> } @else { <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="continue()">Continue</button> }</footer>
-      @if (session.pending()) { <div class="commit-overlay" role="status" aria-live="assertive"><strong>Importing data…</strong><span>Validating, saving, and refreshing the workspace. Do not close this window.</span></div> }
+      <footer class="wizard-actions">
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="back()">Back</button>
+        @if (state.currentStepId() === 'review') {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="commit()">
+            {{ session.pending() ? 'Importing…' : 'Import data' }}
+          </button>
+        } @else {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="continue()">Continue</button>
+        }
+      </footer>
+
+      @if (session.pending()) {
+        <div class="commit-overlay" role="status" aria-live="assertive">
+          <strong>Importing data…</strong>
+          <span>Validating, saving, and refreshing the workspace. Do not close this window.</span>
+        </div>
+      }
     }
   </section>
 }

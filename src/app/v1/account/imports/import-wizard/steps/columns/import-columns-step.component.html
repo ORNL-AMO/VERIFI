@@ -1,0 +1,19 @@
+<p><strong>Date range:</strong> {{ state.dateRange() }}</p>
+<table>
+  <thead><tr><th>Column</th><th>Use as</th></tr></thead>
+  <tbody>
+    @for (column of state.allColumns(); track column.id) {
+      <tr>
+        <td>{{ column.value }}</td>
+        <td>
+          <select [ngModel]="state.columnTarget(column.id)" (ngModelChange)="state.assignColumn(column.id, $event)">
+            <option>Worksheet Columns</option>
+            <option>Meters</option>
+            <option>Predictors</option>
+            <option>Date</option>
+          </select>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

@@ -1,0 +1,9 @@
+<label class="field">
+  <span>Import energy uses into</span>
+  <select [ngModel]="state.draft().selectedFacilityId" (ngModelChange)="state.setFootprintFacility($event)">
+    <option value="">Select a facility</option>
+    @for (facility of state.workspace.facilities(); track facility.guid) {
+      <option [value]="facility.guid">{{ facility.name }}</option>
+    }
+  </select>
+</label>

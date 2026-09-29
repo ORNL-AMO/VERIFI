@@ -1,20 +1,22 @@
 .import-page { display: grid; gap: 1rem; padding: 1rem; position: relative; }
 .import-panel { border: 1px solid var(--v1-border-color, #c8d0d8); padding: 1rem; background: var(--bs-body-bg, #fff); }
-.field { display: grid; gap: .35rem; max-width: 36rem; margin-bottom: 1rem; font-weight: 600; }
-input, select { min-height: 2.25rem; padding: .35rem .5rem; border: 1px solid var(--v1-border-color, #9aa5b1); background: var(--bs-body-bg, #fff); color: inherit; }
-.table-wrap { overflow: auto; max-width: 100%; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: .55rem; border: 1px solid var(--v1-border-color, #d5dae0); text-align: left; }
-.invalid-row { background: color-mix(in srgb, var(--bs-danger, #dc3545) 12%, transparent); }
-.wizard-actions, .button-row { display: flex; justify-content: space-between; gap: .75rem; }
-.review-list { list-style: none; margin: 0; padding: 0; }
-.review-list li { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--v1-border-color, #ddd); padding: .65rem 0; }
-.review-list span, small { color: var(--bs-secondary-color, #666); }
-.check-row { display: block; margin: .5rem 0; }
-.equipment { border-top: 1px solid var(--v1-border-color, #ddd); padding-block: .75rem; }
-.add-facility { display: flex; align-items: end; gap: .75rem; margin-bottom: 1rem; }.add-facility .field { margin: 0; flex: 1; }
-.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem; }
-.summary div { border: 1px solid var(--v1-border-color, #ddd); padding: .75rem; }
-.summary dt { color: var(--bs-secondary-color, #666); }.summary dd { margin: 0; font-size: 1.5rem; font-weight: 700; }
-.commit-overlay { position: fixed; inset: 0; z-index: 1100; display: grid; place-content: center; gap: .5rem; text-align: center; background: rgba(0, 0, 0, .65); color: #fff; }
-@media (max-width: 48rem) { .wizard-actions { position: sticky; bottom: 0; background: var(--bs-body-bg, #fff); padding: .75rem 0; } }
+.import-page .field { display: grid; gap: .35rem; max-width: 36rem; margin-bottom: 1rem; font-weight: 600; }
+.import-page input, .import-page select { min-height: 2.25rem; padding: .35rem .5rem; border: 1px solid var(--v1-border-color, #9aa5b1); background: var(--bs-body-bg, #fff); color: inherit; }
+.import-page .table-wrap { overflow: auto; max-width: 100%; }
+.import-page table { width: 100%; border-collapse: collapse; }
+.import-page th, .import-page td { padding: .55rem; border: 1px solid var(--v1-border-color, #d5dae0); text-align: left; }
+.import-page .invalid-row { background: color-mix(in srgb, var(--bs-danger, #dc3545) 12%, transparent); }
+.import-page .wizard-actions, .import-page .button-row { display: flex; justify-content: space-between; gap: .75rem; }
+.import-page .review-list { list-style: none; margin: 0; padding: 0; }
+.import-page .review-list li { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--v1-border-color, #ddd); padding: .65rem 0; }
+.import-page .review-list span, .import-page small { color: var(--bs-secondary-color, #666); }
+.import-page .check-row { display: block; margin: .5rem 0; }
+.import-page .equipment { border-top: 1px solid var(--v1-border-color, #ddd); padding-block: .75rem; }
+.import-page .add-facility { display: flex; align-items: end; gap: .75rem; margin-bottom: 1rem; }
+.import-page .add-facility .field { margin: 0; flex: 1; }
+.import-page .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem; }
+.import-page .summary div { border: 1px solid var(--v1-border-color, #ddd); padding: .75rem; }
+.import-page .summary dt { color: var(--bs-secondary-color, #666); }
+.import-page .summary dd { margin: 0; font-size: 1.5rem; font-weight: 700; }
+.import-page .commit-overlay { position: fixed; inset: 0; z-index: 1100; display: grid; place-content: center; gap: .5rem; text-align: center; background: rgba(0, 0, 0, .65); color: #fff; }
+@media (max-width: 48rem) { .import-page .wizard-actions { position: sticky; bottom: 0; background: var(--bs-body-bg, #fff); padding: .75rem 0; } }

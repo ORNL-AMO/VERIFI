@@ -1,0 +1,17 @@
+@if (!state.draft().predictors.length) { <p>No predictors are included.</p> }
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Include</th><th>Name</th><th>Unit</th><th>Production</th><th>Status</th></tr></thead>
+    <tbody>
+      @for (predictor of state.draft().predictors; track predictor.guid; let index = $index) {
+        <tr [class.invalid-row]="!predictor.skipImport && !predictor.name">
+          <td><input type="checkbox" [ngModel]="!predictor.skipImport" (ngModelChange)="state.togglePredictorIncluded(index, $event)" [attr.aria-label]="'Include ' + predictor.name"></td>
+          <td><input [(ngModel)]="predictor.name" (ngModelChange)="state.notifyChanged()"></td>
+          <td><input [(ngModel)]="predictor.unit" (ngModelChange)="state.notifyChanged()"></td>
+          <td><input type="checkbox" [ngModel]="predictor.production" (ngModelChange)="state.setPredictorProduction(index, $event)" [attr.aria-label]="'Treat ' + predictor.name + ' as production'"></td>
+          <td>{{ predictor.skipImport ? 'Skipped' : (predictor.id ? 'Update' : 'New') }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

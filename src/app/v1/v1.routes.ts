@@ -65,6 +65,17 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
 import { predictorCanonicalRouteGuard } from '@app/v1/facility/data/predictors/predictor-canonical-route.guard';
 import { ImportUploadComponent } from '@app/v1/account/imports/import-upload/import-upload.component';
 import { ImportWizardComponent } from '@app/v1/account/imports/import-wizard/import-wizard.component';
+import { ImportColumnsStepComponent } from '@app/v1/account/imports/import-wizard/steps/columns/import-columns-step.component';
+import { ImportEquipmentStepComponent } from '@app/v1/account/imports/import-wizard/steps/equipment/import-equipment-step.component';
+import { ImportFacilitiesStepComponent } from '@app/v1/account/imports/import-wizard/steps/facilities/import-facilities-step.component';
+import { ImportFootprintFacilityStepComponent } from '@app/v1/account/imports/import-wizard/steps/footprint-facility/import-footprint-facility-step.component';
+import { ImportMappingStepComponent } from '@app/v1/account/imports/import-wizard/steps/mapping/import-mapping-step.component';
+import { ImportMeterReadingsStepComponent } from '@app/v1/account/imports/import-wizard/steps/meter-readings/import-meter-readings-step.component';
+import { ImportMetersStepComponent } from '@app/v1/account/imports/import-wizard/steps/meters/import-meters-step.component';
+import { ImportPredictorReadingsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictor-readings/import-predictor-readings-step.component';
+import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictors/import-predictors-step.component';
+import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
+import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
 
 export const V1Routes: Routes = [
   {
@@ -130,7 +141,25 @@ export const V1Routes: Routes = [
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'upload' },
               { path: 'upload', component: ImportUploadComponent, canDeactivate: [unsavedChangesGuard] },
-              { path: 'file/:fileId/:step', component: ImportWizardComponent, canDeactivate: [unsavedChangesGuard] },
+              {
+                path: 'file/:fileId',
+                component: ImportWizardComponent,
+                canDeactivate: [unsavedChangesGuard],
+                children: [
+                  { path: 'facilities', component: ImportFacilitiesStepComponent, data: { importStep: 'facilities' } },
+                  { path: 'worksheet', component: ImportWorksheetStepComponent, data: { importStep: 'worksheet' } },
+                  { path: 'columns', component: ImportColumnsStepComponent, data: { importStep: 'columns' } },
+                  { path: 'map-meters', component: ImportMappingStepComponent, data: { importStep: 'map-meters', mappingType: 'meter' } },
+                  { path: 'meters', component: ImportMetersStepComponent, data: { importStep: 'meters' } },
+                  { path: 'meter-readings', component: ImportMeterReadingsStepComponent, data: { importStep: 'meter-readings' } },
+                  { path: 'map-predictors', component: ImportMappingStepComponent, data: { importStep: 'map-predictors', mappingType: 'predictor' } },
+                  { path: 'predictors', component: ImportPredictorsStepComponent, data: { importStep: 'predictors' } },
+                  { path: 'predictor-readings', component: ImportPredictorReadingsStepComponent, data: { importStep: 'predictor-readings' } },
+                  { path: 'facility', component: ImportFootprintFacilityStepComponent, data: { importStep: 'facility' } },
+                  { path: 'equipment', component: ImportEquipmentStepComponent, data: { importStep: 'equipment' } },
+                  { path: 'review', component: ImportReviewStepComponent, data: { importStep: 'review' } }
+                ]
+              },
               { path: '**', redirectTo: 'upload' }
             ]
           },

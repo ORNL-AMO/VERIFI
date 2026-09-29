@@ -1,0 +1,10 @@
+<p>{{ state.draft().predictorData.length }} predictor readings found.</p>
+<fieldset>
+  <legend>Existing predictor decisions</legend>
+  @for (facility of state.draft().importFacilities; track facility.guid) {
+    <label class="check-row">
+      <input type="checkbox" [checked]="state.draft().skipExistingPredictorFacilityIds.includes(facility.guid)" (change)="state.setSkipExistingPredictorReadings(facility.guid, $any($event.target).checked)">
+      Keep existing predictor readings for {{ facility.name }}
+    </label>
+  }
+</fieldset>

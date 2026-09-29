@@ -1,0 +1,33 @@
+<p>{{ state.draft().meterData.length }} readings found; {{ state.invalidReadingCount() }} need attention.</p>
+@if (state.invalidReadingCount()) {
+  <div class="v1-alert v1-alert--warning">
+    <strong>Invalid readings are never silently imported.</strong>
+    <ul>
+      @for (reading of state.draft().meterData; track reading.guid; let index = $index) {
+        @if (state.readingInvalid(index)) {
+          <li>
+            <label>
+              <input type="checkbox" [checked]="state.isReadingExcluded(index)" (change)="state.toggleExcludedReading(index, $any($event.target).checked)">
+              Exclude {{ reading.year }}-{{ reading.month }}-{{ reading.day }} for meter {{ reading.meterId }}
+            </label>
+          </li>
+        }
+      }
+    </ul>
+    <label>
+      <input type="checkbox" [(ngModel)]="state.draft().invalidMeterReadingsAcknowledged" (ngModelChange)="state.notifyChanged()">
+      I acknowledge that excluded readings will not be imported.
+    </label>
+  </div>
+}
+<fieldset>
+  <legend>Existing reading decisions</legend>
+  @for (meter of state.draft().meters; track meter.guid) {
+    @if (meter.id) {
+      <label class="check-row">
+        <input type="checkbox" [checked]="state.draft().skipExistingReadingsMeterIds.includes(meter.guid)" (change)="state.setSkipExistingMeterReadings(meter.guid, $any($event.target).checked)">
+        Keep existing readings for {{ meter.name }}
+      </label>
+    }
+  }
+</fieldset>

@@ -81,6 +81,7 @@ Accepted workbook extensions are `.xlsx`, `.xls`, and `.xlsm`. The shipped Excel
 
 - Read multiple files independently with the browser File API and SheetJS.
 - Show file-specific detection or parse failures.
+- Keep shared workflow state and controls in the file-route shell, with each named step implemented as a routed child component.
 - Provide an accessible named stepper, Back/Continue controls, concise contextual help, error alerts, and a live non-dismissible commit state.
 - Protect dirty and pending sessions from accidental navigation.
 

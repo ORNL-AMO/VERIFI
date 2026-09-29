@@ -1,0 +1,17 @@
+@if (!state.draft().meters.length) { <p>No meters are included.</p> }
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Include</th><th>Name</th><th>Source</th><th>Starting unit</th><th>Status</th></tr></thead>
+    <tbody>
+      @for (meter of state.draft().meters; track meter.guid; let index = $index) {
+        <tr [class.invalid-row]="!meter.skipImport && state.meterInvalid(index)">
+          <td><input type="checkbox" [ngModel]="!meter.skipImport" (ngModelChange)="state.toggleMeterIncluded(index, $event)" [attr.aria-label]="'Include ' + meter.name"></td>
+          <td><input [(ngModel)]="meter.name" (ngModelChange)="state.notifyChanged()"></td>
+          <td><input [(ngModel)]="meter.source" (ngModelChange)="state.notifyChanged()"></td>
+          <td><input [(ngModel)]="meter.startingUnit" (ngModelChange)="state.notifyChanged()"></td>
+          <td>{{ meter.skipImport ? 'Skipped' : (state.meterInvalid(index) ? 'Needs attention' : (meter.id ? 'Update' : 'New')) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
