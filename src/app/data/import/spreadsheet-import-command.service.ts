@@ -132,9 +132,22 @@ export class SpreadsheetImportCommandService {
     unique('facility', request.facilities.map(value => value.guid));
     unique('meter group', request.meterGroups.map(value => value.guid));
     unique('meter', request.meters.map(value => value.guid));
+    unique('meter reading', request.meterReadings.map(value => value.guid));
     unique('predictor', request.predictors.map(value => value.guid));
+    unique('predictor reading', request.predictorReadings.map(value => value.guid));
     unique('energy-use group', request.energyUseGroups.map(value => value.guid));
     unique('equipment', request.energyUseEquipment.map(value => value.guid));
+    unique('meter reading date', request.meterReadings.map(value => `${value.meterId}:${value.year}:${value.month}:${value.day}`));
+    unique('predictor reading month', request.predictorReadings.map(value => `${value.predictorId}:${value.year}:${value.month}`));
+
+    const requestedGuids = [
+      ...request.facilities, ...request.meterGroups, ...request.meters, ...request.meterReadings,
+      ...request.predictors, ...request.predictorReadings, ...request.energyUseGroups,
+      ...request.energyUseEquipment
+    ].map(value => value.guid);
+    if (requestedGuids.some(guid => existing.foreignGuids.has(guid))) {
+      throw new WorkspaceWriteError('cross-account-entity', 'The import reuses an identifier owned by another account.');
+    }
 
     const facilityIds = new Set([...existing.facilities, ...request.facilities].map(value => value.guid));
     const meterIds = new Set([...existing.meters, ...request.meters].map(value => value.guid));
@@ -170,6 +183,11 @@ export class SpreadsheetImportCommandService {
       transaction.getAll<any>('facilityEnergyUseGroups'), transaction.getAll<any>('facilityEnergyUseEquipment')
     ]);
     const accountGuid = this.workspaceStore.account().guid;
+    const allCollections = [facilities, meterGroups, meters, meterReadings, predictors, predictorReadings, energyUseGroups, energyUseEquipment];
+    const foreignGuids = new Set(allCollections
+      .flatMap(collection => collection)
+      .filter(value => value.accountId !== accountGuid)
+      .map(value => value.guid));
     return {
       facilities: facilities.filter(value => value.accountId === accountGuid),
       meterGroups: meterGroups.filter(value => value.accountId === accountGuid),
@@ -178,7 +196,8 @@ export class SpreadsheetImportCommandService {
       predictors: predictors.filter(value => value.accountId === accountGuid),
       predictorReadings: predictorReadings.filter(value => value.accountId === accountGuid),
       energyUseGroups: energyUseGroups.filter(value => value.accountId === accountGuid),
-      energyUseEquipment: energyUseEquipment.filter(value => value.accountId === accountGuid)
+      energyUseEquipment: energyUseEquipment.filter(value => value.accountId === accountGuid),
+      foreignGuids
     };
   }
 
@@ -254,4 +273,5 @@ interface ExistingImportData {
   predictorReadings: IdbPredictorData[];
   energyUseGroups: any[];
   energyUseEquipment: any[];
+  foreignGuids: Set<string>;
 }

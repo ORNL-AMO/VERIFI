@@ -55,6 +55,14 @@ describe('SpreadsheetImportCommandService', () => {
     expect(writes).toHaveLength(0);
   });
 
+  it('rejects duplicate reading periods before writing', async () => {
+    const { service, writes } = setup();
+    const invalid = request();
+    invalid.meterReadings.push({ ...invalid.meterReadings[0], guid: 'reading-b' });
+    await expect(service.commit(invalid)).rejects.toMatchObject({ code: 'validation-failed' });
+    expect(writes).toHaveLength(0);
+  });
+
   function request(): ImportCommitRequest {
     const timestamp = new Date('2025-01-01T00:00:00Z');
     return {
