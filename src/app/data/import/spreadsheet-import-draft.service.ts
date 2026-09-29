@@ -36,6 +36,7 @@ import {
 import { checkSameMonthPredictorData } from './upload-helper-functions';
 import { applyImportedWeatherReadingSemantics } from './predictor-import-review';
 import { predictorReadingEntityKey } from './predictor-reading-import-review';
+import { meterReadingEntityKey } from './meter-reading-import-review';
 
 @Injectable({ providedIn: 'root' })
 export class SpreadsheetImportDraftService {
@@ -124,7 +125,7 @@ export class SpreadsheetImportDraftService {
     const sheetMetadata = workbook.Workbook?.Sheets;
     if (!sheetMetadata) return [...workbook.SheetNames];
     return sheetMetadata
-      .filter(sheet => includeHidden || sheet.Hidden !== 1)
+      .filter(sheet => includeHidden || sheet.Hidden === 0)
       .map(sheet => sheet.name);
   }
 
@@ -315,13 +316,18 @@ export class SpreadsheetImportDraftService {
 
     const excluded = new Set(draft.excludedMeterReadingIds.map(String));
     const updatedExclusions: Array<number | string> = [];
-    draft.meterData = rebuilt.map(reading => {
-      const previous = previousReadings.find(candidate => this.sameMeterReading(candidate, reading));
+    const matchedPreviousIndices = new Set<number>();
+    draft.meterData = rebuilt.map((reading, index) => {
+      const previousIndex = previousReadings.findIndex((candidate, candidateIndex) =>
+        !matchedPreviousIndices.has(candidateIndex) && this.sameMeterReading(candidate, reading));
+      const previous = previousReadings[previousIndex];
+      if (previousIndex >= 0) matchedPreviousIndices.add(previousIndex);
       const reconciled = previous && reading.id == null
         ? { ...reading, id: previous.id, guid: previous.guid }
         : reading;
-      if (previous && excluded.has(String(previous.id ?? previous.guid))) {
-        updatedExclusions.push(reconciled.id ?? reconciled.guid);
+      if (previous && (excluded.has(meterReadingEntityKey(previous, previousIndex))
+        || excluded.has(meterReadingEntityKey(previous)))) {
+        updatedExclusions.push(meterReadingEntityKey(reconciled, index));
       }
       return reconciled;
     });

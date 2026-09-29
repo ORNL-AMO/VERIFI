@@ -35,10 +35,17 @@ describe('SpreadsheetImportDraftService', () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Date'], ['2025-01-01']]), 'Visible');
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Lookup']]), 'Hidden');
-    workbook.Workbook = { Sheets: [{ name: 'Visible', Hidden: 0 }, { name: 'Hidden', Hidden: 1 }] };
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Lookup']]), 'Very Hidden');
+    workbook.Workbook = {
+      Sheets: [
+        { name: 'Visible', Hidden: 0 },
+        { name: 'Hidden', Hidden: 1 },
+        { name: 'Very Hidden', Hidden: 2 }
+      ]
+    };
 
     expect(service.visibleWorksheetNames(workbook)).toEqual(['Visible']);
-    expect(service.visibleWorksheetNames(workbook, true)).toEqual(['Visible', 'Hidden']);
+    expect(service.visibleWorksheetNames(workbook, true)).toEqual(['Visible', 'Hidden', 'Very Hidden']);
   });
 
   it('replaces a meter and retargets readings and import decisions without losing source identity', () => {
@@ -87,7 +94,35 @@ describe('SpreadsheetImportDraftService', () => {
       meterId: replacement.guid
     }));
     expect(draft.skipExistingReadingsMeterIds).toEqual([replacement.guid]);
-    expect(draft.excludedMeterReadingIds).toEqual(['old-reading']);
+    expect(draft.excludedMeterReadingIds).toEqual(['old-reading:0']);
+  });
+
+  it('preserves the selected occurrence when duplicate meter readings are rebuilt', () => {
+    const parser = {
+      getUtilityMeterData: vi.fn((_workbook, meters) => [
+        reading({ guid: 'rebuilt-a', meterId: meters[0].guid }),
+        reading({ guid: 'rebuilt-b', meterId: meters[0].guid })
+      ])
+    };
+    const draftService = new SpreadsheetImportDraftService(
+      { meterData: () => [] } as any,
+      {} as any, {} as any, {} as any, parser as any, {} as any, {} as any, {} as any
+    );
+    const original = meter({ guid: 'import-meter', meterNumber: 'WORKBOOK-17', importWizardName: 'WORKBOOK-17' });
+    const replacement = meter({ id: 9, guid: 'existing-meter', meterNumber: 'LIVE-42' });
+    const draft = importDraft('verifi-v2', {
+      meters: [original],
+      meterData: [
+        reading({ id: 21, guid: 'old-a', meterId: original.guid }),
+        reading({ id: 22, guid: 'old-b', meterId: original.guid })
+      ],
+      excludedMeterReadingIds: ['22:1']
+    });
+
+    draftService.replaceMeter(draft, original.guid, replacement);
+
+    expect(draft.meterData.map(value => value.guid)).toEqual(['old-a', 'old-b']);
+    expect(draft.excludedMeterReadingIds).toEqual(['22:1']);
   });
 
   it('materializes general predictors without overwriting reviewed meters', () => {
@@ -167,7 +202,7 @@ describe('SpreadsheetImportDraftService', () => {
         facilityId: 'facility-a', facilityName: 'Plant', color: '',
         groupItems: [{ id: 'predictor-column', index: 1, value: 'HDD 60' }]
       }],
-      headerMap: [{ Date: '2026-01-01', 'HDD 60': 18 }]
+      headerMap: [{ Date: '2026-01-01T12:00:00', 'HDD 60': 18 }]
     });
 
     draftService.materializeGeneralPredictors(draft);

@@ -63,6 +63,21 @@ describe('SpreadsheetImportCommandService', () => {
     expect(writes).toHaveLength(0);
   });
 
+  it('allows one duplicate meter date when the other reading is explicitly excluded', async () => {
+    const imported = request();
+    imported.meterReadings = [
+      { ...imported.meterReadings[0], id: 22, guid: 'shared-reading', totalEnergyUse: 10 },
+      { ...imported.meterReadings[0], id: 22, guid: 'shared-reading', totalEnergyUse: 12 }
+    ];
+    imported.excludedMeterReadingIds = ['22:1'];
+    imported.invalidMeterReadingsAcknowledged = true;
+    const { service, writes } = setup();
+
+    await service.commit(imported);
+
+    expect(writes.filter(write => write.store === 'utilityMeterData').map(write => write.value.totalEnergyUse)).toEqual([10]);
+  });
+
   it('keeps same-date workspace readings while still importing new dates', async () => {
     const imported = request();
     const current = { ...structuredClone(imported.meterReadings[0]), guid: 'current-reading', id: 12 };

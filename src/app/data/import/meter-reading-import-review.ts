@@ -100,7 +100,7 @@ export function buildImportMeterReadingReview(
   const currentByPeriod = new Map<string, IdbUtilityMeterData>();
   options.currentReadings.forEach(reading => {
     const key = meterReadingPeriodKey(reading);
-    if (!currentByPeriod.has(key)) currentByPeriod.set(key, reading);
+    if (key && !currentByPeriod.has(key)) currentByPeriod.set(key, reading);
   });
 
   return options.meters.reduce<ImportMeterReadingSummaryRow[]>((rows, meter, meterIndex) => {
@@ -108,6 +108,8 @@ export function buildImportMeterReadingReview(
     const meterReadings = options.readings
       .map((reading, index): IndexedReading => ({ reading, index }))
       .filter(entry => entry.reading.meterId === meter.guid);
+    const originalPeriodCounts = periodCounts(meterReadings);
+    const activePeriodCounts = periodCounts(meterReadings.filter(entry => !isExcluded(entry, excludedIds)));
     const newEntries: IndexedReading[] = [];
     const invalidEntries: IndexedReading[] = [];
     const existingEntries: IndexedReading[] = [];
@@ -115,22 +117,28 @@ export function buildImportMeterReadingReview(
     const comparisons: ImportMeterReadingComparison[] = [];
 
     meterReadings.forEach(entry => {
-      const messages = getImportMeterReadingIssues(entry.reading);
+      const excluded = isExcluded(entry, excludedIds);
+      const messages = [...getImportMeterReadingIssues(entry.reading)];
+      const period = meterReadingPeriodKey(entry.reading);
+      const duplicateCount = period
+        ? (excluded ? originalPeriodCounts.get(period) : activePeriodCounts.get(period)) ?? 0
+        : 0;
+      if (duplicateCount > 1) messages.push('Only one reading can be imported for this meter and date.');
       if (messages.length) {
         invalidEntries.push(entry);
         invalidReadingDetails.push({
           index: entry.index,
-          key: meterReadingEntityKey(entry.reading),
+          key: meterReadingEntityKey(entry.reading, entry.index),
           reading: entry.reading,
           dateLabel: formatSuppliedReadingDate(entry.reading),
           primaryValue: primaryReadingValue(meter, entry.reading),
           messages,
-          excluded: excludedIds.has(meterReadingEntityKey(entry.reading))
+          excluded
         });
         return;
       }
 
-      const current = currentByPeriod.get(meterReadingPeriodKey(entry.reading));
+      const current = period ? currentByPeriod.get(period) : undefined;
       if (!current) {
         newEntries.push(entry);
         return;
@@ -159,9 +167,15 @@ export function buildImportMeterReadingReview(
 
 export function getImportMeterReadingIssues(reading: IdbUtilityMeterData): string[] {
   const issues: string[] = [];
-  if (!Number.isInteger(reading.year) || reading.year <= 1900) issues.push('Year must be a whole number after 1900.');
-  if (!Number.isInteger(reading.month) || reading.month < 1 || reading.month > 12) issues.push('Month must be between 1 and 12.');
-  if (!Number.isInteger(reading.day) || reading.day < 1 || reading.day > 31) issues.push('Day must be between 1 and 31.');
+  const yearValid = Number.isInteger(reading.year) && reading.year > 1900;
+  const monthValid = Number.isInteger(reading.month) && reading.month >= 1 && reading.month <= 12;
+  const dayValid = Number.isInteger(reading.day) && reading.day >= 1 && reading.day <= 31;
+  if (!yearValid) issues.push('Year must be a whole number after 1900.');
+  if (!monthValid) issues.push('Month must be between 1 and 12.');
+  if (!dayValid) issues.push('Day must be between 1 and 31.');
+  if (yearValid && monthValid && dayValid && !readingDate(reading)) {
+    issues.push('Date must be a valid calendar date.');
+  }
   const numericValues: Array<[unknown, string]> = [
     [reading.totalEnergyUse, 'Energy use'],
     [reading.totalVolume, 'Total volume'],
@@ -182,8 +196,9 @@ export function sameMeterReadingPeriod(left: IdbUtilityMeterData, right: IdbUtil
     left.month === right.month && left.day === right.day;
 }
 
-export function meterReadingEntityKey(reading: IdbUtilityMeterData): string {
-  return String(reading.id ?? reading.guid);
+export function meterReadingEntityKey(reading: IdbUtilityMeterData, index?: number): string {
+  const key = String(reading.id ?? reading.guid);
+  return index === undefined ? key : `${key}:${index}`;
 }
 
 function compareMeterReadings(
@@ -252,11 +267,29 @@ function rangeSummary(entries: readonly IndexedReading[]): ImportReadingRangeSum
 function readingDate(reading: IdbUtilityMeterData): Date | undefined {
   if (!Number.isInteger(reading.year) || !Number.isInteger(reading.month) || !Number.isInteger(reading.day)) return undefined;
   if (reading.year <= 1900 || reading.month < 1 || reading.month > 12 || reading.day < 1 || reading.day > 31) return undefined;
-  return new Date(reading.year, reading.month - 1, reading.day);
+  const date = new Date(reading.year, reading.month - 1, reading.day);
+  return date.getFullYear() === reading.year
+    && date.getMonth() === reading.month - 1
+    && date.getDate() === reading.day
+    ? date
+    : undefined;
 }
 
-function meterReadingPeriodKey(reading: IdbUtilityMeterData): string {
-  return `${reading.meterId}:${reading.year}:${reading.month}:${reading.day}`;
+function meterReadingPeriodKey(reading: IdbUtilityMeterData): string | undefined {
+  return readingDate(reading) ? `${reading.meterId}:${reading.year}:${reading.month}:${reading.day}` : undefined;
+}
+
+function periodCounts(entries: readonly IndexedReading[]): Map<string, number> {
+  return entries.reduce((counts, entry) => {
+    const key = meterReadingPeriodKey(entry.reading);
+    if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+    return counts;
+  }, new Map<string, number>());
+}
+
+function isExcluded(entry: IndexedReading, excludedIds: ReadonlySet<string>): boolean {
+  return excludedIds.has(meterReadingEntityKey(entry.reading, entry.index))
+    || excludedIds.has(meterReadingEntityKey(entry.reading));
 }
 
 function primaryReadingField(meter: IdbUtilityMeter): 'totalVolume' | 'totalEnergyUse' {

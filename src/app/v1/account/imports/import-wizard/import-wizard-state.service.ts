@@ -479,7 +479,7 @@ export class ImportWizardStateService {
 
   toggleExcludedReading(index: number, excluded: boolean): void {
     const reading = this.draft().meterData[index];
-    const key = reading.id ?? reading.guid;
+    const key = meterReadingEntityKey(reading, index);
     const exclusions = this.draft().excludedMeterReadingIds;
     if (excluded && !exclusions.map(String).includes(String(key))) exclusions.push(key);
     if (!excluded) this.draft().excludedMeterReadingIds = exclusions.filter(value => String(value) !== String(key));
@@ -490,7 +490,9 @@ export class ImportWizardStateService {
 
   isReadingExcluded(index: number): boolean {
     const reading = this.draft().meterData[index];
-    return this.draft().excludedMeterReadingIds.map(String).includes(String(reading.id ?? reading.guid));
+    const exclusions = new Set(this.draft().excludedMeterReadingIds.map(String));
+    return exclusions.has(meterReadingEntityKey(reading, index))
+      || exclusions.has(meterReadingEntityKey(reading));
   }
 
   readingInvalid(index: number): boolean {
@@ -582,6 +584,15 @@ export class ImportWizardStateService {
   viewImportedData(): void {
     const draft = this.draft();
     const accountGuid = this.workspace.account()?.guid;
+    const returnUrl = allowedWorkspaceReturnUrl(
+      this.session.origin().returnUrl,
+      accountGuid,
+      this.workspace.facilities().map(facility => facility.guid)
+    );
+    if (returnUrl) {
+      void this.router.navigateByUrl(returnUrl);
+      return;
+    }
     const affected = this.session.summary()?.affectedFacilityGuids ?? [];
     if (draft.kind === 'footprint-tool' && draft.selectedFacilityId) {
       void this.router.navigate(['/v1/workspace/facility', draft.selectedFacilityId, 'data', 'energy-uses']);
@@ -603,6 +614,9 @@ export class ImportWizardStateService {
     const draft = this.draft();
     const step = this.currentStepId();
     if (!draft) return 'The upload session is no longer available.';
+    if (step === 'review' && !this.hasRecordsToCommit(this.commitRequest(draft))) {
+      return 'Include at least one record before uploading this file.';
+    }
     if (step === 'worksheet' && !draft.selectedWorksheetData.length) return 'Choose a non-empty worksheet.';
     if (step === 'columns') {
       if (this.groupItems('Date').length !== 1) return 'Identify exactly one usable date column.';
@@ -653,6 +667,17 @@ export class ImportWizardStateService {
     const predictors = draft.predictors.filter(predictor => !predictor.skipImport);
     const meterIds = new Set(meters.map(meter => meter.guid));
     const predictorIds = new Set(predictors.map(predictor => predictor.guid));
+    const meterReadingExclusions = new Set(draft.excludedMeterReadingIds.map(String));
+    const meterReadingEntries = draft.meterData
+      .map((reading, index) => ({ reading, index }))
+      .filter(entry => meterIds.has(entry.reading.meterId));
+    const excludedMeterReadingIds = meterReadingEntries.reduce<Array<number | string>>((keys, entry, index) => {
+      if (meterReadingExclusions.has(meterReadingEntityKey(entry.reading, entry.index))
+        || meterReadingExclusions.has(meterReadingEntityKey(entry.reading))) {
+        keys.push(meterReadingEntityKey(entry.reading, index));
+      }
+      return keys;
+    }, []);
     const predictorReadingExclusions = new Set(draft.excludedPredictorReadingIds.map(String));
     const predictorReadingEntries = draft.predictorData
       .map((reading, index) => ({ reading, index }))
@@ -680,14 +705,14 @@ export class ImportWizardStateService {
       meterGroups: draft.newMeterGroups.filter(group => affectedFacilities.has(group.facilityId) &&
         meters.some(meter => meter.groupId === group.guid)),
       meters,
-      meterReadings: draft.meterData.filter(reading => meterIds.has(reading.meterId)),
+      meterReadings: meterReadingEntries.map(entry => entry.reading),
       predictors,
       predictorReadings: predictorReadingEntries.map(entry => entry.reading),
       energyUseGroups: draft.facilityEnergyUseGroups,
       energyUseEquipment: draft.facilityEnergyUseEquipment,
       skipExistingReadingsMeterIds: draft.skipExistingReadingsMeterIds,
       skipExistingPredictorIds: draft.skipExistingPredictorIds,
-      excludedMeterReadingIds: draft.excludedMeterReadingIds,
+      excludedMeterReadingIds,
       invalidMeterReadingsAcknowledged: draft.invalidMeterReadingsAcknowledged,
       excludedPredictorReadingIds,
       invalidPredictorReadingsAcknowledged: draft.invalidPredictorReadingsAcknowledged
@@ -754,12 +779,29 @@ export class ImportWizardStateService {
 
   private invalidReadingGateSatisfied(): boolean {
     const draft = this.draft();
-    const includedMeterIds = new Set(draft.meters.filter(meter => !meter.skipImport).map(meter => meter.guid));
-    const invalidReadings = draft.meterData
-      .filter(reading => includedMeterIds.has(reading.meterId) && !isImportMeterReadingValid(reading));
-    const exclusions = new Set(draft.excludedMeterReadingIds.map(String));
+    const invalidReadings = buildImportMeterReadingReview({
+      meters: draft.meters,
+      readings: draft.meterData,
+      facilities: draft.importFacilities,
+      currentReadings: this.workspace.meterData(),
+      excludedReadingIds: draft.excludedMeterReadingIds,
+      skipExistingMeterIds: draft.skipExistingReadingsMeterIds
+    }).flatMap(row => row.invalidReadingDetails);
     return invalidReadings.length === 0 ||
-      (invalidReadings.every(reading => exclusions.has(meterReadingEntityKey(reading))) && draft.invalidMeterReadingsAcknowledged);
+      (invalidReadings.every(reading => reading.excluded) && draft.invalidMeterReadingsAcknowledged);
+  }
+
+  private hasRecordsToCommit(request: ImportCommitRequest): boolean {
+    return [
+      request.facilities,
+      request.meterGroups,
+      request.meters,
+      request.meterReadings,
+      request.predictors,
+      request.predictorReadings,
+      request.energyUseGroups,
+      request.energyUseEquipment
+    ].some(records => records.length > 0);
   }
 
   private invalidPredictorReadingGateSatisfied(): boolean {
@@ -802,6 +844,26 @@ export class ImportWizardStateService {
   private invalidatePredictorReviewSteps(): void {
     this.draft().completedSteps = this.draft().completedSteps
       .filter(step => step !== 'predictor-readings' && step !== 'review');
+  }
+}
+
+function allowedWorkspaceReturnUrl(
+  returnUrl: string | undefined,
+  accountGuid: string | undefined,
+  facilityGuids: readonly string[]
+): string | undefined {
+  if (!returnUrl?.startsWith('/') || returnUrl.startsWith('//')) return undefined;
+  try {
+    const segments = returnUrl.split(/[?#]/, 1)[0]
+      .split('/')
+      .filter(Boolean)
+      .map(segment => decodeURIComponent(segment));
+    if (segments[0] !== 'v1' || segments[1] !== 'workspace') return undefined;
+    if (segments[2] === 'account' && segments[3] === accountGuid) return returnUrl;
+    if (segments[2] === 'facility' && facilityGuids.includes(segments[3])) return returnUrl;
+    return undefined;
+  } catch {
+    return undefined;
   }
 }
 

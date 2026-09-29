@@ -24,18 +24,22 @@ describe('ImportWizardStateService', () => {
   let workspaceMeters: ReturnType<typeof signal<IdbUtilityMeter[]>>;
   let workspaceMeterGroups: ReturnType<typeof signal<IdbUtilityMeterGroup[]>>;
   let workspaceMeterData: ReturnType<typeof signal<IdbUtilityMeterData[]>>;
+  let workspaceFacilities: ReturnType<typeof signal<any[]>>;
   let workspacePredictors: ReturnType<typeof signal<IdbPredictor[]>>;
   let workspacePredictorData: ReturnType<typeof signal<IdbPredictorData[]>>;
   let commandCommit: ReturnType<typeof vi.fn>;
+  let router: { navigate: ReturnType<typeof vi.fn>; navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     draftService = { materializeGeneralRecords: vi.fn(), replaceMeter: vi.fn(), replacePredictor: vi.fn() };
     workspaceMeters = signal([]);
     workspaceMeterGroups = signal([]);
     workspaceMeterData = signal([]);
+    workspaceFacilities = signal([]);
     workspacePredictors = signal([]);
     workspacePredictorData = signal([]);
     commandCommit = vi.fn(async () => ({ affectedFacilityGuids: [] }));
+    router = { navigate: vi.fn(), navigateByUrl: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
@@ -56,12 +60,12 @@ describe('ImportWizardStateService', () => {
           }
         },
         { provide: SpreadsheetImportCommandService, useValue: { commit: commandCommit } },
-        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: Router, useValue: router },
         {
           provide: AccountWorkspaceStore,
           useValue: {
             account: () => ({ guid: 'account-1' }),
-            facilities: () => [],
+            facilities: workspaceFacilities,
             meters: workspaceMeters,
             meterGroups: workspaceMeterGroups,
             meterData: workspaceMeterData,
@@ -437,6 +441,67 @@ describe('ImportWizardStateService', () => {
       predictorReadings: [invalidReading],
       excludedPredictorReadingIds: ['included-reading:0']
     }));
+  });
+
+  it('remaps index-qualified exclusions after skipped meters are removed from the commit request', async () => {
+    const skipped = meter({ guid: 'skipped', skipImport: true });
+    const included = meter({ guid: 'included' });
+    const skippedReading = reading({ guid: 'skipped-reading', meterId: skipped.guid });
+    const invalidReading = reading({ guid: 'included-reading', meterId: included.guid, month: 13 });
+    const draft = templateDraft({
+      meters: [skipped, included], meterData: [skippedReading, invalidReading],
+      excludedMeterReadingIds: ['included-reading:1'], invalidMeterReadingsAcknowledged: true
+    });
+    service.initialize(draft);
+    service.activateStep('review');
+
+    await service.commit();
+
+    expect(commandCommit).toHaveBeenCalledWith(expect.objectContaining({
+      meterReadings: [invalidReading],
+      excludedMeterReadingIds: ['included-reading:0']
+    }));
+  });
+
+  it('does not submit a review with no records selected', async () => {
+    service.initialize(generalDraft());
+    service.activateStep('review');
+
+    await service.commit();
+
+    expect(commandCommit).not.toHaveBeenCalled();
+    expect(service.error()).toBe('Include at least one record before uploading this file.');
+  });
+
+  it('returns to a valid workspace origin after completion', () => {
+    const selectedFacility = facility({ guid: 'facility-a', accountId: 'account-1' });
+    workspaceFacilities.set([selectedFacility]);
+    TestBed.inject(ImportSessionService).setOrigin({
+      facilityGuid: selectedFacility.guid,
+      returnUrl: '/v1/workspace/facility/facility-a/data/predictors?tab=monthly'
+    });
+    service.initialize(templateDraft());
+
+    service.viewImportedData();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith(
+      '/v1/workspace/facility/facility-a/data/predictors?tab=monthly'
+    );
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('rejects a cross-account origin and uses the contextual fallback', () => {
+    TestBed.inject(ImportSessionService).setOrigin({
+      returnUrl: '/v1/workspace/account/account-2/data/portfolio/facilities'
+    });
+    service.initialize(templateDraft());
+
+    service.viewImportedData();
+
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1/workspace/account', 'account-1', 'data', 'portfolio', 'facilities'
+    ]);
   });
 
   it('prepares the facility review from included records and current reading decisions', () => {

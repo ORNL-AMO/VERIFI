@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet, RouterStateSnapshot } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
@@ -53,6 +53,12 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
 
   hasUnsavedChanges(): boolean { return this.state.hasUnsavedChanges(); }
   isNavigationBlocked(): boolean { return this.state.isNavigationBlocked(); }
+
+  canNavigateWithoutDiscard(nextState: RouterStateSnapshot): boolean {
+    const accountGuid = this.state.workspace.account()?.guid;
+    const path = nextState.url.split(/[?#]/, 1)[0];
+    return !!accountGuid && path === `/v1/workspace/account/${accountGuid}/imports/upload`;
+  }
 
   @HostListener('window:beforeunload', ['$event'])
   beforeUnload(event: BeforeUnloadEvent): void {

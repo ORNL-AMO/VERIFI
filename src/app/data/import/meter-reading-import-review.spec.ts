@@ -41,7 +41,7 @@ describe('meter reading import review', () => {
     expect(rows[0].existingReadings.start?.getMonth()).toBe(0);
     expect(rows[0].invalidReadingDetails[0]).toMatchObject({
       index: 2,
-      key: invalid.guid,
+      key: `${invalid.guid}:2`,
       excluded: true,
       messages: ['Energy use must be a number.']
     });
@@ -107,6 +107,35 @@ describe('meter reading import review', () => {
       'Day must be between 1 and 31.',
       'Total volume must be a number.'
     ]);
+  });
+
+  it('surfaces duplicate meter dates and resolves the included reading with an index-qualified exclusion', () => {
+    const selectedMeter = meter();
+    const first = reading({ id: 22, guid: 'shared-reading', totalEnergyUse: 10 });
+    const second = reading({ id: 22, guid: 'shared-reading', totalEnergyUse: 12 });
+
+    const conflicted = buildImportMeterReadingReview({
+      meters: [selectedMeter], readings: [first, second], facilities: [facility()], currentReadings: [],
+      excludedReadingIds: [], skipExistingMeterIds: []
+    })[0];
+    expect(conflicted.invalidReadings.count).toBe(2);
+    expect(conflicted.invalidReadingDetails.map(detail => detail.key)).toEqual(['22:0', '22:1']);
+
+    const resolved = buildImportMeterReadingReview({
+      meters: [selectedMeter], readings: [first, second], facilities: [facility()], currentReadings: [],
+      excludedReadingIds: ['22:1'], skipExistingMeterIds: []
+    })[0];
+    expect(resolved.newReadings.count).toBe(1);
+    expect(resolved.invalidReadings.count).toBe(1);
+    expect(resolved.invalidReadingDetails[0]).toMatchObject({ key: '22:1', excluded: true });
+  });
+
+  it('rejects impossible calendar dates while accepting leap-day dates', () => {
+    expect(getImportMeterReadingIssues(reading({ year: 2026, month: 4, day: 31 })))
+      .toContain('Date must be a valid calendar date.');
+    expect(getImportMeterReadingIssues(reading({ year: 2025, month: 2, day: 29 })))
+      .toContain('Date must be a valid calendar date.');
+    expect(isImportMeterReadingValid(reading({ year: 2024, month: 2, day: 29 }))).toBe(true);
   });
 });
 
