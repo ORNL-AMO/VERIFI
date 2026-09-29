@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { FacilityPickerComponent } from '../section-nav/facility-picker/facility-picker.component';
@@ -20,7 +21,7 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, IconComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
+  imports: [CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,

@@ -6,13 +6,12 @@ import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
-import { ImportStepperComponent } from '../import-stepper/import-stepper.component';
 import { ImportWizardStateService } from './import-wizard-state.service';
 
 @Component({
   selector: 'app-import-wizard',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ImportStepperComponent],
+  imports: [CommonModule, RouterOutlet],
   providers: [ImportWizardStateService],
   templateUrl: './import-wizard.component.html',
   styleUrls: ['./import-wizard.component.css'],
@@ -57,10 +56,6 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
   @HostListener('window:beforeunload', ['$event'])
   beforeUnload(event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges() || this.isNavigationBlocked()) event.preventDefault();
-  }
-
-  openCompletedStep(stepId: string): void {
-    if (this.state.canOpenStep(stepId)) this.goToStep(stepId);
   }
 
   back(): void {

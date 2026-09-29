@@ -73,10 +73,6 @@ export class ImportWizardStateService {
     }
   }
 
-  canOpenStep(stepId: string): boolean {
-    return stepId === this.currentStepId() || this.draft()?.completedSteps.includes(stepId);
-  }
-
   completeCurrentStep(): string | undefined {
     const issue = this.validationMessage();
     if (issue) {

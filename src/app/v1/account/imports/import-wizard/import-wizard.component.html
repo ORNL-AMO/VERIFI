@@ -5,17 +5,7 @@
         <p class="v1-eyebrow">Imports &amp; Backup · {{ file.name }}</p>
         <h1 id="import-wizard-title">{{ state.currentStep()?.label }}</h1>
       </div>
-      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="openUpload()">
-        Import queue
-      </button>
     </header>
-
-    <app-import-stepper
-      [steps]="state.steps()"
-      [currentStep]="state.currentStepId()"
-      [completedSteps]="file.completedSteps"
-      (stepSelected)="openCompletedStep($event)">
-    </app-import-stepper>
 
     <div class="v1-alert v1-alert--info" role="note">{{ state.currentStep()?.help }}</div>
     @if (state.error()) {

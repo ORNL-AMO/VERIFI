@@ -310,6 +310,42 @@
         </section>
       }
     }
+    @case ('imports') {
+      @if (account) {
+        <section class="v1-nav__group v1-nav__group--imports" aria-label="Upload workflow">
+          <a
+            [class.active]="navigation.activeDetail() === 'upload'"
+            [routerLink]="navigation.accountImportsRoute(account.guid)"
+            [attr.aria-current]="navigation.activeDetail() === 'upload' ? 'page' : null">
+            <app-ui-icon name="uploadData"></app-ui-icon>
+            Upload Files
+          </a>
+
+          @if (importFiles().length) {
+            <div class="v1-nav__import-files" aria-label="Uploaded files">
+              @for (file of importFiles(); track file.id) {
+                <section class="v1-nav__import-file" [attr.aria-label]="file.name">
+                  <h2 title="{{ file.name }}">
+                    <app-ui-icon name="file"></app-ui-icon>
+                    <span>{{ file.name }}</span>
+                  </h2>
+                  <app-import-stepper
+                    [accountGuid]="account.guid"
+                    [fileId]="file.id"
+                    [fileName]="file.name"
+                    [steps]="file.steps"
+                    [currentStep]="file.currentStep"
+                    [completedSteps]="file.completedSteps"
+                    [activeFile]="file.active"
+                    [disabled]="file.disabled">
+                  </app-import-stepper>
+                </section>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
     @default {
       <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">
         <span id="v1-future-nav-title" class="v1-nav__label">{{ navigation.activeSection() }}</span>

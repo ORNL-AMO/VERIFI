@@ -132,6 +132,50 @@
   border-top: 1px solid var(--v1-divider);
 }
 
+.v1-nav__import-files {
+  display: grid;
+  gap: .7rem;
+  min-width: 0;
+  margin-top: .35rem;
+}
+
+.v1-nav__import-file {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+  padding-top: .7rem;
+  border-top: 1px solid var(--v1-divider);
+}
+
+.v1-nav__import-file app-import-stepper {
+  margin-left: .55rem;
+}
+
+.v1-nav__import-file h2 {
+  display: flex;
+  gap: .45rem;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: .25rem .45rem .1rem;
+  color: var(--v1-text);
+  font-size: .84rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.v1-nav__import-file h2 .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-muted);
+}
+
+.v1-nav__import-file h2 span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .v1-nav__label {
   color: var(--v1-muted);
   font-size: .72rem;

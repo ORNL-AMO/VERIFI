@@ -207,6 +207,19 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
+  it('exposes the active uploaded file and workflow step from the route', () => {
+    router.events.next(new NavigationEnd(
+      1,
+      '/v1/workspace/account/account-a/imports/file/draft%201/meter-readings',
+      '/v1/workspace/account/account-a/imports/file/draft%201/meter-readings'
+    ));
+
+    expect(service.activeSection()).toBe('imports');
+    expect(service.activeDetail()).toBe('file');
+    expect(service.activeImportFileId()).toBe('draft 1');
+    expect(service.activeImportStep()).toBe('meter-readings');
+  });
+
   it('keeps support panel tab changes in shell state instead of navigating', () => {
     service.isSupportPanelOpen.set(false);
 

@@ -62,6 +62,8 @@ interface RouteState {
   readonly meterGroupGuid?: string;
   readonly predictorGuid?: string;
   readonly weatherPredictorGroupKey?: string;
+  readonly importFileId?: string;
+  readonly importStep?: string;
   readonly section: SectionId;
   readonly detail: string;
 }
@@ -142,6 +144,8 @@ export class WorkspaceNavigationService {
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
+  readonly activeImportFileId = computed(() => this.routeState().importFileId);
+  readonly activeImportStep = computed(() => this.routeState().importStep);
   readonly account = computed(() => this.resolveAccount());
   readonly facilities = computed(() => this.workspace.facilities());
   readonly facility = computed(() => this.resolveFacility());
@@ -560,12 +564,19 @@ export function parseWorkspaceRoute(url: string): RouteState {
     };
   }
   const section = normalizeSection(routeParts[3]);
+  const isImportFileRoute = section === 'imports' && routeParts[4] === 'file';
   return {
     view: 'workspace',
     contextMode: 'account',
     accountGuid: routeParts[2],
     section,
-    detail: routeParts[4] || DEFAULT_DETAILS[section]
+    detail: routeParts[4] || DEFAULT_DETAILS[section],
+    importFileId: isImportFileRoute && routeParts[5]
+      ? safeDecodeRoutePart(routeParts[5])
+      : undefined,
+    importStep: isImportFileRoute && routeParts[6]
+      ? safeDecodeRoutePart(routeParts[6])
+      : undefined
   };
 }
 
