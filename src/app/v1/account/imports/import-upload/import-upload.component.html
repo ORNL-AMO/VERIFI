@@ -11,10 +11,22 @@
   <div class="import-panel">
     <h2>Select spreadsheet files</h2>
     <p>Upload VERIFI templates, general workbooks, Energy Treasure Hunt workbooks, or footprint-tool files. Files are reviewed and imported one at a time.</p>
-    <label class="file-picker" [class.is-disabled]="readingFiles()">
-      <span>{{ readingFiles() ? 'Reading files…' : 'Choose workbooks' }}</span>
-      <input type="file" multiple accept=".xlsx,.xls,.xlsm" [disabled]="readingFiles()" (change)="filesSelected($event)">
-    </label>
+    <div
+      class="file-drop"
+      [class.is-drag-active]="dragActive()"
+      [class.is-disabled]="readingFiles()"
+      (dragenter)="dragEntered($event)"
+      (dragover)="dragOver($event)"
+      (dragleave)="dragLeft($event)"
+      (drop)="filesDropped($event)">
+      <app-ui-icon name="uploadData" [size]="30"></app-ui-icon>
+      <strong>{{ dragActive() ? 'Drop files to add them' : 'Drag and drop Excel files here' }}</strong>
+      <span>or</span>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="readingFiles()" (click)="fileInput.click()">Browse files</button>
+      <small>XLSX, XLS, XLSM · Multiple files supported</small>
+      <input #fileInput class="file-input" type="file" multiple accept=".xlsx,.xls,.xlsm" [disabled]="readingFiles()" (change)="filesSelected($event)">
+    </div>
+    <p class="file-status" role="status" aria-live="polite">{{ readingFiles() ? 'Reading files…' : '' }}</p>
   </div>
 
   @if (failures().length) {

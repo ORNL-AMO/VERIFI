@@ -76,6 +76,7 @@ import ThermometerWarmIcon from '@hugeicons/core-free-icons/ThermometerWarmIcon'
 import TagsIcon from '@hugeicons/core-free-icons/TagsIcon';
 import Target02Icon from '@hugeicons/core-free-icons/Target02Icon';
 import ToolsIcon from '@hugeicons/core-free-icons/ToolsIcon';
+import Upload03Icon from '@hugeicons/core-free-icons/Upload03Icon';
 import Upload04Icon from '@hugeicons/core-free-icons/Upload04Icon';
 import VectorSquareIcon from '@hugeicons/core-free-icons/VectorSquareIcon';
 import ViewOffSlashIcon from '@hugeicons/core-free-icons/ViewOffSlashIcon';
@@ -165,6 +166,7 @@ export const ICON_REGISTRY = {
   tools: ToolsIcon,
   transfer: ArrowDataTransferHorizontalIcon,
   upload: Upload04Icon,
+  uploadData: Upload03Icon,
   vectorSquare: VectorSquareIcon,
   viewHidden: ViewOffSlashIcon,
   warning: Alert02Icon,

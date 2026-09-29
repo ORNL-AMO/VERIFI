@@ -7,13 +7,14 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
 import { HasUnsavedChanges } from '@app/v1/account/data/unsaved-changes.guard';
+import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 interface UploadFailure { name: string; message: string; }
 
 @Component({
   selector: 'app-import-upload',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, IconComponent],
   templateUrl: './import-upload.component.html',
   styleUrls: ['./import-upload.component.css']
 })
@@ -26,7 +27,9 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   readonly workspace = inject(AccountWorkspaceStore);
   readonly failures = signal<UploadFailure[]>([]);
   readonly readingFiles = signal(false);
+  readonly dragActive = signal(false);
   readonly sessionLost = signal(false);
+  private dragDepth = 0;
   private unregisterUnsaved?: () => void;
 
   ngOnInit(): void {
@@ -61,26 +64,63 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   async filesSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const files = [...(input.files ?? [])];
-    if (!files.length) return;
+    await this.processFiles(files);
+    input.value = '';
+  }
+
+  dragEntered(event: DragEvent): void {
+    event.preventDefault();
+    if (this.isNavigationBlocked()) return;
+    this.dragDepth += 1;
+    this.dragActive.set(true);
+  }
+
+  dragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+  }
+
+  dragLeft(event: DragEvent): void {
+    event.preventDefault();
+    this.dragDepth = Math.max(0, this.dragDepth - 1);
+    if (this.dragDepth === 0) this.dragActive.set(false);
+  }
+
+  async filesDropped(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    this.resetDragState();
+    if (this.isNavigationBlocked()) return;
+    await this.processFiles([...(event.dataTransfer?.files ?? [])]);
+  }
+
+  private async processFiles(files: File[]): Promise<void> {
+    if (!files.length || this.readingFiles()) return;
     this.readingFiles.set(true);
     const failures: UploadFailure[] = [];
-    for (const file of files) {
-      try {
-        if (!/\.(xlsx|xls|xlsm)$/i.test(file.name)) throw new Error('Choose an .xlsx, .xls, or .xlsm workbook.');
-        const draft = await this.parser.readFile(file);
-        const originFacility = this.session.origin().facilityGuid;
-        if (originFacility && draft.importFacilities.some(facility => facility.guid === originFacility)) {
-          draft.selectedFacilityId = originFacility;
-          if (draft.kind === 'footprint-tool') this.parser.applyFootprintFacility(draft, originFacility);
+    try {
+      for (const file of files) {
+        try {
+          if (!/\.(xlsx|xls|xlsm)$/i.test(file.name)) throw new Error('Choose an .xlsx, .xls, or .xlsm workbook.');
+          const draft = await this.parser.readFile(file);
+          const originFacility = this.session.origin().facilityGuid;
+          if (originFacility && draft.importFacilities.some(facility => facility.guid === originFacility)) {
+            draft.selectedFacilityId = originFacility;
+            if (draft.kind === 'footprint-tool') this.parser.applyFootprintFacility(draft, originFacility);
+          }
+          this.session.addDrafts([draft]);
+        } catch (error) {
+          failures.push({ name: file.name, message: error instanceof Error ? error.message : String(error) });
         }
-        this.session.addDrafts([draft]);
-      } catch (error) {
-        failures.push({ name: file.name, message: error instanceof Error ? error.message : String(error) });
       }
+    } finally {
+      this.failures.set(failures);
+      this.readingFiles.set(false);
     }
-    this.failures.set(failures);
-    this.readingFiles.set(false);
-    input.value = '';
+  }
+
+  private resetDragState(): void {
+    this.dragDepth = 0;
+    this.dragActive.set(false);
   }
 
   openDraft(id: string): void {

@@ -1,8 +1,12 @@
 .import-page { display: grid; gap: 1rem; padding: 1rem; }
 .import-panel { border: 1px solid var(--v1-border-color, #c8d0d8); padding: 1rem; background: var(--bs-body-bg, #fff); }
-.file-picker { display: inline-flex; cursor: pointer; padding: .65rem 1rem; background: var(--bs-primary, #0d6efd); color: #fff; font-weight: 700; }
-.file-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.file-picker.is-disabled { opacity: .6; cursor: wait; }
+.file-drop { display: grid; justify-items: center; gap: .5rem; padding: 2rem 1rem; border: 2px dashed var(--v1-action, var(--bs-primary, #0d6efd)); background: color-mix(in srgb, var(--v1-action, #0d6efd) 5%, var(--bs-body-bg, #fff)); text-align: center; }
+.file-drop > app-ui-icon { color: var(--v1-action, var(--bs-primary, #0d6efd)); }
+.file-drop.is-drag-active { border-style: solid; background: color-mix(in srgb, var(--v1-action, #0d6efd) 14%, var(--bs-body-bg, #fff)); }
+.file-drop.is-disabled { opacity: .65; cursor: wait; }
+.file-drop:focus-within { outline: 3px solid var(--v1-focus-ring, var(--bs-primary, #0d6efd)); outline-offset: 2px; }
+.file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-status { min-height: 1.5rem; margin: .5rem 0 0; text-align: center; }
 .queue-list { list-style: none; margin: 0; padding: 0; }
 .queue-list li { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .75rem 0; border-top: 1px solid var(--v1-border-color, #ddd); }
 .queue-list li div { display: grid; }
