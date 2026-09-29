@@ -293,7 +293,11 @@ export class PredictorCommandHandler {
 
     await this.transactions.runTransaction(['predictor', 'predictorData', 'analysisItems'], 'readwrite', async transaction => {
       for (const predictor of changes.predictors) {
-        await transaction.put('predictor', { ...predictor });
+        if (predictor.id === undefined) {
+          await transaction.add('predictor', { ...predictor });
+        } else {
+          await transaction.put('predictor', { ...predictor });
+        }
       }
       for (const entry of changes.predictorData) {
         await transaction.add('predictorData', { ...entry });
