@@ -1,0 +1,18 @@
+<app-confirmation-dialog
+  [title]="'Delete ' + monthLabel + '?'"
+  titleId="weather-reading-delete-title"
+  [cancelAriaLabel]="'Cancel deleting ' + monthLabel"
+  confirmLabel="Delete month"
+  confirmIcon="delete"
+  [busy]="saving"
+  [disabled]="saving"
+  (confirmed)="confirmed.emit()"
+  (cancelled)="cancelled.emit()">
+  @if (error) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ error }}</span>
+    </div>
+  }
+  <p>This deletes every stored record for all predictors at this station in that month, including duplicates. This action cannot be undone.</p>
+</app-confirmation-dialog>

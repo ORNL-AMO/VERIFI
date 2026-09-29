@@ -4,14 +4,14 @@ import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.
 import { IdbAccount } from '@data/models/idbModels/account';
 import { firstValueFrom } from 'rxjs';
 import { WELCOME_EXAMPLES, WelcomeExample } from '../welcome.models';
-import { DrawerFocusTrapDirective } from '../shared/drawer-focus-trap.directive';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-example-account-panel',
   templateUrl: './example-account.component.html',
   styleUrls: ['./example-account.component.css'],
-  imports: [DrawerFocusTrapDirective, IconComponent],
+  imports: [ModalFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class ExampleAccountComponent {

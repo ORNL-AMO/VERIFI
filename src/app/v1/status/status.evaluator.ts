@@ -12,6 +12,7 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
 import { buildMeterDataQualityReport } from '@domain/calculations/data-quality/meter-data-quality';
+import { buildPredictorDataQualityReport } from '@domain/calculations/data-quality/predictor-data-quality';
 import { getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { getAccountAnalysisSetupErrors } from '@domain/calculations/status-check-calculations/validation/accountAnalysisValidation';
 import { getAccountReportErrors } from '@domain/calculations/status-check-calculations/validation/accountReportValidation';
@@ -208,8 +209,17 @@ function evaluatePredictor(
   }
   const latest = latestMonth(data.map(item => ({ month: item.month, year: item.year })));
   findings.push(...currencyFindings('predictor', entity, latest, facilityLatest, predictor.ignoreDateStatusChecks, predictor.noLongerInUse, predictor.noLongerInUseMonth, predictor.noLongerInUseYear, staleness, asOfDate));
-  if (predictor.predictorType === 'Weather' && !predictor.ignoreWeatherDataWarning && data.some(item => item.weatherDataWarning)) {
+  if (predictor.predictorType === 'Weather'
+    && !predictor.ignoreWeatherDataWarning
+    && data.some(item => item.weatherDataWarning || item.weatherDataChanged)) {
     findings.push(makeFinding('predictor.weather.warning', 'warning', 'quality', entity));
+  }
+  const quality = buildPredictorDataQualityReport(data, predictor);
+  if (quality.outlierCount > 0) {
+    findings.push(makeFinding('predictor.quality.outlier', 'warning', 'quality', entity, {
+      count: quality.outlierCount,
+      periods: quality.outlierPeriods
+    }));
   }
   return findings;
 }

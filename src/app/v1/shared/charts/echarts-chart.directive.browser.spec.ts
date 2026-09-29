@@ -1,7 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import * as echarts from 'echarts/core';
-import { EChartsChartDirective, V1EChartsOption, v1ChartPngFileName } from './echarts-chart.directive';
+import {
+  EChartsChartDirective,
+  V1EChartsOption,
+  V1EChartsPointClickEvent,
+  v1ChartPngFileName
+} from './echarts-chart.directive';
 
 @Component({
   template: `<div class="chart-host" [appV1ECharts]="option()"></div>`,
@@ -10,6 +15,7 @@ import { EChartsChartDirective, V1EChartsOption, v1ChartPngFileName } from './ec
 })
 class EChartsDirectiveHostComponent {
   readonly zoom = signal<{ readonly start: number; readonly end: number } | undefined>(undefined);
+  readonly pointClick = signal<V1EChartsPointClickEvent | undefined>(undefined);
   readonly option = signal<V1EChartsOption>({
     xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr'] },
     yAxis: { type: 'value' },
@@ -84,6 +90,31 @@ describe('EChartsChartDirective in Chromium', () => {
     await fixture.whenStable();
 
     expect(fixture.componentInstance.zoom()).toEqual({ start: 20, end: 60 });
+  });
+
+  it('emits clicks on chart series points', async () => {
+    TestBed.overrideComponent(EChartsDirectiveHostComponent, {
+      set: {
+        template: `<div class="chart-host" [appV1ECharts]="option()" (chartPointClicked)="pointClick.set($event)"></div>`
+      }
+    });
+    TestBed.configureTestingModule({ imports: [EChartsDirectiveHostComponent] });
+    const fixture = TestBed.createComponent(EChartsDirectiveHostComponent);
+    const host = fixture.nativeElement.querySelector('.chart-host') as HTMLElement;
+    host.style.width = '360px';
+    host.style.height = '240px';
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await nextAnimationFrame();
+
+    const chart = echarts.getInstanceByDom(host) as unknown as {
+      trigger: (eventName: string, event: V1EChartsPointClickEvent) => void;
+    };
+    chart.trigger('click', { componentType: 'series', seriesIndex: 0, dataIndex: 1, name: 'Feb', value: 2 });
+
+    expect(fixture.componentInstance.pointClick()).toEqual(expect.objectContaining({
+      componentType: 'series', seriesIndex: 0, dataIndex: 1, name: 'Feb', value: 2
+    }));
   });
 
   it('removes stale series and axes when an updated option shrinks them', async () => {

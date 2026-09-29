@@ -1,0 +1,204 @@
+@let selectedStation = station();
+@let busy = workflow.busy() || committing() || deleting();
+@let canEditSetup = canEdit();
+
+<section class="weather-setup" aria-label="Weather predictor setup">
+  <div class="weather-setup__top-actions">
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canSubmit()" (click)="saveAndUpdateReadings()">
+      <app-ui-icon [name]="busy ? 'loading' : 'refresh'" [spin]="busy"></app-ui-icon>
+      Save and Update Readings
+    </button>
+  </div>
+
+  <app-weather-station-selector
+    [selectedStationId]="selectedStation?.ID"
+    [selectedStationName]="selectedStation?.name"
+    [initialSearch]="initialStationSearch()"
+    [previewRange]="stationPreviewRange()"
+    [previewDefinitions]="definitions()"
+    [disabled]="!canEditSetup"
+    (stationSelected)="selectStation($event)">
+  </app-weather-station-selector>
+
+  @if (isCreation()) {
+    <div class="weather-setup__range">
+      <label>
+        <span>Start month</span>
+        <input
+          type="month"
+          required
+          [value]="startMonth()"
+          [disabled]="!canEditSetup"
+          [attr.aria-invalid]="rangeError() ? 'true' : null"
+          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
+          (change)="setStartMonth($any($event.target).value)">
+      </label>
+      <label>
+        <span>End month</span>
+        <input
+          type="month"
+          required
+          [value]="endMonth()"
+          [disabled]="!canEditSetup"
+          [attr.aria-invalid]="rangeError() ? 'true' : null"
+          [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
+          (change)="setEndMonth($any($event.target).value)">
+      </label>
+    </div>
+    @if (rangeError(); as error) {
+      <p id="weather-range-error" class="weather-setup__field-error">{{ error }}</p>
+    }
+    @if (futureMonthCount() > 0) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>
+          We can't predict the future. {{ futureMonthCount() }} future {{ futureMonthCount() === 1 ? 'month' : 'months' }} will be saved as 0.
+          Use Save and Update Readings later to replace them when weather data becomes available.
+        </span>
+      </div>
+    }
+  }
+
+  <section class="weather-setup__predictors" aria-labelledby="weather-predictors-title">
+    <div class="weather-setup__section-heading"><h2 id="weather-predictors-title">Predictors</h2><button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canEditSetup" (click)="addDefinition()"><app-ui-icon name="add"></app-ui-icon> Add predictor</button></div>
+    @if (definitions().length === 0) {
+      <div class="v1-alert v1-alert--warning" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Saving with no predictors will remove this weather station workbench and all of its readings.</span></div>
+    }
+    <div class="weather-setup__definition-list">
+      @for (definition of definitions(); track definition.draftId) {
+        @let errors = definitionErrors().get(definition.draftId);
+        <article class="weather-setup__definition">
+          <div class="weather-setup__definition-grid">
+            <label>
+              <span>Weather type</span>
+              <select
+                class="v1-select"
+                [value]="definition.weatherDataType"
+                [disabled]="!canEditSetup"
+                (change)="setDefinitionType(definition.draftId, $any($event.target).value)">
+                @for (option of weatherTypes; track option.value) {
+                  <option [attr.value]="option.value">
+                    {{ option.label }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label>
+              <span>Predictor name</span>
+              <input
+                type="text"
+                maxlength="100"
+                required
+                [value]="definition.name"
+                [disabled]="!canEditSetup"
+                [attr.aria-invalid]="errors?.name ? 'true' : null"
+                [attr.aria-describedby]="errors?.name ? definition.draftId + '-name-error' : null"
+                (input)="setDefinitionName(definition.draftId, $any($event.target).value)">
+              @if (errors?.name) {
+                <small [id]="definition.draftId + '-name-error'" class="weather-setup__field-error">
+                  Enter a predictor name of 100 characters or fewer.
+                </small>
+              }
+            </label>
+            @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
+              <label>
+                <span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span>
+                <input
+                  type="number"
+                  required
+                  [value]="definition.baseTemperature"
+                  [disabled]="!canEditSetup"
+                  [attr.aria-invalid]="errors?.base ? 'true' : null"
+                  [attr.aria-describedby]="errors?.base ? definition.draftId + '-base-error' : null"
+                  (change)="setDefinitionBase(definition.draftId, $any($event.target).value)">
+                @if (errors?.base) {
+                  <small [id]="definition.draftId + '-base-error'" class="weather-setup__field-error">
+                    Enter a base temperature.
+                  </small>
+                }
+              </label>
+            }
+            <div class="weather-setup__unit"><span>Unit</span><strong>{{ definition.unit }}</strong></div>
+          </div>
+          <button type="button" class="v1-icon-btn v1-icon-btn--danger" title="Remove predictor" [disabled]="!canEditSetup" [attr.aria-label]="'Remove ' + definition.name" (click)="removeDefinition(definition.draftId)"><app-ui-icon name="delete"></app-ui-icon></button>
+        </article>
+      }
+    </div>
+  </section>
+
+  @if (workflow.state().status === 'loading' || workflow.state().status === 'calculating' || workflow.state().status === 'committing') {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon><span>{{ workflow.state().message }}</span></div>
+  }
+  @if (workflow.state().error || saveError()) {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ workflow.state().error || saveError() }}</span></div>
+  }
+
+  @if (!isCreation()) {
+    <footer class="weather-setup__footer">
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDeleteStation()"><app-ui-icon name="delete"></app-ui-icon> Delete weather station</button>
+    </footer>
+  }
+</section>
+
+<ng-template #saveChangesConfirmModal>
+  @if (preview(); as changePreview) {
+    <app-confirmation-dialog
+      [title]="saveCompleted() ? 'Weather readings updated' : 'Review reading updates'"
+      titleId="weather-save-process-title"
+      [cancelAriaLabel]="saveCompleted() ? 'Close weather update summary' : 'Cancel weather update'"
+      [confirmLabel]="saveCompleted() ? 'Done' : 'Save and Update Readings'"
+      confirmClass="v1-btn--action"
+      [confirmIcon]="saveCompleted() ? undefined : 'refresh'"
+      size="wide"
+      bodySpacing="spacious"
+      [hideCancel]="saveCompleted()"
+      [busy]="committing()"
+      [disabled]="committing()"
+      (confirmed)="saveCompleted() ? closeSaveProcess() : confirmSaveAndUpdateReadings()"
+      (cancelled)="closeSaveProcess()">
+      @if (saveCompleted()) {
+        <div class="v1-alert v1-alert--success" role="status"><app-ui-icon name="success"></app-ui-icon><span>The station setup and its readings were saved together.</span></div>
+      } @else {
+        <p>Saving changes for <strong>{{ changePreview.station.name }}</strong> will update the following stored data.</p>
+      }
+      <dl class="weather-setup__change-summary">
+        <div><dt>Readings added</dt><dd>{{ changePreview.addReadings.length }}</dd></div>
+        <div><dt>Readings updated</dt><dd>{{ changePreview.updateReadings.length }}</dd></div>
+        <div><dt>Readings removed</dt><dd>{{ changePreview.deleteReadings.length }}</dd></div>
+        <div><dt>Warning months</dt><dd>{{ changePreview.warningMonths.length }}</dd></div>
+      </dl>
+      <p class="weather-setup__predictor-summary">
+        Predictors: {{ changePreview.addPredictors.length }} added,
+        {{ changePreview.updatePredictors.length }} updated,
+        {{ changePreview.deletePredictors.length }} removed.
+      </p>
+      @if (changePreview.deleteReadings.length || changePreview.deletePredictors.length) {
+        <div class="v1-alert v1-alert--warning"><app-ui-icon name="warning"></app-ui-icon><span>Removed predictors, their readings, and their analysis references will be permanently deleted.</span></div>
+      }
+      @if (saveError()) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ saveError() }}</span></div>
+      }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #deleteStationConfirmModal>
+  @if (context.group(); as group) {
+    <app-confirmation-dialog
+      [title]="'Delete ' + group.stationName + '?'"
+      titleId="delete-weather-station-title"
+      cancelAriaLabel="Cancel delete weather station"
+      confirmLabel="Delete weather station"
+      confirmIcon="delete"
+      [busy]="deleting()"
+      [disabled]="deleting()"
+      (confirmed)="confirmDeleteStation()"
+      (cancelled)="cancelDeleteStation()">
+      <p>This station setup, its {{ group.predictors.length }} {{ group.predictors.length === 1 ? 'predictor' : 'predictors' }}, all associated readings, and analysis references will be removed.</p>
+      <p><strong>This action cannot be undone.</strong></p>
+      @if (deleteError()) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ deleteError() }}</span></div>
+      }
+    </app-confirmation-dialog>
+  }
+</ng-template>

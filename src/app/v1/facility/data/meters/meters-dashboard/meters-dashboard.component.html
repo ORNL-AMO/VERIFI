@@ -51,8 +51,8 @@
     </div>
   }
 
-  <div class="v1-meter-dashboard-workspace">
-    <div class="v1-meters-browse" aria-label="Facility meters">
+  <div class="v1-data-dashboard-workspace v1-meter-dashboard-workspace">
+    <div class="v1-data-browse v1-meters-browse" aria-label="Facility meters">
       @if (actionError()) {
         <div class="v1-alert v1-alert--danger" role="alert">
           <app-ui-icon name="warning"></app-ui-icon>
@@ -60,8 +60,8 @@
         </div>
       }
 
-      <form class="v1-meters-browse__toolbar" aria-label="Meter filters">
-        <div class="v1-meters-browse__search">
+      <form class="v1-data-browse-toolbar v1-meters-browse__toolbar" aria-label="Meter filters">
+        <div class="v1-data-browse-search v1-meters-browse__search">
           <span class="input-group-text">
             <app-ui-icon name="search"></app-ui-icon>
           </span>
@@ -76,7 +76,7 @@
 
         <label>
           <span>Status</span>
-          <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+          <select class="v1-select" [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
             <option value="all">All</option>
             <option value="attention">Needs attention</option>
             <option value="noReadings">No readings</option>
@@ -87,7 +87,7 @@
 
         <label>
           <span>Sort</span>
-          <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+          <select class="v1-select" [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
             <option value="attention">Attention first</option>
             <option value="meterName">Meter name</option>
             <option value="latestReading">Latest reading</option>
@@ -113,7 +113,7 @@
           <p>Adjust the search or filter controls to return to the full meter list.</p>
         </article>
       } @else {
-        <div class="v1-meters-browse__grid" role="list" aria-label="Facility meters">
+        <div class="v1-data-browse-grid v1-meters-browse__grid" role="list" aria-label="Facility meters">
           @for (item of visibleMeterCards; track item.card.meter.guid) {
             <app-meter-browse-card
               [card]="item.card"

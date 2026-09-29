@@ -1,0 +1,586 @@
+import { Injectable, inject } from '@angular/core';
+import { deleteWorkspaceRecords, upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import {
+  buildFacilityAnalysisPredictorUpdates,
+  buildFacilityAnalysesWithoutPredictors,
+  buildFacilityAnalysesWithPredictors
+} from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
+import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { getGUID } from '@shared/sharedHelperFunctions';
+import {
+  PredictorDraft,
+  PredictorMissingMonth,
+  WeatherMaintenancePreview,
+  WeatherPredictorGenerationPreview,
+  WeatherStationGroupPreview,
+  WeatherStationMonthChangeSet,
+  createPredictorReading,
+  findMissingPredictorMonths,
+  isDegreeDayType,
+  weatherStationRouteKey
+} from './models';
+
+@Injectable()
+export class PredictorWorkspaceActionsService {
+  private readonly workspace = inject(AccountWorkspaceStore);
+  private readonly workspaceService = inject(AccountWorkspaceService);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+  private readonly predictorHandler = inject(PredictorCommandHandler);
+
+  async createPredictor(draft: PredictorDraft): Promise<IdbPredictor> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    const predictor = this.predictorFromDraft(draft, account.guid, facility.guid);
+    return this.executeWithRecovery(async () => {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'add', entityGuid: predictor.guid,
+          label: 'Adding predictor',
+          notification: { successTitle: 'Predictor added', successMessage: predictor.name },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.createStandardPredictor({
+          predictor,
+          facilityAnalyses: buildFacilityAnalysesWithPredictors(
+            this.facilityAnalyses(predictor.facilityId),
+            [predictor]
+          )
+        }, account.guid)
+      );
+      return result.value;
+    });
+  }
+
+  async updatePredictor(updatedPredictor: IdbPredictor): Promise<IdbPredictor> {
+    const account = this.requireAccount();
+    const current = this.requirePredictor(updatedPredictor.guid);
+    const updated = { ...structuredClone(updatedPredictor), id: current.id };
+    if (updated.predictorType !== current.predictorType) {
+      throw new WorkspaceWriteError('validation-failed', 'Predictor type cannot be changed after creation.');
+    }
+    this.validatePredictor(updated);
+    return this.executeWithRecovery(async () => {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'update', entityGuid: updated.guid,
+          label: 'Saving predictor settings',
+          notification: { suppressSuccessToast: true },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.updateStandardPredictor({
+          predictor: updated,
+          facilityAnalyses: buildFacilityAnalysisPredictorUpdates(
+            this.facilityAnalyses(updated.facilityId),
+            updated
+          )
+        }, account.guid)
+      );
+      return result.value;
+    });
+  }
+
+  async copyPredictor(predictor: IdbPredictor): Promise<IdbPredictor> {
+    const account = this.requireAccount();
+    const current = this.requirePredictor(predictor.guid);
+    const copy = structuredClone(current);
+    delete copy.id;
+    copy.guid = getGUID();
+    copy.name = `${copy.name || 'Untitled predictor'} (copy)`;
+    return this.executeWithRecovery(async () => {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'add', entityGuid: copy.guid,
+          label: 'Copying predictor',
+          notification: { successTitle: 'Predictor copied', successMessage: copy.name },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.createStandardPredictor({
+          predictor: copy,
+          facilityAnalyses: buildFacilityAnalysesWithPredictors(
+            this.facilityAnalyses(copy.facilityId),
+            [copy]
+          )
+        }, account.guid)
+      );
+      return result.value;
+    });
+  }
+
+  async deletePredictor(predictor: IdbPredictor): Promise<void> {
+    const account = this.requireAccount();
+    const current = this.requirePredictor(predictor.guid);
+    if (current.id === undefined) {
+      throw new WorkspaceWriteError('validation-failed', 'Predictor is missing its IndexedDB id.');
+    }
+    const readings = this.workspace.facilityPredictorData().filter(reading => reading.predictorId === current.guid);
+    this.requireReadingIds(readings);
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'delete', entityGuid: current.guid,
+          label: 'Deleting predictor and readings',
+          notification: { successTitle: 'Predictor deleted', successMessage: current.name },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.deleteStandardPredictor({
+          predictor: current,
+          predictorData: readings,
+          facilityAnalyses: buildFacilityAnalysesWithoutPredictors(
+            this.facilityAnalyses(current.facilityId),
+            new Set([current.guid])
+          )
+        }, account.guid)
+      );
+    });
+  }
+
+  async addPredictorReading(reading: IdbPredictorData): Promise<IdbPredictorData> {
+    const account = this.requireAccount();
+    const predictor = this.requirePredictor(reading.predictorId);
+    if (reading.accountId !== account.guid || reading.facilityId !== predictor.facilityId) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor reading does not belong to the active facility.');
+    }
+    const newReading = structuredClone(reading);
+    delete newReading.id;
+    return this.executeWithRecovery(async () => {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData', changeKind: 'add', entityGuid: newReading.guid,
+          label: 'Adding predictor reading',
+          notification: { successTitle: 'Predictor reading added' },
+          publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('predictorData', [value]) }
+        },
+        () => this.predictorHandler.addPredictorData(newReading, account.guid)
+      );
+      return result.value;
+    });
+  }
+
+  async updatePredictorReading(reading: IdbPredictorData): Promise<IdbPredictorData> {
+    const account = this.requireAccount();
+    const current = this.requireReading(reading.guid, reading.predictorId);
+    if (reading.accountId !== current.accountId || reading.facilityId !== current.facilityId) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor reading does not belong to the active facility.');
+    }
+    const updated = { ...structuredClone(reading), id: current.id };
+    return this.executeWithRecovery(async () => {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData', changeKind: 'update', entityGuid: updated.guid,
+          label: 'Saving predictor reading',
+          notification: { successTitle: 'Predictor reading saved' },
+          publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('predictorData', [value]) }
+        },
+        () => this.predictorHandler.updatePredictorData(updated, account.guid)
+      );
+      return result.value;
+    });
+  }
+
+  async deletePredictorReading(reading: IdbPredictorData): Promise<void> {
+    this.requireAccount();
+    const current = this.requireReading(reading.guid, reading.predictorId);
+    this.requireReadingIds([current]);
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData', changeKind: 'delete', entityGuid: current.guid,
+          label: 'Deleting predictor reading',
+          notification: { successTitle: 'Predictor reading deleted' },
+          publication: { mode: 'patch', buildPatch: () => deleteWorkspaceRecords('predictorData', { ids: [current.id!] }) }
+        },
+        () => this.predictorHandler.deletePredictorData(current.id!)
+      );
+    });
+  }
+
+  async deletePredictorReadings(predictorGuid: string, readings: readonly IdbPredictorData[]): Promise<void> {
+    const account = this.requireAccount();
+    this.requirePredictor(predictorGuid);
+    const selectedGuids = new Set(readings.map(reading => reading.guid));
+    const current = this.workspace.facilityPredictorData()
+      .filter(reading => reading.predictorId === predictorGuid && selectedGuids.has(reading.guid));
+    this.requireReadingIds(current);
+    if (current.length === 0) return;
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData', changeKind: 'bulk',
+          label: 'Deleting predictor readings',
+          notification: { successTitle: 'Predictor readings deleted' },
+          publication: {
+            mode: 'patch',
+            buildPatch: () => deleteWorkspaceRecords('predictorData', { ids: current.map(reading => reading.id!) })
+          }
+        },
+        () => this.predictorHandler.reconcilePredictorData(
+          predictorGuid,
+          { add: [], update: [], delete: current },
+          account.guid
+        )
+      );
+    });
+  }
+
+  async fillMissingPredictorMonths(
+    predictorGuid: string,
+    requestedMonths: readonly PredictorMissingMonth[]
+  ): Promise<readonly IdbPredictorData[]> {
+    const account = this.requireAccount();
+    const predictor = this.requirePredictor(predictorGuid);
+    const currentReadings = this.workspace.facilityPredictorData()
+      .filter(reading => reading.predictorId === predictorGuid);
+    const requestedKeys = new Set(requestedMonths.map(month => month.key));
+    const currentMissing = findMissingPredictorMonths(currentReadings).filter(month => requestedKeys.has(month.key));
+    if (currentMissing.length === 0) return [];
+    const additions = currentMissing.map(month => {
+      const reading = createPredictorReading(predictor, currentReadings, month);
+      reading.amount = 0;
+      return reading;
+    });
+    return this.executeWithRecovery(async () => {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData', changeKind: 'bulk',
+          label: 'Filling missing predictor months',
+          notification: { successTitle: 'Missing predictor months filled' },
+          // The atomic handler does not return generated IndexedDB ids for additions,
+          // so a committed reload is required to publish complete persisted records.
+          publication: { mode: 'reload' }
+        },
+        async () => {
+          await this.predictorHandler.reconcilePredictorData(
+            predictorGuid,
+            { add: additions, update: [], delete: [] },
+            account.guid
+          );
+          return additions;
+        }
+      );
+      return result.value;
+    });
+  }
+
+  async createWeatherPredictors(preview: WeatherPredictorGenerationPreview): Promise<void> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    this.requireCurrentRevision(preview.workspaceRevision);
+    if (preview.predictors.length === 0) {
+      throw new WorkspaceWriteError('validation-failed', 'Select at least one weather predictor to create.');
+    }
+    if (preview.predictors.some(predictor => predictor.accountId !== account.guid
+      || predictor.facilityId !== facility.guid || predictor.predictorType !== 'Weather')) {
+      throw new WorkspaceWriteError('validation-failed', 'The generated predictors do not belong to the active facility.');
+    }
+    const analyses = buildFacilityAnalysesWithPredictors(
+      this.workspace.facilityAnalyses().filter(analysis => analysis.facilityId === facility.guid),
+      preview.predictors
+    );
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'bulk',
+          label: 'Creating weather predictors',
+          notification: { successTitle: 'Weather predictors created' },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.createWeatherPredictors({
+          predictors: preview.predictors,
+          predictorData: preview.readings,
+          facilityAnalyses: analyses
+        }, account.guid)
+      );
+    });
+  }
+
+  async applyWeatherMaintenance(preview: WeatherMaintenancePreview): Promise<void> {
+    const account = this.requireAccount();
+    this.requireCurrentRevision(preview.workspaceRevision);
+    this.requirePredictor(preview.predictorGuid);
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictorData', changeKind: 'bulk', entityGuid: preview.predictorGuid,
+          label: preview.mode === 'restore' ? 'Restoring calculated weather reading' : 'Updating calculated weather readings',
+          notification: {
+            successTitle: preview.mode === 'restore' ? 'Calculated weather reading restored' : 'Weather readings updated'
+          },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.reconcilePredictorData(
+          preview.predictorGuid,
+          { add: preview.add, update: preview.update, delete: preview.delete },
+          account.guid
+        )
+      );
+    });
+  }
+
+  async applyWeatherSettings(preview: WeatherMaintenancePreview): Promise<void> {
+    const account = this.requireAccount();
+    this.requireCurrentRevision(preview.workspaceRevision);
+    const current = this.requirePredictor(preview.predictorGuid);
+    const proposed = { ...structuredClone(preview.proposedPredictor), id: current.id };
+    this.validatePredictor(proposed);
+    const analyses = buildFacilityAnalysisPredictorUpdates(
+      this.workspace.facilityAnalyses().filter(analysis => analysis.facilityId === proposed.facilityId),
+      proposed
+    );
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'bulk', entityGuid: proposed.guid,
+          label: 'Saving weather settings and recalculated readings',
+          notification: { successTitle: 'Weather settings updated' },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.updateWeatherPredictor({
+          predictor: proposed,
+          predictorData: { add: preview.add, update: preview.update, delete: preview.delete },
+          facilityAnalyses: analyses
+        }, account.guid)
+      );
+    });
+  }
+
+  async applyWeatherStationGroup(preview: WeatherStationGroupPreview): Promise<void> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    this.requireCurrentRevision(preview.workspaceRevision);
+    const changedIds = new Set([
+      ...preview.updatePredictors.map(predictor => predictor.guid),
+      ...preview.deletePredictors.map(predictor => predictor.guid)
+    ]);
+    const sourceStationIds = new Set<string | undefined>();
+    for (const predictor of [...preview.updatePredictors, ...preview.deletePredictors]) {
+      const current = this.requirePredictor(predictor.guid);
+      if (current.facilityId !== facility.guid || current.predictorType !== 'Weather') {
+        throw new WorkspaceWriteError('validation-failed', 'The weather station group is no longer available.');
+      }
+      sourceStationIds.add(current.weatherStationId);
+    }
+    if (sourceStationIds.size > 1) {
+      throw new WorkspaceWriteError('validation-failed', 'The reviewed predictors do not share one source station.');
+    }
+    if (this.workspace.facilityPredictors().some(predictor => predictor.predictorType === 'Weather'
+      && predictor.weatherStationId === preview.station.ID && !changedIds.has(predictor.guid))) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'That weather station already has a workbench. Open the existing station instead.'
+      );
+    }
+    if ([...preview.addPredictors, ...preview.updatePredictors].some(predictor =>
+      predictor.accountId !== account.guid || predictor.facilityId !== facility.guid
+      || predictor.predictorType !== 'Weather' || predictor.weatherStationId !== preview.station.ID)) {
+      throw new WorkspaceWriteError('validation-failed', 'The reviewed weather predictors do not belong to this station.');
+    }
+
+    if (preview.facilityAnalyses.some(analysis => analysis.facilityId !== facility.guid)) {
+      throw new WorkspaceWriteError('validation-failed', 'The reviewed analysis changes do not belong to this facility.');
+    }
+
+    await this.executeWithRecovery(async () => {
+      await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor', changeKind: 'bulk',
+          label: 'Saving weather station predictors',
+          notification: {
+            successTitle: preview.updatePredictors.length || preview.deletePredictors.length
+              ? 'Weather station updated' : 'Weather predictors created'
+          },
+          publication: { mode: 'reload' }
+        },
+        () => this.predictorHandler.applyWeatherStationGroup({
+          facilityId: facility.guid,
+          weatherStationId: preview.station.ID,
+          sourceWeatherStationId: sourceStationIds.values().next().value,
+          addPredictors: preview.addPredictors,
+          updatePredictors: preview.updatePredictors,
+          deletePredictors: preview.deletePredictors,
+          predictorData: {
+            add: preview.addReadings,
+            update: preview.updateReadings,
+            delete: preview.deleteReadings
+          },
+          facilityAnalyses: preview.facilityAnalyses
+        }, account.guid)
+      );
+    });
+  }
+
+  async applyWeatherStationMonth(changes: WeatherStationMonthChangeSet): Promise<void> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    this.requireCurrentRevision(changes.workspaceRevision);
+    const groupPredictors = this.workspace.facilityPredictors().filter(predictor =>
+      predictor.predictorType === 'Weather'
+      && weatherStationRouteKey(predictor) === changes.groupKey);
+    const currentGuids = new Set(groupPredictors.map(predictor => predictor.guid));
+    if (currentGuids.size !== changes.predictorGuids.length
+      || changes.predictorGuids.some(guid => !currentGuids.has(guid))) {
+      throw new WorkspaceWriteError('stale-workspace', 'The weather station predictors changed. Review the latest readings and try again.');
+    }
+    const currentRecords = new Map(this.workspace.facilityPredictorData().map(reading => [reading.guid, reading]));
+    const currentMonthRecords = this.workspace.facilityPredictorData().filter(reading =>
+      currentGuids.has(reading.predictorId) && reading.year === changes.year && reading.month === changes.month);
+    const assertCurrentRecord = (reading: IdbPredictorData): void => {
+      const current = currentRecords.get(reading.guid);
+      if (!current || current.id !== reading.id || current.predictorId !== reading.predictorId
+        || current.facilityId !== facility.guid || !currentGuids.has(reading.predictorId)) {
+        throw new WorkspaceWriteError('stale-workspace', 'The weather readings changed. Review the latest month and try again.');
+      }
+    };
+    changes.update.forEach(assertCurrentRecord);
+    changes.delete.forEach(assertCurrentRecord);
+    const addedPredictorIds = new Set<string>();
+    for (const reading of changes.add) {
+      if (reading.accountId !== account.guid || reading.facilityId !== facility.guid
+        || !currentGuids.has(reading.predictorId) || reading.year !== changes.year || reading.month !== changes.month
+        || addedPredictorIds.has(reading.predictorId)
+        || currentMonthRecords.some(current => current.predictorId === reading.predictorId)) {
+        throw new WorkspaceWriteError('validation-failed', 'A new reading is outside this weather station month.');
+      }
+      addedPredictorIds.add(reading.predictorId);
+    }
+
+    await this.commandBoundary.execute(
+      {
+        entityKind: 'predictorData', changeKind: 'bulk',
+        label: changes.delete.length && !changes.add.length && !changes.update.length
+          ? 'Deleting weather station month' : 'Saving weather station month',
+        notification: { suppressSuccessToast: true },
+        publication: { mode: 'reload' }
+      },
+      () => this.predictorHandler.applyWeatherStationMonth({
+        facilityId: facility.guid,
+        predictorGuids: changes.predictorGuids,
+        year: changes.year,
+        month: changes.month,
+        add: changes.add,
+        update: changes.update,
+        delete: changes.delete
+      }, account.guid)
+    );
+  }
+
+  private predictorFromDraft(draft: PredictorDraft, accountGuid: string, facilityGuid: string): IdbPredictor {
+    const predictor = getNewIdbPredictor(accountGuid, facilityGuid);
+    predictor.name = this.requireName(draft.name);
+    predictor.production = draft.production;
+    predictor.productionInAnalysis = draft.production;
+    predictor.predictorType = draft.predictorType;
+    predictor.unit = this.cleanText(draft.unit);
+    predictor.canBeNegative = false;
+    predictor.ignoreDateStatusChecks = false;
+    predictor.noLongerInUse = false;
+    if (draft.predictorType === 'Weather') {
+      if (!draft.weatherStation || !draft.weatherDataType) {
+        throw new WorkspaceWriteError('validation-failed', 'Select a weather station and weather data type.');
+      }
+      if (isDegreeDayType(draft.weatherDataType) && !Number.isFinite(draft.baseTemperature)) {
+        throw new WorkspaceWriteError('validation-failed', 'Enter a base temperature for the degree-day predictor.');
+      }
+      predictor.weatherStationId = draft.weatherStation.ID;
+      predictor.weatherStationName = draft.weatherStation.name;
+      predictor.weatherDataType = draft.weatherDataType;
+      if (draft.weatherDataType === 'HDD') predictor.heatingBaseTemperature = draft.baseTemperature;
+      if (draft.weatherDataType === 'CDD') predictor.coolingBaseTemperature = draft.baseTemperature;
+    }
+    return predictor;
+  }
+
+  private validatePredictor(predictor: IdbPredictor): void {
+    predictor.name = this.requireName(predictor.name);
+    if (predictor.predictorType === 'Weather') {
+      if (!predictor.weatherStationId || !predictor.weatherStationName) {
+        throw new WorkspaceWriteError('validation-failed', 'Select a weather station.');
+      }
+      const base = predictor.weatherDataType === 'HDD'
+        ? predictor.heatingBaseTemperature
+        : predictor.weatherDataType === 'CDD' ? predictor.coolingBaseTemperature : 0;
+      if (isDegreeDayType(predictor.weatherDataType) && !Number.isFinite(base)) {
+        throw new WorkspaceWriteError('validation-failed', 'Enter the applicable base temperature.');
+      }
+    }
+  }
+
+  private requirePredictor(guid: string): IdbPredictor {
+    const predictor = this.workspace.facilityPredictors().find(item => item.guid === guid);
+    if (!predictor) {
+      throw new WorkspaceWriteError('validation-failed', 'The predictor is not part of the selected facility.');
+    }
+    return structuredClone(predictor);
+  }
+
+  private requireReading(guid: string, predictorGuid: string): IdbPredictorData {
+    this.requirePredictor(predictorGuid);
+    const reading = this.workspace.facilityPredictorData()
+      .find(item => item.guid === guid && item.predictorId === predictorGuid);
+    if (!reading) throw new WorkspaceWriteError('validation-failed', 'The predictor reading is no longer available.');
+    return structuredClone(reading);
+  }
+
+  private facilityAnalyses(facilityGuid: string) {
+    return this.workspace.facilityAnalyses().filter(analysis => analysis.facilityId === facilityGuid);
+  }
+
+  private requireAccount() {
+    const account = this.workspace.account();
+    if (!account || !this.workspace.canWrite() || this.workspace.hasPending()) {
+      throw new WorkspaceWriteError('workspace-not-ready', 'The workspace is not ready for predictor changes.');
+    }
+    return account;
+  }
+
+  private requireFacility() {
+    const facility = this.workspace.selectedFacility();
+    if (!facility) throw new WorkspaceWriteError('workspace-not-ready', 'Select a facility before changing predictors.');
+    return facility;
+  }
+
+  private requireName(name: string): string {
+    const trimmed = name?.trim();
+    if (!trimmed) throw new WorkspaceWriteError('validation-failed', 'Predictor name is required.');
+    if (trimmed.length > 100) throw new WorkspaceWriteError('validation-failed', 'Predictor name must be 100 characters or fewer.');
+    return trimmed;
+  }
+
+  private cleanText(value: string | undefined): string | undefined {
+    const trimmed = value?.trim();
+    return trimmed || undefined;
+  }
+
+  private requireReadingIds(readings: readonly IdbPredictorData[]): void {
+    if (readings.some(reading => reading.id === undefined)) {
+      throw new WorkspaceWriteError('validation-failed', 'One or more predictor readings are missing their IndexedDB id.');
+    }
+  }
+
+  private requireCurrentRevision(revision: number): void {
+    if (this.workspace.revision() !== revision) {
+      throw new WorkspaceWriteError(
+        'stale-workspace',
+        'Predictor data changed after this preview was generated. Review the latest data and generate a new preview.'
+      );
+    }
+  }
+
+  private async executeWithRecovery<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      try {
+        await this.workspaceService.reloadActiveWorkspace(true);
+      } catch {
+        // The original command error remains the most useful error for the caller.
+      }
+      throw error;
+    }
+  }
+}

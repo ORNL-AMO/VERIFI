@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DrawerFocusTrapDirective } from '@app/v1/welcome/shared/drawer-focus-trap.directive';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { IconComponent } from '../icons/icon.component';
 
 @Component({
@@ -7,7 +7,7 @@ import { IconComponent } from '../icons/icon.component';
   templateUrl: './workspace-slideout.component.html',
   styleUrls: ['./workspace-slideout.component.css'],
   standalone: true,
-  imports: [DrawerFocusTrapDirective, IconComponent]
+  imports: [ModalFocusTrapDirective, IconComponent]
 })
 export class WorkspaceSlideoutComponent {
   @Input({ required: true }) title = '';

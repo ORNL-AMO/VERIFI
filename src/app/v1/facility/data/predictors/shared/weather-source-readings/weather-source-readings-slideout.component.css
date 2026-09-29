@@ -1,0 +1,11 @@
+:host { display: contents; }
+.weather-source-readings { display: grid; gap: var(--v1-space-3); min-width: 0; }
+.weather-source-readings__loading { display: flex; min-height: 18rem; align-items: center; justify-content: center; gap: var(--v1-space-2); color: var(--v1-muted); }
+.weather-source-readings__chart { width: 100%; height: 28rem; min-height: 20rem; }
+.weather-source-readings .v1-alert { margin: 0; }
+.weather-source-readings .v1-alert .v1-btn { margin-left: auto; }
+.weather-source-readings__gap-list { display: grid; gap: var(--v1-space-2); margin: 0; padding: 0; list-style: none; }
+.weather-source-readings__gap-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--v1-space-2); align-items: start; padding: var(--v1-space-2) var(--v1-space-3); border-left: .2rem solid var(--v1-warning); background: var(--v1-panel); color: var(--v1-muted); }
+.weather-source-readings__gap-list app-ui-icon { margin-top: .15rem; color: var(--v1-warning); }
+.weather-source-readings__gap-list strong { color: var(--v1-text); }
+@media (max-width: 42rem) { .weather-source-readings__chart { height: 22rem; } }

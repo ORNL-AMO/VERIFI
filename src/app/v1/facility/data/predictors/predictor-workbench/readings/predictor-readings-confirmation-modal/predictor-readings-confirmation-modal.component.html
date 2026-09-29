@@ -1,0 +1,32 @@
+<app-confirmation-dialog
+  [title]="title"
+  titleId="predictor-readings-confirm-title"
+  cancelAriaLabel="Cancel predictor readings action"
+  [confirmLabel]="confirmLabel"
+  [disabled]="saving"
+  (confirmed)="confirmed.emit()"
+  (cancelled)="cancelled.emit()">
+  @if (error) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ error }}</span>
+    </div>
+  }
+  @switch (confirmation.kind) {
+    @case ('fill-missing') {
+      <p>Zero-valued predictor readings will be added for these missing months:</p>
+      <ul class="predictor-readings-confirmation__months" aria-label="Missing months">
+        @for (month of confirmation.months; track month.key) { <li>{{ month.label }}</li> }
+      </ul>
+      @if (isWeather) {
+        <p class="predictor-readings-confirmation__note">Weather predictor values added here will be saved as manual overrides.</p>
+      }
+    }
+    @case ('delete-many') {
+      <p>Deleting {{ confirmation.readings.length }} selected predictor reading{{ confirmation.readings.length === 1 ? '' : 's' }} cannot be undone.</p>
+    }
+    @case ('delete-one') {
+      <p>Deleting this predictor reading cannot be undone.</p>
+    }
+  }
+</app-confirmation-dialog>

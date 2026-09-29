@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
+import { normalizeTimePeriodPageSize } from '@shared/table-pagination';
 
 @Injectable({
   providedIn: 'root'
@@ -62,7 +63,7 @@ export class SharedDataService {
 
   getInitialItemsPerPage(): number {
     let itemsPerPage: number = this.localStorageService.retrieve("itemsPerPage");
-    return itemsPerPage;
+    return normalizeTimePeriodPageSize(itemsPerPage);
   }
 
   getInitialEnergyHomeCarouselIndex(): number {

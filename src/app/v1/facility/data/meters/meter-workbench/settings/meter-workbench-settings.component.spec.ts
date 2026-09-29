@@ -413,7 +413,7 @@ describe('MeterWorkbenchSettingsComponent', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent;
     expect(text).toContain('Inactive date');
     expect(text).toContain('Return meter to use');
-    expect(query<HTMLButtonElement>(fixture, '.meter-settings__inactive-toggle').classList.contains('v1-btn--quiet')).toBe(true);
+    expect(query<HTMLButtonElement>(fixture, '.meter-settings__inactive-toggle').classList.contains('v1-btn--deactivate')).toBe(true);
     expect(text.indexOf('Inactive date')).toBeLessThan(text.indexOf('Allow Negative Readings'));
     expect(text.indexOf('Allow Negative Readings')).toBeLessThan(text.indexOf('Calendarization Method'));
     expect(query<HTMLButtonElement>(fixture, '.meter-settings__inactive-toggle').getAttribute('aria-pressed')).toBe('true');

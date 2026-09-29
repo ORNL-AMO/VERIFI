@@ -3,9 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
-import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
-import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -14,7 +11,6 @@ import { makeFinding } from '@app/v1/status/status.models';
 import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab.component';
-import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 
 describe('AccountPortfolioMetersTabComponent', () => {
   it('renders account-wide meter cards with their owning facility headers', () => {
@@ -23,7 +19,8 @@ describe('AccountPortfolioMetersTabComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    expect(fixture.nativeElement.querySelectorAll('app-meter-browse-card').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('app-resource-browse-card').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__actions')).toHaveLength(0);
     expect(text).toContain('Alpha Plant');
     expect(text).toContain('Beta Works');
     expect(text).toContain('Main Electric');
@@ -126,10 +123,6 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
           ]
         }
       },
-      { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
-      { provide: WorkspaceCommandBoundary, useValue: { execute: vi.fn() } },
-      { provide: MeterCommandHandler, useValue: {} },
-      { provide: MeterGroupCommandHandler, useValue: {} },
       { provide: Router, useValue: { navigate: vi.fn(async () => true) } }
     ]
   });

@@ -57,6 +57,21 @@ export interface ResourceBrowseCardAction {
   readonly loading?: boolean;
 }
 
+export interface ResourceBrowseCardCapabilities {
+  readonly canOpen: boolean;
+  readonly canAct: boolean;
+}
+
+export const DEFAULT_RESOURCE_BROWSE_CARD_CAPABILITIES: ResourceBrowseCardCapabilities = {
+  canOpen: true,
+  canAct: true
+};
+
+export const READ_ONLY_RESOURCE_BROWSE_CARD_CAPABILITIES: ResourceBrowseCardCapabilities = {
+  canOpen: true,
+  canAct: false
+};
+
 export interface ResourceBrowseCardView {
   readonly title: string;
   readonly openLabel: string;

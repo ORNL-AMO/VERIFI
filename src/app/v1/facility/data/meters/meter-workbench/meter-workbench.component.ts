@@ -1,9 +1,9 @@
-import { Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
+import type { DataWorkbenchResource } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
@@ -35,19 +35,15 @@ export class MeterWorkbenchComponent {
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly meterHandler = inject(MeterCommandHandler);
   private readonly activeTabState = signal<MeterWorkbenchTabId>('settings');
-  private readonly meterSwitcherOpenState = signal(false);
   private readonly savingDisplaySettingsState = signal(false);
   private readonly displaySettingsErrorState = signal<string | undefined>(undefined);
-
-  @ViewChild('meterSwitcherToggle') private readonly meterSwitcherToggle?: ElementRef<HTMLButtonElement>;
 
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly status = inject(WorkspaceStatusService);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly activeTab = this.activeTabState.asReadonly();
-  readonly meterSwitcherOpen = this.meterSwitcherOpenState.asReadonly();
-  readonly factsExpanded = this.workbenchLayout.factsExpanded;
+  readonly meterResources = computed<readonly DataWorkbenchResource[]>(() =>
+    this.workspace.meterCards().map(card => ({ id: card.meter.guid, label: card.meter.name })));
   readonly energyUnitOptions = computed(() => EnergyUnitOptions);
   readonly savingDisplaySettings = this.savingDisplaySettingsState.asReadonly();
   readonly displaySettingsError = this.displaySettingsErrorState.asReadonly();
@@ -120,20 +116,13 @@ export class MeterWorkbenchComponent {
     return meterWorkbenchTabsForMeter(this.workspace.selectedMeter());
   }
 
-  openMeter(tab: MeterWorkbenchTabId): void {
+  openMeter(tab: string): void {
+    if (!isMeterWorkbenchTab(tab)) return;
     const facility = this.workspace.facility();
     const meter = this.workspace.selectedMeter();
     if (facility && meter) {
       void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meter.guid, tab));
     }
-  }
-
-  toggleMeterSwitcher(): void {
-    this.meterSwitcherOpenState.update(open => !open);
-  }
-
-  toggleFacts(): void {
-    this.workbenchLayout.toggleFacts();
   }
 
   setDisplayEnergyUnit(event: Event): void {
@@ -167,18 +156,6 @@ export class MeterWorkbenchComponent {
     void this.saveDisplaySettings({ ...meter, displayEnergyIsSource: nextPreference });
   }
 
-  closeMeterSwitcher(): void {
-    this.meterSwitcherOpenState.set(false);
-  }
-
-  onMeterSwitcherEscape(): void {
-    if (!this.meterSwitcherOpen()) {
-      return;
-    }
-    this.closeMeterSwitcher();
-    this.meterSwitcherToggle?.nativeElement.focus();
-  }
-
   switchMeter(meterGuid: string): void {
     const facility = this.workspace.facility();
     if (!facility) {
@@ -192,7 +169,6 @@ export class MeterWorkbenchComponent {
     if (targetTab === 'bill-inspection' && !shouldShowMeterBillInspectionTab(targetMeter)) {
       targetTab = 'settings';
     }
-    this.closeMeterSwitcher();
     void this.router.navigate(this.navigation.facilityMeterRoute(facility.guid, meterGuid, targetTab));
   }
 

@@ -140,6 +140,40 @@ describe('v1 workspace status evaluator', () => {
     ]));
   });
 
+  it('reports Predictor outliers with affected periods and revised Weather source data', () => {
+    const predictorValue = predictor({ predictorType: 'Weather', weatherDataType: 'CDD' });
+    const result = evaluate(snapshot({
+      predictors: [predictorValue],
+      predictorData: [
+        predictorData({ guid: 'p1', month: 1, amount: 10 }),
+        predictorData({ guid: 'p2', month: 2, amount: 10 }),
+        predictorData({ guid: 'p3', month: 3, amount: 11 }),
+        predictorData({ guid: 'p4', month: 4, amount: 12, weatherDataChanged: true }),
+        predictorData({ guid: 'p5', month: 5, amount: 100 })
+      ]
+    }));
+
+    expect(entityCodes(result, predictorValue.guid)).toEqual(expect.arrayContaining([
+      'predictor.weather.warning',
+      'predictor.quality.outlier'
+    ]));
+    expect(result.findings.find(finding => finding.code === 'predictor.quality.outlier')?.evidence)
+      .toEqual({ count: 1, periods: ['2026-05'] });
+  });
+
+  it('keeps legacy zero-MAD Predictor data out of the outlier rule', () => {
+    const result = evaluate(snapshot({
+      predictorData: [
+        predictorData({ guid: 'p1', month: 1, amount: 10 }),
+        predictorData({ guid: 'p2', month: 2, amount: 10 }),
+        predictorData({ guid: 'p3', month: 3, amount: 10 }),
+        predictorData({ guid: 'p4', month: 4, amount: 100 })
+      ]
+    }));
+
+    expect(entityCodes(result, 'predictor-a')).not.toContain('predictor.quality.outlier');
+  });
+
   it('reports analysis, account-analysis, and report setup errors', () => {
     const facilityAnalysis = {
       guid: 'analysis-a', accountId: 'account-a', facilityId: 'facility-a', name: '', groups: [],

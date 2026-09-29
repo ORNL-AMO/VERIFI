@@ -17,8 +17,12 @@
   padding: .55rem .7rem;
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius-sm);
-  background: var(--v1-surface);
+  background-color: var(--v1-surface);
   color: var(--v1-text);
+}
+
+.v1-meter-slideout-form select {
+  padding-right: 2.1rem;
 }
 
 .v1-meter-slideout-form textarea {

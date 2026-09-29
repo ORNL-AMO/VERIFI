@@ -10,6 +10,8 @@ import { WorkspaceCalendarizationBaseResult } from '@app/v1/shared/calendarizati
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceStatusService } from './workspace-status.service';
+import { presentFinding } from './status.catalog';
+import { makeFinding } from './status.models';
 
 describe('WorkspaceStatusService', () => {
   it('publishes ready only after the current revision evaluates successfully', () => {
@@ -110,6 +112,20 @@ describe('WorkspaceStatusService', () => {
     completions[1]();
     await secondAction;
     expect(service.warningActionId()).toBeUndefined();
+  });
+
+  it('navigates facility and Predictor destinations to their v1 data workflows', () => {
+    const snapshot = signal(workspaceSnapshot());
+    const service = setup(snapshot, signal(1), new BehaviorSubject(result('ready')));
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const facilityEntity = { kind: 'facility' as const, guid: 'facility-a', name: 'Facility A', accountGuid: 'account-a', facilityGuid: 'facility-a' };
+    const predictorEntity = { kind: 'predictor' as const, guid: 'predictor-a', name: 'Production', accountGuid: 'account-a', facilityGuid: 'facility-a' };
+
+    service.navigateTo(presentFinding(makeFinding('facility.predictors.missing', 'error', 'readiness', facilityEntity)));
+    service.navigateTo(presentFinding(makeFinding('predictor.quality.outlier', 'warning', 'quality', predictorEntity, { count: 1, periods: ['2026-01'] })));
+
+    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors']);
+    expect(router.navigate).toHaveBeenNthCalledWith(2, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'predictor-a', 'quality']);
   });
 });
 

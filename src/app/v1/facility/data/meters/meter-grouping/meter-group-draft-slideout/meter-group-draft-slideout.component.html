@@ -12,6 +12,7 @@
     <label>
       <span>Group type</span>
       <select
+        class="v1-select"
         [value]="draft().groupType"
         [disabled]="saving || assignedMeterCount > 0"
         required

@@ -6,6 +6,9 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
+import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
+import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 
 import { FacilityDataPlaceholderComponent } from './facility-data-placeholder.component';
 import { FacilityMetersComponent } from './meters/facility-meters.component';
@@ -32,7 +35,6 @@ import { MeterSettingsOtherInfoComponent } from './meters/meter-workbench/settin
 import { MeterSettingsReadingFormComponent } from './meters/meter-workbench/settings/meter-settings-reading-form/meter-settings-reading-form.component';
 import { MeterSettingsVehicleFormComponent } from './meters/meter-workbench/settings/meter-settings-vehicle-form/meter-settings-vehicle-form.component';
 import { MeterCalendarizationHelpSlideoutComponent } from './meters/meter-workbench/settings/meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
-import { MeterWorkbenchTabsComponent } from './meters/meter-workbench/meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
 import { MeterGroupWorkbenchGraphComponent } from './meters/meter-group-workbench/graph/meter-group-workbench-graph.component';
@@ -50,12 +52,15 @@ import { PredictorWorkbenchQualityReportComponent } from './predictors/predictor
 import { PredictorWorkbenchReadingsComponent } from './predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from './predictors/predictor-workbench/settings/predictor-workbench-settings.component';
 import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/predictors-dashboard.component';
+import { WeatherPredictorWorkbenchComponent } from './predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorSetupComponent } from './predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
+import { WeatherPredictorReadingsComponent } from './predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
+import { WeatherPredictorQualityComponent } from './predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
 
 @NgModule({
   declarations: [
     FacilityDataPlaceholderComponent,
     MeterWorkbenchComponent,
-    MeterWorkbenchTabsComponent,
     MeterWorkbenchSettingsComponent,
     MeterSettingsCoreFormComponent,
     MeterSettingsVehicleFormComponent,
@@ -80,6 +85,9 @@ import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/
   ],
   imports: [
     CommonModule,
+    DataWorkbenchTabsComponent,
+    DataWorkbenchResourceSwitcherComponent,
+    DataWorkbenchFactsToggleComponent,
     IconsModule,
     NgbPaginationModule,
     ReactiveFormsModule,
@@ -103,7 +111,11 @@ import { PredictorsDashboardComponent } from './predictors/predictors-dashboard/
     PredictorWorkbenchComponent,
     PredictorWorkbenchSettingsComponent,
     PredictorWorkbenchReadingsComponent,
-    PredictorWorkbenchQualityReportComponent
+    PredictorWorkbenchQualityReportComponent,
+    WeatherPredictorWorkbenchComponent,
+    WeatherPredictorSetupComponent,
+    WeatherPredictorReadingsComponent,
+    WeatherPredictorQualityComponent
   ],
   exports: [
     FacilityDataPlaceholderComponent,

@@ -46,7 +46,7 @@ export class PredictorsDataTableComponent {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
   copyingTable: boolean = false;
 
-  itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 10 });
+  itemsPerPage: Signal<number> = toSignal(this.sharedDataService.itemsPerPage, { initialValue: 12 });
   private facilityPredictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
   private facilityPredictorData: Signal<Array<IdbPredictorData>> = computed(() => [...this.accountWorkspaceStore.facilityPredictorData()]);
   private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);

@@ -13,7 +13,7 @@ import { MeterGroupWorkbenchTableComponent } from './meter-group-workbench-table
 
 describe('MeterGroupWorkbenchTableComponent', () => {
   it('clamps the current page when switched results have fewer rows', () => {
-    const results = signal(resultsView({ monthlyRows: monthlyRows(25) }));
+    const results = signal(resultsView({ monthlyRows: monthlyRows(29) }));
     const fixture = setup({ results });
     const component = fixture.componentInstance;
     const root = fixture.nativeElement as HTMLElement;
@@ -58,7 +58,7 @@ describe('MeterGroupWorkbenchTableComponent', () => {
 
     component.currentPage.set(2);
     const pageSize = root.querySelector<HTMLSelectElement>('select') as HTMLSelectElement;
-    pageSize.value = '25';
+    pageSize.value = '24';
     pageSize.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(component.currentPage()).toBe(1);

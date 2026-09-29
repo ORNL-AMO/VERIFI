@@ -30,11 +30,16 @@ import { MeterGroupWorkbenchComponent } from '@app/v1/facility/data/meters/meter
 import { MeterGroupingComponent } from '@app/v1/facility/data/meters/meter-grouping/meter-grouping.component';
 import { MetersDashboardComponent } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard.component';
 import { FacilityPredictorsComponent } from '@app/v1/facility/data/predictors/facility-predictors.component';
+import { FacilityPredictorsWorkspaceService } from '@app/v1/facility/data/predictors/facility-predictors-workspace.service';
 import { PredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/predictor-workbench/predictor-workbench.component';
 import { PredictorWorkbenchQualityReportComponent } from '@app/v1/facility/data/predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';
 import { PredictorWorkbenchReadingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/readings/predictor-workbench-readings.component';
 import { PredictorWorkbenchSettingsComponent } from '@app/v1/facility/data/predictors/predictor-workbench/settings/predictor-workbench-settings.component';
 import { PredictorsDashboardComponent } from '@app/v1/facility/data/predictors/predictors-dashboard/predictors-dashboard.component';
+import { WeatherPredictorWorkbenchComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/weather-predictor-workbench.component';
+import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
+import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
+import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
 import { V1Routes } from './v1.routes';
 
 describe('V1Routes facility data meters routes', () => {
@@ -200,12 +205,13 @@ describe('V1Routes facility data meters routes', () => {
     });
   });
 
-  it('routes Predictors to the dashboard and all read-only workbench tabs', () => {
+  it('routes Predictors to the dashboard and guarded Settings workbench', () => {
     const predictorsRoute = predictorsRouteConfig();
     const predictorRoute = predictorsRoute.children?.find(child => child.path === ':predictorGuid');
     const children = predictorRoute?.children ?? [];
 
     expect(predictorsRoute.component).toBe(FacilityPredictorsComponent);
+    expect(predictorsRoute.providers).toContain(FacilityPredictorsWorkspaceService);
     expect(predictorsRoute.children?.find(child => child.path === '')).toMatchObject({
       path: '',
       pathMatch: 'full',
@@ -213,10 +219,51 @@ describe('V1Routes facility data meters routes', () => {
     });
     expect(predictorRoute?.component).toBe(PredictorWorkbenchComponent);
     expect(children.find(child => child.path === '')).toMatchObject({ path: '', pathMatch: 'full', redirectTo: 'settings' });
-    expect(children.find(child => child.path === 'settings')).toMatchObject({ component: PredictorWorkbenchSettingsComponent, data: { predictorTab: 'settings' } });
-    expect(children.find(child => child.path === 'readings')).toMatchObject({ component: PredictorWorkbenchReadingsComponent, data: { predictorTab: 'readings' } });
+    expect(children.find(child => child.path === 'settings')).toMatchObject({
+      component: PredictorWorkbenchSettingsComponent,
+      canDeactivate: [unsavedChangesGuard],
+      data: { predictorTab: 'settings' }
+    });
+    expect(children.find(child => child.path === 'readings')).toMatchObject({
+      component: PredictorWorkbenchReadingsComponent,
+      canDeactivate: [unsavedChangesGuard],
+      data: { predictorTab: 'readings' }
+    });
     expect(children.find(child => child.path === 'quality')).toMatchObject({ component: PredictorWorkbenchQualityReportComponent, data: { predictorTab: 'quality' } });
     expect(children.find(child => child.path === '**')).toMatchObject({ path: '**', redirectTo: 'settings' });
+  });
+
+  it('routes weather creation and station tabs before the standard predictor route', () => {
+    const predictorsRoute = predictorsRouteConfig();
+    const weatherRoute = predictorsRoute.children?.find(child => child.path === 'weather');
+    const creationRoute = weatherRoute?.children?.find(child => child.path === 'new');
+    const stationRoute = weatherRoute?.children?.find(child => child.path === ':weatherGroupKey');
+    const setupRoute = stationRoute?.children?.find(child => child.path === 'setup');
+    const readingsRoute = stationRoute?.children?.find(child => child.path === 'readings');
+    const qualityRoute = stationRoute?.children?.find(child => child.path === 'quality/:predictorGuid');
+    const legacyQualityRoute = stationRoute?.children?.find(child => child.path === 'quality');
+    const outputRoute = stationRoute?.children?.find(child => child.path === 'outputs/:predictorGuid');
+
+    expect((predictorsRoute.children ?? []).findIndex(child => child.path === 'weather'))
+      .toBeLessThan((predictorsRoute.children ?? []).findIndex(child => child.path === ':predictorGuid'));
+    expect(creationRoute?.component).toBe(WeatherPredictorWorkbenchComponent);
+    expect(creationRoute?.children?.find(child => child.path === '')).toMatchObject({
+      component: WeatherPredictorSetupComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+    expect(stationRoute?.component).toBe(WeatherPredictorWorkbenchComponent);
+    expect(setupRoute).toMatchObject({ component: WeatherPredictorSetupComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'setup' } });
+    expect(readingsRoute).toMatchObject({ component: WeatherPredictorReadingsComponent, canDeactivate: [unsavedChangesGuard], data: { weatherTab: 'readings' } });
+    expect(qualityRoute).toMatchObject({ component: WeatherPredictorQualityComponent, data: { weatherTab: 'quality' } });
+    expect(legacyQualityRoute).toMatchObject({ component: WeatherPredictorQualityComponent, data: { weatherTab: 'quality' } });
+    expect(outputRoute?.children?.find(child => child.path === 'settings')).toMatchObject({
+      redirectTo: '../../setup'
+    });
+    expect(outputRoute?.children?.find(child => child.path === 'readings')).toMatchObject({ redirectTo: '../../readings' });
+    const legacyOutputQualityRoute = outputRoute?.children?.find(child => child.path === 'quality');
+    expect(legacyOutputQualityRoute?.redirectTo).toEqual(expect.any(Function));
+    expect((legacyOutputQualityRoute?.redirectTo as Function)({ params: { predictorGuid: 'weather-a' } }))
+      .toBe('../../quality/weather-a');
   });
 });
 

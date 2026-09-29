@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
+import { ALL_TABLE_ROWS_PAGE_SIZE, EXTENDED_TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -10,6 +11,8 @@ import { Subscription } from 'rxjs';
 })
 export class TableItemsDropdownComponent implements OnInit {
 
+  readonly pageSizeOptions = EXTENDED_TIME_PERIOD_PAGE_SIZE_OPTIONS;
+  readonly allRowsPageSize = ALL_TABLE_ROWS_PAGE_SIZE;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
   constructor(private sharedDataService: SharedDataService) { }

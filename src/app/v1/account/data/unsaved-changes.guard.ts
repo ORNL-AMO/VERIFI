@@ -7,7 +7,8 @@ export interface HasUnsavedChanges {
   isNavigationBlocked?(): boolean;
 }
 
-export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = component => {
+export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges | null> = component => {
+  if (!component) return true;
   if (component.isNavigationBlocked?.()) return false;
   return !component.hasUnsavedChanges() || inject(UnsavedChangesService).confirmDiscard(true);
 };

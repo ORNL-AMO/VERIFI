@@ -26,6 +26,7 @@ export type StatusRuleCode =
   | 'predictor.currency.stale'
   | 'predictor.currency.behind-facility'
   | 'predictor.weather.warning'
+  | 'predictor.quality.outlier'
   | 'analysis.configuration.invalid'
   | 'analysis-group.setup.invalid'
   | 'analysis-group.model.invalid'
@@ -76,6 +77,7 @@ export type StatusDestination =
   | { readonly kind: 'account-settings'; readonly accountGuid: string; readonly detail: string }
   | { readonly kind: 'facility-data'; readonly facilityGuid: string; readonly detail: string }
   | { readonly kind: 'meter-tab'; readonly facilityGuid: string; readonly meterGuid: string; readonly tab: 'settings' | 'readings' | 'quality' }
+  | { readonly kind: 'predictor-tab'; readonly facilityGuid: string; readonly predictorGuid: string; readonly tab: 'settings' | 'readings' | 'quality' }
   | { readonly kind: 'unavailable' };
 
 export interface StatusItem extends StatusFinding {

@@ -1,0 +1,43 @@
+<div class="v1-modal-layer">
+  <button
+    type="button"
+    class="v1-modal-backdrop"
+    [attr.aria-label]="cancelAriaLabel"
+    [disabled]="disabled"
+    (click)="cancel()">
+  </button>
+  <section
+    class="v1-modal"
+    [class.confirmation-dialog--wide]="size === 'wide'"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    appModalFocusTrap
+    (escapePressed)="cancel()">
+    <header class="v1-modal__header">
+      <h2 [id]="titleId">{{ title }}</h2>
+      <button
+        type="button"
+        class="v1-icon-btn"
+        [attr.aria-label]="cancelAriaLabel"
+        [disabled]="disabled"
+        (click)="cancel()">
+        <app-ui-icon name="close"></app-ui-icon>
+      </button>
+    </header>
+    <div class="v1-modal__body confirmation-dialog__body" [class.confirmation-dialog__body--spacious]="bodySpacing === 'spacious'">
+      <ng-content></ng-content>
+    </div>
+    <footer class="v1-modal__footer">
+      @if (!hideCancel) {
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="disabled" (click)="cancel()">Cancel</button>
+      }
+      <button type="button" class="v1-btn {{ confirmClass }}" [disabled]="disabled" (click)="confirm()">
+        @if (confirmIcon) {
+          <app-ui-icon [name]="busy ? 'loading' : confirmIcon" [spin]="busy"></app-ui-icon>
+        }
+        {{ confirmLabel }}
+      </button>
+    </footer>
+  </section>
+</div>

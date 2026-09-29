@@ -117,6 +117,10 @@ export class WorkspaceStatusService {
     return this.findingsForEntity(meterGuid);
   }
 
+  predictorFindings(predictorGuid: string): StatusItem[] {
+    return this.findingsForEntity(predictorGuid);
+  }
+
   async discardWarning(item: StatusItem): Promise<boolean> {
     if (item.severity !== 'warning') return false;
     const account = this.workspace.account();
@@ -157,6 +161,9 @@ export class WorkspaceStatusService {
         break;
       case 'meter-tab':
         void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', 'meters', item.destination.meterGuid, item.destination.tab]);
+        break;
+      case 'predictor-tab':
+        void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', 'predictors', item.destination.predictorGuid, item.destination.tab]);
         break;
     }
   }

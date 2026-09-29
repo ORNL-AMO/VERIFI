@@ -1,0 +1,19 @@
+<app-confirmation-dialog
+  [title]="'Delete ' + (card.predictor.name || 'this predictor') + '?'"
+  titleId="v1-delete-predictor-title"
+  cancelAriaLabel="Cancel delete predictor"
+  confirmLabel="Delete predictor"
+  confirmIcon="delete"
+  [busy]="saving"
+  [disabled]="saving"
+  (confirmed)="confirmed.emit()"
+  (cancelled)="cancelled.emit()">
+  <p>This predictor, its {{ card.readingCount }} {{ card.readingCount === 1 ? 'reading' : 'readings' }}, and its analysis references will be removed.</p>
+  <p><strong>This action cannot be undone.</strong></p>
+  @if (error) {
+    <div class="v1-alert v1-alert--danger" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ error }}</span>
+    </div>
+  }
+</app-confirmation-dialog>

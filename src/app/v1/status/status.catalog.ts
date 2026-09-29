@@ -33,7 +33,7 @@ const RULES: Record<StatusRuleCode, StatusRulePresentation> = {
   },
   'facility.predictors.missing': {
     title: 'Add predictors', description: finding => `${finding.entity.name} has no predictors.`, todo: true,
-    destination: unavailable
+    destination: finding => ({ kind: 'facility-data', facilityGuid: finding.entity.guid, detail: 'predictors' })
   },
   'meter.configuration.invalid': {
     title: 'Complete meter setup', description: finding => `Review these meter settings: ${evidenceList(finding, 'fields')}.`, todo: true,
@@ -48,13 +48,14 @@ const RULES: Record<StatusRuleCode, StatusRulePresentation> = {
   'meter.currency.behind-facility': { title: 'Bring meter data current', description: finding => `Meter data ends ${formatPeriod(finding.evidence.latestPeriod)}, while facility data runs through ${formatPeriod(finding.evidence.facilityLatestPeriod)}.`, todo: true, destination: meterTab('readings') },
   'meter.quality.consumption-outlier': { title: 'Review consumption outliers', description: finding => `${finding.evidence.count} consumption value(s) fall outside the expected range.`, todo: false, destination: meterTab('quality') },
   'meter.quality.cost-outlier': { title: 'Review cost outliers', description: finding => `${finding.evidence.count} cost value(s) fall outside the expected range.`, todo: false, destination: meterTab('quality') },
-  'predictor.data.missing': { title: 'Add predictor data', description: () => 'No data has been entered for this predictor.', todo: true, destination: unavailable },
-  'predictor.data.duplicate-month': { title: 'Resolve duplicate predictor data', description: finding => `${finding.evidence.count} month(s) contain duplicate entries.`, todo: true, destination: unavailable },
-  'predictor.data.gap': { title: 'Fill missing predictor data', description: finding => `${finding.evidence.count} month(s) are missing between the first and last entry.`, todo: true, destination: unavailable },
-  'predictor.data.negative': { title: 'Review negative predictor data', description: finding => `${finding.evidence.count} negative value(s) require review.`, todo: true, destination: unavailable },
-  'predictor.currency.stale': { title: 'Update stale predictor data', description: staleDescription, todo: true, destination: unavailable },
-  'predictor.currency.behind-facility': { title: 'Bring predictor data current', description: finding => `Predictor data ends ${formatPeriod(finding.evidence.latestPeriod)}, while facility data runs through ${formatPeriod(finding.evidence.facilityLatestPeriod)}.`, todo: true, destination: unavailable },
-  'predictor.weather.warning': { title: 'Review weather data', description: () => 'Some weather entries contain source gaps or missing readings.', todo: true, destination: unavailable },
+  'predictor.data.missing': { title: 'Add predictor data', description: () => 'No data has been entered for this predictor.', todo: true, destination: predictorTab('readings') },
+  'predictor.data.duplicate-month': { title: 'Resolve duplicate predictor data', description: finding => `${finding.evidence.count} month(s) contain duplicate entries.`, todo: true, destination: predictorTab('readings') },
+  'predictor.data.gap': { title: 'Fill missing predictor data', description: finding => `${finding.evidence.count} month(s) are missing between the first and last entry.`, todo: true, destination: predictorTab('readings') },
+  'predictor.data.negative': { title: 'Review negative predictor data', description: finding => `${finding.evidence.count} negative value(s) require review.`, todo: true, destination: predictorTab('readings') },
+  'predictor.currency.stale': { title: 'Update stale predictor data', description: staleDescription, todo: true, destination: predictorTab('readings') },
+  'predictor.currency.behind-facility': { title: 'Bring predictor data current', description: finding => `Predictor data ends ${formatPeriod(finding.evidence.latestPeriod)}, while facility data runs through ${formatPeriod(finding.evidence.facilityLatestPeriod)}.`, todo: true, destination: predictorTab('readings') },
+  'predictor.weather.warning': { title: 'Review weather data', description: () => 'Some weather entries contain incomplete or revised source data.', todo: true, destination: predictorTab('readings') },
+  'predictor.quality.outlier': { title: 'Review predictor outliers', description: finding => `${finding.evidence.count} predictor value(s) fall outside the expected range.`, todo: false, destination: predictorTab('quality') },
   'analysis.configuration.invalid': { title: 'Complete analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
   'analysis-group.setup.invalid': { title: 'Complete analysis group setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
   'analysis-group.model.invalid': { title: 'Review regression model', description: () => 'The selected regression model does not pass its validity checks.', todo: true, destination: unavailable },
@@ -87,6 +88,10 @@ export function severityLabel(severity: StatusSeverity): string {
 
 function meterTab(tab: 'settings' | 'readings' | 'quality'): (finding: StatusFinding) => StatusDestination {
   return finding => ({ kind: 'meter-tab', facilityGuid: finding.entity.facilityGuid!, meterGuid: finding.entity.guid, tab });
+}
+
+function predictorTab(tab: 'settings' | 'readings' | 'quality'): (finding: StatusFinding) => StatusDestination {
+  return finding => ({ kind: 'predictor-tab', facilityGuid: finding.entity.facilityGuid!, predictorGuid: finding.entity.guid, tab });
 }
 
 function compareStatusItems(first: StatusItem, second: StatusItem): number {

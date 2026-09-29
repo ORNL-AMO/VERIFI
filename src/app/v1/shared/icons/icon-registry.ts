@@ -124,6 +124,7 @@ export const ICON_REGISTRY = {
   fileImport: FileImportIcon,
   fileUpload: FileUploadIcon,
   fuel: FireIcon,
+  gap: ViewOffSlashIcon,
   gear: Settings02Icon,
   naturalGas: GasPipeIcon,
   gears: GearsIcon,

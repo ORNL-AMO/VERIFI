@@ -27,9 +27,9 @@
       <label class="meter-readings-table__control">
         <span>Rows</span>
         <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
-          <option [value]="10">10</option>
-          <option [value]="25">25</option>
-          <option [value]="50">50</option>
+          @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
+            <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
+          }
         </select>
       </label>
       @if (_view.hasEstimatedReadings) {

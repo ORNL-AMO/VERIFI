@@ -9,10 +9,12 @@ import { vi } from 'vitest';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
+import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
+import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
+import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { account, facility, group, meter } from '@app/v1/facility/data/meters/facility-meters.testing';
-import { MeterWorkbenchTabsComponent } from './meter-workbench-tabs/meter-workbench-tabs.component';
 import { MeterWorkbenchComponent } from './meter-workbench.component';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
@@ -155,10 +157,10 @@ describe('MeterWorkbenchComponent', () => {
     expect(toggle?.querySelector('.v1-meter-workbench-header__facts-symbol')?.textContent?.trim()).toBe('+');
     expect(factsRegion?.hidden).toBe(true);
     expect(getComputedStyle(factsRegion as HTMLElement).display).toBe('none');
-    expect(element.querySelector('.v1-meter-workbench-header__status-notes')?.textContent)
+    expect(element.querySelector('.v1-data-workbench-status-notes')?.textContent)
       .toContain('A calendarization method is required.');
     expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
-    expect(element.querySelector('app-meter-workbench-tabs')).not.toBeNull();
+    expect(element.querySelector('app-data-workbench-tabs')).not.toBeNull();
 
     toggle?.click();
     fixture.detectChanges();
@@ -283,7 +285,7 @@ describe('MeterWorkbenchComponent', () => {
     expect(element.querySelector('.v1-meter-workbench-header__facts-toggle')?.getAttribute('aria-expanded')).toBe('false');
     expect(element.querySelector<HTMLElement>('#v1-meter-workbench-facts')?.hidden).toBe(true);
     expect(element.querySelector('.v1-meter-workbench-header__meter-title')?.textContent).toContain('Electric Main');
-    expect(element.querySelector('app-meter-workbench-tabs')).not.toBeNull();
+    expect(element.querySelector('app-data-workbench-tabs')).not.toBeNull();
   });
 
   it('renders usage fact placeholders while calendarized meter values are loading', () => {
@@ -347,12 +349,12 @@ describe('MeterWorkbenchComponent', () => {
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('[aria-label="Meter breadcrumb"]')?.textContent).not.toContain('Electric Main');
-    expect(element.querySelector('.v1-meter-workbench-header__meter-title .v1-meter-workbench-header__meter-toggle')).not.toBeNull();
-    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    expect(element.querySelector('.v1-meter-workbench-header__meter-title .v1-data-workbench-switcher-toggle')).not.toBeNull();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
 
-    const menu = element.querySelector<HTMLElement>('.v1-meter-workbench-header__meter-menu');
-    const meterItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'));
+    const menu = element.querySelector<HTMLElement>('.v1-data-workbench-switcher-menu');
+    const meterItems = Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'));
     expect(menu).not.toBeNull();
     expect(meterItems.map(item => item.textContent?.trim())).toEqual(['Electric Main', 'Gas Backup']);
     expect(meterItems[0].getAttribute('aria-checked')).toBe('true');
@@ -454,9 +456,9 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
-    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'))[1].click();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'))[1].click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -498,9 +500,9 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    element.querySelector<HTMLButtonElement>('.v1-meter-workbench-header__meter-toggle')?.click();
+    element.querySelector<HTMLButtonElement>('.v1-data-workbench-switcher-toggle')?.click();
     fixture.detectChanges();
-    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-meter-workbench-header__meter-item'))[1].click();
+    Array.from(element.querySelectorAll<HTMLButtonElement>('.v1-data-workbench-switcher-item'))[1].click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -632,11 +634,17 @@ function setup(options: {
   TestBed.configureTestingModule({
     declarations: [
       MeterWorkbenchComponent,
-      MeterWorkbenchTabsComponent,
       RouterOutletStubDirective,
       RouterLinkStubDirective
     ],
-    imports: [CommonModule, ReactiveFormsModule, IconComponent],
+    imports: [
+      CommonModule,
+      DataWorkbenchFactsToggleComponent,
+      DataWorkbenchResourceSwitcherComponent,
+      DataWorkbenchTabsComponent,
+      ReactiveFormsModule,
+      IconComponent
+    ],
     providers: [
       {
         provide: FacilityMetersWorkspaceService,

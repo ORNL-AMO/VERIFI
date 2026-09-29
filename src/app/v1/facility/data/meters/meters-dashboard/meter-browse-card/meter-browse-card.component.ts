@@ -4,16 +4,18 @@ import { Router } from '@angular/router';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { MeterCardView, MeterUsageFactsView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/models';
+import { MeterCardView, MeterWorkbenchTabId } from '@app/v1/facility/data/meters/models';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { ConfirmCopyMeterModalComponent } from './confirm-copy-meter-modal/confirm-copy-meter-modal.component';
 import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from '../meters-dashboard-actions.service';
 import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
 import { ResourceBrowseCardAction, ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
+import { buildMeterResourceView } from './meter-browse-card.view';
 
 @Component({
   selector: 'app-meter-browse-card',
+  host: { class: 'v1-resource-browse-card-host' },
   templateUrl: './meter-browse-card.component.html',
   styleUrls: ['./meter-browse-card.component.css'],
   standalone: true,
@@ -33,15 +35,6 @@ export class MeterBrowseCardComponent implements OnDestroy {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
-  readonly placeholderUsageFacts: MeterUsageFactsView = {
-    facts: [
-      { id: 'latest-month', label: 'Latest month', valueLabel: 'Not available', unavailable: true },
-      { id: 'previous-year-month', label: 'Same month last year', valueLabel: 'Not available', unavailable: true },
-      { id: 'latest-twelve-month-average', label: 'Latest 12-mo avg', valueLabel: 'Not available', unavailable: true },
-      { id: 'previous-twelve-month-average', label: 'Previous 12-mo avg', valueLabel: 'Not available', unavailable: true }
-    ]
-  };
-
   @ViewChild('copyMeterConfirmModal') private readonly copyMeterConfirmModal!: TemplateRef<unknown>;
   @ViewChild('deleteMeterConfirmModal') private readonly deleteMeterConfirmModal!: TemplateRef<unknown>;
   @Input({ required: true }) card!: MeterCardView;
@@ -49,62 +42,12 @@ export class MeterBrowseCardComponent implements OnDestroy {
   @Input() showFacilityHeader = false;
   @Input() usageFactsLoading = false;
 
-  get displayUsageFacts(): MeterUsageFactsView | undefined {
-    return this.card?.usageFacts ?? (this.usageFactsLoading ? this.placeholderUsageFacts : undefined);
-  }
-
   get resourceView(): ResourceBrowseCardView {
-    const usageFacts = this.displayUsageFacts;
-    return {
-      title: this.card.meter.name,
-      openLabel: `Open ${this.card.meter.name} settings`,
-      icon: this.card.sourceIcon || 'meter',
-      iconColor: this.card.sourceColor,
-      statusTone: this.card.statusTone,
-      owner: this.showFacilityHeader && this.portfolioFacility
-        ? { label: this.portfolioFacility.name, icon: 'facility' }
-        : undefined,
-      chips: [
-        { id: 'source', label: this.card.meter.source, icon: this.card.sourceIcon || 'meter', accentColor: this.card.sourceColor },
-        {
-          id: 'status',
-          label: this.card.statusLabel || 'Checking',
-          icon: this.card.statusIcon || 'loading',
-          tone: this.card.statusTone || 'info',
-          loading: !this.card.statusIcon || this.card.statusIcon === 'loading'
-        }
-      ],
-      factSections: [
-        {
-          id: 'identity',
-          facts: [
-            { id: 'first-reading', label: 'First reading', valueLabel: this.card.firstReadingLabel || 'No data' },
-            { id: 'latest-reading', label: 'Latest', valueLabel: this.card.latestReadingLabel || 'No data' },
-            { id: 'scope', label: 'Scope', valueLabel: this.card.scopeLabel || 'Not set' },
-            ...(this.card.fuelLabel ? [{ id: 'fuel', label: 'Fuel', valueLabel: this.card.fuelLabel }] : [])
-          ]
-        },
-        ...(usageFacts
-          ? [{
-            id: 'usage',
-            ariaLabel: 'Meter usage facts',
-            emphasis: 'secondary' as const,
-            note: usageFacts.unitLabel
-              ? `Usage values shown in ${usageFacts.basisLabel ? usageFacts.basisLabel + ' ' : ''}${usageFacts.unitLabel}/month`
-              : undefined,
-            facts: usageFacts.facts.map(fact => ({ ...fact, metaLabel: fact.periodLabel, loading: this.usageFactsLoading }))
-          }]
-          : [])
-      ],
-      notes: this.card.statusActionSummaries?.map((summary, index) => ({
-        id: `status-${index}`,
-        label: summary,
-        icon: this.card.statusIcon || 'loading',
-        loading: !this.card.statusIcon || this.card.statusIcon === 'loading'
-      })),
-      footerTag: { label: this.card.group?.name || 'Ungrouped', icon: 'meterGroupItem' },
+    return buildMeterResourceView(this.card, {
+      facility: this.showFacilityHeader ? this.portfolioFacility : undefined,
+      usageFactsLoading: this.usageFactsLoading,
       errorMessage: this.actionError()
-    };
+    });
   }
 
   get resourceActions(): ReadonlyArray<ResourceBrowseCardAction> {

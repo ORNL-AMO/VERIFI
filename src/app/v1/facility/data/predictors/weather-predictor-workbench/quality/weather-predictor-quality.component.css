@@ -1,0 +1,3 @@
+:host { display: block; }
+.weather-quality { display: block; }
+.weather-quality > app-predictor-workbench-quality-report { display: block; }

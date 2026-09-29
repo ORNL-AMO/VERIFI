@@ -28,11 +28,19 @@ describe('MeterGroupCommandHandler', () => {
       updateMeterGroup: vi.fn().mockResolvedValue(undefined),
       updateMeter: vi.fn().mockResolvedValue(undefined),
     };
+    const transaction = {
+      add: vi.fn().mockResolvedValue(9),
+      put: vi.fn().mockResolvedValue(1),
+      deleteByKey: vi.fn().mockResolvedValue(undefined)
+    };
+    const transactions = {
+      runTransaction: vi.fn(async (_stores, _mode, work) => work(transaction))
+    };
     const handler = new MeterGroupCommandHandler(
       analysisDb as any, accountReportDb as any,
-      accountWorkspaceStore as any, meterHandler as any
+      accountWorkspaceStore as any, meterHandler as any, transactions as any
     );
-    return { handler, analysisDb, accountReportDb, accountWorkspaceStore, meterHandler };
+    return { handler, analysisDb, accountReportDb, accountWorkspaceStore, meterHandler, transactions, transaction };
   }
 
   const energyGroup: IdbUtilityMeterGroup = {
@@ -191,5 +199,104 @@ describe('MeterGroupCommandHandler', () => {
       expect(meterHandler.updateMeterGroup).toHaveBeenCalledWith(group, ACCOUNT);
     });
   });
-});
 
+  describe('atomic commands', () => {
+    it('creates a group with analysis and report references in one transaction', async () => {
+      const analysis = {
+        id: 3, guid: 'analysis', accountId: ACCOUNT, facilityId: FACILITY,
+        analysisCategory: 'energy', groups: []
+      };
+      const report = {
+        id: 4, guid: 'report', accountId: ACCOUNT, reportType: 'betterClimate',
+        betterClimateReportSetup: { includedFacilityGroups: [{ facilityId: FACILITY, groups: [] }] },
+        dataOverviewReportSetup: { includedFacilities: [] }
+      };
+      const { handler, transactions, transaction } = createHandler([analysis], [report]);
+      const group = { ...energyGroup, accountId: ACCOUNT };
+
+      const created = await handler.createMeterGroup(group, ACCOUNT);
+
+      expect(created.id).toBe(9);
+      expect(transactions.runTransaction).toHaveBeenCalledWith(
+        ['utilityMeterGroups', 'analysisItems', 'accountReports'], 'readwrite', expect.any(Function)
+      );
+      expect(transaction.add).toHaveBeenCalledWith('utilityMeterGroups', group);
+      expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 3 }));
+      expect(transaction.put).toHaveBeenCalledWith('accountReports', expect.objectContaining({ id: 4 }));
+    });
+
+    it('deletes a group and clears related meters in one transaction', async () => {
+      const analysis = {
+        id: 3, guid: 'analysis', accountId: ACCOUNT, facilityId: FACILITY,
+        analysisCategory: 'energy', groups: [{ idbGroupId: 'g-1' }]
+      };
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const assignedMeter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: 'g-1'
+      } as IdbUtilityMeter;
+      const { handler, transactions, transaction } = createHandler([analysis]);
+
+      await handler.deleteMeterGroupAtomic(group, [assignedMeter], ACCOUNT);
+
+      expect(transactions.runTransaction).toHaveBeenCalledWith(
+        ['utilityMeterGroups', 'utilityMeter', 'analysisItems', 'accountReports'],
+        'readwrite',
+        expect.any(Function)
+      );
+      expect(transaction.deleteByKey).toHaveBeenCalledWith('utilityMeterGroups', 2);
+      expect(transaction.put).toHaveBeenCalledWith('utilityMeter', expect.objectContaining({ id: 5, groupId: undefined }));
+    });
+
+    it('rejects adding a meter from another facility before opening a transaction', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: 'fac-2', groupId: undefined
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.updateMeterGroupAtomic(group, false, 'Energy', [meter], [], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects adding a meter that already belongs to another group', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: 'g-2'
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.updateMeterGroupAtomic(group, false, 'Energy', [meter], [], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects removing a meter that is not currently in the group', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: undefined
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.updateMeterGroupAtomic(group, false, 'Energy', [], [meter], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects clearing a meter that is not currently in the deleted group', async () => {
+      const group = { ...energyGroup, id: 2, accountId: ACCOUNT };
+      const meter = {
+        id: 5, guid: 'meter', accountId: ACCOUNT, facilityId: FACILITY, groupId: 'g-2'
+      } as IdbUtilityMeter;
+      const { handler, transactions } = createHandler();
+
+      await expect(handler.deleteMeterGroupAtomic(group, [meter], ACCOUNT))
+        .rejects.toMatchObject({ code: 'validation-failed' });
+
+      expect(transactions.runTransaction).not.toHaveBeenCalled();
+    });
+  });
+});

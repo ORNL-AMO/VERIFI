@@ -1,0 +1,9 @@
+<button
+  type="button"
+  class="v1-btn v1-btn--quiet v1-btn--sm {{ buttonClass }}"
+  [attr.aria-controls]="controls"
+  [attr.aria-expanded]="expanded()"
+  (click)="toggle()">
+  <span class="{{ symbolClass }}" aria-hidden="true">{{ expanded() ? '−' : '+' }}</span>
+  {{ expanded() ? 'Hide facts' : 'Show facts' }}
+</button>

@@ -1,7 +1,72 @@
-<section class="v1-predictor-workbench-placeholder" aria-labelledby="predictor-settings-title">
-  <app-ui-icon name="settings"></app-ui-icon>
-  <div>
-    <h2 id="predictor-settings-title">Predictor settings</h2>
-    <p>Settings are read-only in this first workspace phase. Editing will be added with the predictor form.</p>
-  </div>
-</section>
+@let settingsForm = form();
+@let predictor = context.predictor();
+
+@if (predictor && !supportedPredictor()) {
+  <section class="v1-settings-panel predictor-settings">
+    <div class="v1-alert v1-alert--warning" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ predictor.predictorType }} predictors are preserved but cannot be edited in the standard predictor workbench.</span>
+    </div>
+  </section>
+} @else if (predictor && settingsForm) {
+  <form class="v1-settings-panel predictor-settings" [formGroup]="settingsForm" aria-label="Predictor settings">
+    @if (!workspace.canWrite()) {
+      <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
+    }
+
+    <section class="predictor-settings__section">
+      <div class="predictor-settings__heading predictor-settings__heading--save-state">
+        <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState() === 'error' || saveState() === 'invalid'">
+          @if (saveState() === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> }
+          {{ saveMessage() }}
+          @if (saveState() === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" (click)="saveNow()">Retry</button> }
+        </p>
+      </div>
+      <div class="predictor-settings__grid">
+        <label><span>Name</span><input type="text" maxlength="100" formControlName="name" required (input)="onTextChange()">
+          @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small class="predictor-settings__error">Enter a name of 100 characters or fewer.</small> }
+        </label>
+        <label><span>Unit</span><input type="text" maxlength="100" formControlName="unit" (input)="onTextChange()"></label>
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="production" (change)="onImmediateChange()"><span>Is Production?</span></label>
+        <label class="predictor-settings__wide"><span>Description</span><textarea rows="3" formControlName="description" (input)="onTextChange()"></textarea></label>
+      </div>
+    </section>
+
+    <section class="predictor-settings__section" aria-labelledby="predictor-settings-status">
+      <div class="predictor-settings__heading"><div><p>Validation</p><h2 id="predictor-settings-status">Status settings</h2></div></div>
+      <div class="predictor-settings__status-grid">
+        @if (settingsForm.controls.noLongerInUse.value) {
+          <label><span>Stop month <small>Optional</small></span><input type="month" formControlName="stopMonth" (change)="onImmediateChange()"></label>
+        }
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="canBeNegative" (change)="onImmediateChange()"><span>Allow negative values</span></label>
+        <label class="predictor-settings__check"><input type="checkbox" formControlName="ignoreDateStatusChecks" (change)="onImmediateChange()"><span>Ignore date status checks</span></label>
+      </div>
+    </section>
+
+    <footer class="predictor-settings__footer">
+      <button
+        type="button"
+        class="v1-btn v1-btn--deactivate"
+        [attr.aria-pressed]="settingsForm.controls.noLongerInUse.value"
+        [disabled]="!canEdit()"
+        (click)="toggleNoLongerInUse()">
+        @if (settingsForm.controls.noLongerInUse.value) {
+          <app-ui-icon name="refresh"></app-ui-icon>
+          Return predictor to use
+        } @else {
+          <app-ui-icon name="viewHidden"></app-ui-icon>
+          Mark no longer in use
+        }
+      </button>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="requestDeletePredictor()"><app-ui-icon name="delete"></app-ui-icon> Delete predictor</button>
+    </footer>
+  </form>
+} @else {
+  <section class="v1-settings-panel predictor-settings"><div class="v1-alert v1-alert--info"><app-ui-icon name="info"></app-ui-icon><span>Select a predictor to edit its settings.</span></div></section>
+}
+
+<ng-template #deletePredictorConfirmModal>
+  @if (context.card(); as card) {
+    <app-confirm-delete-predictor-modal [card]="card" [saving]="deleting()" [error]="deleteError()" (confirmed)="confirmDeletePredictor()" (cancelled)="cancelDeletePredictor()"></app-confirm-delete-predictor-modal>
+  }
+</ng-template>

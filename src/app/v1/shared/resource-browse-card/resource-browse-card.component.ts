@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { IconComponent } from '../icons/icon.component';
-import { ResourceBrowseCardAction, ResourceBrowseCardView } from './resource-browse-card.models';
+import {
+  DEFAULT_RESOURCE_BROWSE_CARD_CAPABILITIES,
+  ResourceBrowseCardAction,
+  ResourceBrowseCardCapabilities,
+  ResourceBrowseCardView
+} from './resource-browse-card.models';
 
 @Component({
   selector: 'app-resource-browse-card',
@@ -13,6 +18,7 @@ import { ResourceBrowseCardAction, ResourceBrowseCardView } from './resource-bro
 export class ResourceBrowseCardComponent {
   @Input({ required: true }) view!: ResourceBrowseCardView;
   @Input() actions: ReadonlyArray<ResourceBrowseCardAction> = [];
+  @Input() capabilities: ResourceBrowseCardCapabilities = DEFAULT_RESOURCE_BROWSE_CARD_CAPABILITIES;
 
   @Output() readonly opened = new EventEmitter<void>();
   @Output() readonly actionSelected = new EventEmitter<string>();

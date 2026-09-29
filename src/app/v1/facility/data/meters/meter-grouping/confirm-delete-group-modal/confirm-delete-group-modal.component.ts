@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 
 @Component({
   selector: 'app-confirm-delete-group-modal',
   templateUrl: './confirm-delete-group-modal.component.html',
-  styleUrls: ['./confirm-delete-group-modal.component.css'],
   standalone: true,
-  imports: [IconComponent]
+  imports: [ConfirmationDialogComponent, IconComponent]
 })
 export class ConfirmDeleteGroupModalComponent {
   @Input({ required: true }) group!: IdbUtilityMeterGroup;

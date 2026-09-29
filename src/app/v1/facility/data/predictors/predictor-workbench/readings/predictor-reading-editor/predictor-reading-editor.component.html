@@ -1,0 +1,97 @@
+<app-workspace-slideout
+  [title]="mode === 'add' ? 'Add predictor reading' : 'Edit predictor reading'"
+  [description]="'Record a monthly value for ' + predictor.name + '.'"
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  @if (form) {
+    <form class="predictor-reading-editor" [formGroup]="form" (submit)="$event.preventDefault(); save(false)">
+      @if (error) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ error }}</span>
+        </div>
+      }
+      @if (predictor.predictorType === 'Weather') {
+        <div class="v1-alert" [class.v1-alert--warning]="reading.weatherDataWarning" [class.v1-alert--info]="!reading.weatherDataWarning">
+          <app-ui-icon [name]="reading.weatherDataWarning ? 'cloudRain' : reading.weatherOverride ? 'edit' : 'info'"></app-ui-icon>
+          <span>
+            @if (reading.weatherDataWarning && isCalculatedWeather) {
+              This calculated value contains gaps or missing weather source data.
+            } @else if (form.controls.manualOverride.value) {
+              This is a manual weather override and will be preserved by future refreshes.
+            } @else {
+              This value was calculated from weather data.
+            }
+          </span>
+        </div>
+      }
+
+      <label class="v1-field">
+        <span>Month</span>
+        <input class="v1-input" type="month" formControlName="month" [readOnly]="saving">
+        @if (form.controls.month.touched && form.controls.month.hasError('required')) {
+          <span class="predictor-reading-editor__error">Month is required.</span>
+        }
+        @if (form.controls.month.touched && form.controls.month.hasError('invalidMonth')) {
+          <span class="predictor-reading-editor__error">Enter a valid month.</span>
+        }
+        @if (form.controls.month.touched && form.controls.month.hasError('duplicateMonth')) {
+          <span class="predictor-reading-editor__error">A reading already exists for this month.</span>
+        }
+      </label>
+
+      <label class="v1-field">
+        <span>Value</span>
+        <div class="input-group">
+          <input class="v1-input" type="number" formControlName="amount" [readOnly]="saving">
+          @if (predictor.unit) { <span class="input-group-text">{{ predictor.unit }}</span> }
+        </div>
+        @if (form.controls.amount.touched && form.controls.amount.hasError('required')) {
+          <span class="predictor-reading-editor__error">Value is required.</span>
+        }
+        @if (form.controls.amount.touched && form.controls.amount.hasError('finiteNumber')) {
+          <span class="predictor-reading-editor__error">Enter a finite numeric value.</span>
+        }
+        @if (form.controls.amount.touched && form.controls.amount.hasError('negativeNotAllowed')) {
+          <span class="predictor-reading-editor__error">Negative values are not allowed for this predictor.</span>
+        }
+      </label>
+
+      @if (isCalculatedWeather) {
+        <div class="predictor-reading-editor__manual">
+          <p>The calculated month and value are locked. Set this entry manually to replace the calculated value.</p>
+          <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="setManually()">
+            <app-ui-icon name="edit"></app-ui-icon>
+            Set Manually
+          </button>
+        </div>
+      }
+
+      <label class="v1-field">
+        <span>Notes</span>
+        <textarea class="v1-input" rows="5" formControlName="notes" [readOnly]="saving"></textarea>
+      </label>
+
+      @if (form.invalid && form.touched) {
+        <div class="v1-alert v1-alert--danger" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>Resolve the highlighted fields before saving this reading.</span>
+        </div>
+      }
+
+      <footer class="predictor-reading-editor__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+        @if (mode === 'add') {
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="saving || form.invalid" (click)="save(true)">
+            Save and Add Another
+          </button>
+        }
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || form.invalid">
+          @if (saving) { <app-ui-icon name="loading" spin></app-ui-icon> }
+          @else { <app-ui-icon name="check"></app-ui-icon> }
+          Save
+        </button>
+      </footer>
+    </form>
+  }
+</app-workspace-slideout>

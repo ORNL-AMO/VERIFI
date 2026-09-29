@@ -120,12 +120,7 @@ export class MetersDashboardActionsService {
         },
         publication: { mode: 'reload' }
       },
-      async () => {
-        await this.meterHandler.deleteMeter(current, account.guid);
-        for (const data of meterData) {
-          await this.meterHandler.deleteMeterData(data.id);
-        }
-      }
+      () => this.meterHandler.deleteMeterWithData({ meter: current, meterData }, account.guid)
     );
   }
 
@@ -150,11 +145,7 @@ export class MetersDashboardActionsService {
         },
         publication: { mode: 'reload' }
       },
-      async () => {
-        const added = await this.meterHandler.addMeterGroup(group, account.guid);
-        await this.meterGroupHandler.addGroup(added);
-        return added;
-      }
+      () => this.meterGroupHandler.createMeterGroup(group, account.guid)
     );
     return result.value;
   }
@@ -187,7 +178,7 @@ export class MetersDashboardActionsService {
         },
         publication: { mode: 'reload' }
       },
-      () => this.meterGroupHandler.saveMeterGroup(
+      () => this.meterGroupHandler.updateMeterGroupAtomic(
         updated,
         groupTypeChanged,
         current.groupType,
@@ -206,10 +197,7 @@ export class MetersDashboardActionsService {
     }
     const metersToClear = this.workspace.facilityMeters()
       .filter(meter => meter.groupId === current.guid)
-      .map(meter => ({
-        ...structuredClone(meter),
-        groupId: undefined
-      }));
+      .map(meter => structuredClone(meter));
 
     await this.commandBoundary.execute(
       {
@@ -223,13 +211,7 @@ export class MetersDashboardActionsService {
         },
         publication: { mode: 'reload' }
       },
-      async () => {
-        await this.meterHandler.deleteMeterGroup(current.id);
-        for (const meter of metersToClear) {
-          await this.meterHandler.updateMeter(meter, account.guid);
-        }
-        await this.meterGroupHandler.deleteGroup(structuredClone(current));
-      }
+      () => this.meterGroupHandler.deleteMeterGroupAtomic(current, metersToClear, account.guid)
     );
   }
 

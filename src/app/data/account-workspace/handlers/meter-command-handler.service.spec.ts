@@ -68,6 +68,24 @@ describe('MeterCommandHandler', () => {
       await expect(handler.deleteMeter(meter, ACCOUNT)).rejects.toMatchObject({ code: 'cross-account-entity' });
       expect(meterDb.deleteIndexWithObservable).not.toHaveBeenCalled();
     });
+
+    it('deletes a meter and its readings in one transaction', async () => {
+      const { handler, transactions } = createHandler();
+      const transaction = { deleteByKey: vi.fn(async () => undefined) };
+      transactions.runTransaction.mockImplementation(
+        async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction)
+      );
+      const meter = { id: 7, guid: 'm-1', accountId: ACCOUNT } as IdbUtilityMeter;
+      const data = { id: 8, guid: 'd-1', meterId: 'm-1', accountId: ACCOUNT } as IdbUtilityMeterData;
+
+      await handler.deleteMeterWithData({ meter, meterData: [data] }, ACCOUNT);
+
+      expect(transactions.runTransaction).toHaveBeenCalledWith(
+        ['utilityMeter', 'utilityMeterData'], 'readwrite', expect.any(Function)
+      );
+      expect(transaction.deleteByKey).toHaveBeenCalledWith('utilityMeterData', 8);
+      expect(transaction.deleteByKey).toHaveBeenCalledWith('utilityMeter', 7);
+    });
   });
 
   describe('meterData', () => {

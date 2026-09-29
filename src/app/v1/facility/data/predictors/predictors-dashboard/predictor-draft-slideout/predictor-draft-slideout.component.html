@@ -1,0 +1,55 @@
+<app-workspace-slideout
+  title="Add predictor"
+  [description]="step() === 'choice' ? 'Choose how this predictor gets its data.' : 'Create a standard predictor, then continue in its workbench.'"
+  size="large"
+  [saving]="saving"
+  (closed)="cancelled.emit()">
+  @if (step() === 'choice') {
+    <section class="predictor-type-choice" aria-labelledby="predictor-type-choice-title">
+      <div>
+        <p>Predictor type</p>
+        <h2 id="predictor-type-choice-title">What kind of predictor do you want to create?</h2>
+      </div>
+      <div class="predictor-type-choice__options">
+        <button type="button" [disabled]="saving" (click)="chooseStandard()">
+          <app-ui-icon name="predictor"></app-ui-icon>
+          <span><strong>Standard predictor</strong><small>Enter and maintain monthly values directly.</small></span>
+          <app-ui-icon name="chevronRight"></app-ui-icon>
+        </button>
+        <button type="button" [disabled]="saving" (click)="chooseWeather()">
+          <app-ui-icon name="cloudRain"></app-ui-icon>
+          <span><strong>Weather predictors</strong><small>Choose a station and generate one or more calculated predictors.</small></span>
+          <app-ui-icon name="chevronRight"></app-ui-icon>
+        </button>
+      </div>
+      <footer class="predictor-draft-form__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
+      </footer>
+    </section>
+  } @else {
+    @let currentDraft = draft();
+    <form class="predictor-draft-form" (submit)="$event.preventDefault(); submit()">
+      <div class="predictor-draft-form__grid">
+        <label><span>Predictor name</span>
+          <input type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName($any($event.target).value)">
+        </label>
+        <label class="predictor-draft-form__check">
+          <input type="checkbox" [checked]="currentDraft.production" [disabled]="saving" (change)="setProduction($any($event.target).checked)">
+          <span>Is Production?</span>
+        </label>
+        <label><span>Unit <small>Optional</small></span>
+          <input type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit($any($event.target).value)">
+        </label>
+      </div>
+      @if (error) {
+        <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ error }}</span></div>
+      }
+      <footer class="predictor-draft-form__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="back()">Back</button>
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
+          <app-ui-icon [name]="saving ? 'loading' : 'add'" [spin]="saving"></app-ui-icon> Add predictor
+        </button>
+      </footer>
+    </form>
+  }
+</app-workspace-slideout>

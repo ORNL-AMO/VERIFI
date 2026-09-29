@@ -3,6 +3,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
+import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
   MeterReadingColumn,
@@ -81,7 +82,8 @@ export class MeterReadingsTableComponent {
   readonly copyingTable = signal(false);
   readonly filterOption = signal<MeterReadingFilterOption>('all');
   readonly hoveredColumnId = signal<string | undefined>(undefined);
-  readonly pageSize = signal(10);
+  readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
+  readonly pageSize = signal(DEFAULT_TIME_PERIOD_PAGE_SIZE);
   readonly sortColumnId = signal('readDate');
   readonly sortDirection = signal<MeterReadingSortDirection>('desc');
   readonly viewModel = this.viewState.asReadonly();

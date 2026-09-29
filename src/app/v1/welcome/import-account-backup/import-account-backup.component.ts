@@ -2,14 +2,14 @@ import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
 import { FutureBackupVersionError, PreparedBackupFile } from '@data/backup/backup-preparation.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { DrawerFocusTrapDirective } from '../shared/drawer-focus-trap.directive';
+import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
 @Component({
   selector: 'app-import-account-backup-panel',
   templateUrl: './import-account-backup.component.html',
   styleUrls: ['./import-account-backup.component.css'],
-  imports: [DrawerFocusTrapDirective, IconComponent],
+  imports: [ModalFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class ImportAccountBackupComponent {

@@ -13,6 +13,11 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 
+export interface MeterDeletionChanges {
+  readonly meter: IdbUtilityMeter;
+  readonly meterData: readonly IdbUtilityMeterData[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class MeterCommandHandler {
   constructor(
@@ -99,6 +104,28 @@ export class MeterCommandHandler {
     this.assertOwnership(meter.accountId, activeAccountGuid, 'meter');
     await firstValueFrom(this.meterDb.deleteIndexWithObservable(meter.id));
     return meter.id;
+  }
+
+  async deleteMeterWithData(
+    changes: MeterDeletionChanges,
+    activeAccountGuid: string
+  ): Promise<void> {
+    this.assertOwnership(changes.meter.accountId, activeAccountGuid, 'meter');
+    if (changes.meter.id === undefined) {
+      throw new WorkspaceWriteError('validation-failed', 'Meter is missing its IndexedDB id.');
+    }
+    changes.meterData.forEach(entry => {
+      this.assertOwnership(entry.accountId, activeAccountGuid, 'meter data');
+      if (entry.meterId !== changes.meter.guid || entry.id === undefined) {
+        throw new WorkspaceWriteError('validation-failed', 'Meter data is incomplete or belongs to another meter.');
+      }
+    });
+    await this.transactions.runTransaction(['utilityMeter', 'utilityMeterData'], 'readwrite', async transaction => {
+      for (const entry of changes.meterData) {
+        await transaction.deleteByKey('utilityMeterData', entry.id!);
+      }
+      await transaction.deleteByKey('utilityMeter', changes.meter.id!);
+    });
   }
 
   // ---------------------------------------------------------------------------

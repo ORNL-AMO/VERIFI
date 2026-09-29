@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
+import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import {
   MeterGroupResultRow,
@@ -28,7 +29,8 @@ export class MeterGroupWorkbenchTableComponent {
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly period = signal<MeterGroupResultsPeriod>(this.route.snapshot.data['meterGroupPeriod'] ?? 'monthly');
   readonly currentPage = signal(1);
-  readonly pageSize = signal(10);
+  readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
+  readonly pageSize = signal(DEFAULT_TIME_PERIOD_PAGE_SIZE);
   readonly copyingTable = signal(false);
   readonly sortColumn = signal<MeterGroupResultsSortColumn>('period');
   readonly sortDirection = signal<MeterGroupResultsSortDirection>('desc');

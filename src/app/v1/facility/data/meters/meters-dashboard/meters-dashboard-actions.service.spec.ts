@@ -38,7 +38,7 @@ describe('MetersDashboardActionsService', () => {
     }), expect.any(Function));
   });
 
-  it('creates, updates, and deletes groups through the meter group handlers', async () => {
+  it('creates, updates, and deletes groups through atomic meter group commands', async () => {
     const existingGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy', id: 4 });
     const groupedMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: existingGroup.guid });
     const { service, meterHandler, meterGroupHandler } = setup({
@@ -50,13 +50,12 @@ describe('MetersDashboardActionsService', () => {
     await service.updateGroup(existingGroup, { name: 'Purchased Electricity', groupType: 'Energy' });
     await service.deleteGroup(existingGroup);
 
-    expect(meterHandler.addMeterGroup).toHaveBeenCalledWith(expect.objectContaining({
+    expect(meterGroupHandler.createMeterGroup).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Water',
       groupType: 'Water',
       description: 'Incoming'
     }), 'account-a');
-    expect(meterGroupHandler.addGroup).toHaveBeenCalled();
-    expect(meterGroupHandler.saveMeterGroup).toHaveBeenCalledWith(
+    expect(meterGroupHandler.updateMeterGroupAtomic).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Purchased Electricity' }),
       false,
       'Energy',
@@ -64,12 +63,11 @@ describe('MetersDashboardActionsService', () => {
       [],
       'account-a'
     );
-    expect(meterHandler.deleteMeterGroup).toHaveBeenCalledWith(4);
-    expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.objectContaining({
-      guid: groupedMeter.guid,
-      groupId: undefined
-    }), 'account-a');
-    expect(meterGroupHandler.deleteGroup).toHaveBeenCalledWith(expect.objectContaining({ guid: existingGroup.guid }));
+    expect(meterGroupHandler.deleteMeterGroupAtomic).toHaveBeenCalledWith(
+      expect.objectContaining({ guid: existingGroup.guid }),
+      [expect.objectContaining({ guid: groupedMeter.guid, groupId: existingGroup.guid })],
+      'account-a'
+    );
     expect(groupedMeter.groupId).toBe(existingGroup.guid);
   });
 
@@ -141,10 +139,10 @@ describe('MetersDashboardActionsService', () => {
       entityGuid: sourceMeter.guid,
       publication: { mode: 'reload' }
     }), expect.any(Function));
-    expect(meterHandler.deleteMeter).toHaveBeenCalledWith(sourceMeter, 'account-a');
-    expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(11);
-    expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(12);
-    expect(meterHandler.deleteMeterData).not.toHaveBeenCalledWith(13);
+    expect(meterHandler.deleteMeterWithData).toHaveBeenCalledWith({
+      meter: sourceMeter,
+      meterData: [meterData[0], meterData[1]]
+    }, 'account-a');
   });
 
   it('copies and deletes account meters outside the selected facility', async () => {
@@ -165,8 +163,10 @@ describe('MetersDashboardActionsService', () => {
       name: 'Portfolio Meter (copy)',
       facilityId: 'facility-b'
     }), 'account-a');
-    expect(meterHandler.deleteMeter).toHaveBeenCalledWith(portfolioMeter, 'account-a');
-    expect(meterHandler.deleteMeterData).toHaveBeenCalledWith(31);
+    expect(meterHandler.deleteMeterWithData).toHaveBeenCalledWith({
+      meter: portfolioMeter,
+      meterData: [portfolioReading]
+    }, 'account-a');
   });
 
   it('blocks invalid source to group assignments before persistence', async () => {
@@ -197,6 +197,7 @@ function setup(options: {
   const meterHandler = {
     addMeter: vi.fn().mockImplementation(async item => ({ ...item, id: 10 })),
     updateMeter: vi.fn().mockImplementation(async item => item),
+    deleteMeterWithData: vi.fn().mockResolvedValue(undefined),
     deleteMeter: vi.fn().mockResolvedValue(1),
     deleteMeterData: vi.fn().mockResolvedValue(1),
     addMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),
@@ -204,6 +205,9 @@ function setup(options: {
     deleteMeterGroup: vi.fn().mockResolvedValue(1)
   };
   const meterGroupHandler = {
+    createMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),
+    updateMeterGroupAtomic: vi.fn().mockResolvedValue(undefined),
+    deleteMeterGroupAtomic: vi.fn().mockResolvedValue(undefined),
     addGroup: vi.fn().mockResolvedValue(undefined),
     saveMeterGroup: vi.fn().mockResolvedValue(undefined),
     deleteGroup: vi.fn().mockResolvedValue(undefined)

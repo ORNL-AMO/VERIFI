@@ -14,6 +14,14 @@ describe('unsavedChangesGuard', () => {
     expect(result).toBe(true);
   });
 
+  it('allows navigation when a route has no active component instance', () => {
+    const result = TestBed.runInInjectionContext(() =>
+      unsavedChangesGuard(null, null as any, null as any, null as any)
+    );
+
+    expect(result).toBe(true);
+  });
+
   it('uses user confirmation when changes are dirty', () => {
     const unsaved = TestBed.inject(UnsavedChangesService);
     vi.spyOn(unsaved, 'confirmDiscard').mockReturnValue(false);

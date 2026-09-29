@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -6,7 +6,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
+import { DataWorkbenchResource } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import {
   METER_GROUP_WORKBENCH_TABS,
   MeterGroupWorkbenchTab,
@@ -28,21 +28,18 @@ export class MeterGroupWorkbenchComponent {
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly facilityHandler = inject(FacilityCommandHandler);
   private readonly activeTabState = signal<MeterGroupWorkbenchTabId>('monthly-table');
-  private readonly groupSwitcherOpenState = signal(false);
   private readonly savingEnergySource = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
 
-  @ViewChild('groupSwitcherToggle') private readonly groupSwitcherToggle?: ElementRef<HTMLButtonElement>;
-
   readonly workspace = inject(FacilityMetersWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly workbenchLayout = inject(WorkbenchLayoutService);
   readonly activeTab = this.activeTabState.asReadonly();
-  readonly groupSwitcherOpen = this.groupSwitcherOpenState.asReadonly();
-  readonly factsExpanded = this.workbenchLayout.factsExpanded;
   readonly results = this.workspace.selectedMeterGroupResults;
   readonly selectedGroup = this.workspace.selectedMeterGroupForWorkbench;
   readonly groupOptions = computed(() => [...this.workspace.meterGroups()].sort((first, second) => first.name.localeCompare(second.name)));
+  readonly groupResources = computed<readonly DataWorkbenchResource[]>(() =>
+    this.groupOptions().map(group => ({ id: group.guid, label: group.name || 'Untitled group' }))
+  );
   readonly isLoading = computed(() => this.workspace.calendarizationState() === 'loading');
   readonly hasError = computed(() => this.workspace.calendarizationState() === 'error');
   readonly canSetEnergySource = computed(() =>
@@ -88,32 +85,11 @@ export class MeterGroupWorkbenchComponent {
     }
   }
 
-  toggleGroupSwitcher(): void {
-    this.groupSwitcherOpenState.update(open => !open);
-  }
-
-  toggleFacts(): void {
-    this.workbenchLayout.toggleFacts();
-  }
-
-  closeGroupSwitcher(): void {
-    this.groupSwitcherOpenState.set(false);
-  }
-
-  onGroupSwitcherEscape(): void {
-    if (!this.groupSwitcherOpen()) {
-      return;
-    }
-    this.closeGroupSwitcher();
-    this.groupSwitcherToggle?.nativeElement.focus();
-  }
-
   switchGroup(groupGuid: string): void {
     const facility = this.workspace.facility();
     if (!facility) {
       return;
     }
-    this.closeGroupSwitcher();
     void this.router.navigate(this.navigation.facilityMeterGroupRoute(facility.guid, groupGuid, this.activeTab()));
   }
 
