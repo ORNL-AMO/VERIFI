@@ -23,6 +23,8 @@ import { RouterGuardService } from '@shared/shared-router-guard-modal/router-gua
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { DataManagementService } from '@v0/data-management/data-management.service';
+import { WeatherPredictorCreationService } from '@v0/shared/shared-predictors-content/weather-predictor-creation.service';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -43,6 +45,7 @@ export class FacilityPredictorComponent {
   destroyed: boolean = false;
   latestMeterReading: Date;
   firstMeterReading: Date;
+  addOrEdit: 'add' | 'edit' = 'edit';
 
   showDeletePredictor: boolean = false;
 
@@ -66,7 +69,9 @@ export class FacilityPredictorComponent {
     private loadingService: LoadingService,
     private predictorDataHelperService: PredictorDataHelperService,
     private weatherDataService: WeatherDataService,
-    private routerGuardService: RouterGuardService
+    private routerGuardService: RouterGuardService,
+    private dataManagementService: DataManagementService,
+    private weatherPredictorCreationService: WeatherPredictorCreationService
   ) {
   }
 
@@ -76,7 +81,15 @@ export class FacilityPredictorComponent {
       let predictorId: string = params['id'];
       if (predictorId) {
         this.setPredictor(predictorId);
-        this.setPredictorForm();
+        const hasDraftMarker = this.dataManagementService.isPredictorDraft(predictorId);
+        const isValidDraft = hasDraftMarker
+          && this.predictor?.guid === predictorId
+          && this.predictor.accountId === this.facility.accountId
+          && this.predictor.facilityId === this.facility.guid;
+        this.addOrEdit = isValidDraft ? 'add' : 'edit';
+        if (hasDraftMarker && !isValidDraft) {
+          this.dataManagementService.completePredictorDraft(predictorId);
+        }
         this.setLastMeterReading();
       } else {
         //route to manage predictors
@@ -111,21 +124,55 @@ export class FacilityPredictorComponent {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.editPredictorFormService.setPredictorDataFromForm(this.predictor, this.predictorForm);
-    this.predictorForm.markAsPristine();
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const predictor = this.predictor;
-    await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Predictor' },
-      async () => {
-        await this.predictorHandler.updatePredictor(predictor, accountGuid);
-        if (predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
-          await this.updateWeatherData();
-        }
-        await this.analysisHandler.updateAnalysisPredictor(predictor);
+    const isDraft = this.addOrEdit === 'add';
+
+    try {
+      if (isDraft && predictor.predictorType === 'Weather') {
+        await this.commandBoundary.execute(
+          { entityKind: 'predictor', changeKind: 'bulk', entityGuid: predictor.guid, label: 'Create Weather Predictors' },
+          () => this.weatherPredictorCreationService.createFromForm({
+            predictorForm: this.predictorForm,
+            facility: this.facility,
+            activeAccountGuid: accountGuid,
+            weatherStationName: predictor.weatherStationName,
+            existingPredictor: predictor,
+            shouldStop: () => this.destroyed
+          })
+        );
+      } else {
+        await this.commandBoundary.execute(
+          { entityKind: 'predictor', changeKind: 'update', entityGuid: predictor.guid, label: 'Update Predictor' },
+          async () => {
+            await this.predictorHandler.updatePredictor(predictor, accountGuid);
+            if (predictor.predictorType == 'Weather' && needsWeatherDataUpdate) {
+              await this.updateWeatherData();
+            }
+            await this.analysisHandler.updateAnalysisPredictor(predictor);
+          }
+        );
       }
-    );
+    } catch (error) {
+      this.loadingService.setLoadingStatus(false);
+      throw error;
+    }
+
+    this.predictorForm.markAsPristine();
+    if (isDraft) {
+      this.dataManagementService.completePredictorDraft(predictor.guid);
+    }
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
+    this.toastNotificationService.showToast(
+      isDraft && predictor.predictorType === 'Weather' ? 'Weather Predictors Created!' : 'Predictor Entries Updated!',
+      undefined,
+      undefined,
+      false,
+      'alert-success'
+    );
+    if (isDraft) {
+      this.goToManagePredictors();
+    }
   }
 
   setLastMeterReading() {
@@ -185,13 +232,17 @@ export class FacilityPredictorComponent {
   }
 
   canDeactivate(): Observable<boolean> {
-    if (this.predictorForm && this.predictorForm.dirty) {
+    const isDraft = !!this.predictor && this.dataManagementService.isPredictorDraft(this.predictor.guid);
+    if (this.predictorForm && (this.predictorForm.dirty || isDraft)) {
       this.routerGuardService.setShowSave(true);
       this.routerGuardService.setShowModal(true);
       return this.routerGuardService.getModalAction().pipe(map(action => {
         if (action == 'save') {
           return from(this.saveChanges()).pipe(map(() => true));
         } else if (action == 'discard') {
+          if (isDraft) {
+            return from(this.discardDraft());
+          }
           return of(true);
         }
         return of(false);
@@ -209,15 +260,33 @@ export class FacilityPredictorComponent {
     this.showDeletePredictor = false;
   }
 
-  async confirmDelete() {
-    this.showDeletePredictor = false;
-    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+  private async discardDraft(): Promise<boolean> {
+    this.loadingService.setLoadingMessage('Discarding Predictor...');
     this.loadingService.setLoadingStatus(true);
+    try {
+      await this.deletePredictorAndReferences('Discard Predictor Draft');
+      this.predictorForm.markAsPristine();
+      return true;
+    } catch {
+      this.toastNotificationService.showToast(
+        'Unable to discard predictor',
+        'The draft predictor was not fully removed. Please try again.',
+        10000,
+        false,
+        'alert-danger'
+      );
+      return false;
+    } finally {
+      this.loadingService.setLoadingStatus(false);
+    }
+  }
+
+  private async deletePredictorAndReferences(label: string): Promise<void> {
     const predictor = this.predictor;
     const accountGuid = this.accountWorkspaceStore.account()?.guid;
     const predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(predictor.guid);
     await this.commandBoundary.execute(
-      { entityKind: 'predictor', changeKind: 'delete', entityGuid: predictor.guid, label: 'Delete Predictor' },
+      { entityKind: 'predictor', changeKind: 'delete', entityGuid: predictor.guid, label },
       async () => {
         await this.predictorHandler.deletePredictor(predictor, accountGuid);
         for (const data of predictorData) {
@@ -226,6 +295,15 @@ export class FacilityPredictorComponent {
         await this.analysisHandler.deleteAnalysisPredictor(predictor);
       }
     );
+    this.dataManagementService.completePredictorDraft(predictor.guid);
+  }
+
+  async confirmDelete() {
+    this.showDeletePredictor = false;
+    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+    this.loadingService.setLoadingStatus(true);
+    const predictor = this.predictor;
+    await this.deletePredictorAndReferences('Delete Predictor');
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.goToManagePredictors();

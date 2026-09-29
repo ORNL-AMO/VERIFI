@@ -107,6 +107,65 @@ export class AnalysisCommandHandler {
     }
   }
 
+  async upsertAnalysisPredictors(predictors: readonly IdbPredictor[]): Promise<void> {
+    const facilityAnalysisItems = this.buildUpsertedAnalysisPredictors(predictors);
+    for (const analysisItem of facilityAnalysisItems) {
+      await firstValueFrom(this.analysisDb.updateWithObservable(analysisItem));
+    }
+  }
+
+  buildUpsertedAnalysisPredictors(predictors: readonly IdbPredictor[]): IdbAnalysisItem[] {
+    const predictorsByFacility = new Map<string, readonly IdbPredictor[]>();
+    for (const predictor of predictors) {
+      const facilityPredictors = predictorsByFacility.get(predictor.facilityId) ?? [];
+      predictorsByFacility.set(predictor.facilityId, [...facilityPredictors, predictor]);
+    }
+
+    const facilityAnalysisItems = this.accountWorkspaceStore.facilityAnalyses()
+      .filter(item => predictorsByFacility.has(item.facilityId));
+
+    return facilityAnalysisItems.map(analysisItem => {
+      const facilityPredictors = predictorsByFacility.get(analysisItem.facilityId) ?? [];
+      const predictorByGuid = new Map(facilityPredictors.map(predictor => [predictor.guid, predictor]));
+      return {
+        ...analysisItem,
+        groups: analysisItem.groups.map(group => {
+          const existingById = new Set(group.predictorVariables.map(variable => variable.id));
+          const updatedVariables = group.predictorVariables.map(variable => {
+            const predictor = predictorByGuid.get(variable.id);
+            return predictor
+              ? { ...variable, name: predictor.name, production: predictor.production, unit: predictor.unit }
+              : variable;
+          });
+          const variablesToAdd = facilityPredictors
+            .filter(predictor => !existingById.has(predictor.guid))
+            .map(predictor => ({
+              id: predictor.guid,
+              name: predictor.name,
+              production: predictor.production,
+              productionInAnalysis: predictor.productionInAnalysis,
+              regressionCoefficient: undefined,
+              unit: predictor.unit
+            }));
+
+          return {
+            ...group,
+            predictorVariables: [...updatedVariables, ...variablesToAdd],
+            models: group.models?.map(model => ({
+              ...model,
+              predictorVariables: model.predictorVariables.map(variable => {
+                const predictor = predictorByGuid.get(variable.id);
+                return predictor
+                  ? { ...variable, name: predictor.name, production: predictor.production, unit: predictor.unit }
+                  : variable;
+              })
+            }))
+          };
+        })
+      };
+    });
+  }
+
   /**
    * Propagates a predictor's renamed/updated fields to every analysis group
    * and regression model that references it.

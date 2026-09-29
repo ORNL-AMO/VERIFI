@@ -21,6 +21,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { PredictorStatusCheck } from '@domain/calculations/status-check-calculations/predictorStatusCheck';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
+import { DataManagementService } from '@v0/data-management/data-management.service';
 
 interface PredictorListItem {
   predictor: IdbPredictor,
@@ -44,6 +45,7 @@ export class PredictorTableComponent {
   private weatherDataService: WeatherDataService = inject(WeatherDataService);
   private toastNotificationService: ToastNotificationsService = inject(ToastNotificationsService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
+  private dataManagementService: DataManagementService = inject(DataManagementService);
 
   facilityPredictors: Signal<Array<IdbPredictor>> = computed(() => [...this.accountWorkspaceStore.facilityPredictors()]);
   selectedFacility: Signal<IdbFacility> = this.accountWorkspaceStore.selectedFacility;
@@ -141,6 +143,7 @@ export class PredictorTableComponent {
     );
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
+    this.dataManagementService.completePredictorDraft(predictor.guid);
     this.cancelDelete();
   }
 
@@ -185,7 +188,8 @@ export class PredictorTableComponent {
       );
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
-      this.selectEditPredictor(result.value);
+      this.dataManagementService.markPredictorDraft(result.value.guid);
+      await this.selectEditPredictor(result.value);
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + facility.guid + '/utility/predictors/manage/add-predictor');
     }
