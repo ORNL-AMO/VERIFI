@@ -63,6 +63,11 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
       try {
         if (!/\.(xlsx|xls|xlsm)$/i.test(file.name)) throw new Error('Choose an .xlsx, .xls, or .xlsm workbook.');
         const draft = await this.parser.readFile(file);
+        const originFacility = this.session.origin().facilityGuid;
+        if (originFacility && draft.importFacilities.some(facility => facility.guid === originFacility)) {
+          draft.selectedFacilityId = originFacility;
+          if (draft.kind === 'footprint-tool') this.parser.applyFootprintFacility(draft, originFacility);
+        }
         this.session.addDrafts([draft]);
       } catch (error) {
         failures.push({ name: file.name, message: error instanceof Error ? error.message : String(error) });

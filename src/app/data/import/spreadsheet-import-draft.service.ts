@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { IdbFacility } from '@data/models/idbModels/facility';
+import { getNewIdbFacility, IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -58,7 +58,7 @@ export class SpreadsheetImportDraftService {
     const version = this.detectVersion(workbook.SheetNames);
     const kind = this.kindForVersion(version);
     const parsed = version === 'Non-template' ? this.emptyParsed() : this.parseTemplate(workbook, version);
-    const facilities = version === 'Non-template'
+    const facilities = version === 'Non-template' || version === 'Footprint-tool'
       ? this.store.facilities().map(facility => ({ ...facility }))
       : parsed.importFacilities;
     const selectedWorksheetName = this.visibleWorksheetNames(workbook)[0] ?? workbook.SheetNames[0];
@@ -96,6 +96,7 @@ export class SpreadsheetImportDraftService {
       excludedMeterReadingIds: []
     };
     if (version === 'Non-template') this.selectWorksheet(draft, selectedWorksheetName);
+    if (version === 'Footprint-tool' && draft.selectedFacilityId) this.footprintParser.setSelectedFacility(draft);
     return draft;
   }
 
@@ -195,6 +196,16 @@ export class SpreadsheetImportDraftService {
   applyFootprintFacility(draft: ImportFileDraft, facilityId: string): void {
     draft.selectedFacilityId = facilityId;
     this.footprintParser.setSelectedFacility(draft);
+  }
+
+  addGeneralFacility(draft: ImportFileDraft, name: string): IdbFacility {
+    const facility = getNewIdbFacility(this.store.account());
+    facility.name = name.trim();
+    draft.importFacilities.push(facility);
+    const mapping = { facilityId: facility.guid, facilityName: facility.name, color: facility.color, groupItems: [] };
+    draft.meterFacilityGroups.push({ ...mapping, groupItems: [] });
+    draft.predictorFacilityGroups.push({ ...mapping, groupItems: [] });
+    return facility;
   }
 
   private parseTemplate(workbook: XLSX.WorkBook, version: TemplateVersion): ParsedTemplate {

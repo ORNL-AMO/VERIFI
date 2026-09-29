@@ -34,6 +34,7 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
   readonly currentStepId = signal('');
   readonly error = signal<string | undefined>(undefined);
   readonly committed = signal(false);
+  readonly newFacilityName = signal('');
   readonly steps = computed(() => this.draft() ? stepsForDraft(this.draft()) : []);
   readonly currentStep = computed(() => this.steps().find(step => step.id === this.currentStepId()));
   readonly meterColumns = computed(() => this.groupItems('Meters'));
@@ -101,6 +102,14 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
     this.changed();
   }
 
+  addFacility(): void {
+    const name = this.newFacilityName().trim();
+    if (!name) return;
+    this.drafts.addGeneralFacility(this.draft(), name);
+    this.newFacilityName.set('');
+    this.changed();
+  }
+
   setFootprintFacility(facilityId: string): void {
     this.drafts.applyFootprintFacility(this.draft(), facilityId);
     this.changed();
@@ -111,6 +120,24 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
     if (checked && !ids.includes(groupId)) ids.push(groupId);
     if (!checked) this.draft().facilityEnergyUseEquipment[equipmentIndex].utilityMeterGroupIds = ids.filter(id => id !== groupId);
     this.changed();
+  }
+
+  compatibleMeterGroups(equipmentIndex: number) {
+    const file = this.draft();
+    const equipment = file.facilityEnergyUseEquipment[equipmentIndex];
+    const equipmentSources = new Set(equipment.utilityData.map(value => value.energySource));
+    return this.workspace.meterGroups().filter(group => group.facilityId === file.selectedFacilityId &&
+      this.workspace.meters().some(meter => meter.groupId === group.guid && equipmentSources.has(meter.source)));
+  }
+
+  meterGroupSourceConflict(equipmentIndex: number, groupId: string): boolean {
+    const file = this.draft();
+    const equipment = file.facilityEnergyUseEquipment[equipmentIndex];
+    if (equipment.utilityMeterGroupIds.includes(groupId)) return false;
+    const selectedSources = new Set(this.workspace.meters()
+      .filter(meter => equipment.utilityMeterGroupIds.includes(meter.groupId))
+      .map(meter => meter.source));
+    return this.workspace.meters().some(meter => meter.groupId === groupId && selectedSources.has(meter.source));
   }
 
   toggleExcludedReading(readingIndex: number, excluded: boolean): void {
@@ -229,6 +256,16 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
 
   invalidReadingCount(): number { return this.draft()?.meterData.filter((_, index) => this.readingInvalid(index)).length ?? 0; }
 
+  dateRange(): string {
+    const values = this.draft()?.headerMap.map(row => {
+      const dateColumn = this.groupItems('Date')[0]?.value;
+      return dateColumn ? new Date(row[dateColumn] as any) : undefined;
+    }).filter(date => date && !isNaN(date.valueOf())) as Date[];
+    if (!values?.length) return 'No usable dates found';
+    const times = values.map(value => value.getTime());
+    return `${new Date(Math.min(...times)).toLocaleDateString()} – ${new Date(Math.max(...times)).toLocaleDateString()}`;
+  }
+
   private validationMessage(): string | undefined {
     const draft = this.draft();
     const step = this.currentStepId();
@@ -274,7 +311,9 @@ export class ImportWizardComponent implements OnInit, OnDestroy, HasUnsavedChang
       accountGuid: this.workspace.account().guid,
       draftId: draft.id,
       kind: draft.kind,
-      facilities: draft.kind === 'general-workbook'
+      facilities: draft.kind === 'footprint-tool'
+        ? []
+        : draft.kind === 'general-workbook'
         ? draft.importFacilities.filter(facility => affectedFacilities.has(facility.guid))
         : draft.importFacilities,
       meterGroups: draft.newMeterGroups.filter(group => affectedFacilities.has(group.facilityId)),

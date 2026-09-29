@@ -12,6 +12,7 @@ th, td { padding: .55rem; border: 1px solid var(--v1-border-color, #d5dae0); tex
 .review-list span, small { color: var(--bs-secondary-color, #666); }
 .check-row { display: block; margin: .5rem 0; }
 .equipment { border-top: 1px solid var(--v1-border-color, #ddd); padding-block: .75rem; }
+.add-facility { display: flex; align-items: end; gap: .75rem; margin-bottom: 1rem; }.add-facility .field { margin: 0; flex: 1; }
 .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem; }
 .summary div { border: 1px solid var(--v1-border-color, #ddd); padding: .75rem; }
 .summary dt { color: var(--bs-secondary-color, #666); }.summary dd { margin: 0; font-size: 1.5rem; font-weight: 700; }
