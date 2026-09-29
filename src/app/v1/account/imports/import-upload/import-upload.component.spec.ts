@@ -9,6 +9,7 @@ import { ImportUploadComponent } from './import-upload.component';
 describe('ImportUploadComponent', () => {
   let component: ImportUploadComponent;
   let router: Router;
+  let draft: any;
   let parser: {
     readFile: ReturnType<typeof vi.fn>;
     applyFootprintFacility: ReturnType<typeof vi.fn>;
@@ -17,13 +18,17 @@ describe('ImportUploadComponent', () => {
     hasUnsavedChanges: () => boolean;
     pending: () => boolean;
     draft: ReturnType<typeof vi.fn>;
+    drafts: () => any[];
     origin: ReturnType<typeof vi.fn>;
     addDrafts: ReturnType<typeof vi.fn>;
+    setOrigin: ReturnType<typeof vi.fn>;
+    clear: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    const draft = {
+    draft = {
       id: 'draft-1',
+      name: 'utility-data.xlsx',
       kind: 'verifi-v3',
       status: 'ready',
       importFacilities: [],
@@ -37,15 +42,18 @@ describe('ImportUploadComponent', () => {
       hasUnsavedChanges: () => true,
       pending: () => false,
       draft: vi.fn(() => draft),
+      drafts: () => [draft],
       origin: vi.fn(() => ({})),
-      addDrafts: vi.fn()
+      addDrafts: vi.fn(),
+      setOrigin: vi.fn(),
+      clear: vi.fn()
     };
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
         { provide: SpreadsheetImportDraftService, useValue: parser },
-        { provide: ActivatedRoute, useValue: { snapshot: {} } },
-        { provide: UnsavedChangesService, useValue: {} },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+        { provide: UnsavedChangesService, useValue: { register: vi.fn(() => vi.fn()) } },
         { provide: ImportSessionService, useValue: session },
         {
           provide: AccountWorkspaceStore,
@@ -114,6 +122,63 @@ describe('ImportUploadComponent', () => {
 
     component.dragLeft(event);
     expect(component.dragActive()).toBe(false);
+  });
+
+  it('renders upload guidance, template download, friendly queue labels, and a quiet backup import path', () => {
+    const fixture = TestBed.createComponent(ImportUploadComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector('h1')?.textContent).toContain('Upload spreadsheet data');
+    expect([...element.querySelectorAll('.upload-option h3')].map(node => node.textContent?.trim())).toEqual([
+      'VERIFI template', 'Footprint workbook', 'Spreadsheet columns'
+    ]);
+    const templateLink = element.querySelector<HTMLAnchorElement>('.template-link');
+    expect(templateLink?.getAttribute('href')).toBe('assets/csv_templates/VERIFI-Import-Data.xlsx');
+    expect(templateLink?.hasAttribute('download')).toBe(true);
+    expect(element.querySelector('app-ui-icon[name="uploadData"]')).not.toBeNull();
+    expect(element.querySelector('.queue-list')?.textContent).toContain('VERIFI template · Ready for review');
+    expect(element.querySelector('.queue-list')?.textContent).not.toContain('verifi-v3');
+    const backupLink = element.querySelector<HTMLAnchorElement>('.backup-import a');
+    expect(backupLink?.textContent).toContain('Import a VERIFI backup (.json)');
+    expect(backupLink?.getAttribute('href')).toBe('/v1/workspace/account/account-1/settings/backup');
+  });
+
+  it('renders session loss, processing, and file-specific error states accessibly', () => {
+    const fixture = TestBed.createComponent(ImportUploadComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.sessionLost.set(true);
+    fixture.componentInstance.readingFiles.set(true);
+    fixture.componentInstance.failures.set([{ name: 'bad.json', message: 'Choose an Excel workbook.' }]);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector('.v1-alert--info[role="status"]')?.textContent).toContain('temporary upload session');
+    expect(element.querySelector('.file-drop strong')?.textContent).toContain('Reading files');
+    expect(element.querySelector<HTMLButtonElement>('.file-drop button')?.disabled).toBe(true);
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('bad.json');
+  });
+
+  it('renders an active drop target while files are dragged over it', () => {
+    const fixture = TestBed.createComponent(ImportUploadComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.dragEntered(dragEvent([]));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.file-drop').classList).toContain('is-drag-active');
+    expect(fixture.nativeElement.querySelector('.file-drop strong').textContent).toContain('Drop files to add them');
+  });
+
+  it('keeps the empty upload state focused on the drop field and backup alternative', () => {
+    session.drafts = () => [];
+    const fixture = TestBed.createComponent(ImportUploadComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector('.file-drop')).not.toBeNull();
+    expect(element.querySelector('.queue-list')).toBeNull();
+    expect(element.querySelector('.backup-import')).not.toBeNull();
   });
 });
 

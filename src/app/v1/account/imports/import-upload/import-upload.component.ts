@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterStateSnapshot } from '@angular/router';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
+import { ImportFileKind, ImportFileStatus } from '@data/import/spreadsheet-import.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ImportSessionService } from '../import-session.service';
@@ -29,6 +30,21 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   readonly readingFiles = signal(false);
   readonly dragActive = signal(false);
   readonly sessionLost = signal(false);
+  readonly formatLabels: Record<ImportFileKind, string> = {
+    'verifi-v1': 'VERIFI template',
+    'verifi-v2': 'VERIFI template',
+    'verifi-v3': 'VERIFI template',
+    'energy-treasure-hunt': 'Energy Treasure Hunt',
+    'general-workbook': 'Spreadsheet columns',
+    'footprint-tool': 'Footprint workbook'
+  };
+  readonly statusLabels: Record<ImportFileStatus, string> = {
+    queued: 'Queued',
+    ready: 'Ready for review',
+    invalid: 'Needs attention',
+    importing: 'Saving data',
+    completed: 'Uploaded'
+  };
   private dragDepth = 0;
   private unregisterUnsaved?: () => void;
 
