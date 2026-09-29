@@ -6,7 +6,7 @@ import { MeterSettingsFormService, MeterSettingsViewModel } from '../meter-setti
 @Component({
   selector: 'app-meter-settings-emissions-details',
   standalone: false,
-  styleUrls: ['../meter-workbench-settings.component.css'],
+  styleUrls: ['../meter-settings-form.component.css'],
   templateUrl: './meter-settings-emissions-details.component.html'
 })
 export class MeterSettingsEmissionsDetailsComponent {

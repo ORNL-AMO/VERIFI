@@ -25,7 +25,7 @@
 
     <label class="meter-settings-field">
       <span>Source <span class="meter-settings-required">*</span></span>
-      <select class="form-select" formControlName="source" (change)="ruleChange.emit('source')">
+      <select class="v1-select" formControlName="source" (change)="ruleChange.emit('source')">
         @for (source of viewModel.sourceOptions; track source) {
           <option [ngValue]="source">{{ source }}</option>
         }
@@ -35,7 +35,7 @@
     @if (viewModel.displayScope) {
       <label class="meter-settings-field">
         <span>Scope</span>
-        <select class="form-select" formControlName="scope" (change)="immediateChange.emit('scope')">
+        <select class="v1-select" formControlName="scope" (change)="immediateChange.emit('scope')">
           @for (scope of viewModel.scopeOptions; track scope.value) {
             <option [ngValue]="scope.value">{{ scope.optionLabel }}</option>
           }
@@ -46,7 +46,7 @@
     @if (form.controls.scope.value !== 2) {
       <label class="meter-settings-field">
         <span>Collection Unit <span class="meter-settings-required">*</span></span>
-        <select class="form-select" formControlName="startingUnit" (change)="immediateChange.emit('collectionUnit')">
+        <select class="v1-select" formControlName="startingUnit" (change)="immediateChange.emit('collectionUnit')">
           @for (unit of viewModel.startingUnitOptions; track unit.value) {
             <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
           }
@@ -59,7 +59,7 @@
       @if (viewModel.displayEnergyUnit) {
         <label class="meter-settings-field">
           <span>Energy Unit <span class="meter-settings-required">*</span></span>
-          <select class="form-select" formControlName="energyUnit" (change)="immediateChange.emit('energyUnit')">
+          <select class="v1-select" formControlName="energyUnit" (change)="immediateChange.emit('energyUnit')">
             @for (unit of viewModel.energyUnitOptions; track unit.value) {
               <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
             }
@@ -73,7 +73,7 @@
       @if (viewModel.displayDemandUnit) {
         <label class="meter-settings-field">
           <span>Demand Unit</span>
-          <select class="form-select" formControlName="demandUnit" (change)="immediateChange.emit('collectionUnit')">
+          <select class="v1-select" formControlName="demandUnit" (change)="immediateChange.emit('collectionUnit')">
             @for (unit of viewModel.demandUnitOptions; track unit.value) {
               <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
             }
@@ -97,7 +97,7 @@
       @if (viewModel.displayPhase) {
         <label class="meter-settings-field">
           <span>Phase <span class="meter-settings-required">*</span></span>
-          <select class="form-select" formControlName="phase" (change)="immediateChange.emit('phase')">
+          <select class="v1-select" formControlName="phase" (change)="immediateChange.emit('phase')">
             @for (phase of viewModel.phaseOptions; track phase) {
               <option [ngValue]="phase">{{ phase }}</option>
             }
@@ -108,7 +108,7 @@
       @if (viewModel.displayFuel) {
         <label class="meter-settings-field">
           <span>{{ viewModel.energySourceLabel }} <span class="meter-settings-required">*</span></span>
-          <select class="form-select" formControlName="fuel" (change)="immediateChange.emit('fuel')">
+          <select class="v1-select" formControlName="fuel" (change)="immediateChange.emit('fuel')">
             @for (fuel of viewModel.fuelTypeOptions; track fuel.value) {
               <option [ngValue]="fuel.value">{{ fuel.value }}</option>
             }
@@ -122,7 +122,7 @@
       @if (viewModel.displayWaterIntakeTypes) {
         <label class="meter-settings-field">
           <span>Water Intake Type <span class="meter-settings-required">*</span></span>
-          <select class="form-select" formControlName="waterIntakeType" (change)="immediateChange.emit()">
+          <select class="v1-select" formControlName="waterIntakeType" (change)="immediateChange.emit()">
             @for (waterType of viewModel.waterIntakeTypes; track waterType) {
               <option [ngValue]="waterType">{{ waterType }}</option>
             }
@@ -133,7 +133,7 @@
       @if (viewModel.displayWaterDischargeTypes) {
         <label class="meter-settings-field">
           <span>Water Discharge Type <span class="meter-settings-required">*</span></span>
-          <select class="form-select" formControlName="waterDischargeType" (change)="immediateChange.emit()">
+          <select class="v1-select" formControlName="waterDischargeType" (change)="immediateChange.emit()">
             @for (waterType of viewModel.waterDischargeTypes; track waterType) {
               <option [ngValue]="waterType">{{ waterType }}</option>
             }
@@ -163,7 +163,7 @@
       @if (viewModel.displayGlobalWarmingPotential) {
         <label class="meter-settings-field">
           <span>{{ form.controls.scope.value === 5 ? 'Refrigeration Charge' : 'Process Emissions' }} <span class="meter-settings-required">*</span></span>
-          <select class="form-select" formControlName="globalWarmingPotentialOption" (change)="immediateChange.emit()">
+          <select class="v1-select" formControlName="globalWarmingPotentialOption" (change)="immediateChange.emit()">
             @for (gwp of viewModel.globalWarmingPotentials; track gwp.value) {
               <option [ngValue]="gwp.value" [innerHTML]="gwp.display"></option>
             }

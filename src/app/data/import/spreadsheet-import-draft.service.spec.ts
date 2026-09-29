@@ -1,4 +1,6 @@
 import * as XLSX from 'xlsx';
+import { getEmptyFileReference, ImportFileDraft } from './spreadsheet-import.models';
+import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { SpreadsheetImportDraftService } from './spreadsheet-import-draft.service';
 
 describe('SpreadsheetImportDraftService', () => {
@@ -36,4 +38,81 @@ describe('SpreadsheetImportDraftService', () => {
     expect(service.visibleWorksheetNames(workbook)).toEqual(['Visible']);
     expect(service.visibleWorksheetNames(workbook, true)).toEqual(['Visible', 'Hidden']);
   });
+
+  it('replaces a meter and retargets readings and import decisions without losing source identity', () => {
+    const parser = {
+      getUtilityMeterData: vi.fn((_workbook, meters) => [reading({ meterId: meters[0].guid })])
+    };
+    const draftService = new SpreadsheetImportDraftService(
+      { meterData: () => [] } as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      parser as any,
+      {} as any,
+      {} as any,
+      {} as any
+    );
+    const original = meter({
+      guid: 'import-meter',
+      meterNumber: 'WORKBOOK-17',
+      importWizardName: 'WORKBOOK-17',
+      skipImport: false
+    });
+    const replacement = meter({ id: 9, guid: 'existing-meter', meterNumber: 'LIVE-42' });
+    const draft = importDraft('verifi-v2', {
+      meters: [original],
+      meterData: [reading({ guid: 'old-reading', meterId: original.guid })],
+      skipExistingReadingsMeterIds: [original.guid],
+      excludedMeterReadingIds: ['old-reading']
+    });
+
+    draftService.replaceMeter(draft, original.guid, replacement);
+
+    expect(draft.meters[0]).toEqual(expect.objectContaining({
+      id: 9,
+      guid: replacement.guid,
+      meterNumber: replacement.meterNumber,
+      importWizardName: original.importWizardName,
+      skipImport: false
+    }));
+    expect(parser.getUtilityMeterData).toHaveBeenCalledWith(
+      draft.workbook,
+      [expect.objectContaining({ guid: replacement.guid, meterNumber: original.importWizardName })]
+    );
+    expect(draft.meterData[0]).toEqual(expect.objectContaining({
+      guid: 'old-reading',
+      meterId: replacement.guid
+    }));
+    expect(draft.skipExistingReadingsMeterIds).toEqual([replacement.guid]);
+    expect(draft.excludedMeterReadingIds).toEqual(['old-reading']);
+  });
+
+  it('materializes general predictors without overwriting reviewed meters', () => {
+    const draftService = new SpreadsheetImportDraftService(
+      {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any
+    );
+    const reviewedMeter = meter({ guid: 'reviewed-meter', name: 'Reviewed name' });
+    const draft = importDraft('general-workbook', { meters: [reviewedMeter] });
+
+    draftService.materializeGeneralPredictors(draft);
+
+    expect(draft.meters).toEqual([reviewedMeter]);
+  });
 });
+
+function importDraft(kind: ImportFileDraft['kind'], values: Partial<ImportFileDraft> = {}): ImportFileDraft {
+  return {
+    ...getEmptyFileReference(),
+    id: 'draft-1',
+    name: 'test.xlsx',
+    workbook: XLSX.utils.book_new(),
+    kind,
+    status: 'ready',
+    findings: [],
+    completedSteps: [],
+    invalidMeterReadingsAcknowledged: false,
+    excludedMeterReadingIds: [],
+    ...values
+  };
+}

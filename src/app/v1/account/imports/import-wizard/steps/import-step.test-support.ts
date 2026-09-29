@@ -1,4 +1,4 @@
-import { signal, Type } from '@angular/core';
+import { computed, signal, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { ImportWizardStateService } from '../import-wizard-state.service';
@@ -10,7 +10,19 @@ export function createImportWizardStateStub() {
     selectedWorksheetData: [['Date', 'Electricity'], ['2026-01-01', 12]],
     headerMap: [{ Date: '2026-01-01', Electricity: 12 }],
     importFacilities: [{ id: undefined, guid: 'facility-1', name: 'Main Plant' }],
-    meters: [{ id: undefined, guid: 'meter-1', name: 'Electricity', source: 'Electricity', startingUnit: 'kWh', skipImport: false }],
+    meters: [{
+      id: undefined,
+      guid: 'meter-1',
+      accountId: 'account-1',
+      facilityId: 'facility-1',
+      name: 'Electricity',
+      importWizardName: 'Electricity',
+      source: 'Electricity',
+      startingUnit: 'kWh',
+      energyUnit: 'MMBtu',
+      meterReadingDataApplication: 'backward',
+      skipImport: false
+    }],
     meterData: [{ guid: 'reading-1', meterId: 'meter-1', year: 2026, month: 1, day: 1, totalEnergyUse: 12 }],
     predictors: [{ id: 1, guid: 'predictor-1', name: 'Production', unit: 'units', production: true, skipImport: false }],
     predictorData: [{ guid: 'predictor-reading-1', predictorId: 'predictor-1' }],
@@ -28,10 +40,26 @@ export function createImportWizardStateStub() {
       utilityData: [{ energySource: 'Natural Gas' }]
     }]
   });
-  return {
+  const meterInvalid = vi.fn((_index: number) => false);
+  const state: any = {
     draft,
     workspace: {
-      facilities: signal([{ guid: 'facility-1', name: 'Main Plant' }])
+      account: signal({ guid: 'account-1', assessmentReportVersion: 'AR6' }),
+      facilities: signal([{
+        guid: 'facility-1',
+        accountId: 'account-1',
+        name: 'Main Plant',
+        energyUnit: 'MMBtu',
+        electricityUnit: 'kWh',
+        volumeGasUnit: 'CCF',
+        volumeLiquidUnit: 'gal',
+        massUnit: 'lb'
+      }]),
+      meters: signal([]),
+      meterGroups: signal([]),
+      meterData: signal([]),
+      customFuels: signal([]),
+      customGWPs: signal([])
     },
     newFacilityName: signal(''),
     worksheetNames: signal(['Visible']),
@@ -44,8 +72,14 @@ export function createImportWizardStateStub() {
     assignColumn: vi.fn(),
     mapColumn: vi.fn(),
     addFacility: vi.fn(),
-    meterInvalid: vi.fn(() => false),
+    meterInvalid,
     toggleMeterIncluded: vi.fn(),
+    setMeterGroup: vi.fn(),
+    autoGroupMeters: vi.fn(),
+    setMeterCalendarization: vi.fn(),
+    toggleAllMeterCalendarization: vi.fn(),
+    availableExistingMeters: vi.fn(() => []),
+    saveMeter: vi.fn(),
     notifyChanged: vi.fn(),
     readingInvalid: vi.fn(() => false),
     isReadingExcluded: vi.fn(() => false),
@@ -59,6 +93,15 @@ export function createImportWizardStateStub() {
     meterGroupSourceConflict: vi.fn(() => false),
     toggleEquipmentMeterGroup: vi.fn()
   };
+  state.meterRows = computed(() => draft().meters.map((meter: any, index: number) => ({
+    index,
+    meter,
+    facilityName: draft().importFacilities.find((facility: any) => facility.guid === meter.facilityId)?.name ?? 'Unknown facility',
+    valid: !meterInvalid(index),
+    unitLabel: meter.scope === 2 ? meter.vehicleCollectionUnit : meter.startingUnit,
+    groups: []
+  })));
+  return state;
 }
 
 export function renderImportStep<T>(

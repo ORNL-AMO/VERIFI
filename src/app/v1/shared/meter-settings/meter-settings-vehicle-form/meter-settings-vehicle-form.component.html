@@ -3,7 +3,7 @@
   <div class="v1-settings-grid v1-settings-grid--2">
     <label class="meter-settings-field">
       <span>Vehicle Category <span class="meter-settings-required">*</span></span>
-      <select class="form-select" formControlName="vehicleCategory" (change)="ruleChange.emit('vehicleCategory')">
+      <select class="v1-select" formControlName="vehicleCategory" (change)="ruleChange.emit('vehicleCategory')">
         @for (category of viewModel.vehicleCategories; track category.value) {
           <option [ngValue]="category.value">{{ category.label }}</option>
         }
@@ -13,7 +13,7 @@
     @if (form.controls.vehicleCategory.value !== 1) {
       <label class="meter-settings-field">
         <span>Vehicle Type <span class="meter-settings-required">*</span></span>
-        <select class="form-select" formControlName="vehicleType" (change)="ruleChange.emit('vehicleType')">
+        <select class="v1-select" formControlName="vehicleType" (change)="ruleChange.emit('vehicleType')">
           @for (vehicleType of viewModel.vehicleTypes; track vehicleType.value) {
             <option [ngValue]="vehicleType.value">{{ vehicleType.label }}</option>
           }
@@ -24,7 +24,7 @@
     @if (form.controls.vehicleCategory.value === 2) {
       <label class="meter-settings-field">
         <span>Collection Method <span class="meter-settings-required">*</span></span>
-        <select class="form-select" formControlName="vehicleCollectionType" (change)="immediateChange.emit()">
+        <select class="v1-select" formControlName="vehicleCollectionType" (change)="immediateChange.emit()">
           @for (collectionType of viewModel.vehicleCollectionTypes; track collectionType.value) {
             <option [ngValue]="collectionType.value">{{ collectionType.label }}</option>
           }
@@ -34,7 +34,7 @@
 
     <label class="meter-settings-field">
       <span>Collection Unit <span class="meter-settings-required">*</span></span>
-      <select class="form-select" formControlName="vehicleCollectionUnit" (change)="immediateChange.emit('vehicleCollectionUnit')">
+      <select class="v1-select" formControlName="vehicleCollectionUnit" (change)="immediateChange.emit('vehicleCollectionUnit')">
         @for (unit of viewModel.vehicleCollectionUnitOptions; track unit.value) {
           <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
         }
@@ -44,7 +44,7 @@
     @if (form.controls.vehicleCategory.value === 2) {
       <label class="meter-settings-field">
         <span>Distance Unit <span class="meter-settings-required">*</span></span>
-        <select class="form-select" formControlName="vehicleDistanceUnit" (change)="immediateChange.emit()">
+        <select class="v1-select" formControlName="vehicleDistanceUnit" (change)="immediateChange.emit()">
           <option [ngValue]="'mi'">Miles (mi)</option>
           <option [ngValue]="'km'">Kilometers (km)</option>
         </select>
@@ -53,7 +53,7 @@
 
     <label class="meter-settings-field">
       <span>Energy Unit <span class="meter-settings-required">*</span></span>
-      <select class="form-select" formControlName="energyUnit" (change)="immediateChange.emit('energyUnit')">
+      <select class="v1-select" formControlName="energyUnit" (change)="immediateChange.emit('energyUnit')">
         @for (unit of viewModel.energyUnitOptions; track unit.value) {
           <option [ngValue]="unit.value" [innerHTML]="unit.display"></option>
         }
@@ -65,7 +65,7 @@
 
     <label class="meter-settings-field">
       <span>Fuel <span class="meter-settings-required">*</span></span>
-      <select class="form-select" formControlName="vehicleFuel" (change)="immediateChange.emit('vehicleFuel')">
+      <select class="v1-select" formControlName="vehicleFuel" (change)="immediateChange.emit('vehicleFuel')">
         @for (fuel of viewModel.vehicleFuelOptions; track fuel.value) {
           <option [ngValue]="fuel.value">{{ fuel.value }}</option>
         }

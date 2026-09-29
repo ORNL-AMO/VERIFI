@@ -6,6 +6,7 @@ import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import type {
   MeterSettingsRuleChange,
   MeterSettingsRuleContext,
+  MeterSettingsSaveState,
   MeterSettingsViewModel
 } from './meter-settings-form-services/meter-settings-form.models';
 import { MeterSettingsDisplayService } from './meter-settings-form-services/meter-settings-display.service';
@@ -17,6 +18,7 @@ import { MeterSettingsViewModelService } from './meter-settings-form-services/me
 export type {
   MeterSettingsRuleChange,
   MeterSettingsRuleContext,
+  MeterSettingsSaveState,
   MeterSettingsViewModel
 } from './meter-settings-form-services/meter-settings-form.models';
 

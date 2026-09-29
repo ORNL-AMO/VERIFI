@@ -1,0 +1,44 @@
+:host { display: contents; }
+
+.import-meter-editor {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.import-meter-editor__existing {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 34rem;
+}
+
+.import-meter-editor__existing-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--v1-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.import-meter-editor__existing-label label {
+  margin: 0;
+}
+
+.import-meter-editor__existing small {
+  color: var(--v1-muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.import-meter-editor__actions {
+  position: sticky;
+  bottom: -1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin: 0 -1rem -1rem;
+  padding: 1rem;
+  border-top: 1px solid var(--v1-border);
+  background: var(--v1-surface);
+}

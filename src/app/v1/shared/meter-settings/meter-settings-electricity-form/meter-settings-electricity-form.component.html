@@ -4,7 +4,7 @@
     <div class="v1-settings-grid">
       <label class="meter-settings-field">
         <span>Agreement Type</span>
-        <select class="form-select" formControlName="agreementType" (change)="immediateChange.emit('agreementType')">
+        <select class="v1-select" formControlName="agreementType" (change)="immediateChange.emit('agreementType')">
           @for (agreementType of viewModel.agreementTypes; track agreementType.value) {
             <option [ngValue]="agreementType.value">{{ agreementType.typeLabel }}</option>
           }
@@ -24,19 +24,19 @@
       <div class="meter-settings-checks">
         @if (viewModel.displayIncludeEnergy) {
           <label class="meter-settings-check">
-            <input type="checkbox" class="form-check-input" formControlName="includeInEnergy" (change)="immediateChange.emit('includeInEnergy')">
+            <input type="checkbox" formControlName="includeInEnergy" (change)="immediateChange.emit('includeInEnergy')">
             <span>Include In Energy</span>
           </label>
         }
         @if (viewModel.displayRetainRecs) {
           <label class="meter-settings-check">
-            <input type="checkbox" class="form-check-input" formControlName="retainRECs" (change)="immediateChange.emit()">
+            <input type="checkbox" formControlName="retainRECs" (change)="immediateChange.emit()">
             <span>Retain RECs</span>
           </label>
         }
         @if (form.controls.agreementType.value === 2) {
           <label class="meter-settings-check">
-            <input type="checkbox" class="form-check-input" formControlName="directConnection" (change)="immediateChange.emit()">
+            <input type="checkbox" formControlName="directConnection" (change)="immediateChange.emit()">
             <span>Direct Connection</span>
           </label>
         }

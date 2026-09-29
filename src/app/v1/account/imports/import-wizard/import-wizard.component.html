@@ -1,13 +1,19 @@
 @if (state.draft(); as file) {
   <section class="import-page" aria-labelledby="import-wizard-title">
-    <header class="v1-section-header">
-      <div>
-        <p class="v1-eyebrow">Imports &amp; Backup · {{ file.name }}</p>
-        <h1 id="import-wizard-title">{{ state.currentStep()?.label }}</h1>
-      </div>
-    </header>
+    @if (state.currentStep(); as step) {
+      <header class="v1-section-header">
+        <p class="v1-eyebrow">{{ file.name }}</p>
+        <h1
+          id="import-wizard-title"
+          class="import-page__title"
+          [attr.aria-label]="'Step ' + state.currentStepNumber() + ': ' + step.label">
+          <span class="import-page__step-number" aria-hidden="true">{{ state.currentStepNumber() }}</span>
+          <span>{{ step.label }}</span>
+        </h1>
+        <p class="v1-section-header__summary">{{ step.help }}</p>
+      </header>
+    }
 
-    <div class="v1-alert v1-alert--info" role="note">{{ state.currentStep()?.help }}</div>
     @if (state.error()) {
       <div class="v1-alert v1-alert--danger" role="alert" tabindex="-1">{{ state.error() }}</div>
     }

@@ -5,7 +5,7 @@ import { MeterSettingsFormService, MeterSettingsRuleChange, MeterSettingsViewMod
 @Component({
   selector: 'app-meter-settings-charges-form',
   standalone: false,
-  styleUrls: ['../meter-workbench-settings.component.css'],
+  styleUrls: ['../meter-settings-form.component.css'],
   templateUrl: './meter-settings-charges-form.component.html'
 })
 export class MeterSettingsChargesFormComponent {

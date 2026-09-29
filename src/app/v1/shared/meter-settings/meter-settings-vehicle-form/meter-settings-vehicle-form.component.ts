@@ -3,12 +3,12 @@ import { FormGroup } from '@angular/forms';
 import { MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
 
 @Component({
-  selector: 'app-meter-settings-electricity-form',
+  selector: 'app-meter-settings-vehicle-form',
   standalone: false,
-  styleUrls: ['../meter-workbench-settings.component.css'],
-  templateUrl: './meter-settings-electricity-form.component.html'
+  styleUrls: ['../meter-settings-form.component.css'],
+  templateUrl: './meter-settings-vehicle-form.component.html'
 })
-export class MeterSettingsElectricityFormComponent {
+export class MeterSettingsVehicleFormComponent {
   @Input({ required: true }) form: FormGroup;
   @Input({ required: true }) viewModel: MeterSettingsViewModel;
   @Output() ruleChange = new EventEmitter<MeterSettingsRuleChange>();

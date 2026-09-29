@@ -4,7 +4,7 @@ import { FormGroup } from '@angular/forms';
 @Component({
   selector: 'app-meter-settings-other-info',
   standalone: false,
-  styleUrls: ['../meter-workbench-settings.component.css'],
+  styleUrls: ['../meter-settings-form.component.css'],
   templateUrl: './meter-settings-other-info.component.html'
 })
 export class MeterSettingsOtherInfoComponent {

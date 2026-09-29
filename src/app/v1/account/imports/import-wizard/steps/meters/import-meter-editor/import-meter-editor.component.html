@@ -1,0 +1,49 @@
+<app-workspace-slideout
+  [title]="'Edit ' + workingMeter?.name"
+  description="Review meter setup before importing. Changes are not saved to the workspace until the import is completed."
+  size="large"
+  (closed)="cancelled.emit()">
+  <form class="import-meter-editor" [formGroup]="form" (submit)="$event.preventDefault(); save()">
+    @if (meter.id == null) {
+      <div class="import-meter-editor__existing">
+        <div class="import-meter-editor__existing-label">
+          <label for="import-existing-meter">Match this import to an existing meter</label>
+          <app-ui-tooltip
+            label="Why match an existing meter?"
+            text="Use this when the imported meter is the same as one already in VERIFI but has a different or mistyped name. Imported readings will be assigned to the selected meter."
+            placement="bottom">
+          </app-ui-tooltip>
+        </div>
+        <select id="import-existing-meter" class="v1-select" [value]="workingMeter.guid === meter.guid ? '' : workingMeter.guid" (change)="selectExisting($event)">
+          <option value="">Keep as a new meter</option>
+          @for (existing of existingMeters; track existing.guid) {
+            <option [value]="existing.guid">{{ existing.name }}</option>
+          }
+        </select>
+        @if (!existingMeters.length) {
+          <small>No unused existing meters are available for this facility.</small>
+        }
+      </div>
+    }
+
+    <app-meter-settings-form
+      [form]="form"
+      [viewModel]="viewModel"
+      [meterDataExists]="hasPersistedReadings"
+      [setupValuesUnlocked]="setupUnlocked"
+      [saveState]="form.invalid && form.touched ? 'invalid' : 'idle'"
+      [saveMessage]="saveMessage"
+      [showCalendarizationHelp]="false"
+      layout="single-column"
+      (ruleChange)="onRuleChange($event)"
+      (immediateChange)="onImmediateChange($event)"
+      (setupUnlockRequested)="unlockSetup()"
+      (textChange)="onTextChange()">
+    </app-meter-settings-form>
+
+    <footer class="import-meter-editor__actions">
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="cancelled.emit()">Cancel</button>
+      <button type="submit" class="v1-btn v1-btn--action">Save meter</button>
+    </footer>
+  </form>
+</app-workspace-slideout>

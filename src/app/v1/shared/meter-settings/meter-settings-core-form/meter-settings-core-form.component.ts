@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MeterSettingsFormService, MeterSettingsRuleChange, MeterSettingsViewModel } from '../meter-settings-form.service';
-import type { MeterSettingsSaveState } from '../meter-workbench-settings.component';
+import type { MeterSettingsSaveState } from '../meter-settings-form-services/meter-settings-form.models';
 
 @Component({
   selector: 'app-meter-settings-core-form',
   standalone: false,
-  styleUrls: ['../meter-workbench-settings.component.css'],
+  styleUrls: ['../meter-settings-form.component.css'],
   templateUrl: './meter-settings-core-form.component.html'
 })
 export class MeterSettingsCoreFormComponent {

@@ -17,7 +17,7 @@
           </label>
           <label class="meter-settings-field">
             <span [class.visually-hidden]="index > 0">Charge Type</span>
-            <select class="form-select" formControlName="chargeType" (change)="immediateChange.emit('chargeType')">
+            <select class="v1-select" formControlName="chargeType" (change)="immediateChange.emit('chargeType')">
               @for (type of viewModel.chargeTypes; track type.value) {
                 <option [ngValue]="type.value">{{ type.label }}</option>
               }

@@ -78,7 +78,10 @@ export class SpreadsheetImportDraftService {
       predictorFacilityGroups: this.getFacilityGroups(facilities, parsed.predictors, 'predictor'),
       headerMap: [],
       importFacilities: facilities,
-      meters: parsed.importMeters,
+      meters: parsed.importMeters.map(meter => ({
+        ...meter,
+        importWizardName: meter.importWizardName ?? meter.meterNumber
+      })),
       meterData: parsed.meterData,
       predictors: parsed.predictors,
       predictorData: parsed.predictorData,
@@ -182,15 +185,81 @@ export class SpreadsheetImportDraftService {
     });
     const target = groups.find(group => facilityId ? group.facilityId === facilityId : group.facilityName.startsWith('Unmapped'));
     if (item && target) target.groupItems.push(item);
-    this.materializeGeneralRecords(draft);
+    if (type === 'meter') this.materializeGeneralMeters(draft);
+    else this.materializeGeneralPredictors(draft);
   }
 
   materializeGeneralRecords(draft: ImportFileDraft): void {
+    this.materializeGeneralMeters(draft);
+    this.materializeGeneralPredictors(draft);
+  }
+
+  materializeGeneralMeters(draft: ImportFileDraft): void {
     draft.meters = this.parseMeters(draft);
     draft.meterData = this.parseMeterReadings(draft);
+  }
+
+  materializeGeneralPredictors(draft: ImportFileDraft): void {
     const predictorResult = this.parsePredictors(draft);
     draft.predictors = predictorResult.predictors;
     draft.predictorData = predictorResult.readings;
+  }
+
+  replaceMeter(draft: ImportFileDraft, originalGuid: string, replacement: IdbUtilityMeter): void {
+    const meterIndex = draft.meters.findIndex(meter => meter.guid === originalGuid);
+    if (meterIndex < 0) return;
+
+    const original = draft.meters[meterIndex];
+    const updated = {
+      ...replacement,
+      importWizardName: original.importWizardName,
+      skipImport: original.skipImport
+    };
+    draft.meters[meterIndex] = updated;
+    draft.meterData.forEach(reading => {
+      if (reading.meterId === originalGuid) reading.meterId = updated.guid;
+    });
+    draft.skipExistingReadingsMeterIds = draft.skipExistingReadingsMeterIds
+      .map(guid => guid === originalGuid ? updated.guid : guid)
+      .filter((guid, index, values) => values.indexOf(guid) === index);
+    this.rebuildMeterReadings(draft);
+  }
+
+  rebuildMeterReadings(draft: ImportFileDraft): void {
+    const previousReadings = draft.meterData.map(reading => ({ ...reading }));
+    let rebuilt: IdbUtilityMeterData[];
+    if (draft.kind === 'general-workbook') {
+      rebuilt = this.parseMeterReadings(draft);
+    } else if (draft.kind === 'verifi-v1') {
+      rebuilt = this.v1Parser.getMeterDataEntries(draft.workbook, this.templateParserMeters(draft.meters));
+    } else if (draft.kind === 'verifi-v2') {
+      rebuilt = this.v2Parser.getUtilityMeterData(draft.workbook, this.templateParserMeters(draft.meters));
+    } else if (draft.kind === 'verifi-v3') {
+      rebuilt = this.v3Parser.getUtilityMeterData(draft.workbook, this.templateParserMeters(draft.meters));
+    } else {
+      rebuilt = previousReadings.map(reading => {
+        const meter = draft.meters.find(candidate => candidate.guid === reading.meterId);
+        return meter ? {
+          ...reading,
+          heatCapacity: meter.heatCapacity ?? reading.heatCapacity,
+          vehicleFuelEfficiency: meter.vehicleFuelEfficiency ?? reading.vehicleFuelEfficiency
+        } : reading;
+      });
+    }
+
+    const excluded = new Set(draft.excludedMeterReadingIds.map(String));
+    const updatedExclusions: Array<number | string> = [];
+    draft.meterData = rebuilt.map(reading => {
+      const previous = previousReadings.find(candidate => this.sameMeterReading(candidate, reading));
+      const reconciled = previous && reading.id == null
+        ? { ...reading, id: previous.id, guid: previous.guid }
+        : reading;
+      if (previous && excluded.has(String(previous.id ?? previous.guid))) {
+        updatedExclusions.push(reconciled.id ?? reconciled.guid);
+      }
+      return reconciled;
+    });
+    draft.excludedMeterReadingIds = updatedExclusions;
   }
 
   applyFootprintFacility(draft: ImportFileDraft, facilityId: string): void {
@@ -284,6 +353,18 @@ export class SpreadsheetImportDraftService {
       result.push(reading);
     }));
     return result;
+  }
+
+  private sameMeterReading(left: IdbUtilityMeterData, right: IdbUtilityMeterData): boolean {
+    return left.meterId === right.meterId && left.year === right.year &&
+      left.month === right.month && left.day === right.day;
+  }
+
+  private templateParserMeters(meters: IdbUtilityMeter[]): IdbUtilityMeter[] {
+    return meters.map(meter => ({
+      ...meter,
+      meterNumber: meter.importWizardName ?? meter.meterNumber
+    }));
   }
 
   private parsePredictors(draft: ImportFileDraft): { predictors: IdbPredictor[]; readings: IdbPredictorData[] } {

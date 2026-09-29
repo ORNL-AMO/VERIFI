@@ -8,7 +8,7 @@
         <div class="v1-settings-grid v1-settings-grid--2">
           <label class="meter-settings-field">
             <span>Stop Month</span>
-            <select class="form-select" formControlName="noLongerInUseMonth" (change)="immediateChange.emit()">
+            <select class="v1-select" formControlName="noLongerInUseMonth" (change)="immediateChange.emit()">
               <option [ngValue]="null" disabled>Month</option>
               @for (month of viewModel.months; track month.monthNumValue) {
                 <option [ngValue]="month.monthNumValue">{{ month.abbreviation }}</option>
@@ -17,7 +17,7 @@
           </label>
           <label class="meter-settings-field">
             <span>Stop Year</span>
-            <select class="form-select" formControlName="noLongerInUseYear" (change)="immediateChange.emit()">
+            <select class="v1-select" formControlName="noLongerInUseYear" (change)="immediateChange.emit()">
               <option [ngValue]="null" disabled>Year</option>
               @for (year of viewModel.noLongerInUseYearOptions; track year) {
                 <option [ngValue]="year">{{ year }}</option>
@@ -30,12 +30,12 @@
 
     <div class="meter-settings-checks">
       <label class="meter-settings-check">
-        <input type="checkbox" class="form-check-input" formControlName="canBeNegative" (change)="immediateChange.emit()">
+        <input type="checkbox" formControlName="canBeNegative" (change)="immediateChange.emit()">
         <span>Allow Negative Readings</span>
       </label>
 
       <label class="meter-settings-check">
-        <input type="checkbox" class="form-check-input" formControlName="ignoreDateStatusChecks" (change)="immediateChange.emit()">
+        <input type="checkbox" formControlName="ignoreDateStatusChecks" (change)="immediateChange.emit()">
         <span>Ignore Date Related Status Checks</span>
       </label>
     </div>
@@ -52,17 +52,19 @@
               text="Changing this affects calendarized reporting results but does not change original readings.">
             </app-ui-tooltip>
           }
-          <button
-            type="button"
-            class="meter-settings-link-button meter-settings-calendarization__help"
-            (click)="calendarizationHelpRequested.emit()">
-            View example
-          </button>
+          @if (showCalendarizationHelp) {
+            <button
+              type="button"
+              class="meter-settings-link-button meter-settings-calendarization__help"
+              (click)="calendarizationHelpRequested.emit()">
+              View example
+            </button>
+          }
         </div>
       </div>
       <select
         id="meter-reading-data-application"
-        class="form-select"
+        class="v1-select"
         formControlName="meterReadingDataApplication"
         (change)="immediateChange.emit()">
         <option [ngValue]="undefined">Select a calendarization method</option>
