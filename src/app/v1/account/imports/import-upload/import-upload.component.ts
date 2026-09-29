@@ -87,6 +87,6 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
     const draft = this.session.draft(id);
     const accountGuid = this.workspace.account()?.guid;
     if (!draft || !accountGuid || draft.status === 'invalid') return;
-    void this.router.navigate(['/v1/workspace/account', accountGuid, 'imports/file', id, stepsForDraft(draft)[0].id]);
+    void this.router.navigate(['/v1/workspace/account', accountGuid, 'imports', 'file', id, stepsForDraft(draft)[0].id]);
   }
 }
