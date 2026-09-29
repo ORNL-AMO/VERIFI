@@ -63,6 +63,8 @@ import { ShellComponent } from '@app/v1/shell/shell.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
 import { predictorCanonicalRouteGuard } from '@app/v1/facility/data/predictors/predictor-canonical-route.guard';
+import { ImportUploadComponent } from '@app/v1/account/imports/import-upload/import-upload.component';
+import { ImportWizardComponent } from '@app/v1/account/imports/import-wizard/import-wizard.component';
 
 export const V1Routes: Routes = [
   {
@@ -121,6 +123,15 @@ export const V1Routes: Routes = [
               { path: 'portfolio', component: AccountSettingsPortfolioComponent },
               { path: 'delete', component: AccountSettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }
+            ]
+          },
+          {
+            path: 'imports',
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'upload' },
+              { path: 'upload', component: ImportUploadComponent, canDeactivate: [unsavedChangesGuard] },
+              { path: 'file/:fileId/:step', component: ImportWizardComponent, canDeactivate: [unsavedChangesGuard] },
+              { path: '**', redirectTo: 'upload' }
             ]
           },
           { path: '**', redirectTo: 'home/overview' }

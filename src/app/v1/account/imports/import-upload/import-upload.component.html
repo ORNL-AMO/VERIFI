@@ -1,0 +1,42 @@
+<section class="import-page" aria-labelledby="import-upload-title">
+  <header class="v1-section-header">
+    <div><p class="v1-eyebrow">Imports &amp; Backup</p><h1 id="import-upload-title">Import data</h1></div>
+    <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', workspace.account()?.guid, 'settings', 'backup']">JSON backup</a>
+  </header>
+
+  @if (sessionLost()) {
+    <div class="v1-alert v1-alert--info" role="status">The temporary import session was not available. Select the workbook again to continue.</div>
+  }
+
+  <div class="import-panel">
+    <h2>Select spreadsheet files</h2>
+    <p>Upload VERIFI templates, general workbooks, Energy Treasure Hunt workbooks, or footprint-tool files. Files are reviewed and imported one at a time.</p>
+    <label class="file-picker" [class.is-disabled]="readingFiles()">
+      <span>{{ readingFiles() ? 'Reading files…' : 'Choose workbooks' }}</span>
+      <input type="file" multiple accept=".xlsx,.xls,.xlsm" [disabled]="readingFiles()" (change)="filesSelected($event)">
+    </label>
+  </div>
+
+  @if (failures().length) {
+    <section class="v1-alert v1-alert--danger" role="alert" aria-labelledby="failed-files-title">
+      <h2 id="failed-files-title">Some files could not be opened</h2>
+      <ul>@for (failure of failures(); track failure.name) { <li><strong>{{ failure.name }}:</strong> {{ failure.message }}</li> }</ul>
+    </section>
+  }
+
+  @if (session.drafts().length) {
+    <section class="import-panel" aria-labelledby="queue-title">
+      <h2 id="queue-title">Import queue</h2>
+      <ul class="queue-list">
+        @for (draft of session.drafts(); track draft.id) {
+          <li>
+            <div><strong>{{ draft.name }}</strong><span>{{ draft.kind }} · {{ draft.status }}</span></div>
+            <button type="button" class="v1-btn v1-btn--action" [disabled]="draft.status === 'completed' || draft.status === 'invalid'" (click)="openDraft(draft.id)">
+              {{ draft.completedSteps.length ? 'Continue review' : 'Start review' }}
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</section>

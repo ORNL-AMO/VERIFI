@@ -106,6 +106,9 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'portfolio'
     ]);
+    expect(service.accountImportsRoute('account-a')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'
+    ]);
     expect(service.facilityRoute('facility-a')).toEqual([
       '/v1',
       'workspace',
@@ -342,6 +345,25 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'portfolio'
     ]);
+  });
+
+  it('opens imports from account and facility context', () => {
+    service.openSection('imports');
+    expect(router.navigate).toHaveBeenLastCalledWith(
+      ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
+      { queryParams: undefined }
+    );
+
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-a/data/meters',
+      '/v1/workspace/facility/facility-a/data/meters'
+    ));
+    service.openSection('imports');
+    expect(router.navigate).toHaveBeenLastCalledWith(
+      ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
+      { queryParams: { facilityGuid: 'facility-a', returnUrl: '/v1/workspace/facility/facility-a/data/meters' } }
+    );
   });
 
   it('parses account and facility settings routes and enables settings in workspace context', () => {

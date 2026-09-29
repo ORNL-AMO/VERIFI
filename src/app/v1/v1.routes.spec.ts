@@ -41,6 +41,8 @@ import { WeatherPredictorSetupComponent } from '@app/v1/facility/data/predictors
 import { WeatherPredictorReadingsComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
 import { WeatherPredictorQualityComponent } from '@app/v1/facility/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
 import { V1Routes } from './v1.routes';
+import { ImportUploadComponent } from '@app/v1/account/imports/import-upload/import-upload.component';
+import { ImportWizardComponent } from '@app/v1/account/imports/import-wizard/import-wizard.component';
 
 describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
@@ -83,6 +85,20 @@ describe('V1Routes facility data meters routes', () => {
     expect(children.find(child => child.path === '**')).toMatchObject({
       path: '**',
       redirectTo: 'facilities'
+    });
+  });
+
+  it('routes the protected account import queue and file wizard', () => {
+    const route = accountImportsRoute();
+    const children = route.children ?? [];
+    expect(children.find(child => child.path === '')).toMatchObject({ redirectTo: 'upload' });
+    expect(children.find(child => child.path === 'upload')).toMatchObject({
+      component: ImportUploadComponent,
+      canDeactivate: [unsavedChangesGuard]
+    });
+    expect(children.find(child => child.path === 'file/:fileId/:step')).toMatchObject({
+      component: ImportWizardComponent,
+      canDeactivate: [unsavedChangesGuard]
     });
   });
 
@@ -283,6 +299,14 @@ function accountPortfolioRoute(): Route {
     throw new Error('Account Portfolio route was not found.');
   }
   return route;
+}
+
+function accountImportsRoute(): Route {
+  const shellRoute = V1Routes[0];
+  const accountRoute = shellRoute.children?.find(route => route.path === 'workspace/account/:accountGuid');
+  const importsRoute = accountRoute?.children?.find(route => route.path === 'imports');
+  if (!importsRoute) throw new Error('Account Imports route was not found.');
+  return importsRoute;
 }
 
 function facilityDataRoute(): Route {

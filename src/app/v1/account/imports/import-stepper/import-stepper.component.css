@@ -1,0 +1,7 @@
+.import-stepper { overflow-x: auto; border-bottom: 1px solid var(--v1-border-color, #c8d0d8); }
+.import-stepper ol { display: flex; gap: .25rem; list-style: none; margin: 0; padding: 0; min-width: max-content; }
+.import-stepper button { display: flex; align-items: center; gap: .5rem; border: 0; border-bottom: 3px solid transparent; background: transparent; padding: .8rem 1rem; color: inherit; }
+.import-stepper button:disabled { opacity: .5; }
+.import-stepper .is-current button { border-bottom-color: var(--bs-primary, #0d6efd); font-weight: 700; }
+.import-stepper .is-complete .step-number { background: var(--bs-success, #198754); color: #fff; }
+.step-number { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1px solid currentColor; border-radius: 50%; font-size: .8rem; }

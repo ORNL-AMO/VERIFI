@@ -73,7 +73,7 @@ export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
   { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'barChart', enabled: false },
   { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
   { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
-  { id: 'imports', label: 'Imports & Backup', shortLabel: 'Imports', icon: 'fileImport', enabled: false }
+  { id: 'imports', label: 'Imports & Backup', shortLabel: 'Imports', icon: 'fileImport', enabled: true }
 ];
 
 export const SUPPORT_PANEL_TABS: ReadonlyArray<PanelTab> = [
@@ -92,7 +92,7 @@ const DEFAULT_DETAILS: Record<SectionId, string> = {
   analysis: 'rollup',
   reports: 'setup',
   settings: 'profile',
-  imports: 'template'
+  imports: 'upload'
 };
 const DEFAULT_FACILITY_DETAILS: Record<SectionId, string> = {
   ...DEFAULT_DETAILS,
@@ -126,7 +126,7 @@ export class WorkspaceNavigationService {
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
     ...section,
-    enabled: section.id === 'settings' || section.id === 'data' ? this.isWorkspaceRoute() : section.enabled
+    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'imports' ? this.isWorkspaceRoute() : section.enabled
   })));
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
@@ -270,6 +270,18 @@ export class WorkspaceNavigationService {
       }
       return;
     }
+    if (sectionId === 'imports') {
+      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
+      if (accountGuid) {
+        const facilityGuid = contextMode === 'facility'
+          ? this.facility()?.guid || this.routeState().facilityGuid
+          : undefined;
+        void this.router.navigate(this.accountImportsRoute(accountGuid), {
+          queryParams: facilityGuid ? { facilityGuid, returnUrl: this.currentUrl() } : undefined
+        });
+      }
+      return;
+    }
     if (sectionId === 'settings' && contextMode === 'facility') {
       const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
       if (facilityGuid) {
@@ -288,6 +300,10 @@ export class WorkspaceNavigationService {
 
   accountDataRoute(accountGuid: string, detail = 'portfolio'): Array<string> {
     return ['/v1', 'workspace', 'account', accountGuid, 'data', detail];
+  }
+
+  accountImportsRoute(accountGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'imports', 'upload'];
   }
 
   facilityRoute(facilityGuid: string): Array<string> {
@@ -355,6 +371,7 @@ export class WorkspaceNavigationService {
     if (section === 'data') {
       return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
     }
+    if (section === 'imports') return this.accountImportsRoute(accountGuid);
     return this.accountRoute(accountGuid);
   }
 
@@ -364,6 +381,10 @@ export class WorkspaceNavigationService {
     }
     if (section === 'data') {
       return this.facilityDataRoute(facilityGuid, this.resolveFacilityDataDetail(detail));
+    }
+    if (section === 'imports') {
+      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
+      return accountGuid ? this.accountImportsRoute(accountGuid) : this.facilityRoute(facilityGuid);
     }
     return this.facilityRoute(facilityGuid);
   }

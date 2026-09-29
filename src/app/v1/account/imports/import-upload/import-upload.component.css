@@ -1,0 +1,9 @@
+.import-page { display: grid; gap: 1rem; padding: 1rem; }
+.import-panel { border: 1px solid var(--v1-border-color, #c8d0d8); padding: 1rem; background: var(--bs-body-bg, #fff); }
+.file-picker { display: inline-flex; cursor: pointer; padding: .65rem 1rem; background: var(--bs-primary, #0d6efd); color: #fff; font-weight: 700; }
+.file-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.file-picker.is-disabled { opacity: .6; cursor: wait; }
+.queue-list { list-style: none; margin: 0; padding: 0; }
+.queue-list li { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .75rem 0; border-top: 1px solid var(--v1-border-color, #ddd); }
+.queue-list li div { display: grid; }
+.queue-list span { color: var(--bs-secondary-color, #666); text-transform: capitalize; }

@@ -1,0 +1,16 @@
+<nav class="import-stepper" aria-label="Import progress">
+  <ol>
+    @for (step of steps(); track step.id; let index = $index) {
+      <li [class.is-current]="step.id === currentStep()" [class.is-complete]="isCompleted(step)">
+        <button
+          type="button"
+          [disabled]="!canOpen(step)"
+          [attr.aria-current]="step.id === currentStep() ? 'step' : null"
+          (click)="stepSelected.emit(step.id)">
+          <span class="step-number" aria-hidden="true">{{ isCompleted(step) ? '✓' : index + 1 }}</span>
+          <span>{{ step.label }}</span>
+        </button>
+      </li>
+    }
+  </ol>
+</nav>
