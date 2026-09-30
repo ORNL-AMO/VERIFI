@@ -88,7 +88,7 @@
   overflow: auto;
 }
 
-.v1-root a {
+.v1-root a:not(.v1-btn) {
   color: var(--v1-link);
 }
 

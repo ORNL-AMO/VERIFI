@@ -1,0 +1,110 @@
+@if (!state.meterRows().length) {
+  <div class="v1-alert v1-alert--info" role="status">No meters are included in this workbook.</div>
+} @else {
+  <div class="meter-review-summary" aria-live="polite">
+    <span>{{ state.meterRows().length }} meters found</span>
+    <span>{{ invalidIncludedCount() }} need attention</span>
+  </div>
+
+  <div class="table-wrap meter-review-table-wrap">
+    <table class="meter-review-table">
+      <thead>
+        <tr>
+          <th scope="col">Facility</th>
+          <th scope="col">Meter</th>
+          <th scope="col">Is valid?</th>
+          <th scope="col">Source</th>
+          <th scope="col">Units</th>
+          <th scope="col">
+            <div class="meter-review-heading">
+              <span>Group</span>
+              <button type="button" class="meter-review-action" (click)="state.autoGroupMeters()">Auto group</button>
+            </div>
+          </th>
+          <th scope="col">
+            <div class="meter-review-heading">
+              <span>Calendarization</span>
+              <button type="button" class="meter-review-action" (click)="state.toggleAllMeterCalendarization()">Toggle calendarization</button>
+            </div>
+          </th>
+          <th scope="col">New / Existing</th>
+          <th scope="col">Include</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of state.meterRows(); track row.meter.guid) {
+          <tr [class.invalid-row]="!row.meter.skipImport && !row.valid" [class.meter-review-row--skipped]="row.meter.skipImport">
+            <td>{{ row.facilityName }}</td>
+            <td>
+              <button type="button" class="meter-review-name" [disabled]="row.meter.skipImport" (click)="openEditor(row.index)">
+                {{ row.meter.name || 'Unnamed meter' }}
+              </button>
+            </td>
+            <td>
+              <span class="meter-review-status" [class.meter-review-status--invalid]="!row.valid">
+                {{ row.valid ? 'Valid' : 'Needs attention' }}
+              </span>
+            </td>
+            <td>{{ row.meter.source || 'Not selected' }}</td>
+            <td><span [innerHTML]="row.unitLabel || 'Not selected'"></span></td>
+            <td>
+              <select
+                class="v1-select meter-review-select"
+                [ngModel]="row.meter.groupId"
+                [disabled]="row.meter.skipImport"
+                (ngModelChange)="state.setMeterGroup(row.index, $event || undefined)"
+                [attr.aria-label]="'Group for ' + row.meter.name">
+                <option [ngValue]="undefined">Ungrouped</option>
+                @for (group of row.groups; track group.guid) {
+                  <option [ngValue]="group.guid">{{ group.name }} ({{ group.groupType }})</option>
+                }
+              </select>
+            </td>
+            <td>
+              <select
+                class="v1-select meter-review-select meter-review-calendarization"
+                [ngModel]="row.meter.meterReadingDataApplication"
+                [disabled]="row.meter.skipImport"
+                (ngModelChange)="state.setMeterCalendarization(row.index, $event)"
+                [attr.aria-label]="'Calendarization method for ' + row.meter.name">
+                <option [ngValue]="undefined">Select a method</option>
+                @for (method of calendarizationMethods; track method.value) {
+                  <option [ngValue]="method.value">{{ method.label }}</option>
+                }
+              </select>
+            </td>
+            <td><span class="meter-review-record-type">{{ row.meter.id == null ? 'New' : 'Existing' }}</span></td>
+            <td class="meter-review-include">
+              <label class="meter-review-include-control">
+                <input
+                  type="checkbox"
+                  class="meter-review-checkbox"
+                  [ngModel]="!row.meter.skipImport"
+                  (ngModelChange)="state.toggleMeterIncluded(row.index, $event)">
+                <span class="visually-hidden">Include {{ row.meter.name }}</span>
+              </label>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (editingRow(); as row) {
+  @if (editingFacility(); as facility) {
+    @if (account(); as activeAccount) {
+      <app-import-meter-editor
+        [meter]="row.meter"
+        [facility]="facility"
+        [account]="activeAccount"
+        [customFuels]="state.workspace.customFuels()"
+        [customGWPs]="state.workspace.customGWPs()"
+        [existingMeters]="existingMeterOptions()"
+        [metersWithPersistedReadings]="meterGuidsWithReadings()"
+        (saved)="saveMeter($event)"
+        (cancelled)="closeEditor()">
+      </app-import-meter-editor>
+    }
+  }
+}

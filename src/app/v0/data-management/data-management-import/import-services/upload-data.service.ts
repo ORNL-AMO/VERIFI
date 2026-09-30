@@ -8,16 +8,16 @@ import { FacilitydbService } from '@data/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '@data/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '@data/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '@shared/helper-services/energy-units-helper.service';
-import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
+import { applyMeterMultipliers } from '@data/import/meter-import-defaults';
 import { UtilityMeterGroupdbService } from '@data/indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '@shared/unitOptions';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '@shared/sharedHelperFunctions';
 import { MeterPhase, MeterSource } from '@data/models/constantsAndTypes';
 import { getMeterDataCopy } from '@domain/calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';;
-import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate, TemplateVersion } from '@v0/data-management/data-management-import/import-services/upload-data-models';
-import { UploadDataV1Service } from '@v0/data-management/data-management-import/import-services/upload-data-v1.service';
-import { UploadDataV2Service } from '@v0/data-management/data-management-import/import-services/upload-data-v2.service';
+import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate, TemplateVersion } from '@data/import/spreadsheet-import.models';
+import { UploadDataV1Service } from '@data/import/parsers/upload-data-v1.service';
+import { UploadDataV2Service } from '@data/import/parsers/upload-data-v2.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
@@ -27,15 +27,15 @@ import { PredictorDbService } from '@data/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '@data/indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
-import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '@data/import/upload-helper-functions';
 import { LoadingService } from '@app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { SharedDataService } from '@shared/helper-services/shared-data.service';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '@v0/shared/shared-meter-content/utility-meter-data.service';
-import { UploadDataEnergyTreasureHuntService } from '@v0/data-management/data-management-import/import-services/upload-data-energy-treasure-hunt.service';
-import { UploadDataV3Service } from '@v0/data-management/data-management-import/import-services/upload-data-v3.service';
-import { UploadDataFootprintToolService } from '@v0/data-management/data-management-import/import-services/upload-data-footprint-tool.service';
+import { UploadDataEnergyTreasureHuntService } from '@data/import/parsers/upload-data-energy-treasure-hunt.service';
+import { UploadDataV3Service } from '@data/import/parsers/upload-data-v3.service';
+import { UploadDataFootprintToolService } from '@data/import/parsers/upload-data-footprint-tool.service';
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { FacilityEnergyUseGroupsDbService } from '@data/indexedDB/facility-energy-use-groups-db.service';
 import { FacilityEnergyUseEquipmentDbService } from '@data/indexedDB/facility-energy-use-equipment-db.service';
@@ -62,7 +62,6 @@ export class UploadDataService {
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
-    private editMeterFormService: EditMeterFormService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private uploadDataV1Service: UploadDataV1Service,
     private uploadDataV2Service: UploadDataV2Service,
@@ -428,7 +427,7 @@ export class UploadDataService {
     newMeter.meterNumber = selectedFacility.name.replace(' ', '_') + '_' + newMeter.source?.replace(' ', '_') + '_' + Math.random().toString(36).substr(2, 3);
 
     //set emissions mulitpliers
-    newMeter = this.editMeterFormService.setMultipliers(newMeter);
+    newMeter = applyMeterMultipliers(newMeter);
     return newMeter;
   }
 

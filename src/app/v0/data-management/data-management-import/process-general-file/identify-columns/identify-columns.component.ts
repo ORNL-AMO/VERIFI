@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { ColumnGroup, ColumnItem, FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { ColumnGroup, ColumnItem, FileReference } from '@data/import/spreadsheet-import.models';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 @Component({
   selector: 'app-identify-columns',

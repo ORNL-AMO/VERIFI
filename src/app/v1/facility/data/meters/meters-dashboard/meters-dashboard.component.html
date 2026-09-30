@@ -32,6 +32,9 @@
       </h1>
     </div>
     <div class="v1-facility-meters__header-actions" aria-label="Meter actions">
+      <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']" [queryParams]="{ facilityGuid: currentFacility.guid, returnUrl: '/v1/workspace/facility/' + currentFacility.guid + '/data/meters' }">
+        <app-ui-icon name="uploadData"></app-ui-icon>Upload data
+      </a>
       <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
         <app-ui-icon name="add"></app-ui-icon>
         Add meter
@@ -100,7 +103,7 @@
           icon="meter"
           context="facility"
           title="No meters"
-          description="Add or import a meter to get started.">
+          description="Add or upload a meter to get started.">
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openAddMeter()">
             <app-ui-icon name="add"></app-ui-icon>
             Add meter

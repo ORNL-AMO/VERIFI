@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference, getEmptyFileReference } from '@data/import/spreadsheet-import.models';
 
 @Component({
   selector: 'app-process-template-facilities',

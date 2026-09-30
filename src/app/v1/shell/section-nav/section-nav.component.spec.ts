@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { MeterSource } from '@data/models/constantsAndTypes';
+import { ImportSessionService } from '@app/v1/account/imports/import-session.service';
+import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
@@ -27,6 +29,8 @@ describe('SectionNavComponent', () => {
   let activeMeterGroupGuid: ReturnType<typeof signal<string | undefined>>;
   let activePredictorGuid: ReturnType<typeof signal<string | undefined>>;
   let activeWeatherPredictorGroupKey: ReturnType<typeof signal<string | undefined>>;
+  let activeImportFileId: ReturnType<typeof signal<string | undefined>>;
+  let activeImportStep: ReturnType<typeof signal<string | undefined>>;
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let facilityPredictors: ReturnType<typeof signal<Array<any>>>;
@@ -49,6 +53,8 @@ describe('SectionNavComponent', () => {
     activeMeterGroupGuid = signal<string | undefined>(undefined);
     activePredictorGuid = signal<string | undefined>(undefined);
     activeWeatherPredictorGroupKey = signal<string | undefined>(undefined);
+    activeImportFileId = signal<string | undefined>(undefined);
+    activeImportStep = signal<string | undefined>(undefined);
     facilityMeters = signal([]);
     facilityMeterGroups = signal([]);
     facilityPredictors = signal([]);
@@ -58,7 +64,7 @@ describe('SectionNavComponent', () => {
     statusItems = signal([]);
     TestBed.configureTestingModule({
       declarations: [SectionNavComponent, FacilityPickerComponent],
-      imports: [RouterModule.forRoot([]), FormsModule, IconComponent],
+      imports: [RouterModule.forRoot([]), FormsModule, IconComponent, ImportStepperComponent],
       providers: [
         {
           provide: WorkspaceNavigationService,
@@ -76,9 +82,12 @@ describe('SectionNavComponent', () => {
             activeMeterGroupGuid,
             activePredictorGuid,
             activeWeatherPredictorGroupKey,
+            activeImportFileId,
+            activeImportStep,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
+            accountImportsRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
             facilityDataRoute: (_facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', detail],
             facilityMeterRoute: (_facilityGuid: string, meterGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', meterGuid, tab],
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
@@ -120,6 +129,29 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Account Home');
     expect(fixture.nativeElement.textContent).toContain('Overview');
     expect(fixture.nativeElement.textContent).not.toContain('Account Settings');
+  });
+
+  it('shows Upload Files followed by route-aware file progress in the Upload sidebar', () => {
+    activeSection.set('imports');
+    activeDetail.set('file');
+    activeImportFileId.set('draft-1');
+    activeImportStep.set('meters');
+    TestBed.inject(ImportSessionService).addDrafts([{
+      id: 'draft-1',
+      name: 'utility-data.xlsx',
+      kind: 'verifi-v3',
+      status: 'ready',
+      completedSteps: ['facilities']
+    } as any]);
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector<HTMLAnchorElement>('a[href$="/imports/upload"]')?.textContent).toContain('Upload Files');
+    expect(element.querySelector('.v1-nav__import-file h2')?.textContent).toContain('utility-data.xlsx');
+    expect(element.querySelector('[aria-current="step"]')?.textContent).toContain('Meters');
+    expect(element.querySelectorAll('app-import-stepper a').length).toBe(2);
+    expect(element.querySelectorAll('app-import-stepper [aria-disabled="true"]').length).toBe(4);
   });
 
   it('shows account settings navigation only when the Settings rail section is active', () => {

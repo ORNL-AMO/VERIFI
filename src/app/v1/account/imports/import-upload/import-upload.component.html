@@ -1,0 +1,104 @@
+<section class="import-page" aria-labelledby="upload-title">
+  <header class="v1-section-header upload-header">
+    <div>
+      <p class="v1-eyebrow">Data upload</p>
+      <h1 id="upload-title">Upload spreadsheet data</h1>
+      <p>Upload one or more Excel files. We’ll identify the format and guide you through each step.</p>
+    </div>
+    <a class="v1-btn v1-btn--secondary template-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx" download>
+      <app-ui-icon name="download"></app-ui-icon>
+      Download VERIFI Excel template
+    </a>
+  </header>
+
+  @if (sessionLost()) {
+    <div class="v1-alert v1-alert--info" role="status">
+      The temporary upload session was not available. Select the workbook again to continue.
+    </div>
+  }
+
+  <section class="upload-options" aria-label="Supported spreadsheet formats">
+    <div class="upload-options__grid">
+      <article class="upload-option">
+        <app-ui-icon name="file" [size]="22"></app-ui-icon>
+        <h2>VERIFI Template</h2>
+        <p>Facilities, meters, readings, and predictors in the standard format.</p>
+      </article>
+      <article class="upload-option">
+        <app-ui-icon name="spreadsheetColumns" [size]="22"></app-ui-icon>
+        <h2>Spread Sheet Columns</h2>
+        <p>Dates, meters, and predictors from an existing worksheet.</p>
+      </article>
+      <article class="upload-option">
+        <app-ui-icon name="energy" [size]="22"></app-ui-icon>
+        <h2>Other</h2>
+        <p>Energy Footprint Tool and Energy Treasure Hunt workbooks are also supported.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="upload-panel" aria-labelledby="add-files-title">
+    <h2 id="add-files-title">Add Excel files</h2>
+    <div
+      class="file-drop"
+      [class.is-drag-active]="dragActive()"
+      [class.is-disabled]="readingFiles()"
+      (dragenter)="dragEntered($event)"
+      (dragover)="dragOver($event)"
+      (dragleave)="dragLeft($event)"
+      (drop)="filesDropped($event)">
+      <span class="file-drop__icon">
+        @if (readingFiles()) {
+          <app-ui-icon name="loading" spin [size]="32"></app-ui-icon>
+        } @else {
+          <app-ui-icon name="uploadData" [size]="32"></app-ui-icon>
+        }
+      </span>
+      <strong role="status" aria-live="polite" aria-atomic="true">
+        {{ readingFiles() ? 'Reading files…' : (dragActive() ? 'Drop files to add them' : 'Drag and drop Excel files here') }}
+      </strong>
+      <span>or</span>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="readingFiles()" (click)="fileInput.click()">Browse files</button>
+      <small>XLSX, XLS, XLSM · Multiple files supported</small>
+      <input #fileInput class="file-input" type="file" multiple accept=".xlsx,.xls,.xlsm" [disabled]="readingFiles()" (change)="filesSelected($event)">
+    </div>
+  </section>
+
+  @if (failures().length) {
+    <section class="v1-alert v1-alert--danger" role="alert" aria-labelledby="failed-files-title">
+      <h2 id="failed-files-title">Some files could not be opened</h2>
+      <ul>
+        @for (failure of failures(); track failure.name) {
+          <li><strong>{{ failure.name }}:</strong> {{ failure.message }}</li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (session.drafts().length) {
+    <section class="upload-panel" aria-labelledby="queue-title">
+      <h2 id="queue-title">Upload queue</h2>
+      <ul class="queue-list">
+        @for (draft of session.drafts(); track draft.id) {
+          <li>
+            <div>
+              <strong>{{ draft.name }}</strong>
+              <span>{{ formatLabels[draft.kind] }} · {{ statusLabels[draft.status] }}</span>
+            </div>
+            <button type="button" class="v1-btn v1-btn--action" [disabled]="draft.status === 'completed' || draft.status === 'invalid'" (click)="openDraft(draft.id)">
+              Process Upload
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <footer class="backup-import">
+    <span>Have a VERIFI backup?</span>
+    <a class="v1-btn v1-btn--quiet" [routerLink]="['/v1/workspace/account', workspace.account()?.guid, 'settings', 'backup']">
+      <app-ui-icon name="fileImport"></app-ui-icon>
+      Import a VERIFI backup (.json)
+    </a>
+  </footer>
+</section>

@@ -7,17 +7,18 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { PredictorSettingsFormComponent } from '@app/v1/shared/predictor-settings/predictor-settings-form.component';
+import { PredictorSettingsForm, PredictorSettingsFormService } from '@app/v1/shared/predictor-settings/predictor-settings-form.service';
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorSettingsSaveState } from '../../models';
 import { ConfirmDeletePredictorModalComponent } from '../../predictors-dashboard/predictor-browse-card/confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
-import { PredictorSettingsForm, PredictorSettingsFormService } from './predictor-settings-form.service';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 
 @Component({
   selector: 'app-predictor-workbench-settings', templateUrl: './predictor-workbench-settings.component.html',
   styleUrls: ['./predictor-workbench-settings.component.css'], standalone: true,
-  imports: [ReactiveFormsModule, IconComponent, ConfirmDeletePredictorModalComponent]
+  imports: [ReactiveFormsModule, IconComponent, PredictorSettingsFormComponent, ConfirmDeletePredictorModalComponent]
 })
 export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, OnDestroy {
   private readonly formService = inject(PredictorSettingsFormService);

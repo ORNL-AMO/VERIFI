@@ -1,0 +1,23 @@
+<div class="add-facility">
+  <label class="field">
+    <span>New facility name</span>
+    <input [ngModel]="state.newFacilityName()" (ngModelChange)="state.newFacilityName.set($event)">
+  </label>
+  <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!state.newFacilityName().trim()" (click)="state.addFacility()">
+    Add facility
+  </button>
+</div>
+@if (!state.mappingItems(mappingType).length) {
+  <p>No {{ title }} columns were selected.@if (mappingType === 'meter') { You can continue to predictors. }</p>
+}
+@for (item of state.mappingItems(mappingType); track item.id) {
+  <label class="field">
+    <span>{{ item.value }}</span>
+    <select [ngModel]="item.facilityId" (ngModelChange)="state.mapColumn(mappingType, item.id, $event)">
+      <option value="">Unmapped</option>
+      @for (facility of state.draft().importFacilities; track facility.guid) {
+        <option [value]="facility.guid">{{ facility.name }}</option>
+      }
+    </select>
+  </label>
+}

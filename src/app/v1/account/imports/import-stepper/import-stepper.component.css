@@ -1,0 +1,10 @@
+:host { display: block; min-width: 0; }
+.import-stepper ol { display: grid; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+.import-stepper li { min-width: 0; }
+.import-stepper a, .import-stepper__blocked { display: flex; gap: .5rem; align-items: center; min-width: 0; min-height: 2.15rem; padding: .32rem .45rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); color: var(--v1-muted); font-size: .82rem; font-weight: 800; line-height: 1.2; text-decoration: none; }
+.import-stepper a:hover, .import-stepper a:focus-visible { border-color: color-mix(in srgb, var(--v1-content-control) 28%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); color: var(--v1-text); }
+.import-stepper .is-current a { border-color: color-mix(in srgb, var(--v1-content-control) 34%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface)); color: var(--v1-text); box-shadow: inset 3px 0 0 var(--v1-content-control); }
+.import-stepper .is-complete .step-number { border-color: var(--v1-success); background: var(--v1-success); color: #fff; }
+.import-stepper .is-blocked { opacity: .55; }
+.step-number { display: inline-grid; flex: 0 0 1.45rem; width: 1.45rem; height: 1.45rem; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: .72rem; font-weight: 900; }
+.step-label { min-width: 0; overflow-wrap: anywhere; }

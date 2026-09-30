@@ -1,0 +1,9 @@
+<h2>Facilities found</h2>
+<ul class="review-list">
+  @for (facility of state.draft().importFacilities; track facility.guid) {
+    <li>
+      <strong>{{ facility.name }}</strong>
+      <span>{{ facility.id ? 'Update existing facility' : 'Create facility' }}</span>
+    </li>
+  }
+</ul>

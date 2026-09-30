@@ -1,0 +1,92 @@
+<div class="meter-settings" [class.meter-settings--single-column]="layout === 'single-column'">
+  @if (meterDataExists && showSetupUnlockControl && !setupValuesUnlocked) {
+    <div class="v1-alert v1-alert--warning meter-settings__lock-alert">
+      <app-ui-icon name="warning" class="meter-settings__lock-alert-icon"></app-ui-icon>
+      <span class="meter-settings__lock-alert-message">
+        <strong>Readings exist for this meter.</strong>
+        Setup values are locked because calculations use these settings.
+      </span>
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!canUnlockSetup" (click)="setupUnlockRequested.emit()">
+        Change values if necessary
+      </button>
+    </div>
+  } @else if (meterDataExists && showSetupUnlockControl && setupValuesUnlocked) {
+    <div class="v1-alert v1-alert--warning meter-settings__lock-alert">
+      <app-ui-icon name="warning" class="meter-settings__lock-alert-icon"></app-ui-icon>
+      <span class="meter-settings__lock-alert-message">
+        <strong>Setup values are unlocked.</strong>
+        Changing collection values does not alter amounts already entered in meter readings.
+      </span>
+    </div>
+  }
+
+  <div class="meter-settings__layout">
+    <div class="meter-settings__main">
+      <app-meter-settings-core-form
+        [form]="form"
+        [viewModel]="viewModel"
+        [saveState]="saveState"
+        [saveMessage]="saveMessage"
+        (ruleChange)="ruleChange.emit($event)"
+        (textChange)="textChange.emit()"
+        (immediateChange)="immediateChange.emit($event)">
+      </app-meter-settings-core-form>
+
+      @if (viewModel.displayVehicle) {
+        <app-meter-settings-vehicle-form
+          [form]="form"
+          [viewModel]="viewModel"
+          (ruleChange)="ruleChange.emit($event)"
+          (textChange)="textChange.emit()"
+          (immediateChange)="immediateChange.emit($event)">
+        </app-meter-settings-vehicle-form>
+      }
+
+      @if (viewModel.selectedFuelTypeOption || viewModel.selectedVehicleFuelOption) {
+        <app-meter-settings-emissions-details [form]="form" [viewModel]="viewModel">
+        </app-meter-settings-emissions-details>
+      }
+
+      @if (form.controls.source.value === 'Electricity') {
+        <app-meter-settings-electricity-form
+          [form]="form"
+          [viewModel]="viewModel"
+          (ruleChange)="ruleChange.emit($event)"
+          (textChange)="textChange.emit()"
+          (immediateChange)="immediateChange.emit($event)">
+        </app-meter-settings-electricity-form>
+      }
+
+      @if (layout === 'two-column') {
+        <app-meter-settings-other-info [form]="form" (textChange)="textChange.emit()">
+        </app-meter-settings-other-info>
+      }
+    </div>
+
+    <aside class="meter-settings__aside">
+      <app-meter-settings-reading-form
+        [form]="form"
+        [viewModel]="viewModel"
+        [meterDataExists]="meterDataExists"
+        [showCalendarizationHelp]="showCalendarizationHelp"
+        (immediateChange)="immediateChange.emit($event)"
+        (calendarizationHelpRequested)="calendarizationHelpRequested.emit()">
+      </app-meter-settings-reading-form>
+
+      <app-meter-settings-charges-form
+        [form]="form"
+        [viewModel]="viewModel"
+        (textChange)="textChange.emit()"
+        (immediateChange)="immediateChange.emit($event)">
+      </app-meter-settings-charges-form>
+    </aside>
+
+    @if (layout === 'single-column') {
+      <app-meter-settings-other-info
+        class="meter-settings__single-other"
+        [form]="form"
+        (textChange)="textChange.emit()">
+      </app-meter-settings-other-info>
+    }
+  </div>
+</div>

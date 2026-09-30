@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
+import Upload03Icon from '@hugeicons/core-free-icons/Upload03Icon';
 import { IconComponent } from './icon.component';
+import { ICON_REGISTRY } from './icon-registry';
 
 @Component({
   template: `
     <app-ui-icon name="search"></app-ui-icon>
     <app-ui-icon name="download" [size]="20" [strokeWidth]="2" [decorative]="false" label="Download data"></app-ui-icon>
     <app-ui-icon name="loading" spin></app-ui-icon>
+    <app-ui-icon name="uploadData"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -28,8 +32,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(3);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(3);
+    expect(icons.length).toBe(4);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(4);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -53,5 +57,13 @@ describe('IconComponent', () => {
 
     expect(icons[0].classList.contains('v1-icon--spin')).toBe(false);
     expect(icons[2].classList.contains('v1-icon--spin')).toBe(true);
+  });
+
+  it('maps the spreadsheet upload icon to Upload03Icon', () => {
+    expect(ICON_REGISTRY.uploadData).toBe(Upload03Icon);
+  });
+
+  it('maps the spreadsheet columns icon to LayoutTable01Icon', () => {
+    expect(ICON_REGISTRY.spreadsheetColumns).toBe(LayoutTable01Icon);
   });
 });

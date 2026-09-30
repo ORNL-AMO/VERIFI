@@ -12,7 +12,7 @@ import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '@data/import/upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'

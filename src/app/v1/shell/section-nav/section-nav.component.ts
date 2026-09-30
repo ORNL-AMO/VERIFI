@@ -1,5 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import { ImportSessionService } from '@app/v1/account/imports/import-session.service';
+import { ImportStepDefinition, stepsForDraft } from '@app/v1/account/imports/import-workflow.config';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
 import { buildWeatherStationGroups, predictorIcon } from '@app/v1/facility/data/predictors/models';
@@ -55,6 +57,16 @@ type ChildLinksState = {
   readonly collapsed: boolean;
 };
 
+type ImportNavigationFile = {
+  readonly id: string;
+  readonly name: string;
+  readonly steps: ReadonlyArray<ImportStepDefinition>;
+  readonly completedSteps: string[];
+  readonly currentStep: string;
+  readonly active: boolean;
+  readonly disabled: boolean;
+};
+
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
   { id: 'portfolio', label: 'Portfolio', icon: 'portfolio' }
 ];
@@ -102,6 +114,7 @@ const PORTFOLIO_TRANSITION_ITEM: SettingsNavItem = { id: 'portfolio', label: 'Po
 })
 export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
+  private readonly importSession = inject(ImportSessionService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly status = inject(WorkspaceStatusService);
   private readonly meterChildrenState = signal<ChildLinksState>({
@@ -124,6 +137,31 @@ export class SectionNavComponent {
       : ACCOUNT_CUSTOM_DATA_ITEMS.filter(item => item.id === 'custom-fuels');
   });
   readonly facilityDataItems = computed(() => FACILITY_DATA_ITEMS);
+  readonly importFiles = computed<ReadonlyArray<ImportNavigationFile>>(() => {
+    const activeFileId = this.navigation.activeImportFileId();
+    const activeStep = this.navigation.activeImportStep();
+    const navigationBlocked = this.importSession.pending();
+    return this.importSession.drafts().map(draft => {
+      const steps = stepsForDraft(draft);
+      const completedSteps = draft.status === 'completed'
+        ? steps.map(step => step.id)
+        : [...draft.completedSteps];
+      const nextStep = steps.find(step => !completedSteps.includes(step.id)) ?? steps[steps.length - 1];
+      const active = draft.id === activeFileId;
+      const currentStep = active && steps.some(step => step.id === activeStep)
+        ? activeStep!
+        : nextStep?.id ?? '';
+      return {
+        id: draft.id,
+        name: draft.name,
+        steps,
+        completedSteps,
+        currentStep,
+        active,
+        disabled: navigationBlocked || draft.status === 'invalid' || draft.status === 'importing'
+      };
+    });
+  });
   readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
     const statusReady = this.status.state() === 'ready';
     return [...this.workspace.facilityMeters()]

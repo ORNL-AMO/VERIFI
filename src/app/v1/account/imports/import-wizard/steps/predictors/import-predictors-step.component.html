@@ -1,0 +1,102 @@
+@let rows = state.predictorRows();
+
+@if (!rows.length) {
+  <div class="v1-alert v1-alert--info" role="status">No predictors are included in this workbook.</div>
+} @else {
+  <div class="predictor-review-summary" aria-live="polite">
+    <span>{{ rows.length }} predictor{{ rows.length === 1 ? '' : 's' }} found</span>
+    <span>{{ invalidIncludedCount() }} need attention</span>
+  </div>
+
+  <div class="table-wrap predictor-review-table-wrap">
+    <table class="predictor-review-table">
+      <thead>
+        <tr>
+          <th scope="col">Facility</th>
+          <th scope="col">Predictor</th>
+          <th scope="col">Type</th>
+          <th scope="col">Units</th>
+          <th scope="col">Production</th>
+          <th scope="col">Is valid?</th>
+          <th scope="col">New / Existing</th>
+          <th scope="col" class="predictor-review-include">
+            <label class="predictor-review-bulk-control">
+              <input
+                type="checkbox"
+                class="predictor-review-checkbox"
+                [checked]="state.allPredictorsIncluded()"
+                [indeterminate]="state.somePredictorsIncluded() && !state.allPredictorsIncluded()"
+                (change)="state.setAllPredictorsIncluded($any($event.target).checked)">
+              <span>Include</span>
+            </label>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.predictor.guid) {
+          <tr
+            [class.invalid-row]="!row.predictor.skipImport && !row.valid"
+            [class.predictor-review-row--skipped]="row.predictor.skipImport">
+            <td>{{ row.facilityName }}</td>
+            <td>
+              <button
+                type="button"
+                class="predictor-review-name"
+                [disabled]="row.predictor.skipImport"
+                (click)="openEditor(row.index)">
+                {{ row.predictor.name || 'Unnamed predictor' }}
+              </button>
+            </td>
+            <td>
+              <strong>{{ row.typeLabel }}</strong>
+              @if (row.typeDetail) { <small class="predictor-review-detail">{{ row.typeDetail }}</small> }
+            </td>
+            <td>{{ row.predictor.unit || 'Not specified' }}</td>
+            <td class="predictor-review-production">
+              <label class="predictor-review-check-control">
+                <input
+                  type="checkbox"
+                  class="predictor-review-checkbox"
+                  [ngModel]="row.predictor.production"
+                  [disabled]="row.predictor.skipImport"
+                  (ngModelChange)="state.setPredictorProduction(row.index, $event)">
+                <span class="visually-hidden">Treat {{ row.predictor.name }} as production</span>
+              </label>
+            </td>
+            <td>
+              <span class="predictor-review-status" [class.predictor-review-status--invalid]="!row.valid">
+                {{ row.valid ? 'Valid' : 'Needs attention' }}
+              </span>
+              @if (!row.valid && row.issues.length) {
+                <small class="predictor-review-detail">{{ row.issues[0] }}</small>
+              }
+            </td>
+            <td><span class="predictor-review-record-type">{{ row.predictor.id == null ? 'New' : 'Existing' }}</span></td>
+            <td class="predictor-review-include">
+              <label class="predictor-review-check-control">
+                <input
+                  type="checkbox"
+                  class="predictor-review-checkbox"
+                  [ngModel]="!row.predictor.skipImport"
+                  (ngModelChange)="state.togglePredictorIncluded(row.index, $event)">
+                <span class="visually-hidden">Include {{ row.predictor.name }}</span>
+              </label>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (editingRow(); as row) {
+  @if (editingFacility(); as facility) {
+    <app-import-predictor-editor
+      [predictor]="row.predictor"
+      [facility]="facility"
+      [existingPredictors]="existingPredictorOptions()"
+      (saved)="savePredictor($event)"
+      (cancelled)="closeEditor()">
+    </app-import-predictor-editor>
+  }
+}

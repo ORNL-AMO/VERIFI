@@ -1,0 +1,24 @@
+<nav class="import-stepper" [attr.aria-label]="'Upload progress for ' + fileName()">
+  <ol>
+    @for (step of steps(); track step.id; let index = $index) {
+      <li
+        [class.is-current]="activeFile() && step.id === currentStep()"
+        [class.is-complete]="isCompleted(step)"
+        [class.is-blocked]="!canOpen(step)">
+        @if (canOpen(step)) {
+          <a
+            [routerLink]="['/v1/workspace/account', accountGuid(), 'imports', 'file', fileId(), step.id]"
+            [attr.aria-current]="activeFile() && step.id === currentStep() ? 'step' : null">
+            <span class="step-number" aria-hidden="true">{{ isCompleted(step) ? '✓' : index + 1 }}</span>
+            <span class="step-label">{{ step.label }}</span>
+          </a>
+        } @else {
+          <span class="import-stepper__blocked" aria-disabled="true">
+            <span class="step-number" aria-hidden="true">{{ index + 1 }}</span>
+            <span class="step-label">{{ step.label }}</span>
+          </span>
+        }
+      </li>
+    }
+  </ol>
+</nav>

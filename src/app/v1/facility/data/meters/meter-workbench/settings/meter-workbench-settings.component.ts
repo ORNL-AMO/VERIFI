@@ -17,10 +17,9 @@ import {
   MeterSettingsFormService,
   MeterSettingsRuleChange,
   MeterSettingsRuleContext,
+  MeterSettingsSaveState,
   MeterSettingsViewModel
-} from './meter-settings-form.service';
-
-export type MeterSettingsSaveState = 'idle' | 'saving' | 'saved' | 'error' | 'invalid';
+} from '@app/v1/shared/meter-settings/meter-settings-form.service';
 
 @Component({
   selector: 'app-meter-workbench-settings',

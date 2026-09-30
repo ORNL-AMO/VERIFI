@@ -1,0 +1,61 @@
+@if (state.draft(); as file) {
+  <section class="import-page" aria-labelledby="import-wizard-title">
+    @if (state.currentStep(); as step) {
+      <header class="v1-section-header">
+        <p class="v1-eyebrow">{{ file.name }}</p>
+        <h1
+          id="import-wizard-title"
+          class="import-page__title"
+          [attr.aria-label]="'Step ' + state.currentStepNumber() + ': ' + step.label">
+          <span class="import-page__step-number" aria-hidden="true">{{ state.currentStepNumber() }}</span>
+          <span>{{ step.label }}</span>
+        </h1>
+        <p class="v1-section-header__summary">{{ step.help }}</p>
+      </header>
+    }
+
+    @if (state.error()) {
+      <div class="v1-alert v1-alert--danger" role="alert" tabindex="-1">{{ state.error() }}</div>
+    }
+
+    @if (state.committed()) {
+      <article class="import-panel import-success" role="status">
+        <h2>Upload complete</h2>
+        <p>The workbook was saved in one transaction. {{ session.summary()?.affectedFacilityGuids?.length || 0 }} facilities were affected.</p>
+        <div class="button-row">
+          <button type="button" class="v1-btn v1-btn--action" (click)="state.viewImportedData()">View uploaded data</button>
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="state.importAnother()">Upload another file</button>
+        </div>
+      </article>
+    } @else {
+      <article class="import-panel">
+        <router-outlet></router-outlet>
+      </article>
+
+      <footer class="wizard-actions">
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="session.pending()" (click)="back()">
+          <app-ui-icon name="chevronLeft"></app-ui-icon>
+          Back
+        </button>
+        @if (state.currentStepId() === 'review') {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="commit()">
+            {{ session.pending() ? 'Uploading…' : 'Upload data' }}
+          </button>
+        } @else {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="continue()">
+            Continue
+            <app-ui-icon name="chevronRight"></app-ui-icon>
+          </button>
+        }
+      </footer>
+
+      @if (session.pending()) {
+        <div class="commit-overlay" role="status" aria-live="assertive">
+          <app-ui-icon name="loading" spin [size]="28"></app-ui-icon>
+          <strong>Uploading data…</strong>
+          <span>Validating, saving, and refreshing the workspace. Do not close this window.</span>
+        </div>
+      }
+    }
+  </section>
+}

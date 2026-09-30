@@ -1,0 +1,128 @@
+:host { display: block; }
+
+.meter-review-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--v1-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.meter-review-table-wrap {
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+}
+
+.meter-review-table {
+  min-width: 82rem;
+}
+
+.meter-review-table th {
+  vertical-align: bottom;
+  background: var(--v1-panel);
+  color: var(--v1-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.meter-review-table td {
+  vertical-align: middle;
+}
+
+.meter-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.meter-review-action,
+.meter-review-name {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--v1-action);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.meter-review-action {
+  white-space: nowrap;
+  font-size: 0.78rem;
+  text-transform: none;
+}
+
+.meter-review-name:disabled {
+  color: inherit;
+  cursor: default;
+  text-decoration: none;
+}
+
+.meter-review-action:focus-visible,
+.meter-review-name:focus-visible,
+.meter-review-select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--v1-content-control) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.meter-review-select {
+  min-width: 12rem;
+}
+
+.meter-review-calendarization {
+  min-width: 15rem;
+}
+
+.meter-review-status,
+.meter-review-record-type {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  background: color-mix(in srgb, var(--v1-success, #198754) 14%, transparent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.meter-review-status--invalid {
+  background: color-mix(in srgb, var(--v1-danger, #dc3545) 15%, transparent);
+  color: var(--v1-danger, #b02a37);
+}
+
+.meter-review-record-type {
+  background: color-mix(in srgb, var(--v1-content-control) 14%, transparent);
+}
+
+.meter-review-row--skipped td:not(.meter-review-include) {
+  opacity: 0.58;
+}
+
+.meter-review-include {
+  text-align: center;
+}
+
+.meter-review-include-control {
+  display: inline-grid;
+  width: 2rem;
+  min-height: 2rem;
+  place-items: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+.meter-review-checkbox {
+  width: 1rem;
+  min-width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--v1-action);
+  cursor: pointer;
+}

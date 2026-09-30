@@ -62,7 +62,7 @@ export class ImportAccountBackupComponent {
       }
 
       if (preparedBackup.backupFileType !== 'Account') {
-        this.backupFileError = 'Selected file is a facility backup. Upload an account backup from the welcome screen.';
+        this.backupFileError = 'Selected file is a facility backup. Import an account backup from the welcome screen.';
         return;
       }
 

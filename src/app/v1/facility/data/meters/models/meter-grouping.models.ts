@@ -1,8 +1,9 @@
 /** Meter-group presentation, drag-and-drop targets, sorting, and assignment rules. */
-import { EnergySources, MeterSource, WaterSources } from '@data/models/constantsAndTypes';
+import { MeterSource } from '@data/models/constantsAndTypes';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { canAssignMeterSourceToGroup } from '@domain/meters/meter-group-compatibility';
 import { StatusItem } from '@app/v1/status/status.models';
 import { buildMeterCards, MeterCardView } from './meter-card.models';
 
@@ -92,18 +93,7 @@ export function canAssignMeterToGroup(meter: IdbUtilityMeter, group?: IdbUtility
 }
 
 export function canAssignSourceToGroup(source: MeterSource, group?: IdbUtilityMeterGroup): boolean {
-  if (!group) {
-    return true;
-  }
-  switch (group.groupType) {
-    case 'Energy':
-      return EnergySources.includes(source);
-    case 'Water':
-      return WaterSources.includes(source);
-    case 'Other':
-    default:
-      return true;
-  }
+  return canAssignMeterSourceToGroup(source, group);
 }
 
 function sortGroupsForDisplay(first: IdbUtilityMeterGroup, second: IdbUtilityMeterGroup): number {

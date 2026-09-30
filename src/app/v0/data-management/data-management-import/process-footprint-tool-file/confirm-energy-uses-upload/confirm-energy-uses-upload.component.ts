@@ -1,6 +1,6 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, inject } from '@angular/core';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataManagementService } from '@v0/data-management/data-management.service';

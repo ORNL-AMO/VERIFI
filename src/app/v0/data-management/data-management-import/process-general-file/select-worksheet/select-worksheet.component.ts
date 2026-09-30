@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '@v0/data-management/data-management.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import * as XLSX from 'xlsx';
 
 @Component({

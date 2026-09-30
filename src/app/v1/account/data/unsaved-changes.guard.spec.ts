@@ -33,6 +33,22 @@ describe('unsavedChangesGuard', () => {
     expect(unsaved.confirmDiscard).toHaveBeenCalledWith(true);
   });
 
+  it('allows a component-owned workflow transition without discarding dirty state', () => {
+    const unsaved = TestBed.inject(UnsavedChangesService);
+    vi.spyOn(unsaved, 'confirmDiscard');
+    const nextState = { url: '/v1/workspace/account/account-1/imports/file/draft-1/facilities' } as any;
+
+    const result = TestBed.runInInjectionContext(() =>
+      unsavedChangesGuard({
+        hasUnsavedChanges: () => true,
+        canNavigateWithoutDiscard: state => state === nextState
+      }, null as any, null as any, nextState)
+    );
+
+    expect(result).toBe(true);
+    expect(unsaved.confirmDiscard).not.toHaveBeenCalled();
+  });
+
   it('blocks navigation without prompting while a save is in progress', () => {
     const unsaved = TestBed.inject(UnsavedChangesService);
     vi.spyOn(unsaved, 'confirmDiscard');
@@ -40,8 +56,9 @@ describe('unsavedChangesGuard', () => {
     const result = TestBed.runInInjectionContext(() =>
       unsavedChangesGuard({
         hasUnsavedChanges: () => true,
-        isNavigationBlocked: () => true
-      }, null as any, null as any, null as any)
+        isNavigationBlocked: () => true,
+        canNavigateWithoutDiscard: () => true
+      }, null as any, null as any, { url: '/allowed' } as any)
     );
 
     expect(result).toBe(false);

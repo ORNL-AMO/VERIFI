@@ -1,0 +1,158 @@
+@let rows = state.predictorReadingRows();
+
+@if (!rows.length) {
+  <div class="v1-alert v1-alert--info" role="status">No predictors are included in this workbook.</div>
+} @else if (!state.importedPredictorReadingCount()) {
+  <div class="v1-alert v1-alert--info" role="status">No predictor readings were found for the included predictors.</div>
+} @else {
+  <div class="predictor-reading-summary" aria-live="polite">
+    <span>{{ state.importedPredictorReadingCount() }} reading{{ state.importedPredictorReadingCount() === 1 ? '' : 's' }} found</span>
+    <span>{{ state.invalidPredictorReadingCount() }} need{{ state.invalidPredictorReadingCount() === 1 ? 's' : '' }} attention</span>
+  </div>
+
+  <div class="table-wrap predictor-reading-table-wrap">
+    <table class="predictor-reading-table">
+      <colgroup>
+        <col class="predictor-reading-column--facility">
+        <col class="predictor-reading-column--predictor">
+        <col class="predictor-reading-column--new">
+        <col class="predictor-reading-column--invalid">
+        <col class="predictor-reading-column--existing">
+        <col class="predictor-reading-column--decision">
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Facility</th>
+          <th scope="col">Predictor</th>
+          <th scope="col">New readings</th>
+          <th scope="col">Invalid readings</th>
+          <th scope="col">
+            <div class="predictor-reading-heading">
+              <span>Existing readings</span>
+              <app-ui-tooltip
+                label="About existing predictor reading comparisons"
+                text="Compare uploaded values with readings already in VERIFI for the same predictor and month."
+                placement="bottom">
+              </app-ui-tooltip>
+            </div>
+          </th>
+          <th scope="col">
+            <div class="predictor-reading-heading predictor-reading-heading--decision">
+              <label class="predictor-reading-bulk-control">
+                <input
+                  type="checkbox"
+                  class="predictor-reading-checkbox"
+                  [checked]="state.allExistingPredictorReadingsKept()"
+                  [indeterminate]="state.someExistingPredictorReadingsKept() && !state.allExistingPredictorReadingsKept()"
+                  [disabled]="!state.hasExistingPredictorReadings()"
+                  (change)="state.setAllSkipExistingPredictorReadings($any($event.target).checked)">
+                <span>Keep current readings?</span>
+              </label>
+              <app-ui-tooltip
+                label="About keeping current predictor readings"
+                text="Select this to keep readings already in VERIFI when an uploaded reading has the same month. Readings for new months will still be uploaded."
+                placement="bottom">
+              </app-ui-tooltip>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.predictor.guid) {
+          <tr [class.predictor-reading-row--kept]="row.keepExisting">
+            <td>{{ row.facilityName }}</td>
+            <td>
+              <strong>{{ row.predictor.name || 'Unnamed predictor' }}</strong>
+              @if (row.unit) { <span class="predictor-reading-status">{{ row.unit }}</span> }
+            </td>
+            <td>
+              <strong>{{ row.newReadings.count }}</strong>
+              @if (row.newReadings.start) {
+                <span class="predictor-reading-range">
+                  {{ row.newReadings.start | date:'MMM y' }} – {{ row.newReadings.end | date:'MMM y' }}
+                </span>
+              }
+            </td>
+            <td>
+              @if (row.invalidReadings.count) {
+                <button type="button" class="predictor-reading-action" (click)="openReview(row.predictor.guid, 'invalid')">
+                  {{ row.invalidReadings.count }} needs attention
+                </button>
+                @if (row.invalidReadings.start) {
+                  <span class="predictor-reading-range">
+                    {{ row.invalidReadings.start | date:'MMM y' }} – {{ row.invalidReadings.end | date:'MMM y' }}
+                  </span>
+                }
+              } @else {
+                <strong>0</strong>
+              }
+            </td>
+            <td>
+              <strong>{{ row.existingReadings.count }}</strong>
+              @if (row.existingReadings.start) {
+                <span class="predictor-reading-range">
+                  {{ row.existingReadings.start | date:'MMM y' }} – {{ row.existingReadings.end | date:'MMM y' }}
+                </span>
+              }
+              @if (row.comparisons.length) {
+                <button
+                  type="button"
+                  class="predictor-reading-action predictor-reading-action--comparison"
+                  (click)="openReview(row.predictor.guid, 'comparisons')">
+                  Compare changes
+                </button>
+              } @else if (row.existingReadings.count) {
+                <span class="predictor-reading-status">No value changes</span>
+              }
+              @if (row.keepExisting) {
+                <span class="predictor-reading-status predictor-reading-status--kept">Current readings will be kept</span>
+              }
+            </td>
+            <td class="predictor-reading-keep">
+              @if (row.existingReadings.count) {
+                <label class="predictor-reading-checkbox-control">
+                  <input
+                    type="checkbox"
+                    class="predictor-reading-checkbox"
+                    [checked]="row.keepExisting"
+                    (change)="state.setSkipExistingPredictorReadings(row.predictor.guid, $any($event.target).checked)">
+                  <span class="visually-hidden">Keep current readings for {{ row.predictor.name }}</span>
+                </label>
+              } @else {
+                <span aria-label="No existing readings">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (state.invalidPredictorReadingCount()) {
+    <div class="v1-alert v1-alert--warning predictor-reading-acknowledgement">
+      <div>
+        <strong>Invalid predictor readings are never silently uploaded.</strong>
+        <p>Open each needs-attention count and exclude every invalid reading before continuing.</p>
+      </div>
+      <label class="predictor-reading-acknowledgement__control">
+        <input
+          type="checkbox"
+          class="predictor-reading-checkbox"
+          [checked]="state.draft().invalidPredictorReadingsAcknowledged"
+          (change)="state.setInvalidPredictorReadingsAcknowledged($any($event.target).checked)">
+        <span>I acknowledge that excluded predictor readings will not be uploaded.</span>
+      </label>
+    </div>
+  }
+}
+
+@if (activeReview(); as review) {
+  @if (activeRow(); as row) {
+    <app-import-predictor-reading-review-slideout
+      [row]="row"
+      [mode]="review.mode"
+      (exclusionChanged)="state.toggleExcludedPredictorReading($event.index, $event.excluded)"
+      (closed)="closeReview()">
+    </app-import-predictor-reading-review-slideout>
+  }
+}

@@ -1,0 +1,143 @@
+:host { display: block; }
+
+.meter-reading-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--v1-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.meter-reading-table-wrap {
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+}
+
+.meter-reading-table {
+  min-width: 64rem;
+  table-layout: fixed;
+}
+
+.meter-reading-column--facility { width: 16%; }
+.meter-reading-column--meter { width: 15%; }
+.meter-reading-column--new { width: 15%; }
+.meter-reading-column--invalid { width: 13%; }
+.meter-reading-column--existing { width: 23%; }
+.meter-reading-column--decision { width: 18%; }
+
+.meter-reading-table th,
+.meter-reading-table td {
+  padding: 0.4rem 0.45rem;
+  line-height: 1.25;
+}
+
+.meter-reading-table th {
+  vertical-align: bottom;
+  background: var(--v1-panel);
+  color: var(--v1-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.meter-reading-table td { vertical-align: top; }
+
+.meter-reading-table td > strong { line-height: 1; }
+
+.meter-reading-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.meter-reading-heading--decision { justify-content: space-between; }
+
+.meter-reading-bulk-control,
+.meter-reading-acknowledgement__control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.meter-reading-bulk-control { font: inherit; }
+
+.meter-reading-range,
+.meter-reading-status {
+  display: block;
+  margin-top: 0.12rem;
+  color: var(--v1-muted);
+  font-size: 0.76rem;
+  line-height: 1.2;
+}
+
+.meter-reading-action {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--v1-action);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.meter-reading-action--comparison { display: block; margin-top: 0.2rem; }
+
+.meter-reading-action:focus-visible,
+.meter-reading-checkbox:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--v1-content-control) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.meter-reading-status--kept {
+  color: var(--v1-text);
+  font-weight: 800;
+}
+
+.meter-reading-row--kept td:nth-child(5) > :not(.meter-reading-status--kept) { opacity: 0.55; }
+
+.meter-reading-table td.meter-reading-keep {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.meter-reading-checkbox-control {
+  display: inline-grid;
+  width: 2rem;
+  min-height: 2rem;
+  place-items: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+.meter-reading-checkbox {
+  width: 1rem;
+  min-width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--v1-action);
+  cursor: pointer;
+}
+
+.meter-reading-checkbox:disabled { cursor: not-allowed; }
+
+.meter-reading-acknowledgement {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.meter-reading-acknowledgement p { margin: 0.25rem 0 0; }
+
+@media (max-width: 40rem) {
+  .meter-reading-heading--decision { align-items: flex-start; }
+  .meter-reading-acknowledgement__control { align-items: flex-start; }
+}

@@ -1,4 +1,4 @@
-import { getCountryCode, getState } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { getCountryCode, getState } from '@data/import/upload-helper-functions';
 
 describe('upload helper functions', () => {
   it('normalizes country names and codes to stored country codes', () => {

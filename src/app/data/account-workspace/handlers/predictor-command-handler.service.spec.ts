@@ -226,15 +226,19 @@ describe('PredictorCommandHandler', () => {
     const transaction = { put: vi.fn(async () => undefined), add: vi.fn(async () => undefined), deleteByKey: vi.fn(async () => undefined) };
     transactions.runTransaction.mockImplementation(async (_stores: unknown, _mode: unknown, work: (value: unknown) => Promise<void>) => work(transaction));
     const predictor = { guid: 'p-1', accountId: ACCOUNT } as IdbPredictor;
+    const existingPredictor = { id: 2, guid: 'p-2', accountId: ACCOUNT } as IdbPredictor;
     const entry = { guid: 'd-1', predictorId: 'p-1', accountId: ACCOUNT } as IdbPredictorData;
     const analysis = { id: 4, guid: 'a-1', accountId: ACCOUNT } as any;
 
-    await handler.createWeatherPredictors({ predictors: [predictor], predictorData: [entry], facilityAnalyses: [analysis] }, ACCOUNT);
+    await handler.createWeatherPredictors({
+      predictors: [predictor, existingPredictor], predictorData: [entry], facilityAnalyses: [analysis]
+    }, ACCOUNT);
 
     expect(transactions.runTransaction).toHaveBeenCalledWith(
       ['predictor', 'predictorData', 'analysisItems'], 'readwrite', expect.any(Function)
     );
     expect(transaction.add).toHaveBeenCalledWith('predictor', expect.objectContaining({ guid: 'p-1' }));
+    expect(transaction.put).toHaveBeenCalledWith('predictor', expect.objectContaining({ guid: 'p-2' }));
     expect(transaction.add).toHaveBeenCalledWith('predictorData', expect.objectContaining({ guid: 'd-1' }));
     expect(transaction.put).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ id: 4 }));
   });

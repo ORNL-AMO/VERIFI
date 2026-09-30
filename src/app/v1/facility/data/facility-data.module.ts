@@ -6,6 +6,7 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { EChartsChartDirective } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
+import { MeterSettingsModule } from '@app/v1/shared/meter-settings/meter-settings.module';
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
@@ -27,13 +28,6 @@ import { MeterReadingsColumnsSlideoutComponent } from './meters/meter-workbench/
 import { MeterReadingsStatusComponent } from './meters/meter-workbench/readings/meter-readings-status/meter-readings-status.component';
 import { MeterReadingsTableComponent } from './meters/meter-workbench/readings/meter-readings-table/meter-readings-table.component';
 import { MeterWorkbenchSettingsComponent } from './meters/meter-workbench/settings/meter-workbench-settings.component';
-import { MeterSettingsChargesFormComponent } from './meters/meter-workbench/settings/meter-settings-charges-form/meter-settings-charges-form.component';
-import { MeterSettingsCoreFormComponent } from './meters/meter-workbench/settings/meter-settings-core-form/meter-settings-core-form.component';
-import { MeterSettingsElectricityFormComponent } from './meters/meter-workbench/settings/meter-settings-electricity-form/meter-settings-electricity-form.component';
-import { MeterSettingsEmissionsDetailsComponent } from './meters/meter-workbench/settings/meter-settings-emissions-details/meter-settings-emissions-details.component';
-import { MeterSettingsOtherInfoComponent } from './meters/meter-workbench/settings/meter-settings-other-info/meter-settings-other-info.component';
-import { MeterSettingsReadingFormComponent } from './meters/meter-workbench/settings/meter-settings-reading-form/meter-settings-reading-form.component';
-import { MeterSettingsVehicleFormComponent } from './meters/meter-workbench/settings/meter-settings-vehicle-form/meter-settings-vehicle-form.component';
 import { MeterCalendarizationHelpSlideoutComponent } from './meters/meter-workbench/settings/meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
 import { MeterWorkbenchComponent } from './meters/meter-workbench/meter-workbench.component';
 import { MeterWorkbenchYearlyDataComponent } from './meters/meter-workbench/yearly-data/meter-workbench-yearly-data.component';
@@ -62,13 +56,6 @@ import { WeatherPredictorQualityComponent } from './predictors/weather-predictor
     FacilityDataPlaceholderComponent,
     MeterWorkbenchComponent,
     MeterWorkbenchSettingsComponent,
-    MeterSettingsCoreFormComponent,
-    MeterSettingsVehicleFormComponent,
-    MeterSettingsElectricityFormComponent,
-    MeterSettingsChargesFormComponent,
-    MeterSettingsOtherInfoComponent,
-    MeterSettingsReadingFormComponent,
-    MeterSettingsEmissionsDetailsComponent,
     MeterWorkbenchReadingsComponent,
     MeterWorkbenchBillInspectionComponent,
     BillInspectionOverviewChartComponent,
@@ -91,6 +78,7 @@ import { WeatherPredictorQualityComponent } from './predictors/weather-predictor
     IconsModule,
     NgbPaginationModule,
     ReactiveFormsModule,
+    MeterSettingsModule,
     RouterModule,
     EChartsChartDirective,
     MeterResultsChartComponent,

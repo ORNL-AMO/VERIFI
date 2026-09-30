@@ -8,7 +8,7 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
-import { FileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference } from '@data/import/spreadsheet-import.models';
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { LoadingService } from '@app/core-components/loading/loading.service';

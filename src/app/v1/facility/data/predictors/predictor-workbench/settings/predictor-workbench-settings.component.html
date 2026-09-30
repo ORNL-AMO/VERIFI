@@ -14,34 +14,15 @@
       <div class="v1-alert v1-alert--info"><app-ui-icon name="lock"></app-ui-icon><span>This workspace is read-only. Predictor settings can be reviewed but not changed.</span></div>
     }
 
-    <section class="predictor-settings__section">
-      <div class="predictor-settings__heading predictor-settings__heading--save-state">
-        <p class="predictor-settings__save-state" aria-live="polite" [class.is-error]="saveState() === 'error' || saveState() === 'invalid'">
-          @if (saveState() === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> }
-          {{ saveMessage() }}
-          @if (saveState() === 'error') { <button type="button" class="v1-btn v1-btn--quiet v1-btn--sm" (click)="saveNow()">Retry</button> }
-        </p>
-      </div>
-      <div class="predictor-settings__grid">
-        <label><span>Name</span><input type="text" maxlength="100" formControlName="name" required (input)="onTextChange()">
-          @if (settingsForm.controls.name.touched && settingsForm.controls.name.invalid) { <small class="predictor-settings__error">Enter a name of 100 characters or fewer.</small> }
-        </label>
-        <label><span>Unit</span><input type="text" maxlength="100" formControlName="unit" (input)="onTextChange()"></label>
-        <label class="predictor-settings__check"><input type="checkbox" formControlName="production" (change)="onImmediateChange()"><span>Is Production?</span></label>
-        <label class="predictor-settings__wide"><span>Description</span><textarea rows="3" formControlName="description" (input)="onTextChange()"></textarea></label>
-      </div>
-    </section>
-
-    <section class="predictor-settings__section" aria-labelledby="predictor-settings-status">
-      <div class="predictor-settings__heading"><div><p>Validation</p><h2 id="predictor-settings-status">Status settings</h2></div></div>
-      <div class="predictor-settings__status-grid">
-        @if (settingsForm.controls.noLongerInUse.value) {
-          <label><span>Stop month <small>Optional</small></span><input type="month" formControlName="stopMonth" (change)="onImmediateChange()"></label>
-        }
-        <label class="predictor-settings__check"><input type="checkbox" formControlName="canBeNegative" (change)="onImmediateChange()"><span>Allow negative values</span></label>
-        <label class="predictor-settings__check"><input type="checkbox" formControlName="ignoreDateStatusChecks" (change)="onImmediateChange()"><span>Ignore date status checks</span></label>
-      </div>
-    </section>
+    <app-predictor-settings-form
+      [form]="settingsForm"
+      [embedded]="true"
+      [saveState]="saveState()"
+      [saveMessage]="saveMessage()"
+      (textChange)="onTextChange()"
+      (immediateChange)="onImmediateChange()"
+      (retryRequested)="saveNow()">
+    </app-predictor-settings-form>
 
     <footer class="predictor-settings__footer">
       <button

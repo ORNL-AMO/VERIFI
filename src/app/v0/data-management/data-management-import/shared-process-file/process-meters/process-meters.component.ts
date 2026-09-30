@@ -8,7 +8,7 @@ import { EditMeterFormService } from '@v0/shared/shared-meter-content/edit-meter
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { FileReference, getEmptyFileReference } from '@data/import/spreadsheet-import.models';
 import { UploadDataService } from '@v0/data-management/data-management-import/import-services/upload-data.service';
 
 

@@ -1,0 +1,17 @@
+<p>Review name-matched equipment updates and choose source-compatible meter groups. A piece of equipment can use only one meter group for each energy source.</p>
+@for (equipment of state.draft().facilityEnergyUseEquipment; track equipment.guid; let equipmentIndex = $index) {
+  <section class="equipment">
+    <h3>{{ equipment.name }} <small>{{ equipment.id ? 'Update' : 'New' }}</small></h3>
+    @for (group of state.compatibleMeterGroups(equipmentIndex); track group.guid) {
+      <label class="check-row">
+        <input
+          type="checkbox"
+          [checked]="equipment.utilityMeterGroupIds.includes(group.guid)"
+          [disabled]="state.meterGroupSourceConflict(equipmentIndex, group.guid)"
+          (change)="state.toggleEquipmentMeterGroup(equipmentIndex, group.guid, $any($event.target).checked)">
+        {{ group.name }}
+        @if (state.meterGroupSourceConflict(equipmentIndex, group.guid)) { <span>— source already linked</span> }
+      </label>
+    }
+  </section>
+}

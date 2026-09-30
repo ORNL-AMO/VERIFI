@@ -14,7 +14,7 @@ import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels
 import { PredictorDataHelperService } from '@shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from '@v0/shared/shared-predictors-content/edit-predictor-form.service';
 import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
-import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { checkSameMonthPredictorData } from '@data/import/upload-helper-functions';
 import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
 import { getDetailedDataForMonth, hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
 import { getDateFromPredictorData } from '@shared/dateHelperFunctions';

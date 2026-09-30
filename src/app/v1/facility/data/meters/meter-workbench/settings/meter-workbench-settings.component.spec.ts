@@ -9,6 +9,7 @@ import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-comm
 import { vi } from 'vitest';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
@@ -16,14 +17,15 @@ import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/mete
 import { ConfirmDeleteMeterModalComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
 import { MeterCalendarizationHelpSlideoutComponent } from './meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
-import { MeterSettingsChargesFormComponent } from './meter-settings-charges-form/meter-settings-charges-form.component';
-import { MeterSettingsCoreFormComponent } from './meter-settings-core-form/meter-settings-core-form.component';
-import { MeterSettingsElectricityFormComponent } from './meter-settings-electricity-form/meter-settings-electricity-form.component';
-import { MeterSettingsEmissionsDetailsComponent } from './meter-settings-emissions-details/meter-settings-emissions-details.component';
-import { MeterSettingsFormService } from './meter-settings-form.service';
-import { MeterSettingsOtherInfoComponent } from './meter-settings-other-info/meter-settings-other-info.component';
-import { MeterSettingsReadingFormComponent } from './meter-settings-reading-form/meter-settings-reading-form.component';
-import { MeterSettingsVehicleFormComponent } from './meter-settings-vehicle-form/meter-settings-vehicle-form.component';
+import { MeterSettingsFormService } from '@app/v1/shared/meter-settings/meter-settings-form.service';
+import { MeterSettingsFormComponent } from '@app/v1/shared/meter-settings/meter-settings-form.component';
+import { MeterSettingsChargesFormComponent } from '@app/v1/shared/meter-settings/meter-settings-charges-form/meter-settings-charges-form.component';
+import { MeterSettingsCoreFormComponent } from '@app/v1/shared/meter-settings/meter-settings-core-form/meter-settings-core-form.component';
+import { MeterSettingsElectricityFormComponent } from '@app/v1/shared/meter-settings/meter-settings-electricity-form/meter-settings-electricity-form.component';
+import { MeterSettingsEmissionsDetailsComponent } from '@app/v1/shared/meter-settings/meter-settings-emissions-details/meter-settings-emissions-details.component';
+import { MeterSettingsOtherInfoComponent } from '@app/v1/shared/meter-settings/meter-settings-other-info/meter-settings-other-info.component';
+import { MeterSettingsReadingFormComponent } from '@app/v1/shared/meter-settings/meter-settings-reading-form/meter-settings-reading-form.component';
+import { MeterSettingsVehicleFormComponent } from '@app/v1/shared/meter-settings/meter-settings-vehicle-form/meter-settings-vehicle-form.component';
 import { MeterWorkbenchSettingsComponent } from './meter-workbench-settings.component';
 
 describe('MeterWorkbenchSettingsComponent', () => {
@@ -475,15 +477,16 @@ function setup(options: {
   TestBed.configureTestingModule({
     declarations: [
       MeterWorkbenchSettingsComponent,
-      MeterSettingsCoreFormComponent,
-      MeterSettingsVehicleFormComponent,
-      MeterSettingsElectricityFormComponent,
+      MeterSettingsFormComponent,
       MeterSettingsChargesFormComponent,
+      MeterSettingsCoreFormComponent,
+      MeterSettingsElectricityFormComponent,
+      MeterSettingsEmissionsDetailsComponent,
       MeterSettingsOtherInfoComponent,
       MeterSettingsReadingFormComponent,
-      MeterSettingsEmissionsDetailsComponent
+      MeterSettingsVehicleFormComponent
     ],
-    imports: [CommonModule, ReactiveFormsModule, IconComponent, ConfirmDeleteMeterModalComponent, MeterCalendarizationHelpSlideoutComponent, TooltipComponent],
+    imports: [CommonModule, ReactiveFormsModule, IconsModule, IconComponent, ConfirmDeleteMeterModalComponent, MeterCalendarizationHelpSlideoutComponent, TooltipComponent],
     providers: [
       MeterSettingsFormService,
       {

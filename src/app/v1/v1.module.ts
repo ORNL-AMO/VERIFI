@@ -7,6 +7,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
+import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { AccountSettingsModule } from '@app/v1/account/settings/account-settings.module';
 import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
 import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
@@ -46,6 +47,7 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     FacilityDataModule,
     AccountSettingsModule,
     FacilitySettingsModule,
+    ImportStepperComponent,
     WelcomeComponent,
     RouterModule.forChild(V1Routes)
   ]
