@@ -480,7 +480,7 @@ describe('ImportWizardStateService', () => {
   it('returns the session-owned draft to ready when commit fails', async () => {
     commandCommit.mockRejectedValueOnce(new Error('write failed'));
     const draft = templateDraft({
-      meters: [meter()],
+      meters: [meter({})],
       completedSteps: ['facilities', 'meters', 'meter-readings', 'predictors', 'predictor-readings']
     });
     service.initialize(draft);

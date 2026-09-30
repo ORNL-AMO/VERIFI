@@ -1,4 +1,4 @@
-import { ImportFileKind } from '@data/import/spreadsheet-import.models';
+import type { ImportFileKind } from '@data/import/spreadsheet-import.models';
 import { ImportMeterReadingSummaryRow } from '@data/import/meter-reading-import-review';
 import { ImportPredictorReadingSummaryRow } from '@data/import/predictor-reading-import-review';
 import { IdbFacility } from '@data/models/idbModels/facility';

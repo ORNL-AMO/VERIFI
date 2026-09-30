@@ -5,7 +5,7 @@ import { buildImportMeterReadingReview } from '@data/import/meter-reading-import
 import { getImportPredictorIssues, isImportPredictorValid } from '@data/import/predictor-import-review';
 import { buildImportPredictorReadingReview } from '@data/import/predictor-reading-import-review';
 import { ImportWizardStateService } from '../import-wizard-state.service';
-import { buildImportReviewSummary } from './review/import-review-summary';
+import { buildImportReviewSummary } from '../import-review-summary';
 
 export function createImportWizardStateStub() {
   const draft = signal<any>({

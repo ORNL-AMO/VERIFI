@@ -5,9 +5,9 @@ import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEn
 import { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import {
+import { buildImportReviewSummary } from './import-review-summary';
+import type {
   BuildImportReviewSummaryOptions,
-  buildImportReviewSummary,
   ImportReviewMeterRowInput,
   ImportReviewPredictorRowInput
 } from './import-review-summary';

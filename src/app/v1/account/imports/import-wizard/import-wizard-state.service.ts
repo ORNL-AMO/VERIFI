@@ -33,7 +33,7 @@ import {
 } from '@data/import/predictor-reading-import-review';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
-import { buildImportReviewSummary } from './steps/review/import-review-summary';
+import { buildImportReviewSummary } from './import-review-summary';
 
 export type ImportMappingType = 'meter' | 'predictor';
 

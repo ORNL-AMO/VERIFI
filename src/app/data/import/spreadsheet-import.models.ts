@@ -107,6 +107,8 @@ export type TemplateVersion = "V1" | "V2" | "V3" | "ETH" | "Non-template" | "Foo
 export type ImportFileKind = 'verifi-v1' | 'verifi-v2' | 'verifi-v3' |
   'energy-treasure-hunt' | 'general-workbook' | 'footprint-tool';
 
+export type ImportWorkflowKind = 'template' | 'general-workbook' | 'footprint';
+
 export type ImportFileStatus = 'queued' | 'ready' | 'invalid' | 'importing' | 'completed';
 
 export type ImportFindingSeverity = 'error' | 'warning' | 'info';
@@ -125,8 +127,7 @@ export interface ImportOriginContext {
   returnUrl?: string;
 }
 
-export interface ImportFileDraft extends FileReference {
-  kind: ImportFileKind;
+interface ImportFileDraftBase extends FileReference {
   status: ImportFileStatus;
   findings: ImportValidationFinding[];
   completedSteps: string[];
@@ -136,6 +137,20 @@ export interface ImportFileDraft extends FileReference {
   invalidPredictorReadingsAcknowledged: boolean;
   excludedPredictorReadingIds: Array<number | string>;
 }
+
+export interface TemplateImportFileDraft extends ImportFileDraftBase {
+  kind: 'verifi-v1' | 'verifi-v2' | 'verifi-v3' | 'energy-treasure-hunt';
+}
+
+export interface GeneralWorkbookImportFileDraft extends ImportFileDraftBase {
+  kind: 'general-workbook';
+}
+
+export interface FootprintImportFileDraft extends ImportFileDraftBase {
+  kind: 'footprint-tool';
+}
+
+export type ImportFileDraft = TemplateImportFileDraft | GeneralWorkbookImportFileDraft | FootprintImportFileDraft;
 
 export interface ImportCommitRequest {
   accountGuid: string;

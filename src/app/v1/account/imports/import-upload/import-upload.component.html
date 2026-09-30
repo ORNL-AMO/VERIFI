@@ -83,7 +83,7 @@
           <li>
             <div>
               <strong>{{ draft.name }}</strong>
-              <span>{{ formatLabels[draft.kind] }} · {{ statusLabels[draft.status] }}</span>
+              <span>{{ formatLabel(draft.kind) }} · {{ statusLabels[draft.status] }}</span>
             </div>
             <button type="button" class="v1-btn v1-btn--action" [disabled]="draft.status === 'completed' || draft.status === 'invalid'" (click)="openDraft(draft.id)">
               Process Upload
