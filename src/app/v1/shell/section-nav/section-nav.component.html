@@ -353,11 +353,11 @@
             {{ contextMode === 'facility' ? 'Facility Analysis' : 'Account Analysis' }}
           </span>
           <a
-            class="active"
+            [class.active]="navigation.activeDetail() === 'dashboard'"
             [routerLink]="contextMode === 'facility' && selectedFacility
               ? navigation.facilityAnalysisRoute(selectedFacility.guid)
               : navigation.accountAnalysisRoute(account.guid)"
-            aria-current="page">
+            [attr.aria-current]="navigation.activeDetail() === 'dashboard' ? 'page' : null">
             <app-ui-icon name="barChart"></app-ui-icon>
             Dashboard
           </a>
