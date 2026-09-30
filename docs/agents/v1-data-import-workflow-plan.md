@@ -99,7 +99,9 @@ Sequence: Facilities → Meters → Meter readings → Predictors → Predictor 
 Sequence: Worksheet → Identify columns → Map meters → Review meters → Meter readings → Map predictors → Review predictors → Predictor readings → Review.
 
 - Hide hidden worksheets by default and show a data preview.
-- Require one date column and at least one meter or predictor column.
+- Identify columns through a four-lane drag/drop board for Not imported, Date, Meters, and Predictors, with equivalent Move to controls and bulk assignment.
+- Conservatively suggest a unique date-like alias, require one selected date column with at least one usable value, and require at least one meter or predictor column.
+- Warn and continue when the selected date column mixes usable and unusable nonblank values; name representative worksheet rows that will not create readings.
 - Assign each included data column to a facility or return it to excluded worksheet columns.
 - Preserve existing record matching and established parsing/coercion rules.
 

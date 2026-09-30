@@ -232,12 +232,49 @@ export function createImportWizardStateStub() {
     newFacilityName: signal(''),
     worksheetNames: signal(['Visible']),
     allColumns: signal([{ id: 'column-1', value: 'Date' }]),
-    dateRange: signal('1/1/2026 – 1/1/2026'),
+    selectedColumnIds: signal<readonly string[]>([]),
+    columnAnnouncement: signal(''),
+    selectedColumnCount: signal(0),
+    columnStepStatus: signal({
+      ready: true,
+      hasDataColumn: true,
+      date: {
+        selected: true,
+        usable: true,
+        usableCount: 1,
+        invalidCount: 0,
+        invalidRows: [],
+        range: '1/1/2026 – 1/1/2026'
+      }
+    }),
+    columnContinueMessage: signal<string | undefined>(undefined),
+    columnLanes: signal([
+      {
+        target: 'Worksheet Columns', label: 'Not imported', description: 'Columns here will not be uploaded.',
+        icon: 'viewHidden', cards: [], totalCount: 0
+      },
+      {
+        target: 'Date', label: 'Date', description: 'Choose the single date column.', icon: 'calendar',
+        cards: [{ id: 'column-1', header: 'Date', index: 0, target: 'Date', likelyDate: true }],
+        totalCount: 1
+      },
+      {
+        target: 'Meters', label: 'Meters', description: 'Utility readings.', icon: 'meter',
+        cards: [{ id: 'column-2', header: 'Electricity', index: 1, target: 'Meters', likelyDate: false }],
+        totalCount: 1
+      },
+      {
+        target: 'Predictors', label: 'Predictors', description: 'Relevant variables.', icon: 'predictor',
+        cards: [], totalCount: 0
+      }
+    ]),
     reviewSummary,
     columnTarget: vi.fn(() => 'Date'),
     mappingItems: vi.fn(() => [{ id: 'column-2', value: 'Electricity', facilityId: '' }]),
     selectWorksheet: vi.fn(),
-    assignColumn: vi.fn(),
+    moveColumns: vi.fn(),
+    setColumnSelected: vi.fn(),
+    moveSelectedColumns: vi.fn(),
     mapColumn: vi.fn(),
     addFacility: vi.fn(),
     setFootprintFacility: vi.fn(),

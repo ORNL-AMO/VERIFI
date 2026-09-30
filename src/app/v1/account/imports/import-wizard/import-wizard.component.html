@@ -1,16 +1,31 @@
 @if (state.draft(); as file) {
   <section class="import-page" aria-labelledby="import-wizard-title">
     @if (state.currentStep(); as step) {
-      <header class="v1-section-header">
-        <p class="v1-eyebrow">{{ file.name }}</p>
-        <h1
-          id="import-wizard-title"
-          class="import-page__title"
-          [attr.aria-label]="'Step ' + state.currentStepNumber() + ': ' + step.label">
-          <span class="import-page__step-number" aria-hidden="true">{{ state.currentStepNumber() }}</span>
-          <span>{{ step.label }}</span>
-        </h1>
-        <p class="v1-section-header__summary">{{ step.help }}</p>
+      <header class="v1-section-header" [class.import-page__header--columns]="state.currentStepId() === 'columns'">
+        <div class="import-page__header-title">
+          <p class="v1-eyebrow">{{ file.name }}</p>
+          <h1
+            id="import-wizard-title"
+            class="import-page__title"
+            [attr.aria-label]="'Step ' + state.currentStepNumber() + ': ' + step.label">
+            <span class="import-page__step-number" aria-hidden="true">{{ state.currentStepNumber() }}</span>
+            <span>{{ step.label }}</span>
+          </h1>
+          <p class="v1-section-header__summary">{{ step.help }}</p>
+        </div>
+        @if (state.currentStepId() === 'columns') {
+          <div class="import-page__column-summary" aria-label="Column classification summary">
+            <div class="import-page__column-counts">
+              @for (lane of state.columnLanes(); track lane.target) {
+                <span class="v1-chip">{{ lane.label }}: {{ lane.totalCount }}</span>
+              }
+            </div>
+            <div class="import-page__column-date">
+              <app-ui-icon name="calendar"></app-ui-icon>
+              <span><strong>Date range:</strong> {{ state.columnStepStatus().date.range }}</span>
+            </div>
+          </div>
+        }
       </header>
     }
 
@@ -28,7 +43,7 @@
         </div>
       </article>
     } @else {
-      <article class="import-panel">
+      <article class="import-panel" [class.import-panel--columns]="state.currentStepId() === 'columns'">
         <router-outlet></router-outlet>
       </article>
 
@@ -42,10 +57,19 @@
             {{ session.pending() ? 'Uploading…' : 'Upload data' }}
           </button>
         } @else {
-          <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="continue()">
-            Continue
-            <app-ui-icon name="chevronRight"></app-ui-icon>
-          </button>
+          <div class="wizard-actions__next">
+            @if (state.currentStepId() === 'columns' && state.columnContinueMessage(); as message) {
+              <span class="wizard-actions__requirement" role="status">{{ message }}</span>
+            }
+            <button
+              type="button"
+              class="v1-btn v1-btn--action"
+              [disabled]="session.pending() || (state.currentStepId() === 'columns' && !state.columnStepStatus().ready)"
+              (click)="continue()">
+              Continue
+              <app-ui-icon name="chevronRight"></app-ui-icon>
+            </button>
+          </div>
         }
       </footer>
 

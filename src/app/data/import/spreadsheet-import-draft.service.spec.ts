@@ -48,6 +48,78 @@ describe('SpreadsheetImportDraftService', () => {
     expect(service.visibleWorksheetNames(workbook, true)).toEqual(['Visible', 'Hidden', 'Very Hidden']);
   });
 
+  it('auto-assigns only one unambiguous likely date column when selecting a general worksheet', () => {
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+      ['Read Date', 'Electricity'],
+      ['2026-01-01', 12],
+      ['2026-02-01', 14]
+    ]), 'Data');
+    const draft = importDraft('general-workbook', { workbook });
+
+    service.selectWorksheet(draft, 'Data');
+
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Date')?.groupItems.map(item => item.value))
+      .toEqual(['Read Date']);
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns')?.groupItems.map(item => item.value))
+      .toEqual(['Electricity']);
+  });
+
+  it('moves columns in one batch, swaps Date, preserves source order, and clears derived review state', () => {
+    const draft = importDraft('general-workbook', {
+      columnGroups: [
+        { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [
+          { id: 'gas', index: 2, value: 'Gas' },
+          { id: 'read-date', index: 1, value: 'Read Date' }
+        ] },
+        { id: 'meters', groupLabel: 'Meters', groupItems: [{ id: 'electricity', index: 3, value: 'Electricity' }] },
+        { id: 'predictors', groupLabel: 'Predictors', groupItems: [] },
+        { id: 'date', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }] }
+      ],
+      meters: [meter({})],
+      meterData: [reading({})],
+      predictors: [predictor()],
+      predictorData: [predictorReading()],
+      invalidMeterReadingsAcknowledged: true,
+      invalidPredictorReadingsAcknowledged: true,
+      excludedMeterReadingIds: ['reading'],
+      excludedPredictorReadingIds: ['predictor-reading']
+    });
+
+    service.assignColumns(draft, ['gas', 'electricity'], 'Predictors');
+    service.assignColumn(draft, 'read-date', 'Date');
+
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Predictors')?.groupItems.map(item => item.id))
+      .toEqual(['gas', 'electricity']);
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns')?.groupItems.map(item => item.id))
+      .toEqual(['date-column']);
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Date')?.groupItems.map(item => item.id))
+      .toEqual(['read-date']);
+    expect(draft.meters).toEqual([]);
+    expect(draft.meterData).toEqual([]);
+    expect(draft.predictors).toEqual([]);
+    expect(draft.predictorData).toEqual([]);
+    expect(draft.invalidMeterReadingsAcknowledged).toBe(false);
+    expect(draft.invalidPredictorReadingsAcknowledged).toBe(false);
+    expect(draft.excludedMeterReadingIds).toEqual([]);
+    expect(draft.excludedPredictorReadingIds).toEqual([]);
+  });
+
+  it('does not mutate groups when several columns are assigned to Date', () => {
+    const groups = [
+      { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [
+        { id: 'one', index: 0, value: 'One' },
+        { id: 'two', index: 1, value: 'Two' }
+      ] },
+      { id: 'date', groupLabel: 'Date', groupItems: [] }
+    ];
+    const draft = importDraft('general-workbook', { columnGroups: groups });
+
+    service.assignColumns(draft, ['one', 'two'], 'Date');
+
+    expect(draft.columnGroups).toEqual(groups);
+  });
+
   it('replaces a meter and retargets readings and import decisions without losing source identity', () => {
     const parser = {
       getUtilityMeterData: vi.fn((_workbook, meters) => [reading({ meterId: meters[0].guid })])

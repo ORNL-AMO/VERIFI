@@ -7,5 +7,6 @@ describe('ImportFootprintFacilityStepComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Upload energy uses into');
     expect(fixture.nativeElement.textContent).toContain('Main Plant');
+    expect(fixture.nativeElement.querySelector('select').classList.contains('v1-select')).toBe(true);
   });
 });

@@ -1,0 +1,52 @@
+<section
+  class="import-column-lane"
+  [class.import-column-lane--unused]="lane.target === 'Worksheet Columns'"
+  [class.import-column-lane--date]="lane.target === 'Date'"
+  [class.import-column-lane--meters]="lane.target === 'Meters'"
+  [class.import-column-lane--predictors]="lane.target === 'Predictors'"
+  [attr.aria-labelledby]="dropListId + '-title'">
+  <header>
+    <div class="import-column-lane__heading">
+      <app-ui-icon [name]="lane.icon"></app-ui-icon>
+      <div>
+        <h2 [id]="dropListId + '-title'">{{ lane.label }}</h2>
+        <p>{{ lane.description }}</p>
+      </div>
+    </div>
+    <div class="import-column-lane__actions">
+      <span class="v1-badge">{{ lane.totalCount }}</span>
+      <button
+        type="button"
+        class="v1-btn v1-btn--secondary v1-btn--sm"
+        [disabled]="!canMoveSelectedHere"
+        [attr.aria-label]="'Move selected columns to ' + lane.label"
+        (click)="moveSelectedRequested.emit(lane.target)">
+        Move here
+      </button>
+    </div>
+  </header>
+
+  <div
+    class="import-column-lane__dropzone"
+    cdkDropList
+    [id]="dropListId"
+    [cdkDropListData]="lane.cards"
+    [cdkDropListConnectedTo]="connectedDropListIds"
+    [cdkDropListSortingDisabled]="true"
+    (cdkDropListDropped)="drop($event)"
+    role="list"
+    [attr.aria-label]="lane.label + ' columns'">
+    @if (!lane.cards.length) {
+      <p class="import-column-lane__empty">Drop columns here.</p>
+    } @else {
+      @for (card of lane.cards; track card.id) {
+        <app-import-column-card
+          [card]="card"
+          [selected]="selected(card.id)"
+          (selectedChange)="selectionChanged.emit({ itemId: card.id, selected: $event })"
+          (moveRequested)="moveRequested.emit({ itemId: card.id, target: $event })">
+        </app-import-column-card>
+      }
+    }
+  </div>
+</section>

@@ -23,6 +23,7 @@ describe('ImportWizardStateService', () => {
     materializeGeneralRecords: ReturnType<typeof vi.fn>;
     replaceMeter: ReturnType<typeof vi.fn>;
     replacePredictor: ReturnType<typeof vi.fn>;
+    assignColumns: ReturnType<typeof vi.fn>;
   };
   let workspaceMeters: ReturnType<typeof signal<IdbUtilityMeter[]>>;
   let workspaceMeterGroups: ReturnType<typeof signal<IdbUtilityMeterGroup[]>>;
@@ -34,7 +35,22 @@ describe('ImportWizardStateService', () => {
   let router: { navigate: ReturnType<typeof vi.fn>; navigateByUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    draftService = { materializeGeneralRecords: vi.fn(), replaceMeter: vi.fn(), replacePredictor: vi.fn() };
+    draftService = {
+      materializeGeneralRecords: vi.fn(),
+      replaceMeter: vi.fn(),
+      replacePredictor: vi.fn(),
+      assignColumns: vi.fn((draft: ImportFileDraft, itemIds: string[], target: string) => {
+        const items = draft.columnGroups.flatMap(group => group.groupItems).filter(item => itemIds.includes(item.id));
+        draft.columnGroups.forEach(group => group.groupItems = group.groupItems.filter(item => !itemIds.includes(item.id)));
+        if (target === 'Date') {
+          const date = draft.columnGroups.find(group => group.groupLabel === 'Date');
+          const worksheet = draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns');
+          worksheet?.groupItems.push(...(date?.groupItems ?? []));
+          if (date) date.groupItems = [];
+        }
+        draft.columnGroups.find(group => group.groupLabel === target)?.groupItems.push(...items);
+      })
+    };
     workspaceMeters = signal([]);
     workspaceMeterGroups = signal([]);
     workspaceMeterData = signal([]);
@@ -58,6 +74,7 @@ describe('ImportWizardStateService', () => {
             initializeFacilityMappings: vi.fn(),
             selectWorksheet: vi.fn(),
             assignColumn: vi.fn(),
+            assignColumns: draftService.assignColumns,
             mapColumnToFacility: vi.fn(),
             addGeneralFacility: vi.fn(),
             applyFootprintFacility: vi.fn(),
@@ -101,6 +118,7 @@ describe('ImportWizardStateService', () => {
       { id: 'date', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }] },
       { id: 'meters', groupLabel: 'Meters', groupItems: [{ id: 'meter-column', index: 1, value: 'Electricity' }] }
     ];
+    draft.headerMap = [{ Date: '2026-01-01', Electricity: 10 }];
     service.initialize(draft);
     service.activateStep('columns');
 
@@ -108,6 +126,99 @@ describe('ImportWizardStateService', () => {
     expect(service.completeCurrentStep()).toBe('map-meters');
     expect(draft.completedSteps).toContain('columns');
     expect(draftService.materializeGeneralRecords).not.toHaveBeenCalled();
+  });
+
+  it('explains when Continue is blocked until Date and a data column are identified', () => {
+    const draft = generalDraft();
+    draft.columnGroups = [
+      { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [{ id: 'meter-column', index: 1, value: 'Electricity' }] },
+      { id: 'date', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }] },
+      { id: 'meters', groupLabel: 'Meters', groupItems: [] },
+      { id: 'predictors', groupLabel: 'Predictors', groupItems: [] }
+    ];
+    draft.headerMap = [{ Date: '2026-01-01', Electricity: 10 }];
+    service.initialize(draft);
+
+    expect(service.columnStepStatus().ready).toBe(false);
+    expect(service.columnContinueMessage()).toBe('Move at least one column to Meters or Predictors.');
+
+    service.moveColumns(['meter-column'], 'Meters');
+
+    expect(service.columnStepStatus().ready).toBe(true);
+    expect(service.columnContinueMessage()).toBeUndefined();
+  });
+
+  it('moves selected columns in one batch and invalidates dependent general-workbook steps', () => {
+    const draft = generalDraft();
+    draft.columnGroups = [
+      { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [
+        { id: 'electricity', index: 1, value: 'Electricity' },
+        { id: 'gas', index: 2, value: 'Natural Gas' }
+      ] },
+      { id: 'date', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }] },
+      { id: 'meters', groupLabel: 'Meters', groupItems: [] },
+      { id: 'predictors', groupLabel: 'Predictors', groupItems: [] }
+    ];
+    draft.headerMap = [{ Date: '2026-01-01', Electricity: 12, 'Natural Gas': 4 }];
+    draft.completedSteps = ['worksheet', 'columns', 'map-meters', 'meters', 'meter-readings', 'review'];
+    service.initialize(draft);
+    service.setColumnSelected('electricity', true);
+    service.setColumnSelected('gas', true);
+
+    service.moveSelectedColumns('Meters');
+
+    expect(draftService.assignColumns).toHaveBeenCalledWith(draft, ['electricity', 'gas'], 'Meters');
+    expect(service.meterColumns().map(column => column.id)).toEqual(['electricity', 'gas']);
+    expect(draft.completedSteps).toEqual(['worksheet']);
+    expect(service.selectedColumnIds()).toEqual([]);
+    expect(service.columnAnnouncement()).toContain('2 columns moved to Meters');
+  });
+
+  it('swaps the existing date column and reports mixed invalid dates without blocking readiness', () => {
+    const draft = generalDraft();
+    draft.columnGroups = [
+      { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [{ id: 'read-date', index: 1, value: 'Read Date' }] },
+      { id: 'date', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }] },
+      { id: 'meters', groupLabel: 'Meters', groupItems: [{ id: 'meter', index: 2, value: 'Electricity' }] },
+      { id: 'predictors', groupLabel: 'Predictors', groupItems: [] }
+    ];
+    draft.headerMap = [
+      { Date: '2026-01-01', 'Read Date': '2026-02-01', Electricity: 12 },
+      { Date: '2026-02-01', 'Read Date': 'bad', Electricity: 13 }
+    ];
+    service.initialize(draft);
+
+    service.moveColumns(['read-date'], 'Date');
+
+    expect(service.columnTarget('date-column')).toBe('Worksheet Columns');
+    expect(service.columnStepStatus()).toMatchObject({
+      ready: true,
+      date: { usableCount: 1, invalidCount: 1, invalidRows: [3] }
+    });
+    expect(service.columnAnnouncement()).toContain('Date was returned to Not imported');
+  });
+
+  it('selects and deselects individual workbook columns', () => {
+    const draft = generalDraft();
+    draft.columnGroups = [
+      { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [
+        { id: 'electricity', index: 1, value: 'Electricity' },
+        { id: 'production', index: 2, value: 'Production' }
+      ] },
+      { id: 'date', groupLabel: 'Date', groupItems: [] },
+      { id: 'meters', groupLabel: 'Meters', groupItems: [] },
+      { id: 'predictors', groupLabel: 'Predictors', groupItems: [] }
+    ];
+    service.initialize(draft);
+
+    service.setColumnSelected('electricity', true);
+    service.setColumnSelected('production', true);
+
+    expect(service.selectedColumnIds()).toEqual(['electricity', 'production']);
+
+    service.setColumnSelected('electricity', false);
+
+    expect(service.selectedColumnIds()).toEqual(['production']);
   });
 
   it('auto-groups only ungrouped meters and synchronizes referenced draft groups', () => {

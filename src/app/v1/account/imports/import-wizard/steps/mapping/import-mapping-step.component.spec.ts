@@ -8,5 +8,6 @@ describe('ImportMappingStepComponent', () => {
     expect(state.mappingItems).toHaveBeenCalledWith('meter');
     expect(fixture.nativeElement.textContent).toContain('Electricity');
     expect(fixture.nativeElement.textContent).toContain('Main Plant');
+    expect(fixture.nativeElement.querySelector('select').classList.contains('v1-select')).toBe(true);
   });
 });

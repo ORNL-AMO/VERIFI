@@ -74,6 +74,8 @@ export interface ColumnGroup {
   dragDropClass?: string
 }
 
+export type ColumnTarget = 'Worksheet Columns' | 'Meters' | 'Predictors' | 'Date';
+
 export interface FacilityGroup {
   facilityId: string,
   groupItems: Array<ColumnItem>,

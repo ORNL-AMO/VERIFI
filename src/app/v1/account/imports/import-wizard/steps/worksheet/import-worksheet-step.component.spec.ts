@@ -7,5 +7,6 @@ describe('ImportWorksheetStepComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('1 data rows found');
     expect(fixture.nativeElement.textContent).toContain('Electricity');
+    expect(fixture.nativeElement.querySelector('select').classList.contains('v1-select')).toBe(true);
   });
 });

@@ -1,0 +1,41 @@
+<article
+  class="import-column-card"
+  role="listitem"
+  cdkDrag
+  cdkDragPreviewContainer="parent"
+  [cdkDragData]="card">
+  <button
+    type="button"
+    class="v1-icon-btn import-column-card__drag"
+    cdkDragHandle
+    [attr.aria-label]="'Drag ' + card.header">
+    <app-ui-icon name="drag"></app-ui-icon>
+  </button>
+
+  <div class="import-column-card__main">
+    <label class="import-column-card__select">
+      <input
+        type="checkbox"
+        [checked]="selected"
+        [attr.aria-label]="'Select ' + card.header"
+        (change)="selectedChange.emit($any($event.target).checked)">
+      <span class="visually-hidden">Select {{ card.header }}</span>
+    </label>
+    <h3>{{ card.header }}</h3>
+    @if (card.likelyDate) {
+      <span class="v1-badge v1-badge--info">Likely date</span>
+    }
+  </div>
+
+  <label class="import-column-card__move">
+    <span class="visually-hidden">Move {{ card.header }} to</span>
+    <select class="v1-select" #moveTarget [value]="''" (change)="move(moveTarget.value); moveTarget.value = ''">
+      <option value="" disabled>Move to…</option>
+      @for (target of targets; track target) {
+        @if (target !== card.target) {
+          <option [value]="target">{{ targetLabel(target) }}</option>
+        }
+      }
+    </select>
+  </label>
+</article>

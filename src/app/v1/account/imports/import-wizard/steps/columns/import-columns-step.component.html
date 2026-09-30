@@ -1,19 +1,33 @@
-<p><strong>Date range:</strong> {{ state.dateRange() }}</p>
-<table>
-  <thead><tr><th>Column</th><th>Use as</th></tr></thead>
-  <tbody>
-    @for (column of state.allColumns(); track column.id) {
-      <tr>
-        <td>{{ column.value }}</td>
-        <td>
-          <select [ngModel]="state.columnTarget(column.id)" (ngModelChange)="state.assignColumn(column.id, $event)">
-            <option>Worksheet Columns</option>
-            <option>Meters</option>
-            <option>Predictors</option>
-            <option>Date</option>
-          </select>
-        </td>
-      </tr>
+@let status = state.columnStepStatus();
+
+<section class="column-identification" aria-label="Column classification board">
+  @if (status.date.usable && status.date.invalidCount) {
+    <div class="column-date-warning" aria-live="polite">
+      <div class="v1-alert v1-alert--warning" role="status">
+        <app-ui-icon name="warning"></app-ui-icon>
+        <span>
+          {{ status.date.invalidCount }} nonblank {{ status.date.invalidCount === 1 ? 'value is' : 'values are' }} not a usable date and will not create readings.
+          Worksheet {{ status.date.invalidRows.length === 1 ? 'row' : 'rows' }} {{ invalidDateRows() }}{{ status.date.invalidCount > status.date.invalidRows.length ? ' and others' : '' }}.
+        </span>
+      </div>
+    </div>
+  }
+
+  <div class="column-board">
+    @for (lane of state.columnLanes(); track lane.target) {
+      <app-import-column-lane
+        [class.column-board__source]="lane.target === 'Worksheet Columns'"
+        [lane]="lane"
+        [connectedDropListIds]="dropListIds"
+        [selectedIds]="state.selectedColumnIds()"
+        [selectedCount]="state.selectedColumnCount()"
+        (columnDropped)="move($event.itemId, $event.target)"
+        (selectionChanged)="state.setColumnSelected($event.itemId, $event.selected)"
+        (moveSelectedRequested)="state.moveSelectedColumns($event)"
+        (moveRequested)="move($event.itemId, $event.target)">
+      </app-import-column-lane>
     }
-  </tbody>
-</table>
+  </div>
+
+  <p class="visually-hidden" aria-live="polite" aria-atomic="true">{{ state.columnAnnouncement() }}</p>
+</section>

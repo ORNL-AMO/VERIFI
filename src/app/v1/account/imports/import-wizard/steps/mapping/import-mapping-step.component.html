@@ -13,7 +13,7 @@
 @for (item of state.mappingItems(mappingType); track item.id) {
   <label class="field">
     <span>{{ item.value }}</span>
-    <select [ngModel]="item.facilityId" (ngModelChange)="state.mapColumn(mappingType, item.id, $event)">
+    <select class="v1-select" [ngModel]="item.facilityId" (ngModelChange)="state.mapColumn(mappingType, item.id, $event)">
       <option value="">Unmapped</option>
       @for (facility of state.draft().importFacilities; track facility.guid) {
         <option [value]="facility.guid">{{ facility.name }}</option>

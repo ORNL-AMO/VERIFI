@@ -1,0 +1,48 @@
+:host { display: block; min-width: 0; }
+
+.import-column-lane {
+  --column-lane-color: var(--v1-neutral);
+  display: grid;
+  align-content: start;
+  gap: .75rem;
+  min-width: 0;
+  height: 100%;
+  padding: .85rem;
+  border: 1px solid var(--v1-border);
+  border-left: 4px solid var(--column-lane-color);
+  border-radius: var(--v1-radius);
+  background: color-mix(in srgb, var(--column-lane-color) 5%, var(--v1-surface));
+}
+
+.import-column-lane--date { --column-lane-color: var(--v1-success); }
+.import-column-lane--meters { --column-lane-color: var(--v1-action); }
+.import-column-lane--predictors { --column-lane-color: var(--v1-content-control); }
+
+.import-column-lane > header,
+.import-column-lane__heading { display: flex; gap: .65rem; align-items: flex-start; justify-content: space-between; min-width: 0; }
+.import-column-lane__heading { justify-content: flex-start; }
+.import-column-lane__actions { display: flex; flex: 0 0 auto; gap: .45rem; align-items: center; }
+.import-column-lane__actions .v1-btn { white-space: nowrap; }
+.import-column-lane__heading > app-ui-icon { flex: 0 0 auto; margin-top: .18rem; color: var(--column-lane-color); }
+.import-column-lane h2 { margin: 0; font-size: 1.05rem; }
+.import-column-lane p { margin: .15rem 0 0; color: var(--v1-muted); font-size: .8rem; }
+
+.import-column-lane__dropzone {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  align-content: start;
+  gap: .65rem;
+  min-height: 6rem;
+  padding: .65rem;
+  border: 1px dashed color-mix(in srgb, var(--column-lane-color) 55%, var(--v1-border));
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--column-lane-color) 3%, var(--v1-surface));
+}
+
+.import-column-lane__dropzone.cdk-drop-list-dragging {
+  border-style: solid;
+  border-color: var(--column-lane-color);
+  background: color-mix(in srgb, var(--column-lane-color) 11%, var(--v1-surface));
+}
+
+.import-column-lane__empty { grid-column: 1 / -1; align-self: center; padding: .75rem; text-align: center; }

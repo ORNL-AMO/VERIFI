@@ -1,6 +1,6 @@
 <label class="field">
   <span>Worksheet</span>
-  <select [ngModel]="state.draft().selectedWorksheetName" (ngModelChange)="state.selectWorksheet($event)">
+  <select class="v1-select" [ngModel]="state.draft().selectedWorksheetName" (ngModelChange)="state.selectWorksheet($event)">
     @for (name of state.worksheetNames(); track name) {
       <option [value]="name">{{ name }}</option>
     }
