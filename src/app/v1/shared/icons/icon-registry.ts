@@ -65,6 +65,7 @@ import PieChartIcon from '@hugeicons/core-free-icons/PieChartIcon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
 import RainDropIcon from '@hugeicons/core-free-icons/RainDropIcon';
 import RulerIcon from '@hugeicons/core-free-icons/RulerIcon';
+import SaveIcon from '@hugeicons/core-free-icons/SaveIcon';
 import Search01Icon from '@hugeicons/core-free-icons/Search01Icon';
 import ShippingLoadingIcon from '@hugeicons/core-free-icons/ShippingLoadingIcon';
 import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon';
@@ -150,6 +151,7 @@ export const ICON_REGISTRY = {
   refresh: RefreshIcon,
   rainDrop: RainDropIcon,
   ruler: RulerIcon,
+  save: SaveIcon,
   search: Search01Icon,
   settings: Settings02Icon,
   settingsSliders: SlidersHorizontalIcon,

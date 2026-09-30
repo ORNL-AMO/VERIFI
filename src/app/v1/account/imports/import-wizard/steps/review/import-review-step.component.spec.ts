@@ -2,13 +2,18 @@ import { ImportReviewStepComponent } from './import-review-step.component';
 import { createImportWizardStateStub, renderImportStep } from '../import-step.test-support';
 
 describe('ImportReviewStepComponent', () => {
-  it('renders nonzero totals and named records in a facility card without a summary table', () => {
+  it('renders open totals and named records with only one card boundary per facility', () => {
     const { fixture } = renderImportStep(ImportReviewStepComponent);
     const element: HTMLElement = fixture.nativeElement;
     const card = element.querySelector('[role="listitem"]');
+    const firstFact = element.querySelector('.import-review-overview__item');
 
     expect(element.querySelector('table')).toBeNull();
+    expect(element.textContent).not.toContain('Ready to upload');
     expect(element.querySelector('[aria-label="Upload totals"]')?.textContent).toContain('Facilities affected');
+    expect(firstFact?.querySelector('dt app-ui-icon')).toBeNull();
+    expect(firstFact?.querySelector('dd app-ui-icon')).toBeTruthy();
+    expect(element.querySelectorAll('.v1-card').length).toBe(1);
     expect(card?.textContent).toContain('Main Plant');
     expect(card?.textContent).toContain('Electricity');
     expect(card?.textContent).toContain('kWh');

@@ -11,7 +11,7 @@
 .import-page__column-date app-ui-icon { color: var(--v1-content-control); }
 .import-page__mapping-summary { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
 .import-panel { padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); }
-.import-panel--drag-board { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.import-panel--flat { padding: 0; border: 0; border-radius: 0; background: transparent; }
 .import-page .field { display: grid; gap: .35rem; max-width: 36rem; margin-bottom: 1rem; font-weight: 600; }
 .import-page input:not([type='checkbox']):not([type='radio']):not(.v1-input) { min-height: 2.25rem; padding: .35rem .5rem; border: 1px solid var(--v1-border-color, #9aa5b1); background: var(--bs-body-bg, #fff); color: inherit; }
 .import-page .table-wrap { overflow: auto; max-width: 100%; }

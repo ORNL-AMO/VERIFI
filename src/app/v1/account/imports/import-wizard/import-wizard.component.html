@@ -50,7 +50,7 @@
     } @else {
       <article
         class="import-panel"
-        [class.import-panel--drag-board]="state.currentStepId() === 'columns' || state.activeMappingBoard()">
+        [class.import-panel--flat]="state.currentStepId() === 'columns' || state.activeMappingBoard() || state.currentStepId() === 'review'">
         <router-outlet></router-outlet>
       </article>
 
@@ -61,7 +61,13 @@
         </button>
         @if (state.currentStepId() === 'review') {
           <button type="button" class="v1-btn v1-btn--action" [disabled]="session.pending()" (click)="commit()">
-            {{ session.pending() ? 'Uploading…' : 'Upload data' }}
+            @if (session.pending()) {
+              <app-ui-icon name="loading" spin></app-ui-icon>
+              Uploading…
+            } @else {
+              <app-ui-icon name="save"></app-ui-icon>
+              Upload data
+            }
           </button>
         } @else {
           <div class="wizard-actions__next">
