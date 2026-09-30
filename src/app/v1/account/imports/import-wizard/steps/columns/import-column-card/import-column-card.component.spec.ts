@@ -31,16 +31,19 @@ describe('ImportColumnCardComponent', () => {
     expect(element.querySelector('[role="tooltip"]')).toBeNull();
     expect(select.classList.contains('v1-select')).toBe(true);
     expect(select.querySelector('option[value=""]')?.textContent).toContain('Move to');
-    expect(fixture.componentInstance.targets.filter(target => target !== fixture.componentInstance.card.target))
-      .toEqual(['Worksheet Columns', 'Meters', 'Predictors']);
+    expect(Array.from(select.options).map(option => option.value))
+      .toEqual(['', 'Worksheet Columns', 'Meters', 'Predictors']);
   });
 
   it('emits the selected destination', () => {
     const emitted = vi.fn();
     fixture.componentInstance.moveRequested.subscribe(emitted);
+    const select: HTMLSelectElement = fixture.nativeElement.querySelector('select');
 
-    fixture.componentInstance.move('Meters');
+    select.value = 'Meters';
+    select.dispatchEvent(new Event('change'));
 
     expect(emitted).toHaveBeenCalledWith('Meters');
+    expect(select.value).toBe('');
   });
 });

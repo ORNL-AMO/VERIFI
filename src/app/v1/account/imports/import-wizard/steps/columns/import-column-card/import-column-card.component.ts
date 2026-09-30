@@ -18,7 +18,9 @@ export class ImportColumnCardComponent {
   @Output() selectedChange = new EventEmitter<boolean>();
   @Output() moveRequested = new EventEmitter<ColumnTarget>();
 
-  readonly targets = IMPORT_COLUMN_TARGETS;
+  get targets(): readonly ColumnTarget[] {
+    return IMPORT_COLUMN_TARGETS;
+  }
 
   targetLabel(target: ColumnTarget): string {
     return columnTargetLabel(target);
