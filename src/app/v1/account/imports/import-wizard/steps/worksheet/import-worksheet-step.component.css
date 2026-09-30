@@ -1,1 +1,16 @@
 :host { display: block; }
+
+.worksheet-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 52rem;
+}
+
+.worksheet-controls .v1-field { margin: 0; max-width: none; }
+.worksheet-controls .v1-select { width: 100%; }
+.worksheet-help { max-width: 52rem; margin: .65rem 0 1rem; color: var(--v1-muted); font-size: .82rem; }
+
+@media (max-width: 40rem) {
+  .worksheet-controls { grid-template-columns: 1fr; }
+}

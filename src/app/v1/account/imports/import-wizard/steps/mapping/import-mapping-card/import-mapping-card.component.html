@@ -1,5 +1,5 @@
 <article
-  class="import-drag-card import-column-card"
+  class="import-drag-card import-mapping-card"
   role="listitem"
   cdkDrag
   cdkDragPreviewContainer="parent"
@@ -8,7 +8,7 @@
     type="button"
     class="v1-icon-btn import-drag-card__drag"
     cdkDragHandle
-    [attr.aria-label]="'Drag ' + card.header">
+    [attr.aria-label]="'Drag ' + card.label">
     <app-ui-icon name="drag"></app-ui-icon>
   </button>
 
@@ -17,23 +17,20 @@
       <input
         type="checkbox"
         [checked]="selected"
-        [attr.aria-label]="'Select ' + card.header"
+        [attr.aria-label]="'Select ' + card.label"
         (change)="selectedChange.emit($any($event.target).checked)">
-      <span class="visually-hidden">Select {{ card.header }}</span>
+      <span class="visually-hidden">Select {{ card.label }}</span>
     </label>
-    <h3>{{ card.header }}</h3>
-    @if (card.likelyDate) {
-      <span class="v1-badge v1-badge--info">Likely date</span>
-    }
+    <h3>{{ card.label }}</h3>
   </div>
 
   <label class="import-drag-card__move">
-    <span class="visually-hidden">Move {{ card.header }} to</span>
+    <span class="visually-hidden">Move {{ card.label }} to</span>
     <select class="v1-select" #moveTarget [value]="''" (change)="move(moveTarget.value); moveTarget.value = ''">
       <option value="" disabled>Move to…</option>
-      @for (target of targets; track target) {
-        @if (target !== card.target) {
-          <option [value]="target">{{ targetLabel(target) }}</option>
+      @for (destination of destinations; track destination.id) {
+        @if (destination.facilityId !== card.facilityId) {
+          <option [value]="destinationValue(destination)">{{ destination.label }}</option>
         }
       }
     </select>

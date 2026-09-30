@@ -11,6 +11,7 @@ import { ImportMeterReviewStateService } from '../import-meter-review-state.serv
 import { ImportPredictorReviewStateService } from '../import-predictor-review-state.service';
 import { buildImportReviewSummary } from '../import-review-summary';
 import { ImportWizardStateService } from '../import-wizard-state.service';
+import { ImportMappingBoardView, ImportMappingType } from '../import-mapping.models';
 
 export function createImportWizardStateStub() {
   const draft = signal<ImportFileDraft>({
@@ -226,6 +227,36 @@ export function createImportWizardStateStub() {
     energyUseGroups: draft().facilityEnergyUseGroups,
     equipment: draft().facilityEnergyUseEquipment
   }));
+  const mappingBoard = vi.fn((type: ImportMappingType): ImportMappingBoardView => {
+    const itemLabel = type === 'meter' ? 'meters' : 'predictors';
+    const card = {
+      id: type === 'meter' ? 'column-2' : 'column-3',
+      label: type === 'meter' ? 'Electricity' : 'Production',
+      index: type === 'meter' ? 1 : 2,
+      facilityId: undefined
+    };
+    const unmappedLane = {
+      id: 'unmapped', facilityId: undefined, label: 'Unmapped', description: `Assign every ${type} column to a facility.`,
+      color: 'var(--v1-danger)', unmapped: true, cards: [card], totalCount: 1
+    };
+    const facilityLane = {
+      id: 'facility-1', facilityId: 'facility-1', label: 'Main Plant', description: `${type} columns assigned here.`,
+      color: '#1f77b4', unmapped: false, cards: [], totalCount: 0
+    };
+    return {
+      type,
+      itemLabel,
+      unmappedLane,
+      facilityLanes: [facilityLane],
+      lanes: [unmappedLane, facilityLane],
+      destinations: [
+        { id: 'unmapped', facilityId: undefined, label: 'Unmapped' },
+        { id: 'facility-1', facilityId: 'facility-1', label: 'Main Plant' }
+      ],
+      connectedDropListIds: [`import-${type}-mapping-unmapped`, `import-${type}-mapping-facility-1`],
+      status: { totalCount: 1, mappedCount: 0, unmappedCount: 1, ready: false }
+    };
+  });
   const wizardState = {
     draft,
     workspace,
@@ -248,6 +279,9 @@ export function createImportWizardStateStub() {
       }
     }),
     columnContinueMessage: signal<string | undefined>(undefined),
+    selectedMappingItemIds: signal<readonly string[]>([]),
+    selectedMappingItemCount: signal(0),
+    mappingAnnouncement: signal(''),
     columnLanes: signal([
       {
         target: 'Worksheet Columns', label: 'Not imported', description: 'Columns here will not be uploaded.',
@@ -270,12 +304,15 @@ export function createImportWizardStateStub() {
     ]),
     reviewSummary,
     columnTarget: vi.fn(() => 'Date'),
-    mappingItems: vi.fn(() => [{ id: 'column-2', value: 'Electricity', facilityId: '' }]),
+    mappingBoard,
     selectWorksheet: vi.fn(),
+    setGeneralWorkbookFacility: vi.fn(),
     moveColumns: vi.fn(),
     setColumnSelected: vi.fn(),
     moveSelectedColumns: vi.fn(),
-    mapColumn: vi.fn(),
+    setMappingItemSelected: vi.fn(),
+    moveFacilityMappingItems: vi.fn(),
+    moveSelectedFacilityMappingItems: vi.fn(),
     addFacility: vi.fn(),
     setFootprintFacility: vi.fn(),
     compatibleMeterGroups: vi.fn(() => [{ guid: 'group-1', name: 'Natural Gas Meters' }]),

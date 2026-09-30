@@ -1,7 +1,7 @@
 @if (state.draft(); as file) {
   <section class="import-page" aria-labelledby="import-wizard-title">
     @if (state.currentStep(); as step) {
-      <header class="v1-section-header" [class.import-page__header--columns]="state.currentStepId() === 'columns'">
+      <header class="v1-section-header" [class.import-page__header--summary]="state.currentStepId() === 'columns' || state.activeMappingBoard()">
         <div class="import-page__header-title">
           <p class="v1-eyebrow">{{ file.name }}</p>
           <h1
@@ -25,6 +25,11 @@
               <span><strong>Date range:</strong> {{ state.columnStepStatus().date.range }}</span>
             </div>
           </div>
+        } @else if (state.activeMappingBoard(); as board) {
+          <div class="import-page__mapping-summary" [attr.aria-label]="'Mapping summary for ' + board.itemLabel">
+            <span class="v1-chip">Mapped: {{ board.status.mappedCount }}</span>
+            <span class="v1-chip">Unmapped: {{ board.status.unmappedCount }}</span>
+          </div>
         }
       </header>
     }
@@ -43,7 +48,9 @@
         </div>
       </article>
     } @else {
-      <article class="import-panel" [class.import-panel--columns]="state.currentStepId() === 'columns'">
+      <article
+        class="import-panel"
+        [class.import-panel--drag-board]="state.currentStepId() === 'columns' || state.activeMappingBoard()">
         <router-outlet></router-outlet>
       </article>
 
@@ -58,13 +65,13 @@
           </button>
         } @else {
           <div class="wizard-actions__next">
-            @if (state.currentStepId() === 'columns' && state.columnContinueMessage(); as message) {
+            @if (state.stepContinueMessage(); as message) {
               <span class="wizard-actions__requirement" role="status">{{ message }}</span>
             }
             <button
               type="button"
               class="v1-btn v1-btn--action"
-              [disabled]="session.pending() || (state.currentStepId() === 'columns' && !state.columnStepStatus().ready)"
+              [disabled]="session.pending() || !state.canContinueCurrentStep()"
               (click)="continue()">
               Continue
               <app-ui-icon name="chevronRight"></app-ui-icon>

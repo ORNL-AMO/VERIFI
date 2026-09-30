@@ -1,13 +1,11 @@
 <section
-  class="import-drag-lane import-column-lane"
-  [class.import-column-lane--unused]="lane.target === 'Worksheet Columns'"
-  [class.import-column-lane--date]="lane.target === 'Date'"
-  [class.import-column-lane--meters]="lane.target === 'Meters'"
-  [class.import-column-lane--predictors]="lane.target === 'Predictors'"
+  class="import-drag-lane import-mapping-lane"
+  [class.import-mapping-lane--unmapped]="lane.unmapped"
+  [style.--import-lane-color]="lane.color"
   [attr.aria-labelledby]="dropListId + '-title'">
   <header>
     <div class="import-drag-lane__heading">
-      <app-ui-icon [name]="lane.icon"></app-ui-icon>
+      <app-ui-icon [name]="lane.unmapped ? 'warning' : 'facility'"></app-ui-icon>
       <div>
         <h2 [id]="dropListId + '-title'">{{ lane.label }}</h2>
         <p>{{ lane.description }}</p>
@@ -18,9 +16,9 @@
       <button
         type="button"
         class="v1-btn v1-btn--secondary v1-btn--sm"
-        [disabled]="!canMoveSelectedHere"
+        [disabled]="!selectedCount"
         [attr.aria-label]="'Move selected columns to ' + lane.label"
-        (click)="moveSelectedRequested.emit(lane.target)">
+        (click)="moveSelectedRequested.emit(lane.facilityId)">
         Move here
       </button>
     </div>
@@ -40,12 +38,13 @@
       <p class="import-drag-lane__empty">Drop columns here.</p>
     } @else {
       @for (card of lane.cards; track card.id) {
-        <app-import-column-card
+        <app-import-mapping-card
           [card]="card"
+          [destinations]="destinations"
           [selected]="selected(card.id)"
           (selectedChange)="selectionChanged.emit({ itemId: card.id, selected: $event })"
-          (moveRequested)="moveRequested.emit({ itemId: card.id, target: $event })">
-        </app-import-column-card>
+          (moveRequested)="moveRequested.emit({ itemId: card.id, facilityId: $event })">
+        </app-import-mapping-card>
       }
     }
   </div>

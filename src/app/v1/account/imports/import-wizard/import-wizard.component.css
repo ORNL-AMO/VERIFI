@@ -4,13 +4,14 @@
 .import-page__title { display: flex; gap: .65rem; align-items: center; }
 .import-page__header-title { display: grid; gap: .35rem; min-width: 0; }
 .import-page__step-number { display: inline-grid; flex: 0 0 1.9rem; width: 1.9rem; height: 1.9rem; place-items: center; border: 1px solid var(--v1-content-control); border-radius: 50%; color: var(--v1-text); font-size: .85rem; font-weight: 900; line-height: 1; }
-.import-page__header--columns { grid-template-columns: minmax(16rem, 1fr) auto; gap: 1rem 2rem; align-items: center; }
+.import-page__header--summary { grid-template-columns: minmax(16rem, 1fr) auto; gap: 1rem 2rem; align-items: center; }
 .import-page__column-summary { display: grid; gap: .55rem; justify-items: end; min-width: 0; }
 .import-page__column-counts { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
 .import-page__column-date { display: flex; gap: .4rem; align-items: center; color: var(--v1-muted); font-size: .8rem; }
 .import-page__column-date app-ui-icon { color: var(--v1-content-control); }
+.import-page__mapping-summary { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
 .import-panel { padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); }
-.import-panel--columns { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.import-panel--drag-board { padding: 0; border: 0; border-radius: 0; background: transparent; }
 .import-page .field { display: grid; gap: .35rem; max-width: 36rem; margin-bottom: 1rem; font-weight: 600; }
 .import-page input:not([type='checkbox']):not([type='radio']):not(.v1-input) { min-height: 2.25rem; padding: .35rem .5rem; border: 1px solid var(--v1-border-color, #9aa5b1); background: var(--bs-body-bg, #fff); color: inherit; }
 .import-page .table-wrap { overflow: auto; max-width: 100%; }
@@ -35,9 +36,10 @@
 .import-page .commit-overlay { position: fixed; inset: 0; z-index: 1100; display: grid; place-content: center; gap: .5rem; text-align: center; background: rgba(0, 0, 0, .65); color: #fff; }
 @media (max-width: 40rem) {
   .import-page { padding: .75rem; }
-  .import-page__header--columns { grid-template-columns: 1fr; }
+  .import-page__header--summary { grid-template-columns: 1fr; }
   .import-page__column-summary { justify-items: start; }
   .import-page__column-counts { justify-content: flex-start; }
+  .import-page__mapping-summary { justify-content: flex-start; }
   .import-page .wizard-actions { padding: .75rem; }
   .import-page .wizard-actions__next { display: grid; justify-items: end; }
 }

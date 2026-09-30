@@ -98,11 +98,12 @@ Sequence: Facilities → Meters → Meter readings → Predictors → Predictor 
 
 Sequence: Worksheet → Identify columns → Map meters → Review meters → Meter readings → Map predictors → Review predictors → Predictor readings → Review.
 
-- Hide hidden worksheets by default and show a data preview.
+- Hide hidden worksheets by default, show a data preview, and let the user choose one import-wide facility or Multiple facilities beside the worksheet selector. A single facility defaults every meter and predictor column to it; changing the choice remaps both roles while preserving the worksheet and column classifications.
 - Identify columns through a four-lane drag/drop board for Not imported, Date, Meters, and Predictors, with equivalent Move to controls and bulk assignment.
 - Conservatively suggest a unique date-like alias, require one selected date column with at least one usable value, and require at least one meter or predictor column.
 - Warn and continue when the selected date column mixes usable and unusable nonblank values; name representative worksheet rows that will not create readings.
-- Assign each included data column to a facility or return it to excluded worksheet columns.
+- Map meter and predictor columns on separate compact drag/drop boards with an Unmapped lane and one lane per facility. Preselect the Unmapped cards when each mapping step opens, preserve worksheet ordering, provide equivalent themed Move to controls and selected-card Move here actions, and require every active role column to be mapped before continuing. Keep the draft-only Add new facility card below the existing facility lanes.
+- Keep exclusion on Identify columns rather than the facility boards, and keep newly added facilities draft-only until imported records use them.
 - Preserve existing record matching and established parsing/coercion rules.
 
 ### 8. Implement the footprint branch

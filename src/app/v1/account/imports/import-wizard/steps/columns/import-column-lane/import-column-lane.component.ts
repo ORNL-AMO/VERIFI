@@ -10,7 +10,7 @@ import { ImportColumnCardComponent } from '../import-column-card/import-column-c
   standalone: true,
   imports: [DragDropModule, IconComponent, ImportColumnCardComponent],
   templateUrl: './import-column-lane.component.html',
-  styleUrls: ['./import-column-lane.component.css']
+  styleUrls: ['../../../import-drag-board.shared.css', './import-column-lane.component.css']
 })
 export class ImportColumnLaneComponent {
   @Input({ required: true }) lane!: ImportColumnLaneView;

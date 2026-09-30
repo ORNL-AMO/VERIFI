@@ -24,6 +24,8 @@ describe('ImportWizardStateService', () => {
     replaceMeter: ReturnType<typeof vi.fn>;
     replacePredictor: ReturnType<typeof vi.fn>;
     assignColumns: ReturnType<typeof vi.fn>;
+    assignFacilityMappingItems: ReturnType<typeof vi.fn>;
+    setGeneralWorkbookDefaultFacility: ReturnType<typeof vi.fn>;
   };
   let workspaceMeters: ReturnType<typeof signal<IdbUtilityMeter[]>>;
   let workspaceMeterGroups: ReturnType<typeof signal<IdbUtilityMeterGroup[]>>;
@@ -39,6 +41,10 @@ describe('ImportWizardStateService', () => {
       materializeGeneralRecords: vi.fn(),
       replaceMeter: vi.fn(),
       replacePredictor: vi.fn(),
+      assignFacilityMappingItems: vi.fn(),
+      setGeneralWorkbookDefaultFacility: vi.fn((draft: ImportFileDraft, facilityId?: string) => {
+        draft.selectedFacilityId = facilityId;
+      }),
       assignColumns: vi.fn((draft: ImportFileDraft, itemIds: string[], target: string) => {
         const items = draft.columnGroups.flatMap(group => group.groupItems).filter(item => itemIds.includes(item.id));
         draft.columnGroups.forEach(group => group.groupItems = group.groupItems.filter(item => !itemIds.includes(item.id)));
@@ -75,6 +81,8 @@ describe('ImportWizardStateService', () => {
             selectWorksheet: vi.fn(),
             assignColumn: vi.fn(),
             assignColumns: draftService.assignColumns,
+            assignFacilityMappingItems: draftService.assignFacilityMappingItems,
+            setGeneralWorkbookDefaultFacility: draftService.setGeneralWorkbookDefaultFacility,
             mapColumnToFacility: vi.fn(),
             addGeneralFacility: vi.fn(),
             applyFootprintFacility: vi.fn(),
@@ -219,6 +227,81 @@ describe('ImportWizardStateService', () => {
     service.setColumnSelected('electricity', false);
 
     expect(service.selectedColumnIds()).toEqual(['production']);
+  });
+
+  it('projects mapping lanes, counts, stable worksheet order, and readiness', () => {
+    const draft = generalDraft();
+    draft.importFacilities = [
+      facility({ guid: 'facility-a', name: 'Plant A', color: '#112233' }),
+      facility({ guid: 'facility-b', name: 'Plant B', color: '#445566' })
+    ];
+    draft.meterFacilityGroups = [
+      { facilityId: 'unmapped-id', facilityName: 'Unmapped Meters', color: '', groupItems: [
+        { id: 'gas', index: 2, value: 'Natural Gas' },
+        { id: 'electricity', index: 1, value: 'Electricity' }
+      ] },
+      { facilityId: 'facility-a', facilityName: 'Plant A', color: '#112233', groupItems: [] },
+      { facilityId: 'facility-b', facilityName: 'Plant B', color: '#445566', groupItems: [
+        { id: 'water', index: 3, value: 'Water' }
+      ] }
+    ];
+    service.initialize(draft);
+    service.activateStep('map-meters');
+
+    const board = service.mappingBoard('meter');
+
+    expect(board.unmappedLane.cards.map(card => card.id)).toEqual(['electricity', 'gas']);
+    expect(board.facilityLanes.map(lane => lane.label)).toEqual(['Plant A', 'Plant B']);
+    expect(board.status).toEqual({ totalCount: 3, mappedCount: 1, unmappedCount: 2, ready: false });
+    expect(service.selectedMappingItemIds()).toEqual(['electricity', 'gas']);
+    expect(service.canContinueCurrentStep()).toBe(false);
+    expect(service.stepContinueMessage()).toBe('Map all meter columns before continuing.');
+
+    service.setMappingItemSelected('electricity', false);
+    service.activateStep('map-meters');
+    expect(service.selectedMappingItemIds()).toEqual(['gas']);
+
+    service.activateStep('columns');
+    service.activateStep('map-meters');
+    expect(service.selectedMappingItemIds()).toEqual(['electricity', 'gas']);
+  });
+
+  it('moves selected mappings in one batch, clears moved selection, and invalidates dependent steps', () => {
+    const draft = generalDraft();
+    draft.importFacilities = [facility({ guid: 'facility-a', name: 'Plant A' })];
+    draft.meterFacilityGroups = [
+      { facilityId: 'unmapped-id', facilityName: 'Unmapped Meters', color: '', groupItems: [
+        { id: 'electricity', index: 1, value: 'Electricity' },
+        { id: 'gas', index: 2, value: 'Natural Gas' }
+      ] },
+      { facilityId: 'facility-a', facilityName: 'Plant A', color: '', groupItems: [] }
+    ];
+    draft.completedSteps = ['worksheet', 'columns', 'map-meters', 'meters', 'meter-readings'];
+    service.initialize(draft);
+    service.setMappingItemSelected('electricity', true);
+    service.setMappingItemSelected('gas', true);
+
+    service.moveSelectedFacilityMappingItems('meter', 'facility-a');
+
+    expect(draftService.assignFacilityMappingItems).toHaveBeenCalledWith(
+      draft, 'meter', ['electricity', 'gas'], 'facility-a'
+    );
+    expect(service.selectedMappingItemIds()).toEqual([]);
+    expect(service.mappingAnnouncement()).toBe('2 meters moved to Plant A.');
+    expect(draft.completedSteps).toEqual(['worksheet', 'columns']);
+  });
+
+  it('changes the worksheet facility default and invalidates mapping without invalidating earlier steps', () => {
+    const draft = generalDraft();
+    draft.importFacilities = [facility({ guid: 'facility-a', name: 'Plant A' })];
+    draft.completedSteps = ['worksheet', 'columns', 'map-meters', 'meters'];
+    service.initialize(draft);
+
+    service.setGeneralWorkbookFacility('facility-a');
+
+    expect(draftService.setGeneralWorkbookDefaultFacility).toHaveBeenCalledWith(draft, 'facility-a');
+    expect(draft.completedSteps).toEqual(['worksheet', 'columns']);
+    expect(service.mappingAnnouncement()).toContain('Plant A');
   });
 
   it('auto-groups only ungrouped meters and synchronizes referenced draft groups', () => {

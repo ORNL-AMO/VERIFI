@@ -10,7 +10,7 @@ import { columnTargetLabel, ImportColumnCardView, IMPORT_COLUMN_TARGETS } from '
   standalone: true,
   imports: [DragDropModule, FormsModule, IconComponent],
   templateUrl: './import-column-card.component.html',
-  styleUrls: ['./import-column-card.component.css']
+  styleUrls: ['../../../import-drag-board.shared.css', './import-column-card.component.css']
 })
 export class ImportColumnCardComponent {
   @Input({ required: true }) card!: ImportColumnCardView;

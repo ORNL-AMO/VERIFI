@@ -23,8 +23,14 @@ import {
   ImportColumnStepStatus,
   IMPORT_COLUMN_TARGETS
 } from './import-column.models';
+import {
+  importMappingDropListId,
+  ImportMappingBoardView,
+  ImportMappingLaneView,
+  ImportMappingType
+} from './import-mapping.models';
 
-export type ImportMappingType = 'meter' | 'predictor';
+export { ImportMappingType } from './import-mapping.models';
 
 @Injectable()
 export class ImportWizardStateService {
@@ -44,6 +50,8 @@ export class ImportWizardStateService {
   readonly newFacilityName = signal('');
   readonly selectedColumnIds = signal<readonly string[]>([]);
   readonly columnAnnouncement = signal('');
+  readonly selectedMappingItemIds = signal<readonly string[]>([]);
+  readonly mappingAnnouncement = signal('');
 
   readonly steps = computed(() => this.draft() ? stepsForDraft(this.draft()) : []);
   readonly currentStep = computed(() => this.steps().find(step => step.id === this.currentStepId()));
@@ -105,6 +113,26 @@ export class ImportWizardStateService {
     if (!status.hasDataColumn) return 'Move at least one column to Meters or Predictors.';
     return undefined;
   });
+  readonly selectedMappingItemCount = computed(() => this.selectedMappingItemIds().length);
+  readonly activeMappingType = computed<ImportMappingType | undefined>(() => {
+    if (this.currentStepId() === 'map-meters') return 'meter';
+    if (this.currentStepId() === 'map-predictors') return 'predictor';
+    return undefined;
+  });
+  readonly activeMappingBoard = computed(() => {
+    const type = this.activeMappingType();
+    return type ? this.mappingBoard(type) : undefined;
+  });
+  readonly stepContinueMessage = computed(() => {
+    if (this.currentStepId() === 'columns') return this.columnContinueMessage();
+    const board = this.activeMappingBoard();
+    if (!board || board.status.ready) return undefined;
+    return `Map all ${board.type} columns before continuing.`;
+  });
+  readonly canContinueCurrentStep = computed(() => {
+    if (this.currentStepId() === 'columns') return this.columnStepStatus().ready;
+    return this.activeMappingBoard()?.status.ready ?? true;
+  });
   readonly worksheetNames = computed(() => this.draft()
     ? this.drafts.visibleWorksheetNames(this.draft().workbook)
     : []);
@@ -130,6 +158,8 @@ export class ImportWizardStateService {
     this.committed.set(draft.status === 'completed');
     this.selectedColumnIds.set([]);
     this.columnAnnouncement.set('');
+    this.selectedMappingItemIds.set([]);
+    this.mappingAnnouncement.set('');
   }
 
   allowedStep(requestedStep: string | undefined): string {
@@ -144,6 +174,11 @@ export class ImportWizardStateService {
   }
 
   activateStep(stepId: string): void {
+    const enteringStep = this.currentStepId() !== stepId;
+    if (enteringStep) {
+      this.selectedMappingItemIds.set([]);
+      this.mappingAnnouncement.set('');
+    }
     this.currentStepId.set(stepId);
     this.error.set(undefined);
     const draft = this.draft();
@@ -151,6 +186,11 @@ export class ImportWizardStateService {
       draft.meterFacilityGroups.length === 0 && draft.predictorFacilityGroups.length === 0) {
       this.drafts.initializeFacilityMappings(draft);
       this.changed();
+    }
+    if (enteringStep && stepId === 'map-meters') {
+      this.selectedMappingItemIds.set(this.mappingBoard('meter').unmappedLane.cards.map(card => card.id));
+    } else if (enteringStep && stepId === 'map-predictors') {
+      this.selectedMappingItemIds.set(this.mappingBoard('predictor').unmappedLane.cards.map(card => card.id));
     }
   }
 
@@ -236,16 +276,89 @@ export class ImportWizardStateService {
     this.moveColumns(this.selectedColumnIds(), target);
   }
 
-  mappingItems(type: ImportMappingType) {
-    const groups = type === 'meter' ? this.draft()?.meterFacilityGroups : this.draft()?.predictorFacilityGroups;
-    return (groups ?? []).flatMap(group => group.groupItems.map(item => ({
-      ...item,
-      facilityId: group.facilityName.startsWith('Unmapped') ? '' : group.facilityId
-    })));
+  mappingBoard(type: ImportMappingType): ImportMappingBoardView {
+    const draft = this.draft();
+    const groups = type === 'meter' ? draft?.meterFacilityGroups : draft?.predictorFacilityGroups;
+    const unmappedGroup = groups?.find(group => group.facilityName.startsWith('Unmapped'));
+    const unmappedLane = this.mappingLane({
+      id: 'unmapped',
+      label: 'Unmapped',
+      description: `Assign every ${type} column to a facility.`,
+      color: 'var(--v1-danger)',
+      unmapped: true,
+      items: unmappedGroup?.groupItems ?? []
+    });
+    const facilityLanes = (draft?.importFacilities ?? []).map(facility => {
+      const group = groups?.find(candidate => candidate.facilityId === facility.guid);
+      return this.mappingLane({
+        id: facility.guid,
+        facilityId: facility.guid,
+        label: facility.name,
+        description: `${type === 'meter' ? 'Meter' : 'Predictor'} columns assigned here.`,
+        color: facility.color || 'var(--v1-action)',
+        unmapped: false,
+        items: group?.groupItems ?? []
+      });
+    });
+    const lanes = [unmappedLane, ...facilityLanes];
+    const unmappedCount = unmappedLane.totalCount;
+    const totalCount = lanes.reduce((total, lane) => total + lane.totalCount, 0);
+    return {
+      type,
+      itemLabel: type === 'meter' ? 'meters' : 'predictors',
+      unmappedLane,
+      facilityLanes,
+      lanes,
+      destinations: lanes.map(lane => ({ id: lane.id, facilityId: lane.facilityId, label: lane.label })),
+      connectedDropListIds: lanes.map(lane => importMappingDropListId(type, lane.id)),
+      status: {
+        totalCount,
+        mappedCount: totalCount - unmappedCount,
+        unmappedCount,
+        ready: unmappedCount === 0
+      }
+    };
   }
 
-  mapColumn(type: ImportMappingType, itemId: string, facilityId: string): void {
-    this.drafts.mapColumnToFacility(this.draft(), type, itemId, facilityId || undefined);
+  setMappingItemSelected(itemId: string, selected: boolean): void {
+    this.selectedMappingItemIds.update(ids => selected
+      ? [...new Set([...ids, itemId])]
+      : ids.filter(id => id !== itemId));
+  }
+
+  moveFacilityMappingItems(type: ImportMappingType, itemIds: readonly string[], facilityId?: string): void {
+    const board = this.mappingBoard(type);
+    const target = board.lanes.find(lane => lane.facilityId === facilityId);
+    if (!target) return;
+    const currentLaneById = new Map(board.lanes.flatMap(lane => lane.cards.map(card => [card.id, lane.facilityId] as const)));
+    const movingIds = [...new Set(itemIds)].filter(id => currentLaneById.has(id) && currentLaneById.get(id) !== facilityId);
+    if (!movingIds.length) return;
+    this.drafts.assignFacilityMappingItems(this.draft(), type, movingIds, facilityId);
+    const movedIds = new Set(movingIds);
+    this.selectedMappingItemIds.update(ids => ids.filter(id => !movedIds.has(id)));
+    this.mappingAnnouncement.set(`${movingIds.length} ${type}${movingIds.length === 1 ? '' : 's'} moved to ${target.label}.`);
+    this.invalidateFromStep(type === 'meter' ? 'map-meters' : 'map-predictors');
+    this.changed();
+  }
+
+  moveSelectedFacilityMappingItems(type: ImportMappingType, facilityId?: string): void {
+    this.moveFacilityMappingItems(type, this.selectedMappingItemIds(), facilityId);
+  }
+
+  setGeneralWorkbookFacility(facilityId?: string): void {
+    const normalizedFacilityId = facilityId || undefined;
+    const draft = this.draft();
+    if (!draft || draft.selectedFacilityId === normalizedFacilityId) return;
+    const label = normalizedFacilityId
+      ? draft.importFacilities.find(facility => facility.guid === normalizedFacilityId)?.name
+      : 'Multiple facilities';
+    if (!label) return;
+    this.drafts.setGeneralWorkbookDefaultFacility(draft, normalizedFacilityId);
+    this.selectedMappingItemIds.set([]);
+    this.mappingAnnouncement.set(normalizedFacilityId
+      ? `All meter and predictor columns default to ${label}.`
+      : 'Meter and predictor columns reset to Unmapped.');
+    this.invalidateFromStep('map-meters');
     this.changed();
   }
 
@@ -334,8 +447,8 @@ export class ImportWizardStateService {
       if (!this.columnStepStatus().date.usable) return 'Choose a date column with at least one usable date.';
       if (!this.meterColumns().length && !this.predictorColumns().length) return 'Identify at least one meter or predictor column.';
     }
-    if (step === 'map-meters' && this.unmappedCount('meter')) return 'Assign every meter column to a facility or return it to worksheet columns.';
-    if (step === 'map-predictors' && this.unmappedCount('predictor')) return 'Assign every predictor column to a facility or return it to worksheet columns.';
+    if (step === 'map-meters' && this.unmappedCount('meter')) return 'Map all meter columns before continuing.';
+    if (step === 'map-predictors' && this.unmappedCount('predictor')) return 'Map all predictor columns before continuing.';
     if (step === 'facility' && !draft.selectedFacilityId) return 'Select a facility for this footprint upload.';
     if (step === 'meters' && draft.meters.some((meter, index) => !meter.skipImport && this.meters.invalid(index))) {
       return 'Fix or skip every invalid meter before continuing.';
@@ -370,12 +483,41 @@ export class ImportWizardStateService {
   }
 
   private invalidateGeneralColumnDependencies(): void {
+    this.invalidateFromStep('columns');
+  }
+
+  private invalidateFromStep(stepId: string): void {
     const draft = this.draft();
-    const columnIndex = this.steps().findIndex(step => step.id === 'columns');
-    if (columnIndex < 0) return;
-    const invalidSteps = new Set(this.steps().slice(columnIndex).map(step => step.id));
+    if (!draft) return;
+    const stepIndex = this.steps().findIndex(step => step.id === stepId);
+    if (stepIndex < 0) return;
+    const invalidSteps = new Set(this.steps().slice(stepIndex).map(step => step.id));
     draft.completedSteps = draft.completedSteps.filter(step => !invalidSteps.has(step));
     this.error.set(undefined);
+  }
+
+  private mappingLane(value: {
+    id: string;
+    facilityId?: string;
+    label: string;
+    description: string;
+    color: string;
+    unmapped: boolean;
+    items: readonly { id: string; value: string; index: number }[];
+  }): ImportMappingLaneView {
+    const cards = value.items
+      .map(item => ({ id: item.id, label: item.value, index: item.index, facilityId: value.facilityId }))
+      .sort((left, right) => left.index - right.index);
+    return {
+      id: value.id,
+      facilityId: value.facilityId,
+      label: value.label,
+      description: value.description,
+      color: value.color,
+      unmapped: value.unmapped,
+      cards,
+      totalCount: cards.length
+    };
   }
 
   private changed(): void {

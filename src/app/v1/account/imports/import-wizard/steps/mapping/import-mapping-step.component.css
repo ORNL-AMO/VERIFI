@@ -1,1 +1,53 @@
 :host { display: block; }
+
+.mapping-empty { margin: 0 0 .75rem; color: var(--v1-muted); }
+
+.mapping-board {
+  display: grid;
+  grid-template-columns: minmax(18rem, .8fr) minmax(0, 2fr);
+  gap: .75rem;
+  align-items: stretch;
+}
+
+.mapping-board__facilities {
+  display: grid;
+  align-content: start;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.mapping-board__facility-lanes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));
+  gap: .75rem;
+  min-width: 0;
+}
+
+.mapping-add-facility {
+  display: grid;
+  grid-template-columns: minmax(13rem, .65fr) minmax(18rem, 1.35fr);
+  gap: 1rem;
+  align-items: center;
+  padding: .75rem .85rem;
+  border: 1px solid var(--v1-border);
+  border-left: 4px solid var(--v1-action);
+  border-radius: var(--v1-radius);
+  background: color-mix(in srgb, var(--v1-action) 3%, var(--v1-surface));
+}
+
+.mapping-add-facility__heading { display: flex; gap: .65rem; align-items: center; min-width: 0; }
+.mapping-add-facility__heading > app-ui-icon { flex: 0 0 auto; color: var(--v1-action); }
+.mapping-add-facility h2 { margin: 0; font-size: 1.05rem; }
+.mapping-add-facility p { margin: .15rem 0 0; color: var(--v1-muted); font-size: .8rem; }
+.mapping-add-facility__controls { display: flex; gap: .75rem; align-items: center; }
+.mapping-add-facility__field { flex: 1; margin: 0; }
+
+@media (max-width: 900px) {
+  .mapping-board { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 40rem) {
+  .mapping-add-facility { grid-template-columns: 1fr; }
+  .mapping-add-facility__controls { align-items: stretch; flex-direction: column; }
+  .mapping-add-facility__controls .v1-btn { align-self: start; }
+}

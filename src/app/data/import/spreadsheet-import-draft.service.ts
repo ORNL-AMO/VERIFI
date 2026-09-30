@@ -192,19 +192,58 @@ export class SpreadsheetImportDraftService {
   initializeFacilityMappings(draft: ImportFileDraft): void {
     draft.meterFacilityGroups = this.mappingGroups(draft, 'Meters', 'Unmapped Meters');
     draft.predictorFacilityGroups = this.mappingGroups(draft, 'Predictors', 'Unmapped Predictors');
+    this.resetGeneralMeterMappingState(draft);
+    this.resetGeneralPredictorMappingState(draft);
+    this.materializeGeneralRecords(draft);
   }
 
   mapColumnToFacility(draft: ImportFileDraft, type: 'meter' | 'predictor', itemId: string, facilityId?: string): void {
+    this.assignFacilityMappingItems(draft, type, [itemId], facilityId);
+  }
+
+  assignFacilityMappingItems(
+    draft: ImportFileDraft,
+    type: 'meter' | 'predictor',
+    itemIds: readonly string[],
+    facilityId?: string
+  ): void {
     const groups = type === 'meter' ? draft.meterFacilityGroups : draft.predictorFacilityGroups;
-    let item: ColumnItem;
+    if (facilityId && !draft.importFacilities.some(facility => facility.guid === facilityId)) return;
+    const target = groups.find(group => facilityId
+      ? group.facilityId === facilityId
+      : group.facilityName.startsWith('Unmapped'));
+    if (!target) return;
+
+    const requestedIds = new Set(itemIds);
+    const movingItems = groups
+      .filter(group => group !== target)
+      .flatMap(group => group.groupItems)
+      .filter(item => requestedIds.has(item.id))
+      .sort((left, right) => left.index - right.index);
+    if (!movingItems.length) return;
+
+    const movingIds = new Set(movingItems.map(item => item.id));
     groups.forEach(group => {
-      const index = group.groupItems.findIndex(candidate => candidate.id === itemId);
-      if (index >= 0) item = group.groupItems.splice(index, 1)[0];
+      group.groupItems = group.groupItems.filter(item => !movingIds.has(item.id));
     });
-    const target = groups.find(group => facilityId ? group.facilityId === facilityId : group.facilityName.startsWith('Unmapped'));
-    if (item && target) target.groupItems.push(item);
-    if (type === 'meter') this.materializeGeneralMeters(draft);
-    else this.materializeGeneralPredictors(draft);
+    target.groupItems.push(...movingItems);
+    groups.forEach(group => group.groupItems.sort((left, right) => left.index - right.index));
+
+    if (type === 'meter') {
+      this.resetGeneralMeterMappingState(draft);
+      this.materializeGeneralMeters(draft);
+    } else {
+      this.resetGeneralPredictorMappingState(draft);
+      this.materializeGeneralPredictors(draft);
+    }
+  }
+
+  setGeneralWorkbookDefaultFacility(draft: ImportFileDraft, facilityId?: string): void {
+    if (facilityId && !draft.importFacilities.some(facility => facility.guid === facilityId)) return;
+    if (draft.selectedFacilityId === facilityId) return;
+    draft.selectedFacilityId = facilityId;
+    const mappingsInitialized = draft.meterFacilityGroups.length > 0 || draft.predictorFacilityGroups.length > 0;
+    if (mappingsInitialized) this.initializeFacilityMappings(draft);
   }
 
   materializeGeneralRecords(draft: ImportFileDraft): void {
@@ -538,6 +577,24 @@ export class SpreadsheetImportDraftService {
     draft.excludedMeterReadingIds = [];
     draft.excludedPredictorReadingIds = [];
     draft.invalidMeterReadingsAcknowledged = false;
+    draft.invalidPredictorReadingsAcknowledged = false;
+  }
+
+  private resetGeneralMeterMappingState(draft: ImportFileDraft): void {
+    draft.meters = [];
+    draft.meterData = [];
+    draft.newMeterGroups = [];
+    draft.skipExistingReadingsMeterIds = [];
+    draft.excludedMeterReadingIds = [];
+    draft.invalidMeterReadingsAcknowledged = false;
+  }
+
+  private resetGeneralPredictorMappingState(draft: ImportFileDraft): void {
+    draft.predictors = [];
+    draft.predictorData = [];
+    draft.skipExistingPredictorFacilityIds = [];
+    draft.skipExistingPredictorIds = [];
+    draft.excludedPredictorReadingIds = [];
     draft.invalidPredictorReadingsAcknowledged = false;
   }
 
