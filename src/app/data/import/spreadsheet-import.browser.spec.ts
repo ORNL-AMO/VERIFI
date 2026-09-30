@@ -170,6 +170,7 @@ describe('spreadsheet import browser boundaries', () => {
   }
 
   async function initializeHarness(): Promise<void> {
+    TestBed.resetTestingModule();
     harness = await IndexedDbTestHarness.create('spreadsheet-import');
     transactionService = new IndexedDbTransactionService(indexedDB, {
       [harness.databaseName]: { ...dbConfig, name: harness.databaseName }
