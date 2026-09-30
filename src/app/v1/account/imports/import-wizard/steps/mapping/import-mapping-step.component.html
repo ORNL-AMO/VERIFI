@@ -1,23 +1,63 @@
-<div class="add-facility">
-  <label class="field">
-    <span>New facility name</span>
-    <input [ngModel]="state.newFacilityName()" (ngModelChange)="state.newFacilityName.set($event)">
-  </label>
-  <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!state.newFacilityName().trim()" (click)="state.addFacility()">
-    Add facility
-  </button>
-</div>
-@if (!state.mappingItems(mappingType).length) {
-  <p>No {{ title }} columns were selected.@if (mappingType === 'meter') { You can continue to predictors. }</p>
+@let mappingBoard = board();
+@if (!mappingBoard.status.totalCount) {
+  <p class="mapping-empty">No {{ title }} columns were selected.</p>
 }
-@for (item of state.mappingItems(mappingType); track item.id) {
-  <label class="field">
-    <span>{{ item.value }}</span>
-    <select [ngModel]="item.facilityId" (ngModelChange)="state.mapColumn(mappingType, item.id, $event)">
-      <option value="">Unmapped</option>
-      @for (facility of state.draft().importFacilities; track facility.guid) {
-        <option [value]="facility.guid">{{ facility.name }}</option>
+<section class="mapping-board" [attr.aria-label]="'Map ' + mappingBoard.itemLabel + ' to facilities'">
+  <app-import-mapping-lane
+    class="mapping-board__unmapped"
+    [type]="mappingType"
+    [lane]="mappingBoard.unmappedLane"
+    [destinations]="mappingBoard.destinations"
+    [connectedDropListIds]="mappingBoard.connectedDropListIds"
+    [selectedIds]="state.selectedMappingItemIds()"
+    [selectedCount]="state.selectedMappingItemCount()"
+    (itemDropped)="state.moveFacilityMappingItems(mappingType, [$event.itemId], $event.facilityId)"
+    (selectionChanged)="state.setMappingItemSelected($event.itemId, $event.selected)"
+    (moveSelectedRequested)="state.moveSelectedFacilityMappingItems(mappingType, $event)"
+    (moveRequested)="state.moveFacilityMappingItems(mappingType, [$event.itemId], $event.facilityId)">
+  </app-import-mapping-lane>
+
+  <div class="mapping-board__facilities">
+    <div class="mapping-board__facility-lanes">
+      @for (lane of mappingBoard.facilityLanes; track lane.id) {
+        <app-import-mapping-lane
+          [type]="mappingType"
+          [lane]="lane"
+          [destinations]="mappingBoard.destinations"
+          [connectedDropListIds]="mappingBoard.connectedDropListIds"
+          [selectedIds]="state.selectedMappingItemIds()"
+          [selectedCount]="state.selectedMappingItemCount()"
+          (itemDropped)="state.moveFacilityMappingItems(mappingType, [$event.itemId], $event.facilityId)"
+          (selectionChanged)="state.setMappingItemSelected($event.itemId, $event.selected)"
+          (moveSelectedRequested)="state.moveSelectedFacilityMappingItems(mappingType, $event)"
+          (moveRequested)="state.moveFacilityMappingItems(mappingType, [$event.itemId], $event.facilityId)">
+        </app-import-mapping-lane>
       }
-    </select>
-  </label>
-}
+    </div>
+
+    <section class="mapping-add-facility" aria-labelledby="mapping-add-facility-title">
+      <div class="mapping-add-facility__heading">
+        <app-ui-icon name="facility"></app-ui-icon>
+        <div>
+          <h2 id="mapping-add-facility-title">Add new facility</h2>
+          <p>Create another destination for this import.</p>
+        </div>
+      </div>
+      <div class="mapping-add-facility__controls">
+        <label class="v1-field mapping-add-facility__field">
+          <span class="visually-hidden">Facility name</span>
+          <input
+            class="v1-input"
+            placeholder="Facility name"
+            [ngModel]="state.newFacilityName()"
+            (ngModelChange)="state.newFacilityName.set($event)">
+        </label>
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!state.newFacilityName().trim()" (click)="state.addFacility()">
+          Add facility
+        </button>
+      </div>
+    </section>
+  </div>
+</section>
+
+<p class="visually-hidden" aria-live="polite" aria-atomic="true">{{ state.mappingAnnouncement() }}</p>

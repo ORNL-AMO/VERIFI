@@ -1,11 +1,30 @@
-<label class="field">
-  <span>Worksheet</span>
-  <select [ngModel]="state.draft().selectedWorksheetName" (ngModelChange)="state.selectWorksheet($event)">
-    @for (name of state.worksheetNames(); track name) {
-      <option [value]="name">{{ name }}</option>
-    }
-  </select>
-</label>
+<div class="worksheet-controls">
+  <label class="v1-field">
+    <span>Worksheet</span>
+    <select class="v1-select" [ngModel]="state.draft().selectedWorksheetName" (ngModelChange)="state.selectWorksheet($event)">
+      @for (name of state.worksheetNames(); track name) {
+        <option [value]="name">{{ name }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="v1-field">
+    <span>Import facility</span>
+    <select
+      class="v1-select"
+      [ngModel]="state.draft().selectedFacilityId || ''"
+      (ngModelChange)="state.setGeneralWorkbookFacility($event || undefined)"
+      aria-describedby="import-facility-help">
+      <option value="">Multiple facilities</option>
+      @for (facility of state.draft().importFacilities; track facility.guid) {
+        <option [value]="facility.guid">{{ facility.name }}</option>
+      }
+    </select>
+  </label>
+</div>
+<p id="import-facility-help" class="worksheet-help">
+  One facility assigns every meter and predictor column to it. Multiple facilities leave them ready for manual mapping.
+</p>
 <p>{{ state.draft().headerMap.length }} data rows found. Hidden worksheets are not shown.</p>
 <div class="table-wrap">
   <table>
@@ -17,3 +36,4 @@
     </tbody>
   </table>
 </div>
+<p class="visually-hidden" aria-live="polite" aria-atomic="true">{{ state.mappingAnnouncement() }}</p>

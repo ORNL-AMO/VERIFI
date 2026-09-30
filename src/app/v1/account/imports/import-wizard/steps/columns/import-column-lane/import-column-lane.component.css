@@ -1,0 +1,7 @@
+.import-column-lane {
+  --import-lane-color: var(--v1-neutral);
+}
+
+.import-column-lane--date { --import-lane-color: var(--v1-success); }
+.import-column-lane--meters { --import-lane-color: var(--v1-action); }
+.import-column-lane--predictors { --import-lane-color: var(--v1-content-control); }

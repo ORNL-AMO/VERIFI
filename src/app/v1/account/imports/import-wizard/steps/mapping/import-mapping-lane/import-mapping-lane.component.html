@@ -1,0 +1,51 @@
+<section
+  class="import-drag-lane import-mapping-lane"
+  [class.import-mapping-lane--unmapped]="lane.unmapped"
+  [style.--import-lane-color]="lane.color"
+  [attr.aria-labelledby]="dropListId + '-title'">
+  <header>
+    <div class="import-drag-lane__heading">
+      <app-ui-icon [name]="lane.unmapped ? 'warning' : 'facility'"></app-ui-icon>
+      <div>
+        <h2 [id]="dropListId + '-title'">{{ lane.label }}</h2>
+        <p>{{ lane.description }}</p>
+      </div>
+    </div>
+    <div class="import-drag-lane__actions">
+      <span class="v1-badge">{{ lane.totalCount }}</span>
+      <button
+        type="button"
+        class="v1-btn v1-btn--secondary v1-btn--sm"
+        [disabled]="!selectedCount"
+        [attr.aria-label]="'Move selected columns to ' + lane.label"
+        (click)="moveSelectedRequested.emit(lane.facilityId)">
+        Move here
+      </button>
+    </div>
+  </header>
+
+  <div
+    class="import-drag-lane__dropzone"
+    cdkDropList
+    [id]="dropListId"
+    [cdkDropListData]="lane.cards"
+    [cdkDropListConnectedTo]="connectedDropListIds"
+    [cdkDropListSortingDisabled]="true"
+    (cdkDropListDropped)="drop($event)"
+    role="list"
+    [attr.aria-label]="lane.label + ' columns'">
+    @if (!lane.cards.length) {
+      <p class="import-drag-lane__empty">Drop columns here.</p>
+    } @else {
+      @for (card of lane.cards; track card.id) {
+        <app-import-mapping-card
+          [card]="card"
+          [destinations]="destinations"
+          [selected]="selected(card.id)"
+          (selectedChange)="selectionChanged.emit({ itemId: card.id, selected: $event })"
+          (moveRequested)="moveRequested.emit({ itemId: card.id, facilityId: $event })">
+        </app-import-mapping-card>
+      }
+    }
+  </div>
+</section>

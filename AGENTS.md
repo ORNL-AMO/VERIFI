@@ -76,6 +76,7 @@ Use the mode and discoverable skill selected by the [task context index](docs/ag
 - Treat Web Worker messages as contracts: update payloads, results, errors, call sites, and browser tests together.
 - Keep Electron `contextIsolation` intact. Expose only explicit IPC channels through `preload.js`; never expose unrestricted Node or `ipcRenderer` access.
 - Reuse the correct shared layer, Bootstrap/ng-bootstrap conventions, and existing style layers. Legacy reusable UI belongs behind `@v0/shared/*`; only version-neutral helpers and contracts belong behind `@shared/*`. Cover loading, empty, validation, error, disabled, and success states.
+- Every native `<select>` in production v1 templates must include the shared `v1-select` class so its surface, text, border, focus, disabled, and dropdown indicator remain theme-aware and consistent in light, dark, and high-contrast modes. Feature-specific select classes may supplement `v1-select`, but must not replace it.
 - Check responsive behavior, keyboard access, focus, labels, contrast, screen-reader semantics, printing, charts, and Electron window constraints when relevant.
 - For v1 workbench tabs, stack primary content sections with connected borders, square outer corners, and no vertical gaps. Do not use floating, rounded top-level cards in workbench tab content unless a workflow explicitly calls for a different pattern.
 - Do not edit `node_modules/`, `dist/`, or `output/`. Treat spreadsheets, images, and other binary assets under `src/assets/` as deliberate source artifacts.

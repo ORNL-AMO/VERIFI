@@ -1,1 +1,16 @@
 :host { display: block; }
+
+.column-identification { display: grid; gap: 1rem; min-width: 0; }
+.column-date-warning { display: grid; }
+
+.column-board { display: grid; grid-template-columns: minmax(18rem, 1.15fr) minmax(18rem, 1fr); gap: .75rem; align-items: stretch; }
+.column-board__source { grid-row: 1 / span 3; }
+
+@media (max-width: 900px) {
+  .column-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .column-board__source { grid-row: auto; }
+}
+
+@media (max-width: 640px) {
+  .column-board { grid-template-columns: 1fr; }
+}

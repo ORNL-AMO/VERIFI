@@ -1,18 +1,13 @@
 @if (state.reviewSummary(); as review) {
-  <header class="import-review-intro">
-    <h2>Ready to upload</h2>
-    <p>Confirm the records and readings that will be saved. Only nonzero reading activity is shown.</p>
-  </header>
-
   @if (review.overview.length) {
     <dl class="import-review-overview" aria-label="Upload totals">
       @for (item of review.overview; track item.key) {
         <div class="import-review-overview__item">
-          <dt>
+          <dt>{{ item.label }}</dt>
+          <dd>
             <app-ui-icon [name]="item.icon"></app-ui-icon>
-            {{ item.label }}
-          </dt>
-          <dd>{{ item.count }}</dd>
+            <span>{{ item.count }}</span>
+          </dd>
         </div>
       }
     </dl>

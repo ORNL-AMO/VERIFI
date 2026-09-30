@@ -4,6 +4,7 @@ import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.tes
 import { SpreadsheetImportDraftService } from './spreadsheet-import-draft.service';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { profileGeneralWorkbookColumn } from './general-workbook-column-profile';
 
 describe('SpreadsheetImportDraftService', () => {
   const service = new SpreadsheetImportDraftService(
@@ -46,6 +47,194 @@ describe('SpreadsheetImportDraftService', () => {
 
     expect(service.visibleWorksheetNames(workbook)).toEqual(['Visible']);
     expect(service.visibleWorksheetNames(workbook, true)).toEqual(['Visible', 'Hidden', 'Very Hidden']);
+  });
+
+  it('auto-assigns only one unambiguous likely date column when selecting a general worksheet', () => {
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+      ['Read Date', 'Electricity'],
+      ['2026-01-01', 12],
+      ['2026-02-01', 14]
+    ]), 'Data');
+    const draft = importDraft('general-workbook', { workbook });
+
+    service.selectWorksheet(draft, 'Data');
+
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Date')?.groupItems.map(item => item.value))
+      .toEqual(['Read Date']);
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns')?.groupItems.map(item => item.value))
+      .toEqual(['Electricity']);
+  });
+
+  it('preserves source worksheet rows when blank lines precede an invalid date', () => {
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+      ['Date', 'Electricity'],
+      ['2026-01-01', 12],
+      [],
+      ['not-a-date', 14]
+    ]), 'Data');
+    const draft = importDraft('general-workbook', { workbook });
+
+    service.selectWorksheet(draft, 'Data');
+
+    const dateColumn = draft.columnGroups.flatMap(group => group.groupItems)
+      .find(item => item.value === 'Date')!;
+    const profile = profileGeneralWorkbookColumn(dateColumn, draft.headerMap);
+    expect(profile.invalidDateRows).toEqual([4]);
+  });
+
+  it('moves columns in one batch, swaps Date, preserves source order, and clears derived review state', () => {
+    const draft = importDraft('general-workbook', {
+      columnGroups: [
+        { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [
+          { id: 'gas', index: 2, value: 'Gas' },
+          { id: 'read-date', index: 1, value: 'Read Date' }
+        ] },
+        { id: 'meters', groupLabel: 'Meters', groupItems: [{ id: 'electricity', index: 3, value: 'Electricity' }] },
+        { id: 'predictors', groupLabel: 'Predictors', groupItems: [] },
+        { id: 'date', groupLabel: 'Date', groupItems: [{ id: 'date-column', index: 0, value: 'Date' }] }
+      ],
+      meters: [meter({})],
+      meterData: [reading({})],
+      predictors: [predictor()],
+      predictorData: [predictorReading()],
+      invalidMeterReadingsAcknowledged: true,
+      invalidPredictorReadingsAcknowledged: true,
+      excludedMeterReadingIds: ['reading'],
+      excludedPredictorReadingIds: ['predictor-reading']
+    });
+
+    service.assignColumns(draft, ['gas', 'electricity'], 'Predictors');
+    service.assignColumn(draft, 'read-date', 'Date');
+
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Predictors')?.groupItems.map(item => item.id))
+      .toEqual(['gas', 'electricity']);
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns')?.groupItems.map(item => item.id))
+      .toEqual(['date-column']);
+    expect(draft.columnGroups.find(group => group.groupLabel === 'Date')?.groupItems.map(item => item.id))
+      .toEqual(['read-date']);
+    expect(draft.meters).toEqual([]);
+    expect(draft.meterData).toEqual([]);
+    expect(draft.predictors).toEqual([]);
+    expect(draft.predictorData).toEqual([]);
+    expect(draft.invalidMeterReadingsAcknowledged).toBe(false);
+    expect(draft.invalidPredictorReadingsAcknowledged).toBe(false);
+    expect(draft.excludedMeterReadingIds).toEqual([]);
+    expect(draft.excludedPredictorReadingIds).toEqual([]);
+  });
+
+  it('does not mutate groups when several columns are assigned to Date', () => {
+    const groups = [
+      { id: 'unused', groupLabel: 'Worksheet Columns', groupItems: [
+        { id: 'one', index: 0, value: 'One' },
+        { id: 'two', index: 1, value: 'Two' }
+      ] },
+      { id: 'date', groupLabel: 'Date', groupItems: [] }
+    ];
+    const draft = importDraft('general-workbook', { columnGroups: groups });
+
+    service.assignColumns(draft, ['one', 'two'], 'Date');
+
+    expect(draft.columnGroups).toEqual(groups);
+  });
+
+  it('moves facility mapping items in one batch, preserves source order, and clears meter review state', () => {
+    const draft = importDraft('general-workbook', {
+      importFacilities: [
+        { guid: 'facility-a', name: 'Plant A' } as any,
+        { guid: 'facility-b', name: 'Plant B' } as any
+      ],
+      meterFacilityGroups: [
+        {
+          facilityId: 'unmapped', facilityName: 'Unmapped Meters', color: '', groupItems: [
+            { id: 'gas', index: 2, value: 'Gas' },
+            { id: 'electricity', index: 1, value: 'Electricity' }
+          ]
+        },
+        { facilityId: 'facility-a', facilityName: 'Plant A', color: '', groupItems: [] },
+        { facilityId: 'facility-b', facilityName: 'Plant B', color: '', groupItems: [] }
+      ],
+      meters: [meter({ guid: 'reviewed-meter' })],
+      meterData: [reading({ guid: 'reviewed-reading' })],
+      newMeterGroups: [{ guid: 'draft-group' } as any],
+      skipExistingReadingsMeterIds: ['reviewed-meter'],
+      excludedMeterReadingIds: ['reviewed-reading'],
+      invalidMeterReadingsAcknowledged: true
+    });
+    vi.spyOn(service, 'materializeGeneralMeters').mockImplementation(() => undefined);
+
+    service.assignFacilityMappingItems(draft, 'meter', ['gas', 'electricity'], 'facility-b');
+
+    expect(draft.meterFacilityGroups.find(group => group.facilityId === 'facility-b')?.groupItems.map(item => item.id))
+      .toEqual(['electricity', 'gas']);
+    expect(draft.meterFacilityGroups[0].groupItems).toEqual([]);
+    expect(draft.meters).toEqual([]);
+    expect(draft.meterData).toEqual([]);
+    expect(draft.newMeterGroups).toEqual([]);
+    expect(draft.skipExistingReadingsMeterIds).toEqual([]);
+    expect(draft.excludedMeterReadingIds).toEqual([]);
+    expect(draft.invalidMeterReadingsAcknowledged).toBe(false);
+    expect(service.materializeGeneralMeters).toHaveBeenCalledOnce();
+  });
+
+  it('does not rematerialize a facility mapping for same-lane items or an invalid destination', () => {
+    const draft = importDraft('general-workbook', {
+      importFacilities: [{ guid: 'facility-a', name: 'Plant A' } as any],
+      meterFacilityGroups: [
+        { facilityId: 'unmapped', facilityName: 'Unmapped Meters', color: '', groupItems: [] },
+        {
+          facilityId: 'facility-a', facilityName: 'Plant A', color: '',
+          groupItems: [{ id: 'electricity', index: 1, value: 'Electricity' }]
+        }
+      ]
+    });
+    const materialize = vi.spyOn(service, 'materializeGeneralMeters').mockImplementation(() => undefined);
+    materialize.mockClear();
+
+    service.assignFacilityMappingItems(draft, 'meter', ['electricity'], 'facility-a');
+    service.assignFacilityMappingItems(draft, 'meter', ['electricity'], 'missing-facility');
+
+    expect(materialize).not.toHaveBeenCalled();
+    expect(draft.meterFacilityGroups[1].groupItems.map(item => item.id)).toEqual(['electricity']);
+  });
+
+  it('stores an initial default facility and later rebuilds both initialized mappings', () => {
+    const draft = importDraft('general-workbook', {
+      importFacilities: [
+        { guid: 'facility-a', name: 'Plant A', color: '#123456' } as any,
+        { guid: 'facility-b', name: 'Plant B', color: '#654321' } as any
+      ],
+      columnGroups: [
+        { id: 'meters', groupLabel: 'Meters', groupItems: [{ id: 'meter', index: 1, value: 'Electricity' }] },
+        { id: 'predictors', groupLabel: 'Predictors', groupItems: [{ id: 'predictor', index: 2, value: 'Production' }] }
+      ]
+    });
+    const materialize = vi.spyOn(service, 'materializeGeneralRecords').mockImplementation(() => undefined);
+
+    service.setGeneralWorkbookDefaultFacility(draft, 'facility-a');
+
+    expect(draft.selectedFacilityId).toBe('facility-a');
+    expect(draft.meterFacilityGroups).toEqual([]);
+    expect(materialize).not.toHaveBeenCalled();
+
+    service.initializeFacilityMappings(draft);
+    service.setGeneralWorkbookDefaultFacility(draft, 'facility-b');
+
+    expect(draft.selectedFacilityId).toBe('facility-b');
+    expect(draft.meterFacilityGroups.find(group => group.facilityId === 'facility-b')?.groupItems.map(item => item.id))
+      .toEqual(['meter']);
+    expect(draft.predictorFacilityGroups.find(group => group.facilityId === 'facility-b')?.groupItems.map(item => item.id))
+      .toEqual(['predictor']);
+
+    service.setGeneralWorkbookDefaultFacility(draft, undefined);
+
+    expect(draft.selectedFacilityId).toBeUndefined();
+    expect(draft.meterFacilityGroups.find(group => group.facilityName === 'Unmapped Meters')?.groupItems.map(item => item.id))
+      .toEqual(['meter']);
+    expect(draft.predictorFacilityGroups.find(group => group.facilityName === 'Unmapped Predictors')?.groupItems.map(item => item.id))
+      .toEqual(['predictor']);
+    expect(materialize).toHaveBeenCalledTimes(3);
   });
 
   it('replaces a meter and retargets readings and import decisions without losing source identity', () => {

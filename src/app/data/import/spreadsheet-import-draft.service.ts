@@ -19,6 +19,7 @@ import {
 import { setPredictorDateDataFromDate } from '@shared/dateHelperFunctions';
 import * as XLSX from 'xlsx';
 import { applyMeterMultipliers } from './meter-import-defaults';
+import { likelyGeneralWorkbookDateColumn, parseGeneralWorkbookDate } from './general-workbook-column-profile';
 import { UploadDataEnergyTreasureHuntService } from './parsers/upload-data-energy-treasure-hunt.service';
 import { UploadDataFootprintToolService } from './parsers/upload-data-footprint-tool.service';
 import { UploadDataV1Service } from './parsers/upload-data-v1.service';
@@ -27,6 +28,7 @@ import { UploadDataV3Service } from './parsers/upload-data-v3.service';
 import {
   ColumnGroup,
   ColumnItem,
+  ColumnTarget,
   FacilityGroup,
   ImportFileDraft,
   ParsedTemplate,
@@ -142,58 +144,111 @@ export class SpreadsheetImportDraftService {
     }
     const headers = draft.selectedWorksheetData[0].map(value => String(value ?? '').trim());
     draft.selectedWorksheetData[0] = headers;
-    draft.headerMap = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet).map(row =>
-      Object.keys(row).reduce((result, key) => {
+    draft.headerMap = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet).map(row => {
+      const normalized = Object.keys(row).reduce((result, key) => {
         result[key.trim()] = row[key];
         return result;
-      }, {} as Record<string, unknown>)
-    );
+      }, {} as Record<string, unknown>);
+      const sourceIndex = (row as Record<string, unknown> & { __rowNum__?: unknown }).__rowNum__;
+      if (typeof sourceIndex === 'number') {
+        Object.defineProperty(normalized, '__rowNum__', { value: sourceIndex, enumerable: false });
+      }
+      return normalized;
+    });
     const items = headers.filter(Boolean).map((value, index) => ({ value, index, id: crypto.randomUUID() }));
-    const date = items.find(item => item.value === 'Date');
+    const date = likelyGeneralWorkbookDateColumn(items, draft.headerMap);
     draft.columnGroups = [
       this.columnGroup('Worksheet Columns', items.filter(item => item !== date)),
       this.columnGroup('Meters', []),
       this.columnGroup('Predictors', []),
       this.columnGroup('Date', date ? [date] : [])
     ];
-    draft.meterFacilityGroups = [];
-    draft.predictorFacilityGroups = [];
+    this.resetGeneralWorkbookDerivedState(draft);
     draft.findings = [];
   }
 
-  assignColumn(draft: ImportFileDraft, itemId: string, target: 'Worksheet Columns' | 'Meters' | 'Predictors' | 'Date'): void {
-    let item: ColumnItem;
-    for (const group of draft.columnGroups) {
-      const index = group.groupItems.findIndex(candidate => candidate.id === itemId);
-      if (index >= 0) item = group.groupItems.splice(index, 1)[0];
-    }
-    if (!item) return;
+  assignColumn(draft: ImportFileDraft, itemId: string, target: ColumnTarget): void {
+    this.assignColumns(draft, [itemId], target);
+  }
+
+  assignColumns(draft: ImportFileDraft, itemIds: readonly string[], target: ColumnTarget): void {
     const targetGroup = draft.columnGroups.find(group => group.groupLabel === target);
+    const worksheetGroup = draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns');
+    const uniqueIds = [...new Set(itemIds)];
+    const items = draft.columnGroups
+      .flatMap(group => group.groupItems)
+      .filter(item => uniqueIds.includes(item.id))
+      .sort((left, right) => left.index - right.index);
+    if (!targetGroup || items.length === 0 || (target === 'Date' && (items.length !== 1 || !worksheetGroup))) return;
+
+    const itemIdSet = new Set(items.map(item => item.id));
+    draft.columnGroups.forEach(group => {
+      group.groupItems = group.groupItems.filter(item => !itemIdSet.has(item.id));
+    });
     if (target === 'Date' && targetGroup.groupItems.length) {
       const prior = targetGroup.groupItems.pop();
-      draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns').groupItems.push(prior);
+      if (prior && worksheetGroup) worksheetGroup.groupItems.push(prior);
     }
-    targetGroup.groupItems.push(item);
-    draft.meterFacilityGroups = [];
-    draft.predictorFacilityGroups = [];
+    targetGroup.groupItems.push(...items);
+    draft.columnGroups.forEach(group => group.groupItems.sort((left, right) => left.index - right.index));
+    this.resetGeneralWorkbookDerivedState(draft);
   }
 
   initializeFacilityMappings(draft: ImportFileDraft): void {
     draft.meterFacilityGroups = this.mappingGroups(draft, 'Meters', 'Unmapped Meters');
     draft.predictorFacilityGroups = this.mappingGroups(draft, 'Predictors', 'Unmapped Predictors');
+    this.resetGeneralMeterMappingState(draft);
+    this.resetGeneralPredictorMappingState(draft);
+    this.materializeGeneralRecords(draft);
   }
 
   mapColumnToFacility(draft: ImportFileDraft, type: 'meter' | 'predictor', itemId: string, facilityId?: string): void {
+    this.assignFacilityMappingItems(draft, type, [itemId], facilityId);
+  }
+
+  assignFacilityMappingItems(
+    draft: ImportFileDraft,
+    type: 'meter' | 'predictor',
+    itemIds: readonly string[],
+    facilityId?: string
+  ): void {
     const groups = type === 'meter' ? draft.meterFacilityGroups : draft.predictorFacilityGroups;
-    let item: ColumnItem;
+    if (facilityId && !draft.importFacilities.some(facility => facility.guid === facilityId)) return;
+    const target = groups.find(group => facilityId
+      ? group.facilityId === facilityId
+      : group.facilityName.startsWith('Unmapped'));
+    if (!target) return;
+
+    const requestedIds = new Set(itemIds);
+    const movingItems = groups
+      .filter(group => group !== target)
+      .flatMap(group => group.groupItems)
+      .filter(item => requestedIds.has(item.id))
+      .sort((left, right) => left.index - right.index);
+    if (!movingItems.length) return;
+
+    const movingIds = new Set(movingItems.map(item => item.id));
     groups.forEach(group => {
-      const index = group.groupItems.findIndex(candidate => candidate.id === itemId);
-      if (index >= 0) item = group.groupItems.splice(index, 1)[0];
+      group.groupItems = group.groupItems.filter(item => !movingIds.has(item.id));
     });
-    const target = groups.find(group => facilityId ? group.facilityId === facilityId : group.facilityName.startsWith('Unmapped'));
-    if (item && target) target.groupItems.push(item);
-    if (type === 'meter') this.materializeGeneralMeters(draft);
-    else this.materializeGeneralPredictors(draft);
+    target.groupItems.push(...movingItems);
+    groups.forEach(group => group.groupItems.sort((left, right) => left.index - right.index));
+
+    if (type === 'meter') {
+      this.resetGeneralMeterMappingState(draft);
+      this.materializeGeneralMeters(draft);
+    } else {
+      this.resetGeneralPredictorMappingState(draft);
+      this.materializeGeneralPredictors(draft);
+    }
+  }
+
+  setGeneralWorkbookDefaultFacility(draft: ImportFileDraft, facilityId?: string): void {
+    if (facilityId && !draft.importFacilities.some(facility => facility.guid === facilityId)) return;
+    if (draft.selectedFacilityId === facilityId) return;
+    draft.selectedFacilityId = facilityId;
+    const mappingsInitialized = draft.meterFacilityGroups.length > 0 || draft.predictorFacilityGroups.length > 0;
+    if (mappingsInitialized) this.initializeFacilityMappings(draft);
   }
 
   materializeGeneralRecords(draft: ImportFileDraft): void {
@@ -410,8 +465,8 @@ export class SpreadsheetImportDraftService {
     const existing = this.store.meterData().map(reading => getMeterDataCopy(reading));
     const result: IdbUtilityMeterData[] = [];
     draft.meters.filter(meter => !meter.skipImport).forEach(meter => draft.headerMap.forEach(row => {
-      const date = new Date(row[dateColumn] as any);
-      if (isNaN(date.valueOf())) return;
+      const date = parseGeneralWorkbookDate(row[dateColumn]);
+      if (!date) return;
       const reading = existing.find(value => value.meterId === meter.guid && checkSameDate(date, value))
         ?? getNewIdbUtilityMeterData(meter, []);
       reading.year = date.getFullYear();
@@ -452,8 +507,8 @@ export class SpreadsheetImportDraftService {
       const importedPredictor = { ...predictor, importWizardName: item.value };
       predictors.push(importedPredictor);
       draft.headerMap.forEach(row => {
-        const date = new Date(row[dateColumn] as any);
-        if (isNaN(date.valueOf())) return;
+        const date = parseGeneralWorkbookDate(row[dateColumn]);
+        if (!date) return;
         const existingReading = existingReadings.find(value => value.predictorId === predictor.guid && checkSameMonthPredictorData(value, date));
         const reading = existingReading ? { ...existingReading } : getNewIdbPredictorData(predictor);
         reading.amount = Number(row[item.value]);
@@ -509,8 +564,43 @@ export class SpreadsheetImportDraftService {
     })).filter(group => group.groupItems.length > 0);
   }
 
-  private columnGroup(groupLabel: string, groupItems: ColumnItem[]): ColumnGroup {
+  private columnGroup(groupLabel: ColumnTarget, groupItems: ColumnItem[]): ColumnGroup {
     return { groupLabel, groupItems, id: crypto.randomUUID(), dragDropClass: groupLabel.replace(' ', '') };
+  }
+
+  private resetGeneralWorkbookDerivedState(draft: ImportFileDraft): void {
+    draft.meterFacilityGroups = [];
+    draft.predictorFacilityGroups = [];
+    draft.meters = [];
+    draft.meterData = [];
+    draft.predictors = [];
+    draft.predictorData = [];
+    draft.newMeterGroups = [];
+    draft.skipExistingReadingsMeterIds = [];
+    draft.skipExistingPredictorFacilityIds = [];
+    draft.skipExistingPredictorIds = [];
+    draft.excludedMeterReadingIds = [];
+    draft.excludedPredictorReadingIds = [];
+    draft.invalidMeterReadingsAcknowledged = false;
+    draft.invalidPredictorReadingsAcknowledged = false;
+  }
+
+  private resetGeneralMeterMappingState(draft: ImportFileDraft): void {
+    draft.meters = [];
+    draft.meterData = [];
+    draft.newMeterGroups = [];
+    draft.skipExistingReadingsMeterIds = [];
+    draft.excludedMeterReadingIds = [];
+    draft.invalidMeterReadingsAcknowledged = false;
+  }
+
+  private resetGeneralPredictorMappingState(draft: ImportFileDraft): void {
+    draft.predictors = [];
+    draft.predictorData = [];
+    draft.skipExistingPredictorFacilityIds = [];
+    draft.skipExistingPredictorIds = [];
+    draft.excludedPredictorReadingIds = [];
+    draft.invalidPredictorReadingsAcknowledged = false;
   }
 
   private startsWith(actual: string[], expected: string[]): boolean {

@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import-command.service';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
-import { ImportFileDraft } from '@data/import/spreadsheet-import.models';
+import { profileGeneralWorkbookColumn } from '@data/import/general-workbook-column-profile';
+import { ColumnTarget, ImportFileDraft } from '@data/import/spreadsheet-import.models';
 import {
   buildSpreadsheetImportCommitRequest,
   hasSpreadsheetImportRecords
@@ -15,8 +16,21 @@ import { buildImportReviewSummary } from './import-review-summary';
 import { ImportWizardDraftStore } from './import-wizard-draft.store';
 import { ImportMeterReviewStateService } from './import-meter-review-state.service';
 import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
+import {
+  columnTargetLabel,
+  ImportColumnCardView,
+  ImportColumnLaneView,
+  ImportColumnStepStatus,
+  IMPORT_COLUMN_TARGETS
+} from './import-column.models';
+import {
+  importMappingDropListId,
+  ImportMappingBoardView,
+  ImportMappingLaneView,
+  ImportMappingType
+} from './import-mapping.models';
 
-export type ImportMappingType = 'meter' | 'predictor';
+export { ImportMappingType } from './import-mapping.models';
 
 @Injectable()
 export class ImportWizardStateService {
@@ -34,6 +48,10 @@ export class ImportWizardStateService {
   readonly error = signal<string | undefined>(undefined);
   readonly committed = signal(false);
   readonly newFacilityName = signal('');
+  readonly selectedColumnIds = signal<readonly string[]>([]);
+  readonly columnAnnouncement = signal('');
+  readonly selectedMappingItemIds = signal<readonly string[]>([]);
+  readonly mappingAnnouncement = signal('');
 
   readonly steps = computed(() => this.draft() ? stepsForDraft(this.draft()) : []);
   readonly currentStep = computed(() => this.steps().find(step => step.id === this.currentStepId()));
@@ -46,18 +64,78 @@ export class ImportWizardStateService {
   readonly allColumns = computed(() => this.draft()?.columnGroups
     .flatMap(group => group.groupItems)
     .sort((left, right) => left.index - right.index) ?? []);
+  private readonly columnProfiles = computed(() => new Map(this.allColumns().map(column => [
+    column.id,
+    profileGeneralWorkbookColumn(column, this.draft()?.headerMap ?? [])
+  ])));
+  readonly columnCards = computed<readonly ImportColumnCardView[]>(() => this.allColumns().map(column => ({
+    id: column.id,
+    header: column.value,
+    index: column.index,
+    target: this.columnTarget(column.id),
+    likelyDate: this.columnProfiles().get(column.id)?.likelyDate ?? false
+  })));
+  readonly columnLanes = computed<readonly ImportColumnLaneView[]>(() => {
+    return IMPORT_COLUMN_TARGETS.map(target => {
+      const cards = this.columnCards().filter(card => card.target === target);
+      return {
+        target,
+        label: columnTargetLabel(target),
+        description: columnLaneDescription(target),
+        icon: columnLaneIcon(target),
+        cards,
+        totalCount: cards.length
+      };
+    });
+  });
+  readonly selectedColumnCount = computed(() => this.selectedColumnIds().length);
+  readonly columnStepStatus = computed<ImportColumnStepStatus>(() => {
+    const dateColumn = this.groupItems('Date')[0];
+    const profile = dateColumn ? this.columnProfiles().get(dateColumn.id) : undefined;
+    const range = profile?.minDate && profile.maxDate
+      ? `${profile.minDate.toLocaleDateString()} – ${profile.maxDate.toLocaleDateString()}`
+      : 'No usable dates found';
+    const date = {
+      selected: !!dateColumn,
+      usable: !!profile?.usableDateCount,
+      usableCount: profile?.usableDateCount ?? 0,
+      invalidCount: profile?.invalidDateRows.length ?? 0,
+      invalidRows: profile?.invalidDateRows.slice(0, 5) ?? [],
+      range
+    };
+    const hasDataColumn = this.meterColumns().length > 0 || this.predictorColumns().length > 0;
+    return { ready: date.selected && date.usable && hasDataColumn, hasDataColumn, date };
+  });
+  readonly columnContinueMessage = computed(() => {
+    const status = this.columnStepStatus();
+    if (!status.date.selected) return 'Choose one Date column before continuing.';
+    if (!status.date.usable) return 'Choose a Date column with at least one usable date.';
+    if (!status.hasDataColumn) return 'Move at least one column to Meters or Predictors.';
+    return undefined;
+  });
+  readonly selectedMappingItemCount = computed(() => this.selectedMappingItemIds().length);
+  readonly activeMappingType = computed<ImportMappingType | undefined>(() => {
+    if (this.currentStepId() === 'map-meters') return 'meter';
+    if (this.currentStepId() === 'map-predictors') return 'predictor';
+    return undefined;
+  });
+  readonly activeMappingBoard = computed(() => {
+    const type = this.activeMappingType();
+    return type ? this.mappingBoard(type) : undefined;
+  });
+  readonly stepContinueMessage = computed(() => {
+    if (this.currentStepId() === 'columns') return this.columnContinueMessage();
+    const board = this.activeMappingBoard();
+    if (!board || board.status.ready) return undefined;
+    return `Map all ${board.type} columns before continuing.`;
+  });
+  readonly canContinueCurrentStep = computed(() => {
+    if (this.currentStepId() === 'columns') return this.columnStepStatus().ready;
+    return this.activeMappingBoard()?.status.ready ?? true;
+  });
   readonly worksheetNames = computed(() => this.draft()
     ? this.drafts.visibleWorksheetNames(this.draft().workbook)
     : []);
-  readonly dateRange = computed(() => {
-    const dateColumn = this.groupItems('Date')[0]?.value;
-    const dates = dateColumn
-      ? this.draft()?.headerMap.map(row => new Date(row[dateColumn] as any)).filter(date => !isNaN(date.valueOf())) ?? []
-      : [];
-    if (!dates.length) return 'No usable dates found';
-    const times = dates.map(date => date.getTime());
-    return `${new Date(Math.min(...times)).toLocaleDateString()} – ${new Date(Math.max(...times)).toLocaleDateString()}`;
-  });
   readonly reviewSummary = computed(() => {
     const draft = this.draft();
     if (!draft) return undefined;
@@ -78,6 +156,10 @@ export class ImportWizardStateService {
     this.draftStore.initialize(draft);
     this.meters.initialize();
     this.committed.set(draft.status === 'completed');
+    this.selectedColumnIds.set([]);
+    this.columnAnnouncement.set('');
+    this.selectedMappingItemIds.set([]);
+    this.mappingAnnouncement.set('');
   }
 
   allowedStep(requestedStep: string | undefined): string {
@@ -92,6 +174,11 @@ export class ImportWizardStateService {
   }
 
   activateStep(stepId: string): void {
+    const enteringStep = this.currentStepId() !== stepId;
+    if (enteringStep) {
+      this.selectedMappingItemIds.set([]);
+      this.mappingAnnouncement.set('');
+    }
     this.currentStepId.set(stepId);
     this.error.set(undefined);
     const draft = this.draft();
@@ -99,6 +186,11 @@ export class ImportWizardStateService {
       draft.meterFacilityGroups.length === 0 && draft.predictorFacilityGroups.length === 0) {
       this.drafts.initializeFacilityMappings(draft);
       this.changed();
+    }
+    if (enteringStep && stepId === 'map-meters') {
+      this.selectedMappingItemIds.set(this.mappingBoard('meter').unmappedLane.cards.map(card => card.id));
+    } else if (enteringStep && stepId === 'map-predictors') {
+      this.selectedMappingItemIds.set(this.mappingBoard('predictor').unmappedLane.cards.map(card => card.id));
     }
   }
 
@@ -146,29 +238,127 @@ export class ImportWizardStateService {
 
   selectWorksheet(name: string): void {
     this.drafts.selectWorksheet(this.draft(), name);
+    this.invalidateGeneralColumnDependencies();
+    this.selectedColumnIds.set([]);
     this.changed();
   }
 
-  assignColumn(itemId: string, target: string): void {
-    this.drafts.assignColumn(this.draft(), itemId, target as any);
+  moveColumns(itemIds: readonly string[], target: ColumnTarget): void {
+    const currentTargets = new Map(this.columnCards().map(card => [card.id, card.target]));
+    const movingIds = [...new Set(itemIds)].filter(id => currentTargets.has(id) && currentTargets.get(id) !== target);
+    if (!movingIds.length || (target === 'Date' && movingIds.length !== 1)) return;
+    const priorDate = target === 'Date' ? this.groupItems('Date')[0] : undefined;
+    this.drafts.assignColumns(this.draft(), movingIds, target);
+    this.invalidateGeneralColumnDependencies();
+    const movedIds = new Set([...movingIds, ...(priorDate ? [priorDate.id] : [])]);
+    this.selectedColumnIds.update(selected => selected.filter(id => !movedIds.has(id)));
+    const movedLabel = movingIds.length === 1 ? '1 column' : `${movingIds.length} columns`;
+    const swapLabel = priorDate && !movingIds.includes(priorDate.id)
+      ? ` ${priorDate.value} was returned to Not imported.`
+      : '';
+    this.columnAnnouncement.set(`${movedLabel} moved to ${columnTargetLabel(target)}.${swapLabel}`);
     this.changed();
   }
 
-  columnTarget(itemId: string): string {
-    return this.draft()?.columnGroups.find(group => group.groupItems.some(item => item.id === itemId))?.groupLabel
-      ?? 'Worksheet Columns';
+  columnTarget(itemId: string): ColumnTarget {
+    const label = this.draft()?.columnGroups
+      .find(group => group.groupItems.some(item => item.id === itemId))?.groupLabel as ColumnTarget | undefined;
+    return label && IMPORT_COLUMN_TARGETS.includes(label) ? label : 'Worksheet Columns';
   }
 
-  mappingItems(type: ImportMappingType) {
-    const groups = type === 'meter' ? this.draft()?.meterFacilityGroups : this.draft()?.predictorFacilityGroups;
-    return (groups ?? []).flatMap(group => group.groupItems.map(item => ({
-      ...item,
-      facilityId: group.facilityName.startsWith('Unmapped') ? '' : group.facilityId
-    })));
+  setColumnSelected(itemId: string, selected: boolean): void {
+    this.selectedColumnIds.update(ids => selected
+      ? [...new Set([...ids, itemId])]
+      : ids.filter(id => id !== itemId));
   }
 
-  mapColumn(type: ImportMappingType, itemId: string, facilityId: string): void {
-    this.drafts.mapColumnToFacility(this.draft(), type, itemId, facilityId || undefined);
+  moveSelectedColumns(target: ColumnTarget): void {
+    this.moveColumns(this.selectedColumnIds(), target);
+  }
+
+  mappingBoard(type: ImportMappingType): ImportMappingBoardView {
+    const draft = this.draft();
+    const groups = type === 'meter' ? draft?.meterFacilityGroups : draft?.predictorFacilityGroups;
+    const unmappedGroup = groups?.find(group => group.facilityName.startsWith('Unmapped'));
+    const unmappedLane = this.mappingLane({
+      id: 'unmapped',
+      label: 'Unmapped',
+      description: `Assign every ${type} column to a facility.`,
+      color: 'var(--v1-danger)',
+      unmapped: true,
+      items: unmappedGroup?.groupItems ?? []
+    });
+    const facilityLanes = (draft?.importFacilities ?? []).map(facility => {
+      const group = groups?.find(candidate => candidate.facilityId === facility.guid);
+      return this.mappingLane({
+        id: facility.guid,
+        facilityId: facility.guid,
+        label: facility.name,
+        description: `${type === 'meter' ? 'Meter' : 'Predictor'} columns assigned here.`,
+        color: facility.color || 'var(--v1-action)',
+        unmapped: false,
+        items: group?.groupItems ?? []
+      });
+    });
+    const lanes = [unmappedLane, ...facilityLanes];
+    const unmappedCount = unmappedLane.totalCount;
+    const totalCount = lanes.reduce((total, lane) => total + lane.totalCount, 0);
+    return {
+      type,
+      itemLabel: type === 'meter' ? 'meters' : 'predictors',
+      unmappedLane,
+      facilityLanes,
+      lanes,
+      destinations: lanes.map(lane => ({ id: lane.id, facilityId: lane.facilityId, label: lane.label })),
+      connectedDropListIds: lanes.map(lane => importMappingDropListId(type, lane.id)),
+      status: {
+        totalCount,
+        mappedCount: totalCount - unmappedCount,
+        unmappedCount,
+        ready: unmappedCount === 0
+      }
+    };
+  }
+
+  setMappingItemSelected(itemId: string, selected: boolean): void {
+    this.selectedMappingItemIds.update(ids => selected
+      ? [...new Set([...ids, itemId])]
+      : ids.filter(id => id !== itemId));
+  }
+
+  moveFacilityMappingItems(type: ImportMappingType, itemIds: readonly string[], facilityId?: string): void {
+    const board = this.mappingBoard(type);
+    const target = board.lanes.find(lane => lane.facilityId === facilityId);
+    if (!target) return;
+    const currentLaneById = new Map(board.lanes.flatMap(lane => lane.cards.map(card => [card.id, lane.facilityId] as const)));
+    const movingIds = [...new Set(itemIds)].filter(id => currentLaneById.has(id) && currentLaneById.get(id) !== facilityId);
+    if (!movingIds.length) return;
+    this.drafts.assignFacilityMappingItems(this.draft(), type, movingIds, facilityId);
+    const movedIds = new Set(movingIds);
+    this.selectedMappingItemIds.update(ids => ids.filter(id => !movedIds.has(id)));
+    this.mappingAnnouncement.set(`${movingIds.length} ${type}${movingIds.length === 1 ? '' : 's'} moved to ${target.label}.`);
+    this.invalidateFromStep(type === 'meter' ? 'map-meters' : 'map-predictors');
+    this.changed();
+  }
+
+  moveSelectedFacilityMappingItems(type: ImportMappingType, facilityId?: string): void {
+    this.moveFacilityMappingItems(type, this.selectedMappingItemIds(), facilityId);
+  }
+
+  setGeneralWorkbookFacility(facilityId?: string): void {
+    const normalizedFacilityId = facilityId || undefined;
+    const draft = this.draft();
+    if (!draft || draft.selectedFacilityId === normalizedFacilityId) return;
+    const label = normalizedFacilityId
+      ? draft.importFacilities.find(facility => facility.guid === normalizedFacilityId)?.name
+      : 'Multiple facilities';
+    if (!label) return;
+    this.drafts.setGeneralWorkbookDefaultFacility(draft, normalizedFacilityId);
+    this.selectedMappingItemIds.set([]);
+    this.mappingAnnouncement.set(normalizedFacilityId
+      ? `All meter and predictor columns default to ${label}.`
+      : 'Meter and predictor columns reset to Unmapped.');
+    this.invalidateFromStep('map-meters');
     this.changed();
   }
 
@@ -254,10 +444,11 @@ export class ImportWizardStateService {
     if (step === 'worksheet' && !draft.selectedWorksheetData.length) return 'Choose a non-empty worksheet.';
     if (step === 'columns') {
       if (this.groupItems('Date').length !== 1) return 'Identify exactly one usable date column.';
+      if (!this.columnStepStatus().date.usable) return 'Choose a date column with at least one usable date.';
       if (!this.meterColumns().length && !this.predictorColumns().length) return 'Identify at least one meter or predictor column.';
     }
-    if (step === 'map-meters' && this.unmappedCount('meter')) return 'Assign every meter column to a facility or return it to worksheet columns.';
-    if (step === 'map-predictors' && this.unmappedCount('predictor')) return 'Assign every predictor column to a facility or return it to worksheet columns.';
+    if (step === 'map-meters' && this.unmappedCount('meter')) return 'Map all meter columns before continuing.';
+    if (step === 'map-predictors' && this.unmappedCount('predictor')) return 'Map all predictor columns before continuing.';
     if (step === 'facility' && !draft.selectedFacilityId) return 'Select a facility for this footprint upload.';
     if (step === 'meters' && draft.meters.some((meter, index) => !meter.skipImport && this.meters.invalid(index))) {
       return 'Fix or skip every invalid meter before continuing.';
@@ -291,6 +482,44 @@ export class ImportWizardStateService {
     return this.draft()?.columnGroups.find(group => group.groupLabel === label)?.groupItems ?? [];
   }
 
+  private invalidateGeneralColumnDependencies(): void {
+    this.invalidateFromStep('columns');
+  }
+
+  private invalidateFromStep(stepId: string): void {
+    const draft = this.draft();
+    if (!draft) return;
+    const stepIndex = this.steps().findIndex(step => step.id === stepId);
+    if (stepIndex < 0) return;
+    const invalidSteps = new Set(this.steps().slice(stepIndex).map(step => step.id));
+    draft.completedSteps = draft.completedSteps.filter(step => !invalidSteps.has(step));
+    this.error.set(undefined);
+  }
+
+  private mappingLane(value: {
+    id: string;
+    facilityId?: string;
+    label: string;
+    description: string;
+    color: string;
+    unmapped: boolean;
+    items: readonly { id: string; value: string; index: number }[];
+  }): ImportMappingLaneView {
+    const cards = value.items
+      .map(item => ({ id: item.id, label: item.value, index: item.index, facilityId: value.facilityId }))
+      .sort((left, right) => left.index - right.index);
+    return {
+      id: value.id,
+      facilityId: value.facilityId,
+      label: value.label,
+      description: value.description,
+      color: value.color,
+      unmapped: value.unmapped,
+      cards,
+      totalCount: cards.length
+    };
+  }
+
   private changed(): void {
     this.draftStore.changed();
   }
@@ -299,6 +528,20 @@ export class ImportWizardStateService {
     return buildSpreadsheetImportCommitRequest(draft, this.workspace.account().guid);
   }
 
+}
+
+function columnLaneDescription(target: ColumnTarget): string {
+  if (target === 'Worksheet Columns') return 'Columns here will not be uploaded.';
+  if (target === 'Date') return 'Choose the single column that dates each reading.';
+  if (target === 'Meters') return 'Energy, water, emissions, or other utility readings.';
+  return 'Production, weather, occupancy, or other relevant variables.';
+}
+
+function columnLaneIcon(target: ColumnTarget): ImportColumnLaneView['icon'] {
+  if (target === 'Worksheet Columns') return 'viewHidden';
+  if (target === 'Date') return 'calendar';
+  if (target === 'Meters') return 'meter';
+  return 'predictor';
 }
 
 function allowedWorkspaceReturnUrl(
