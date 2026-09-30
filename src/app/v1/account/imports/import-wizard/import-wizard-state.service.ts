@@ -11,7 +11,7 @@ import {
   isImportMeterReadingValid,
   meterReadingEntityKey
 } from '@data/import/meter-reading-import-review';
-import { isMeterInvalid } from '@domain/calculations/status-check-calculations/validation/meterValidation';
+import { isImportMeterValid } from '@data/import/meter-import-review';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { canAssignMeterSourceToGroup } from '@domain/meters/meter-group-compatibility';
@@ -355,7 +355,7 @@ export class ImportWizardStateService {
 
   meterInvalid(index: number): boolean {
     const meter = this.draft().meters[index];
-    return isMeterInvalid(meter) || this.meterSettings.buildMeterSettingsForm(meter).invalid;
+    return !isImportMeterValid(meter);
   }
 
   setMeterGroup(index: number, groupId: string | undefined): void {
@@ -593,7 +593,7 @@ export class ImportWizardStateService {
       void this.router.navigateByUrl(returnUrl);
       return;
     }
-    const affected = this.session.summary()?.affectedFacilityGuids ?? [];
+    const affected = this.session.summary(draft.id)?.affectedFacilityGuids ?? [];
     if (draft.kind === 'footprint-tool' && draft.selectedFacilityId) {
       void this.router.navigate(['/v1/workspace/facility', draft.selectedFacilityId, 'data', 'energy-uses']);
     } else if (affected.length === 1) {

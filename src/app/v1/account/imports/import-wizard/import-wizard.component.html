@@ -21,7 +21,7 @@
     @if (state.committed()) {
       <article class="import-panel import-success" role="status">
         <h2>Upload complete</h2>
-        <p>The workbook was saved in one transaction. {{ session.summary()?.affectedFacilityGuids?.length || 0 }} facilities were affected.</p>
+        <p>The workbook was saved in one transaction. {{ session.summary(file.id)?.affectedFacilityGuids?.length || 0 }} facilities were affected.</p>
         <div class="button-row">
           <button type="button" class="v1-btn v1-btn--action" (click)="state.viewImportedData()">View uploaded data</button>
           <button type="button" class="v1-btn v1-btn--secondary" (click)="state.importAnother()">Upload another file</button>

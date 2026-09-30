@@ -8,6 +8,8 @@ import { IdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { canAssignMeterSourceToGroup } from '@domain/meters/meter-group-compatibility';
+import { isImportMeterValid } from './meter-import-review';
 import {
   buildImportMeterReadingReview,
   isImportMeterReadingValid,
@@ -74,6 +76,7 @@ export class SpreadsheetImportCommandService {
 
     const existing = await this.loadExisting(transaction);
     this.validateRelationships(request, existing);
+    this.validateMeters(request, existing.meterGroups);
     this.validatePredictors(request, existing.predictors);
 
     const excludedIds = new Set(request.excludedMeterReadingIds.map(String));
@@ -199,6 +202,28 @@ export class SpreadsheetImportCommandService {
       throw new WorkspaceWriteError(
         'validation-failed',
         'Imported Weather predictor readings must be preserved as manual overrides.'
+      );
+    }
+  }
+
+  private validateMeters(request: ImportCommitRequest, existingMeterGroups: ExistingImportData['meterGroups']): void {
+    if (request.meters.some(meter => !isImportMeterValid(meter))) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Imported meters must have valid settings before importing.'
+      );
+    }
+    const meterGroups = new Map([...existingMeterGroups, ...request.meterGroups]
+      .map(group => [group.guid, group]));
+    const invalidGroup = request.meters.find(meter => {
+      if (!meter.groupId) return false;
+      const group = meterGroups.get(meter.groupId);
+      return !group || group.facilityId !== meter.facilityId || !canAssignMeterSourceToGroup(meter.source, group);
+    });
+    if (invalidGroup) {
+      throw new WorkspaceWriteError(
+        'validation-failed',
+        'Imported meters must reference a compatible meter group in the same facility.'
       );
     }
   }

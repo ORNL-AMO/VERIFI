@@ -476,7 +476,7 @@ describe('ImportWizardStateService', () => {
   it('returns to a valid workspace origin after completion', () => {
     const selectedFacility = facility({ guid: 'facility-a', accountId: 'account-1' });
     workspaceFacilities.set([selectedFacility]);
-    TestBed.inject(ImportSessionService).setOrigin({
+    TestBed.inject(ImportSessionService).begin({
       facilityGuid: selectedFacility.guid,
       returnUrl: '/v1/workspace/facility/facility-a/data/predictors?tab=monthly'
     });
@@ -491,7 +491,7 @@ describe('ImportWizardStateService', () => {
   });
 
   it('rejects a cross-account origin and uses the contextual fallback', () => {
-    TestBed.inject(ImportSessionService).setOrigin({
+    TestBed.inject(ImportSessionService).begin({
       returnUrl: '/v1/workspace/account/account-2/data/portfolio/facilities'
     });
     service.initialize(templateDraft());

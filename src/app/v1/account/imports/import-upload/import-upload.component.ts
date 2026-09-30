@@ -52,7 +52,7 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
     this.sessionLost.set(this.route.snapshot.queryParamMap.get('sessionLost') === '1');
     const facilityGuid = this.route.snapshot.queryParamMap.get('facilityGuid') ?? undefined;
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? undefined;
-    if (facilityGuid || returnUrl) this.session.setOrigin({ facilityGuid, returnUrl });
+    this.session.begin({ facilityGuid, returnUrl });
     this.unregisterUnsaved = this.unsaved.register(
       () => this.hasUnsavedChanges(),
       () => this.session.clear(),
