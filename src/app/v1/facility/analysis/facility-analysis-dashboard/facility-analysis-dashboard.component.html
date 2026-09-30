@@ -38,7 +38,7 @@
     } @else {
       @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
       <div class="v1-data-browse-grid" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsCard.set($event)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)"></app-analysis-browse-card> }
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsCard.set($event)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
       </div>
     }
   </div></div>
@@ -65,6 +65,19 @@
         @if (candidate.dependencyCount) { <p>{{ candidate.dependencyCount }} downstream link(s) currently reference this analysis.</p> }
         @if (activeEligibility(); as eligibility) { @if (!eligibility.allowed) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ eligibility.reason }}</div> } }
         <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="activeCandidate.set(undefined)">Cancel</button><button type="button" class="v1-btn v1-btn--action" [disabled]="saving() || !activeEligibility()?.allowed" (click)="confirmActive()">@if (saving()) { <app-ui-icon name="loading" spin></app-ui-icon> } @else { <app-ui-icon name="target"></app-ui-icon> }Set active</button></footer>
+      </div>
+    </app-workspace-slideout>
+  }
+
+  @if (deleteCandidate(); as candidate) {
+    <app-workspace-slideout title="Delete analysis" [description]="'Review downstream usage before deleting ' + candidate.analysis.name + '.'" [saving]="saving()" (closed)="deleteCandidate.set(undefined)">
+      <div class="v1-analysis-active-confirmation">
+        @if (candidate.linkedReports.length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="lock"></app-ui-icon>Remove this analysis from {{ candidate.linkedReports.length }} facility report(s) before deleting it.</div> }
+        @if (candidate.bankingConsumers.length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="lock"></app-ui-icon>Remove this analysis from {{ candidate.bankingConsumers.length }} banking workflow(s) before deleting it.</div> }
+        @if (!candidate.linkedReports.length && !candidate.bankingConsumers.length) {
+          <p>This permanently deletes the analysis. {{ candidate.linkedAccountAnalyses.length }} account-analysis link(s) will be cleared, and its active reporting selection will be removed if applicable.</p>
+        }
+        <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="deleteCandidate.set(undefined)">Cancel</button><button type="button" class="v1-btn v1-btn--danger" [disabled]="saving() || candidate.linkedReports.length > 0 || candidate.bankingConsumers.length > 0" (click)="confirmDelete()">@if (saving()) { <app-ui-icon name="loading" spin></app-ui-icon> } @else { <app-ui-icon name="delete"></app-ui-icon> }Delete analysis</button></footer>
       </div>
     </app-workspace-slideout>
   }

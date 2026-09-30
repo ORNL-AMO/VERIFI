@@ -21,6 +21,7 @@ export class AnalysisBrowseCardComponent {
   @Output() comparisonToggled = new EventEmitter<FacilityAnalysisCard>();
   @Output() copyRequested = new EventEmitter<FacilityAnalysisCard>();
   @Output() activeRequested = new EventEmitter<FacilityAnalysisCard>();
+  @Output() deleteRequested = new EventEmitter<FacilityAnalysisCard>();
 
   get view() { return buildFacilityAnalysisResourceView(this.card); }
   get actions(): readonly ResourceBrowseCardAction[] {
@@ -28,7 +29,8 @@ export class AnalysisBrowseCardComponent {
       { id: 'active', label: this.card.isActiveForReporting ? 'Active for reporting' : 'Set active for reporting', icon: 'target', disabled: !this.canAct || this.card.isActiveForReporting },
       { id: 'details', label: 'View analysis details', icon: 'monocle' },
       { id: 'compare', label: this.selectedForComparison ? 'Remove from comparison' : 'Add to comparison', icon: 'transfer' },
-      { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct }
+      { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct },
+      { id: 'delete', label: 'Delete analysis', icon: 'delete', tone: 'danger', disabled: !this.canAct }
     ];
   }
 
@@ -37,5 +39,6 @@ export class AnalysisBrowseCardComponent {
     if (id === 'compare') this.comparisonToggled.emit(this.card);
     if (id === 'copy') this.copyRequested.emit(this.card);
     if (id === 'active') this.activeRequested.emit(this.card);
+    if (id === 'delete') this.deleteRequested.emit(this.card);
   }
 }

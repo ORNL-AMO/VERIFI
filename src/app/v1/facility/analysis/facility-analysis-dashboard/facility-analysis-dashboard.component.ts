@@ -36,6 +36,7 @@ export class FacilityAnalysisDashboardComponent {
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
   readonly activeCandidate = signal<FacilityAnalysisCard | undefined>(undefined);
+  readonly deleteCandidate = signal<FacilityAnalysisCard | undefined>(undefined);
   readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
   readonly energyAvailable = computed(() => this.actions.categoryAvailable('energy'));
   readonly waterAvailable = computed(() => this.actions.categoryAvailable('water'));
@@ -99,6 +100,21 @@ export class FacilityAnalysisDashboardComponent {
     await this.runAction(async () => {
       await this.actions.setActiveAnalysis(candidate.analysis.guid);
       this.activeCandidate.set(undefined);
+    });
+  }
+
+  requestDelete(card: FacilityAnalysisCard): void {
+    if (this.canAct()) { this.actionError.set(undefined); this.deleteCandidate.set(card); }
+  }
+
+  async confirmDelete(): Promise<void> {
+    const candidate = this.deleteCandidate();
+    if (!candidate || candidate.linkedReports.length || candidate.bankingConsumers.length) return;
+    await this.runAction(async () => {
+      await this.actions.deleteAnalysis(candidate.analysis.guid);
+      this.deleteCandidate.set(undefined);
+      this.detailsCard.set(undefined);
+      this.comparisonGuids.update(guids => guids.filter(guid => guid !== candidate.analysis.guid));
     });
   }
 

@@ -88,6 +88,21 @@ export class FacilityAnalysisActionsService {
     return result.value;
   }
 
+  async deleteAnalysis(analysisGuid: string): Promise<void> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    const analysis = this.requireAnalysis(analysisGuid);
+    await this.boundary.execute({
+      entityKind: 'facilityAnalysis', changeKind: 'delete', entityGuid: analysis.guid, label: 'Deleting facility analysis',
+      notification: { successTitle: 'Analysis deleted', successMessage: analysis.name },
+      publication: { mode: 'reload' }
+    }, () => this.analysisHandler.deleteFacilityAnalysisAtomic({
+      accountGuid: account.guid,
+      facilityGuid: facility.guid,
+      analysisGuid: analysis.guid
+    }));
+  }
+
   private requireAccount(requireWritable = true): IdbAccount {
     const account = this.workspace.account();
     if (!account || (requireWritable && (!this.workspace.canWrite() || this.workspace.hasPending()))) {
