@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
-import { ImportWizardStateService } from '../../import-wizard-state.service';
+import { ImportMeterReviewStateService } from '../../import-meter-review-state.service';
 import {
   ImportMeterReadingReviewMode,
   ImportMeterReadingReviewSlideoutComponent
@@ -15,11 +15,11 @@ import {
   styleUrls: ['./import-meter-readings-step.component.css']
 })
 export class ImportMeterReadingsStepComponent {
-  readonly state = inject(ImportWizardStateService);
+  readonly state = inject(ImportMeterReviewStateService);
   readonly activeReview = signal<{ meterId: string; mode: ImportMeterReadingReviewMode } | undefined>(undefined);
   readonly activeRow = computed(() => {
     const active = this.activeReview();
-    return active ? this.state.meterReadingRows().find(row => row.meter.guid === active.meterId) : undefined;
+    return active ? this.state.readingRows().find(row => row.meter.guid === active.meterId) : undefined;
   });
 
   openReview(meterId: string, mode: ImportMeterReadingReviewMode): void {

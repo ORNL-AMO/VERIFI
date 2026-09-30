@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, input, output, signal } from '@angular/core';
 import { ImportPredictorReadingComparison } from '@data/import/predictor-reading-import-review';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
-import { ImportPredictorReadingRow } from '../../../import-wizard-state.service';
+import { ImportPredictorReadingRow } from '../../../import-predictor-review-state.service';
 
 export type ImportPredictorReadingReviewMode = 'comparisons' | 'invalid';
 type ComparisonSortField = 'month' | 'current' | 'imported' | 'difference' | 'percentage';

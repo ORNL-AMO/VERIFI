@@ -8,59 +8,15 @@ import {
   buildSpreadsheetImportCommitRequest,
   hasSpreadsheetImportRecords
 } from '@data/import/spreadsheet-import-request.builder';
-import {
-  buildImportMeterReadingReview,
-  getImportMeterReadingIssues,
-  ImportMeterReadingSummaryRow,
-  isImportMeterReadingValid,
-  meterReadingEntityKey
-} from '@data/import/meter-reading-import-review';
-import { isImportMeterValid } from '@data/import/meter-import-review';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { canAssignMeterSourceToGroup } from '@domain/meters/meter-group-compatibility';
-import { MeterSettingsFormService } from '@app/v1/shared/meter-settings/meter-settings-form.service';
-import { IdbPredictor } from '@data/models/idbModels/predictor';
-import {
-  getImportPredictorIssues,
-  isImportPredictorValid,
-  isSelectableExistingImportPredictor
-} from '@data/import/predictor-import-review';
-import {
-  buildImportPredictorReadingReview,
-  ImportPredictorReadingSummaryRow,
-  predictorReadingEntityKey
-} from '@data/import/predictor-reading-import-review';
+import { isImportPredictorValid } from '@data/import/predictor-import-review';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
 import { buildImportReviewSummary } from './import-review-summary';
+import { ImportWizardDraftStore } from './import-wizard-draft.store';
+import { ImportMeterReviewStateService } from './import-meter-review-state.service';
+import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
 
 export type ImportMappingType = 'meter' | 'predictor';
-
-export interface ImportMeterRow {
-  readonly index: number;
-  readonly meter: IdbUtilityMeter;
-  readonly facilityName: string;
-  readonly valid: boolean;
-  readonly unitLabel: string;
-  readonly groups: readonly IdbUtilityMeterGroup[];
-}
-
-export interface ImportMeterReadingRow extends ImportMeterReadingSummaryRow {
-  readonly primaryUnitLabel: string;
-}
-
-export interface ImportPredictorRow {
-  readonly index: number;
-  readonly predictor: IdbPredictor;
-  readonly facilityName: string;
-  readonly valid: boolean;
-  readonly issues: readonly string[];
-  readonly typeLabel: string;
-  readonly typeDetail?: string;
-}
-
-export type ImportPredictorReadingRow = ImportPredictorReadingSummaryRow;
 
 @Injectable()
 export class ImportWizardStateService {
@@ -69,19 +25,15 @@ export class ImportWizardStateService {
   private readonly router = inject(Router);
   readonly session = inject(ImportSessionService);
   readonly workspace = inject(AccountWorkspaceStore);
-  private readonly meterSettings = inject(MeterSettingsFormService);
+  private readonly draftStore = inject(ImportWizardDraftStore);
+  readonly meters = inject(ImportMeterReviewStateService);
+  readonly predictors = inject(ImportPredictorReviewStateService);
 
-  private readonly activeDraftId = signal<string | undefined>(undefined);
-  readonly draft = computed(() => {
-    const id = this.activeDraftId();
-    return id ? this.session.draft(id) : undefined;
-  });
+  readonly draft = this.draftStore.draft;
   readonly currentStepId = signal('');
   readonly error = signal<string | undefined>(undefined);
   readonly committed = signal(false);
   readonly newFacilityName = signal('');
-  private readonly nextCalendarizationMethod = signal<'backward' | 'fullYear' | 'fullMonth'>('backward');
-  private readonly defaultMeterGroups = new Map<string, IdbUtilityMeterGroup>();
 
   readonly steps = computed(() => this.draft() ? stepsForDraft(this.draft()) : []);
   readonly currentStep = computed(() => this.steps().find(step => step.id === this.currentStepId()));
@@ -106,93 +58,6 @@ export class ImportWizardStateService {
     const times = dates.map(date => date.getTime());
     return `${new Date(Math.min(...times)).toLocaleDateString()} – ${new Date(Math.max(...times)).toLocaleDateString()}`;
   });
-  readonly meterRows = computed<ImportMeterRow[]>(() => {
-    const draft = this.draft();
-    if (!draft) return [];
-    return draft.meters.map((meter, index) => ({
-      index,
-      meter,
-      facilityName: draft.importFacilities.find(facility => facility.guid === meter.facilityId)?.name ?? 'Unknown facility',
-      valid: !this.meterInvalid(index),
-      unitLabel: this.meterSettings.getUnitLabel(meter.scope === 2 ? meter.vehicleCollectionUnit : meter.startingUnit),
-      groups: this.compatibleGroupsForMeter(meter)
-    }));
-  });
-  readonly meterReadingRows = computed<ImportMeterReadingRow[]>(() => {
-    const draft = this.draft();
-    if (!draft) return [];
-    return buildImportMeterReadingReview({
-      meters: draft.meters,
-      readings: draft.meterData,
-      facilities: draft.importFacilities,
-      currentReadings: this.workspace.meterData(),
-      excludedReadingIds: draft.excludedMeterReadingIds,
-      skipExistingMeterIds: draft.skipExistingReadingsMeterIds
-    }).map(row => ({
-      ...row,
-      primaryUnitLabel: this.meterSettings.getUnitLabel(row.primaryUnit)
-    }));
-  });
-  readonly importedMeterReadingCount = computed(() => this.meterReadingRows().reduce((total, row) =>
-    total + row.newReadings.count + row.invalidReadings.count + row.existingReadings.count, 0));
-  readonly invalidReadingCount = computed(() => this.meterReadingRows().reduce((total, row) =>
-    total + row.invalidReadings.count, 0));
-  readonly hasExistingMeterReadings = computed(() => this.meterReadingRows()
-    .some(row => row.existingReadings.count > 0));
-  readonly allExistingMeterReadingsKept = computed(() => {
-    const eligible = this.meterReadingRows().filter(row => row.existingReadings.count > 0);
-    return eligible.length > 0 && eligible.every(row => row.keepExisting);
-  });
-  readonly someExistingMeterReadingsKept = computed(() => this.meterReadingRows()
-    .some(row => row.existingReadings.count > 0 && row.keepExisting));
-  readonly predictorRows = computed<ImportPredictorRow[]>(() => {
-    const draft = this.draft();
-    if (!draft) return [];
-    return draft.predictors.map((predictor, index) => ({
-      index,
-      predictor,
-      facilityName: draft.importFacilities.find(facility => facility.guid === predictor.facilityId)?.name ?? 'Unknown facility',
-      valid: isImportPredictorValid(predictor),
-      issues: getImportPredictorIssues(predictor),
-      typeLabel: predictor.predictorType === 'Weather' ? 'Weather' : 'Standard',
-      typeDetail: predictor.predictorType === 'Weather'
-        ? [predictor.weatherStationName || predictor.weatherStationId, weatherMetricLabel(predictor)]
-          .filter(Boolean).join(' · ')
-        : undefined
-    }));
-  });
-  readonly allPredictorsIncluded = computed(() => this.predictorRows().length > 0
-    && this.predictorRows().every(row => !row.predictor.skipImport));
-  readonly somePredictorsIncluded = computed(() => this.predictorRows()
-    .some(row => !row.predictor.skipImport));
-  readonly predictorReadingRows = computed<ImportPredictorReadingRow[]>(() => {
-    const draft = this.draft();
-    if (!draft) return [];
-    return buildImportPredictorReadingReview({
-      predictors: draft.predictors,
-      readings: draft.predictorData,
-      facilities: draft.importFacilities,
-      currentReadings: this.workspace.predictorData(),
-      excludedReadingIds: draft.excludedPredictorReadingIds,
-      skipExistingPredictorIds: draft.skipExistingPredictorIds
-    });
-  });
-  readonly importedPredictorReadingCount = computed(() => this.predictorReadingRows().reduce((total, row) =>
-    total + row.newReadings.count + row.invalidReadings.count + row.existingReadings.count, 0));
-  readonly invalidPredictorReadingCount = computed(() => this.predictorReadingRows().reduce((total, row) =>
-    total + row.invalidReadings.count, 0));
-  readonly predictorReadingsToImportCount = computed(() => this.predictorReadingRows().reduce((total, row) =>
-    total + row.newReadings.count
-      + (row.keepExisting ? 0 : row.existingReadings.count)
-      + row.invalidReadingDetails.filter(reading => !reading.excluded).length, 0));
-  readonly hasExistingPredictorReadings = computed(() => this.predictorReadingRows()
-    .some(row => row.existingReadings.count > 0));
-  readonly allExistingPredictorReadingsKept = computed(() => {
-    const eligible = this.predictorReadingRows().filter(row => row.existingReadings.count > 0);
-    return eligible.length > 0 && eligible.every(row => row.keepExisting);
-  });
-  readonly someExistingPredictorReadingsKept = computed(() => this.predictorReadingRows()
-    .some(row => row.existingReadings.count > 0 && row.keepExisting));
   readonly reviewSummary = computed(() => {
     const draft = this.draft();
     if (!draft) return undefined;
@@ -200,21 +65,19 @@ export class ImportWizardStateService {
       kind: draft.kind,
       selectedFacilityId: draft.selectedFacilityId,
       facilities: draft.importFacilities,
-      meterRows: this.meterRows(),
-      meterReadingRows: this.meterReadingRows(),
-      predictorRows: this.predictorRows(),
-      predictorReadingRows: this.predictorReadingRows(),
+      meterRows: this.meters.rows(),
+      meterReadingRows: this.meters.readingRows(),
+      predictorRows: this.predictors.rows(),
+      predictorReadingRows: this.predictors.readingRows(),
       energyUseGroups: draft.facilityEnergyUseGroups,
       equipment: draft.facilityEnergyUseEquipment
     });
   });
 
   initialize(draft: ImportFileDraft): void {
-    if (!this.session.draft(draft.id)) this.session.addDrafts([draft]);
-    this.activeDraftId.set(draft.id);
+    this.draftStore.initialize(draft);
+    this.meters.initialize();
     this.committed.set(draft.status === 'completed');
-    this.defaultMeterGroups.clear();
-    this.nextCalendarizationMethod.set('backward');
   }
 
   allowedStep(requestedStep: string | undefined): string {
@@ -346,233 +209,6 @@ export class ImportWizardStateService {
     this.changed();
   }
 
-  toggleMeterIncluded(index: number, included: boolean): void {
-    this.draft().meters[index].skipImport = !included;
-    this.changed();
-  }
-
-  meterInvalid(index: number): boolean {
-    const meter = this.draft().meters[index];
-    return !isImportMeterValid(meter);
-  }
-
-  setMeterGroup(index: number, groupId: string | undefined): void {
-    const draft = this.draft();
-    const meter = draft.meters[index];
-    const group = this.compatibleGroupsForMeter(meter).find(option => option.guid === groupId);
-    meter.groupId = group?.guid;
-    if (group && group.id == null && !draft.newMeterGroups.some(option => option.guid === group.guid)) {
-      draft.newMeterGroups.push(group);
-    }
-    this.syncNewMeterGroups();
-    this.invalidateReview();
-    this.changed();
-  }
-
-  autoGroupMeters(): void {
-    this.draft().meters.forEach((meter, index) => {
-      if (meter.groupId) return;
-      const targetName = meter.source === 'Electricity' && (meter.agreementType === 4 || meter.agreementType === 6)
-        ? 'Other (non-energy)'
-        : meter.source;
-      const groups = this.compatibleGroupsForMeter(meter);
-      const expectedType = targetName === 'Other (non-energy)'
-        ? 'Other'
-        : meter.source === 'Water Intake' || meter.source === 'Water Discharge' ? 'Water' : 'Energy';
-      const target = groups.find(group => group.name === targetName && group.groupType === expectedType)
-        ?? groups.find(group => group.name === 'Other (non-energy)');
-      if (target) {
-        meter.groupId = target.guid;
-        if (target.id == null && !this.draft().newMeterGroups.some(group => group.guid === target.guid)) {
-          this.draft().newMeterGroups.push(target);
-        }
-      }
-    });
-    this.syncNewMeterGroups();
-    this.invalidateReview();
-    this.changed();
-  }
-
-  setMeterCalendarization(index: number, method: 'backward' | 'fullYear' | 'fullMonth' | undefined): void {
-    this.draft().meters[index].meterReadingDataApplication = method;
-    this.invalidateReview();
-    this.changed();
-  }
-
-  toggleAllMeterCalendarization(): void {
-    const method = this.nextCalendarizationMethod();
-    this.draft().meters.forEach(meter => meter.meterReadingDataApplication = method);
-    this.nextCalendarizationMethod.set(method === 'backward' ? 'fullYear' : method === 'fullYear' ? 'fullMonth' : 'backward');
-    this.invalidateReview();
-    this.changed();
-  }
-
-  availableExistingMeters(index: number): IdbUtilityMeter[] {
-    const meter = this.draft().meters[index];
-    const used = new Set(this.draft().meters
-      .filter((_, candidateIndex) => candidateIndex !== index)
-      .map(candidate => candidate.guid));
-    return this.workspace.meters()
-      .filter(candidate => candidate.facilityId === meter.facilityId && !used.has(candidate.guid))
-      .map(candidate => structuredClone(candidate));
-  }
-
-  saveMeter(originalGuid: string, meter: IdbUtilityMeter): void {
-    const current = this.draft().meters.find(candidate => candidate.guid === originalGuid);
-    if (!current) return;
-    const selectedGroup = this.allMeterGroups(current.facilityId).find(group => group.guid === meter.groupId);
-    if (selectedGroup && !canAssignMeterSourceToGroup(meter.source, selectedGroup)) meter.groupId = undefined;
-    this.drafts.replaceMeter(this.draft(), originalGuid, meter);
-    this.syncNewMeterGroups();
-    this.invalidateMeterReviewSteps();
-    this.changed();
-  }
-
-  togglePredictorIncluded(index: number, included: boolean): void {
-    const predictor = this.draft().predictors[index];
-    predictor.skipImport = !included;
-    if (!included) this.clearPredictorReadingDecisions(predictor.guid);
-    this.invalidatePredictorReviewSteps();
-    this.changed();
-  }
-
-  setAllPredictorsIncluded(included: boolean): void {
-    this.draft().predictors.forEach(predictor => predictor.skipImport = !included);
-    if (!included) {
-      this.draft().skipExistingPredictorIds = [];
-      this.draft().excludedPredictorReadingIds = [];
-      this.draft().invalidPredictorReadingsAcknowledged = false;
-    }
-    this.invalidatePredictorReviewSteps();
-    this.changed();
-  }
-
-  setPredictorProduction(index: number, production: boolean): void {
-    const predictor = this.draft().predictors[index];
-    predictor.production = production;
-    predictor.productionInAnalysis = production;
-    this.invalidateReview();
-    this.changed();
-  }
-
-  availableExistingPredictors(index: number): IdbPredictor[] {
-    const predictor = this.draft().predictors[index];
-    const used = new Set(this.draft().predictors
-      .filter((_, candidateIndex) => candidateIndex !== index)
-      .map(candidate => candidate.guid));
-    return this.workspace.predictors()
-      .filter(candidate => candidate.facilityId === predictor.facilityId
-        && !used.has(candidate.guid)
-        && isSelectableExistingImportPredictor(candidate))
-      .sort((left, right) => left.name.localeCompare(right.name))
-      .map(candidate => structuredClone(candidate));
-  }
-
-  savePredictor(originalGuid: string, predictor: IdbPredictor): void {
-    if (!this.draft().predictors.some(candidate => candidate.guid === originalGuid)) return;
-    this.drafts.replacePredictor(this.draft(), originalGuid, predictor);
-    this.invalidatePredictorReviewSteps();
-    this.changed();
-  }
-
-  toggleExcludedReading(index: number, excluded: boolean): void {
-    const reading = this.draft().meterData[index];
-    const key = meterReadingEntityKey(reading, index);
-    const exclusions = this.draft().excludedMeterReadingIds;
-    if (excluded && !exclusions.map(String).includes(String(key))) exclusions.push(key);
-    if (!excluded) this.draft().excludedMeterReadingIds = exclusions.filter(value => String(value) !== String(key));
-    this.invalidateReview();
-    if (!this.invalidReadingGateSatisfied()) this.invalidateMeterReadings();
-    this.changed();
-  }
-
-  isReadingExcluded(index: number): boolean {
-    const reading = this.draft().meterData[index];
-    const exclusions = new Set(this.draft().excludedMeterReadingIds.map(String));
-    return exclusions.has(meterReadingEntityKey(reading, index))
-      || exclusions.has(meterReadingEntityKey(reading));
-  }
-
-  readingInvalid(index: number): boolean {
-    return !isImportMeterReadingValid(this.draft().meterData[index]);
-  }
-
-  readingIssues(index: number): readonly string[] {
-    return getImportMeterReadingIssues(this.draft().meterData[index]);
-  }
-
-  setSkipExistingMeterReadings(meterId: string, skip: boolean): void {
-    const eligibleIds = new Set(this.meterReadingRows()
-      .filter(row => row.existingReadings.count > 0)
-      .map(row => row.meter.guid));
-    if (skip && !eligibleIds.has(meterId)) return;
-    const selected = new Set(this.draft().skipExistingReadingsMeterIds.filter(id => eligibleIds.has(id)));
-    if (skip) selected.add(meterId);
-    else selected.delete(meterId);
-    this.draft().skipExistingReadingsMeterIds = [...selected];
-    this.invalidateReview();
-    this.changed();
-  }
-
-  setAllSkipExistingMeterReadings(skip: boolean): void {
-    const eligibleIds = this.meterReadingRows()
-      .filter(row => row.existingReadings.count > 0)
-      .map(row => row.meter.guid);
-    this.draft().skipExistingReadingsMeterIds = skip ? [...new Set(eligibleIds)] : [];
-    this.invalidateReview();
-    this.changed();
-  }
-
-  setInvalidMeterReadingsAcknowledged(acknowledged: boolean): void {
-    this.draft().invalidMeterReadingsAcknowledged = acknowledged;
-    this.invalidateReview();
-    if (!this.invalidReadingGateSatisfied()) this.invalidateMeterReadings();
-    this.changed();
-  }
-
-  setSkipExistingPredictorReadings(predictorId: string, skip: boolean): void {
-    const eligibleIds = new Set(this.predictorReadingRows()
-      .filter(row => row.existingReadings.count > 0)
-      .map(row => row.predictor.guid));
-    if (skip && !eligibleIds.has(predictorId)) return;
-    const selected = new Set(this.draft().skipExistingPredictorIds.filter(id => eligibleIds.has(id)));
-    if (skip) selected.add(predictorId);
-    else selected.delete(predictorId);
-    this.draft().skipExistingPredictorIds = [...selected];
-    this.invalidateReview();
-    this.changed();
-  }
-
-  setAllSkipExistingPredictorReadings(skip: boolean): void {
-    const eligibleIds = this.predictorReadingRows()
-      .filter(row => row.existingReadings.count > 0)
-      .map(row => row.predictor.guid);
-    this.draft().skipExistingPredictorIds = skip ? [...new Set(eligibleIds)] : [];
-    this.invalidateReview();
-    this.changed();
-  }
-
-  toggleExcludedPredictorReading(index: number, excluded: boolean): void {
-    const reading = this.draft().predictorData[index];
-    if (!reading) return;
-    const key = predictorReadingEntityKey(reading, index);
-    const exclusions = this.draft().excludedPredictorReadingIds;
-    if (excluded && !exclusions.map(String).includes(String(key))) exclusions.push(key);
-    if (!excluded) {
-      this.draft().excludedPredictorReadingIds = exclusions.filter(value => String(value) !== String(key));
-    }
-    this.invalidateReview();
-    if (!this.invalidPredictorReadingGateSatisfied()) this.invalidatePredictorReadings();
-    this.changed();
-  }
-
-  setInvalidPredictorReadingsAcknowledged(acknowledged: boolean): void {
-    this.draft().invalidPredictorReadingsAcknowledged = acknowledged;
-    this.invalidateReview();
-    if (!this.invalidPredictorReadingGateSatisfied()) this.invalidatePredictorReadings();
-    this.changed();
-  }
-
   hasUnsavedChanges(): boolean {
     return !this.committed() && this.session.hasUnsavedChanges();
   }
@@ -623,23 +259,23 @@ export class ImportWizardStateService {
     if (step === 'map-meters' && this.unmappedCount('meter')) return 'Assign every meter column to a facility or return it to worksheet columns.';
     if (step === 'map-predictors' && this.unmappedCount('predictor')) return 'Assign every predictor column to a facility or return it to worksheet columns.';
     if (step === 'facility' && !draft.selectedFacilityId) return 'Select a facility for this footprint upload.';
-    if (step === 'meters' && draft.meters.some((meter, index) => !meter.skipImport && this.meterInvalid(index))) {
+    if (step === 'meters' && draft.meters.some((meter, index) => !meter.skipImport && this.meters.invalid(index))) {
       return 'Fix or skip every invalid meter before continuing.';
     }
     if (step === 'predictors' && draft.predictors.some(predictor => !predictor.skipImport && !isImportPredictorValid(predictor))) {
       return 'Fix or skip every invalid predictor before continuing.';
     }
-    if ((step === 'meter-readings' || step === 'review') && this.invalidReadingCount()) {
-      const excludedInvalid = this.meterReadingRows().reduce((total, row) =>
+    if ((step === 'meter-readings' || step === 'review') && this.meters.invalidReadingCount()) {
+      const excludedInvalid = this.meters.readingRows().reduce((total, row) =>
         total + row.invalidReadingDetails.filter(reading => reading.excluded).length, 0);
-      if (excludedInvalid !== this.invalidReadingCount() || !draft.invalidMeterReadingsAcknowledged) {
+      if (excludedInvalid !== this.meters.invalidReadingCount() || !draft.invalidMeterReadingsAcknowledged) {
         return 'Exclude every invalid meter reading and acknowledge the exclusion before continuing.';
       }
     }
-    if ((step === 'predictor-readings' || step === 'review') && this.invalidPredictorReadingCount()) {
-      const excludedInvalid = this.predictorReadingRows().reduce((total, row) =>
+    if ((step === 'predictor-readings' || step === 'review') && this.predictors.invalidReadingCount()) {
+      const excludedInvalid = this.predictors.readingRows().reduce((total, row) =>
         total + row.invalidReadingDetails.filter(reading => reading.excluded).length, 0);
-      if (excludedInvalid !== this.invalidPredictorReadingCount() || !draft.invalidPredictorReadingsAcknowledged) {
+      if (excludedInvalid !== this.predictors.invalidReadingCount() || !draft.invalidPredictorReadingsAcknowledged) {
         return 'Exclude every invalid predictor reading and acknowledge the exclusion before continuing.';
       }
     }
@@ -656,127 +292,13 @@ export class ImportWizardStateService {
   }
 
   private changed(): void {
-    const id = this.activeDraftId();
-    if (id) this.session.updateDraft(id, () => undefined);
+    this.draftStore.changed();
   }
 
   private commitRequest(draft: ImportFileDraft) {
     return buildSpreadsheetImportCommitRequest(draft, this.workspace.account().guid);
   }
 
-  private compatibleGroupsForMeter(meter: IdbUtilityMeter): IdbUtilityMeterGroup[] {
-    return this.allMeterGroups(meter.facilityId)
-      .filter(group => canAssignMeterSourceToGroup(meter.source, group))
-      .sort((left, right) => left.groupType.localeCompare(right.groupType) || left.name.localeCompare(right.name));
-  }
-
-  private allMeterGroups(facilityId: string): IdbUtilityMeterGroup[] {
-    const persisted = this.workspace.meterGroups().filter(group => group.facilityId === facilityId);
-    const draft = this.draft().newMeterGroups.filter(group => group.facilityId === facilityId);
-    const defaults = this.defaultGroupsForFacility(facilityId);
-    const byGuid = new Map([...persisted, ...draft, ...defaults].map(group => [group.guid, group]));
-    return [...byGuid.values()];
-  }
-
-  private defaultGroupsForFacility(facilityId: string): IdbUtilityMeterGroup[] {
-    const facility = this.draft().importFacilities.find(candidate => candidate.guid === facilityId);
-    if (!facility) return [];
-    const definitions: Array<['Energy' | 'Water' | 'Other', string]> = [
-      ['Energy', 'Electricity'],
-      ['Energy', 'Natural Gas'],
-      ['Energy', 'Other Fuels'],
-      ['Energy', 'Other Energy'],
-      ['Water', 'Water Intake'],
-      ['Water', 'Water Discharge'],
-      ['Other', 'Other (non-energy)']
-    ];
-    const existingNames = new Set([
-      ...this.workspace.meterGroups().filter(group => group.facilityId === facilityId),
-      ...this.draft().newMeterGroups.filter(group => group.facilityId === facilityId)
-    ].map(group => group.name));
-    return definitions
-      .filter(([, name]) => !existingNames.has(name))
-      .map(([type, name]) => {
-        const key = `${facilityId}:${type}:${name}`;
-        if (!this.defaultMeterGroups.has(key)) {
-          this.defaultMeterGroups.set(key, getNewIdbUtilityMeterGroup(type, name, facilityId, facility.accountId));
-        }
-        return this.defaultMeterGroups.get(key)!;
-      });
-  }
-
-  private syncNewMeterGroups(): void {
-    const referenced = new Set(this.draft().meters.map(meter => meter.groupId).filter(Boolean));
-    this.draft().newMeterGroups = this.draft().newMeterGroups.filter(group => referenced.has(group.guid));
-  }
-
-  private invalidateReview(): void {
-    this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'review');
-  }
-
-  private invalidateMeterReadings(): void {
-    this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'meter-readings');
-  }
-
-  private invalidatePredictorReadings(): void {
-    this.draft().completedSteps = this.draft().completedSteps.filter(step => step !== 'predictor-readings');
-  }
-
-  private invalidReadingGateSatisfied(): boolean {
-    const draft = this.draft();
-    const invalidReadings = buildImportMeterReadingReview({
-      meters: draft.meters,
-      readings: draft.meterData,
-      facilities: draft.importFacilities,
-      currentReadings: this.workspace.meterData(),
-      excludedReadingIds: draft.excludedMeterReadingIds,
-      skipExistingMeterIds: draft.skipExistingReadingsMeterIds
-    }).flatMap(row => row.invalidReadingDetails);
-    return invalidReadings.length === 0 ||
-      (invalidReadings.every(reading => reading.excluded) && draft.invalidMeterReadingsAcknowledged);
-  }
-
-  private invalidPredictorReadingGateSatisfied(): boolean {
-    const draft = this.draft();
-    const rows = buildImportPredictorReadingReview({
-      predictors: draft.predictors,
-      readings: draft.predictorData,
-      facilities: draft.importFacilities,
-      currentReadings: this.workspace.predictorData(),
-      excludedReadingIds: draft.excludedPredictorReadingIds,
-      skipExistingPredictorIds: draft.skipExistingPredictorIds
-    });
-    const invalidReadings = rows.flatMap(row => row.invalidReadingDetails);
-    return invalidReadings.length === 0 ||
-      (invalidReadings.every(reading => reading.excluded) && draft.invalidPredictorReadingsAcknowledged);
-  }
-
-  private clearPredictorReadingDecisions(predictorId: string): void {
-    this.draft().skipExistingPredictorIds = this.draft().skipExistingPredictorIds
-      .filter(id => id !== predictorId);
-    const readingKeys = new Set(this.draft().predictorData
-      .map((reading, index) => ({ reading, index }))
-      .filter(entry => entry.reading.predictorId === predictorId)
-      .flatMap(entry => [
-        predictorReadingEntityKey(entry.reading, entry.index),
-        predictorReadingEntityKey(entry.reading)
-      ]));
-    this.draft().excludedPredictorReadingIds = this.draft().excludedPredictorReadingIds
-      .filter(key => !readingKeys.has(String(key)));
-    if (!this.draft().excludedPredictorReadingIds.length) {
-      this.draft().invalidPredictorReadingsAcknowledged = false;
-    }
-  }
-
-  private invalidateMeterReviewSteps(): void {
-    this.draft().completedSteps = this.draft().completedSteps
-      .filter(step => step !== 'meter-readings' && step !== 'review');
-  }
-
-  private invalidatePredictorReviewSteps(): void {
-    this.draft().completedSteps = this.draft().completedSteps
-      .filter(step => step !== 'predictor-readings' && step !== 'review');
-  }
 }
 
 function allowedWorkspaceReturnUrl(
@@ -797,17 +319,4 @@ function allowedWorkspaceReturnUrl(
   } catch {
     return undefined;
   }
-}
-
-function weatherMetricLabel(predictor: IdbPredictor): string {
-  const labels: Record<IdbPredictor['weatherDataType'], string> = {
-    HDD: 'Heating degree days',
-    CDD: 'Cooling degree days',
-    relativeHumidity: 'Relative humidity',
-    dryBulbTemp: 'Dry bulb temperature',
-    wetBulbTemp: 'Wet bulb temperature',
-    dewPointTemp: 'Dew point temperature',
-    precipitation: 'Precipitation'
-  };
-  return labels[predictor.weatherDataType];
 }

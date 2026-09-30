@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, input, output, signal } from '@angular/core';
 import { ImportMeterReadingComparison } from '@data/import/meter-reading-import-review';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
-import { ImportMeterReadingRow } from '../../../import-wizard-state.service';
+import { ImportMeterReadingRow } from '../../../import-meter-review-state.service';
 
 export type ImportMeterReadingReviewMode = 'comparisons' | 'invalid';
 type ComparisonSortField = 'date' | 'current' | 'imported' | 'difference' | 'percentage';

@@ -1,13 +1,13 @@
-@let rows = state.predictorReadingRows();
+@let rows = state.readingRows();
 
 @if (!rows.length) {
   <div class="v1-alert v1-alert--info" role="status">No predictors are included in this workbook.</div>
-} @else if (!state.importedPredictorReadingCount()) {
+} @else if (!state.importedReadingCount()) {
   <div class="v1-alert v1-alert--info" role="status">No predictor readings were found for the included predictors.</div>
 } @else {
   <div class="predictor-reading-summary" aria-live="polite">
-    <span>{{ state.importedPredictorReadingCount() }} reading{{ state.importedPredictorReadingCount() === 1 ? '' : 's' }} found</span>
-    <span>{{ state.invalidPredictorReadingCount() }} need{{ state.invalidPredictorReadingCount() === 1 ? 's' : '' }} attention</span>
+    <span>{{ state.importedReadingCount() }} reading{{ state.importedReadingCount() === 1 ? '' : 's' }} found</span>
+    <span>{{ state.invalidReadingCount() }} need{{ state.invalidReadingCount() === 1 ? 's' : '' }} attention</span>
   </div>
 
   <div class="table-wrap predictor-reading-table-wrap">
@@ -42,10 +42,10 @@
                 <input
                   type="checkbox"
                   class="predictor-reading-checkbox"
-                  [checked]="state.allExistingPredictorReadingsKept()"
-                  [indeterminate]="state.someExistingPredictorReadingsKept() && !state.allExistingPredictorReadingsKept()"
-                  [disabled]="!state.hasExistingPredictorReadings()"
-                  (change)="state.setAllSkipExistingPredictorReadings($any($event.target).checked)">
+                  [checked]="state.allExistingReadingsKept()"
+                  [indeterminate]="state.someExistingReadingsKept() && !state.allExistingReadingsKept()"
+                  [disabled]="!state.hasExistingReadings()"
+                  (change)="state.setAllSkipExistingReadings($any($event.target).checked)">
                 <span>Keep current readings?</span>
               </label>
               <app-ui-tooltip
@@ -115,7 +115,7 @@
                     type="checkbox"
                     class="predictor-reading-checkbox"
                     [checked]="row.keepExisting"
-                    (change)="state.setSkipExistingPredictorReadings(row.predictor.guid, $any($event.target).checked)">
+                    (change)="state.setSkipExistingReadings(row.predictor.guid, $any($event.target).checked)">
                   <span class="visually-hidden">Keep current readings for {{ row.predictor.name }}</span>
                 </label>
               } @else {
@@ -128,7 +128,7 @@
     </table>
   </div>
 
-  @if (state.invalidPredictorReadingCount()) {
+  @if (state.invalidReadingCount()) {
     <div class="v1-alert v1-alert--warning predictor-reading-acknowledgement">
       <div>
         <strong>Invalid predictor readings are never silently uploaded.</strong>
@@ -139,7 +139,7 @@
           type="checkbox"
           class="predictor-reading-checkbox"
           [checked]="state.draft().invalidPredictorReadingsAcknowledged"
-          (change)="state.setInvalidPredictorReadingsAcknowledged($any($event.target).checked)">
+          (change)="state.setInvalidReadingsAcknowledged($any($event.target).checked)">
         <span>I acknowledge that excluded predictor readings will not be uploaded.</span>
       </label>
     </div>
@@ -151,7 +151,7 @@
     <app-import-predictor-reading-review-slideout
       [row]="row"
       [mode]="review.mode"
-      (exclusionChanged)="state.toggleExcludedPredictorReading($event.index, $event.excluded)"
+      (exclusionChanged)="state.toggleExcludedReading($event.index, $event.excluded)"
       (closed)="closeReview()">
     </app-import-predictor-reading-review-slideout>
   }

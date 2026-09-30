@@ -4,6 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 import { buildImportMeterReadingReview } from '@data/import/meter-reading-import-review';
 import { getImportPredictorIssues, isImportPredictorValid } from '@data/import/predictor-import-review';
 import { buildImportPredictorReadingReview } from '@data/import/predictor-reading-import-review';
+import { ImportMeterReviewStateService } from '../import-meter-review-state.service';
+import { ImportPredictorReviewStateService } from '../import-predictor-review-state.service';
 import { ImportWizardStateService } from '../import-wizard-state.service';
 import { buildImportReviewSummary } from '../import-review-summary';
 
@@ -213,6 +215,52 @@ export function createImportWizardStateStub() {
     energyUseGroups: draft().facilityEnergyUseGroups,
     equipment: draft().facilityEnergyUseEquipment
   }));
+  state.meterState = {
+    draft,
+    workspace: state.workspace,
+    rows: state.meterRows,
+    readingRows: state.meterReadingRows,
+    importedReadingCount: state.importedMeterReadingCount,
+    invalidReadingCount: state.invalidReadingCount,
+    hasExistingReadings: state.hasExistingMeterReadings,
+    allExistingReadingsKept: state.allExistingMeterReadingsKept,
+    someExistingReadingsKept: state.someExistingMeterReadingsKept,
+    invalid: state.meterInvalid,
+    toggleIncluded: state.toggleMeterIncluded,
+    setGroup: state.setMeterGroup,
+    autoGroup: state.autoGroupMeters,
+    setCalendarization: state.setMeterCalendarization,
+    toggleAllCalendarization: state.toggleAllMeterCalendarization,
+    availableExisting: state.availableExistingMeters,
+    save: state.saveMeter,
+    toggleExcludedReading: state.toggleExcludedReading,
+    setSkipExistingReadings: state.setSkipExistingMeterReadings,
+    setAllSkipExistingReadings: state.setAllSkipExistingMeterReadings,
+    setInvalidReadingsAcknowledged: state.setInvalidMeterReadingsAcknowledged
+  };
+  state.predictorState = {
+    draft,
+    workspace: state.workspace,
+    rows: state.predictorRows,
+    allIncluded: state.allPredictorsIncluded,
+    someIncluded: state.somePredictorsIncluded,
+    readingRows: state.predictorReadingRows,
+    importedReadingCount: state.importedPredictorReadingCount,
+    invalidReadingCount: state.invalidPredictorReadingCount,
+    readingsToImportCount: state.predictorReadingsToImportCount,
+    hasExistingReadings: state.hasExistingPredictorReadings,
+    allExistingReadingsKept: state.allExistingPredictorReadingsKept,
+    someExistingReadingsKept: state.someExistingPredictorReadingsKept,
+    toggleIncluded: state.togglePredictorIncluded,
+    setAllIncluded: state.setAllPredictorsIncluded,
+    setProduction: state.setPredictorProduction,
+    availableExisting: state.availableExistingPredictors,
+    save: state.savePredictor,
+    setSkipExistingReadings: state.setSkipExistingPredictorReadings,
+    setAllSkipExistingReadings: state.setAllSkipExistingPredictorReadings,
+    toggleExcludedReading: state.toggleExcludedPredictorReading,
+    setInvalidReadingsAcknowledged: state.setInvalidPredictorReadingsAcknowledged
+  };
   return state;
 }
 
@@ -225,6 +273,8 @@ export function renderImportStep<T>(
     imports: [component],
     providers: [
       { provide: ImportWizardStateService, useValue: state },
+      { provide: ImportMeterReviewStateService, useValue: state.meterState },
+      { provide: ImportPredictorReviewStateService, useValue: state.predictorState },
       { provide: ActivatedRoute, useValue: { snapshot: { data: routeData } } }
     ]
   });

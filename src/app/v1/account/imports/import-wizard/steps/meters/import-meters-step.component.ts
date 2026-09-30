@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ImportWizardStateService } from '../../import-wizard-state.service';
+import { ImportMeterReviewStateService } from '../../import-meter-review-state.service';
 import { METER_CALENDARIZATION_METHODS } from '@app/v1/shared/meter-settings/meter-calendarization-options';
 import { ImportMeterEditorComponent, ImportMeterEditResult } from './import-meter-editor/import-meter-editor.component';
 
@@ -13,15 +13,15 @@ import { ImportMeterEditorComponent, ImportMeterEditResult } from './import-mete
   styleUrls: ['./import-meters-step.component.css']
 })
 export class ImportMetersStepComponent {
-  readonly state = inject(ImportWizardStateService);
+  readonly state = inject(ImportMeterReviewStateService);
   readonly calendarizationMethods = METER_CALENDARIZATION_METHODS;
-  readonly invalidIncludedCount = computed(() => this.state.meterRows()
+  readonly invalidIncludedCount = computed(() => this.state.rows()
     .filter(row => !row.valid && !row.meter.skipImport).length);
   readonly account = computed(() => this.state.workspace.account());
   readonly editingIndex = signal<number | undefined>(undefined);
   readonly editingRow = computed(() => {
     const index = this.editingIndex();
-    return index === undefined ? undefined : this.state.meterRows().find(row => row.index === index);
+    return index === undefined ? undefined : this.state.rows().find(row => row.index === index);
   });
   readonly editingFacility = computed(() => {
     const row = this.editingRow();
@@ -29,7 +29,7 @@ export class ImportMetersStepComponent {
   });
   readonly existingMeterOptions = computed(() => {
     const index = this.editingIndex();
-    return index === undefined ? [] : this.state.availableExistingMeters(index);
+    return index === undefined ? [] : this.state.availableExisting(index);
   });
   readonly meterGuidsWithReadings = computed(() => [
     ...new Set(this.state.workspace.meterData().map(reading => reading.meterId))
@@ -44,7 +44,7 @@ export class ImportMetersStepComponent {
   }
 
   saveMeter(result: ImportMeterEditResult): void {
-    this.state.saveMeter(result.originalGuid, result.meter);
+    this.state.save(result.originalGuid, result.meter);
     this.closeEditor();
   }
 }
