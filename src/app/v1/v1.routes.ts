@@ -76,6 +76,9 @@ import { ImportPredictorReadingsStepComponent } from '@app/v1/account/imports/im
 import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictors/import-predictors-step.component';
 import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
+import { AccountAnalysisPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-placeholder/account-analysis-placeholder.component';
+import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
+import { FacilityAnalysisWorkbenchPlaceholderComponent } from '@app/v1/facility/analysis/facility-analysis-workbench-placeholder/facility-analysis-workbench-placeholder.component';
 
 export const V1Routes: Routes = [
   {
@@ -161,6 +164,14 @@ export const V1Routes: Routes = [
                 ]
               },
               { path: '**', redirectTo: 'upload' }
+            ]
+          },
+          {
+            path: 'analysis',
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+              { path: 'dashboard', component: AccountAnalysisPlaceholderComponent },
+              { path: '**', redirectTo: 'dashboard' }
             ]
           },
           { path: '**', redirectTo: 'home/overview' }
@@ -317,6 +328,16 @@ export const V1Routes: Routes = [
               { path: 'portfolio', component: PortfolioTransitionSettingsComponent },
               { path: 'delete', component: FacilitySettingsDeleteComponent },
               { path: '**', redirectTo: 'profile' }
+            ]
+          },
+          {
+            path: 'analysis',
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+              { path: 'dashboard', component: FacilityAnalysisDashboardComponent },
+              { path: 'workbench/:analysisGuid', pathMatch: 'full', redirectTo: 'workbench/:analysisGuid/setup' },
+              { path: 'workbench/:analysisGuid/setup', component: FacilityAnalysisWorkbenchPlaceholderComponent },
+              { path: '**', redirectTo: 'dashboard' }
             ]
           },
           { path: '**', redirectTo: 'home/overview' }

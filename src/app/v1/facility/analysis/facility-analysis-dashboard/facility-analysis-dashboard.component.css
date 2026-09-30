@@ -1,0 +1,2 @@
+:host { display: block; min-width: 0; }
+h1 { display: inline-flex; align-items: center; gap: var(--v1-space-2); }

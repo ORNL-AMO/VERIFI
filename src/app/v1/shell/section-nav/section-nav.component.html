@@ -346,6 +346,24 @@
         </section>
       }
     }
+    @case ('analysis') {
+      @if (account) {
+        <section class="v1-nav__group" aria-labelledby="v1-analysis-nav-title">
+          <span id="v1-analysis-nav-title" class="v1-nav__label">
+            {{ contextMode === 'facility' ? 'Facility Analysis' : 'Account Analysis' }}
+          </span>
+          <a
+            class="active"
+            [routerLink]="contextMode === 'facility' && selectedFacility
+              ? navigation.facilityAnalysisRoute(selectedFacility.guid)
+              : navigation.accountAnalysisRoute(account.guid)"
+            aria-current="page">
+            <app-ui-icon name="barChart"></app-ui-icon>
+            Dashboard
+          </a>
+        </section>
+      }
+    }
     @default {
       <section class="v1-nav__group" aria-labelledby="v1-future-nav-title">
         <span id="v1-future-nav-title" class="v1-nav__label">{{ navigation.activeSection() }}</span>

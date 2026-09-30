@@ -109,6 +109,9 @@ describe('WorkspaceNavigationService', () => {
     expect(service.accountImportsRoute('account-a')).toEqual([
       '/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'
     ]);
+    expect(service.accountAnalysisRoute('account-a')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
+    ]);
     expect(service.facilityRoute('facility-a')).toEqual([
       '/v1',
       'workspace',
@@ -140,6 +143,12 @@ describe('WorkspaceNavigationService', () => {
       'facility-a',
       'data',
       'custom-fuels'
+    ]);
+    expect(service.facilityAnalysisRoute('facility-a')).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'
+    ]);
+    expect(service.facilityAnalysisWorkbenchRoute('facility-a', 'analysis-a')).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'setup'
     ]);
     expect(service.facilityMeterRoute('facility-a', 'meter-a', 'readings')).toEqual([
       '/v1',
@@ -377,6 +386,28 @@ describe('WorkspaceNavigationService', () => {
       ['/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'],
       { queryParams: { facilityGuid: 'facility-a', returnUrl: '/v1/workspace/facility/facility-a/data/meters' } }
     );
+  });
+
+  it('opens and parses Analysis routes in account and facility contexts', () => {
+    service.openSection('analysis');
+    expect(router.navigate).toHaveBeenLastCalledWith([
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
+    ]);
+
+    router.events.next(new NavigationEnd(
+      2,
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/setup',
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/setup'
+    ));
+    expect(service.activeSection()).toBe('analysis');
+    expect(service.activeDetail()).toBe('workbench');
+    expect(service.activeAnalysisGuid()).toBe('analysis a');
+    expect(service.sections().find(section => section.id === 'analysis')?.enabled).toBe(true);
+
+    service.openSection('analysis');
+    expect(router.navigate).toHaveBeenLastCalledWith([
+      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'
+    ]);
   });
 
   it('parses account and facility settings routes and enables settings in workspace context', () => {
