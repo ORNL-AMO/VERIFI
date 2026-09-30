@@ -25,9 +25,9 @@ describe('ImportPredictorsStepComponent', () => {
     checkboxes[1].click();
     checkboxes[2].click();
 
-    expect(state.setAllPredictorsIncluded).toHaveBeenCalledWith(false);
-    expect(state.setPredictorProduction).toHaveBeenCalled();
-    expect(state.togglePredictorIncluded).toHaveBeenCalled();
+    expect(state.predictorState.setAllIncluded).toHaveBeenCalledWith(false);
+    expect(state.predictorState.setProduction).toHaveBeenCalled();
+    expect(state.predictorState.toggleIncluded).toHaveBeenCalled();
   });
 
   it('opens the editor with the matching explanation and cancels without committing', () => {
@@ -48,7 +48,7 @@ describe('ImportPredictorsStepComponent', () => {
 
     element.querySelector<HTMLButtonElement>('.import-predictor-editor__actions .v1-btn--secondary')!.click();
     fixture.detectChanges();
-    expect(state.savePredictor).not.toHaveBeenCalled();
+    expect(state.predictorState.save).not.toHaveBeenCalled();
   });
 
   it('maps a new import to an existing Weather predictor on Save', () => {
@@ -67,7 +67,7 @@ describe('ImportPredictorsStepComponent', () => {
       weatherStationName: 'Chicago O’Hare',
       heatingBaseTemperature: 60
     };
-    state.availableExistingPredictors.mockReturnValue([weather]);
+    state.predictorState.availableExisting.mockReturnValue([weather]);
     const { fixture } = renderImportStep(ImportPredictorsStepComponent, state);
     const element = fixture.nativeElement as HTMLElement;
 
@@ -82,7 +82,7 @@ describe('ImportPredictorsStepComponent', () => {
     expect(element.textContent).toContain('manual overrides');
     element.querySelector<HTMLButtonElement>('.import-predictor-editor__actions .v1-btn--action')!.click();
 
-    expect(state.savePredictor).toHaveBeenCalledWith(
+    expect(state.predictorState.save).toHaveBeenCalledWith(
       original.guid,
       expect.objectContaining({
         id: weather.id,
@@ -104,7 +104,7 @@ describe('ImportPredictorsStepComponent', () => {
     element.querySelector<HTMLButtonElement>('.import-predictor-editor__actions .v1-btn--action')!.click();
     fixture.detectChanges();
 
-    expect(state.savePredictor).not.toHaveBeenCalled();
+    expect(state.predictorState.save).not.toHaveBeenCalled();
     expect(element.textContent).toContain('Resolve validation issues before saving this predictor.');
   });
 });

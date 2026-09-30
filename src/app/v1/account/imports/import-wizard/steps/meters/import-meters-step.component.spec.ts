@@ -4,7 +4,7 @@ import { ImportMetersStepComponent } from './import-meters-step.component';
 describe('ImportMetersStepComponent', () => {
   it('marks included invalid meters as needing attention', () => {
     const state = createImportWizardStateStub();
-    state.meterInvalid.mockReturnValue(true);
+    state.meterState.invalid.mockReturnValue(true);
     const { fixture } = renderImportStep(ImportMetersStepComponent, state);
 
     expect(fixture.nativeElement.textContent).toContain('Needs attention');
@@ -27,13 +27,13 @@ describe('ImportMetersStepComponent', () => {
     expect([...element.querySelectorAll('select')].every(select => select.classList.contains('v1-select'))).toBe(true);
     actions[0].click();
     actions[1].click();
-    expect(state.autoGroupMeters).toHaveBeenCalled();
-    expect(state.toggleAllMeterCalendarization).toHaveBeenCalled();
+    expect(state.meterState.autoGroup).toHaveBeenCalled();
+    expect(state.meterState.toggleAllCalendarization).toHaveBeenCalled();
   });
 
   it('allows an invalid row to be excluded and exposes the empty state', () => {
     const state = createImportWizardStateStub();
-    state.meterInvalid.mockReturnValue(true);
+    state.meterState.invalid.mockReturnValue(true);
     const { fixture } = renderImportStep(ImportMetersStepComponent, state);
 
     const element = fixture.nativeElement as HTMLElement;
@@ -43,9 +43,9 @@ describe('ImportMetersStepComponent', () => {
     fixture.detectChanges();
     expect(include.classList.contains('meter-review-checkbox')).toBe(true);
     expect(include.classList.contains('form-check-input')).toBe(false);
-    expect(state.toggleMeterIncluded).toHaveBeenCalledWith(0, false);
+    expect(state.meterState.toggleIncluded).toHaveBeenCalledWith(0, false);
 
-    state.draft.update((draft: any) => ({ ...draft, meters: [] }));
+    state.draft.update(draft => ({ ...draft, meters: [] }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No meters are included in this workbook.');
   });
@@ -76,7 +76,7 @@ describe('ImportMetersStepComponent', () => {
     expect(charges.compareDocumentPosition(otherInformation) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     element.querySelector<HTMLButtonElement>('.import-meter-editor__actions .v1-btn--secondary').click();
     fixture.detectChanges();
-    expect(state.saveMeter).not.toHaveBeenCalled();
+    expect(state.meterState.save).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelector('app-import-meter-editor')).toBeNull();
   });
 
@@ -91,7 +91,7 @@ describe('ImportMetersStepComponent', () => {
     element.querySelector<HTMLButtonElement>('.import-meter-editor__actions .v1-btn--action').click();
     fixture.detectChanges();
 
-    expect(state.saveMeter).not.toHaveBeenCalled();
+    expect(state.meterState.save).not.toHaveBeenCalled();
     expect(element.querySelector('app-import-meter-editor')).not.toBeNull();
     expect(element.textContent).toContain('Resolve validation issues before saving this meter.');
   });
@@ -100,7 +100,7 @@ describe('ImportMetersStepComponent', () => {
     const state = createImportWizardStateStub();
     const original = state.draft().meters[0];
     const existing = { ...structuredClone(original), id: 7, guid: 'existing-meter', name: 'Existing electricity' };
-    state.availableExistingMeters.mockReturnValue([existing]);
+    state.meterState.availableExisting.mockReturnValue([existing]);
     const { fixture } = renderImportStep(ImportMetersStepComponent, state);
     const element = fixture.nativeElement as HTMLElement;
 
@@ -113,7 +113,7 @@ describe('ImportMetersStepComponent', () => {
     element.querySelector<HTMLButtonElement>('.import-meter-editor__actions .v1-btn--action').click();
     fixture.detectChanges();
 
-    expect(state.saveMeter).toHaveBeenCalledWith(
+    expect(state.meterState.save).toHaveBeenCalledWith(
       original.guid,
       expect.objectContaining({
         id: existing.id,

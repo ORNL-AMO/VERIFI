@@ -12,11 +12,14 @@ describe('ImportMeterReadingsStepComponent', () => {
     expect(text).toContain('1 reading found');
     expect(text).toContain('Main Plant');
 
-    state.draft.update((draft: any) => ({ ...draft, meterData: [] }));
+    state.draft.update(draft => ({ ...draft, meterData: [] }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No meter readings were found for the included meters.');
 
-    state.draft.update((draft: any) => ({ ...draft, meters: draft.meters.map((meter: any) => ({ ...meter, skipImport: true })) }));
+    state.draft.update(draft => ({
+      ...draft,
+      meters: draft.meters.map(meter => ({ ...meter, skipImport: true }))
+    }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No meters are included in this workbook.');
   });
@@ -44,8 +47,8 @@ describe('ImportMeterReadingsStepComponent', () => {
     acknowledgement.checked = true;
     acknowledgement.dispatchEvent(new Event('change'));
 
-    expect(state.toggleExcludedReading).toHaveBeenCalledWith(0, true);
-    expect(state.setInvalidMeterReadingsAcknowledged).toHaveBeenCalledWith(true);
+    expect(state.meterState.toggleExcludedReading).toHaveBeenCalledWith(0, true);
+    expect(state.meterState.setInvalidReadingsAcknowledged).toHaveBeenCalledWith(true);
   });
 
   it('opens a large comparison slideout for changed same-date readings', () => {
@@ -90,7 +93,7 @@ describe('ImportMeterReadingsStepComponent', () => {
     const secondMeter = { ...structuredClone(firstMeter), guid: 'meter-2', name: 'Electricity 2' };
     const firstReading = state.draft().meterData[0];
     const secondReading = { ...structuredClone(firstReading), guid: 'reading-2', meterId: secondMeter.guid };
-    state.draft.update((draft: any) => ({
+    state.draft.update(draft => ({
       ...draft,
       meters: [firstMeter, secondMeter],
       meterData: [firstReading, secondReading],
@@ -111,7 +114,7 @@ describe('ImportMeterReadingsStepComponent', () => {
     rowDecision.checked = false;
     rowDecision.dispatchEvent(new Event('change'));
 
-    expect(state.setAllSkipExistingMeterReadings).toHaveBeenCalledWith(true);
-    expect(state.setSkipExistingMeterReadings).toHaveBeenCalledWith(firstMeter.guid, false);
+    expect(state.meterState.setAllSkipExistingReadings).toHaveBeenCalledWith(true);
+    expect(state.meterState.setSkipExistingReadings).toHaveBeenCalledWith(firstMeter.guid, false);
   });
 });

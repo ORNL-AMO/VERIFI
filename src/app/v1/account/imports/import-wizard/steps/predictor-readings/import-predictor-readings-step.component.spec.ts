@@ -12,13 +12,13 @@ describe('ImportPredictorReadingsStepComponent', () => {
     expect(text).toContain('1 reading found');
     expect(text).toContain('Main Plant');
 
-    state.draft.update((draft: any) => ({ ...draft, predictorData: [] }));
+    state.draft.update(draft => ({ ...draft, predictorData: [] }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No predictor readings were found for the included predictors.');
 
-    state.draft.update((draft: any) => ({
+    state.draft.update(draft => ({
       ...draft,
-      predictors: draft.predictors.map((predictor: any) => ({ ...predictor, skipImport: true }))
+      predictors: draft.predictors.map(predictor => ({ ...predictor, skipImport: true }))
     }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No predictors are included in this workbook.');
@@ -81,8 +81,8 @@ describe('ImportPredictorReadingsStepComponent', () => {
     acknowledgement.checked = true;
     acknowledgement.dispatchEvent(new Event('change'));
 
-    expect(state.toggleExcludedPredictorReading).toHaveBeenCalledWith(0, true);
-    expect(state.setInvalidPredictorReadingsAcknowledged).toHaveBeenCalledWith(true);
+    expect(state.predictorState.toggleExcludedReading).toHaveBeenCalledWith(0, true);
+    expect(state.predictorState.setInvalidReadingsAcknowledged).toHaveBeenCalledWith(true);
   });
 
   it('supports bulk and per-predictor keep-current decisions with an indeterminate bulk state', () => {
@@ -91,7 +91,7 @@ describe('ImportPredictorReadingsStepComponent', () => {
     const secondPredictor = { ...structuredClone(firstPredictor), id: 2, guid: 'predictor-2', name: 'Occupancy' };
     const firstReading = state.draft().predictorData[0];
     const secondReading = { ...structuredClone(firstReading), guid: 'predictor-reading-2', predictorId: secondPredictor.guid };
-    state.draft.update((draft: any) => ({
+    state.draft.update(draft => ({
       ...draft,
       predictors: [firstPredictor, secondPredictor],
       predictorData: [firstReading, secondReading],
@@ -112,7 +112,7 @@ describe('ImportPredictorReadingsStepComponent', () => {
     rowDecision.checked = false;
     rowDecision.dispatchEvent(new Event('change'));
 
-    expect(state.setAllSkipExistingPredictorReadings).toHaveBeenCalledWith(true);
-    expect(state.setSkipExistingPredictorReadings).toHaveBeenCalledWith(firstPredictor.guid, false);
+    expect(state.predictorState.setAllSkipExistingReadings).toHaveBeenCalledWith(true);
+    expect(state.predictorState.setSkipExistingReadings).toHaveBeenCalledWith(firstPredictor.guid, false);
   });
 });
