@@ -14,7 +14,7 @@ export class ImportSessionService {
   readonly hasUnsavedChanges = computed(() => this.draftsState().some(draft => draft.status !== 'completed'));
 
   begin(origin: ImportOriginContext): void {
-    if (!this.draftsState().length) this.originState.set(origin);
+    if (!this.draftsState().some(draft => draft.status !== 'completed')) this.originState.set(origin);
   }
 
   addDrafts(drafts: ImportFileDraft[]): void {
