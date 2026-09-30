@@ -16,6 +16,7 @@ import { UploadDataV2Service } from './parsers/upload-data-v2.service';
 import { UploadDataV3Service } from './parsers/upload-data-v3.service';
 import { SpreadsheetImportCommandService } from './spreadsheet-import-command.service';
 import { SpreadsheetImportDraftService } from './spreadsheet-import-draft.service';
+import { buildSpreadsheetImportCommitRequest } from './spreadsheet-import-request.builder';
 import { ImportCommitRequest } from './spreadsheet-import.models';
 
 describe('spreadsheet import browser boundaries', () => {
@@ -80,6 +81,68 @@ describe('spreadsheet import browser boundaries', () => {
     expect(draft.kind).toBe('general-workbook');
     expect(draft.selectedWorksheetName).toBe('Usage');
     expect(draft.headerMap).toHaveLength(1);
+  });
+
+  it('persists a real general workbook through the default-facility mapping path', async () => {
+    workspaceFacilities = [{
+      guid: 'facility-default',
+      accountId: 'account-import',
+      name: 'Default Plant',
+      color: '#123456',
+      energyUnit: 'MMBtu',
+      electricityUnit: 'kWh',
+      volumeLiquidUnit: 'gal',
+      volumeGasUnit: 'CCF',
+      massUnit: 'lb'
+    } as IdbFacility, {
+      guid: 'facility-other',
+      accountId: 'account-import',
+      name: 'Other Plant',
+      color: '#654321',
+      energyUnit: 'MMBtu',
+      electricityUnit: 'kWh',
+      volumeLiquidUnit: 'gal',
+      volumeGasUnit: 'CCF',
+      massUnit: 'lb'
+    } as IdbFacility];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+      ['Date', 'Electricity (kWh)'],
+      ['2026-01-01', 100]
+    ]), 'Usage');
+    const draft = await draftService.readFile(workbookFile(workbook, 'general-default.xlsx'));
+    const meterColumn = draft.columnGroups
+      .find(group => group.groupLabel === 'Worksheet Columns')!
+      .groupItems.find(item => item.value === 'Electricity (kWh)')!;
+
+    draftService.setGeneralWorkbookDefaultFacility(draft, 'facility-default');
+    draftService.assignColumn(draft, meterColumn.id, 'Meters');
+    draftService.initializeFacilityMappings(draft);
+    draft.meters.forEach(meter => meter.meterReadingDataApplication = 'backward');
+    const request = buildSpreadsheetImportCommitRequest(draft, 'account-import');
+
+    await initializeHarness();
+    await commandService().commit(request);
+    await harness!.reopen();
+
+    const facilities = await harness!.getAll('facilities');
+    const meters = await harness!.getAll('utilityMeter');
+    const readings = await harness!.getAll('utilityMeterData');
+    expect(facilities).toContainEqual(expect.objectContaining({ guid: 'facility-default' }));
+    expect(meters).toHaveLength(1);
+    expect(meters[0]).toEqual(expect.objectContaining({
+      facilityId: 'facility-default',
+      accountId: 'account-import'
+    }));
+    expect(readings).toHaveLength(1);
+    expect(readings[0]).toEqual(expect.objectContaining({
+      meterId: meters[0].guid,
+      facilityId: 'facility-default',
+      accountId: 'account-import',
+      year: 2026,
+      month: 1,
+      day: 1
+    }));
   });
 
   it('materializes representative V1 facility, meter, and reading records from a browser File', async () => {

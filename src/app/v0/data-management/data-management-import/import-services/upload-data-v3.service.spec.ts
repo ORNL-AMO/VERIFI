@@ -9,8 +9,6 @@ import { ExportToExcelTemplateV3Service } from '@shared/helper-services/export-t
 import { EGridService } from '@shared/helper-services/e-grid.service';
 import { UploadDataSharedFunctionsService } from '@data/import/parsers/upload-data-shared-functions.service';
 import { UploadDataV3Service } from '@data/import/parsers/upload-data-v3.service';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
 
@@ -97,8 +95,22 @@ describe('UploadDataV3Service', () => {
     } as IdbFacility];
     const exportService = TestBed.inject(ExportToExcelTemplateV3Service);
     const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Facilities');
+    worksheet.addRow(['Facility Setup']);
+    worksheet.addRow([
+      'Facility Name',
+      'Address',
+      'Country',
+      'U.S. State',
+      'City',
+      'ZIP Code',
+      'NAICS Code (2-digit)',
+      'NAICS Code (3-digit)',
+      'Contact Name',
+      'Contact Phone',
+      'Contact Email'
+    ]);
 
-    await workbook.xlsx.load(readTemplateArrayBuffer());
     exportService.setFacilityWorksheet(workbook);
     const exportedTemplateBuffer = await workbook.xlsx.writeBuffer();
     const parsedWorkbook = XLSX.read(toArrayBuffer(exportedTemplateBuffer), { type: 'array' });
@@ -145,11 +157,6 @@ describe('UploadDataV3Service', () => {
         Facilities: worksheet
       }
     };
-  }
-
-  function readTemplateArrayBuffer(): ArrayBuffer {
-    const buffer = readFileSync(join(process.cwd(), 'src/assets/csv_templates/VERIFI-Import-Data.xlsx'));
-    return toArrayBuffer(buffer);
   }
 
   function toArrayBuffer(buffer: ArrayBuffer | Uint8Array): ArrayBuffer {

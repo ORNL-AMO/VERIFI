@@ -4,6 +4,7 @@ import { meter, reading } from '@app/v1/facility/data/meters/facility-meters.tes
 import { SpreadsheetImportDraftService } from './spreadsheet-import-draft.service';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { profileGeneralWorkbookColumn } from './general-workbook-column-profile';
 
 describe('SpreadsheetImportDraftService', () => {
   const service = new SpreadsheetImportDraftService(
@@ -63,6 +64,24 @@ describe('SpreadsheetImportDraftService', () => {
       .toEqual(['Read Date']);
     expect(draft.columnGroups.find(group => group.groupLabel === 'Worksheet Columns')?.groupItems.map(item => item.value))
       .toEqual(['Electricity']);
+  });
+
+  it('preserves source worksheet rows when blank lines precede an invalid date', () => {
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+      ['Date', 'Electricity'],
+      ['2026-01-01', 12],
+      [],
+      ['not-a-date', 14]
+    ]), 'Data');
+    const draft = importDraft('general-workbook', { workbook });
+
+    service.selectWorksheet(draft, 'Data');
+
+    const dateColumn = draft.columnGroups.flatMap(group => group.groupItems)
+      .find(item => item.value === 'Date')!;
+    const profile = profileGeneralWorkbookColumn(dateColumn, draft.headerMap);
+    expect(profile.invalidDateRows).toEqual([4]);
   });
 
   it('moves columns in one batch, swaps Date, preserves source order, and clears derived review state', () => {

@@ -144,12 +144,17 @@ export class SpreadsheetImportDraftService {
     }
     const headers = draft.selectedWorksheetData[0].map(value => String(value ?? '').trim());
     draft.selectedWorksheetData[0] = headers;
-    draft.headerMap = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet).map(row =>
-      Object.keys(row).reduce((result, key) => {
+    draft.headerMap = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet).map(row => {
+      const normalized = Object.keys(row).reduce((result, key) => {
         result[key.trim()] = row[key];
         return result;
-      }, {} as Record<string, unknown>)
-    );
+      }, {} as Record<string, unknown>);
+      const sourceIndex = (row as Record<string, unknown> & { __rowNum__?: unknown }).__rowNum__;
+      if (typeof sourceIndex === 'number') {
+        Object.defineProperty(normalized, '__rowNum__', { value: sourceIndex, enumerable: false });
+      }
+      return normalized;
+    });
     const items = headers.filter(Boolean).map((value, index) => ({ value, index, id: crypto.randomUUID() }));
     const date = likelyGeneralWorkbookDateColumn(items, draft.headerMap);
     draft.columnGroups = [

@@ -36,7 +36,7 @@ export function profileGeneralWorkbookColumn(
     if (samples.length < 2) samples.push(formatColumnSample(value));
     const date = parseGeneralWorkbookDate(value);
     if (date) dates.push(date);
-    else invalidDateRows.push(index + 2);
+    else invalidDateRows.push(worksheetRowNumber(row, index));
   });
 
   const times = dates.map(date => date.getTime());
@@ -65,8 +65,29 @@ export function likelyGeneralWorkbookDateColumn(
 }
 
 export function parseGeneralWorkbookDate(value: unknown): Date | undefined {
+  if (typeof value === 'string') {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+    if (match) {
+      const [, yearValue, monthValue, dayValue] = match;
+      const year = Number(yearValue);
+      const month = Number(monthValue) - 1;
+      const day = Number(dayValue);
+      const localDate = new Date(0);
+      localDate.setHours(0, 0, 0, 0);
+      localDate.setFullYear(year, month, day);
+      if (localDate.getFullYear() === year && localDate.getMonth() === month && localDate.getDate() === day) {
+        return localDate;
+      }
+      return undefined;
+    }
+  }
   const date = new Date(value as any);
   return isNaN(date.valueOf()) ? undefined : date;
+}
+
+function worksheetRowNumber(row: Record<string, unknown>, index: number): number {
+  const sourceIndex = (row as Record<string, unknown> & { __rowNum__?: unknown }).__rowNum__;
+  return typeof sourceIndex === 'number' ? sourceIndex + 1 : index + 2;
 }
 
 function isNonBlank(value: unknown): boolean {

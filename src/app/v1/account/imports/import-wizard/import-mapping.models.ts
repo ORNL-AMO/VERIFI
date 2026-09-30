@@ -44,6 +44,14 @@ export interface ImportMappingBoardView {
 
 export const UNMAPPED_FACILITY_TARGET = '__unmapped__';
 
+export function importMappingDestinationValue(destination: ImportMappingDestinationView): string {
+  return destination.facilityId ?? UNMAPPED_FACILITY_TARGET;
+}
+
+export function importMappingFacilityId(target: string): string | undefined {
+  return target === UNMAPPED_FACILITY_TARGET ? undefined : target;
+}
+
 export function importMappingDropListId(type: ImportMappingType, laneId: string): string {
   return `import-${type}-mapping-${laneId.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 }

@@ -2,9 +2,10 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
+  importMappingDestinationValue,
+  importMappingFacilityId,
   ImportMappingCardView,
-  ImportMappingDestinationView,
-  UNMAPPED_FACILITY_TARGET
+  ImportMappingDestinationView
 } from '../../../import-mapping.models';
 
 @Component({
@@ -21,14 +22,12 @@ export class ImportMappingCardComponent {
   @Output() selectedChange = new EventEmitter<boolean>();
   @Output() moveRequested = new EventEmitter<string | undefined>();
 
-  readonly unmappedTarget = UNMAPPED_FACILITY_TARGET;
-
   destinationValue(destination: ImportMappingDestinationView): string {
-    return destination.facilityId ?? this.unmappedTarget;
+    return importMappingDestinationValue(destination);
   }
 
   move(value: string): void {
     if (!value) return;
-    this.moveRequested.emit(value === this.unmappedTarget ? undefined : value);
+    this.moveRequested.emit(importMappingFacilityId(value));
   }
 }

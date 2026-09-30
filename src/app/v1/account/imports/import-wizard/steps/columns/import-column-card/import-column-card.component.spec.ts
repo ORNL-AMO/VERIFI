@@ -30,7 +30,9 @@ describe('ImportColumnCardComponent', () => {
     expect(element.textContent).toContain('Likely date');
     expect(element.querySelector('[role="tooltip"]')).toBeNull();
     expect(select.classList.contains('v1-select')).toBe(true);
-    expect(select.querySelectorAll('option')).toHaveLength(4);
+    expect(select.querySelector('option[value=""]')?.textContent).toContain('Move to');
+    expect(fixture.componentInstance.targets.filter(target => target !== fixture.componentInstance.card.target))
+      .toEqual(['Worksheet Columns', 'Meters', 'Predictors']);
   });
 
   it('emits the selected destination', () => {

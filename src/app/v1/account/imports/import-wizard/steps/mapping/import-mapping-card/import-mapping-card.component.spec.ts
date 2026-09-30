@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { UNMAPPED_FACILITY_TARGET } from '../../../import-mapping.models';
 import { ImportMappingCardComponent } from './import-mapping-card.component';
 
 describe('ImportMappingCardComponent', () => {
@@ -25,11 +26,12 @@ describe('ImportMappingCardComponent', () => {
   });
 
   it('emits both facility and Unmapped destinations', () => {
+    const component = new ImportMappingCardComponent();
     const emitted: Array<string | undefined> = [];
-    fixture.componentInstance.moveRequested.subscribe(value => emitted.push(value));
+    component.moveRequested.subscribe(value => emitted.push(value));
 
-    fixture.componentInstance.move('facility-1');
-    fixture.componentInstance.move(fixture.componentInstance.unmappedTarget);
+    component.move('facility-1');
+    component.move(UNMAPPED_FACILITY_TARGET);
 
     expect(emitted).toEqual(['facility-1', undefined]);
   });

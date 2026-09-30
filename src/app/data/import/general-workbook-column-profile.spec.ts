@@ -1,5 +1,6 @@
 import {
   likelyGeneralWorkbookDateColumn,
+  parseGeneralWorkbookDate,
   profileGeneralWorkbookColumn
 } from './general-workbook-column-profile';
 import { ColumnItem } from './spreadsheet-import.models';
@@ -37,8 +38,17 @@ describe('general workbook column profiles', () => {
     expect(profile.nonBlankCount).toBe(3);
     expect(profile.usableDateCount).toBe(2);
     expect(profile.invalidDateRows).toEqual([4]);
-    expect(profile.minDate?.getUTCMonth()).toBe(0);
-    expect(profile.maxDate?.getUTCMonth()).toBe(1);
+    expect(profile.minDate?.getMonth()).toBe(0);
+    expect(profile.maxDate?.getMonth()).toBe(1);
+  });
+
+  it('parses date-only ISO values as local calendar dates', () => {
+    const date = parseGeneralWorkbookDate('2026-01-01');
+
+    expect(date).toEqual(new Date(2026, 0, 1));
+    expect(date?.getFullYear()).toBe(2026);
+    expect(date?.getMonth()).toBe(0);
+    expect(date?.getDate()).toBe(1);
   });
 
   it('auto-selects only one unambiguous likely date column', () => {
