@@ -11,4 +11,6 @@
 .v1-analysis-details li span { display: block; color: var(--v1-muted); font-size: .82rem; }
 .v1-analysis-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-4); }
 .v1-analysis-comparison article { min-width: 0; }
+.v1-analysis-active-confirmation { display: grid; gap: var(--v1-space-4); }
+.v1-analysis-active-confirmation footer { display: flex; justify-content: flex-end; gap: var(--v1-space-2); }
 @media (max-width: 760px) { .v1-analysis-dashboard__header, .v1-analysis-comparison { display: grid; grid-template-columns: 1fr; } .v1-analysis-details dl, .v1-analysis-comparison dl { grid-template-columns: 1fr; } }

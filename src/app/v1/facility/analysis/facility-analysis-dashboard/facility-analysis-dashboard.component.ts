@@ -7,6 +7,9 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { AnalysisBrowseCardComponent } from './analysis-browse-card/analysis-browse-card.component';
 import { FacilityAnalysisWorkspaceService } from '../facility-analysis-workspace.service';
 import { FacilityAnalysisCard } from '../facility-analysis.models';
+import { AnalysisDraftSlideoutComponent } from './analysis-draft-slideout/analysis-draft-slideout.component';
+import { FacilityAnalysisActionsService } from '../facility-analysis-actions.service';
+import { AnalysisCategory } from '@data/models/analysis';
 
 type AnalysisCategoryFilter = 'all' | 'energy' | 'water';
 type AnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
@@ -15,12 +18,13 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 @Component({
   selector: 'app-facility-analysis-dashboard',
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent],
+  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']
 })
 export class FacilityAnalysisDashboardComponent {
   private readonly router = inject(Router);
+  private readonly actions = inject(FacilityAnalysisActionsService);
   readonly workspace = inject(FacilityAnalysisWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly search = signal('');
@@ -28,6 +32,24 @@ export class FacilityAnalysisDashboardComponent {
   readonly statusFilter = signal<AnalysisStatusFilter>('all');
   readonly sortBy = signal<AnalysisSort>('attention');
   readonly detailsCard = signal<FacilityAnalysisCard | undefined>(undefined);
+  readonly createOpen = signal(false);
+  readonly saving = signal(false);
+  readonly actionError = signal<string | undefined>(undefined);
+  readonly activeCandidate = signal<FacilityAnalysisCard | undefined>(undefined);
+  readonly canAct = computed(() => this.workspace.canWrite() && !this.workspace.hasPending() && !this.saving());
+  readonly energyAvailable = computed(() => this.actions.categoryAvailable('energy'));
+  readonly waterAvailable = computed(() => this.actions.categoryAvailable('water'));
+  readonly activeEligibility = computed(() => {
+    const candidate = this.activeCandidate();
+    return candidate ? this.actions.activeEligibility(candidate.analysis) : undefined;
+  });
+  readonly activeReplacement = computed(() => {
+    const candidate = this.activeCandidate();
+    const facility = this.workspace.facility();
+    if (!candidate || !facility) return undefined;
+    const guid = candidate.category === 'water' ? facility.selectedWaterAnalysisId : facility.selectedEnergyAnalysisId;
+    return this.workspace.cards().find(card => card.analysis.guid === guid);
+  });
   readonly comparisonGuids = signal<readonly string[]>([]);
   readonly comparisonCards = computed(() => this.comparisonGuids()
     .map(guid => this.workspace.cards().find(card => card.analysis.guid === guid))
@@ -52,6 +74,34 @@ export class FacilityAnalysisDashboardComponent {
     if (facility) void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, card.analysis.guid));
   }
 
+  openCreate(): void { if (this.canAct()) { this.actionError.set(undefined); this.createOpen.set(true); } }
+  closeCreate(): void { if (!this.saving()) this.createOpen.set(false); }
+
+  async create(category: AnalysisCategory): Promise<void> {
+    await this.runAction(async () => {
+      const analysis = await this.actions.createAnalysis(category);
+      this.createOpen.set(false);
+      this.openAnalysisGuid(analysis.guid);
+    });
+  }
+
+  async copy(card: FacilityAnalysisCard): Promise<void> {
+    await this.runAction(async () => this.openAnalysisGuid((await this.actions.copyAnalysis(card.analysis.guid)).guid));
+  }
+
+  requestActive(card: FacilityAnalysisCard): void {
+    if (this.canAct()) { this.actionError.set(undefined); this.activeCandidate.set(card); }
+  }
+
+  async confirmActive(): Promise<void> {
+    const candidate = this.activeCandidate();
+    if (!candidate || !this.activeEligibility()?.allowed) return;
+    await this.runAction(async () => {
+      await this.actions.setActiveAnalysis(candidate.analysis.guid);
+      this.activeCandidate.set(undefined);
+    });
+  }
+
   toggleComparison(card: FacilityAnalysisCard): void {
     const current = this.comparisonGuids();
     if (current.includes(card.analysis.guid)) {
@@ -63,6 +113,20 @@ export class FacilityAnalysisDashboardComponent {
 
   isCompared(guid: string): boolean { return this.comparisonGuids().includes(guid); }
   clearComparison(): void { this.comparisonGuids.set([]); }
+
+  private openAnalysisGuid(guid: string): void {
+    const facility = this.workspace.facility();
+    if (facility) void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, guid));
+  }
+
+  private async runAction(action: () => Promise<void>): Promise<void> {
+    if (!this.canAct()) return;
+    this.saving.set(true);
+    this.actionError.set(undefined);
+    try { await action(); }
+    catch (error) { this.actionError.set(error instanceof Error ? error.message : 'The analysis change could not be saved.'); }
+    finally { this.saving.set(false); }
+  }
 
   private compareCards(first: FacilityAnalysisCard, second: FacilityAnalysisCard): number {
     if (this.sortBy() === 'modified') return second.modifiedSortValue - first.modifiedSortValue || compareName(first, second);

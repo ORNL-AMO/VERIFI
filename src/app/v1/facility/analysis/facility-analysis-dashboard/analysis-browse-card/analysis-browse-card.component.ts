@@ -15,20 +15,27 @@ import { buildFacilityAnalysisResourceView } from '../../facility-analysis-card.
 export class AnalysisBrowseCardComponent {
   @Input({ required: true }) card!: FacilityAnalysisCard;
   @Input() selectedForComparison = false;
+  @Input() canAct = true;
   @Output() opened = new EventEmitter<FacilityAnalysisCard>();
   @Output() detailsRequested = new EventEmitter<FacilityAnalysisCard>();
   @Output() comparisonToggled = new EventEmitter<FacilityAnalysisCard>();
+  @Output() copyRequested = new EventEmitter<FacilityAnalysisCard>();
+  @Output() activeRequested = new EventEmitter<FacilityAnalysisCard>();
 
   get view() { return buildFacilityAnalysisResourceView(this.card); }
   get actions(): readonly ResourceBrowseCardAction[] {
     return [
+      { id: 'active', label: this.card.isActiveForReporting ? 'Active for reporting' : 'Set active for reporting', icon: 'target', disabled: !this.canAct || this.card.isActiveForReporting },
       { id: 'details', label: 'View analysis details', icon: 'monocle' },
-      { id: 'compare', label: this.selectedForComparison ? 'Remove from comparison' : 'Add to comparison', icon: 'transfer' }
+      { id: 'compare', label: this.selectedForComparison ? 'Remove from comparison' : 'Add to comparison', icon: 'transfer' },
+      { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct }
     ];
   }
 
   selectAction(id: string): void {
     if (id === 'details') this.detailsRequested.emit(this.card);
     if (id === 'compare') this.comparisonToggled.emit(this.card);
+    if (id === 'copy') this.copyRequested.emit(this.card);
+    if (id === 'active') this.activeRequested.emit(this.card);
   }
 }

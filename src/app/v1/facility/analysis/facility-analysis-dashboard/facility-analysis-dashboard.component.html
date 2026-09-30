@@ -8,7 +8,7 @@
 } @else {
   <header class="v1-section-header v1-analysis-dashboard__header">
     <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / {{ facility.name || 'Facility' }}</p><h1 id="v1-facility-analysis-title"><app-ui-icon name="barChart"></app-ui-icon> Facility analysis</h1></div>
-    <button type="button" class="v1-btn v1-btn--action" disabled title="Analysis creation is loading"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
   </header>
 
   @if (workspace.workspaceState() === 'loading' || workspace.workspaceState() === 'switching') {
@@ -20,6 +20,8 @@
   } @else if (workspace.statusState() === 'evaluating') {
     <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Checking analysis readiness…</div>
   }
+  @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ actionError() }}</div> }
+  @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
 
   <div class="v1-data-dashboard-workspace"><div class="v1-data-browse" aria-label="Facility analyses">
     <form class="v1-data-browse-toolbar" aria-label="Analysis filters">
@@ -36,7 +38,7 @@
     } @else {
       @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
       <div class="v1-data-browse-grid" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsCard.set($event)" (comparisonToggled)="toggleComparison($event)"></app-analysis-browse-card> }
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsCard.set($event)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)"></app-analysis-browse-card> }
       </div>
     }
   </div></div>
@@ -50,6 +52,19 @@
         <h3>Used by</h3>
         @if (card.dependencyCount || card.bankingSource) { <ul>@for (item of card.linkedAccountAnalyses; track item.guid) { <li>Account analysis: {{ item.name }}</li> } @for (item of card.linkedReports; track item.guid) { <li>Facility report: {{ item.name }}</li> } @for (item of card.bankingConsumers; track item.guid) { <li>Banking analysis: {{ item.name }}</li> } @if (card.bankingSource) { <li>Uses banked source: {{ card.bankingSource.name }}</li> }</ul> } @else { <p>No downstream links.</p> }
         @if (card.findings.length) { <h3>Validation</h3><ul>@for (finding of card.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
+      </div>
+    </app-workspace-slideout>
+  }
+
+  @if (createOpen()) { <app-analysis-draft-slideout [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" (submitted)="create($event)" (cancelled)="closeCreate()"></app-analysis-draft-slideout> }
+
+  @if (activeCandidate(); as candidate) {
+    <app-workspace-slideout title="Set active for reporting" [description]="'Use ' + candidate.analysis.name + ' as the active ' + candidate.category + ' analysis.'" [saving]="saving()" (closed)="activeCandidate.set(undefined)">
+      <div class="v1-analysis-active-confirmation">
+        @if (activeReplacement(); as current) { <p>This replaces <strong>{{ current.analysis.name }}</strong> as the active {{ candidate.category }} analysis.</p> }
+        @if (candidate.dependencyCount) { <p>{{ candidate.dependencyCount }} downstream link(s) currently reference this analysis.</p> }
+        @if (activeEligibility(); as eligibility) { @if (!eligibility.allowed) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ eligibility.reason }}</div> } }
+        <footer><button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving()" (click)="activeCandidate.set(undefined)">Cancel</button><button type="button" class="v1-btn v1-btn--action" [disabled]="saving() || !activeEligibility()?.allowed" (click)="confirmActive()">@if (saving()) { <app-ui-icon name="loading" spin></app-ui-icon> } @else { <app-ui-icon name="target"></app-ui-icon> }Set active</button></footer>
       </div>
     </app-workspace-slideout>
   }
