@@ -12,6 +12,7 @@ export interface FacilityAnalysisGroupSummary {
   readonly id: string;
   readonly name: string;
   readonly analysisType: AnalysisType;
+  readonly analysisTypeLabel: string;
   readonly predictorCount: number;
   readonly generatedModelCount: number;
   readonly hasSelectedModel: boolean;
@@ -61,6 +62,7 @@ export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInpu
       id: group.idbGroupId,
       name: groupNames.get(group.idbGroupId) ?? group.idbGroupId,
       analysisType: group.analysisType,
+      analysisTypeLabel: analysisTypeLabel(group.analysisType),
       predictorCount: group.predictorVariables?.filter(variable => variable.productionInAnalysis).length ?? 0,
       generatedModelCount: group.models?.length ?? 0,
       hasSelectedModel: !!group.selectedModelId

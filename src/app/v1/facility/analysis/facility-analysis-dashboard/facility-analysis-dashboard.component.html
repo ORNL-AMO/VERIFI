@@ -1,12 +1,62 @@
-<section aria-labelledby="v1-facility-analysis-title">
-  <header class="v1-section-header">
-    <div>
-      <p class="v1-eyebrow">{{ workspace.selectedFacility()?.name || 'Facility' }}</p>
-      <h1 id="v1-facility-analysis-title"><app-ui-icon name="barChart"></app-ui-icon> Facility analysis</h1>
-    </div>
+@let facility = workspace.facility();
+@let account = workspace.account();
+@let cards = workspace.cards();
+@let visibleCards = filteredCards();
+
+@if (!facility) {
+  <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing analyses.</p></article>
+} @else {
+  <header class="v1-section-header v1-analysis-dashboard__header">
+    <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / {{ facility.name || 'Facility' }}</p><h1 id="v1-facility-analysis-title"><app-ui-icon name="barChart"></app-ui-icon> Facility analysis</h1></div>
+    <button type="button" class="v1-btn v1-btn--action" disabled title="Analysis creation is loading"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
   </header>
-  <div class="v1-alert v1-alert--info" role="status">
-    <app-ui-icon name="loading"></app-ui-icon>
-    <span>The facility analysis dashboard is being prepared.</span>
-  </div>
-</section>
+
+  @if (workspace.workspaceState() === 'loading' || workspace.workspaceState() === 'switching') {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Loading analyses…</div>
+  } @else if (workspace.workspaceState() === 'error') {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ workspace.workspaceError()?.message || 'The analysis workspace could not be loaded.' }}</div>
+  } @else if (workspace.statusState() === 'error') {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>Analysis validation could not be completed. Records remain available.</div>
+  } @else if (workspace.statusState() === 'evaluating') {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Checking analysis readiness…</div>
+  }
+
+  <div class="v1-data-dashboard-workspace"><div class="v1-data-browse" aria-label="Facility analyses">
+    <form class="v1-data-browse-toolbar" aria-label="Analysis filters">
+      <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" [value]="search()" (input)="search.set($any($event.target).value)"></div>
+      <label><span>Category</span><select class="v1-select" [value]="categoryFilter()" (change)="setCategoryFilter($any($event.target).value)"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label>
+      <label><span>Status</span><select class="v1-select" [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)"><option value="all">All</option><option value="ready">Ready</option><option value="warning">Warning</option><option value="error">Error</option><option value="active">Active</option></select></label>
+      <label><span>Sort</span><select class="v1-select" [value]="sortBy()" (change)="setSort($any($event.target).value)"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
+    </form>
+
+    @if (cards.length === 0) {
+      <app-data-empty-state icon="barChart" context="facility" title="No analyses" description="Create an energy or water analysis to get started."></app-data-empty-state>
+    } @else if (visibleCards.length === 0) {
+      <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
+    } @else {
+      @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
+      <div class="v1-data-browse-grid" role="list" aria-label="Facility analyses">
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsCard.set($event)" (comparisonToggled)="toggleComparison($event)"></app-analysis-browse-card> }
+      </div>
+    }
+  </div></div>
+
+  @if (detailsCard(); as card) {
+    <app-workspace-slideout [title]="card.analysis.name" description="Analysis setup, validation, and downstream usage" size="large" (closed)="detailsCard.set(undefined)">
+      <div class="v1-analysis-details">
+        <dl><div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div><div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div><div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Modified</dt><dd>{{ card.modifiedDateLabel }}</dd></div></dl>
+        <h3>Groups</h3>
+        @if (card.groupSummaries.length) { <ul>@for (group of card.groupSummaries; track group.id) { <li><strong>{{ group.name }}</strong><span>{{ group.analysisTypeLabel }} · {{ group.predictorCount }} predictors · {{ group.generatedModelCount }} models</span></li> }</ul> } @else { <p>No groups are included.</p> }
+        <h3>Used by</h3>
+        @if (card.dependencyCount || card.bankingSource) { <ul>@for (item of card.linkedAccountAnalyses; track item.guid) { <li>Account analysis: {{ item.name }}</li> } @for (item of card.linkedReports; track item.guid) { <li>Facility report: {{ item.name }}</li> } @for (item of card.bankingConsumers; track item.guid) { <li>Banking analysis: {{ item.name }}</li> } @if (card.bankingSource) { <li>Uses banked source: {{ card.bankingSource.name }}</li> }</ul> } @else { <p>No downstream links.</p> }
+        @if (card.findings.length) { <h3>Validation</h3><ul>@for (finding of card.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
+      </div>
+    </app-workspace-slideout>
+  }
+
+  @if (comparisonCards().length === 2) {
+    <app-workspace-slideout title="Compare analyses" description="Setup and readiness comparison" size="large" (closed)="clearComparison()">
+      <div class="v1-analysis-comparison">@for (card of comparisonCards(); track card.analysis.guid) { <article><h3>{{ card.analysis.name }}</h3><dl><div><dt>Category</dt><dd>{{ card.category }}</dd></div><div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div><div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Groups</dt><dd>{{ card.groupCount }}</dd></div><div><dt>Regression groups</dt><dd>{{ card.regressionCount }}</dd></div><div><dt>Downstream links</dt><dd>{{ card.dependencyCount }}</dd></div></dl></article> }</div>
+    </app-workspace-slideout>
+  }
+}
