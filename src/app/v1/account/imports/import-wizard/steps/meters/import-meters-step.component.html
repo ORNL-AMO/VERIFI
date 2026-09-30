@@ -1,8 +1,8 @@
-@if (!state.meterRows().length) {
+@if (!state.rows().length) {
   <div class="v1-alert v1-alert--info" role="status">No meters are included in this workbook.</div>
 } @else {
   <div class="meter-review-summary" aria-live="polite">
-    <span>{{ state.meterRows().length }} meters found</span>
+    <span>{{ state.rows().length }} meters found</span>
     <span>{{ invalidIncludedCount() }} need attention</span>
   </div>
 
@@ -18,13 +18,13 @@
           <th scope="col">
             <div class="meter-review-heading">
               <span>Group</span>
-              <button type="button" class="meter-review-action" (click)="state.autoGroupMeters()">Auto group</button>
+              <button type="button" class="meter-review-action" (click)="state.autoGroup()">Auto group</button>
             </div>
           </th>
           <th scope="col">
             <div class="meter-review-heading">
               <span>Calendarization</span>
-              <button type="button" class="meter-review-action" (click)="state.toggleAllMeterCalendarization()">Toggle calendarization</button>
+              <button type="button" class="meter-review-action" (click)="state.toggleAllCalendarization()">Toggle calendarization</button>
             </div>
           </th>
           <th scope="col">New / Existing</th>
@@ -32,7 +32,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of state.meterRows(); track row.meter.guid) {
+        @for (row of state.rows(); track row.meter.guid) {
           <tr [class.invalid-row]="!row.meter.skipImport && !row.valid" [class.meter-review-row--skipped]="row.meter.skipImport">
             <td>{{ row.facilityName }}</td>
             <td>
@@ -52,7 +52,7 @@
                 class="v1-select meter-review-select"
                 [ngModel]="row.meter.groupId"
                 [disabled]="row.meter.skipImport"
-                (ngModelChange)="state.setMeterGroup(row.index, $event || undefined)"
+                (ngModelChange)="state.setGroup(row.index, $event || undefined)"
                 [attr.aria-label]="'Group for ' + row.meter.name">
                 <option [ngValue]="undefined">Ungrouped</option>
                 @for (group of row.groups; track group.guid) {
@@ -65,7 +65,7 @@
                 class="v1-select meter-review-select meter-review-calendarization"
                 [ngModel]="row.meter.meterReadingDataApplication"
                 [disabled]="row.meter.skipImport"
-                (ngModelChange)="state.setMeterCalendarization(row.index, $event)"
+                (ngModelChange)="state.setCalendarization(row.index, $event)"
                 [attr.aria-label]="'Calendarization method for ' + row.meter.name">
                 <option [ngValue]="undefined">Select a method</option>
                 @for (method of calendarizationMethods; track method.value) {
@@ -80,7 +80,7 @@
                   type="checkbox"
                   class="meter-review-checkbox"
                   [ngModel]="!row.meter.skipImport"
-                  (ngModelChange)="state.toggleMeterIncluded(row.index, $event)">
+                  (ngModelChange)="state.toggleIncluded(row.index, $event)">
                 <span class="visually-hidden">Include {{ row.meter.name }}</span>
               </label>
             </td>

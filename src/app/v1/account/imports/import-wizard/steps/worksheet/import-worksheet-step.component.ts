@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ImportWizardStateService } from '../../import-wizard-state.service';
 
@@ -12,4 +12,5 @@ import { ImportWizardStateService } from '../../import-wizard-state.service';
 })
 export class ImportWorksheetStepComponent {
   readonly state = inject(ImportWizardStateService);
+  readonly previewRows = computed(() => this.state.draft().selectedWorksheetData.slice(1, 6));
 }

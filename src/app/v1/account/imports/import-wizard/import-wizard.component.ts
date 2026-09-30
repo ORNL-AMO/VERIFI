@@ -7,13 +7,21 @@ import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ImportSessionService } from '../import-session.service';
 import { stepsForDraft } from '../import-workflow.config';
+import { ImportMeterReviewStateService } from './import-meter-review-state.service';
+import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
+import { ImportWizardDraftStore } from './import-wizard-draft.store';
 import { ImportWizardStateService } from './import-wizard-state.service';
 
 @Component({
   selector: 'app-import-wizard',
   standalone: true,
   imports: [CommonModule, RouterOutlet, IconComponent],
-  providers: [ImportWizardStateService],
+  providers: [
+    ImportWizardDraftStore,
+    ImportMeterReviewStateService,
+    ImportPredictorReviewStateService,
+    ImportWizardStateService
+  ],
   templateUrl: './import-wizard.component.html',
   styleUrls: ['./import-wizard.component.css'],
   encapsulation: ViewEncapsulation.None

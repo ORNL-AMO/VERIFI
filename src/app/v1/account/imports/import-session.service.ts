@@ -6,16 +6,15 @@ export class ImportSessionService {
   private readonly draftsState = signal<ImportFileDraft[]>([]);
   private readonly originState = signal<ImportOriginContext>({});
   private readonly pendingState = signal(false);
-  private readonly summaryState = signal<ImportCommitSummary | undefined>(undefined);
+  private readonly summariesState = signal<Readonly<Record<string, ImportCommitSummary>>>({});
 
   readonly drafts = this.draftsState.asReadonly();
   readonly origin = this.originState.asReadonly();
   readonly pending = this.pendingState.asReadonly();
-  readonly summary = this.summaryState.asReadonly();
   readonly hasUnsavedChanges = computed(() => this.draftsState().some(draft => draft.status !== 'completed'));
 
-  setOrigin(origin: ImportOriginContext): void {
-    this.originState.set(origin);
+  begin(origin: ImportOriginContext): void {
+    if (!this.draftsState().some(draft => draft.status !== 'completed')) this.originState.set(origin);
   }
 
   addDrafts(drafts: ImportFileDraft[]): void {
@@ -26,8 +25,16 @@ export class ImportSessionService {
     return this.draftsState().find(draft => draft.id === id);
   }
 
-  notifyChanged(): void {
-    this.draftsState.update(drafts => [...drafts]);
+  updateDraft(id: string, update: (draft: ImportFileDraft) => void): void {
+    this.draftsState.update(drafts => drafts.map(draft => {
+      if (draft.id !== id) return draft;
+      update(draft);
+      return { ...draft };
+    }));
+  }
+
+  summary(draftId: string): ImportCommitSummary | undefined {
+    return this.summariesState()[draftId];
   }
 
   setPending(pending: boolean): void {
@@ -35,13 +42,11 @@ export class ImportSessionService {
   }
 
   complete(draftId: string, summary: ImportCommitSummary): void {
-    const draft = this.draft(draftId);
-    if (draft) {
+    this.updateDraft(draftId, draft => {
       draft.status = 'completed';
       draft.dataSubmitted = true;
-    }
-    this.summaryState.set(summary);
-    this.notifyChanged();
+    });
+    this.summariesState.update(summaries => ({ ...summaries, [draftId]: summary }));
   }
 
   nextReady(excludingId?: string): ImportFileDraft | undefined {
@@ -50,7 +55,7 @@ export class ImportSessionService {
 
   clear(): void {
     this.draftsState.set([]);
-    this.summaryState.set(undefined);
+    this.summariesState.set({});
     this.originState.set({});
   }
 }

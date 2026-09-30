@@ -29,7 +29,6 @@ import {
   ColumnItem,
   FacilityGroup,
   ImportFileDraft,
-  ImportFileKind,
   ParsedTemplate,
   TemplateVersion
 } from './spreadsheet-import.models';
@@ -37,6 +36,7 @@ import { checkSameMonthPredictorData } from './upload-helper-functions';
 import { applyImportedWeatherReadingSemantics } from './predictor-import-review';
 import { predictorReadingEntityKey } from './predictor-reading-import-review';
 import { meterReadingEntityKey } from './meter-reading-import-review';
+import { importKindForTemplateVersion } from './spreadsheet-import-format.registry';
 
 @Injectable({ providedIn: 'root' })
 export class SpreadsheetImportDraftService {
@@ -59,7 +59,7 @@ export class SpreadsheetImportDraftService {
 
   createDraft(file: File, workbook: XLSX.WorkBook): ImportFileDraft {
     const version = this.detectVersion(workbook.SheetNames);
-    const kind = this.kindForVersion(version);
+    const kind = importKindForTemplateVersion(version);
     const parsed = version === 'Non-template' ? this.emptyParsed() : this.parseTemplate(workbook, version);
     const facilities = version === 'Non-template' || version === 'Footprint-tool'
       ? this.store.facilities().map(facility => ({ ...facility }))
@@ -515,14 +515,6 @@ export class SpreadsheetImportDraftService {
 
   private startsWith(actual: string[], expected: string[]): boolean {
     return expected.every((name, index) => actual[index] === name);
-  }
-
-  private kindForVersion(version: TemplateVersion): ImportFileKind {
-    const kinds: Record<TemplateVersion, ImportFileKind> = {
-      V1: 'verifi-v1', V2: 'verifi-v2', V3: 'verifi-v3', ETH: 'energy-treasure-hunt',
-      'Non-template': 'general-workbook', 'Footprint-tool': 'footprint-tool'
-    };
-    return kinds[version];
   }
 
   private emptyParsed(): ParsedTemplate {

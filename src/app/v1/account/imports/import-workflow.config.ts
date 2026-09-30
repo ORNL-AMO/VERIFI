@@ -1,4 +1,5 @@
 import { ImportFileDraft } from '@data/import/spreadsheet-import.models';
+import { importWorkflowForKind } from '@data/import/spreadsheet-import-format.registry';
 
 export interface ImportStepDefinition {
   readonly id: string;
@@ -34,7 +35,8 @@ const FOOTPRINT_STEPS: ImportStepDefinition[] = [
 ];
 
 export function stepsForDraft(draft: ImportFileDraft): ImportStepDefinition[] {
-  if (draft.kind === 'general-workbook') return GENERAL_STEPS;
-  if (draft.kind === 'footprint-tool') return FOOTPRINT_STEPS;
+  const workflow = importWorkflowForKind(draft.kind);
+  if (workflow === 'general-workbook') return GENERAL_STEPS;
+  if (workflow === 'footprint') return FOOTPRINT_STEPS;
   return TEMPLATE_STEPS;
 }

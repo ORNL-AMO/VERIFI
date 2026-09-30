@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterStateSnapshot } from '@angular/router';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
-import { ImportFileKind, ImportFileStatus } from '@data/import/spreadsheet-import.models';
+import { ImportFileStatus } from '@data/import/spreadsheet-import.models';
+import { importFormat } from '@data/import/spreadsheet-import-format.registry';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ImportSessionService } from '../import-session.service';
@@ -30,14 +31,6 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   readonly readingFiles = signal(false);
   readonly dragActive = signal(false);
   readonly sessionLost = signal(false);
-  readonly formatLabels: Record<ImportFileKind, string> = {
-    'verifi-v1': 'VERIFI Template',
-    'verifi-v2': 'VERIFI Template',
-    'verifi-v3': 'VERIFI Template',
-    'energy-treasure-hunt': 'Energy Treasure Hunt',
-    'general-workbook': 'Spread Sheet Columns',
-    'footprint-tool': 'Energy Footprint Tool'
-  };
   readonly statusLabels: Record<ImportFileStatus, string> = {
     queued: 'Queued',
     ready: 'Ready to process',
@@ -48,11 +41,13 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
   private dragDepth = 0;
   private unregisterUnsaved?: () => void;
 
+  readonly formatLabel = (kind: Parameters<typeof importFormat>[0]): string => importFormat(kind).label;
+
   ngOnInit(): void {
     this.sessionLost.set(this.route.snapshot.queryParamMap.get('sessionLost') === '1');
     const facilityGuid = this.route.snapshot.queryParamMap.get('facilityGuid') ?? undefined;
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? undefined;
-    if (facilityGuid || returnUrl) this.session.setOrigin({ facilityGuid, returnUrl });
+    this.session.begin({ facilityGuid, returnUrl });
     this.unregisterUnsaved = this.unsaved.register(
       () => this.hasUnsavedChanges(),
       () => this.session.clear(),

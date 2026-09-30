@@ -1,4 +1,4 @@
-@let rows = state.predictorRows();
+@let rows = state.rows();
 
 @if (!rows.length) {
   <div class="v1-alert v1-alert--info" role="status">No predictors are included in this workbook.</div>
@@ -24,9 +24,9 @@
               <input
                 type="checkbox"
                 class="predictor-review-checkbox"
-                [checked]="state.allPredictorsIncluded()"
-                [indeterminate]="state.somePredictorsIncluded() && !state.allPredictorsIncluded()"
-                (change)="state.setAllPredictorsIncluded($any($event.target).checked)">
+                [checked]="state.allIncluded()"
+                [indeterminate]="state.someIncluded() && !state.allIncluded()"
+                (change)="state.setAllIncluded($any($event.target).checked)">
               <span>Include</span>
             </label>
           </th>
@@ -59,7 +59,7 @@
                   class="predictor-review-checkbox"
                   [ngModel]="row.predictor.production"
                   [disabled]="row.predictor.skipImport"
-                  (ngModelChange)="state.setPredictorProduction(row.index, $event)">
+                  (ngModelChange)="state.setProduction(row.index, $event)">
                 <span class="visually-hidden">Treat {{ row.predictor.name }} as production</span>
               </label>
             </td>
@@ -78,7 +78,7 @@
                   type="checkbox"
                   class="predictor-review-checkbox"
                   [ngModel]="!row.predictor.skipImport"
-                  (ngModelChange)="state.togglePredictorIncluded(row.index, $event)">
+                  (ngModelChange)="state.toggleIncluded(row.index, $event)">
                 <span class="visually-hidden">Include {{ row.predictor.name }}</span>
               </label>
             </td>

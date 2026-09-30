@@ -21,7 +21,7 @@ describe('ImportUploadComponent', () => {
     drafts: () => any[];
     origin: ReturnType<typeof vi.fn>;
     addDrafts: ReturnType<typeof vi.fn>;
-    setOrigin: ReturnType<typeof vi.fn>;
+    begin: ReturnType<typeof vi.fn>;
     clear: ReturnType<typeof vi.fn>;
   };
 
@@ -45,7 +45,7 @@ describe('ImportUploadComponent', () => {
       drafts: () => [draft],
       origin: vi.fn(() => ({})),
       addDrafts: vi.fn(),
-      setOrigin: vi.fn(),
+      begin: vi.fn(),
       clear: vi.fn()
     };
     TestBed.configureTestingModule({

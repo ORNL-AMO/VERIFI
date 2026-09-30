@@ -63,6 +63,31 @@ describe('SpreadsheetImportCommandService', () => {
     expect(writes).toHaveLength(0);
   });
 
+  it('rejects invalid meter settings at the command boundary', async () => {
+    const { service } = setup();
+    const invalid = request();
+    invalid.meters[0].meterReadingDataApplication = undefined;
+
+    await expect(service.commit(invalid)).rejects.toMatchObject({ code: 'validation-failed' });
+  });
+
+  it('rejects meters assigned to an unknown or incompatible group', async () => {
+    const imported = request();
+    imported.meters[0].groupId = 'missing-group';
+    const unknown = setup();
+
+    await expect(unknown.service.commit(imported)).rejects.toThrow('compatible meter group');
+
+    const incompatible = request();
+    incompatible.meters[0].groupId = 'water-group';
+    incompatible.meterGroups = [{
+      guid: 'water-group', accountId: 'account-a', facilityId: 'facility-a',
+      name: 'Water', groupType: 'Water'
+    } as any];
+
+    await expect(setup().service.commit(incompatible)).rejects.toThrow('compatible meter group');
+  });
+
   it('allows one duplicate meter date when the other reading is explicitly excluded', async () => {
     const imported = request();
     imported.meterReadings = [
@@ -248,7 +273,11 @@ describe('SpreadsheetImportCommandService', () => {
       accountGuid: 'account-a', draftId: 'draft-a', kind: 'verifi-v3',
       facilities: [{ id: undefined, guid: 'facility-a', accountId: 'account-a', name: 'Plant', createdDate: timestamp, modifiedDate: timestamp } as any],
       meterGroups: [],
-      meters: [{ id: undefined, guid: 'meter-a', facilityId: 'facility-a', accountId: 'account-a', name: 'Electricity', createdDate: timestamp, modifiedDate: timestamp } as any],
+      meters: [{
+        id: undefined, guid: 'meter-a', facilityId: 'facility-a', accountId: 'account-a',
+        name: 'Electricity', source: 'Electricity', startingUnit: 'kWh', energyUnit: 'MMBtu',
+        meterReadingDataApplication: 'backward', createdDate: timestamp, modifiedDate: timestamp
+      } as any],
       meterReadings: [{ id: undefined, guid: 'reading-a', meterId: 'meter-a', facilityId: 'facility-a', accountId: 'account-a', year: 2025, month: 1, day: 1, totalEnergyUse: 10, createdDate: timestamp, modifiedDate: timestamp } as any],
       predictors: [], predictorReadings: [], energyUseGroups: [], energyUseEquipment: [],
       skipExistingReadingsMeterIds: [], skipExistingPredictorIds: [],

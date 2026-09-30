@@ -183,7 +183,11 @@ describe('spreadsheet import browser boundaries', () => {
       accountGuid: 'account-import', draftId: 'draft-import', kind: 'general-workbook',
       facilities: [{ guid: 'facility-import', accountId: 'account-import', name: 'Imported facility', createdDate: timestamp, modifiedDate: timestamp } as any],
       meterGroups: [],
-      meters: [{ guid: 'meter-import', facilityId: 'facility-import', accountId: 'account-import', name: 'Electricity', createdDate: timestamp, modifiedDate: timestamp } as any],
+      meters: [{
+        guid: 'meter-import', facilityId: 'facility-import', accountId: 'account-import',
+        name: 'Electricity', source: 'Electricity', startingUnit: 'kWh', energyUnit: 'MMBtu',
+        meterReadingDataApplication: 'backward', createdDate: timestamp, modifiedDate: timestamp
+      } as any],
       meterReadings: [{ guid: 'reading-import', meterId: 'meter-import', facilityId: 'facility-import', accountId: 'account-import', year: 2025, month: 1, day: 1, totalEnergyUse: 100, createdDate: timestamp, modifiedDate: timestamp } as any],
       predictors: [], predictorReadings: [], energyUseGroups: [], energyUseEquipment: [],
       skipExistingReadingsMeterIds: [], skipExistingPredictorIds: [],

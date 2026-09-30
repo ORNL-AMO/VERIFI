@@ -12,6 +12,9 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { ImportSessionService } from '../import-session.service';
+import { ImportMeterReviewStateService } from './import-meter-review-state.service';
+import { ImportPredictorReviewStateService } from './import-predictor-review-state.service';
+import { ImportWizardDraftStore } from './import-wizard-draft.store';
 import { ImportWizardStateService } from './import-wizard-state.service';
 
 describe('ImportWizardStateService', () => {
@@ -43,6 +46,9 @@ describe('ImportWizardStateService', () => {
     TestBed.configureTestingModule({
       providers: [
         ImportWizardStateService,
+        ImportWizardDraftStore,
+        ImportMeterReviewStateService,
+        ImportPredictorReviewStateService,
         ImportSessionService,
         {
           provide: SpreadsheetImportDraftService,
@@ -117,7 +123,7 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    service.autoGroupMeters();
+    service.meters.autoGroup();
 
     expect(draft.meters[0].groupId).toBe(electricityGroup.guid);
     expect(draft.meters[1].groupId).toBe(manualGroup.guid);
@@ -131,11 +137,11 @@ describe('ImportWizardStateService', () => {
     const draft = templateDraft({ meters: [meter({ guid: 'one' }), meter({ guid: 'two', skipImport: true })] });
     service.initialize(draft);
 
-    service.toggleAllMeterCalendarization();
+    service.meters.toggleAllCalendarization();
     expect(draft.meters.map(value => value.meterReadingDataApplication)).toEqual(['backward', 'backward']);
-    service.toggleAllMeterCalendarization();
+    service.meters.toggleAllCalendarization();
     expect(draft.meters.map(value => value.meterReadingDataApplication)).toEqual(['fullYear', 'fullYear']);
-    service.toggleAllMeterCalendarization();
+    service.meters.toggleAllCalendarization();
     expect(draft.meters.map(value => value.meterReadingDataApplication)).toEqual(['fullMonth', 'fullMonth']);
   });
 
@@ -165,11 +171,11 @@ describe('ImportWizardStateService', () => {
     const draft = templateDraft({ meters: [meter({ groupId: undefined })], completedSteps: [...completedSteps] });
     service.initialize(draft);
 
-    service.setMeterGroup(0, electricityGroup.guid);
-    expect(draft.completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
-    draft.completedSteps = [...completedSteps];
-    service.setMeterCalendarization(0, 'fullYear');
-    expect(draft.completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
+    service.meters.setGroup(0, electricityGroup.guid);
+    expect(service.draft().completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => current.completedSteps = [...completedSteps]);
+    service.meters.setCalendarization(0, 'fullYear');
+    expect(service.draft().completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
   });
 
   it('offers only unused existing meters from the same facility', () => {
@@ -182,7 +188,7 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    expect(service.availableExistingMeters(0).map(value => value.guid)).toEqual([available.guid]);
+    expect(service.meters.availableExisting(0).map(value => value.guid)).toEqual([available.guid]);
   });
 
   it('delegates meter replacement and invalidates meter-reading and review completion', () => {
@@ -194,7 +200,7 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    service.saveMeter(original.guid, replacement);
+    service.meters.save(original.guid, replacement);
 
     expect(draftService.replaceMeter).toHaveBeenCalledWith(draft, original.guid, replacement);
     expect(draft.completedSteps).toEqual(['facilities', 'meters', 'predictors', 'predictor-readings']);
@@ -213,7 +219,7 @@ describe('ImportWizardStateService', () => {
     const draft = templateDraft({ meters: [original] });
     service.initialize(draft);
 
-    service.saveMeter(original.guid, replacement);
+    service.meters.save(original.guid, replacement);
 
     expect(draftService.replaceMeter).toHaveBeenCalledWith(
       draft,
@@ -230,14 +236,14 @@ describe('ImportWizardStateService', () => {
     workspaceMeterData.set([current]);
     service.initialize(templateDraft({ meters: [selectedMeter], meterData: [overlap, added] }));
 
-    expect(service.importedMeterReadingCount()).toBe(2);
-    expect(service.meterReadingRows()[0]).toMatchObject({
+    expect(service.meters.importedReadingCount()).toBe(2);
+    expect(service.meters.readingRows()[0]).toMatchObject({
       newReadings: { count: 1 },
       existingReadings: { count: 1 },
       invalidReadings: { count: 0 },
       primaryUnitLabel: 'kWh'
     });
-    expect(service.meterReadingRows()[0].comparisons[0].difference).toBe(2);
+    expect(service.meters.readingRows()[0].comparisons[0].difference).toBe(2);
   });
 
   it('synchronizes keep-current decisions and invalidates final review', () => {
@@ -252,12 +258,12 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    service.setSkipExistingMeterReadings(selectedMeter.guid, true);
-    expect(draft.skipExistingReadingsMeterIds).toEqual([selectedMeter.guid]);
-    expect(draft.completedSteps).not.toContain('review');
+    service.meters.setSkipExistingReadings(selectedMeter.guid, true);
+    expect(service.draft().skipExistingReadingsMeterIds).toEqual([selectedMeter.guid]);
+    expect(service.draft().completedSteps).not.toContain('review');
 
-    service.setAllSkipExistingMeterReadings(false);
-    expect(draft.skipExistingReadingsMeterIds).toEqual([]);
+    service.meters.setAllSkipExistingReadings(false);
+    expect(service.draft().skipExistingReadingsMeterIds).toEqual([]);
   });
 
   it('clears meter-reading completion only while invalid exclusions are unresolved', () => {
@@ -274,14 +280,16 @@ describe('ImportWizardStateService', () => {
     expect(service.completeCurrentStep()).toBeUndefined();
     expect(service.error()).toContain('Exclude every invalid meter reading');
 
-    service.toggleExcludedReading(0, true);
-    expect(draft.completedSteps).not.toContain('meter-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    service.meters.toggleExcludedReading(0, true);
+    expect(service.draft().completedSteps).not.toContain('meter-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
 
-    draft.completedSteps = ['facilities', 'meters', 'meter-readings', 'review'];
-    service.setInvalidMeterReadingsAcknowledged(true);
-    expect(draft.completedSteps).toContain('meter-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => {
+      current.completedSteps = ['facilities', 'meters', 'meter-readings', 'review'];
+    });
+    service.meters.setInvalidReadingsAcknowledged(true);
+    expect(service.draft().completedSteps).toContain('meter-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
     expect(service.completeCurrentStep()).toBe('predictors');
   });
 
@@ -309,8 +317,8 @@ describe('ImportWizardStateService', () => {
         kind
       });
 
-      expect(service.meterReadingRows()[0].newReadings.count).toBe(1);
-      expect(service.meterReadingRows()[0].facilityName).toBeTruthy();
+      expect(service.meters.readingRows()[0].newReadings.count).toBe(1);
+      expect(service.meters.readingRows()[0].facilityName).toBeTruthy();
     }
   );
 
@@ -327,7 +335,7 @@ describe('ImportWizardStateService', () => {
     const draft = templateDraft({ predictors: [predictor({ guid: 'import-a' }), used] });
     service.initialize(draft);
 
-    expect(service.availableExistingPredictors(0).map(value => value.guid)).toEqual(['standard-a', 'weather-a']);
+    expect(service.predictors.availableExisting(0).map(value => value.guid)).toEqual(['standard-a', 'weather-a']);
   });
 
   it('delegates predictor replacement and invalidates predictor-reading and review completion', () => {
@@ -339,7 +347,7 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    service.savePredictor(original.guid, replacement);
+    service.predictors.save(original.guid, replacement);
 
     expect(draftService.replacePredictor).toHaveBeenCalledWith(draft, original.guid, replacement);
     expect(draft.completedSteps).toEqual(['facilities', 'meters', 'meter-readings', 'predictors']);
@@ -350,13 +358,13 @@ describe('ImportWizardStateService', () => {
     const draft = templateDraft({ predictors: [predictor()], completedSteps: [...completed] });
     service.initialize(draft);
 
-    service.setPredictorProduction(0, true);
-    expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'review'));
+    service.predictors.setProduction(0, true);
+    expect(service.draft().completedSteps).toEqual(completed.filter(step => step !== 'review'));
 
-    draft.completedSteps = [...completed];
-    service.setAllPredictorsIncluded(false);
-    expect(draft.predictors[0].skipImport).toBe(true);
-    expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'predictor-readings' && step !== 'review'));
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => current.completedSteps = [...completed]);
+    service.predictors.setAllIncluded(false);
+    expect(service.draft().predictors[0].skipImport).toBe(true);
+    expect(service.draft().completedSteps).toEqual(completed.filter(step => step !== 'predictor-readings' && step !== 'review'));
   });
 
   it('prepares predictor reading summaries and synchronizes per-predictor keep-current decisions', () => {
@@ -371,16 +379,16 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    expect(service.predictorReadingRows()[0]).toMatchObject({
+    expect(service.predictors.readingRows()[0]).toMatchObject({
       newReadings: { count: 1 }, existingReadings: { count: 1 }, invalidReadings: { count: 0 }
     });
-    expect(service.predictorReadingRows()[0].comparisons[0].difference).toBe(2);
+    expect(service.predictors.readingRows()[0].comparisons[0].difference).toBe(2);
 
-    service.setSkipExistingPredictorReadings(selected.guid, true);
-    expect(draft.skipExistingPredictorIds).toEqual([selected.guid]);
-    expect(draft.completedSteps).not.toContain('review');
-    service.setAllSkipExistingPredictorReadings(false);
-    expect(draft.skipExistingPredictorIds).toEqual([]);
+    service.predictors.setSkipExistingReadings(selected.guid, true);
+    expect(service.draft().skipExistingPredictorIds).toEqual([selected.guid]);
+    expect(service.draft().completedSteps).not.toContain('review');
+    service.predictors.setAllSkipExistingReadings(false);
+    expect(service.draft().skipExistingPredictorIds).toEqual([]);
   });
 
   it('blocks predictor readings until invalid values are excluded and acknowledged', () => {
@@ -395,14 +403,16 @@ describe('ImportWizardStateService', () => {
     expect(service.completeCurrentStep()).toBeUndefined();
     expect(service.error()).toContain('Exclude every invalid predictor reading');
 
-    service.toggleExcludedPredictorReading(0, true);
-    expect(draft.completedSteps).not.toContain('predictor-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    service.predictors.toggleExcludedReading(0, true);
+    expect(service.draft().completedSteps).not.toContain('predictor-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
 
-    draft.completedSteps = ['facilities', 'predictors', 'predictor-readings', 'review'];
-    service.setInvalidPredictorReadingsAcknowledged(true);
-    expect(draft.completedSteps).toContain('predictor-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => {
+      current.completedSteps = ['facilities', 'predictors', 'predictor-readings', 'review'];
+    });
+    service.predictors.setInvalidReadingsAcknowledged(true);
+    expect(service.draft().completedSteps).toContain('predictor-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
     expect(service.completeCurrentStep()).toBe('review');
   });
 
@@ -416,7 +426,7 @@ describe('ImportWizardStateService', () => {
     });
     service.initialize(draft);
 
-    service.togglePredictorIncluded(0, false);
+    service.predictors.toggleIncluded(0, false);
 
     expect(draft.skipExistingPredictorIds).toEqual([]);
     expect(draft.excludedPredictorReadingIds).toEqual([]);
@@ -473,10 +483,25 @@ describe('ImportWizardStateService', () => {
     expect(service.error()).toBe('Include at least one record before uploading this file.');
   });
 
+  it('returns the session-owned draft to ready when commit fails', async () => {
+    commandCommit.mockRejectedValueOnce(new Error('write failed'));
+    const draft = templateDraft({
+      meters: [meter({})],
+      completedSteps: ['facilities', 'meters', 'meter-readings', 'predictors', 'predictor-readings']
+    });
+    service.initialize(draft);
+    service.activateStep('review');
+
+    await service.commit();
+
+    expect(service.draft().status).toBe('ready');
+    expect(service.error()).toBe('write failed');
+  });
+
   it('returns to a valid workspace origin after completion', () => {
     const selectedFacility = facility({ guid: 'facility-a', accountId: 'account-1' });
     workspaceFacilities.set([selectedFacility]);
-    TestBed.inject(ImportSessionService).setOrigin({
+    TestBed.inject(ImportSessionService).begin({
       facilityGuid: selectedFacility.guid,
       returnUrl: '/v1/workspace/facility/facility-a/data/predictors?tab=monthly'
     });
@@ -491,7 +516,7 @@ describe('ImportWizardStateService', () => {
   });
 
   it('rejects a cross-account origin and uses the contextual fallback', () => {
-    TestBed.inject(ImportSessionService).setOrigin({
+    TestBed.inject(ImportSessionService).begin({
       returnUrl: '/v1/workspace/account/account-2/data/portfolio/facilities'
     });
     service.initialize(templateDraft());
@@ -538,8 +563,8 @@ describe('ImportWizardStateService', () => {
         kind
       });
 
-      expect(service.predictorReadingRows()[0].newReadings.count).toBe(1);
-      expect(service.predictorReadingRows()[0].facilityName).toBeTruthy();
+      expect(service.predictors.readingRows()[0].newReadings.count).toBe(1);
+      expect(service.predictors.readingRows()[0].facilityName).toBeTruthy();
     }
   );
 });

@@ -11,7 +11,7 @@
   <table>
     <thead><tr>@for (header of state.draft().selectedWorksheetData[0]; track $index) { <th>{{ header }}</th> }</tr></thead>
     <tbody>
-      @for (row of state.draft().selectedWorksheetData.slice(1, 6); track $index) {
+      @for (row of previewRows(); track $index) {
         <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr>
       }
     </tbody>

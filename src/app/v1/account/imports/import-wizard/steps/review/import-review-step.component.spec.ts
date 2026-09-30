@@ -34,7 +34,7 @@ describe('ImportReviewStepComponent', () => {
     };
     state.workspace.meterData.set([{ ...structuredClone(meterOverlap), guid: 'current-meter-reading' }]);
     state.workspace.predictorData.set([{ ...structuredClone(predictorOverlap), guid: 'current-predictor-reading' }]);
-    state.draft.update((value: any) => ({
+    state.draft.update(value => ({
       ...value,
       meterData: [meterOverlap, invalidMeterReading],
       predictorData: [predictorOverlap, invalidPredictorReading],
@@ -55,7 +55,7 @@ describe('ImportReviewStepComponent', () => {
 
   it('shows the selected footprint facility and its energy-use hierarchy', () => {
     const state = createImportWizardStateStub();
-    state.draft.update((draft: any) => ({
+    state.draft.update(draft => ({
       ...draft,
       kind: 'footprint-tool',
       selectedFacilityId: draft.importFacilities[0].guid,
@@ -75,7 +75,7 @@ describe('ImportReviewStepComponent', () => {
 
   it('renders an accessible empty state when a general workbook has no included records', () => {
     const state = createImportWizardStateStub();
-    state.draft.update((draft: any) => ({
+    state.draft.update(draft => ({
       ...draft,
       kind: 'general-workbook',
       meters: [],
