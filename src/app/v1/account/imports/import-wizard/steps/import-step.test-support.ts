@@ -117,7 +117,6 @@ export function createImportWizardStateStub() {
     toggleAllMeterCalendarization: vi.fn(),
     availableExistingMeters: vi.fn(() => []),
     saveMeter: vi.fn(),
-    notifyChanged: vi.fn(),
     readingInvalid: vi.fn(() => false),
     isReadingExcluded: vi.fn(() => false),
     toggleExcludedReading: vi.fn(),

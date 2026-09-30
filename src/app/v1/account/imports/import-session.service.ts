@@ -25,12 +25,16 @@ export class ImportSessionService {
     return this.draftsState().find(draft => draft.id === id);
   }
 
-  summary(draftId: string): ImportCommitSummary | undefined {
-    return this.summariesState()[draftId];
+  updateDraft(id: string, update: (draft: ImportFileDraft) => void): void {
+    this.draftsState.update(drafts => drafts.map(draft => {
+      if (draft.id !== id) return draft;
+      update(draft);
+      return { ...draft };
+    }));
   }
 
-  notifyChanged(): void {
-    this.draftsState.update(drafts => [...drafts]);
+  summary(draftId: string): ImportCommitSummary | undefined {
+    return this.summariesState()[draftId];
   }
 
   setPending(pending: boolean): void {
@@ -38,13 +42,11 @@ export class ImportSessionService {
   }
 
   complete(draftId: string, summary: ImportCommitSummary): void {
-    const draft = this.draft(draftId);
-    if (draft) {
+    this.updateDraft(draftId, draft => {
       draft.status = 'completed';
       draft.dataSubmitted = true;
-    }
+    });
     this.summariesState.update(summaries => ({ ...summaries, [draftId]: summary }));
-    this.notifyChanged();
   }
 
   nextReady(excludingId?: string): ImportFileDraft | undefined {

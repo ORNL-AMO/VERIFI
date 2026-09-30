@@ -166,10 +166,10 @@ describe('ImportWizardStateService', () => {
     service.initialize(draft);
 
     service.setMeterGroup(0, electricityGroup.guid);
-    expect(draft.completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
-    draft.completedSteps = [...completedSteps];
+    expect(service.draft().completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => current.completedSteps = [...completedSteps]);
     service.setMeterCalendarization(0, 'fullYear');
-    expect(draft.completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
+    expect(service.draft().completedSteps).toEqual(completedSteps.filter(step => step !== 'review'));
   });
 
   it('offers only unused existing meters from the same facility', () => {
@@ -253,11 +253,11 @@ describe('ImportWizardStateService', () => {
     service.initialize(draft);
 
     service.setSkipExistingMeterReadings(selectedMeter.guid, true);
-    expect(draft.skipExistingReadingsMeterIds).toEqual([selectedMeter.guid]);
-    expect(draft.completedSteps).not.toContain('review');
+    expect(service.draft().skipExistingReadingsMeterIds).toEqual([selectedMeter.guid]);
+    expect(service.draft().completedSteps).not.toContain('review');
 
     service.setAllSkipExistingMeterReadings(false);
-    expect(draft.skipExistingReadingsMeterIds).toEqual([]);
+    expect(service.draft().skipExistingReadingsMeterIds).toEqual([]);
   });
 
   it('clears meter-reading completion only while invalid exclusions are unresolved', () => {
@@ -275,13 +275,15 @@ describe('ImportWizardStateService', () => {
     expect(service.error()).toContain('Exclude every invalid meter reading');
 
     service.toggleExcludedReading(0, true);
-    expect(draft.completedSteps).not.toContain('meter-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    expect(service.draft().completedSteps).not.toContain('meter-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
 
-    draft.completedSteps = ['facilities', 'meters', 'meter-readings', 'review'];
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => {
+      current.completedSteps = ['facilities', 'meters', 'meter-readings', 'review'];
+    });
     service.setInvalidMeterReadingsAcknowledged(true);
-    expect(draft.completedSteps).toContain('meter-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    expect(service.draft().completedSteps).toContain('meter-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
     expect(service.completeCurrentStep()).toBe('predictors');
   });
 
@@ -351,12 +353,12 @@ describe('ImportWizardStateService', () => {
     service.initialize(draft);
 
     service.setPredictorProduction(0, true);
-    expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'review'));
+    expect(service.draft().completedSteps).toEqual(completed.filter(step => step !== 'review'));
 
-    draft.completedSteps = [...completed];
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => current.completedSteps = [...completed]);
     service.setAllPredictorsIncluded(false);
-    expect(draft.predictors[0].skipImport).toBe(true);
-    expect(draft.completedSteps).toEqual(completed.filter(step => step !== 'predictor-readings' && step !== 'review'));
+    expect(service.draft().predictors[0].skipImport).toBe(true);
+    expect(service.draft().completedSteps).toEqual(completed.filter(step => step !== 'predictor-readings' && step !== 'review'));
   });
 
   it('prepares predictor reading summaries and synchronizes per-predictor keep-current decisions', () => {
@@ -377,10 +379,10 @@ describe('ImportWizardStateService', () => {
     expect(service.predictorReadingRows()[0].comparisons[0].difference).toBe(2);
 
     service.setSkipExistingPredictorReadings(selected.guid, true);
-    expect(draft.skipExistingPredictorIds).toEqual([selected.guid]);
-    expect(draft.completedSteps).not.toContain('review');
+    expect(service.draft().skipExistingPredictorIds).toEqual([selected.guid]);
+    expect(service.draft().completedSteps).not.toContain('review');
     service.setAllSkipExistingPredictorReadings(false);
-    expect(draft.skipExistingPredictorIds).toEqual([]);
+    expect(service.draft().skipExistingPredictorIds).toEqual([]);
   });
 
   it('blocks predictor readings until invalid values are excluded and acknowledged', () => {
@@ -396,13 +398,15 @@ describe('ImportWizardStateService', () => {
     expect(service.error()).toContain('Exclude every invalid predictor reading');
 
     service.toggleExcludedPredictorReading(0, true);
-    expect(draft.completedSteps).not.toContain('predictor-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    expect(service.draft().completedSteps).not.toContain('predictor-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
 
-    draft.completedSteps = ['facilities', 'predictors', 'predictor-readings', 'review'];
+    TestBed.inject(ImportSessionService).updateDraft(draft.id, current => {
+      current.completedSteps = ['facilities', 'predictors', 'predictor-readings', 'review'];
+    });
     service.setInvalidPredictorReadingsAcknowledged(true);
-    expect(draft.completedSteps).toContain('predictor-readings');
-    expect(draft.completedSteps).not.toContain('review');
+    expect(service.draft().completedSteps).toContain('predictor-readings');
+    expect(service.draft().completedSteps).not.toContain('review');
     expect(service.completeCurrentStep()).toBe('review');
   });
 
@@ -471,6 +475,21 @@ describe('ImportWizardStateService', () => {
 
     expect(commandCommit).not.toHaveBeenCalled();
     expect(service.error()).toBe('Include at least one record before uploading this file.');
+  });
+
+  it('returns the session-owned draft to ready when commit fails', async () => {
+    commandCommit.mockRejectedValueOnce(new Error('write failed'));
+    const draft = templateDraft({
+      meters: [meter()],
+      completedSteps: ['facilities', 'meters', 'meter-readings', 'predictors', 'predictor-readings']
+    });
+    service.initialize(draft);
+    service.activateStep('review');
+
+    await service.commit();
+
+    expect(service.draft().status).toBe('ready');
+    expect(service.error()).toBe('write failed');
   });
 
   it('returns to a valid workspace origin after completion', () => {

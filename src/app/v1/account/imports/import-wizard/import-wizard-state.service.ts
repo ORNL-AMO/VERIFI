@@ -3,7 +3,11 @@ import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { SpreadsheetImportCommandService } from '@data/import/spreadsheet-import-command.service';
 import { SpreadsheetImportDraftService } from '@data/import/spreadsheet-import-draft.service';
-import { ImportCommitRequest, ImportFileDraft } from '@data/import/spreadsheet-import.models';
+import { ImportFileDraft } from '@data/import/spreadsheet-import.models';
+import {
+  buildSpreadsheetImportCommitRequest,
+  hasSpreadsheetImportRecords
+} from '@data/import/spreadsheet-import-request.builder';
 import {
   buildImportMeterReadingReview,
   getImportMeterReadingIssues,
@@ -67,12 +71,15 @@ export class ImportWizardStateService {
   readonly workspace = inject(AccountWorkspaceStore);
   private readonly meterSettings = inject(MeterSettingsFormService);
 
-  readonly draft = signal<ImportFileDraft | undefined>(undefined);
+  private readonly activeDraftId = signal<string | undefined>(undefined);
+  readonly draft = computed(() => {
+    const id = this.activeDraftId();
+    return id ? this.session.draft(id) : undefined;
+  });
   readonly currentStepId = signal('');
   readonly error = signal<string | undefined>(undefined);
   readonly committed = signal(false);
   readonly newFacilityName = signal('');
-  private readonly draftRevision = signal(0);
   private readonly nextCalendarizationMethod = signal<'backward' | 'fullYear' | 'fullMonth'>('backward');
   private readonly defaultMeterGroups = new Map<string, IdbUtilityMeterGroup>();
 
@@ -100,7 +107,6 @@ export class ImportWizardStateService {
     return `${new Date(Math.min(...times)).toLocaleDateString()} – ${new Date(Math.max(...times)).toLocaleDateString()}`;
   });
   readonly meterRows = computed<ImportMeterRow[]>(() => {
-    this.draftRevision();
     const draft = this.draft();
     if (!draft) return [];
     return draft.meters.map((meter, index) => ({
@@ -113,7 +119,6 @@ export class ImportWizardStateService {
     }));
   });
   readonly meterReadingRows = computed<ImportMeterReadingRow[]>(() => {
-    this.draftRevision();
     const draft = this.draft();
     if (!draft) return [];
     return buildImportMeterReadingReview({
@@ -141,7 +146,6 @@ export class ImportWizardStateService {
   readonly someExistingMeterReadingsKept = computed(() => this.meterReadingRows()
     .some(row => row.existingReadings.count > 0 && row.keepExisting));
   readonly predictorRows = computed<ImportPredictorRow[]>(() => {
-    this.draftRevision();
     const draft = this.draft();
     if (!draft) return [];
     return draft.predictors.map((predictor, index) => ({
@@ -162,7 +166,6 @@ export class ImportWizardStateService {
   readonly somePredictorsIncluded = computed(() => this.predictorRows()
     .some(row => !row.predictor.skipImport));
   readonly predictorReadingRows = computed<ImportPredictorReadingRow[]>(() => {
-    this.draftRevision();
     const draft = this.draft();
     if (!draft) return [];
     return buildImportPredictorReadingReview({
@@ -191,7 +194,6 @@ export class ImportWizardStateService {
   readonly someExistingPredictorReadingsKept = computed(() => this.predictorReadingRows()
     .some(row => row.existingReadings.count > 0 && row.keepExisting));
   readonly reviewSummary = computed(() => {
-    this.draftRevision();
     const draft = this.draft();
     if (!draft) return undefined;
     return buildImportReviewSummary({
@@ -208,11 +210,11 @@ export class ImportWizardStateService {
   });
 
   initialize(draft: ImportFileDraft): void {
-    this.draft.set(draft);
+    if (!this.session.draft(draft.id)) this.session.addDrafts([draft]);
+    this.activeDraftId.set(draft.id);
     this.committed.set(draft.status === 'completed');
     this.defaultMeterGroups.clear();
     this.nextCalendarizationMethod.set('backward');
-    this.draftRevision.update(value => value + 1);
   }
 
   allowedStep(requestedStep: string | undefined): string {
@@ -264,17 +266,15 @@ export class ImportWizardStateService {
     }
     const draft = this.draft();
     this.session.setPending(true);
-    draft.status = 'importing';
-    this.changed();
+    this.session.updateDraft(draft.id, current => current.status = 'importing');
     try {
       const summary = await this.commands.commit(this.commitRequest(draft));
       this.session.complete(draft.id, summary);
       this.committed.set(true);
       return this.session.nextReady(draft.id);
     } catch (error) {
-      draft.status = 'ready';
+      this.session.updateDraft(draft.id, current => current.status = 'ready');
       this.error.set(error instanceof Error ? error.message : String(error));
-      this.changed();
       return undefined;
     } finally {
       this.session.setPending(false);
@@ -345,8 +345,6 @@ export class ImportWizardStateService {
     if (!checked) equipment.utilityMeterGroupIds = equipment.utilityMeterGroupIds.filter(id => id !== groupId);
     this.changed();
   }
-
-  notifyChanged(): void { this.changed(); }
 
   toggleMeterIncluded(index: number, included: boolean): void {
     this.draft().meters[index].skipImport = !included;
@@ -614,7 +612,7 @@ export class ImportWizardStateService {
     const draft = this.draft();
     const step = this.currentStepId();
     if (!draft) return 'The upload session is no longer available.';
-    if (step === 'review' && !this.hasRecordsToCommit(this.commitRequest(draft))) {
+    if (step === 'review' && !hasSpreadsheetImportRecords(this.commitRequest(draft))) {
       return 'Include at least one record before uploading this file.';
     }
     if (step === 'worksheet' && !draft.selectedWorksheetData.length) return 'Choose a non-empty worksheet.';
@@ -658,65 +656,12 @@ export class ImportWizardStateService {
   }
 
   private changed(): void {
-    this.draftRevision.update(value => value + 1);
-    this.session.notifyChanged();
+    const id = this.activeDraftId();
+    if (id) this.session.updateDraft(id, () => undefined);
   }
 
-  private commitRequest(draft: ImportFileDraft): ImportCommitRequest {
-    const meters = draft.meters.filter(meter => !meter.skipImport);
-    const predictors = draft.predictors.filter(predictor => !predictor.skipImport);
-    const meterIds = new Set(meters.map(meter => meter.guid));
-    const predictorIds = new Set(predictors.map(predictor => predictor.guid));
-    const meterReadingExclusions = new Set(draft.excludedMeterReadingIds.map(String));
-    const meterReadingEntries = draft.meterData
-      .map((reading, index) => ({ reading, index }))
-      .filter(entry => meterIds.has(entry.reading.meterId));
-    const excludedMeterReadingIds = meterReadingEntries.reduce<Array<number | string>>((keys, entry, index) => {
-      if (meterReadingExclusions.has(meterReadingEntityKey(entry.reading, entry.index))
-        || meterReadingExclusions.has(meterReadingEntityKey(entry.reading))) {
-        keys.push(meterReadingEntityKey(entry.reading, index));
-      }
-      return keys;
-    }, []);
-    const predictorReadingExclusions = new Set(draft.excludedPredictorReadingIds.map(String));
-    const predictorReadingEntries = draft.predictorData
-      .map((reading, index) => ({ reading, index }))
-      .filter(entry => predictorIds.has(entry.reading.predictorId));
-    const excludedPredictorReadingIds = predictorReadingEntries.reduce<Array<number | string>>((keys, entry, index) => {
-      if (predictorReadingExclusions.has(predictorReadingEntityKey(entry.reading, entry.index))
-        || predictorReadingExclusions.has(predictorReadingEntityKey(entry.reading))) {
-        keys.push(predictorReadingEntityKey(entry.reading, index));
-      }
-      return keys;
-    }, []);
-    const affectedFacilities = new Set([
-      ...meters.map(meter => meter.facilityId), ...predictors.map(predictor => predictor.facilityId),
-      ...draft.facilityEnergyUseGroups.map(group => group.facilityId)
-    ]);
-    return {
-      accountGuid: this.workspace.account().guid,
-      draftId: draft.id,
-      kind: draft.kind,
-      facilities: draft.kind === 'footprint-tool'
-        ? []
-        : draft.kind === 'general-workbook'
-          ? draft.importFacilities.filter(facility => affectedFacilities.has(facility.guid))
-          : draft.importFacilities,
-      meterGroups: draft.newMeterGroups.filter(group => affectedFacilities.has(group.facilityId) &&
-        meters.some(meter => meter.groupId === group.guid)),
-      meters,
-      meterReadings: meterReadingEntries.map(entry => entry.reading),
-      predictors,
-      predictorReadings: predictorReadingEntries.map(entry => entry.reading),
-      energyUseGroups: draft.facilityEnergyUseGroups,
-      energyUseEquipment: draft.facilityEnergyUseEquipment,
-      skipExistingReadingsMeterIds: draft.skipExistingReadingsMeterIds,
-      skipExistingPredictorIds: draft.skipExistingPredictorIds,
-      excludedMeterReadingIds,
-      invalidMeterReadingsAcknowledged: draft.invalidMeterReadingsAcknowledged,
-      excludedPredictorReadingIds,
-      invalidPredictorReadingsAcknowledged: draft.invalidPredictorReadingsAcknowledged
-    };
+  private commitRequest(draft: ImportFileDraft) {
+    return buildSpreadsheetImportCommitRequest(draft, this.workspace.account().guid);
   }
 
   private compatibleGroupsForMeter(meter: IdbUtilityMeter): IdbUtilityMeterGroup[] {
@@ -789,19 +734,6 @@ export class ImportWizardStateService {
     }).flatMap(row => row.invalidReadingDetails);
     return invalidReadings.length === 0 ||
       (invalidReadings.every(reading => reading.excluded) && draft.invalidMeterReadingsAcknowledged);
-  }
-
-  private hasRecordsToCommit(request: ImportCommitRequest): boolean {
-    return [
-      request.facilities,
-      request.meterGroups,
-      request.meters,
-      request.meterReadings,
-      request.predictors,
-      request.predictorReadings,
-      request.energyUseGroups,
-      request.energyUseEquipment
-    ].some(records => records.length > 0);
   }
 
   private invalidPredictorReadingGateSatisfied(): boolean {
