@@ -91,6 +91,7 @@ import { FacilityAnalysisAnnualComponent } from '@app/v1/facility/analysis/facil
 import { FacilityAnalysisMonthlyComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-monthly/facility-analysis-monthly.component';
 import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
 import { FacilityAnalysisAutosaveService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-autosave.service';
+import { FacilityAnalysisGroupContext } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-group-context.service';
 
 export const V1Routes: Routes = [
   {
@@ -358,6 +359,7 @@ export const V1Routes: Routes = [
                   {
                     path: 'group/:groupGuid',
                     component: FacilityAnalysisGroupShellComponent,
+                    providers: [FacilityAnalysisGroupContext],
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'setup' },
                       { path: 'setup', component: FacilityAnalysisGroupSetupComponent, data: { analysisScope: 'group', analysisTab: 'setup' } },

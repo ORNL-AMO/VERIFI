@@ -1,1 +1,81 @@
-<section class="v1-analysis-section" aria-labelledby="v1-group-setup-heading"><h3 id="v1-group-setup-heading">Group setup</h3><p>Choose the analysis method, predictors, adjustments, and banking years for this meter group.</p></section>
+@let currentGroup = group();
+@let currentAnalysis = analysis();
+@let facility = workbench.facility();
+@if (currentGroup && currentAnalysis && facility) {
+  <section class="v1-analysis-section" aria-labelledby="v1-group-setup-heading">
+    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Configuration</p><h3 id="v1-group-setup-heading">Group setup</h3></div><span class="v1-chip">{{ groupContext.meters().length }} meter(s)</span></div>
+
+    @if (missingMeters()) {
+      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>This group has no meters. Add meters or exclude the group before continuing.</span><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityDataRoute(facility.guid, 'meter-grouping')">Open Meter Grouping</a></div>
+    }
+
+    @if (groupContext.findings().length) {
+      <ul class="v1-analysis-group-setup__findings" aria-label="Group findings">
+        @for (finding of groupContext.findings(); track finding.id) { <li class="v1-alert v1-alert--{{ finding.severity === 'error' ? 'danger' : 'warning' }}"><app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon><span><strong>{{ finding.title }}</strong><small>{{ finding.description }}</small></span></li> }
+      </ul>
+    }
+
+    <div class="v1-analysis-group-setup__grid">
+      <section class="v1-analysis-group-setup__panel" aria-labelledby="analysis-method-heading">
+        <h4 id="analysis-method-heading">Analysis method</h4>
+        <fieldset><legend class="visually-hidden">Analysis method</legend>
+          <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'absoluteEnergyConsumption'" (change)="requestAnalysisType('absoluteEnergyConsumption')" /> Absolute consumption</label>
+          <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'energyIntensity'" (change)="requestAnalysisType('energyIntensity')" /> Classic intensity</label>
+          <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'regression'" (change)="requestAnalysisType('regression')" /> Regression</label>
+          @if (currentAnalysis.analysisCategory === 'water') { <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'skipAnalysis'" (change)="requestAnalysisType('skipAnalysis')" /> Track use without savings analysis</label> }
+          <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'skip'" (change)="requestAnalysisType('skip')" /> Exclude group</label>
+          @if (currentGroup.analysisType === 'modifiedEnergyIntensity') { <label class="v1-analysis-group-setup__legacy"><input type="radio" name="group-analysis-type" checked /> Modified intensity <span class="v1-chip v1-chip--warning">Legacy configuration</span></label> }
+        </fieldset>
+        @if (currentGroup.analysisType === 'modifiedEnergyIntensity') {
+          <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="info"></app-ui-icon><span>This existing legacy method remains editable for compatibility, but it cannot be selected for a new configuration.</span></div>
+          <label for="legacy-baseload-mode">Baseload method</label>
+          <select id="legacy-baseload-mode" class="v1-select form-select" [value]="currentGroup.specifiedMonthlyPercentBaseload ? 'monthly' : 'average'" (change)="setLegacyBaseloadMode($event)"><option value="average">Average percent baseload</option><option value="monthly">Percent baseload by month</option></select>
+          @if (!currentGroup.specifiedMonthlyPercentBaseload) {
+            <label for="legacy-average-baseload">Average baseload (%)</label><input id="legacy-average-baseload" class="form-control" type="number" min="0" max="100" [value]="currentGroup.averagePercentBaseload ?? ''" (input)="setAverageBaseload($event)" />
+          } @else {
+            <div class="v1-analysis-group-setup__months">
+              @for (entry of currentGroup.monthlyPercentBaseload; track entry.monthNum) { <label>Month {{ entry.monthNum + 1 }}<input class="form-control" type="number" min="0" max="100" [value]="entry.percent ?? ''" (input)="setMonthlyBaseload(entry.monthNum, $event)" /></label> }
+            </div>
+          }
+        }
+      </section>
+
+      @if (currentGroup.analysisType === 'energyIntensity' || currentGroup.analysisType === 'modifiedEnergyIntensity') {
+        <section class="v1-analysis-group-setup__panel" aria-labelledby="production-variables-heading">
+          <h4 id="production-variables-heading">Production variables</h4>
+          @if (!productionVariables().length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityDataRoute(facility.guid, 'predictors')">Open Predictors</a></div> }
+          @for (predictor of productionVariables(); track predictor.id) { <label class="v1-analysis-group-setup__check"><input type="checkbox" [checked]="predictor.productionInAnalysis" (change)="requestPredictor(predictor.id)" /><span>{{ predictor.name }} <small>{{ predictor.unit }}</small></span></label> }
+          @if (productionVariables().length && selectedProductionCount() === 0) { <p class="v1-field-error" role="alert">Select at least one production variable.</p> }
+        </section>
+      }
+
+      @if (!isSkipped()) {
+        <section class="v1-analysis-group-setup__panel" aria-labelledby="data-adjustments-heading">
+          <h4 id="data-adjustments-heading">Data adjustments</h4>
+          @for (adjustment of currentGroup.dataAdjustments; track adjustment.year) { <div class="v1-analysis-group-setup__adjustment"><label [for]="'data-adjustment-' + adjustment.year">{{ adjustment.year }}</label><input [id]="'data-adjustment-' + adjustment.year" class="form-control" type="number" [value]="adjustment.amount" (input)="setAdjustment('dataAdjustments', adjustment.year, $event)" /><button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove data adjustment for ' + adjustment.year" (click)="removeAdjustment('dataAdjustments', adjustment.year)">Remove</button></div> }
+          <label for="add-data-adjustment">Add year</label><select id="add-data-adjustment" class="v1-select form-select" value="" (change)="addAdjustment('dataAdjustments', $event)"><option value="">Select year</option>@for (year of availableDataAdjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select>
+        </section>
+
+        <section class="v1-analysis-group-setup__panel" aria-labelledby="baseline-adjustments-heading">
+          <h4 id="baseline-adjustments-heading">Baseline adjustments</h4>
+          @for (adjustment of currentGroup.baselineAdjustmentsV2; track adjustment.year) { <div class="v1-analysis-group-setup__adjustment"><label [for]="'baseline-adjustment-' + adjustment.year">{{ adjustment.year }}</label><input [id]="'baseline-adjustment-' + adjustment.year" class="form-control" type="number" [value]="adjustment.amount" (input)="setAdjustment('baselineAdjustmentsV2', adjustment.year, $event)" /><button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove baseline adjustment for ' + adjustment.year" (click)="removeAdjustment('baselineAdjustmentsV2', adjustment.year)">Remove</button></div> }
+          <label for="add-baseline-adjustment">Add year</label><select id="add-baseline-adjustment" class="v1-select form-select" value="" (change)="addAdjustment('baselineAdjustmentsV2', $event)"><option value="">Select year</option>@for (year of availableBaselineAdjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select>
+        </section>
+      }
+    </div>
+
+    @if (currentAnalysis.hasBanking && !isSkipped()) {
+      <section class="v1-analysis-group-setup__panel" aria-labelledby="group-banking-heading">
+        <div class="v1-analysis-section__heading"><h4 id="group-banking-heading">Banking configuration</h4><label class="v1-analysis-group-setup__check"><input type="checkbox" [checked]="currentGroup.applyBanking" [disabled]="hasModels()" (change)="setApplyBanking($event)" /> Apply banking to this group</label></div>
+        @if (currentGroup.applyBanking) {
+          <div class="v1-analysis-group-setup__banking-years"><label for="banked-analysis-year">Applied banking year<select id="banked-analysis-year" class="v1-select form-select" [value]="currentGroup.bankedAnalysisYear || ''" [disabled]="hasModels()" (change)="setBankingYear('bankedAnalysisYear', $event)"><option value="">Select year</option>@for (year of adjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select></label><label for="new-baseline-year">New baseline year<select id="new-baseline-year" class="v1-select form-select" [value]="currentGroup.newBaselineYear || ''" [disabled]="hasModels()" (change)="setBankingYear('newBaselineYear', $event)"><option value="">Select year</option>@for (year of adjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select></label></div>
+          @if (bankingYearError()) { <p class="v1-field-error" role="alert">{{ bankingYearError() }}</p> }
+        }
+      </section>
+    }
+  </section>
+
+  @if (pendingType() || pendingPredictorId()) {
+    <div class="v1-modal-backdrop" role="presentation"><section class="v1-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="change-model-input-title"><h2 id="change-model-input-title">Clear generated models?</h2><p>This change invalidates the group’s generated and selected regression models. Results and downstream consumers will be recalculated.</p><footer><button type="button" class="v1-btn v1-btn--secondary" (click)="pendingType.set(undefined); pendingPredictorId.set(undefined)">Cancel</button><button type="button" class="v1-btn v1-btn--danger" (click)="pendingType() ? confirmTypeChange() : confirmPredictorChange()">Clear models and continue</button></footer></section></div>
+  }
+}

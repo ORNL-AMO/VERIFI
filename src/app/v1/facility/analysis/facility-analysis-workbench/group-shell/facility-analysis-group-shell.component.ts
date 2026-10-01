@@ -1,11 +1,12 @@
 import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { AnalysisWorkbenchTabId, isSkippedAnalysisType, tabsForAnalysisGroup } from '../facility-analysis-workbench.models';
+import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 
 @Component({
   selector: 'app-facility-analysis-group-shell',
@@ -15,15 +16,14 @@ import { AnalysisWorkbenchTabId, isSkippedAnalysisType, tabsForAnalysisGroup } f
   styleUrls: ['./facility-analysis-group-shell.component.css']
 })
 export class FacilityAnalysisGroupShellComponent {
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly params = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap });
   private readonly activeTabState = signal<AnalysisWorkbenchTabId>('setup');
   readonly context = inject(FacilityAnalysisWorkbenchContext);
-  readonly groupGuid = computed(() => this.params().get('groupGuid') ?? '');
-  readonly group = computed(() => this.context.analysis()?.groups.find(group => group.idbGroupId === this.groupGuid()));
-  readonly meterGroup = computed(() => this.context.meterGroups().find(group => group.guid === this.groupGuid()));
+  readonly groupContext = inject(FacilityAnalysisGroupContext);
+  readonly groupGuid = this.groupContext.groupGuid;
+  readonly group = this.groupContext.group;
+  readonly meterGroup = this.groupContext.meterGroup;
   readonly tabs = computed(() => tabsForAnalysisGroup(this.group()));
   readonly activeTab = this.activeTabState.asReadonly();
   private readonly canonicalRouteEffect = effect(() => {
@@ -63,7 +63,8 @@ export class FacilityAnalysisGroupShellComponent {
   }
 
   private syncActiveTab(): void {
-    const tab = this.route.firstChild?.snapshot.data['analysisTab'];
+    const segments = this.router.url.split(/[?#]/, 1)[0].split('/');
+    const tab = segments[segments.length - 1];
     this.activeTabState.set(isAnalysisWorkbenchTab(tab) ? tab : 'setup');
   }
 }
