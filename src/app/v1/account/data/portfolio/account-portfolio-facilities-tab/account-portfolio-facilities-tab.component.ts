@@ -207,7 +207,7 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
         { label: 'Meters', value: String(meters.length), icon: 'meter', detail: 'meters' },
         { label: 'Predictors', value: String(predictors.length), icon: 'chartLine', detail: 'predictors' },
         { label: 'Energy Uses', value: String(equipment.length), icon: 'tools', detail: 'energy-uses' },
-        { label: 'Analyses', value: String(analyses.length), icon: 'barChart' },
+        { label: 'Analyses', value: String(analyses.length), icon: 'analysis' },
         { label: 'Reports', value: String(reports.length), icon: 'reports' }
       ]
     };

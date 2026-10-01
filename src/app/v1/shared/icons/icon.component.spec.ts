@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
+import MicroscopeIcon from '@hugeicons/core-free-icons/MicroscopeIcon';
 import SaveIcon from '@hugeicons/core-free-icons/SaveIcon';
 import Upload03Icon from '@hugeicons/core-free-icons/Upload03Icon';
 import { IconComponent } from './icon.component';
@@ -70,5 +71,9 @@ describe('IconComponent', () => {
 
   it('maps the save icon to SaveIcon', () => {
     expect(ICON_REGISTRY.save).toBe(SaveIcon);
+  });
+
+  it('maps the analysis icon to MicroscopeIcon', () => {
+    expect(ICON_REGISTRY.analysis).toBe(MicroscopeIcon);
   });
 });

@@ -7,7 +7,7 @@
   <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing analyses.</p></article>
 } @else {
   <header class="v1-section-header v1-analysis-dashboard__header">
-    <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / {{ facility.name || 'Facility' }}</p><h1 id="v1-facility-analysis-title"><app-ui-icon name="barChart"></app-ui-icon> Facility analysis</h1></div>
+    <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / {{ facility.name || 'Facility' }}</p><h1 id="v1-facility-analysis-title"><app-ui-icon name="analysis"></app-ui-icon> Facility analysis</h1></div>
     <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
   </header>
 
@@ -32,7 +32,7 @@
     </form>
 
     @if (cards.length === 0) {
-      <app-data-empty-state icon="barChart" context="facility" title="No analyses" description="Create an energy or water analysis to get started."></app-data-empty-state>
+      <app-data-empty-state icon="analysis" context="facility" title="No analyses" description="Create an energy or water analysis to get started."></app-data-empty-state>
     } @else if (visibleCards.length === 0) {
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
     } @else {

@@ -43,6 +43,8 @@ describe('FacilityAnalysisDashboardComponent', () => {
   });
 
   it('renders analysis cards and distinguishes filtered empty results', () => {
+    expect(fixture.nativeElement.querySelector('app-ui-icon[name="analysis"]')).not.toBeNull();
+    expect(getComputedStyle(fixture.nativeElement).paddingTop).not.toBe('0px');
     expect(fixture.nativeElement.textContent).toContain('Energy A');
     expect(fixture.nativeElement.textContent).toContain('Water B');
 

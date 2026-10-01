@@ -74,7 +74,7 @@ export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
   { id: 'home', label: 'Home', shortLabel: 'Home', icon: 'home', enabled: true },
   { id: 'data', label: 'Data', shortLabel: 'Data', icon: 'database', enabled: false },
   { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'chartLine', enabled: false },
-  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'barChart', enabled: false },
+  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'analysis', enabled: false },
   { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
   { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
   { id: 'imports', label: 'Upload', shortLabel: 'Upload', icon: 'uploadData', enabled: true }

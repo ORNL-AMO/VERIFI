@@ -58,6 +58,7 @@ import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
 import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
 import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
 import LockIcon from '@hugeicons/core-free-icons/LockIcon';
+import MicroscopeIcon from '@hugeicons/core-free-icons/MicroscopeIcon';
 import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
 import PackageIcon from '@hugeicons/core-free-icons/PackageIcon';
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
@@ -90,6 +91,7 @@ export const ICON_REGISTRY = {
   account: Building03Icon,
   accountIssue: Alert02Icon,
   add: Add01Icon,
+  analysis: MicroscopeIcon,
   arrowLeft: ArrowLeft01Icon,
   arrowRight: ArrowRight01Icon,
   attachment: Attachment01Icon,
