@@ -1,4 +1,102 @@
-<section class="v1-analysis-section" aria-labelledby="v1-analysis-setup-heading">
-  <div><p class="v1-eyebrow">Analysis</p><h2 id="v1-analysis-setup-heading">Setup</h2></div>
-  <p>Review the analysis boundary, baseline, units, and banking configuration.</p>
-</section>
+@let analysis = draft();
+@let facility = context.facility();
+@if (analysis && facility) {
+  <section class="v1-analysis-section" aria-labelledby="v1-analysis-setup-heading">
+    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Analysis</p><h2 id="v1-analysis-setup-heading">Setup</h2></div><span class="v1-chip">{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span></div>
+
+    @if (linkedAccountAnalyses().length || linkedReports().length || bankingConsumers().length) {
+      <div class="v1-alert v1-alert--info" role="status">
+        <app-ui-icon name="info"></app-ui-icon>
+        <span>Changes can affect {{ linkedAccountAnalyses().length }} account analysis(es), {{ linkedReports().length }} report(s), and {{ bankingConsumers().length }} banking consumer(s).</span>
+      </div>
+    }
+
+    @if (context.findings().length) {
+      <section class="v1-analysis-setup__findings" aria-labelledby="analysis-findings-heading">
+        <h3 id="analysis-findings-heading">Items to review</h3>
+        <ul>
+          @for (finding of context.findings(); track finding.id) {
+            <li class="v1-alert v1-alert--{{ finding.severity === 'error' ? 'danger' : 'warning' }}">
+              <app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon>
+              <span><strong>{{ finding.title }}</strong><small>{{ finding.description }}</small></span>
+              @if (finding.destination.kind !== 'unavailable') { <button type="button" class="v1-btn v1-btn--secondary" (click)="context.status.navigateTo(finding)">Correct</button> }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <div class="v1-analysis-setup__grid">
+      <section class="v1-analysis-setup__panel" aria-labelledby="analysis-details-heading">
+        <h3 id="analysis-details-heading">Analysis details</h3>
+        <label for="analysis-name">Name</label>
+        <input id="analysis-name" class="form-control" [value]="analysis.name" maxlength="120" required (input)="setName($event)" [attr.aria-invalid]="!analysis.name.trim()" />
+        @if (!analysis.name.trim()) { <p class="v1-field-error" role="alert">Enter an analysis name.</p> }
+
+        <dl class="v1-analysis-setup__context">
+          <div><dt>Facility</dt><dd>{{ facility.name }}</dd></div>
+          <div><dt>Category</dt><dd>{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</dd></div>
+        </dl>
+
+        @if (analysis.analysisCategory === 'energy') {
+          <fieldset [disabled]="hasModels()"><legend>Analysis boundary</legend>
+            <label><input type="radio" name="energy-boundary" [checked]="analysis.energyIsSource" (change)="setBoundary(true)" /> Source energy</label>
+            <label><input type="radio" name="energy-boundary" [checked]="!analysis.energyIsSource" (change)="setBoundary(false)" /> Site energy</label>
+          </fieldset>
+          <label for="analysis-energy-unit">Display unit</label>
+          <select id="analysis-energy-unit" class="v1-select form-select" [value]="analysis.energyUnit" (change)="setValue('energyUnit', $event)">
+            @for (option of energyUnits; track option.value) { <option [value]="option.value">{{ option.value }}</option> }
+          </select>
+        } @else {
+          <label for="analysis-water-unit">Display unit</label>
+          <select id="analysis-water-unit" class="v1-select form-select" [value]="analysis.waterUnit" (change)="setValue('waterUnit', $event)">
+            @for (option of waterUnits; track option.value) { <option [value]="option.value">{{ option.value }}</option> }
+          </select>
+        }
+      </section>
+
+      <section class="v1-analysis-setup__panel" aria-labelledby="analysis-period-heading">
+        <h3 id="analysis-period-heading">Analysis period</h3>
+        <label for="analysis-baseline-year">Baseline year</label>
+        <select id="analysis-baseline-year" class="v1-select form-select" [value]="analysis.baselineYear || ''" [disabled]="hasModels() || !baselineYears().length" (change)="setBaseline($event)">
+          <option value="" disabled>Select a complete year</option>
+          @for (year of baselineYears(); track year) { <option [value]="year">{{ year }}</option> }
+        </select>
+        @if (!baselineYears().length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No complete baseline years are available. Correct meter and predictor data before continuing.</span></div> }
+        @if (baselineGoalWarning()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="info"></app-ui-icon><span>{{ baselineGoalWarning() }}</span></div> }
+        <dl class="v1-analysis-setup__context">
+          <div><dt>Latest complete year</dt><dd>{{ latestCompleteYear() || 'Unavailable' }}</dd></div>
+          <div><dt>Fiscal calendar</dt><dd>{{ facility.fiscalYear === 'nonCalendarYear' ? 'Non-calendar year' : 'Calendar year' }}</dd></div>
+        </dl>
+        <a class="v1-inline-link" [routerLink]="navigation.facilitySettingsRoute(facility.guid, 'financial')">Review fiscal settings</a>
+        <p class="v1-analysis-setup__guidance">Results include every complete year. A separate report year is selected later when creating a report.</p>
+      </section>
+    </div>
+
+    <section class="v1-analysis-setup__panel v1-analysis-setup__banking" aria-labelledby="analysis-banking-heading">
+      <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Optional</p><h3 id="analysis-banking-heading">Banking</h3></div><label class="v1-analysis-setup__toggle"><input type="checkbox" [checked]="analysis.hasBanking" [disabled]="!eligibleBankingSources().length" (change)="setHasBanking($event)" /> Use an earlier analysis as the banking source</label></div>
+      @if (!eligibleBankingSources().length) { <p class="v1-analysis-setup__guidance">No compatible analysis is available for this facility, category, and energy basis.</p> }
+      @if (analysis.hasBanking) {
+        <label for="analysis-banking-source">Banking source analysis</label>
+        <select id="analysis-banking-source" class="v1-select form-select" [value]="analysis.bankedAnalysisItemId || ''" (change)="setBankingSource($event)">
+          <option value="" disabled>Select an analysis</option>
+          @for (candidate of eligibleBankingSources(); track candidate.guid) { <option [value]="candidate.guid">{{ candidate.name }} (baseline {{ candidate.baselineYear }})</option> }
+        </select>
+      }
+    </section>
+
+    @if (hasModels()) {
+      <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon><span>Boundary and baseline settings are locked because one or more regression models use them.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="showClearModels.set(true)">Clear models to edit</button></div>
+    }
+  </section>
+
+  @if (showClearModels()) {
+    <div class="v1-modal-backdrop" role="presentation">
+      <section class="v1-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="clear-models-title" aria-describedby="clear-models-description">
+        <h2 id="clear-models-title">Clear regression models?</h2>
+        <p id="clear-models-description">This clears generated and selected models for every group in {{ analysis.name }}. It can change linked account analyses, reports, and banking results.</p>
+        <footer><button type="button" class="v1-btn v1-btn--secondary" (click)="showClearModels.set(false)">Cancel</button><button type="button" class="v1-btn v1-btn--danger" (click)="clearModels()">Clear models</button></footer>
+      </section>
+    </div>
+  }
+}
