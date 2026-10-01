@@ -93,6 +93,7 @@ import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facil
 import { FacilityAnalysisAutosaveService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-autosave.service';
 import { FacilityAnalysisGroupContext } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-group-context.service';
 import { FacilityAnalysisResultsService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-results.service';
+import { FacilityAnalysisResultsDisplayService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-results-display.service';
 
 export const V1Routes: Routes = [
   {
@@ -352,7 +353,7 @@ export const V1Routes: Routes = [
               {
                 path: 'workbench/:analysisGuid',
                 component: FacilityAnalysisWorkbenchComponent,
-                providers: [FacilityAnalysisWorkbenchContext, FacilityAnalysisAutosaveService, FacilityAnalysisResultsService],
+                providers: [FacilityAnalysisWorkbenchContext, FacilityAnalysisAutosaveService, FacilityAnalysisResultsService, FacilityAnalysisResultsDisplayService],
                 canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },
