@@ -2,6 +2,7 @@ import { firstValueFrom } from 'rxjs';
 import { PredictorCommandHandler } from '@data/account-workspace/handlers/predictor-command-handler.service';
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
+import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { dbConfig } from './_dbConfig';
 import { IndexedDbTransactionService } from './indexed-db-transaction.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
@@ -218,6 +219,58 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     await harness.reopen();
     expect(await harness.getAll('utilityMeter')).toContainEqual(accountAFixture.meter);
     expect(await harness.getAll('utilityMeterData')).toContainEqual(accountAFixture.meterData);
+  });
+
+  it('atomically deletes a facility analysis and clears active and account-analysis references', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const analysisGuid = accountAFixture.facilityAnalysis.guid as string;
+    await transactionService.runTransaction(['facilities', 'accountAnalysisItems'], 'readwrite', async transaction => {
+      await transaction.put('facilities', { ...accountAFixture.facility, selectedEnergyAnalysisId: analysisGuid });
+      await transaction.put('accountAnalysisItems', {
+        ...accountAFixture.accountAnalysis,
+        facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: analysisGuid }]
+      });
+    });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    const result = await handler.deleteFacilityAnalysisAtomic({ accountGuid, facilityGuid, analysisGuid });
+
+    expect(result).toMatchObject({ clearedAccountAnalysisCount: 1, clearedActiveSelection: true });
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).not.toContainEqual(expect.objectContaining({ guid: analysisGuid }));
+    expect(await harness.getAll('facilities')).toContainEqual(expect.objectContaining({ guid: facilityGuid, selectedEnergyAnalysisId: undefined }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: accountAFixture.accountAnalysis.guid,
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: undefined }]
+    }));
+  });
+
+  it('leaves the database unchanged when a report or banking workflow blocks analysis deletion', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const analysisGuid = accountAFixture.facilityAnalysis.guid as string;
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+    await transactionService.runTransaction(['facilityReports'], 'readwrite', transaction => transaction.put('facilityReports', {
+      ...accountAFixture.facilityReport,
+      analysisItemId: analysisGuid
+    }));
+
+    await expect(handler.deleteFacilityAnalysisAtomic({ accountGuid, facilityGuid, analysisGuid }))
+      .rejects.toThrow('linked facility report');
+    expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
+
+    await transactionService.runTransaction(['facilityReports', 'analysisItems'], 'readwrite', async transaction => {
+      await transaction.put('facilityReports', { ...accountAFixture.facilityReport, analysisItemId: undefined });
+      await transaction.add('analysisItems', {
+        guid: 'banking-consumer-a', accountId: accountGuid, facilityId: facilityGuid,
+        name: 'Banking consumer', bankedAnalysisItemId: analysisGuid
+      });
+    });
+    await expect(handler.deleteFacilityAnalysisAtomic({ accountGuid, facilityGuid, analysisGuid }))
+      .rejects.toThrow('banking workflow');
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
   });
 
   it('rolls back meter-group creation when a related analysis write fails', async () => {

@@ -10,13 +10,29 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { AccountWorkspaceStore } from '../account-workspace.store';
+import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+
+export interface DeleteFacilityAnalysisCommand {
+  readonly accountGuid: string;
+  readonly facilityGuid: string;
+  readonly analysisGuid: string;
+}
+
+export interface DeleteFacilityAnalysisResult {
+  readonly deletedAnalysis: IdbAnalysisItem;
+  readonly clearedAccountAnalysisCount: number;
+  readonly clearedActiveSelection: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AnalysisCommandHandler {
   constructor(
     private readonly analysisDb: AnalysisDbService,
     private readonly accountAnalysisDb: AccountAnalysisDbService,
-    private readonly accountWorkspaceStore: AccountWorkspaceStore
+    private readonly accountWorkspaceStore: AccountWorkspaceStore,
+    private readonly transactions: IndexedDbTransactionService
   ) { }
 
   // ---------------------------------------------------------------------------
@@ -37,6 +53,67 @@ export class AnalysisCommandHandler {
     this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
     await firstValueFrom(this.analysisDb.deleteWithObservable(analysis.id));
     return analysis.id;
+  }
+
+  async deleteFacilityAnalysisAtomic(command: DeleteFacilityAnalysisCommand): Promise<DeleteFacilityAnalysisResult> {
+    return this.transactions.runTransaction(
+      ['analysisItems', 'accountAnalysisItems', 'facilities', 'facilityReports'],
+      'readwrite',
+      async transaction => {
+        const analyses = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', command.accountGuid);
+        const analysis = analyses.find(item => item.guid === command.analysisGuid);
+        if (!analysis || analysis.facilityId !== command.facilityGuid || analysis.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The analysis is missing or does not belong to the selected facility.');
+        }
+        this.assertOwnership(analysis.accountId, command.accountGuid, 'facility analysis');
+
+        const reports = await transaction.getAllByIndex<IdbFacilityReport>('facilityReports', 'accountId', command.accountGuid);
+        const linkedReports = reports.filter(report => report.analysisItemId === analysis.guid);
+        if (linkedReports.length) {
+          throw new WorkspaceWriteError('validation-failed', `Remove this analysis from ${linkedReports.length} linked facility report(s) before deleting it.`);
+        }
+        const bankingConsumers = analyses.filter(item => item.guid !== analysis.guid && item.bankedAnalysisItemId === analysis.guid);
+        if (bankingConsumers.length) {
+          throw new WorkspaceWriteError('validation-failed', `Remove this analysis from ${bankingConsumers.length} banking workflow(s) before deleting it.`);
+        }
+
+        const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', command.accountGuid);
+        const facility = facilities.find(item => item.guid === command.facilityGuid);
+        if (!facility || facility.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected facility could not be found.');
+        }
+        const accountAnalyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>('accountAnalysisItems', 'accountId', command.accountGuid);
+        const now = new Date();
+        let clearedAccountAnalysisCount = 0;
+        for (const item of accountAnalyses) {
+          let changed = false;
+          const links = (item.facilityAnalysisItems ?? []).map(link => {
+            if (link.facilityId === facility.guid && link.analysisItemId === analysis.guid) {
+              changed = true;
+              return { ...link, analysisItemId: undefined };
+            }
+            return { ...link };
+          });
+          if (changed) {
+            clearedAccountAnalysisCount += 1;
+            await transaction.put('accountAnalysisItems', { ...item, facilityAnalysisItems: links, modifiedDate: now });
+          }
+        }
+
+        const clearedActiveSelection = facility.selectedEnergyAnalysisId === analysis.guid
+          || facility.selectedWaterAnalysisId === analysis.guid;
+        if (clearedActiveSelection) {
+          await transaction.put('facilities', {
+            ...facility,
+            selectedEnergyAnalysisId: facility.selectedEnergyAnalysisId === analysis.guid ? undefined : facility.selectedEnergyAnalysisId,
+            selectedWaterAnalysisId: facility.selectedWaterAnalysisId === analysis.guid ? undefined : facility.selectedWaterAnalysisId,
+            modifiedDate: now
+          });
+        }
+        await transaction.deleteByKey('analysisItems', analysis.id);
+        return { deletedAnalysis: analysis, clearedAccountAnalysisCount, clearedActiveSelection };
+      }
+    );
   }
 
   // ---------------------------------------------------------------------------

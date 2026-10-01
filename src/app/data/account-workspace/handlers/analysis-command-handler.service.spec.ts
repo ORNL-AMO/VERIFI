@@ -13,8 +13,9 @@ describe('AnalysisCommandHandler', () => {
     const analysisDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
     const accountAnalysisDb = { addWithObservable: vi.fn(), updateWithObservable: vi.fn(), deleteWithObservable: vi.fn() };
     const accountWorkspaceStore = { facilityAnalyses: vi.fn().mockReturnValue(facilityAnalyses) };
-    const handler = new AnalysisCommandHandler(analysisDb as any, accountAnalysisDb as any, accountWorkspaceStore as any);
-    return { handler, analysisDb, accountAnalysisDb, accountWorkspaceStore };
+    const transactions = { runTransaction: vi.fn() };
+    const handler = new AnalysisCommandHandler(analysisDb as any, accountAnalysisDb as any, accountWorkspaceStore as any, transactions as any);
+    return { handler, analysisDb, accountAnalysisDb, accountWorkspaceStore, transactions };
   }
 
   it('addFacilityAnalysis persists and returns the new analysis', async () => {
@@ -40,6 +41,45 @@ describe('AnalysisCommandHandler', () => {
     await expect(
       handler.deleteFacilityAnalysis({ id: 3, guid: 'a-1', accountId: 'other' } as IdbAnalysisItem, ACCOUNT)
     ).rejects.toMatchObject({ code: 'cross-account-entity' });
+  });
+
+  it('deletes a facility analysis and clears active and account-analysis references atomically', async () => {
+    const { handler, transactions } = createHandler();
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([{ id: 3, guid: 'a-1', accountId: ACCOUNT, facilityId: FACILITY }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: 4, guid: FACILITY, accountId: ACCOUNT, selectedEnergyAnalysisId: 'a-1' }])
+        .mockResolvedValueOnce([{ id: 5, accountId: ACCOUNT, facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'a-1' }] }]),
+      put: vi.fn().mockResolvedValue(undefined),
+      deleteByKey: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.deleteFacilityAnalysisAtomic({ accountGuid: ACCOUNT, facilityGuid: FACILITY, analysisGuid: 'a-1' });
+
+    expect(result).toMatchObject({ clearedAccountAnalysisCount: 1, clearedActiveSelection: true });
+    expect(context.put).toHaveBeenCalledWith('accountAnalysisItems', expect.objectContaining({
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: undefined }]
+    }));
+    expect(context.put).toHaveBeenCalledWith('facilities', expect.objectContaining({ selectedEnergyAnalysisId: undefined }));
+    expect(context.deleteByKey).toHaveBeenCalledWith('analysisItems', 3);
+  });
+
+  it('blocks atomic deletion when reports or banking analyses depend on it', async () => {
+    const { handler, transactions } = createHandler();
+    const operationWith = (analyses: any[], reports: any[]) => {
+      const context = { getAllByIndex: vi.fn().mockResolvedValueOnce(analyses).mockResolvedValueOnce(reports) };
+      transactions.runTransaction.mockImplementationOnce(async (_stores, _mode, operation) => operation(context));
+    };
+    const target = { id: 3, guid: 'a-1', accountId: ACCOUNT, facilityId: FACILITY };
+    operationWith([target], [{ analysisItemId: 'a-1' }]);
+    await expect(handler.deleteFacilityAnalysisAtomic({ accountGuid: ACCOUNT, facilityGuid: FACILITY, analysisGuid: 'a-1' }))
+      .rejects.toThrow('linked facility report');
+
+    operationWith([target, { id: 4, guid: 'a-2', accountId: ACCOUNT, facilityId: FACILITY, bankedAnalysisItemId: 'a-1' }], []);
+    await expect(handler.deleteFacilityAnalysisAtomic({ accountGuid: ACCOUNT, facilityGuid: FACILITY, analysisGuid: 'a-1' }))
+      .rejects.toThrow('banking workflow');
   });
 
   it('addAccountAnalysis persists and returns the new account analysis', async () => {

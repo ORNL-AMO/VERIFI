@@ -78,6 +78,7 @@ export type StatusDestination =
   | { readonly kind: 'facility-data'; readonly facilityGuid: string; readonly detail: string }
   | { readonly kind: 'meter-tab'; readonly facilityGuid: string; readonly meterGuid: string; readonly tab: 'settings' | 'readings' | 'quality' }
   | { readonly kind: 'predictor-tab'; readonly facilityGuid: string; readonly predictorGuid: string; readonly tab: 'settings' | 'readings' | 'quality' }
+  | { readonly kind: 'facility-analysis'; readonly facilityGuid: string; readonly analysisGuid: string; readonly tab: 'setup' }
   | { readonly kind: 'unavailable' };
 
 export interface StatusItem extends StatusFinding {

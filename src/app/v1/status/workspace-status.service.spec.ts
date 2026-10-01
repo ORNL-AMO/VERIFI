@@ -127,6 +127,26 @@ describe('WorkspaceStatusService', () => {
     expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors']);
     expect(router.navigate).toHaveBeenNthCalledWith(2, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'predictor-a', 'quality']);
   });
+
+  it('navigates analysis findings to the canonical facility workbench', () => {
+    const service = setup(signal(workspaceSnapshot()), signal(1), new BehaviorSubject(result('ready')));
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const entity = {
+      kind: 'facility-analysis' as const,
+      guid: 'analysis-a',
+      name: 'Energy analysis',
+      accountGuid: 'account-a',
+      facilityGuid: 'facility-a'
+    };
+
+    service.navigateTo(presentFinding(makeFinding(
+      'analysis.configuration.invalid', 'error', 'configuration', entity, { reasons: ['missingName'] }
+    )));
+
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'setup'
+    ]);
+  });
 });
 
 function setup(

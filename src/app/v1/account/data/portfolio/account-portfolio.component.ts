@@ -27,7 +27,7 @@ const PORTFOLIO_SELECTORS: ReadonlyArray<Omit<PortfolioSelectorSummary, 'total'>
   { path: 'meters', label: 'Meters', icon: 'meter' },
   { path: 'predictors', label: 'Predictors', icon: 'predictor' },
   { path: 'energy-uses', label: 'Energy Uses', icon: 'tools' },
-  { path: 'analyses', label: 'Analyses', icon: 'barChart' },
+  { path: 'analyses', label: 'Analyses', icon: 'analysis' },
   { path: 'reports', label: 'Reports', icon: 'reports' }
 ];
 

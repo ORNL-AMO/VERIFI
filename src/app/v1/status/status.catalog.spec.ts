@@ -31,6 +31,26 @@ describe('v1 status presentation catalog', () => {
       .toEqual({ kind: 'predictor-tab', facilityGuid: 'facility-a', predictorGuid: 'predictor-a', tab: 'quality' });
   });
 
+  it('routes facility analysis and group findings to the analysis workbench', () => {
+    const analysisEntity = {
+      kind: 'facility-analysis' as const,
+      guid: 'analysis-a',
+      name: 'Analysis A',
+      accountGuid: 'account-a',
+      facilityGuid: 'facility-a'
+    };
+    const groupEntity = {
+      ...analysisEntity,
+      kind: 'analysis-group' as const,
+      guid: 'analysis-a:group-a'
+    };
+
+    expect(presentFindings([makeFinding('analysis.configuration.invalid', 'error', 'configuration', analysisEntity, { reasons: ['missingName'] })])[0].destination)
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', tab: 'setup' });
+    expect(presentFindings([makeFinding('analysis-group.model.invalid', 'warning', 'quality', groupEntity)])[0].destination)
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', tab: 'setup' });
+  });
+
   it('sorts Todos by severity, record name, and rule code', () => {
     const otherEntity = { ...meterEntity, guid: 'meter-b', name: 'Alpha meter' };
     const findings = [

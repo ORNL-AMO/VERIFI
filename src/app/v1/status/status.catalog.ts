@@ -56,10 +56,10 @@ const RULES: Record<StatusRuleCode, StatusRulePresentation> = {
   'predictor.currency.behind-facility': { title: 'Bring predictor data current', description: finding => `Predictor data ends ${formatPeriod(finding.evidence.latestPeriod)}, while facility data runs through ${formatPeriod(finding.evidence.facilityLatestPeriod)}.`, todo: true, destination: predictorTab('readings') },
   'predictor.weather.warning': { title: 'Review weather data', description: () => 'Some weather entries contain incomplete or revised source data.', todo: true, destination: predictorTab('readings') },
   'predictor.quality.outlier': { title: 'Review predictor outliers', description: finding => `${finding.evidence.count} predictor value(s) fall outside the expected range.`, todo: false, destination: predictorTab('quality') },
-  'analysis.configuration.invalid': { title: 'Complete analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
-  'analysis-group.setup.invalid': { title: 'Complete analysis group setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
-  'analysis-group.model.invalid': { title: 'Review regression model', description: () => 'The selected regression model does not pass its validity checks.', todo: true, destination: unavailable },
-  'analysis-group.inputs.invalid': { title: 'Review analysis inputs', description: () => 'One or more included meters or predictors has setup or data errors.', todo: true, destination: unavailable },
+  'analysis.configuration.invalid': { title: 'Complete analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: facilityAnalysis },
+  'analysis-group.setup.invalid': { title: 'Complete analysis group setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: facilityAnalysis },
+  'analysis-group.model.invalid': { title: 'Review regression model', description: () => 'The selected regression model does not pass its validity checks.', todo: true, destination: facilityAnalysis },
+  'analysis-group.inputs.invalid': { title: 'Review analysis inputs', description: () => 'One or more included meters or predictors has setup or data errors.', todo: true, destination: facilityAnalysis },
   'account-analysis.configuration.invalid': { title: 'Complete account analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
   'account-analysis.children.warning': { title: 'Review facility analyses', description: () => 'One or more included facility analyses has warnings.', todo: true, destination: unavailable },
   'report.configuration.invalid': { title: 'Complete report setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
@@ -92,6 +92,18 @@ function meterTab(tab: 'settings' | 'readings' | 'quality'): (finding: StatusFin
 
 function predictorTab(tab: 'settings' | 'readings' | 'quality'): (finding: StatusFinding) => StatusDestination {
   return finding => ({ kind: 'predictor-tab', facilityGuid: finding.entity.facilityGuid!, predictorGuid: finding.entity.guid, tab });
+}
+
+function facilityAnalysis(finding: StatusFinding): StatusDestination {
+  const analysisGuid = finding.entity.kind === 'analysis-group'
+    ? finding.entity.guid.split(':', 1)[0]
+    : finding.entity.guid;
+  return {
+    kind: 'facility-analysis',
+    facilityGuid: finding.entity.facilityGuid!,
+    analysisGuid,
+    tab: 'setup'
+  };
 }
 
 function compareStatusItems(first: StatusItem, second: StatusItem): number {

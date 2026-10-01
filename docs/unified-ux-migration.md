@@ -171,6 +171,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker payload, report export, or Electron contract changes.
 - **Tests:** Focused v1 route/navigation specs, meter tab visibility specs, and bill inspection component specs for chart data preparation, regression lines, and empty states.
 
+### Facility Analysis Dashboard Workflow
+
+- **Workflow:** Production v1 Facility Analysis dashboard, issue #2740.
+- **Existing v0 entry point:** Facility analysis management under the current Data Evaluation facility analysis routes.
+- **Decision:** Rebuild the inventory as the canonical `/v1/workspace/facility/:facilityGuid/analysis/dashboard` card dashboard. Reuse the v1 resource-card, filter toolbar, empty-state, slideout, command-boundary, and status-catalog patterns. Reserve `/analysis/workbench/:analysisGuid/setup` for the follow-on setup and modeling workbench; keep the account Analysis dashboard as a stable placeholder until its own issue.
+- **Parity:** Preserve energy/water creation defaults, copy semantics, baseline eligibility for active reporting, analysis/group validation, and GUID relationships. Show account-analysis, facility-report, and banking usage. Deletion clears active and account-analysis references atomically, but is intentionally blocked while a report or another analysis's banking workflow still depends on the record.
+- **Shared contracts:** The dashboard reads the account workspace and v1 status projection. Writes use existing analysis and facility handlers, plus one four-store native transaction for deletion. No IndexedDB schema/version, backup/import/export shape, analysis calculation, Worker, report output, or Electron boundary changes.
+- **Tests:** Cover route/navigation helpers, status destinations, deterministic card projections, dashboard filtering/comparison, action decisions, handler validation, and native IndexedDB commit/block behavior. Use the production web build; Electron validation is unnecessary unless a desktop boundary changes.
+
 ### Portfolio Resource Card Reuse Decision
 
 - **Workflow:** v1 account portfolio resource tabs, starting with account-wide Meters and extending next to Predictors, Energy Uses, Analyses, and Reports.

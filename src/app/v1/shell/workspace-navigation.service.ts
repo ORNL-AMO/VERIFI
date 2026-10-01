@@ -19,6 +19,7 @@ export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' 
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
 export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
 export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
+export type FacilityAnalysisRouteTab = 'setup';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -53,7 +54,7 @@ export interface AccountDropdownOption {
   readonly active: boolean;
 }
 
-interface RouteState {
+export interface RouteState {
   readonly view: 'welcome' | 'workspace';
   readonly contextMode: ContextMode;
   readonly accountGuid?: string;
@@ -62,6 +63,7 @@ interface RouteState {
   readonly meterGroupGuid?: string;
   readonly predictorGuid?: string;
   readonly weatherPredictorGroupKey?: string;
+  readonly analysisGuid?: string;
   readonly importFileId?: string;
   readonly importStep?: string;
   readonly section: SectionId;
@@ -72,7 +74,7 @@ export const WORKSPACE_SECTIONS: ReadonlyArray<SectionDefinition> = [
   { id: 'home', label: 'Home', shortLabel: 'Home', icon: 'home', enabled: true },
   { id: 'data', label: 'Data', shortLabel: 'Data', icon: 'database', enabled: false },
   { id: 'visualization', label: 'Visualization', shortLabel: 'Visuals', icon: 'chartLine', enabled: false },
-  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'barChart', enabled: false },
+  { id: 'analysis', label: 'Analysis', shortLabel: 'Analysis', icon: 'analysis', enabled: false },
   { id: 'reports', label: 'Reports', shortLabel: 'Reports', icon: 'reports', enabled: false },
   { id: 'settings', label: 'Settings', shortLabel: 'Settings', icon: 'settings', enabled: true },
   { id: 'imports', label: 'Upload', shortLabel: 'Upload', icon: 'uploadData', enabled: true }
@@ -91,7 +93,7 @@ const DEFAULT_DETAILS: Record<SectionId, string> = {
   home: 'overview',
   data: 'portfolio',
   visualization: 'time-series',
-  analysis: 'rollup',
+  analysis: 'dashboard',
   reports: 'setup',
   settings: 'profile',
   imports: 'upload'
@@ -128,7 +130,9 @@ export class WorkspaceNavigationService {
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
     ...section,
-    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'imports' ? this.isWorkspaceRoute() : section.enabled
+    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'analysis' || section.id === 'imports'
+      ? this.isWorkspaceRoute()
+      : section.enabled
   })));
   readonly panelTabs = signal(SUPPORT_PANEL_TABS).asReadonly();
   readonly isSupportPanelOpen = signal(true);
@@ -144,6 +148,7 @@ export class WorkspaceNavigationService {
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
+  readonly activeAnalysisGuid = computed(() => this.routeState().analysisGuid);
   readonly activeImportFileId = computed(() => this.routeState().importFileId);
   readonly activeImportStep = computed(() => this.routeState().importStep);
   readonly account = computed(() => this.resolveAccount());
@@ -274,6 +279,20 @@ export class WorkspaceNavigationService {
       }
       return;
     }
+    if (sectionId === 'analysis') {
+      if (contextMode === 'facility') {
+        const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
+        if (facilityGuid) {
+          void this.router.navigate(this.facilityAnalysisRoute(facilityGuid));
+        }
+        return;
+      }
+      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
+      if (accountGuid) {
+        void this.router.navigate(this.accountAnalysisRoute(accountGuid));
+      }
+      return;
+    }
     if (sectionId === 'imports') {
       const accountGuid = this.account()?.guid || this.routeState().accountGuid;
       if (accountGuid) {
@@ -310,12 +329,28 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'account', accountGuid, 'imports', 'upload'];
   }
 
+  accountAnalysisRoute(accountGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
+  }
+
   facilityRoute(facilityGuid: string): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
   }
 
   facilityDataRoute(facilityGuid: string, detail = 'meters'): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
+  }
+
+  facilityAnalysisRoute(facilityGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+  }
+
+  facilityAnalysisWorkbenchRoute(
+    facilityGuid: string,
+    analysisGuid: string,
+    tab: FacilityAnalysisRouteTab = 'setup'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, tab];
   }
 
   facilityMeterRoute(facilityGuid: string, meterGuid: string, tab: FacilityMeterRouteTab = 'settings'): Array<string> {
@@ -376,6 +411,7 @@ export class WorkspaceNavigationService {
       return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
     }
     if (section === 'imports') return this.accountImportsRoute(accountGuid);
+    if (section === 'analysis') return this.accountAnalysisRoute(accountGuid);
     return this.accountRoute(accountGuid);
   }
 
@@ -390,6 +426,7 @@ export class WorkspaceNavigationService {
       const accountGuid = this.account()?.guid || this.routeState().accountGuid;
       return accountGuid ? this.accountImportsRoute(accountGuid) : this.facilityRoute(facilityGuid);
     }
+    if (section === 'analysis') return this.facilityAnalysisRoute(facilityGuid);
     return this.facilityRoute(facilityGuid);
   }
 
@@ -560,6 +597,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
         : undefined,
       weatherPredictorGroupKey: isWeatherPredictorRoute && routeParts[6] && routeParts[6] !== 'new'
         ? safeDecodeRoutePart(routeParts[6])
+        : undefined,
+      analysisGuid: section === 'analysis' && detail === 'workbench' && routeParts[5]
+        ? safeDecodeRoutePart(routeParts[5])
         : undefined
     };
   }

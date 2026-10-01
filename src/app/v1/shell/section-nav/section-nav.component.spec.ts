@@ -93,6 +93,8 @@ describe('SectionNavComponent', () => {
             facilityMeterGroupRoute: (_facilityGuid: string, groupGuid: string, tab = 'monthly-table') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meter-grouping', groupGuid, tab],
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
             facilityWeatherPredictorRoute: (_facilityGuid: string, groupKey: string, tab = 'setup') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', groupKey, tab],
+            accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],
+            facilityAnalysisRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -627,6 +629,33 @@ describe('SectionNavComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Single-facility setup needs one facility');
     expect(fixture.nativeElement.textContent).toContain('Open facility management');
     expect(fixture.nativeElement.querySelector('.v1-nav__context')).not.toBeNull();
+  });
+
+  it('shows the context-specific Analysis dashboard navigation without marking workbench routes active', () => {
+    activeSection.set('analysis');
+    activeDetail.set('dashboard');
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+
+    let element: HTMLElement = fixture.nativeElement;
+    let dashboardLink = element.querySelector<HTMLAnchorElement>('a[href$="/analysis/dashboard"]');
+    expect(element.textContent).toContain('Account Analysis');
+    expect(dashboardLink?.getAttribute('aria-current')).toBe('page');
+    expect(dashboardLink?.getAttribute('href')).toBe('/v1/workspace/account/account-a/analysis/dashboard');
+
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    fixture.detectChanges();
+
+    element = fixture.nativeElement;
+    dashboardLink = element.querySelector<HTMLAnchorElement>('a[href$="/analysis/dashboard"]');
+    expect(element.textContent).toContain('Facility Analysis');
+    expect(dashboardLink?.getAttribute('href')).toBe('/v1/workspace/facility/facility-a/analysis/dashboard');
+
+    activeDetail.set('workbench');
+    fixture.detectChanges();
+    expect(dashboardLink?.getAttribute('aria-current')).toBeNull();
+    expect(dashboardLink?.classList.contains('active')).toBe(false);
   });
 
   it('shows the facility picker in facility context when multiple facilities exist', () => {

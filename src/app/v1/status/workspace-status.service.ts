@@ -165,6 +165,12 @@ export class WorkspaceStatusService {
       case 'predictor-tab':
         void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', 'predictors', item.destination.predictorGuid, item.destination.tab]);
         break;
+      case 'facility-analysis':
+        void this.router.navigate([
+          '/v1', 'workspace', 'facility', item.destination.facilityGuid,
+          'analysis', 'workbench', item.destination.analysisGuid, item.destination.tab
+        ]);
+        break;
     }
   }
 
