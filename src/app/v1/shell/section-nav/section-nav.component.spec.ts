@@ -31,10 +31,14 @@ describe('SectionNavComponent', () => {
   let activeWeatherPredictorGroupKey: ReturnType<typeof signal<string | undefined>>;
   let activeImportFileId: ReturnType<typeof signal<string | undefined>>;
   let activeImportStep: ReturnType<typeof signal<string | undefined>>;
+  let activeAnalysisGuid: ReturnType<typeof signal<string | undefined>>;
+  let activeAnalysisGroupGuid: ReturnType<typeof signal<string | undefined>>;
+  let activeAnalysisStageScope: ReturnType<typeof signal<'analysis' | 'group' | 'facility' | 'used-by' | undefined>>;
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let facilityPredictors: ReturnType<typeof signal<Array<any>>>;
   let facilityPredictorData: ReturnType<typeof signal<Array<any>>>;
+  let selectedFacilityAnalyses: ReturnType<typeof signal<Array<any>>>;
   let setFacility: ReturnType<typeof vi.fn>;
   let statusState: ReturnType<typeof signal<'ready' | 'evaluating'>>;
   let statusItems: ReturnType<typeof signal<StatusItem[]>>;
@@ -55,10 +59,14 @@ describe('SectionNavComponent', () => {
     activeWeatherPredictorGroupKey = signal<string | undefined>(undefined);
     activeImportFileId = signal<string | undefined>(undefined);
     activeImportStep = signal<string | undefined>(undefined);
+    activeAnalysisGuid = signal<string | undefined>(undefined);
+    activeAnalysisGroupGuid = signal<string | undefined>(undefined);
+    activeAnalysisStageScope = signal<'analysis' | 'group' | 'facility' | 'used-by' | undefined>(undefined);
     facilityMeters = signal([]);
     facilityMeterGroups = signal([]);
     facilityPredictors = signal([]);
     facilityPredictorData = signal([]);
+    selectedFacilityAnalyses = signal([]);
     setFacility = vi.fn();
     statusState = signal<'ready' | 'evaluating'>('ready');
     statusItems = signal([]);
@@ -84,6 +92,9 @@ describe('SectionNavComponent', () => {
             activeWeatherPredictorGroupKey,
             activeImportFileId,
             activeImportStep,
+            activeAnalysisGuid,
+            activeAnalysisGroupGuid,
+            activeAnalysisStageScope,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
@@ -108,7 +119,8 @@ describe('SectionNavComponent', () => {
             facilityMeters,
             facilityMeterGroups,
             facilityPredictors,
-            facilityPredictorData
+            facilityPredictorData,
+            selectedFacilityAnalyses
           }
         },
         {
@@ -154,6 +166,38 @@ describe('SectionNavComponent', () => {
     expect(element.querySelector('[aria-current="step"]')?.textContent).toContain('Meters');
     expect(element.querySelectorAll('app-import-stepper a').length).toBe(2);
     expect(element.querySelectorAll('app-import-stepper [aria-disabled="true"]').length).toBe(4);
+  });
+
+  it('shows the active analysis name and ordered workbench stages in the Analysis sidebar', () => {
+    activeSection.set('analysis');
+    activeDetail.set('workbench');
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeAnalysisGuid.set('analysis-a');
+    activeAnalysisGroupGuid.set('group-b');
+    activeAnalysisStageScope.set('group');
+    facilityMeterGroups.set([
+      { guid: 'group-a', name: 'Electricity' },
+      { guid: 'group-b', name: 'Natural Gas' }
+    ]);
+    selectedFacilityAnalyses.set([{
+      guid: 'analysis-a',
+      name: 'FY 2025 Energy Analysis',
+      groups: [
+        { idbGroupId: 'group-b', analysisType: 'regression' },
+        { idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption' }
+      ]
+    }]);
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const workflow: HTMLElement = fixture.nativeElement.querySelector('.v1-nav__analysis-workflow');
+
+    expect(workflow.querySelector('h2')?.textContent).toContain('FY 2025 Energy Analysis');
+    expect([...workflow.querySelectorAll('.v1-workflow-stepper__label')].map(item => item.textContent?.trim()))
+      .toEqual(['Analysis Setup', 'Natural Gas', 'Electricity', 'Facility Results', 'Used By']);
+    expect(workflow.querySelector('[aria-current="step"]')?.textContent).toContain('Natural Gas');
+    expect(workflow.querySelectorAll('a').length).toBe(5);
   });
 
   it('shows account settings navigation only when the Settings rail section is active', () => {

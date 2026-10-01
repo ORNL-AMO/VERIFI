@@ -19,9 +19,6 @@
 .import-page th, .import-page td { padding: .55rem; border: 1px solid var(--v1-border-color, #d5dae0); text-align: left; }
 .import-page .invalid-row { background: color-mix(in srgb, var(--bs-danger, #dc3545) 12%, transparent); }
 .import-page .button-row { display: flex; justify-content: space-between; gap: .75rem; }
-.import-page .wizard-actions { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; gap: .75rem; margin-top: auto; padding: .75rem 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); box-shadow: 0 -.55rem 1rem color-mix(in srgb, var(--v1-shadow) 12%, transparent); }
-.import-page .wizard-actions__next { display: flex; gap: .75rem; align-items: center; justify-content: flex-end; min-width: 0; }
-.import-page .wizard-actions__requirement { max-width: 27rem; color: var(--v1-danger); font-size: .78rem; font-weight: 800; line-height: 1.25; text-align: right; }
 .import-page .review-list { list-style: none; margin: 0; padding: 0; }
 .import-page .review-list li { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--v1-border-color, #ddd); padding: .65rem 0; }
 .import-page .review-list span, .import-page small { color: var(--bs-secondary-color, #666); }
@@ -40,6 +37,4 @@
   .import-page__column-summary { justify-items: start; }
   .import-page__column-counts { justify-content: flex-start; }
   .import-page__mapping-summary { justify-content: flex-start; }
-  .import-page .wizard-actions { padding: .75rem; }
-  .import-page .wizard-actions__next { display: grid; justify-items: end; }
 }

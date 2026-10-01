@@ -24,6 +24,7 @@ export type FacilityAnalysisGroupRouteTab = 'setup' | 'regression' | 'annual' | 
 export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+export type FacilityAnalysisStageScope = 'analysis' | 'group' | 'facility' | 'used-by';
 
 export interface SectionDefinition {
   readonly id: SectionId;
@@ -66,6 +67,8 @@ export interface RouteState {
   readonly predictorGuid?: string;
   readonly weatherPredictorGroupKey?: string;
   readonly analysisGuid?: string;
+  readonly analysisGroupGuid?: string;
+  readonly analysisStageScope?: FacilityAnalysisStageScope;
   readonly importFileId?: string;
   readonly importStep?: string;
   readonly section: SectionId;
@@ -151,6 +154,8 @@ export class WorkspaceNavigationService {
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
   readonly activeAnalysisGuid = computed(() => this.routeState().analysisGuid);
+  readonly activeAnalysisGroupGuid = computed(() => this.routeState().analysisGroupGuid);
+  readonly activeAnalysisStageScope = computed(() => this.routeState().analysisStageScope);
   readonly activeImportFileId = computed(() => this.routeState().importFileId);
   readonly activeImportStep = computed(() => this.routeState().importStep);
   readonly account = computed(() => this.resolveAccount());
@@ -599,6 +604,19 @@ export function parseWorkspaceRoute(url: string): RouteState {
     const isWeatherPredictorRoute = section === 'data'
       && detail === 'predictors'
       && routeParts[5] === 'weather';
+    const isAnalysisWorkbenchRoute = section === 'analysis'
+      && detail === 'workbench'
+      && !!routeParts[5];
+    const analysisRouteSegment = isAnalysisWorkbenchRoute ? routeParts[6] : undefined;
+    const analysisStageScope: FacilityAnalysisStageScope | undefined = analysisRouteSegment === 'group'
+      ? 'group'
+      : analysisRouteSegment === 'facility'
+        ? 'facility'
+        : analysisRouteSegment === 'used-by'
+          ? 'used-by'
+          : isAnalysisWorkbenchRoute
+            ? 'analysis'
+            : undefined;
     return {
       view: 'workspace',
       contextMode: 'facility',
@@ -619,7 +637,11 @@ export function parseWorkspaceRoute(url: string): RouteState {
         : undefined,
       analysisGuid: section === 'analysis' && detail === 'workbench' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
-        : undefined
+        : undefined,
+      analysisGroupGuid: analysisStageScope === 'group' && routeParts[7]
+        ? safeDecodeRoutePart(routeParts[7])
+        : undefined,
+      analysisStageScope
     };
   }
   const section = normalizeSection(routeParts[3]);

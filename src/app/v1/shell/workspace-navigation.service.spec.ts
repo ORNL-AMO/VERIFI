@@ -408,7 +408,17 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeSection()).toBe('analysis');
     expect(service.activeDetail()).toBe('workbench');
     expect(service.activeAnalysisGuid()).toBe('analysis a');
+    expect(service.activeAnalysisStageScope()).toBe('analysis');
+    expect(service.activeAnalysisGroupGuid()).toBeUndefined();
     expect(service.sections().find(section => section.id === 'analysis')?.enabled).toBe(true);
+
+    router.events.next(new NavigationEnd(
+      3,
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/group/group%20a/monthly',
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/group/group%20a/monthly'
+    ));
+    expect(service.activeAnalysisStageScope()).toBe('group');
+    expect(service.activeAnalysisGroupGuid()).toBe('group a');
 
     service.openSection('analysis');
     expect(router.navigate).toHaveBeenLastCalledWith([

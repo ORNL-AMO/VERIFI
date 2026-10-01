@@ -361,6 +361,33 @@
             <app-ui-icon name="analysis"></app-ui-icon>
             Dashboard
           </a>
+          @if (contextMode === 'facility' && activeAnalysisNavigation(); as workflow) {
+            <section class="v1-nav__analysis-workflow" [attr.aria-label]="workflow.name">
+              <h2 [title]="workflow.name">
+                <app-ui-icon name="analysis"></app-ui-icon>
+                <span>{{ workflow.name }}</span>
+              </h2>
+              <nav class="v1-workflow-stepper" [attr.aria-label]="'Analysis progress for ' + workflow.name">
+                <ol>
+                  @for (step of workflow.steps; track step.id; let index = $index) {
+                    <li [class.is-current]="step.current" [class.is-complete]="step.completed" [class.is-blocked]="!step.canOpen">
+                      @if (step.canOpen) {
+                        <a [routerLink]="step.route" [attr.aria-current]="step.current ? 'step' : null">
+                          <span class="v1-workflow-stepper__number" aria-hidden="true">{{ step.completed ? '✓' : index + 1 }}</span>
+                          <span class="v1-workflow-stepper__label">{{ step.label }}</span>
+                        </a>
+                      } @else {
+                        <span class="v1-workflow-stepper__blocked" aria-disabled="true">
+                          <span class="v1-workflow-stepper__number" aria-hidden="true">{{ index + 1 }}</span>
+                          <span class="v1-workflow-stepper__label">{{ step.label }}</span>
+                        </span>
+                      }
+                    </li>
+                  }
+                </ol>
+              </nav>
+            </section>
+          }
         </section>
       }
     }

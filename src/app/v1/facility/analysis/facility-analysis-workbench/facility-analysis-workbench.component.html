@@ -86,28 +86,23 @@
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="v1-analysis-workbench__footer" aria-label="Analysis workflow navigation">
-    <div>
-      <span class="v1-eyebrow">Current stage</span>
-      <strong>{{ currentStage()?.label || 'Analysis Setup' }}</strong>
-      <span class="v1-analysis-workbench__progress">{{ stageIndex() + 1 }} of {{ context.stages().length }}</span>
-    </div>
-    <div class="v1-analysis-workbench__footer-actions">
-      <button type="button" class="v1-btn v1-btn--secondary" (click)="back()">
-        <app-ui-icon name="arrowLeft"></app-ui-icon> Back
-      </button>
+  <footer class="v1-wizard-actions" aria-label="Analysis workflow navigation">
+    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="autosave.isBlocked()" (click)="back()">
+      <app-ui-icon name="chevronLeft"></app-ui-icon> Back
+    </button>
+    <div class="v1-wizard-actions__next">
+      @if (navigationRequirement(); as message) {
+        <span id="v1-analysis-navigation-requirement" class="v1-wizard-actions__requirement" role="status">{{ message }}</span>
+      }
       @if (nextStage()) {
-        <button type="button" class="v1-btn v1-btn--primary" [disabled]="currentStageHasBlockingErrors() || autosave.isBlocked() || autosave.state() === 'invalid' || autosave.state() === 'error'" [attr.aria-describedby]="currentStageHasBlockingErrors() ? 'v1-analysis-stage-blocked' : null" (click)="continue()">
-          Continue <app-ui-icon name="arrowRight"></app-ui-icon>
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="navigationDisabled()" [attr.aria-describedby]="navigationRequirement() ? 'v1-analysis-navigation-requirement' : null" (click)="continue()">
+          Continue <app-ui-icon name="chevronRight"></app-ui-icon>
         </button>
       } @else {
-        <button type="button" class="v1-btn v1-btn--primary" (click)="finish()">
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="navigationDisabled()" [attr.aria-describedby]="navigationRequirement() ? 'v1-analysis-navigation-requirement' : null" (click)="finish()">
           Finish <app-ui-icon name="check"></app-ui-icon>
         </button>
       }
     </div>
-    @if (currentStageHasBlockingErrors()) {
-      <span id="v1-analysis-stage-blocked" class="visually-hidden">Resolve the errors in this stage before continuing.</span>
-    }
   </footer>
 }

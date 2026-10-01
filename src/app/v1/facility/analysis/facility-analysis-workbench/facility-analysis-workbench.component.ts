@@ -8,7 +8,7 @@ import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-work
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { activeAnalysisWorkbenchStageId, stageHasBlockingErrors } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
-import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
+import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from './facility-analysis-results-display.service';
 
@@ -46,6 +46,10 @@ export class FacilityAnalysisWorkbenchComponent {
   readonly currentStageHasBlockingErrors = computed(() => stageHasBlockingErrors(
     this.currentStage(), this.context.analysisGuid(), this.context.findings()
   ));
+  readonly navigationRequirement = computed(() => analysisNavigationRequirement(
+    this.autosave.state(), this.currentStageHasBlockingErrors(), !!this.nextStage()
+  ));
+  readonly navigationDisabled = computed(() => !!this.navigationRequirement());
 
   constructor() {
     this.router.events.pipe(
@@ -81,4 +85,16 @@ export class FacilityAnalysisWorkbenchComponent {
 
   hasUnsavedChanges(): boolean { return this.autosave.isDirty(); }
   isNavigationBlocked(): boolean { return this.autosave.isBlocked(); }
+}
+
+export function analysisNavigationRequirement(
+  autosaveState: AnalysisAutosaveState,
+  currentStageHasBlockingErrors: boolean,
+  hasNextStage: boolean
+): string | undefined {
+  if (autosaveState === 'saving') return 'Saving changes before navigation is available.';
+  if (autosaveState === 'invalid') return 'Fix the validation errors before continuing.';
+  if (autosaveState === 'error') return 'Retry or discard the unsaved changes before continuing.';
+  if (hasNextStage && currentStageHasBlockingErrors) return 'Resolve the errors in this stage before continuing.';
+  return undefined;
 }
