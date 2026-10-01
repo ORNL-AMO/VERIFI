@@ -8,6 +8,7 @@ import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-work
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { activeAnalysisWorkbenchStageId } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -22,6 +23,7 @@ export class FacilityAnalysisWorkbenchComponent {
   private readonly activeStageState = signal(activeAnalysisWorkbenchStageId(this.router.url));
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly activeStageId = this.activeStageState.asReadonly();
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
@@ -64,4 +66,7 @@ export class FacilityAnalysisWorkbenchComponent {
     const facility = this.context.facility();
     if (facility) void this.router.navigate(this.navigation.facilityAnalysisRoute(facility.guid));
   }
+
+  hasUnsavedChanges(): boolean { return this.autosave.isDirty(); }
+  isNavigationBlocked(): boolean { return this.autosave.isBlocked(); }
 }

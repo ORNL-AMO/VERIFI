@@ -97,6 +97,7 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'workbench/:analysisGuid', component: FacilityAnalysisWorkbenchComponent })
     ]));
     const workbench = facilityAnalysis?.children?.find(route => route.path === 'workbench/:analysisGuid');
+    expect(workbench?.canDeactivate).toEqual([unsavedChangesGuard]);
     expect(workbench?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'setup' }),
       expect.objectContaining({ path: 'setup', component: FacilityAnalysisSetupComponent }),

@@ -8,4 +8,7 @@
 .v1-analysis-workbench__progress { color: var(--v1-muted); font-size: .82rem; font-weight: 700; }
 .v1-analysis-workbench__footer-actions { display: flex; gap: var(--v1-space-2); }
 #v1-analysis-workbench-facts[hidden] { display: none; }
+.v1-analysis-workbench__save-state { color: var(--v1-muted); font-size: .8rem; font-weight: 800; white-space: nowrap; }
+.v1-analysis-workbench__save-state--error { color: var(--v1-danger); }
+.v1-analysis-workbench__save-error { margin: 0; }
 @media (max-width: 640px) { .v1-analysis-workbench__footer { align-items: stretch; flex-direction: column; } .v1-analysis-workbench__footer-actions { display: grid; grid-template-columns: 1fr 1fr; } }

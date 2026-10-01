@@ -49,8 +49,26 @@
             {{ context.hasBlockingErrors() ? 'Needs attention' : 'Ready' }}
           </span>
           <app-data-workbench-facts-toggle #factsToggle controls="v1-analysis-workbench-facts"></app-data-workbench-facts-toggle>
+          <span class="v1-analysis-workbench__save-state" [class.v1-analysis-workbench__save-state--error]="autosave.state() === 'error'" aria-live="polite">
+            @switch (autosave.state()) {
+              @case ('dirty') { Unsaved changes }
+              @case ('saving') { Saving… }
+              @case ('saved') { Saved }
+              @case ('invalid') { Fix validation errors }
+              @case ('error') { Save failed }
+            }
+          </span>
         </div>
       </div>
+
+      @if (autosave.error()) {
+        <div class="v1-alert v1-alert--danger v1-analysis-workbench__save-error" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ autosave.error() }}</span>
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="autosave.retry()">Retry</button>
+          <button type="button" class="v1-btn v1-btn--ghost" (click)="autosave.discard()">Discard changes</button>
+        </div>
+      }
 
       <div id="v1-analysis-workbench-facts" [hidden]="!factsToggle.expanded()">
         <dl class="v1-data-workbench-facts">
@@ -79,7 +97,7 @@
         <app-ui-icon name="arrowLeft"></app-ui-icon> Back
       </button>
       @if (nextStage()) {
-        <button type="button" class="v1-btn v1-btn--primary" [disabled]="context.hasBlockingErrors()" (click)="continue()">
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="context.hasBlockingErrors() || autosave.isBlocked() || autosave.state() === 'invalid' || autosave.state() === 'error'" (click)="continue()">
           Continue <app-ui-icon name="arrowRight"></app-ui-icon>
         </button>
       } @else {
