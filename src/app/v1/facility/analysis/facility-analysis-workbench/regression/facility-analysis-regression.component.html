@@ -1,1 +1,63 @@
-<section class="v1-analysis-section" aria-labelledby="v1-regression-heading"><h3 id="v1-regression-heading">Regression model</h3><p>Generate, inspect, compare, or define the group model.</p></section>
+@let currentGroup = group();
+@if (currentGroup) {
+  <section class="v1-analysis-section" aria-labelledby="v1-regression-heading">
+    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Modeling</p><h3 id="v1-regression-heading">Regression model</h3></div>@if (currentGroup.selectedModelId) { <span class="v1-chip v1-chip--success"><app-ui-icon name="check"></app-ui-icon> Model selected</span> }</div>
+
+    <div class="v1-regression__configuration">
+      <section class="v1-regression__panel" aria-labelledby="model-method-heading">
+        <h4 id="model-method-heading">Method and variables</h4>
+        <label for="regression-method">Model method</label>
+        <select id="regression-method" class="v1-select form-select" [value]="currentGroup.isGeneratedModel ? 'generated' : 'user'" (change)="setMethod($event)"><option value="generated">Generated models</option><option value="user">User-defined model</option></select>
+
+        <fieldset><legend>Predictors</legend>
+          @for (predictor of currentGroup.predictorVariables; track predictor.id) { <label class="v1-regression__check"><input type="checkbox" [checked]="predictor.productionInAnalysis" (change)="togglePredictor(predictor.id)" /><span>{{ predictor.name }} @if (predictor.unit) { <small>({{ predictor.unit }})</small> }</span></label> }
+        </fieldset>
+        @if (!selectedPredictors().length) { <p class="v1-field-error" role="alert">Select at least one predictor.</p> }
+
+        @if (currentGroup.isGeneratedModel) {
+          <label for="maximum-model-variables">Maximum variables</label>
+          <select id="maximum-model-variables" class="v1-select form-select" [value]="currentGroup.maxModelVariables" [disabled]="!maxVariableOptions().length" (change)="setMaxVariables($event)">@for (option of maxVariableOptions(); track option) { <option [value]="option">{{ option }}</option> }</select>
+        }
+      </section>
+
+      <section class="v1-regression__panel" aria-labelledby="model-period-heading">
+        <h4 id="model-period-heading">Model period</h4>
+        <div class="v1-regression__period-grid">
+          <label for="model-start-month">Start month<select id="model-start-month" class="v1-select form-select" [value]="currentGroup.regressionModelStartMonth ?? ''" (change)="setRange('regressionModelStartMonth', $event)"><option value="">Select</option>@for (month of months; track month.monthNumValue) { <option [value]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+          <label for="model-start-year">Start year<select id="model-start-year" class="v1-select form-select" [value]="currentGroup.regressionStartYear ?? ''" (change)="setRange('regressionStartYear', $event)"><option value="">Select</option>@for (year of yearOptions(); track year) { <option [value]="year">{{ year }}</option> }</select></label>
+          <label for="model-end-month">End month<select id="model-end-month" class="v1-select form-select" [value]="currentGroup.regressionModelEndMonth ?? ''" (change)="setRange('regressionModelEndMonth', $event)"><option value="">Select</option>@for (month of months; track month.monthNumValue) { <option [value]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+          <label for="model-end-year">End year<select id="model-end-year" class="v1-select form-select" [value]="currentGroup.regressionEndYear ?? ''" (change)="setRange('regressionEndYear', $event)"><option value="">Select</option>@for (year of yearOptions(); track year) { <option [value]="year">{{ year }}</option> }</select></label>
+        </div>
+        <p [class.v1-field-error]="rangeMonths() < 12">Selected duration: {{ rangeMonths() }} month(s). At least 12 complete months are required.</p>
+      </section>
+    </div>
+
+    @if (currentGroup.isGeneratedModel) {
+      <section class="v1-regression__panel" aria-labelledby="generated-models-heading">
+        <div class="v1-analysis-section__heading"><div><h4 id="generated-models-heading">Generated models</h4><p>{{ generatedModels().length }} model(s) available; {{ visibleModels().length }} shown.</p></div><div class="v1-regression__actions"><button type="button" class="v1-btn v1-btn--primary" [disabled]="generating() || !generatedConfigurationValid()" (click)="generateModels()">@if (generating()) { <app-ui-icon name="loading" spin></app-ui-icon> Generating… } @else { Generate models }</button>@if (currentGroup.selectedModelId) { <button type="button" class="v1-btn v1-btn--secondary" (click)="clearSelection()">Clear selection</button> }</div></div>
+        @if (generationError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ generationError() }} The previously selected model has been preserved.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="generateModels()">Retry</button></div> }
+        <div class="v1-regression__filters" aria-label="Model filters"><label><input type="checkbox" [checked]="showInvalid()" (change)="showInvalid.set(!showInvalid())" /> Show statistically invalid</label><label><input type="checkbox" [checked]="showFailedValidation()" (change)="showFailedValidation.set(!showFailedValidation())" /> Show failed range validation</label></div>
+        @if (generatedModels().length === 0 && !generating()) { <div class="v1-empty-state" role="status"><app-ui-icon name="analysis"></app-ui-icon><h4>No generated models</h4><p>Complete the model period and predictor selection, then generate models.</p></div> }
+        @if (generatedModels().length > 0) {
+          <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Generated regression models">
+            <table class="table"><thead><tr><th scope="col">Selected</th><th scope="col"><button type="button" (click)="sort('modelYear')">Year</button></th><th scope="col"><button type="button" (click)="sort('adjust_R2')">Adjusted R²</button></th><th scope="col"><button type="button" (click)="sort('R2')">R²</button></th><th scope="col"><button type="button" (click)="sort('modelPValue')">Model p-value</button></th><th scope="col">Validity</th><th scope="col">Actions</th></tr></thead><tbody>
+              @for (model of visibleModels(); track model.modelId) { <tr [class.v1-regression__selected-row]="model.modelId === currentGroup.selectedModelId"><td>@if (model.modelId === currentGroup.selectedModelId) { <span class="visually-hidden">Selected</span><app-ui-icon name="check"></app-ui-icon> }</td><td>{{ model.modelYear }}</td><td>{{ model.adjust_R2?.toFixed(4) ?? '—' }}</td><td>{{ model.R2?.toFixed(4) ?? '—' }}</td><td>{{ model.modelPValue?.toExponential(2) ?? '—' }}</td><td><span class="v1-chip v1-chip--{{ model.isValid && model.SEPValidationPass ? 'success' : 'warning' }}">{{ model.isValid && model.SEPValidationPass ? 'Valid' : 'Review' }}</span></td><td><button type="button" class="v1-btn v1-btn--ghost" (click)="inspectedModel.set(model)">Inspect</button><button type="button" class="v1-btn v1-btn--secondary" (click)="selectModel(model)">Select</button></td></tr> }
+            </tbody></table>
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="v1-regression__panel" aria-labelledby="user-model-heading">
+        <h4 id="user-model-heading">User-defined equation</h4>
+        <div class="v1-regression__user-grid"><label for="user-model-year">Model year<select id="user-model-year" class="v1-select form-select" [value]="currentGroup.regressionModelYear ?? ''" (change)="setUserValue('regressionModelYear', $event)"><option value="">Select</option>@for (year of yearOptions(); track year) { <option [value]="year">{{ year }}</option> }</select></label><label for="regression-constant">Constant<input id="regression-constant" class="form-control" type="number" [value]="currentGroup.regressionConstant ?? ''" (input)="setUserValue('regressionConstant', $event)" /></label></div>
+        @for (predictor of selectedPredictors(); track predictor.id) { <label [for]="'coefficient-' + predictor.id">{{ predictor.name }} coefficient<input [id]="'coefficient-' + predictor.id" class="form-control" type="number" [value]="predictor.regressionCoefficient ?? ''" (input)="setCoefficient(predictor.id, $event)" /></label> }
+        <label for="regression-notes">Model notes</label><textarea id="regression-notes" class="form-control" rows="4" [value]="currentGroup.regressionModelNotes || ''" (input)="setUserValue('regressionModelNotes', $event)"></textarea>
+        <div class="v1-alert v1-alert--{{ userModelValid() ? 'success' : 'warning' }}" role="status"><app-ui-icon [name]="userModelValid() ? 'check' : 'warning'"></app-ui-icon><span>{{ userModelValid() ? 'The user-defined equation has all required values.' : 'Enter a model year, constant, selected predictor, and coefficient for every selected predictor.' }}</span></div>
+      </section>
+    }
+  </section>
+
+  @if (inspectedModel(); as model) {
+    <div class="v1-modal-backdrop" role="presentation"><section class="v1-confirm-dialog v1-regression__inspection" role="dialog" aria-modal="true" aria-labelledby="model-inspection-title"><div class="v1-analysis-section__heading"><h2 id="model-inspection-title">Model details</h2><button type="button" class="v1-btn v1-btn--ghost" aria-label="Close model details" (click)="inspectedModel.set(undefined)">Close</button></div><dl><div><dt>Model year</dt><dd>{{ model.modelYear }}</dd></div><div><dt>Adjusted R²</dt><dd>{{ model.adjust_R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>R²</dt><dd>{{ model.R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>p-value</dt><dd>{{ model.modelPValue?.toExponential(3) ?? 'Unavailable' }}</dd></div></dl><h3>Equation coefficients</h3><ol><li>Constant: {{ model.coef[0] }}</li>@for (predictor of model.predictorVariables; track predictor.id; let index = $index) { <li>{{ predictor.name }}: {{ model.coef[index + 1] }}</li> }</ol>@if (model.modelNotes?.length) { <h3>Notes</h3><ul>@for (note of model.modelNotes; track note) { <li>{{ note }}</li> }</ul> }<footer><button type="button" class="v1-btn v1-btn--primary" (click)="selectModel(model)">Select this model</button></footer></section></div>
+  }
+}
