@@ -15,7 +15,7 @@ The desktop gate includes the Electron renderer build, macOS packaging and notar
 
 Development web deployment does not depend on Electron packaging because desktop releases run only from `master`.
 
-Every change to `master` is an intentional release. The release-policy job checks the proposed version against the pull request base before merge and against the pre-push `master` commit after merge. It also requires `package.json` and `package-lock.json` to agree and rejects a version tag that belongs to another commit. An existing tag that points to the current commit is accepted during a manual rerun so the same release can be retried safely.
+Every change to `master` is an intentional release. The release-policy job checks the proposed version against the pull request base before merge and against the pre-push `master` commit after merge. It requires the version to increase according to SemVer precedence, requires `package.json` and `package-lock.json` to agree, and rejects a version tag that belongs to another commit. It also requires the preceding `master` commit's version tag to point to that commit and its complete CI/CD run to have succeeded, preventing a later release from overtaking or bypassing an unfinished or failed earlier release. An existing tag that points to the current commit is accepted during a manual rerun so the same release can be retried safely.
 
 ## Triggers and job flow
 
@@ -23,7 +23,7 @@ The caller workflow is [`.github/workflows/main.yml`](../.github/workflows/main.
 
 ### Pull requests
 
-Pull requests targeting `develop` or `master` run the test and release-policy gates. The policy always checks version-file consistency; pull requests to `master` must also propose a new, non-conflicting release version. Release jobs are skipped.
+Pull requests targeting `develop` or `master` run the test and release-policy gates. The policy always checks version-file consistency; pull requests to `master` must also propose a higher, non-conflicting release version and cannot proceed while the preceding release is unfinished. Release jobs are skipped.
 
 ### Development pushes
 
@@ -39,7 +39,7 @@ The release-policy job verifies that the package and lockfile versions agree. Th
 
 A push to `master` must pass the release-policy and test jobs. It then runs the web build and [desktop release workflow](../.github/workflows/release_desktop.yml) in parallel. The [web deployment workflow](../.github/workflows/deploy_web.yml) starts only when the web build and the entire desktop workflow both report success.
 
-The desktop workflow creates a draft GitHub Release. A core maintainer reviews its installers and generated notes before publishing it.
+The desktop workflow creates a draft GitHub Release whose tag and generated notes are pinned to the workflow run's immutable commit. A core maintainer reviews its installers and generated notes before publishing it.
 
 ### Manual dispatch
 
@@ -55,9 +55,9 @@ Artifacts expire according to the `retention-days` values on their upload steps.
 
 ## Concurrent releases
 
-Runs from `master` share the `verifi-production-release` concurrency group and are queued in submission order. A later release cannot overtake an earlier release or interrupt signing, notarization, draft creation, or deployment. Development and pull-request runs use run-specific groups and remain parallel.
+Runs from `master` share the `verifi-production-release` concurrency group, which prevents simultaneous signing, notarization, draft creation, and deployment. GitHub does not guarantee FIFO ordering for runs waiting on a concurrency group. The release-policy sequence guard therefore requires the preceding `master` commit to have its matching release tag and a successful completed CI/CD run before a later commit can build or deploy. Development and pull-request runs use run-specific groups and remain parallel.
 
-Do not manually reorder queued production releases. If a queued release is no longer valid, cancel it deliberately and confirm which commit should be released next.
+If GitHub starts a later run first, its sequence guard fails without publishing anything. Complete the earlier release, then rerun the failed later workflow. If a queued release is no longer valid, cancel it deliberately and confirm which commit should be released next.
 
 ## Branch policy
 
@@ -97,6 +97,7 @@ Use this path only when a vital fix cannot wait for the normal `develop` promoti
 ## Failure and retry behavior
 
 - A test or web-build failure prevents all web deployment for that run.
+- A missing or mismatched preceding release tag, or a failed or incomplete preceding CI/CD run, prevents a later production release from building or deploying.
 - A desktop build, packaging, signing, notarization, upload, or draft-release failure prevents production web deployment.
 - A development deployment does not depend on the skipped desktop job.
 - If the desktop gate fails, fix the underlying problem and rerun the failed jobs and their dependents. Confirm `web_deploy` runs only after the desktop caller reports success.
