@@ -11,6 +11,12 @@ on:
       - 'develop'
   workflow_dispatch:
 
+# Only production releases share a queue. Other refs use a run-specific group so
+# development and pull-request validation can continue in parallel.
+concurrency:
+  group: ${{ github.ref == 'refs/heads/master' && 'verifi-production-release' || format('verifi-ci-{0}', github.run_id) }}
+  queue: max
+
 jobs:
   test:
     runs-on: ubuntu-22.04
@@ -38,13 +44,30 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/release_qa.yml
 
-  web:
+  web_build:
     needs: test
     if: github.ref_name == 'develop' || github.ref_name == 'master'
-    uses: ./.github/workflows/release_web.yml
+    uses: ./.github/workflows/template_build.yml
+    with:
+      # Keep the web artifact distinct from the QA artifact during manual runs.
+      artifact-name: web-dist
+      artifact-path: dist/verifi/browser
 
   desktop:
     needs: test
     if: github.ref_name == 'master'
     uses: ./.github/workflows/release_desktop.yml
     secrets: inherit
+
+  web_deploy:
+    needs: [web_build, desktop]
+    # always() evaluates the gate when desktop is intentionally skipped on
+    # develop; production still requires an explicit successful desktop result.
+    if: >-
+      always() &&
+      needs.web_build.result == 'success' &&
+      (
+        github.ref_name == 'develop' ||
+        (github.ref_name == 'master' && needs.desktop.result == 'success')
+      )
+    uses: ./.github/workflows/deploy_web.yml

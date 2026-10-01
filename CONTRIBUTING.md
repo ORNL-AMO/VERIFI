@@ -107,7 +107,7 @@ Please follow the coding standards outlined in [CODING_STYLE.md](./CODING_STYLE.
 
 ## Release Process
 
-Releases are managed by the core development team. An "Epic" issue and a Milestone are used to track the issues going into the next release of VERIFI. Our QA team will test issues via the project board. When QA has been completed on the full set of "Epic" issues develop is merged into main and a release will be drafted by the CI system. Release notes are compiled from the changelog entries in PRs. Version numbers follow semantic versioning. Only core maintainers should publish releases.
+Releases are managed by the core development team. An "Epic" issue and a Milestone are used to track the issues going into the next release of VERIFI. Our QA team will test issues via the project board. When QA has been completed on the full set of "Epic" issues, `develop` is merged into `master` and a release is drafted by the CI system. Release notes are compiled from the changelog entries in PRs. Version numbers follow semantic versioning. Only core maintainers should publish releases. See the [release process](docs/release-process.md) for the CI job graph, desktop gate, failure behavior, and maintainer checklist.
 
 ### Versioning
 

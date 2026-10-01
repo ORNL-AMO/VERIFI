@@ -109,7 +109,7 @@ Representative executable patterns already exist for a [pure calculation](../src
 
 Install Chromium once with `npx playwright install chromium` when it is not available locally.
 
-GitHub Actions runs `npm run test:all:ci` for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. The same test job gates downstream release workflows.
+GitHub Actions runs `npm run test:all:ci` for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. The same test job gates downstream release workflows. Production web publication also requires the complete desktop release to succeed; see the [release process](release-process.md) for the job graph and failure behavior.
 
 Keep the fast suite below 60 seconds and the browser suite below 120 seconds in CI, excluding dependency and browser installation. These are maintainability targets rather than failure thresholds. Profile slow setup, remove unnecessary TestBed/module work, or split browser scenarios before accepting persistently slow feedback.
 
