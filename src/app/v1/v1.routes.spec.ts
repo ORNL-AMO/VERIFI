@@ -98,6 +98,7 @@ describe('V1Routes facility data meters routes', () => {
     ]));
     const workbench = facilityAnalysis?.children?.find(route => route.path === 'workbench/:analysisGuid');
     expect(workbench?.canDeactivate).toEqual([unsavedChangesGuard]);
+    expect(workbench?.providers).toBeUndefined();
     expect(workbench?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'setup' }),
       expect.objectContaining({ path: 'setup', component: FacilityAnalysisSetupComponent }),
@@ -105,6 +106,7 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'facility', component: FacilityAnalysisResultsShellComponent }),
       expect.objectContaining({ path: 'used-by' })
     ]));
+    expect(workbench?.children?.find(route => route.path === 'group/:groupGuid')?.providers).toBeUndefined();
   });
 
   it('routes Account Portfolio tabs as child workspaces', () => {

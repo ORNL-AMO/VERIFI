@@ -10,10 +10,17 @@ import { activeAnalysisWorkbenchStageId, stageHasBlockingErrors } from './facili
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
+import { FacilityAnalysisResultsDisplayService } from './facility-analysis-results-display.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
   standalone: true,
+  providers: [
+    FacilityAnalysisWorkbenchContext,
+    FacilityAnalysisAutosaveService,
+    FacilityAnalysisResultsService,
+    FacilityAnalysisResultsDisplayService
+  ],
   imports: [RouterOutlet, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent],
   templateUrl: './facility-analysis-workbench.component.html',
   styleUrls: ['./facility-analysis-workbench.component.css']

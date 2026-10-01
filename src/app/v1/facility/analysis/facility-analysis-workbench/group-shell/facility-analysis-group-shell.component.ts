@@ -11,6 +11,7 @@ import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context
 @Component({
   selector: 'app-facility-analysis-group-shell',
   standalone: true,
+  providers: [FacilityAnalysisGroupContext],
   imports: [RouterOutlet, DataWorkbenchTabsComponent, IconComponent],
   templateUrl: './facility-analysis-group-shell.component.html',
   styleUrls: ['./facility-analysis-group-shell.component.css']

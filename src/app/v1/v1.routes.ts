@@ -79,7 +79,6 @@ import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wiz
 import { AccountAnalysisPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-placeholder/account-analysis-placeholder.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
-import { FacilityAnalysisWorkbenchContext } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench-context.service';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group-shell/facility-analysis-group-shell.component';
 import { FacilityAnalysisGroupSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group-setup/facility-analysis-group-setup.component';
@@ -90,10 +89,6 @@ import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis
 import { FacilityAnalysisAnnualComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-annual/facility-analysis-annual.component';
 import { FacilityAnalysisMonthlyComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-monthly/facility-analysis-monthly.component';
 import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
-import { FacilityAnalysisAutosaveService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-autosave.service';
-import { FacilityAnalysisGroupContext } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-group-context.service';
-import { FacilityAnalysisResultsService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-results.service';
-import { FacilityAnalysisResultsDisplayService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-results-display.service';
 
 export const V1Routes: Routes = [
   {
@@ -353,7 +348,6 @@ export const V1Routes: Routes = [
               {
                 path: 'workbench/:analysisGuid',
                 component: FacilityAnalysisWorkbenchComponent,
-                providers: [FacilityAnalysisWorkbenchContext, FacilityAnalysisAutosaveService, FacilityAnalysisResultsService, FacilityAnalysisResultsDisplayService],
                 canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },
@@ -361,7 +355,6 @@ export const V1Routes: Routes = [
                   {
                     path: 'group/:groupGuid',
                     component: FacilityAnalysisGroupShellComponent,
-                    providers: [FacilityAnalysisGroupContext],
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'setup' },
                       { path: 'setup', component: FacilityAnalysisGroupSetupComponent, data: { analysisScope: 'group', analysisTab: 'setup' } },
