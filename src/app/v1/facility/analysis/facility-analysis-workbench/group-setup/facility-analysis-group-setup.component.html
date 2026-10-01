@@ -1,24 +1,17 @@
 @let currentGroup = group();
 @let currentAnalysis = analysis();
 @let facility = workbench.facility();
+@let groupMeters = meterStatusItems();
 @if (currentGroup && currentAnalysis && facility) {
-  <section class="v1-analysis-section" aria-labelledby="v1-group-setup-heading">
-    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Configuration</p><h3 id="v1-group-setup-heading">Group setup</h3></div><span class="v1-chip">{{ groupContext.meters().length }} meter(s)</span></div>
+  <section class="v1-analysis-section" aria-label="Group setup">
 
     @if (missingMeters()) {
-      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>This group has no meters. Add meters or exclude the group before continuing.</span><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityDataRoute(facility.guid, 'meter-grouping')">Open Meter Grouping</a></div>
+      <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>This group has no meters. Add meters or exclude the group before continuing.</span><a [routerLink]="navigation.facilityDataRoute(facility.guid, 'meter-grouping')">Open Meter Grouping</a></p>
     }
 
-    @if (groupContext.findings().length) {
-      <ul class="v1-analysis-group-setup__findings" aria-label="Group findings">
-        @for (finding of groupContext.findings(); track finding.id) { <li class="v1-alert v1-alert--{{ finding.severity === 'error' ? 'danger' : 'warning' }}"><app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon><span><strong>{{ finding.title }}</strong><small>{{ finding.description }}</small></span></li> }
-      </ul>
-    }
-
-    <div class="v1-analysis-group-setup__grid">
-      <section class="v1-analysis-group-setup__panel" aria-labelledby="analysis-method-heading">
-        <h4 id="analysis-method-heading">Analysis method</h4>
-        <fieldset><legend class="visually-hidden">Analysis method</legend>
+    <div class="v1-analysis-group-setup__configuration">
+      <section class="v1-analysis-group-setup__panel" aria-label="Analysis method">
+        <fieldset><legend class="v1-analysis-group-setup__section-title">Analysis method</legend>
           <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'absoluteEnergyConsumption'" (change)="requestAnalysisType('absoluteEnergyConsumption')" /> Absolute consumption</label>
           <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'energyIntensity'" (change)="requestAnalysisType('energyIntensity')" /> Classic intensity</label>
           <label><input type="radio" name="group-analysis-type" [checked]="currentGroup.analysisType === 'regression'" (change)="requestAnalysisType('regression')" /> Regression</label>
@@ -27,7 +20,7 @@
           @if (currentGroup.analysisType === 'modifiedEnergyIntensity') { <label class="v1-analysis-group-setup__legacy"><input type="radio" name="group-analysis-type" checked /> Modified intensity <span class="v1-chip v1-chip--warning">Legacy configuration</span></label> }
         </fieldset>
         @if (currentGroup.analysisType === 'modifiedEnergyIntensity') {
-          <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="info"></app-ui-icon><span>This existing legacy method remains editable for compatibility, but it cannot be selected for a new configuration.</span></div>
+          <p class="v1-analysis-group-setup__notice" role="status"><app-ui-icon name="info"></app-ui-icon><span>This existing legacy method remains editable for compatibility, but it cannot be selected for a new configuration.</span></p>
           <label for="legacy-baseload-mode">Baseload method</label>
           <select id="legacy-baseload-mode" class="v1-select form-select" [value]="currentGroup.specifiedMonthlyPercentBaseload ? 'monthly' : 'average'" (change)="setLegacyBaseloadMode($event)"><option value="average">Average percent baseload</option><option value="monthly">Percent baseload by month</option></select>
           @if (!currentGroup.specifiedMonthlyPercentBaseload) {
@@ -42,31 +35,158 @@
 
       @if (currentGroup.analysisType === 'energyIntensity' || currentGroup.analysisType === 'modifiedEnergyIntensity') {
         <section class="v1-analysis-group-setup__panel" aria-labelledby="production-variables-heading">
-          <h4 id="production-variables-heading">Production variables</h4>
-          @if (!productionVariables().length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityDataRoute(facility.guid, 'predictors')">Open Predictors</a></div> }
+          <h2 id="production-variables-heading" class="v1-analysis-group-setup__section-title">Production variables</h2>
+          @if (!productionVariables().length) { <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a [routerLink]="navigation.facilityDataRoute(facility.guid, 'predictors')">Open Predictors</a></p> }
           @for (predictor of productionVariables(); track predictor.id) { <label class="v1-analysis-group-setup__check"><input type="checkbox" [checked]="predictor.productionInAnalysis" (change)="requestPredictor(predictor.id)" /><span>{{ predictor.name }} <small>{{ predictor.unit }}</small></span></label> }
           @if (productionVariables().length && selectedProductionCount() === 0) { <p class="v1-field-error" role="alert">Select at least one production variable.</p> }
         </section>
       }
 
-      @if (!isSkipped()) {
-        <section class="v1-analysis-group-setup__panel" aria-labelledby="data-adjustments-heading">
-          <h4 id="data-adjustments-heading">Data adjustments</h4>
-          @for (adjustment of currentGroup.dataAdjustments; track adjustment.year) { <div class="v1-analysis-group-setup__adjustment"><label [for]="'data-adjustment-' + adjustment.year">{{ adjustment.year }}</label><input [id]="'data-adjustment-' + adjustment.year" class="form-control" type="number" [value]="adjustment.amount" (input)="setAdjustment('dataAdjustments', adjustment.year, $event)" /><button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove data adjustment for ' + adjustment.year" (click)="removeAdjustment('dataAdjustments', adjustment.year)">Remove</button></div> }
-          <label for="add-data-adjustment">Add year</label><select id="add-data-adjustment" class="v1-select form-select" value="" (change)="addAdjustment('dataAdjustments', $event)"><option value="">Select year</option>@for (year of availableDataAdjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select>
-        </section>
-
-        <section class="v1-analysis-group-setup__panel" aria-labelledby="baseline-adjustments-heading">
-          <h4 id="baseline-adjustments-heading">Baseline adjustments</h4>
-          @for (adjustment of currentGroup.baselineAdjustmentsV2; track adjustment.year) { <div class="v1-analysis-group-setup__adjustment"><label [for]="'baseline-adjustment-' + adjustment.year">{{ adjustment.year }}</label><input [id]="'baseline-adjustment-' + adjustment.year" class="form-control" type="number" [value]="adjustment.amount" (input)="setAdjustment('baselineAdjustmentsV2', adjustment.year, $event)" /><button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove baseline adjustment for ' + adjustment.year" (click)="removeAdjustment('baselineAdjustmentsV2', adjustment.year)">Remove</button></div> }
-          <label for="add-baseline-adjustment">Add year</label><select id="add-baseline-adjustment" class="v1-select form-select" value="" (change)="addAdjustment('baselineAdjustmentsV2', $event)"><option value="">Select year</option>@for (year of availableBaselineAdjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select>
-        </section>
-      }
+      <section class="v1-analysis-group-setup__panel v1-analysis-group-setup__meters" aria-labelledby="group-meters-heading">
+        <div class="v1-analysis-group-setup__meters-heading">
+          <h2 id="group-meters-heading" class="v1-analysis-group-setup__section-title">Meters in this group</h2>
+          <span class="v1-chip">{{ groupMeters.length }}</span>
+        </div>
+        @if (groupMeters.length) {
+          <ul class="v1-analysis-group-setup__meter-list">
+            @for (meter of groupMeters; track meter.meter.guid) {
+              <li>
+                <a class="v1-analysis-group-setup__meter-link" [routerLink]="meter.route">
+                  <span class="v1-analysis-group-setup__meter-identity">
+                    <app-ui-icon [name]="meter.sourceIcon || 'meter'"></app-ui-icon>
+                    <span>
+                      <strong>{{ meter.meter.name }}</strong>
+                      @if (meter.issueSummary) { <small>{{ meter.issueSummary }}</small> }
+                    </span>
+                  </span>
+                  <span
+                    class="v1-chip v1-analysis-group-setup__meter-status"
+                    [class.v1-chip--success]="meter.statusTone === 'success'"
+                    [class.v1-chip--warning]="meter.statusTone === 'warning'"
+                    [class.v1-chip--danger]="meter.statusTone === 'danger'"
+                    [class.v1-chip--info]="meter.statusTone === 'info'">
+                    <app-ui-icon [name]="meter.statusIcon || 'info'" [spin]="meter.statusIcon === 'loading'"></app-ui-icon>
+                    {{ meter.statusLabel }}
+                  </span>
+                </a>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="v1-analysis-group-setup__empty">No meters are assigned to this group.</p>
+        }
+      </section>
     </div>
+
+    @if (!isSkipped()) {
+      <section class="v1-analysis-group-setup__adjustments" aria-labelledby="group-adjustments-heading">
+        <header class="v1-analysis-group-setup__adjustments-heading">
+          <p class="v1-eyebrow">Optional</p>
+          <h2 id="group-adjustments-heading" class="v1-analysis-group-setup__section-title">Adjustments</h2>
+          <p>Choose a year and enter an annual amount only when this group requires an adjustment.</p>
+        </header>
+
+        <div class="v1-analysis-group-setup__adjustment-grid">
+          <section class="v1-analysis-group-setup__adjustment-panel" aria-labelledby="data-adjustments-heading">
+            @let dataDraft = dataAdjustmentDraft();
+            <h3 id="data-adjustments-heading" class="v1-analysis-group-setup__subsection-title">Data adjustments</h3>
+            <p class="v1-analysis-group-setup__guidance">Remove new baseload consumption from the selected year’s data.</p>
+            @if (currentGroup.dataAdjustments.length) {
+              <div class="v1-analysis-group-setup__adjustment-list" aria-label="Data adjustments">
+                @for (adjustment of currentGroup.dataAdjustments; track adjustment.year) {
+                  <div class="v1-analysis-group-setup__adjustment">
+                    <strong>{{ adjustment.year }}</strong>
+                    <label class="visually-hidden" [for]="'data-adjustment-' + adjustment.year">Data adjustment amount for {{ adjustment.year }}</label>
+                    <div class="v1-analysis-group-setup__amount-control">
+                      <input [id]="'data-adjustment-' + adjustment.year" class="form-control" type="number" min="0" step="any" [value]="adjustment.amount" (input)="setAdjustment('dataAdjustments', adjustment.year, $event)" />
+                      <span>{{ adjustmentUnit() }}</span>
+                    </div>
+                    <button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove data adjustment for ' + adjustment.year" (click)="removeAdjustment('dataAdjustments', adjustment.year)"><app-ui-icon name="delete"></app-ui-icon><span class="visually-hidden">Remove</span></button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="v1-analysis-group-setup__empty">No data adjustments added.</p>
+            }
+            @if (availableDataAdjustmentYears().length) {
+              @if (dataAdjustmentEditorOpen()) {
+                <div class="v1-analysis-group-setup__adjustment-editor">
+                  <label class="v1-analysis-group-setup__editor-year-label" for="new-data-adjustment-year">Year</label>
+                  <select id="new-data-adjustment-year" class="v1-select form-select v1-analysis-group-setup__editor-year" [value]="dataDraft.year || ''" (change)="setAdjustmentYear('dataAdjustments', $event)">
+                    <option value="">Select year</option>
+                    @for (year of availableDataAdjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }
+                  </select>
+                  <label class="v1-analysis-group-setup__editor-amount-label" for="new-data-adjustment-amount">Annual amount</label>
+                  <div class="v1-analysis-group-setup__amount-control v1-analysis-group-setup__editor-amount">
+                    <input id="new-data-adjustment-amount" class="form-control" type="number" min="0" step="any" placeholder="Enter amount" [value]="dataDraft.amount" [disabled]="!dataDraft.year" (input)="setAdjustmentAmount('dataAdjustments', $event)" />
+                    <span>{{ adjustmentUnit() }}</span>
+                  </div>
+                  <div class="v1-analysis-group-setup__editor-actions">
+                    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAddDataAdjustment()" (click)="addAdjustment('dataAdjustments')">Add</button>
+                    <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAdjustmentEditor('dataAdjustments')">Cancel</button>
+                  </div>
+                </div>
+              } @else {
+                <button type="button" class="v1-btn v1-btn--sm v1-btn--action v1-analysis-group-setup__add-adjustment" (click)="openAdjustmentEditor('dataAdjustments')"><app-ui-icon name="add"></app-ui-icon> Add adjustment</button>
+              }
+            } @else {
+              <p class="v1-analysis-group-setup__empty">All available years have data adjustments.</p>
+            }
+          </section>
+
+          <section class="v1-analysis-group-setup__adjustment-panel" aria-labelledby="baseline-adjustments-heading">
+            @let baselineDraft = baselineAdjustmentDraft();
+            <h3 id="baseline-adjustments-heading" class="v1-analysis-group-setup__subsection-title">Baseline adjustments</h3>
+            <p class="v1-analysis-group-setup__guidance">Adjust the baseline for equipment transferred from a closed facility.</p>
+            @if (currentGroup.baselineAdjustmentsV2.length) {
+              <div class="v1-analysis-group-setup__adjustment-list" aria-label="Baseline adjustments">
+                @for (adjustment of currentGroup.baselineAdjustmentsV2; track adjustment.year) {
+                  <div class="v1-analysis-group-setup__adjustment">
+                    <strong>{{ adjustment.year }}</strong>
+                    <label class="visually-hidden" [for]="'baseline-adjustment-' + adjustment.year">Baseline adjustment amount for {{ adjustment.year }}</label>
+                    <div class="v1-analysis-group-setup__amount-control">
+                      <input [id]="'baseline-adjustment-' + adjustment.year" class="form-control" type="number" min="0" step="any" [value]="adjustment.amount" (input)="setAdjustment('baselineAdjustmentsV2', adjustment.year, $event)" />
+                      <span>{{ adjustmentUnit() }}</span>
+                    </div>
+                    <button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove baseline adjustment for ' + adjustment.year" (click)="removeAdjustment('baselineAdjustmentsV2', adjustment.year)"><app-ui-icon name="delete"></app-ui-icon><span class="visually-hidden">Remove</span></button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="v1-analysis-group-setup__empty">No baseline adjustments added.</p>
+            }
+            @if (availableBaselineAdjustmentYears().length) {
+              @if (baselineAdjustmentEditorOpen()) {
+                <div class="v1-analysis-group-setup__adjustment-editor">
+                  <label class="v1-analysis-group-setup__editor-year-label" for="new-baseline-adjustment-year">Year</label>
+                  <select id="new-baseline-adjustment-year" class="v1-select form-select v1-analysis-group-setup__editor-year" [value]="baselineDraft.year || ''" (change)="setAdjustmentYear('baselineAdjustmentsV2', $event)">
+                    <option value="">Select year</option>
+                    @for (year of availableBaselineAdjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }
+                  </select>
+                  <label class="v1-analysis-group-setup__editor-amount-label" for="new-baseline-adjustment-amount">Annual amount</label>
+                  <div class="v1-analysis-group-setup__amount-control v1-analysis-group-setup__editor-amount">
+                    <input id="new-baseline-adjustment-amount" class="form-control" type="number" min="0" step="any" placeholder="Enter amount" [value]="baselineDraft.amount" [disabled]="!baselineDraft.year" (input)="setAdjustmentAmount('baselineAdjustmentsV2', $event)" />
+                    <span>{{ adjustmentUnit() }}</span>
+                  </div>
+                  <div class="v1-analysis-group-setup__editor-actions">
+                    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAddBaselineAdjustment()" (click)="addAdjustment('baselineAdjustmentsV2')">Add</button>
+                    <button type="button" class="v1-btn v1-btn--quiet" (click)="cancelAdjustmentEditor('baselineAdjustmentsV2')">Cancel</button>
+                  </div>
+                </div>
+              } @else {
+                <button type="button" class="v1-btn v1-btn--sm v1-btn--action v1-analysis-group-setup__add-adjustment" (click)="openAdjustmentEditor('baselineAdjustmentsV2')"><app-ui-icon name="add"></app-ui-icon> Add adjustment</button>
+              }
+            } @else {
+              <p class="v1-analysis-group-setup__empty">All available years have baseline adjustments.</p>
+            }
+          </section>
+        </div>
+      </section>
+    }
 
     @if (currentAnalysis.hasBanking && !isSkipped()) {
       <section class="v1-analysis-group-setup__panel" aria-labelledby="group-banking-heading">
-        <div class="v1-analysis-section__heading"><h4 id="group-banking-heading">Banking configuration</h4><label class="v1-analysis-group-setup__check"><input type="checkbox" [checked]="currentGroup.applyBanking" [disabled]="hasModels()" (change)="setApplyBanking($event)" /> Apply banking to this group</label></div>
+        <div class="v1-analysis-section__heading"><h2 id="group-banking-heading" class="v1-analysis-group-setup__section-title">Banking configuration</h2><label class="v1-analysis-group-setup__check"><input type="checkbox" [checked]="currentGroup.applyBanking" [disabled]="hasModels()" (change)="setApplyBanking($event)" /> Apply banking to this group</label></div>
         @if (currentGroup.applyBanking) {
           <div class="v1-analysis-group-setup__banking-years"><label for="banked-analysis-year">Applied banking year<select id="banked-analysis-year" class="v1-select form-select" [value]="currentGroup.bankedAnalysisYear || ''" [disabled]="hasModels()" (change)="setBankingYear('bankedAnalysisYear', $event)"><option value="">Select year</option>@for (year of adjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select></label><label for="new-baseline-year">New baseline year<select id="new-baseline-year" class="v1-select form-select" [value]="currentGroup.newBaselineYear || ''" [disabled]="hasModels()" (change)="setBankingYear('newBaselineYear', $event)"><option value="">Select year</option>@for (year of adjustmentYears(); track year) { <option [value]="year">{{ year }}</option> }</select></label></div>
           @if (bankingYearError()) { <p class="v1-field-error" role="alert">{{ bankingYearError() }}</p> }

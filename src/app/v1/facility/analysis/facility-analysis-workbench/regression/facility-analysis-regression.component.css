@@ -2,25 +2,35 @@
 .v1-analysis-section { display: grid; gap: var(--v1-space-4); padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); }
 h2, h3, h4, p { margin: 0; }
 .v1-analysis-section__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); }
-.v1-regression__configuration { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-4); }
-.v1-regression__panel { display: grid; align-content: start; gap: var(--v1-space-2); min-width: 0; padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface-raised); }
+.v1-regression__configuration { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-block: 1px solid var(--v1-divider); }
+.v1-regression__panel { display: grid; align-content: start; gap: var(--v1-space-2); min-width: 0; }
+.v1-regression__configuration > .v1-regression__panel { padding-block: 1rem; }
+.v1-regression__configuration > .v1-regression__panel:first-child { padding-right: 1.25rem; }
+.v1-regression__configuration > .v1-regression__panel + .v1-regression__panel { padding-left: 1.25rem; border-left: 1px solid var(--v1-divider); }
+.v1-analysis-section > .v1-regression__panel { padding-top: 1rem; border-top: 1px solid var(--v1-divider); }
 .v1-regression__panel > label, .v1-regression__panel legend { font-weight: 800; }
-.v1-regression__panel fieldset { display: grid; gap: var(--v1-space-2); padding: .75rem; border: 1px solid var(--v1-border); }
+.v1-regression__panel fieldset { display: grid; gap: var(--v1-space-2); padding: 0; border: 0; }
 .v1-regression__check { display: flex; gap: var(--v1-space-2); align-items: center; }
 .v1-regression__period-grid, .v1-regression__user-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-2); }
 .v1-regression__period-grid label, .v1-regression__user-grid label { display: grid; gap: .25rem; font-weight: 800; }
 .v1-regression__actions, .v1-regression__filters { display: flex; flex-wrap: wrap; gap: var(--v1-space-2); align-items: center; }
-.v1-regression__filters { padding: .65rem; border: 1px solid var(--v1-border); }
+.v1-regression__filters { padding-block: .65rem; border-block: 1px solid var(--v1-divider); }
 .v1-regression__filters label { display: inline-flex; gap: .4rem; align-items: center; }
 .v1-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--v1-border); }
 .v1-table-scroll table { min-width: 55rem; margin: 0; }
 .v1-table-scroll th button { border: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; }
 .v1-regression__selected-row { background: color-mix(in srgb, var(--v1-content-control) 10%, var(--v1-surface)); }
+.v1-regression__selection-status { display: flex; gap: var(--v1-space-1); align-items: center; justify-self: end; color: var(--v1-success); font-size: .82rem; font-weight: 800; }
 .v1-field-error { color: var(--v1-danger); font-weight: 800; }
 .v1-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 1rem; background: rgba(0, 0, 0, .55); }
-.v1-confirm-dialog { display: grid; gap: var(--v1-space-4); width: min(48rem, 100%); max-height: min(90vh, 52rem); overflow: auto; padding: 1.25rem; border: 1px solid var(--v1-border); background: var(--v1-surface); box-shadow: var(--v1-shadow-lg); }
+.v1-confirm-dialog { display: grid; gap: var(--v1-space-4); width: min(48rem, 100%); max-height: min(90vh, 52rem); overflow: auto; padding: 1.25rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); box-shadow: var(--v1-shadow-lg); }
 .v1-confirm-dialog footer { display: flex; justify-content: flex-end; gap: var(--v1-space-2); }
 .v1-regression__inspection dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-2); margin: 0; }
-.v1-regression__inspection dl div { padding: .65rem; border: 1px solid var(--v1-border); }
+.v1-regression__inspection dl div { padding-block: .65rem; border-bottom: 1px solid var(--v1-divider); }
 .v1-regression__inspection dt { color: var(--v1-muted); font-size: .8rem; font-weight: 750; } .v1-regression__inspection dd { margin: .2rem 0 0; font-weight: 850; }
-@media (max-width: 760px) { .v1-regression__configuration, .v1-regression__period-grid, .v1-regression__user-grid { grid-template-columns: 1fr; } .v1-analysis-section__heading { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 760px) {
+  .v1-regression__configuration, .v1-regression__period-grid, .v1-regression__user-grid { grid-template-columns: 1fr; }
+  .v1-regression__configuration > .v1-regression__panel:first-child { padding-right: 0; }
+  .v1-regression__configuration > .v1-regression__panel + .v1-regression__panel { padding-left: 0; border-top: 1px solid var(--v1-divider); border-left: 0; }
+  .v1-analysis-section__heading { align-items: flex-start; flex-direction: column; }
+}

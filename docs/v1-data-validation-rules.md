@@ -91,6 +91,8 @@ Independent predictor problems are all reported; one warning cannot hide an erro
 | `account-analysis.configuration.*` | Error / configuration | Account analyses require a name, baseline year, facility selections, and valid linked facility analyses. |
 | `account-analysis.children.warning` | Warning / quality | One or more included facility analyses has warnings. |
 
+Regression-only group setup findings link to the Regression tab; meter assignment, intensity, baseload, and banking findings continue to link to Group Setup.
+
 Generated regression groups require a selected model, model year, constant, and required coefficients. User-defined regression groups require start/end months and years, constant, coefficients, and complete meter/predictor data for the selected period.
 
 ## Report rules

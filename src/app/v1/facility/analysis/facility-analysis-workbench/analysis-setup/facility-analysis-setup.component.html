@@ -1,42 +1,12 @@
 @let analysis = draft();
 @let facility = context.facility();
 @if (analysis && facility) {
-  <section class="v1-analysis-section" aria-labelledby="v1-analysis-setup-heading">
-    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Analysis</p><h2 id="v1-analysis-setup-heading">Setup</h2></div><span class="v1-chip">{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span></div>
-
-    @if (linkedAccountAnalyses().length || linkedReports().length || bankingConsumers().length) {
-      <div class="v1-alert v1-alert--info" role="status">
-        <app-ui-icon name="info"></app-ui-icon>
-        <span>Changes can affect {{ linkedAccountAnalyses().length }} account analysis(es), {{ linkedReports().length }} report(s), and {{ bankingConsumers().length }} banking consumer(s).</span>
-      </div>
-    }
-
-    @if (context.findings().length) {
-      <section class="v1-analysis-setup__findings" aria-labelledby="analysis-findings-heading">
-        <h3 id="analysis-findings-heading">Items to review</h3>
-        <ul>
-          @for (finding of context.findings(); track finding.id) {
-            <li class="v1-alert v1-alert--{{ finding.severity === 'error' ? 'danger' : 'warning' }}">
-              <app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon>
-              <span><strong>{{ finding.title }}</strong><small>{{ finding.description }}</small></span>
-              @if (finding.destination.kind !== 'unavailable') { <button type="button" class="v1-btn v1-btn--secondary" (click)="context.status.navigateTo(finding)">Correct</button> }
-            </li>
-          }
-        </ul>
-      </section>
-    }
-
+  <section class="v1-analysis-section" aria-label="Analysis setup">
     <div class="v1-analysis-setup__grid">
-      <section class="v1-analysis-setup__panel" aria-labelledby="analysis-details-heading">
-        <h3 id="analysis-details-heading">Analysis details</h3>
+      <section class="v1-analysis-setup__panel" aria-label="Analysis details">
         <label for="analysis-name">Name</label>
         <input id="analysis-name" class="form-control" [value]="analysis.name" maxlength="120" required (input)="setName($event)" [attr.aria-invalid]="!analysis.name.trim()" />
         @if (!analysis.name.trim()) { <p class="v1-field-error" role="alert">Enter an analysis name.</p> }
-
-        <dl class="v1-analysis-setup__context">
-          <div><dt>Facility</dt><dd>{{ facility.name }}</dd></div>
-          <div><dt>Category</dt><dd>{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</dd></div>
-        </dl>
 
         @if (analysis.analysisCategory === 'energy') {
           <fieldset [disabled]="hasModels()"><legend>Analysis boundary</legend>
@@ -44,26 +14,25 @@
             <label><input type="radio" name="energy-boundary" [checked]="!analysis.energyIsSource" (change)="setBoundary(false)" /> Site energy</label>
           </fieldset>
           <label for="analysis-energy-unit">Display unit</label>
-          <select id="analysis-energy-unit" class="v1-select form-select" [value]="analysis.energyUnit" (change)="setValue('energyUnit', $event)">
-            @for (option of energyUnits; track option.value) { <option [value]="option.value">{{ option.value }}</option> }
+          <select id="analysis-energy-unit" class="v1-select form-select" [ngModel]="analysis.energyUnit" [disabled]="hasModels()" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null" (ngModelChange)="setValue('energyUnit', $event)">
+            @for (option of energyUnits; track option.value) { <option [ngValue]="option.value" [innerHTML]="option.display"></option> }
           </select>
         } @else {
           <label for="analysis-water-unit">Display unit</label>
-          <select id="analysis-water-unit" class="v1-select form-select" [value]="analysis.waterUnit" (change)="setValue('waterUnit', $event)">
-            @for (option of waterUnits; track option.value) { <option [value]="option.value">{{ option.value }}</option> }
+          <select id="analysis-water-unit" class="v1-select form-select" [ngModel]="analysis.waterUnit" [disabled]="hasModels()" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null" (ngModelChange)="setValue('waterUnit', $event)">
+            @for (option of waterUnits; track option.value) { <option [ngValue]="option.value" [innerHTML]="option.display"></option> }
           </select>
         }
       </section>
 
-      <section class="v1-analysis-setup__panel" aria-labelledby="analysis-period-heading">
-        <h3 id="analysis-period-heading">Analysis period</h3>
+      <section class="v1-analysis-setup__panel" aria-label="Analysis period">
         <label for="analysis-baseline-year">Baseline year</label>
         <select id="analysis-baseline-year" class="v1-select form-select" [value]="analysis.baselineYear || ''" [disabled]="hasModels() || !baselineYears().length" (change)="setBaseline($event)">
           <option value="" disabled>Select a complete year</option>
           @for (year of baselineYears(); track year) { <option [value]="year">{{ year }}</option> }
         </select>
-        @if (!baselineYears().length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No complete baseline years are available. Correct meter and predictor data before continuing.</span></div> }
-        @if (baselineGoalWarning()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="info"></app-ui-icon><span>{{ baselineGoalWarning() }}</span></div> }
+        @if (!baselineYears().length) { <p class="v1-analysis-setup__notice v1-analysis-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No complete baseline years are available. Correct meter and predictor data before continuing.</span></p> }
+        @if (baselineGoalWarning()) { <p class="v1-analysis-setup__notice" role="status"><app-ui-icon name="info"></app-ui-icon><span>{{ baselineGoalWarning() }}</span></p> }
         <dl class="v1-analysis-setup__context">
           <div><dt>Latest complete year</dt><dd>{{ latestCompleteYear() || 'Unavailable' }}</dd></div>
           <div><dt>Fiscal calendar</dt><dd>{{ facility.fiscalYear === 'nonCalendarYear' ? 'Non-calendar year' : 'Calendar year' }}</dd></div>
@@ -74,7 +43,8 @@
     </div>
 
     <section class="v1-analysis-setup__panel v1-analysis-setup__banking" aria-labelledby="analysis-banking-heading">
-      <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Optional</p><h3 id="analysis-banking-heading">Banking</h3></div><label class="v1-analysis-setup__toggle"><input type="checkbox" [checked]="analysis.hasBanking" [disabled]="!eligibleBankingSources().length" (change)="setHasBanking($event)" /> Use an earlier analysis as the banking source</label></div>
+      <div><p class="v1-eyebrow">Optional</p><h2 id="analysis-banking-heading">Banking</h2></div>
+      <label class="v1-analysis-setup__toggle"><input type="checkbox" [checked]="analysis.hasBanking" [disabled]="!eligibleBankingSources().length" (change)="setHasBanking($event)" /> Use an earlier analysis as the banking source</label>
       @if (!eligibleBankingSources().length) { <p class="v1-analysis-setup__guidance">No compatible analysis is available for this facility, category, and energy basis.</p> }
       @if (analysis.hasBanking) {
         <label for="analysis-banking-source">Banking source analysis</label>
@@ -86,7 +56,10 @@
     </section>
 
     @if (hasModels()) {
-      <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon><span>Boundary and baseline settings are locked because one or more regression models use them.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="showClearModels.set(true)">Clear models to edit</button></div>
+      <div class="v1-analysis-setup__model-lock" role="status">
+        <button type="button" class="v1-btn v1-btn--secondary" (click)="showClearModels.set(true)"><app-ui-icon name="lockKeyhole"></app-ui-icon> Clear models to edit</button>
+        <span id="analysis-model-lock-message">Boundary, baseline, and display unit settings are locked because one or more regression models use them.</span>
+      </div>
     }
   </section>
 

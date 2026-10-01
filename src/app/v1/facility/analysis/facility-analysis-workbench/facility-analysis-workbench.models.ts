@@ -2,7 +2,8 @@ import { AnalysisGroup, AnalysisType } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import type { StatusItem } from '@app/v1/status/status.models';
+import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
+import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 
 export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly';
 export type AnalysisWorkbenchStageKind = 'analysis' | 'group' | 'facility' | 'used-by';
@@ -20,6 +21,15 @@ export interface AnalysisWorkbenchStage {
   readonly groupGuid?: string;
   readonly route: readonly string[];
 }
+
+export interface AnalysisWorkbenchStageNavigation extends AnalysisWorkbenchStage {
+  readonly current: boolean;
+  readonly completed: boolean;
+  readonly canOpen: boolean;
+}
+
+export type AnalysisWorkbenchAttention = Readonly<Record<string, StatusAttentionSummary | undefined>>;
+export type AnalysisWorkbenchTabAttention = Readonly<Partial<Record<AnalysisWorkbenchTabId, StatusAttentionSummary>>>;
 
 export const ANALYSIS_GROUP_SETUP_TAB: AnalysisWorkbenchTab = { id: 'setup', label: 'Setup', icon: 'settings' };
 export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'analysis' };
@@ -86,6 +96,95 @@ export function stageHasBlockingErrors(
       && finding.entity.guid === `${analysisGuid}:${stage.groupGuid}`);
   }
   return errors.length > 0;
+}
+
+export function buildAnalysisWorkbenchStageNavigation(
+  stages: readonly AnalysisWorkbenchStage[],
+  currentStageId: string,
+  analysisGuid: string,
+  findings: readonly StatusItem[],
+  navigationBlocked = false
+): readonly AnalysisWorkbenchStageNavigation[] {
+  const currentIndex = stages.findIndex(stage => stage.id === currentStageId);
+  const firstBlockingIndex = stages.findIndex(stage => stageHasBlockingErrors(stage, analysisGuid, findings));
+  return stages.map((stage, index) => ({
+    ...stage,
+    current: index === currentIndex,
+    completed: currentIndex > index && !stageHasBlockingErrors(stage, analysisGuid, findings),
+    canOpen: index === currentIndex || (!navigationBlocked
+      && (firstBlockingIndex < 0 || index <= firstBlockingIndex))
+  }));
+}
+
+export function findingsForAnalysisStage(
+  stage: AnalysisWorkbenchStage | undefined,
+  analysisGuid: string,
+  findings: readonly StatusItem[]
+): readonly StatusItem[] {
+  if (!stage || stage.kind === 'used-by') return [];
+  if (stage.kind === 'analysis') {
+    return findings.filter(finding => finding.entity.kind === 'facility-analysis'
+      && finding.entity.guid === analysisGuid);
+  }
+  if (stage.kind === 'group') {
+    return findings.filter(finding => finding.entity.kind === 'analysis-group'
+      && finding.entity.guid === `${analysisGuid}:${stage.groupGuid}`);
+  }
+  return findings;
+}
+
+export function buildAnalysisWorkbenchStageAttention(
+  stages: readonly AnalysisWorkbenchStage[],
+  analysisGuid: string,
+  findings: readonly StatusItem[]
+): AnalysisWorkbenchAttention {
+  const attention: Record<string, StatusAttentionSummary | undefined> = {};
+  stages.forEach(stage => {
+    const stageFindings = findings.filter(finding => findingMatchesStage(
+      finding,
+      stage,
+      analysisGuid
+    ));
+    const summary = summarizeStatusAttention(stageFindings);
+    if (summary.total > 0) attention[stage.id] = summary;
+  });
+  return attention;
+}
+
+export function buildAnalysisWorkbenchTabAttention(
+  tabs: readonly AnalysisWorkbenchTab[],
+  analysisGuid: string,
+  scope: 'group' | 'facility',
+  findings: readonly StatusItem[],
+  groupGuid?: string
+): AnalysisWorkbenchTabAttention {
+  const attention: Partial<Record<AnalysisWorkbenchTabId, StatusAttentionSummary>> = {};
+  tabs.forEach(tab => {
+    const tabFindings = findings.filter(finding => {
+      const destination = finding.destination;
+      return destination.kind === 'facility-analysis'
+        && destination.analysisGuid === analysisGuid
+        && destination.scope === scope
+        && destination.groupGuid === groupGuid
+        && destination.tab === tab.id;
+    });
+    const summary = summarizeStatusAttention(tabFindings);
+    if (summary.total > 0) attention[tab.id] = summary;
+  });
+  return attention;
+}
+
+function findingMatchesStage(
+  finding: StatusItem,
+  stage: AnalysisWorkbenchStage,
+  analysisGuid: string
+): boolean {
+  const destination = finding.destination;
+  if (destination.kind !== 'facility-analysis' || destination.analysisGuid !== analysisGuid) return false;
+  if (stage.kind === 'analysis') return destination.scope === 'analysis';
+  if (stage.kind === 'group') return destination.scope === 'group' && destination.groupGuid === stage.groupGuid;
+  if (stage.kind === 'facility') return destination.scope === 'facility';
+  return false;
 }
 
 function decodeRoutePart(value: string): string {

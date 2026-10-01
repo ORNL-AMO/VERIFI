@@ -29,4 +29,21 @@ describe('DataWorkbenchTabsComponent', () => {
     buttons[0].click();
     expect(selected).toHaveBeenCalledWith('settings');
   });
+
+  it('can render attention as an action-needed indicator without exposing the count visually', () => {
+    TestBed.configureTestingModule({ imports: [DataWorkbenchTabsComponent] });
+    const fixture = TestBed.createComponent(DataWorkbenchTabsComponent);
+    fixture.componentRef.setInput('tabs', [{ id: 'regression', label: 'Regression', icon: 'analysis' }]);
+    fixture.componentRef.setInput('activeTab', 'regression');
+    fixture.componentRef.setInput('ariaLabel', 'Analysis sections');
+    fixture.componentRef.setInput('attentionDisplay', 'indicator');
+    fixture.componentRef.setInput('attention', {
+      regression: { total: 2, errorCount: 1, warningCount: 1, state: 'error' }
+    });
+    fixture.detectChanges();
+
+    const indicator = fixture.nativeElement.querySelector('.v1-data-tabs__attention') as HTMLElement;
+    expect(indicator.textContent).toContain('!');
+    expect(indicator.textContent).toContain('2 issues');
+  });
 });

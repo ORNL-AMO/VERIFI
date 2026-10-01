@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { EnergyUnitOptions, VolumeLiquidOptions } from '@shared/unitOptions';
@@ -13,7 +14,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 @Component({
   selector: 'app-facility-analysis-setup',
   standalone: true,
-  imports: [RouterLink, IconComponent],
+  imports: [FormsModule, RouterLink, IconComponent],
   templateUrl: './facility-analysis-setup.component.html',
   styleUrls: ['./facility-analysis-setup.component.css']
 })
@@ -64,19 +65,6 @@ export class FacilityAnalysisSetupComponent {
     const analysis = this.draft();
     return analysis ? compatibleBankingSources(analysis, this.context.analyses()) : [];
   });
-  readonly linkedAccountAnalyses = computed(() => {
-    const analysis = this.draft();
-    return analysis ? this.context.workspace.accountAnalyses().filter(item => item.facilityAnalysisItems?.some(link => link.analysisItemId === analysis.guid && link.facilityId === analysis.facilityId)) : [];
-  });
-  readonly linkedReports = computed(() => {
-    const analysis = this.draft();
-    return analysis ? this.context.workspace.selectedFacilityReports().filter(report => report.analysisItemId === analysis.guid) : [];
-  });
-  readonly bankingConsumers = computed(() => {
-    const analysis = this.draft();
-    return analysis ? this.context.analyses().filter(item => item.bankedAnalysisItemId === analysis.guid) : [];
-  });
-
   setName(event: Event): void {
     const name = (event.target as HTMLInputElement).value;
     this.autosave.update(draft => { draft.name = name; }, { valid: name.trim().length > 0 });
@@ -87,8 +75,8 @@ export class FacilityAnalysisSetupComponent {
     this.autosave.update(draft => { draft.energyIsSource = energyIsSource; draft.bankedAnalysisItemId = undefined; }, { immediate: true });
   }
 
-  setValue(field: 'energyUnit' | 'waterUnit', event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  setValue(field: 'energyUnit' | 'waterUnit', value: string): void {
+    if (this.hasModels()) return;
     this.autosave.update(draft => { draft[field] = value; }, { immediate: true, valid: !!value });
   }
 

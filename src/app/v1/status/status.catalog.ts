@@ -1,7 +1,7 @@
 import { StatusDestination, StatusFinding, StatusItem, StatusRuleCode, StatusSeverity } from './status.models';
 
 interface StatusRulePresentation {
-  readonly title: string;
+  readonly title: string | ((finding: StatusFinding) => string);
   readonly description: (finding: StatusFinding) => string;
   readonly todo: boolean;
   readonly destination: (finding: StatusFinding) => StatusDestination;
@@ -57,7 +57,12 @@ const RULES: Record<StatusRuleCode, StatusRulePresentation> = {
   'predictor.weather.warning': { title: 'Review weather data', description: () => 'Some weather entries contain incomplete or revised source data.', todo: true, destination: predictorTab('readings') },
   'predictor.quality.outlier': { title: 'Review predictor outliers', description: finding => `${finding.evidence.count} predictor value(s) fall outside the expected range.`, todo: false, destination: predictorTab('quality') },
   'analysis.configuration.invalid': { title: 'Complete analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: facilityAnalysis },
-  'analysis-group.setup.invalid': { title: 'Complete analysis group setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: facilityAnalysis },
+  'analysis-group.setup.invalid': {
+    title: finding => isRegressionSetupFinding(finding) ? 'Complete regression setup' : 'Complete analysis group setup',
+    description: finding => `Review: ${evidenceList(finding, 'reasons')}.`,
+    todo: true,
+    destination: facilityAnalysis
+  },
   'analysis-group.model.invalid': { title: 'Review regression model', description: () => 'The selected regression model does not pass its validity checks.', todo: true, destination: facilityAnalysis },
   'analysis-group.inputs.invalid': { title: 'Review analysis inputs', description: () => 'One or more included meters or predictors has setup or data errors.', todo: true, destination: facilityAnalysis },
   'account-analysis.configuration.invalid': { title: 'Complete account analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
@@ -71,7 +76,13 @@ const RULES: Record<StatusRuleCode, StatusRulePresentation> = {
 
 export function presentFinding(finding: StatusFinding): StatusItem {
   const presentation = RULES[finding.code];
-  return { ...finding, title: presentation.title, description: presentation.description(finding), todo: presentation.todo, destination: presentation.destination(finding) };
+  return {
+    ...finding,
+    title: typeof presentation.title === 'function' ? presentation.title(finding) : presentation.title,
+    description: presentation.description(finding),
+    todo: presentation.todo,
+    destination: presentation.destination(finding)
+  };
 }
 
 export function presentFindings(findings: readonly StatusFinding[]): StatusItem[] {
@@ -98,7 +109,7 @@ function facilityAnalysis(finding: StatusFinding): StatusDestination {
   const separatorIndex = finding.entity.kind === 'analysis-group' ? finding.entity.guid.indexOf(':') : -1;
   const analysisGuid = separatorIndex >= 0 ? finding.entity.guid.slice(0, separatorIndex) : finding.entity.guid;
   const groupGuid = separatorIndex >= 0 ? finding.entity.guid.slice(separatorIndex + 1) : undefined;
-  const isModelFinding = finding.code === 'analysis-group.model.invalid';
+  const isModelFinding = finding.code === 'analysis-group.model.invalid' || isRegressionSetupFinding(finding);
   return {
     kind: 'facility-analysis',
     facilityGuid: finding.entity.facilityGuid!,
@@ -107,6 +118,25 @@ function facilityAnalysis(finding: StatusFinding): StatusDestination {
     groupGuid,
     tab: isModelFinding ? 'regression' : 'setup'
   };
+}
+
+const REGRESSION_SETUP_REASONS = new Set([
+  'missingProductionVariables',
+  'missingRegressionConstant',
+  'missingRegressionModelYear',
+  'missingRegressionModelStartMonth',
+  'missingRegressionStartYear',
+  'missingRegressionModelEndMonth',
+  'missingRegressionEndYear',
+  'invalidModelDateSelection',
+  'missingRegressionModelSelection',
+  'missingRegressionPredictorCoef'
+]);
+
+function isRegressionSetupFinding(finding: StatusFinding): boolean {
+  if (finding.code !== 'analysis-group.setup.invalid' || finding.evidence.analysisType !== 'regression') return false;
+  const reasons = evidenceValues(finding, 'reasons');
+  return reasons.length > 0 && reasons.every(reason => REGRESSION_SETUP_REASONS.has(reason));
 }
 
 function compareStatusItems(first: StatusItem, second: StatusItem): number {

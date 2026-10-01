@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, WritableSignal, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AnalysisType } from '@data/models/analysis';
+import { buildMeterCards } from '@app/v1/facility/data/meters/models';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
@@ -16,8 +17,30 @@ export class FacilityAnalysisGroupSetupComponent {
   readonly analysis = this.autosave.draft;
   readonly pendingType = signal<AnalysisType | undefined>(undefined);
   readonly pendingPredictorId = signal<string | undefined>(undefined);
+  readonly dataAdjustmentDraft = signal<AdjustmentDraft>({ amount: '' });
+  readonly baselineAdjustmentDraft = signal<AdjustmentDraft>({ amount: '' });
+  readonly dataAdjustmentEditorOpen = signal(false);
+  readonly baselineAdjustmentEditorOpen = signal(false);
   readonly hasModels = computed(() => (this.group()?.models?.length ?? 0) > 0);
   readonly missingMeters = computed(() => this.groupContext.meters().length === 0);
+  readonly meterStatusItems = computed(() => {
+    const facility = this.workbench.facility();
+    if (!facility) return [];
+
+    return buildMeterCards(
+      this.groupContext.meters(),
+      this.workbench.workspace.facilityMeterData(),
+      this.workbench.meterGroups(),
+      this.workbench.status.items(),
+      facility,
+      [],
+      this.workbench.status.state() === 'ready'
+    ).map(card => ({
+      ...card,
+      route: this.navigation.facilityMeterRoute(facility.guid, card.meter.guid, 'settings'),
+      issueSummary: card.statusIssueLabels?.slice(0, 2).join(', ')
+    }));
+  });
   readonly productionVariables = computed(() => this.group()?.predictorVariables.filter(variable => variable.production) ?? []);
   readonly selectedProductionCount = computed(() => this.productionVariables().filter(variable => variable.productionInAnalysis).length);
   readonly isSkipped = computed(() => !!this.group() && isSkippedAnalysisType(this.group()!.analysisType));
@@ -34,6 +57,13 @@ export class FacilityAnalysisGroupSetupComponent {
     const used = new Set(this.group()?.baselineAdjustmentsV2.map(item => item.year) ?? []);
     return this.adjustmentYears().filter(year => !used.has(year));
   });
+  readonly adjustmentUnit = computed(() => {
+    const analysis = this.analysis();
+    if (!analysis) return '';
+    return `${analysis.analysisCategory === 'water' ? analysis.waterUnit : analysis.energyUnit}/yr`;
+  });
+  readonly canAddDataAdjustment = computed(() => validAdjustmentDraft(this.dataAdjustmentDraft()));
+  readonly canAddBaselineAdjustment = computed(() => validAdjustmentDraft(this.baselineAdjustmentDraft()));
   readonly bankingYearError = computed(() => {
     const group = this.group();
     if (!group?.applyBanking) return undefined;
@@ -82,17 +112,39 @@ export class FacilityAnalysisGroupSetupComponent {
     }, false, amount !== undefined);
   }
 
-  addAdjustment(kind: 'dataAdjustments' | 'baselineAdjustmentsV2', event: Event): void {
-    const year = Number((event.target as HTMLSelectElement).value);
-    if (!year) return;
-    this.updateGroup(group => {
-      if (!group[kind].some(item => item.year === year)) group[kind].push({ year, amount: 0 });
-      group[kind].sort((first, second) => first.year - second.year);
-    }, true);
-    (event.target as HTMLSelectElement).value = '';
+  setAdjustmentYear(kind: AdjustmentKind, event: Event): void {
+    const year = Number((event.target as HTMLSelectElement).value) || undefined;
+    this.adjustmentDraft(kind).update(draft => ({ ...draft, year }));
   }
 
-  setAdjustment(kind: 'dataAdjustments' | 'baselineAdjustmentsV2', year: number, event: Event): void {
+  setAdjustmentAmount(kind: AdjustmentKind, event: Event): void {
+    const amount = (event.target as HTMLInputElement).value;
+    this.adjustmentDraft(kind).update(draft => ({ ...draft, amount }));
+  }
+
+  openAdjustmentEditor(kind: AdjustmentKind): void {
+    this.adjustmentDraft(kind).set({ amount: '' });
+    this.adjustmentEditorOpen(kind).set(true);
+  }
+
+  cancelAdjustmentEditor(kind: AdjustmentKind): void {
+    this.adjustmentDraft(kind).set({ amount: '' });
+    this.adjustmentEditorOpen(kind).set(false);
+  }
+
+  addAdjustment(kind: AdjustmentKind): void {
+    const draft = this.adjustmentDraft(kind)();
+    const amount = Number(draft.amount);
+    if (!draft.year || !Number.isFinite(amount) || amount <= 0) return;
+    this.updateGroup(group => {
+      if (!group[kind].some(item => item.year === draft.year)) group[kind].push({ year: draft.year!, amount });
+      group[kind].sort((first, second) => first.year - second.year);
+    }, true);
+    this.adjustmentDraft(kind).set({ amount: '' });
+    this.adjustmentEditorOpen(kind).set(false);
+  }
+
+  setAdjustment(kind: AdjustmentKind, year: number, event: Event): void {
     const amount = numericValue(event);
     this.updateGroup(group => {
       const adjustment = group[kind].find(item => item.year === year);
@@ -100,7 +152,7 @@ export class FacilityAnalysisGroupSetupComponent {
     });
   }
 
-  removeAdjustment(kind: 'dataAdjustments' | 'baselineAdjustmentsV2', year: number): void {
+  removeAdjustment(kind: AdjustmentKind, year: number): void {
     this.updateGroup(group => { group[kind] = group[kind].filter(item => item.year !== year); }, true);
   }
 
@@ -135,6 +187,14 @@ export class FacilityAnalysisGroupSetupComponent {
     }, true);
   }
 
+  private adjustmentDraft(kind: AdjustmentKind): WritableSignal<AdjustmentDraft> {
+    return kind === 'dataAdjustments' ? this.dataAdjustmentDraft : this.baselineAdjustmentDraft;
+  }
+
+  private adjustmentEditorOpen(kind: AdjustmentKind): WritableSignal<boolean> {
+    return kind === 'dataAdjustments' ? this.dataAdjustmentEditorOpen : this.baselineAdjustmentEditorOpen;
+  }
+
   private updateGroup(
     update: (group: NonNullable<ReturnType<FacilityAnalysisGroupSetupComponent['group']>>) => void,
     immediate = false,
@@ -147,6 +207,13 @@ export class FacilityAnalysisGroupSetupComponent {
       draft.isAnalysisVisited = false;
     }, { immediate, valid });
   }
+}
+
+type AdjustmentKind = 'dataAdjustments' | 'baselineAdjustmentsV2';
+
+interface AdjustmentDraft {
+  readonly year?: number;
+  readonly amount: string;
 }
 
 export function clearGroupModels(group: NonNullable<ReturnType<FacilityAnalysisGroupSetupComponent['group']>>): void {
@@ -163,4 +230,9 @@ function numericValue(event: Event): number | undefined {
   if (!raw.trim()) return undefined;
   const value = Number(raw);
   return Number.isFinite(value) ? value : undefined;
+}
+
+function validAdjustmentDraft(draft: AdjustmentDraft): boolean {
+  const amount = Number(draft.amount);
+  return !!draft.year && draft.amount.trim().length > 0 && Number.isFinite(amount) && amount > 0;
 }

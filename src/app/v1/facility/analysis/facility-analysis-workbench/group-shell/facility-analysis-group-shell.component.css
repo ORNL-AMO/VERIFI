@@ -1,3 +1,2 @@
 :host { display: block; }
-.v1-analysis-group-shell__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface); }
-.v1-analysis-group-shell__heading h2, .v1-analysis-group-shell__heading p { margin: 0; }
+.v1-analysis-group-shell { border-radius: var(--v1-radius); overflow: hidden; }

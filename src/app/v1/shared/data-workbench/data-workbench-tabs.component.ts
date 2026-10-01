@@ -21,5 +21,6 @@ export class DataWorkbenchTabsComponent {
   @Input({ required: true }) activeTab = '';
   @Input({ required: true }) ariaLabel = 'Workbench sections';
   @Input() attention: Readonly<Record<string, StatusAttentionSummary | undefined>> = {};
+  @Input() attentionDisplay: 'count' | 'indicator' = 'count';
   @Output() readonly tabSelected = new EventEmitter<string>();
 }

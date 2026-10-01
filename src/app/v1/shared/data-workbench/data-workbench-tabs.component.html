@@ -12,8 +12,9 @@
       @if (tabAttention && tabAttention.total > 0) {
         <span
           class="v1-data-tabs__attention v1-data-tabs__attention--{{ tabAttention.state }}"
+          [class.v1-data-tabs__attention--indicator]="attentionDisplay === 'indicator'"
           [attr.title]="tabAttention.total + ' active status checks in ' + tab.label">
-          <span aria-hidden="true">{{ tabAttention.total }}</span>
+          <span aria-hidden="true">{{ attentionDisplay === 'indicator' ? '!' : tabAttention.total }}</span>
           <span class="visually-hidden">
             {{ tabAttention.total }} issues: {{ tabAttention.errorCount }} errors,
             {{ tabAttention.warningCount }} warnings

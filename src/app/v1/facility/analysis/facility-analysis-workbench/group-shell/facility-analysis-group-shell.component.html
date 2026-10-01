@@ -6,14 +6,12 @@
     <p>This group is no longer part of the selected analysis. Use Back or Continue to choose another stage.</p>
   </article>
 } @else {
-  <section class="v1-analysis-group-shell" [attr.aria-labelledby]="'analysis-group-' + group.guid">
-    <div class="v1-analysis-group-shell__heading">
-      <div><p class="v1-eyebrow">Meter group</p><h2 [id]="'analysis-group-' + group.guid">{{ group.name }}</h2></div>
-      <span class="v1-chip">{{ this.group()?.analysisType }}</span>
-    </div>
+  <section class="v1-analysis-group-shell" [attr.aria-label]="'Analysis for ' + group.name">
     <app-data-workbench-tabs
       [tabs]="tabs()"
       [activeTab]="activeTab()"
+      [attention]="tabAttention()"
+      attentionDisplay="indicator"
       ariaLabel="Meter group analysis sections"
       (tabSelected)="openTab($event)">
     </app-data-workbench-tabs>

@@ -1,9 +1,8 @@
 @let currentAnalysis = analysis();
 @let facility = context.facility();
 @if (currentAnalysis && facility) {
-  <section class="v1-analysis-section" aria-labelledby="v1-used-by-heading">
-    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Dependencies</p><h2 id="v1-used-by-heading">Used By</h2></div><span class="v1-chip">{{ totalDependencies() }} relationship(s)</span></div>
-    <p>Review workflows that consume this analysis before changing its baseline, models, or banking configuration.</p>
+  <section class="v1-analysis-section" aria-label="Used by">
+    <div class="v1-analysis-section__heading"><p>Review workflows that consume this analysis before changing its baseline, models, or banking configuration.</p><span class="v1-chip">{{ totalDependencies() }} relationship(s)</span></div>
     @if (totalDependencies() === 0) { <article class="v1-empty-state" role="status"><app-ui-icon name="check"></app-ui-icon><h3>No dependencies</h3><p>This analysis is not currently used by another saved workflow.</p></article> }
     <div class="v1-used-by__grid">
       <section class="v1-used-by__panel" aria-labelledby="account-analyses-heading"><h3 id="account-analyses-heading">Account analyses</h3>@if (linkedAccountAnalyses().length) { <ul>@for (item of linkedAccountAnalyses(); track item.guid) { <li><span><strong>{{ item.name || 'Untitled account analysis' }}</strong><small>Account analysis</small></span><span class="v1-chip">Destination coming in account-analysis workbench</span></li> }</ul> } @else { <p>None</p> }</section>

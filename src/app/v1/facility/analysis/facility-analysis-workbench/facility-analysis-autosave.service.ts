@@ -142,6 +142,7 @@ export class FacilityAnalysisAutosaveService {
           changeKind: 'update',
           entityGuid: submitted.guid,
           label: 'Saving facility analysis',
+          notification: { suppressSuccessToast: true },
           publication: {
             mode: 'patch',
             buildPatch: value => upsertWorkspaceRecords('facilityAnalyses', [value])

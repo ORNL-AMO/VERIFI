@@ -5,7 +5,7 @@ import { filter } from 'rxjs';
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
-import { AnalysisWorkbenchTabId, isSkippedAnalysisType, tabsForAnalysisGroup } from '../facility-analysis-workbench.models';
+import { AnalysisWorkbenchTabId, buildAnalysisWorkbenchTabAttention, isSkippedAnalysisType, tabsForAnalysisGroup } from '../facility-analysis-workbench.models';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 
 @Component({
@@ -26,6 +26,13 @@ export class FacilityAnalysisGroupShellComponent {
   readonly group = this.groupContext.group;
   readonly meterGroup = this.groupContext.meterGroup;
   readonly tabs = computed(() => tabsForAnalysisGroup(this.group()));
+  readonly tabAttention = computed(() => buildAnalysisWorkbenchTabAttention(
+    this.tabs(),
+    this.context.analysisGuid(),
+    'group',
+    this.groupContext.findings(),
+    this.groupGuid()
+  ));
   readonly activeTab = this.activeTabState.asReadonly();
   private readonly canonicalRouteEffect = effect(() => {
     const facility = this.context.facility();
@@ -66,7 +73,8 @@ export class FacilityAnalysisGroupShellComponent {
   private syncActiveTab(): void {
     const segments = this.router.url.split(/[?#]/, 1)[0].split('/');
     const tab = segments[segments.length - 1];
-    this.activeTabState.set(isAnalysisWorkbenchTab(tab) ? tab : 'setup');
+    const activeTab = isAnalysisWorkbenchTab(tab) ? tab : 'setup';
+    this.activeTabState.set(activeTab);
   }
 }
 

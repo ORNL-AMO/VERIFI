@@ -1,7 +1,7 @@
 @let currentGroup = group();
 @if (currentGroup) {
-  <section class="v1-analysis-section" aria-labelledby="v1-regression-heading">
-    <div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Modeling</p><h3 id="v1-regression-heading">Regression model</h3></div>@if (currentGroup.selectedModelId) { <span class="v1-chip v1-chip--success"><app-ui-icon name="check"></app-ui-icon> Model selected</span> }</div>
+  <section class="v1-analysis-section" aria-label="Regression model">
+    @if (currentGroup.selectedModelId) { <p class="v1-regression__selection-status" role="status"><app-ui-icon name="check"></app-ui-icon> Model selected</p> }
 
     <div class="v1-regression__configuration">
       <section class="v1-regression__panel" aria-labelledby="model-method-heading">

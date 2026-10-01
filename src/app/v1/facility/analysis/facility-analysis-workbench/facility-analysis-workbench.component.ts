@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -6,10 +7,10 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { activeAnalysisWorkbenchStageId, stageHasBlockingErrors } from './facility-analysis-workbench.models';
+import { activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, findingsForAnalysisStage, stageHasBlockingErrors } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
-import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
+import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from './facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from './facility-analysis-results-display.service';
 
 @Component({
@@ -21,7 +22,7 @@ import { FacilityAnalysisResultsDisplayService } from './facility-analysis-resul
     FacilityAnalysisResultsService,
     FacilityAnalysisResultsDisplayService
   ],
-  imports: [RouterOutlet, RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent],
+  imports: [RouterOutlet, RouterLink, DecimalPipe, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent],
   templateUrl: './facility-analysis-workbench.component.html',
   styleUrls: ['./facility-analysis-workbench.component.css']
 })
@@ -46,16 +47,46 @@ export class FacilityAnalysisWorkbenchComponent {
   readonly currentStageHasBlockingErrors = computed(() => stageHasBlockingErrors(
     this.currentStage(), this.context.analysisGuid(), this.context.findings()
   ));
+  readonly currentStageFindings = computed(() => findingsForAnalysisStage(
+    this.currentStage(), this.context.analysisGuid(), this.context.findings()
+  ));
+  readonly stageNavigation = computed(() => {
+    const stages = this.context.stages();
+    const attention = buildAnalysisWorkbenchStageAttention(
+      stages,
+      this.context.analysisGuid(),
+      this.context.findings()
+    );
+    return buildAnalysisWorkbenchStageNavigation(
+      stages,
+      this.activeStageId(),
+      this.context.analysisGuid(),
+      this.context.findings(),
+      ['saving', 'invalid', 'error'].includes(this.autosave.state())
+    ).map(stage => ({ ...stage, attention: attention[stage.id] }));
+  });
+  readonly resultFacts = computed(() => facilityAnalysisResultFacts(this.results.state()));
+  readonly dependencyMessage = computed(() => {
+    const analysis = this.context.analysis();
+    if (!analysis) return undefined;
+    const accountAnalysisCount = this.context.workspace.accountAnalyses().filter(item =>
+      item.facilityAnalysisItems?.some(link => link.analysisItemId === analysis.guid && link.facilityId === analysis.facilityId)
+    ).length;
+    const reportCount = this.context.workspace.selectedFacilityReports().filter(report => report.analysisItemId === analysis.guid).length;
+    const bankingConsumerCount = this.context.analyses().filter(item => item.bankedAnalysisItemId === analysis.guid).length;
+    return facilityAnalysisDependencyMessage(accountAnalysisCount, reportCount, bankingConsumerCount);
+  });
   readonly navigationRequirement = computed(() => analysisNavigationRequirement(
     this.autosave.state(), this.currentStageHasBlockingErrors(), !!this.nextStage()
   ));
   readonly navigationDisabled = computed(() => !!this.navigationRequirement());
 
   constructor() {
+    this.syncActiveStage(this.router.url);
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(event => this.activeStageState.set(activeAnalysisWorkbenchStageId(event.urlAfterRedirects)));
+    ).subscribe(event => this.syncActiveStage(event.urlAfterRedirects));
   }
 
   switchAnalysis(analysisGuid: string): void {
@@ -85,6 +116,36 @@ export class FacilityAnalysisWorkbenchComponent {
 
   hasUnsavedChanges(): boolean { return this.autosave.isDirty(); }
   isNavigationBlocked(): boolean { return this.autosave.isBlocked(); }
+
+  private syncActiveStage(url: string): void {
+    const stageId = activeAnalysisWorkbenchStageId(url);
+    this.activeStageState.set(stageId);
+  }
+}
+
+export interface FacilityAnalysisResultFacts {
+  readonly latestCompleteYear?: number;
+  readonly totalSavingsPercentImprovement?: number;
+  readonly pending: boolean;
+}
+
+export function facilityAnalysisResultFacts(state: FacilityAnalysisResultState): FacilityAnalysisResultFacts {
+  if (state.state !== 'ready') {
+    return { pending: state.state === 'loading' };
+  }
+  const latestCompleteYear = state.reportYear ?? state.annual.reduce<number | undefined>(
+    (latest, summary) => latest === undefined || summary.year > latest ? summary.year : latest,
+    undefined
+  );
+  const latestSummary = state.annual.find(summary => summary.year === latestCompleteYear);
+  const totalSavingsPercentImprovement = latestSummary?.totalSavingsPercentImprovement;
+  return {
+    latestCompleteYear,
+    totalSavingsPercentImprovement: Number.isFinite(totalSavingsPercentImprovement)
+      ? totalSavingsPercentImprovement
+      : undefined,
+    pending: false
+  };
 }
 
 export function analysisNavigationRequirement(
@@ -97,4 +158,26 @@ export function analysisNavigationRequirement(
   if (autosaveState === 'error') return 'Retry or discard the unsaved changes before continuing.';
   if (hasNextStage && currentStageHasBlockingErrors) return 'Resolve the errors in this stage before continuing.';
   return undefined;
+}
+
+export function facilityAnalysisDependencyMessage(
+  accountAnalysisCount: number,
+  reportCount: number,
+  bankingConsumerCount: number
+): string | undefined {
+  const dependencies = [
+    dependencyCountLabel(accountAnalysisCount, 'account analysis', 'account analyses'),
+    dependencyCountLabel(reportCount, 'report', 'reports'),
+    dependencyCountLabel(bankingConsumerCount, 'banking consumer', 'banking consumers')
+  ].filter((label): label is string => !!label);
+
+  if (!dependencies.length) return undefined;
+  if (dependencies.length === 1) return `Changes can affect ${dependencies[0]}.`;
+  if (dependencies.length === 2) return `Changes can affect ${dependencies[0]} and ${dependencies[1]}.`;
+  return `Changes can affect ${dependencies[0]}, ${dependencies[1]}, and ${dependencies[2]}.`;
+}
+
+function dependencyCountLabel(count: number, singular: string, plural: string): string | undefined {
+  if (!count) return undefined;
+  return `${count} ${count === 1 ? singular : plural}`;
 }

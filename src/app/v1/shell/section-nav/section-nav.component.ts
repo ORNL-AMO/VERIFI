@@ -9,7 +9,7 @@ import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import { StatusAttentionSummary } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
-import { buildAnalysisWorkbenchStages, stageHasBlockingErrors } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
+import { buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
 
 type SettingsNavItem = {
   readonly id: string;
@@ -185,22 +185,13 @@ export class SectionNavComponent {
     const scope = this.navigation.activeAnalysisStageScope();
     const groupGuid = this.navigation.activeAnalysisGroupGuid();
     const currentStageId = scope === 'group' && groupGuid ? `group:${groupGuid}` : scope ?? 'analysis';
-    const currentIndex = stages.findIndex(stage => stage.id === currentStageId);
     const findings = this.status.items().filter(item =>
       (item.entity.kind === 'facility-analysis' && item.entity.guid === analysisGuid)
       || (item.entity.kind === 'analysis-group' && item.entity.guid.startsWith(`${analysisGuid}:`))
     );
-    const firstBlockingIndex = stages.findIndex(stage => stageHasBlockingErrors(stage, analysisGuid, findings));
     return {
       name: analysis.name || 'Untitled analysis',
-      steps: stages.map((stage, index) => ({
-        id: stage.id,
-        label: stage.label,
-        route: stage.route,
-        current: index === currentIndex,
-        completed: currentIndex > index && !stageHasBlockingErrors(stage, analysisGuid, findings),
-        canOpen: firstBlockingIndex < 0 || index <= firstBlockingIndex || index === currentIndex
-      }))
+      steps: buildAnalysisWorkbenchStageNavigation(stages, currentStageId, analysisGuid, findings)
     };
   });
   readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
