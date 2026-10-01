@@ -46,9 +46,9 @@ describe('v1 status presentation catalog', () => {
     };
 
     expect(presentFindings([makeFinding('analysis.configuration.invalid', 'error', 'configuration', analysisEntity, { reasons: ['missingName'] })])[0].destination)
-      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', tab: 'setup' });
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'analysis', groupGuid: undefined, tab: 'setup' });
     expect(presentFindings([makeFinding('analysis-group.model.invalid', 'warning', 'quality', groupEntity)])[0].destination)
-      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', tab: 'setup' });
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'regression' });
   });
 
   it('sorts Todos by severity, record name, and rule code', () => {

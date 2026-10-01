@@ -19,7 +19,9 @@ export type FacilityMeterRouteTab = 'settings' | 'readings' | 'bill-inspection' 
 export type FacilityMeterGroupRouteTab = 'monthly-table' | 'monthly-chart' | 'yearly';
 export type FacilityPredictorRouteTab = 'settings' | 'readings' | 'quality';
 export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
-export type FacilityAnalysisRouteTab = 'setup';
+export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
+export type FacilityAnalysisGroupRouteTab = 'setup' | 'regression' | 'annual' | 'monthly';
+export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
@@ -351,6 +353,23 @@ export class WorkspaceNavigationService {
     tab: FacilityAnalysisRouteTab = 'setup'
   ): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, tab];
+  }
+
+  facilityAnalysisGroupRoute(
+    facilityGuid: string,
+    analysisGuid: string,
+    groupGuid: string,
+    tab: FacilityAnalysisGroupRouteTab = 'setup'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, 'group', groupGuid, tab];
+  }
+
+  facilityAnalysisResultsRoute(
+    facilityGuid: string,
+    analysisGuid: string,
+    tab: FacilityAnalysisResultRouteTab = 'annual'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', analysisGuid, 'facility', tab];
   }
 
   facilityMeterRoute(facilityGuid: string, meterGuid: string, tab: FacilityMeterRouteTab = 'settings'): Array<string> {

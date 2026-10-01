@@ -1,0 +1,5 @@
+<section class="v1-analysis-results-shell" aria-labelledby="v1-facility-results-title">
+  <div class="v1-analysis-results-shell__heading"><p class="v1-eyebrow">All meter groups</p><h2 id="v1-facility-results-title">Facility Results</h2></div>
+  <app-data-workbench-tabs [tabs]="tabs" [activeTab]="activeTab()" ariaLabel="Facility result sections" (tabSelected)="openTab($event)"></app-data-workbench-tabs>
+  <router-outlet></router-outlet>
+</section>

@@ -166,10 +166,9 @@ export class WorkspaceStatusService {
         void this.router.navigate(['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'data', 'predictors', item.destination.predictorGuid, item.destination.tab]);
         break;
       case 'facility-analysis':
-        void this.router.navigate([
-          '/v1', 'workspace', 'facility', item.destination.facilityGuid,
-          'analysis', 'workbench', item.destination.analysisGuid, item.destination.tab
-        ]);
+        void this.router.navigate(item.destination.scope === 'group' && item.destination.groupGuid
+          ? ['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'analysis', 'workbench', item.destination.analysisGuid, 'group', item.destination.groupGuid, item.destination.tab]
+          : ['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'analysis', 'workbench', item.destination.analysisGuid, item.destination.tab]);
         break;
     }
   }

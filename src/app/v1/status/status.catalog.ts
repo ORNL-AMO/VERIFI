@@ -95,14 +95,17 @@ function predictorTab(tab: 'settings' | 'readings' | 'quality'): (finding: Statu
 }
 
 function facilityAnalysis(finding: StatusFinding): StatusDestination {
-  const analysisGuid = finding.entity.kind === 'analysis-group'
-    ? finding.entity.guid.split(':', 1)[0]
-    : finding.entity.guid;
+  const separatorIndex = finding.entity.kind === 'analysis-group' ? finding.entity.guid.indexOf(':') : -1;
+  const analysisGuid = separatorIndex >= 0 ? finding.entity.guid.slice(0, separatorIndex) : finding.entity.guid;
+  const groupGuid = separatorIndex >= 0 ? finding.entity.guid.slice(separatorIndex + 1) : undefined;
+  const isModelFinding = finding.code === 'analysis-group.model.invalid';
   return {
     kind: 'facility-analysis',
     facilityGuid: finding.entity.facilityGuid!,
     analysisGuid,
-    tab: 'setup'
+    scope: groupGuid ? 'group' : 'analysis',
+    groupGuid,
+    tab: isModelFinding ? 'regression' : 'setup'
   };
 }
 

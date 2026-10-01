@@ -220,6 +220,10 @@ If the workflow needs current-state detail, add a short current-state note using
 
 ## Implementation Rules
 
+### Facility analysis workbench (#2739 and #2737)
+
+The production v1 facility-analysis workbench combines setup/modeling and results/savings into one staged workflow. Its footer advances through Analysis Setup, each stored meter group, Facility Results, and Used By. Group stages own routed Setup, conditional Regression, Annual, and Monthly tabs; skipped groups expose Setup only. Banking is configured in Setup and presented in the existing result tabs rather than as a separate tab. Production v1 reuses version-neutral analysis models, status evaluation, calculations, command boundaries, and Workers while rebuilding presentation under `src/app/v1/` without v0 or P1 imports.
+
 - Do not add v0/v1 conditionals to legacy components.
 - Rebuild v1 UI components from scratch using the new architecture and P1 learnings.
 - Reuse shared data, domain, platform, and model contracts when they are not coupled to legacy presentation behavior.

@@ -1,0 +1,22 @@
+@let group = meterGroup();
+@if (!group || !this.group()) {
+  <article class="v1-empty-state" role="alert">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <h2>Meter group not found</h2>
+    <p>This group is no longer part of the selected analysis. Use Back or Continue to choose another stage.</p>
+  </article>
+} @else {
+  <section class="v1-analysis-group-shell" [attr.aria-labelledby]="'analysis-group-' + group.guid">
+    <div class="v1-analysis-group-shell__heading">
+      <div><p class="v1-eyebrow">Meter group</p><h2 [id]="'analysis-group-' + group.guid">{{ group.name }}</h2></div>
+      <span class="v1-chip">{{ this.group()?.analysisType }}</span>
+    </div>
+    <app-data-workbench-tabs
+      [tabs]="tabs()"
+      [activeTab]="activeTab()"
+      ariaLabel="Meter group analysis sections"
+      (tabSelected)="openTab($event)">
+    </app-data-workbench-tabs>
+    <router-outlet></router-outlet>
+  </section>
+}

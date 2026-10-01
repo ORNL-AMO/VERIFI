@@ -1,0 +1,92 @@
+@let facility = context.facility();
+@let analysis = context.analysis();
+
+@if (!facility) {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="accountIssue"></app-ui-icon>
+    <h1>No facility selected</h1>
+    <p>Select a facility before opening an analysis.</p>
+  </article>
+} @else if (!analysis) {
+  <article class="v1-empty-state" role="alert">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <h1>Analysis not found</h1>
+    <p>This analysis is not available in {{ facility.name }}.</p>
+    <a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">
+      <app-ui-icon name="arrowLeft"></app-ui-icon> Back to analyses
+    </a>
+  </article>
+} @else {
+  <div class="v1-data-workbench-sticky v1-analysis-workbench__sticky">
+    <header class="v1-data-workbench-header">
+      <nav class="v1-data-workbench-breadcrumb" aria-label="Facility analysis breadcrumb">
+        <ol>
+          <li>{{ context.account()?.name || 'Account' }}</li>
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          <li>{{ facility.name || 'Facility' }}</li>
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Analyses</a></li>
+        </ol>
+      </nav>
+
+      <div class="v1-data-workbench-title-row">
+        <div class="v1-data-workbench-title">
+          <h1 id="v1-analysis-workbench-title">
+            <app-ui-icon name="analysis"></app-ui-icon>
+            <app-data-workbench-resource-switcher
+              [resources]="analysisResources()"
+              [selectedId]="analysis.guid"
+              [currentLabel]="analysis.name || 'Untitled analysis'"
+              ariaLabel="Switch facility analysis"
+              (resourceSelected)="switchAnalysis($event)">
+            </app-data-workbench-resource-switcher>
+          </h1>
+        </div>
+        <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
+          <span class="v1-chip">{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span>
+          <span class="v1-chip v1-chip--{{ context.hasBlockingErrors() ? 'danger' : 'success' }}">
+            <app-ui-icon [name]="context.hasBlockingErrors() ? 'warning' : 'check'"></app-ui-icon>
+            {{ context.hasBlockingErrors() ? 'Needs attention' : 'Ready' }}
+          </span>
+          <app-data-workbench-facts-toggle #factsToggle controls="v1-analysis-workbench-facts"></app-data-workbench-facts-toggle>
+        </div>
+      </div>
+
+      <div id="v1-analysis-workbench-facts" [hidden]="!factsToggle.expanded()">
+        <dl class="v1-data-workbench-facts">
+          <div><dt>Baseline</dt><dd>{{ analysis.baselineYear || 'Not selected' }}</dd></div>
+          <div><dt>Basis</dt><dd>{{ analysis.analysisCategory === 'energy' ? (analysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }}</dd></div>
+          <div><dt>Units</dt><dd>{{ analysis.analysisCategory === 'water' ? analysis.waterUnit : analysis.energyUnit }}</dd></div>
+          <div><dt>Groups</dt><dd>{{ analysis.groups.length }}</dd></div>
+          <div><dt>Banking</dt><dd>{{ analysis.hasBanking ? 'Configured' : 'Not used' }}</dd></div>
+        </dl>
+      </div>
+    </header>
+  </div>
+
+  <main class="v1-analysis-workbench__content" aria-labelledby="v1-analysis-workbench-title">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="v1-analysis-workbench__footer" aria-label="Analysis workflow navigation">
+    <div>
+      <span class="v1-eyebrow">Current stage</span>
+      <strong>{{ currentStage()?.label || 'Analysis Setup' }}</strong>
+      <span class="v1-analysis-workbench__progress">{{ stageIndex() + 1 }} of {{ context.stages().length }}</span>
+    </div>
+    <div class="v1-analysis-workbench__footer-actions">
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="back()">
+        <app-ui-icon name="arrowLeft"></app-ui-icon> Back
+      </button>
+      @if (nextStage()) {
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="context.hasBlockingErrors()" (click)="continue()">
+          Continue <app-ui-icon name="arrowRight"></app-ui-icon>
+        </button>
+      } @else {
+        <button type="button" class="v1-btn v1-btn--primary" (click)="finish()">
+          Finish <app-ui-icon name="check"></app-ui-icon>
+        </button>
+      }
+    </div>
+  </footer>
+}
