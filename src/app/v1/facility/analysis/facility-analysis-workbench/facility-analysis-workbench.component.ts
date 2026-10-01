@@ -9,6 +9,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { activeAnalysisWorkbenchStageId } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
+import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -24,6 +25,7 @@ export class FacilityAnalysisWorkbenchComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
+  readonly results = inject(FacilityAnalysisResultsService);
   readonly activeStageId = this.activeStageState.asReadonly();
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,

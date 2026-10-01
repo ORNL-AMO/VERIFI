@@ -92,6 +92,7 @@ import { FacilityAnalysisMonthlyComponent } from '@app/v1/facility/analysis/faci
 import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
 import { FacilityAnalysisAutosaveService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-autosave.service';
 import { FacilityAnalysisGroupContext } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-group-context.service';
+import { FacilityAnalysisResultsService } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-results.service';
 
 export const V1Routes: Routes = [
   {
@@ -351,7 +352,7 @@ export const V1Routes: Routes = [
               {
                 path: 'workbench/:analysisGuid',
                 component: FacilityAnalysisWorkbenchComponent,
-                providers: [FacilityAnalysisWorkbenchContext, FacilityAnalysisAutosaveService],
+                providers: [FacilityAnalysisWorkbenchContext, FacilityAnalysisAutosaveService, FacilityAnalysisResultsService],
                 canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },
