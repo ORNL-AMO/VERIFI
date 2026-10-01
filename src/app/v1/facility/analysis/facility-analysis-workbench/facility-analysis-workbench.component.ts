@@ -6,7 +6,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { activeAnalysisWorkbenchStageId } from './facility-analysis-workbench.models';
+import { activeAnalysisWorkbenchStageId, stageHasBlockingErrors } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
@@ -36,6 +36,9 @@ export class FacilityAnalysisWorkbenchComponent {
   readonly currentStage = computed(() => this.context.stages()[this.stageIndex()]);
   readonly previousStage = computed(() => this.context.stages()[this.stageIndex() - 1]);
   readonly nextStage = computed(() => this.context.stages()[this.stageIndex() + 1]);
+  readonly currentStageHasBlockingErrors = computed(() => stageHasBlockingErrors(
+    this.currentStage(), this.context.analysisGuid(), this.context.findings()
+  ));
 
   constructor() {
     this.router.events.pipe(

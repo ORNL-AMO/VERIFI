@@ -2,6 +2,7 @@ import { AnalysisGroup, AnalysisType } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
+import type { StatusItem } from '@app/v1/status/status.models';
 
 export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly';
 export type AnalysisWorkbenchStageKind = 'analysis' | 'group' | 'facility' | 'used-by';
@@ -67,6 +68,24 @@ export function activeAnalysisWorkbenchStageId(url: string): string {
   if (/\/facility\/(annual|monthly)$/.test(cleanUrl)) return 'facility';
   if (/\/used-by$/.test(cleanUrl)) return 'used-by';
   return 'analysis';
+}
+
+export function stageHasBlockingErrors(
+  stage: AnalysisWorkbenchStage | undefined,
+  analysisGuid: string,
+  findings: readonly StatusItem[]
+): boolean {
+  if (!stage || stage.kind === 'used-by') return false;
+  const errors = findings.filter(finding => finding.severity === 'error');
+  if (stage.kind === 'analysis') {
+    return errors.some(finding => finding.entity.kind === 'facility-analysis'
+      && finding.entity.guid === analysisGuid);
+  }
+  if (stage.kind === 'group') {
+    return errors.some(finding => finding.entity.kind === 'analysis-group'
+      && finding.entity.guid === `${analysisGuid}:${stage.groupGuid}`);
+  }
+  return errors.length > 0;
 }
 
 function decodeRoutePart(value: string): string {

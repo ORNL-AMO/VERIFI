@@ -1,7 +1,8 @@
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStages, tabsForAnalysisGroup } from './facility-analysis-workbench.models';
+import { StatusItem } from '@app/v1/status/status.models';
+import { activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStages, stageHasBlockingErrors, tabsForAnalysisGroup } from './facility-analysis-workbench.models';
 
 describe('facility analysis workbench models', () => {
   const regression = { idbGroupId: 'group-b', analysisType: 'regression' } as AnalysisGroup;
@@ -31,4 +32,30 @@ describe('facility analysis workbench models', () => {
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/facility/annual')).toBe('facility');
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/used-by')).toBe('used-by');
   });
+
+  it('blocks progression only for errors owned by the current stage', () => {
+    const stages = buildAnalysisWorkbenchStages('facility-a', analysis, meterGroups);
+    const analysisError = finding('facility-analysis', 'analysis-a');
+    const secondGroupError = finding('analysis-group', 'analysis-a:group-b');
+    const warning = { ...finding('analysis-group', 'analysis-a:group-a'), severity: 'warning' as const };
+
+    expect(stageHasBlockingErrors(stages[0], analysis.guid, [secondGroupError])).toBe(false);
+    expect(stageHasBlockingErrors(stages[0], analysis.guid, [analysisError])).toBe(true);
+    expect(stageHasBlockingErrors(stages[1], analysis.guid, [warning, secondGroupError])).toBe(false);
+    expect(stageHasBlockingErrors(stages[2], analysis.guid, [secondGroupError])).toBe(true);
+    expect(stageHasBlockingErrors(stages[3], analysis.guid, [secondGroupError])).toBe(true);
+    expect(stageHasBlockingErrors(stages[4], analysis.guid, [analysisError, secondGroupError])).toBe(false);
+  });
 });
+
+function finding(kind: 'facility-analysis' | 'analysis-group', guid: string): StatusItem {
+  return {
+    id: `${kind}:${guid}`,
+    code: kind === 'facility-analysis' ? 'analysis.configuration.invalid' : 'analysis-group.model.invalid',
+    severity: 'error',
+    category: 'configuration',
+    entity: { kind, guid, name: 'Analysis', accountGuid: 'account-a', facilityGuid: 'facility-a' },
+    evidence: {}, title: 'Fix setup', description: 'Fix setup.', todo: true,
+    destination: { kind: 'unavailable' }
+  };
+}

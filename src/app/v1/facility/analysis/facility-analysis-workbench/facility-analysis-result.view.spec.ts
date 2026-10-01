@@ -13,4 +13,19 @@ describe('facility analysis result views', () => {
     expect(monthlyChartRows([{ date, energyUse: 1.234567, modeledEnergy: 2.345678, savings: -0.25 } as any])[0])
       .toMatchObject({ sortValue: date.getTime(), values: { actual: 1.234567, modeled: 2.345678, savings: -0.25 } });
   });
+
+  it.each([
+    {
+      label: 'energy regression output',
+      annual: { year: 2025, energyUse: 987654.3210987, adjusted: 1023456.7890123, savings: 35802.4679136 },
+      expected: { actual: 987654.3210987, modeled: 1023456.7890123, savings: 35802.4679136 }
+    },
+    {
+      label: 'water absolute-consumption output',
+      annual: { year: 2024, energyUse: 0.00000125, adjusted: 0.0000015, savings: 0.00000025 },
+      expected: { actual: 0.00000125, modeled: 0.0000015, savings: 0.00000025 }
+    }
+  ])('matches representative v0 $label values at full precision', ({ annual, expected }) => {
+    expect(annualChartRows([annual as any])[0].values).toEqual(expected);
+  });
 });

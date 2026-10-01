@@ -97,7 +97,7 @@
         <app-ui-icon name="arrowLeft"></app-ui-icon> Back
       </button>
       @if (nextStage()) {
-        <button type="button" class="v1-btn v1-btn--primary" [disabled]="context.hasBlockingErrors() || autosave.isBlocked() || autosave.state() === 'invalid' || autosave.state() === 'error'" (click)="continue()">
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="currentStageHasBlockingErrors() || autosave.isBlocked() || autosave.state() === 'invalid' || autosave.state() === 'error'" [attr.aria-describedby]="currentStageHasBlockingErrors() ? 'v1-analysis-stage-blocked' : null" (click)="continue()">
           Continue <app-ui-icon name="arrowRight"></app-ui-icon>
         </button>
       } @else {
@@ -106,5 +106,8 @@
         </button>
       }
     </div>
+    @if (currentStageHasBlockingErrors()) {
+      <span id="v1-analysis-stage-blocked" class="visually-hidden">Resolve the errors in this stage before continuing.</span>
+    }
   </footer>
 }
