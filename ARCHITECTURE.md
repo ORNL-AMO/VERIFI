@@ -163,7 +163,7 @@ Test targets are configured in `angular.json` and exposed through `package.json`
 - Playwright with Chromium runs `*.browser.spec.ts` tests for IndexedDB, Web Workers, and other browser-native behavior.
 - `npm run test:all:ci` runs both suites.
 
-The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. Development web builds deploy after tests. On `master`, the web build and desktop release run in parallel, but production web deployment waits for both the web artifact and the complete desktop workflow, including draft GitHub Release creation. Production runs are queued so they cannot deploy out of order. See the [release process](docs/release-process.md) for the job graph, artifact contracts, failure behavior, and maintainer checklist.
+The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. A release-policy job keeps package and lockfile versions aligned and requires each new `master` push to use an intentional, non-conflicting release version. Development web builds deploy after tests. On `master`, the web build and desktop release run in parallel, but production web deployment waits for both the web artifact and the complete desktop workflow, including draft GitHub Release creation. Production runs are queued so they cannot deploy out of order. See the [release process](docs/release-process.md) for the human promotion process, hotfix path, job graph, artifact contracts, and failure behavior.
 
 Agents and contributors must run the relevant local checks before opening a pull request; do not assume a pull-request event will run the workflow.
 

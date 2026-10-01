@@ -18,6 +18,57 @@ concurrency:
   queue: max
 
 jobs:
+  # Develop checks shared version metadata; master additionally enforces the
+  # release-only branch policy before any release artifacts are built.
+  release_policy:
+    if: github.event_name == 'pull_request' || github.ref_name == 'develop' || github.ref_name == 'master'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Validate version files
+        run: |
+          node <<'NODE'
+          const packageVersion = require('./package.json').version;
+          const lockfile = require('./package-lock.json');
+          const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+
+          if (!semverPattern.test(packageVersion)) {
+            throw new Error(`package.json version '${packageVersion}' is not a semantic version.`);
+          }
+
+          if (packageVersion !== lockfile.version || packageVersion !== lockfile.packages[''].version) {
+            throw new Error('package.json and package-lock.json versions must match.');
+          }
+          NODE
+      - name: Require an intentional production version
+        if: github.ref_name == 'master' || github.base_ref == 'master'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          VERSION=$(node -p 'require("./package.json").version')
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            PREVIOUS_VERSION=$(git show "${BEFORE_SHA}:package.json" | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8")).version')
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            PREVIOUS_VERSION=$(git show "${BASE_SHA}:package.json" | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8")).version')
+          fi
+
+          if [[ -n "$PREVIOUS_VERSION" && "$VERSION" == "$PREVIOUS_VERSION" ]]; then
+            echo "Every change to master is a release and must use a new package version."
+            exit 1
+          fi
+
+          TAG_COMMIT=$(git rev-list -n 1 "refs/tags/v${VERSION}" 2>/dev/null || true)
+          if [[ -n "$TAG_COMMIT" && ( "$EVENT_NAME" == "pull_request" || "$TAG_COMMIT" != "$GITHUB_SHA" ) ]]; then
+            echo "Tag v${VERSION} already belongs to commit ${TAG_COMMIT}. Choose a new release version."
+            exit 1
+          fi
+
   test:
     runs-on: ubuntu-22.04
     steps:
@@ -45,7 +96,7 @@ jobs:
     uses: ./.github/workflows/release_qa.yml
 
   web_build:
-    needs: test
+    needs: [release_policy, test]
     if: github.ref_name == 'develop' || github.ref_name == 'master'
     uses: ./.github/workflows/template_build.yml
     with:
@@ -54,7 +105,7 @@ jobs:
       artifact-path: dist/verifi/browser
 
   desktop:
-    needs: test
+    needs: [release_policy, test]
     if: github.ref_name == 'master'
     uses: ./.github/workflows/release_desktop.yml
     secrets: inherit

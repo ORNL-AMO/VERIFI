@@ -107,7 +107,7 @@ Please follow the coding standards outlined in [CODING_STYLE.md](./CODING_STYLE.
 
 ## Release Process
 
-Releases are managed by the core development team. An "Epic" issue and a Milestone are used to track the issues going into the next release of VERIFI. Our QA team will test issues via the project board. When QA has been completed on the full set of "Epic" issues, `develop` is merged into `master` and a release is drafted by the CI system. Release notes are compiled from the changelog entries in PRs. Version numbers follow semantic versioning. Only core maintainers should publish releases. See the [release process](docs/release-process.md) for the CI job graph, desktop gate, failure behavior, and maintainer checklist.
+Releases are managed by the core development team. An "Epic" issue and a Milestone are used to track the issues going into the next release of VERIFI. After QA is complete, a release-preparation pull request updates the version in `develop`, followed by a promotion pull request from `develop` to `master`. Every `master` push is an intentional release and must advance the version. The CI system creates a draft GitHub Release, and only core maintainers publish it after verification. Vital patch releases may use a reviewed hotfix pull request directly to `master`, but the released fix must be forwarded immediately to `develop`. Release notes are compiled from the changelog entries in PRs. See the [release process](docs/release-process.md) for the full normal-release and hotfix checklists, branch policy, CI job graph, and failure behavior.
 
 ### Versioning
 
