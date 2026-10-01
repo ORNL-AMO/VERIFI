@@ -92,6 +92,11 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: '', redirectTo: 'dashboard' }),
       expect.objectContaining({ path: 'dashboard', component: FacilityAnalysisDashboardComponent }),
       expect.objectContaining({
+        path: 'workbench/:analysisGuid',
+        pathMatch: 'full',
+        redirectTo: 'workbench/:analysisGuid/setup'
+      }),
+      expect.objectContaining({
         path: 'workbench/:analysisGuid/setup',
         component: FacilityAnalysisWorkbenchPlaceholderComponent
       })

@@ -94,7 +94,9 @@ export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInpu
       isActiveForReporting ? 'active reporting' : '',
       ...groupSummaries.map(group => group.name),
       ...linkedAccountAnalyses.map(item => item.name),
-      ...linkedReports.map(item => item.name)
+      ...linkedReports.map(item => item.name),
+      bankingSource?.name ?? '',
+      ...bankingConsumers.map(item => item.name)
     ].join(' ').toLocaleLowerCase();
     return {
       analysis,

@@ -14,6 +14,7 @@ export class AnalysisDraftSlideoutComponent {
   @Input() energyAvailable = false;
   @Input() waterAvailable = false;
   @Input() saving = false;
+  @Input() error?: string;
   @Output() submitted = new EventEmitter<AnalysisCategory>();
   @Output() cancelled = new EventEmitter<void>();
   readonly category = signal<AnalysisCategory>('energy');

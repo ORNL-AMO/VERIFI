@@ -5,9 +5,13 @@ import { buildFacilityAnalysisCards } from './facility-analysis.models';
 
 describe('buildFacilityAnalysisCards', () => {
   it('aggregates status, setup, active selection, and downstream dependencies', () => {
-    const analysis = makeAnalysis('analysis-a', 'Energy model');
+    const analysis = { ...makeAnalysis('analysis-a', 'Energy model'), bankedAnalysisItemId: 'banking-source' };
     const cards = buildFacilityAnalysisCards({
-      analyses: [analysis, { ...makeAnalysis('banking-consumer', 'Banked model'), bankedAnalysisItemId: analysis.guid }],
+      analyses: [
+        analysis,
+        makeAnalysis('banking-source', 'Reference baseline'),
+        { ...makeAnalysis('banking-consumer', 'Banked model'), bankedAnalysisItemId: analysis.guid }
+      ],
       facility: { guid: 'facility-a', selectedEnergyAnalysisId: analysis.guid } as any,
       meterGroups: [{ guid: 'group-a', name: 'Main plant' }] as any,
       accountAnalyses: [{
@@ -31,9 +35,12 @@ describe('buildFacilityAnalysisCards', () => {
     expect(card.groupSummaries[0]).toMatchObject({ name: 'Main plant', predictorCount: 1, hasSelectedModel: true });
     expect(card.linkedAccountAnalyses.map(item => item.guid)).toEqual(['account-analysis-a']);
     expect(card.linkedReports.map(item => item.guid)).toEqual(['report-a']);
+    expect(card.bankingSource?.guid).toBe('banking-source');
     expect(card.bankingConsumers.map(item => item.guid)).toEqual(['banking-consumer']);
     expect(card.searchText).toContain('main plant');
     expect(card.searchText).toContain('active reporting');
+    expect(card.searchText).toContain('reference baseline');
+    expect(card.searchText).toContain('banked model');
   });
 
   it('reports evaluating until the shared status evaluation is ready', () => {
