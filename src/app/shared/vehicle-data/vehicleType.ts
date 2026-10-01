@@ -1,15 +1,15 @@
 
-import { MobileAircraftOptions } from 'src/app/shared/fuel-options/mobileAircraftOptions';
-import { MobileBusOptions } from 'src/app/shared/fuel-options/mobileBusOptions';
-import { MobileHeavyDutyTruckOptions } from 'src/app/shared/fuel-options/mobileHeavyDutyVehicleOptions';
-import { MobileLightDutyTruckOptions } from 'src/app/shared/fuel-options/mobileLightDutyTruckOptions';
-import { MobileMotorcycleOptions } from 'src/app/shared/fuel-options/mobileMotorcycleOptions';
-import { MobileOffRoadAgricultureOptions } from 'src/app/shared/fuel-options/mobileOffRoadAgricultureOptions';
-import { MobileOffRoadConstructionOptions } from 'src/app/shared/fuel-options/mobileOffRoadConstructionOptions';
-import { MobilePassangerCarOptions } from 'src/app/shared/fuel-options/mobilePassangerCarOptions';
-import { MobileRailOptions } from 'src/app/shared/fuel-options/mobileRailOptions';
-import { MobileWaterTransportOptions } from 'src/app/shared/fuel-options/mobileWaterTransportOptions';
-import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
+import { MobileAircraftOptions } from '@shared/fuel-options/mobileAircraftOptions';
+import { MobileBusOptions } from '@shared/fuel-options/mobileBusOptions';
+import { MobileHeavyDutyTruckOptions } from '@shared/fuel-options/mobileHeavyDutyVehicleOptions';
+import { MobileLightDutyTruckOptions } from '@shared/fuel-options/mobileLightDutyTruckOptions';
+import { MobileMotorcycleOptions } from '@shared/fuel-options/mobileMotorcycleOptions';
+import { MobileOffRoadAgricultureOptions } from '@shared/fuel-options/mobileOffRoadAgricultureOptions';
+import { MobileOffRoadConstructionOptions } from '@shared/fuel-options/mobileOffRoadConstructionOptions';
+import { MobilePassangerCarOptions } from '@shared/fuel-options/mobilePassangerCarOptions';
+import { MobileRailOptions } from '@shared/fuel-options/mobileRailOptions';
+import { MobileWaterTransportOptions } from '@shared/fuel-options/mobileWaterTransportOptions';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 
 export type VehicleType = {
     value: number,

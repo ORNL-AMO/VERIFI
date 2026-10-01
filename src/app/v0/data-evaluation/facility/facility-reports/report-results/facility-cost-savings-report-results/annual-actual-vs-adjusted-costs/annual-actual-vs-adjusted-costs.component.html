@@ -1,0 +1,40 @@
+<div class="table-responsive">
+    <table class="table table-bordered report-table mt-3">
+        <thead class="text-center primary-header">
+            <tr>
+                <th>Year</th>
+                <th>Actual Cost</th>
+                <th>Adjusted Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(rowKey of rowKeys; track rowKey) {
+            <tr>
+                <td>{{rowKey}}</td>
+
+                @if (getValue(estimatedEnergyCostTable, rowKey) !== 0) {
+                <td class="text-center">
+                    $ {{ getValue(estimatedEnergyCostTable, rowKey) | number:'1.0-0' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+
+                @if (getValue(expectedEnergyCostTable, rowKey) !== 0) {
+                <td class="text-center">
+                    $ {{ getValue(expectedEnergyCostTable, rowKey) | number:'1.0-0' }}
+                </td>
+                }
+                @else {
+                <td class="text-center">
+                    &mdash;
+                </td>
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

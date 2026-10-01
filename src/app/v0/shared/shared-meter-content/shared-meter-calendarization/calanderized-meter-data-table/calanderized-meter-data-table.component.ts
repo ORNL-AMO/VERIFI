@@ -1,0 +1,59 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
+import { CalanderizedMeter } from '@data/models/calanderization';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { CopyTableService } from '@shared/helper-services/copy-table.service';
+
+@Component({
+    selector: 'app-calanderized-meter-data-table',
+    templateUrl: './calanderized-meter-data-table.component.html',
+    styleUrls: ['./calanderized-meter-data-table.component.css'],
+    standalone: false
+})
+export class CalanderizedMeterDataTableComponent implements OnInit {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  calanderizedMeter: CalanderizedMeter;
+  @Input()
+  itemsPerPage: number;
+  @Input()
+  consumptionLabel: 'Consumption' | 'Distance';
+  @Input()
+  isRECs: boolean;
+
+  @ViewChild('meterDataTable', { static: false }) meterDataTable: ElementRef;
+  orderDataField: string = 'date';
+  orderByDirection: string = 'desc';
+  currentPageNumber: number = 1;
+  copyingTable: boolean = false
+  account: IdbAccount;
+  constructor(
+    private copyTableService: CopyTableService
+
+  ) { }
+
+  ngOnInit(): void {
+    this.account = this.accountWorkspaceStore.account();
+  }
+
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
+
+  copyTable(){
+    this.copyingTable = true;
+    setTimeout(() => {
+      this.copyTableService.copyTable(this.meterDataTable);
+      this.copyingTable = false;
+    }, 200)
+  }
+}

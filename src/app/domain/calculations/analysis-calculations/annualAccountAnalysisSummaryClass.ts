@@ -1,0 +1,134 @@
+import { MonthlyAnalysisSummaryData } from "@data/models/analysis";
+import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
+import { AnnualAnalysisSummary } from '@data/models/analysis';
+import { MonthlyAccountAnalysisClass } from "./monthlyAccountAnalysisClass";
+import { checkAnalysisValue, getLatestCompleteAnalysisYear } from "../shared-calculations/calculationsHelpers";
+import { IdbAccount } from "@data/models/idbModels/account";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
+import { IdbPredictorData } from "@data/models/idbModels/predictorData";
+import { IdbPredictor } from "@data/models/idbModels/predictor";
+import { IdbAccountAnalysisItem } from "@data/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
+import { CalanderizedMeter } from "@data/models/calanderization";
+import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
+import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
+import { AnalysisCalculationOptions } from "./analysisCalculationOptions";
+
+export class AnnualAccountAnalysisSummaryClass {
+
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+    annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
+    facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
+    baselineYear: number;
+    reportYear: number;
+    constructor(
+        accountAnalysisItem: IdbAccountAnalysisItem,
+        account: IdbAccount,
+        accountFacilities: Array<IdbFacility>,
+        accountPredictorEntries: Array<IdbPredictorData>,
+        allAccountAnalysisItems: Array<IdbAnalysisItem>,
+        calculateAllMonthlyData: boolean,
+        meters: Array<IdbUtilityMeter>,
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>,
+        options: AnalysisCalculationOptions = {}) {
+        this.setReportYear(options.reportYear, accountAnalysisItem, meters, meterData, account, accountFacilities, allAccountAnalysisItems, accountPredictorEntries);
+        this.setMonthlyAnalysisSummaryData(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
+        this.setBaselineYear(accountAnalysisItem);
+        this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, accountPredictors);
+    }
+
+    setMonthlyAnalysisSummaryData(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, accountFacilities: Array<IdbFacility>,
+        accountPredictorEntries: Array<IdbPredictorData>, allAccountAnalysisItems: Array<IdbAnalysisItem>, calculateAllMonthlyData: boolean,
+        meters: Array<IdbUtilityMeter>,
+        meterData: Array<IdbUtilityMeterData>, accountPredictors: Array<IdbPredictor>) {
+        let monthlyAnalysisSummaryClass: MonthlyAccountAnalysisClass = new MonthlyAccountAnalysisClass(
+            analysisItem,
+            account,
+            accountFacilities,
+            accountPredictorEntries,
+            allAccountAnalysisItems,
+            calculateAllMonthlyData,
+            meters,
+            meterData,
+            accountPredictors,
+            { reportYear: this.reportYear }
+        );
+        this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+        this.facilitySummaries = monthlyAnalysisSummaryClass.facilitySummaries;
+    }
+
+    setBaselineYear(analysisItem: IdbAccountAnalysisItem) {
+        this.baselineYear = analysisItem.baselineYear;
+    }
+
+    setReportYear(reportYear: number | undefined,
+        analysisItem: IdbAccountAnalysisItem,
+        meters: Array<IdbUtilityMeter>,
+        meterData: Array<IdbUtilityMeterData>,
+        account: IdbAccount,
+        accountFacilities: Array<IdbFacility>,
+        facilityAnalysisItems: Array<IdbAnalysisItem>,
+        predictorData: Array<IdbPredictorData>) {
+        if (reportYear !== undefined) {
+            this.reportYear = reportYear;
+        } else {
+            let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, account.assessmentReportVersion, []);
+            let includedFacilityAnalysis: Array<IdbAnalysisItem> = new Array();
+            analysisItem.facilityAnalysisItems.forEach(facilityItem => {
+                if (facilityItem.analysisItemId) {
+                    const facilityAnalysis: IdbAnalysisItem = facilityAnalysisItems.find(item => item.guid === facilityItem.analysisItemId);
+                    if (facilityAnalysis) {
+                        includedFacilityAnalysis.push(facilityAnalysis);
+                    }
+                }
+            });
+            this.reportYear = getLatestCompleteAnalysisYear(
+                includedFacilityAnalysis.flatMap(item => item.groups),
+                calanderizedMeters,
+                predictorData,
+                accountFacilities
+            );
+        }
+    }
+
+
+
+    setAnnualAnalysisSummaryDataClasses(accountPredictorEntries: Array<IdbPredictorData>, accountPredictors: Array<IdbPredictor>) {
+        this.annualAnalysisSummaryDataClasses = new Array();
+        let analysisYear: number = this.baselineYear;
+        while (analysisYear <= this.reportYear) {
+            let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, undefined, this.annualAnalysisSummaryDataClasses, accountPredictors);
+            this.annualAnalysisSummaryDataClasses.push(yearAnalysisSummaryDataClass);
+            analysisYear++;
+        }
+    }
+
+    getAnnualAnalysisSummaries(): Array<AnnualAnalysisSummary> {
+        return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
+            return {
+                year: summaryDataClass.year,
+                energyUse: summaryDataClass.energyUse,
+                adjusted: summaryDataClass.adjusted,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataClass.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataClass.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataClass.baselineAdjustment),
+                SEnPI: checkAnalysisValue(summaryDataClass.SEnPI),
+                savings: checkAnalysisValue(summaryDataClass.savings),
+                totalSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.totalSavingsPercentImprovement) * 100,
+                annualSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.annualSavingsPercentImprovement) * 100,
+                cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
+                newSavings: checkAnalysisValue(summaryDataClass.newSavings),
+                predictorUsage: summaryDataClass.predictorUsage,
+                isBanked: false,
+                isIntermediateBanked: false,
+                savingsBanked: checkAnalysisValue(summaryDataClass.savingsBanked),
+                savingsUnbanked: checkAnalysisValue(summaryDataClass.savingsUnbanked),
+                missingPredictorValue: summaryDataClass.missingPredictorValue,
+                missingPredictors: summaryDataClass.missingPredictors
+            }
+        })
+    }
+}

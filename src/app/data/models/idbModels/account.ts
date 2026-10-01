@@ -1,0 +1,86 @@
+import { AccountAndFacility } from "./accountAndFacility"
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
+import { DEFAULT_DATA_STALENESS_MONTHS } from "@domain/calculations/status-check-calculations/statusCheckModels";
+
+
+
+export interface IdbAccount extends IdbEntry, AccountAndFacility {
+    name: string,
+    numberOfFacilities?: string,
+    lastBackup?: Date,
+    dataBackupFilePath?: string,
+    dataBackupId?: string,
+    archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
+    isSharedBackupFile?: boolean,
+    sharedFileAuthor?: string
+    deleteAccount?: boolean,
+    sidebarFacilitiesOpen?: boolean,
+    isBetterPlantsPartner?: boolean,
+    assessmentReportVersion?: AssessmentReportVersion,
+    sidebarCustomDataOpen?: boolean,
+    toDoListOutdatedDays?: number
+    migratedDates?: boolean,
+    displayEmissions: boolean
+}
+
+export function getNewIdbAccount(): IdbAccount {
+    let idbEntry: IdbEntry = getNewIdbEntry();
+    let baselineYear: number = new Date().getMonth();
+    let targetYear: number = baselineYear + 10;
+    return {
+        ...idbEntry,
+        name: 'New Account',
+        city: '',
+        state: '',
+        zip: undefined,
+        country: 'US',
+        address: '',
+        size: 0,
+        naics1: undefined,
+        naics2: undefined,
+        naics3: undefined,
+        notes: '',
+        // id: undefined,            
+        unitsOfMeasure: 'Imperial',
+        energyUnit: 'MMBtu',
+        electricityUnit: 'kWh',
+        volumeLiquidUnit: 'gal',
+        volumeGasUnit: 'SCF',
+        massUnit: 'lb',
+        sustainabilityQuestions: {
+            energyReductionGoal: true,
+            energyReductionPercent: 25,
+            energyReductionBaselineYear: baselineYear,
+            energyReductionTargetYear: targetYear,
+            energyIsAbsolute: false,
+            greenhouseReductionGoal: false,
+            greenhouseReductionPercent: 0,
+            greenhouseReductionBaselineYear: baselineYear,
+            greenhouseReductionTargetYear: targetYear,
+            greenhouseIsAbsolute: true,
+            waterReductionGoal: false,
+            waterReductionPercent: 0,
+            waterReductionBaselineYear: baselineYear,
+            waterReductionTargetYear: targetYear,
+            waterIsAbsolute: false
+        },
+        fiscalYear: 'calendarYear',
+        fiscalYearMonth: 0,
+        fiscalYearCalendarEnd: true,
+        energyIsSource: true,
+        contactName: undefined,
+        contactEmail: undefined,
+        contactPhone: undefined,
+        archiveOption: 'skip',
+        isSharedBackupFile: false,
+        color: undefined,
+        assessmentReportVersion: 'AR6',
+        displayEmissions: false,
+        dataStalenessSettings: {
+            enabled: true,
+            thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS
+        }
+    }
+}
+
+export type AssessmentReportVersion = 'AR4' | 'AR5' | 'AR6';

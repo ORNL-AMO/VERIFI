@@ -1,0 +1,176 @@
+import { CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
+import * as _ from 'lodash';
+import { YearMonthData } from "@data/models/dashboard";
+import { IdbAccount } from "@data/models/idbModels/account";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { IdbAccountAnalysisItem } from "@data/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
+
+export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+        monthlyData = calanderizedMeterData.flatMap(data => {
+            return data.monthlyData;
+        });
+    }
+    let lastBill: MonthlyData = _.maxBy(monthlyData, (data: MonthlyData) => {
+        let date = new Date(data.date);
+        // date.setFullYear(data.year, data.monthNumValue);
+        return date;
+    });
+    return lastBill;
+}
+
+export function getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+        monthlyData = calanderizedMeterData.flatMap(data => {
+            return data.monthlyData;
+        });
+    }
+    let firstBill: MonthlyData = _.minBy(monthlyData, (data: MonthlyData) => {
+        let date = new Date(data.date);
+        // date.setFullYear(data.year, data.monthNumValue);
+        return date;
+    });
+    return firstBill;
+}
+
+
+export function getSumValue(val: number): number {
+    if (isNaN(val) == false) {
+        return val;
+    } else {
+        return 0;
+    }
+}
+
+export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMeter>): Array<YearMonthData> {
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
+        return cMeter.monthlyData;
+    });
+    let years: Array<number> = monthlyData.map(data => { return data.fiscalYear });
+    years = _.uniq(years);
+
+    let yearMonthData: Array<YearMonthData> = new Array();
+    years.forEach(year => {
+        let yearData: Array<MonthlyData> = monthlyData.filter(data => {
+            return data.fiscalYear == year;
+        });
+        let months: Array<{month: string, monthNumValue: number}> = yearData.map(data => { return {month: data.month, monthNumValue: data.monthNumValue} });
+        months = _.uniqBy(months, month => { return month.monthNumValue });
+        months.forEach(month => {
+            let energyUse: number = 0;
+            let energyCost: number = 0;
+            let consumption: number = 0;
+            let RECs: number = 0;
+            let locationElectricityEmissions: number = 0;
+            let marketElectricityEmissions: number = 0;
+            let otherScope2Emissions: number = 0;
+            let scope2LocationEmissions: number = 0;
+            let scope2MarketEmissions: number = 0;
+            let excessRECs: number = 0;
+            let excessRECsEmissions: number = 0;
+            let mobileCarbonEmissions: number = 0;
+            let mobileBiogenicEmissions: number = 0;
+            let mobileOtherEmissions: number = 0;
+            let mobileTotalEmissions: number = 0;
+            let fugitiveEmissions: number = 0;
+            let processEmissions: number = 0;
+            let stationaryEmissions: number = 0;
+            let totalScope1Emissions: number = 0;
+            let totalWithMarketEmissions: number = 0;
+            let totalWithLocationEmissions: number = 0;
+            let totalBiogenicEmissions: number = 0;
+            let stationaryBiogenicEmmissions: number = 0;
+            let stationaryOtherEmissions: number = 0;
+            let stationaryCarbonEmissions: number = 0;
+            for (let i = 0; i < yearData.length; i++) {
+                if (yearData[i].monthNumValue == month.monthNumValue) {
+                    energyUse += yearData[i].energyUse;
+                    energyCost += yearData[i].energyCost;
+                    consumption += yearData[i].energyConsumption;
+                    RECs += yearData[i].RECs;
+                    locationElectricityEmissions += yearData[i].locationElectricityEmissions;
+                    marketElectricityEmissions += yearData[i].marketElectricityEmissions;
+                    otherScope2Emissions += yearData[i].otherScope2Emissions;
+                    scope2LocationEmissions += yearData[i].scope2LocationEmissions;
+                    scope2MarketEmissions += yearData[i].scope2MarketEmissions;
+                    excessRECs += yearData[i].excessRECs;
+                    excessRECsEmissions += yearData[i].excessRECsEmissions;
+                    mobileCarbonEmissions += yearData[i].mobileCarbonEmissions;
+                    mobileBiogenicEmissions += yearData[i].mobileBiogenicEmissions;
+                    mobileOtherEmissions += yearData[i].mobileOtherEmissions;
+                    mobileTotalEmissions += yearData[i].mobileTotalEmissions;
+                    fugitiveEmissions += yearData[i].fugitiveEmissions;
+                    processEmissions += yearData[i].processEmissions;
+                    stationaryEmissions += yearData[i].stationaryEmissions;
+                    totalScope1Emissions += yearData[i].totalScope1Emissions;
+                    totalWithMarketEmissions += yearData[i].totalWithMarketEmissions;
+                    totalWithLocationEmissions += yearData[i].totalWithLocationEmissions;
+                    totalBiogenicEmissions += yearData[i].totalBiogenicEmissions;
+                    stationaryBiogenicEmmissions += yearData[i].stationaryBiogenicEmmissions;
+                    stationaryOtherEmissions += yearData[i].stationaryOtherEmissions;
+                    stationaryCarbonEmissions += yearData[i].stationaryCarbonEmissions;
+                }
+            }
+            yearMonthData.push({
+                yearMonth: { year: year, month: month.month, fiscalYear: year, monthNum: month.monthNumValue },
+                energyUse: energyUse,
+                energyCost: energyCost,
+                consumption: consumption,
+                RECs: RECs,
+                locationElectricityEmissions: locationElectricityEmissions,
+                marketElectricityEmissions: marketElectricityEmissions,
+                otherScope2Emissions: otherScope2Emissions,
+                scope2LocationEmissions: scope2LocationEmissions,
+                scope2MarketEmissions: scope2MarketEmissions,
+                excessRECs: excessRECs,
+                excessRECsEmissions: excessRECsEmissions,
+                mobileCarbonEmissions: mobileCarbonEmissions,
+                mobileBiogenicEmissions: mobileBiogenicEmissions,
+                mobileOtherEmissions: mobileOtherEmissions,
+                mobileTotalEmissions: mobileTotalEmissions,
+                fugitiveEmissions: fugitiveEmissions,
+                processEmissions: processEmissions,
+                stationaryEmissions: stationaryEmissions,
+                totalScope1Emissions: totalScope1Emissions,
+                totalWithMarketEmissions: totalWithMarketEmissions,
+                totalWithLocationEmissions: totalWithLocationEmissions,
+                totalBiogenicEmissions: totalBiogenicEmissions,
+                stationaryBiogenicEmmissions: stationaryBiogenicEmmissions,
+                stationaryCarbonEmissions: stationaryCarbonEmissions,
+                stationaryOtherEmissions: stationaryOtherEmissions
+            })
+        })
+    });
+    return yearMonthData;
+}
+
+
+export function getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAccount): number {
+    date = new Date(date);
+    if (facilityOrAccount.fiscalYear == 'calendarYear') {
+        return date.getFullYear();
+    } else {
+        if (facilityOrAccount.fiscalYearCalendarEnd) {
+            if (date.getMonth() >= facilityOrAccount.fiscalYearMonth) {
+                return date.getFullYear() + 1;
+            } else {
+                return date.getFullYear();
+            }
+        } else {
+            if (date.getMonth() >= facilityOrAccount.fiscalYearMonth) {
+                return date.getFullYear();
+            } else {
+                return date.getFullYear() - 1;
+            }
+        }
+    }
+}
+
+export function getNeededUnits(analysisItem: IdbAccountAnalysisItem | IdbAnalysisItem): string {
+    if (analysisItem.analysisCategory == 'water') {
+        return analysisItem.waterUnit;
+    } else {
+        return analysisItem.energyUnit;
+    }
+}

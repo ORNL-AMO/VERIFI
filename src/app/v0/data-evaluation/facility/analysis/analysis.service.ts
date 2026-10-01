@@ -1,0 +1,223 @@
+import { Injectable } from '@angular/core';
+import { LocalStorageService } from 'ngx-webstorage';
+import { BehaviorSubject } from 'rxjs';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AnalysisService {
+
+  selectedGroup: BehaviorSubject<AnalysisGroup>;
+  analysisDisplay: { [key: string]: BehaviorSubject<"graph" | "table"> };
+
+  analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
+  calculating: BehaviorSubject<boolean | 'error'>;
+  annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
+  monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
+  accountAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
+  hideInUseMessage: BehaviorSubject<boolean>;
+  groupSummaries: BehaviorSubject<Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+  }>>;
+
+  constructor(private localStorageService: LocalStorageService) {
+    this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
+    this.analysisDisplay = {};
+    this.calculating = new BehaviorSubject<boolean>(true);
+    this.annualAnalysisSummary = new BehaviorSubject([]);
+    this.monthlyAccountAnalysisData = new BehaviorSubject([]);
+    this.accountAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
+    this.hideInUseMessage = new BehaviorSubject<boolean>(false);
+
+    let analysisTableColumns: AnalysisTableColumns = this.localStorageService.retrieve("analysisTableColumns");
+    if (!analysisTableColumns) {
+      analysisTableColumns = {
+        incrementalImprovement: false,
+        SEnPI: false,
+        savings: false,
+        percentSavingsComparedToBaseline: false,
+        yearToDateSavings: false,
+        yearToDatePercentSavings: false,
+        rollingSavings: false,
+        rolling12MonthImprovement: false,
+        productionVariables: true,
+        energy: true,
+        actualEnergy: true,
+        modeledEnergy: true,
+        adjusted: true,
+        baselineAdjustmentForNormalization: true,
+        baselineAdjustmentForOther: true,
+        baselineAdjustment: true,
+        totalSavingsPercentImprovement: true,
+        annualSavingsPercentImprovement: true,
+        cummulativeSavings: true,
+        newSavings: true,
+        predictors: [],
+        predictorGroupId: undefined,
+        bankedSavings: false,
+        savingsUnbanked: false
+      }
+    }
+    this.analysisTableColumns = new BehaviorSubject<AnalysisTableColumns>(analysisTableColumns);
+
+    this.analysisTableColumns.subscribe(analysisTableColumns => {
+      if (analysisTableColumns) {
+        this.localStorageService.store('analysisTableColumns', analysisTableColumns);
+      }
+    });
+
+    this.groupSummaries = new BehaviorSubject<Array<{
+      group: AnalysisGroup,
+      monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+      annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+    }>>(undefined);
+  }
+
+  getDisplaySubject(key: string, defaultValue: "graph" | "table"): BehaviorSubject<"graph" | "table"> {
+    if (!this.analysisDisplay[key]) {
+      this.analysisDisplay[key] = new BehaviorSubject<"graph" | "table">(defaultValue);
+    }
+    return this.analysisDisplay[key];
+  }
+
+  // setDataAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+  //   if (analysisItem.baselineYear < analysisItem.reportYear) {
+  //     analysisItem.groups.forEach(group => {
+  //       let yearDataAdjustments: Array<{ year: number, amount: number }> = new Array();
+  //       let baselineAdjustments: Array<{ year: number, amount: number }> = new Array();
+  //       for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
+  //         let currentDataAdjustment = group.dataAdjustments.find(adjustment => {
+  //           return adjustment.year == year
+  //         });
+  //         if (currentDataAdjustment) {
+  //           yearDataAdjustments.push({
+  //             year: year,
+  //             amount: currentDataAdjustment.amount
+  //           });
+  //         } else {
+  //           yearDataAdjustments.push({
+  //             year: year,
+  //             amount: 0
+  //           });
+  //         }
+  //         let currentBaselineAdjustment = group.baselineAdjustmentsV2.find(adjustment => {
+  //           return adjustment.year == year
+  //         });
+  //         if (currentBaselineAdjustment) {
+  //           baselineAdjustments.push({
+  //             year: year,
+  //             amount: currentBaselineAdjustment.amount
+  //           });
+  //         } else {
+  //           baselineAdjustments.push({
+  //             year: year,
+  //             amount: 0
+  //           });
+  //         }
+  //       }
+  //       group.dataAdjustments = yearDataAdjustments;
+  //       group.baselineAdjustmentsV2 = baselineAdjustments;
+  //     });
+  //   }
+  //   return analysisItem;
+  // }
+
+  checkFiscalYearEnd(date: Date, facilityOrAccount: IdbFacility | IdbAccount, orderDataField: string, orderByDirection: 'asc' | 'desc'): boolean {
+    if (orderDataField == 'date' || orderDataField == 'fiscalYear') {
+      if (facilityOrAccount.fiscalYear == 'calendarYear' && (orderByDirection == 'asc' || orderDataField == 'fiscalYear')) {
+        return date.getMonth() == 0;
+      } else if (facilityOrAccount.fiscalYear == 'calendarYear' && orderByDirection == 'desc') {
+        return date.getMonth() == 11;
+      } else {
+        if (date.getMonth() == facilityOrAccount.fiscalYearMonth && orderByDirection == 'asc') {
+          return true;
+        } else if (date.getMonth() + 1 == facilityOrAccount.fiscalYearMonth && orderByDirection == 'desc') {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+    return false;
+  }
+
+
+
+  getGroupItem(group: AnalysisGroup): AnalysisGroupItem {
+    let predictorVariables: Array<AnalysisGroupPredictorVariable> = [];
+    let adjust_R2: number = 0;
+    let regressionEquation: string = '';
+    let selectedModel: JStatRegressionModel;
+    if (group.analysisType == 'regression') {
+      if (group.selectedModelId) {
+        selectedModel = getSelectedRegressionModel(group);
+        if (selectedModel) {
+          adjust_R2 = selectedModel.adjust_R2;
+          predictorVariables = selectedModel.predictorVariables;
+          regressionEquation = this.getRegressionsEquationFromModel(selectedModel);
+        } else {
+          predictorVariables = group.predictorVariables.filter(variable => variable.productionInAnalysis);
+          regressionEquation = this.getRegressionEquationNoModel(group, predictorVariables);
+        }
+      } else {
+        predictorVariables = group.predictorVariables.filter(variable => {
+          return (variable.productionInAnalysis == true);
+        });
+        regressionEquation = this.getRegressionEquationNoModel(group, predictorVariables);
+      }
+    } else if (group.analysisType != 'absoluteEnergyConsumption') {
+      predictorVariables = group.predictorVariables.filter(variable => {
+        return (variable.productionInAnalysis == true);
+      });
+    }
+    return {
+      group: group,
+      predictorVariables: predictorVariables,
+      adjust_R2: adjust_R2,
+      regressionEquation: regressionEquation,
+      selectedModel: selectedModel
+    }
+  }
+
+  getRegressionsEquationFromModel(model: JStatRegressionModel): string {
+    let regressionEquation: string = '';
+    for (let i = 0; i < model.coef.length; i++) {
+      regressionEquation = regressionEquation + model.coef[i].toLocaleString(undefined, { maximumSignificantDigits: 5 });
+      if (i != 0) {
+        regressionEquation = regressionEquation + '*' + model.predictorVariables[i - 1].name;
+      }
+      if (i != model.coef.length - 1) {
+        regressionEquation = regressionEquation + ' + ';
+      }
+    }
+    return regressionEquation;
+  }
+
+  getRegressionEquationNoModel(group: AnalysisGroup, predictorVariables: Array<AnalysisGroupPredictorVariable>): string {
+    let regressionEquation: string = group.regressionConstant + ' + ';
+    for (let i = 0; i < predictorVariables.length; i++) {
+      regressionEquation = regressionEquation + predictorVariables[i].regressionCoefficient + '*' + predictorVariables[i].name;
+      if (i != predictorVariables.length - 1) {
+        regressionEquation = regressionEquation + ' + ';
+      }
+    }
+    return regressionEquation;
+  }
+}
+
+
+export interface AnalysisGroupItem {
+  group: AnalysisGroup,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
+  adjust_R2: number,
+  regressionEquation: string,
+  selectedModel?: JStatRegressionModel
+}

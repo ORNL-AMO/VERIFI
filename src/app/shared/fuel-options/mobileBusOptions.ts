@@ -1,4 +1,4 @@
-import { FuelTypeOption } from "./fuelTypeOption";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 
 export const MobileBusOptions: Array<FuelTypeOption> = [
     //No Gasoline or Diesel values for busses in document (Use Heavy Duty?)

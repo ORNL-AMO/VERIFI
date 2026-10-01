@@ -1,0 +1,529 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Injectable, inject } from '@angular/core';
+import { getNewIdbPredictor, IdbPredictor } from '@data/models/idbModels/predictor';
+import { DetailDegreeDay, WeatherDataSelection } from '@data/models/degreeDays';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { WeatherDataReading, WeatherDataService } from '@v0/weather-data/weather-data.service';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import * as _ from 'lodash';
+import { getDetailedDataForMonth, hasWeatherDataWarning } from '@v0/weather-data/weatherDataCalculations';
+import { getNewIdbPredictorData, IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
+import { PredictorCommandHandler, PredictorDataBatchChanges } from '@data/account-workspace/handlers/predictor-command-handler.service';
+import { LoadingService } from '@app/core-components/loading/loading.service';
+import { checkSameMonthPredictorData } from '@v0/data-management/data-management-import/import-services/upload-helper-functions';
+import { Month, Months } from '@shared/form-data/months';
+import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { PredictorChangeCheckResult } from '@app/domain/calculations/status-check-calculations/statusCheckModels';
+import { getDateFromPredictorData } from '@app/shared/dateHelperFunctions';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WeatherPredictorManagementService {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly commandBoundary = inject(WorkspaceCommandBoundary);
+
+  hasWarning: boolean = false;
+  heatingTemp: number;
+  coolingTemp: number;
+
+  constructor(
+    private weatherDataService: WeatherDataService,
+    private predictorHandler: PredictorCommandHandler,
+    private loadingService: LoadingService,
+    private calanderizationService: CalanderizationService
+  ) {
+  }
+
+  async setLoadingMessages(selectedFacility: IdbFacility) {
+    this.loadingService.addLoadingMessage('Adding Predictors');
+
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
+
+    let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
+    let startDate: Date = new Date(monthlyData[0].date);
+
+    let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(this.weatherDataService.selectedStation.ID, startDate, endDate, ['wet_bulb_temp'])
+    if (weatherData != "error") {
+      while (startDate <= endDate) {
+        let entryDate: Date = new Date(startDate);
+
+        let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+        let dateStr = month.abbreviation + ', ' + entryDate.getFullYear();
+        this.loadingService.addLoadingMessage('Calculating Predictors: ' + dateStr);
+
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
+    }
+  }
+
+  async createPredictorsFromWeatherDataPage(selectedFacility: IdbFacility, selectedValues: Array<{ name: WeatherDataSelection, value?: number }>): Promise<"success" | "error"> {
+    let idx: number = 0;
+    const activeAccountGuid = this.accountWorkspaceStore.account()?.guid ?? selectedFacility.accountId;
+    let hddPredictor: IdbPredictor;
+    let cddPredictor: IdbPredictor;
+    let relativeHumidityPredictor: IdbPredictor;
+    let dryBulbTempPredictor: IdbPredictor;
+    let wetBulbTempPredictor: IdbPredictor;
+    let dewPointTempPredictor: IdbPredictor;
+    let precipitationPredictor: IdbPredictor;
+    if (selectedValues.find(val => val.name == 'HDD')) {
+      //create HDD predictor
+      hddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      let hddValue: number = selectedValues.find(val => val.name == 'HDD').value;
+      this.heatingTemp = hddValue;
+
+      hddPredictor.name = 'HDD Generated ' + '(' + this.heatingTemp + "F)";
+      hddPredictor.heatingBaseTemperature = this.heatingTemp;
+      hddPredictor.predictorType = 'Weather';
+      hddPredictor.weatherDataType = 'HDD';
+      hddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      hddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    if (selectedValues.find(val => val.name == 'CDD')) {
+      //create CDD predictor
+      cddPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      let cddValue: number = selectedValues.find(val => val.name == 'CDD').value;
+      this.coolingTemp = cddValue;
+
+      cddPredictor.name = 'CDD Generated ' + '(' + this.coolingTemp + "F)";
+      cddPredictor.coolingBaseTemperature = this.coolingTemp;
+      cddPredictor.predictorType = 'Weather';
+      cddPredictor.weatherDataType = 'CDD';
+      cddPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      cddPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    if (selectedValues.find(val => val.name == 'relativeHumidity')) {
+      //create relative humidity predictor
+      relativeHumidityPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      relativeHumidityPredictor.name = "Relative Humidity";
+      relativeHumidityPredictor.predictorType = 'Weather';
+      relativeHumidityPredictor.weatherDataType = 'relativeHumidity';
+      relativeHumidityPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      relativeHumidityPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    if (selectedValues.find(val => val.name == 'dryBulbTemp')) {
+      //create dry bulb temp predictor
+      dryBulbTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      dryBulbTempPredictor.name = "Dry Bulb Temp";
+      dryBulbTempPredictor.predictorType = 'Weather';
+      dryBulbTempPredictor.weatherDataType = 'dryBulbTemp';
+      dryBulbTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      dryBulbTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    if (selectedValues.find(val => val.name == 'wetBulbTemp')) {
+      //create wet bulb temp predictor
+      wetBulbTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      wetBulbTempPredictor.name = "Wet Bulb Temp";
+      wetBulbTempPredictor.predictorType = 'Weather';
+      wetBulbTempPredictor.weatherDataType = 'wetBulbTemp';
+      wetBulbTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      wetBulbTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    if (selectedValues.find(val => val.name == 'dewPointTemp')) {
+      //create dew point temp predictor
+      dewPointTempPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      dewPointTempPredictor.name = "Dew Point Temp";
+      dewPointTempPredictor.predictorType = 'Weather';
+      dewPointTempPredictor.weatherDataType = 'dewPointTemp';
+      dewPointTempPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      dewPointTempPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    if (selectedValues.find(val => val.name == 'precipitation')) {
+      //create precipitation predictor
+      precipitationPredictor = getNewIdbPredictor(selectedFacility.accountId, selectedFacility.guid);
+      precipitationPredictor.name = "Precipitation";
+      precipitationPredictor.predictorType = 'Weather';
+      precipitationPredictor.weatherDataType = 'precipitation';
+      precipitationPredictor.weatherStationName = this.weatherDataService.selectedStation.name;
+      precipitationPredictor.weatherStationId = this.weatherDataService.selectedStation.ID;
+    }
+
+    const predictors = [
+      hddPredictor,
+      cddPredictor,
+      relativeHumidityPredictor,
+      dryBulbTempPredictor,
+      wetBulbTempPredictor,
+      dewPointTempPredictor,
+      precipitationPredictor
+    ].filter((predictor): predictor is IdbPredictor => predictor !== undefined);
+
+    //create predictor data
+    //predictor data created to match start/end of meter data in facility
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMetersByFacilityID(selectedFacility.guid);
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
+
+    let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
+    let startDate: Date = new Date(monthlyData[0].date);
+    //ISSUE: 1822
+    let weatherData: Array<WeatherDataReading> | "error" = await this.weatherDataService.getHourlyData(this.weatherDataService.selectedStation.ID, startDate, endDate, ['wet_bulb_temp'])
+    if (weatherData != "error") {
+      const predictorDataEntries: IdbPredictorData[] = [];
+      while (startDate <= endDate) {
+        let entryDate: Date = new Date(startDate);
+        // await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.selectedStation.ID)
+
+        let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+        let dateStr = month.abbreviation + ', ' + entryDate.getFullYear();
+        this.loadingService.setCurrentLoadingIndex(++idx);
+
+        //ISSUE: 1822
+        let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
+        // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp)
+        if (cddPredictor) {
+          let newCddPredictorData: IdbPredictorData = getNewIdbPredictorData(cddPredictor);
+          newCddPredictorData.month = entryDate.getMonth() + 1;
+          newCddPredictorData.year = entryDate.getFullYear();
+          newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
+          newCddPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'CDD');
+          predictorDataEntries.push(newCddPredictorData);
+        }
+
+        if (hddPredictor) {
+          let newHddPredictorData: IdbPredictorData = getNewIdbPredictorData(hddPredictor);
+          newHddPredictorData.month = entryDate.getMonth() + 1;
+          newHddPredictorData.year = entryDate.getFullYear();
+          newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
+          newHddPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'HDD');
+          predictorDataEntries.push(newHddPredictorData);
+        }
+
+        if (relativeHumidityPredictor) {
+          let newRHPredictorData: IdbPredictorData = getNewIdbPredictorData(relativeHumidityPredictor);
+          newRHPredictorData.month = entryDate.getMonth() + 1;
+          newRHPredictorData.year = entryDate.getFullYear();
+          newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
+          newRHPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'relativeHumidity');
+          predictorDataEntries.push(newRHPredictorData);
+        }
+
+        if (dryBulbTempPredictor) {
+          let newDryBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dryBulbTempPredictor);
+          newDryBulbTempPredictorData.month = entryDate.getMonth() + 1;
+          newDryBulbTempPredictorData.year = entryDate.getFullYear();
+          newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
+          newDryBulbTempPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'dryBulbTemp');
+          predictorDataEntries.push(newDryBulbTempPredictorData);
+        }
+
+        if (wetBulbTempPredictor) {
+          let newWetBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(wetBulbTempPredictor);
+          newWetBulbTempPredictorData.month = entryDate.getMonth() + 1;
+          newWetBulbTempPredictorData.year = entryDate.getFullYear();
+          newWetBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'wetBulbTemp');
+          newWetBulbTempPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'wetBulbTemp');
+          predictorDataEntries.push(newWetBulbTempPredictorData);
+        }
+
+        if (dewPointTempPredictor) {
+          let newDewPointTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dewPointTempPredictor);
+          newDewPointTempPredictorData.month = entryDate.getMonth() + 1;
+          newDewPointTempPredictorData.year = entryDate.getFullYear();
+          newDewPointTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dewPointTemp');
+          newDewPointTempPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'dewPointTemp');
+          predictorDataEntries.push(newDewPointTempPredictorData);
+        }
+
+        if (precipitationPredictor) {
+          let newPrecipitationPredictorData: IdbPredictorData = getNewIdbPredictorData(precipitationPredictor);
+          newPrecipitationPredictorData.month = entryDate.getMonth() + 1;
+          newPrecipitationPredictorData.year = entryDate.getFullYear();
+          newPrecipitationPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
+          newPrecipitationPredictorData.weatherDataWarning = hasWeatherDataWarning(degreeDays, 'precipitation');
+          predictorDataEntries.push(newPrecipitationPredictorData);
+        }
+
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
+
+      await this.commandBoundary.execute(
+        { entityKind: 'predictor', changeKind: 'bulk', label: 'Create Weather Predictors' },
+        () => this.predictorHandler.createWeatherPredictors(
+          {
+            predictors,
+            predictorData: predictorDataEntries,
+            facilityAnalyses: this.getUpdatedFacilityAnalyses(selectedFacility, predictors)
+          },
+          activeAccountGuid
+        )
+      );
+
+      return "success";
+    } else {
+      return "error";
+    }
+  }
+
+  private getUpdatedFacilityAnalyses(selectedFacility: IdbFacility, predictors: readonly IdbPredictor[]): IdbAnalysisItem[] {
+    const facilityAnalyses = structuredClone(this.accountWorkspaceStore.facilityAnalyses()).filter(item => {
+      return item.facilityId === selectedFacility.guid;
+    });
+
+    for (const analysisItem of facilityAnalyses) {
+      for (const group of analysisItem.groups) {
+        for (const predictor of predictors) {
+          group.predictorVariables.push({
+            id: predictor.guid,
+            name: predictor.name,
+            production: predictor.production,
+            productionInAnalysis: predictor.productionInAnalysis,
+            regressionCoefficient: undefined,
+            unit: predictor.unit
+          });
+        }
+      }
+    }
+
+    return facilityAnalyses;
+  }
+
+  addLoadingMessages(facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>) {
+    this.loadingService.clearLoadingMessages();
+    for (let i = 0; i < facilityList.length; i++) {
+      let facilityWeatherPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()].filter(predictor => {
+        return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
+      });
+      let facility: IdbFacility = this.accountWorkspaceStore.facilities().find(facility => facility.guid === (facilityList[i].facilityId));
+      for (let p = 0; p < facilityWeatherPredictors.length; p++) {
+        let weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
+        this.loadingService.addLoadingMessage('Updating Predictor Data for ' + facility.name + ', ' + weatherPredictor.name);
+        let predictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()].filter(data => {
+          return data.predictorId == weatherPredictor.guid;
+        });
+        let startDate: Date = new Date(facilityList[i].startDate.getFullYear(), facilityList[i].startDate.getMonth(), 1);
+        let endDate: Date = new Date(facilityList[i].endDate.getFullYear(), facilityList[i].endDate.getMonth(), 1);
+        while (startDate <= endDate) {
+          let entryDate: Date = new Date(startDate);
+          let monthPredictorEntry: IdbPredictorData = predictorData.find(data => {
+            return checkSameMonthPredictorData(data, entryDate);
+          });
+          if (!monthPredictorEntry) {
+            let month: Month = Months.find(m => m.monthNumValue == entryDate.getMonth());
+            let formatedDate: string = month.abbreviation + ', ' + entryDate.getFullYear();
+
+            this.loadingService.addLoadingMessage('Fetching weather data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
+            this.loadingService.addLoadingMessage('Calculating predictor data for ' + facility.name + ', ' + weatherPredictor.name + ' for ' + formatedDate);
+          }
+          startDate.setMonth(startDate.getMonth() + 1);
+        }
+      }
+    }
+  }
+
+  async updateAccountWeatherPredictors(
+    facilityList: Array<{ facilityId: string, startDate: Date, endDate: Date }>
+  ): Promise<"success" | "error"> {
+    this.loadingService.setContext('updating-weather-predictors');
+    this.loadingService.setTitle('Updating Weather Predictors');
+    this.addLoadingMessages(facilityList);
+    this.hasWarning = false;
+
+    const accountGuid = this.accountWorkspaceStore.account()?.guid;
+    try {
+      const result = await this.commandBoundary.execute(
+        {
+          entityKind: 'predictor',
+          changeKind: 'bulk',
+          label: 'Update Weather Predictors',
+          publication: { mode: 'reload' }
+        },
+        async () => {
+          let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+          let accountPredictorData: Array<IdbPredictorData> = [...this.accountWorkspaceStore.predictorData()];
+          let status: "success" | "error" = "success";
+          let index: number = -1;
+
+          const dateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth() + 1}`;
+
+          for (let i = 0; i < facilityList.length; i++) {
+            const facilityWeatherPredictors: Array<IdbPredictor> = accountPredictors.filter(predictor => {
+              return predictor.predictorType == 'Weather' && predictor.facilityId == facilityList[i].facilityId;
+            });
+
+            for (let p = 0; p < facilityWeatherPredictors.length; p++) {
+              const weatherPredictor: IdbPredictor = facilityWeatherPredictors[p];
+              ++index;
+              this.loadingService.setCurrentLoadingIndex(index);
+
+              const predictorData: Array<IdbPredictorData> = accountPredictorData.filter(data => {
+                return data.predictorId == weatherPredictor.guid;
+              });
+
+              const existingMonthKeys = new Set(
+                predictorData.map(item => dateKey(new Date(item.year, item.month - 1, 1)))
+              );
+
+              let startDate: Date = new Date(facilityList[i].startDate.getFullYear(), facilityList[i].startDate.getMonth(), 1);
+              const endDate: Date = new Date(facilityList[i].endDate.getFullYear(), facilityList[i].endDate.getMonth(), 1);
+
+              while (startDate <= endDate) {
+                const monthKey = dateKey(startDate);
+
+                if (!existingMonthKeys.has(monthKey)) {
+                  index++;
+                  this.loadingService.setCurrentLoadingIndex(index);
+
+                  const nextMonthsDate: Date = new Date(startDate);
+                  nextMonthsDate.setMonth(nextMonthsDate.getMonth() + 1);
+
+                  const weatherData: Array<WeatherDataReading> | "error" =
+                    await this.weatherDataService.getHourlyData(
+                      weatherPredictor.weatherStationId,
+                      startDate,
+                      nextMonthsDate,
+                      []
+                    );
+
+                  if (weatherData != "error") {
+                    const degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(
+                      weatherData,
+                      startDate.getMonth(),
+                      startDate.getFullYear(),
+                      weatherPredictor.heatingBaseTemperature,
+                      weatherPredictor.coolingBaseTemperature,
+                      weatherPredictor.weatherStationId,
+                      weatherPredictor.weatherStationName
+                    );
+
+                    const newPredictorData: IdbPredictorData = getNewIdbPredictorData(weatherPredictor);
+                    newPredictorData.month = startDate.getMonth() + 1;
+                    newPredictorData.year = startDate.getFullYear();
+
+                    if (weatherPredictor.weatherDataType == 'HDD') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
+                    } else if (weatherPredictor.weatherDataType == 'CDD') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
+                    } else if (weatherPredictor.weatherDataType == 'relativeHumidity') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
+                    } else if (weatherPredictor.weatherDataType == 'dryBulbTemp') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
+                    } else if (weatherPredictor.weatherDataType == 'wetBulbTemp') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'wetBulbTemp');
+                    } else if (weatherPredictor.weatherDataType == 'dewPointTemp') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'dewPointTemp');
+                    } else if (weatherPredictor.weatherDataType == 'precipitation') {
+                      newPredictorData.amount = getDegreeDayAmount(degreeDays, 'precipitation');
+                    }
+
+                    newPredictorData.weatherDataWarning = hasWeatherDataWarning(
+                      degreeDays,
+                      weatherPredictor.weatherDataType
+                    );
+
+                    if (newPredictorData.weatherDataWarning) {
+                      this.hasWarning = true;
+                    }
+
+                    const saved = await this.predictorHandler.addPredictorData(
+                      newPredictorData,
+                      accountGuid ?? weatherPredictor.accountId
+                    );
+
+                    existingMonthKeys.add(monthKey);
+                    accountPredictorData.push(saved);
+                  } else {
+                    status = "error";
+                  }
+                }
+
+                startDate.setMonth(startDate.getMonth() + 1);
+              }
+            }
+          }
+
+          return status;
+        }
+      );
+      return result.value;
+    }
+    catch (error) {
+      throw error;
+    }
+    finally {
+      this.loadingService.isLoadingComplete.next(true);
+    }
+  }
+
+  async checkAccountPredictorsForChanges(checkAll: boolean): Promise<Array<PredictorChangeCheckResult>> {
+    const account = this.accountWorkspaceStore.account();
+    const weatherPredictors: Array<IdbPredictor> = this.accountWorkspaceStore.predictors().filter(predictor => predictor.predictorType === 'Weather' && !predictor.noLongerInUse);
+
+    this.loadingService.setTitle('Checking Weather Predictor Changes');
+    this.loadingService.setLoadingMessage('Checking for changes in weather predictors');
+    this.loadingService.setLoadingStatus(true);
+
+    const results: Array<PredictorChangeCheckResult> = [];
+    const updates: Array<IdbPredictorData> = [];
+
+    for (const predictor of weatherPredictors) {
+      const predictorData: Array<IdbPredictorData> = _.orderBy(
+        this.accountWorkspaceStore.predictorData().filter(data => data.predictorId === predictor.guid),
+        pData => getDateFromPredictorData(pData).getTime()
+      );
+
+      const indexes = predictorData.map((pData, idx) => (pData.weatherOverride ? undefined : idx))
+        .filter((idx): idx is number => idx !== undefined);
+      const startIndex = (!checkAll && indexes.length > 6) ? indexes.length - 6 : 0;
+
+      let changedEntriesCount = 0;
+      for (let i = startIndex; i < indexes.length; i++) {
+        const pData = predictorData[indexes[i]];
+        const entryDate = getDateFromPredictorData(pData);
+        this.loadingService.setLoadingMessage(`Checking ${predictor.name}: ${entryDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`);
+
+        const degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(
+          entryDate,
+          predictor.weatherStationId,
+          predictor.weatherStationName,
+          predictor.heatingBaseTemperature,
+          predictor.coolingBaseTemperature
+        );
+        if (degreeDays !== 'error') {
+          const updatedAmount = getDegreeDayAmount(degreeDays, predictor.weatherDataType);
+          const hasChanged = pData.amount - updatedAmount !== 0;
+          if (hasChanged) {
+            changedEntriesCount++;
+          }
+          if (Boolean(pData.weatherDataChanged) !== hasChanged) {
+            updates.push({
+              ...pData,
+              weatherDataChanged: hasChanged
+            });
+          }
+        }
+      }
+      if (changedEntriesCount > 0) {
+        results.push({
+          predictorId: predictor.guid,
+          predictorName: predictor.name,
+          facilityId: predictor.facilityId,
+          accountId: predictor.accountId ?? account?.guid,
+          changedEntriesCount: changedEntriesCount,
+          checkedAll: checkAll
+        });
+      }
+    }
+    if (updates.length > 0) {
+      await this.commandBoundary.execute(
+        { entityKind: 'predictorData', changeKind: 'bulk', label: 'Check Weather Data Changes' },
+        () => this.predictorHandler.updateAccountPredictorData(updates, account?.guid)
+      );
+    }
+    this.loadingService.setLoadingStatus(false);
+    return results;
+  }
+}

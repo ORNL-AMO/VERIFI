@@ -1,0 +1,44 @@
+import { Pipe, PipeTransform } from '@angular/core';
+import * as _ from 'lodash';
+import { DetailDegreeDay, WeatherDataSelection } from '@data/models/degreeDays';
+import { getDegreeDayAmount } from '@shared/sharedHelperFunctions';
+
+@Pipe({
+    name: 'degreeDayTotal',
+    pure: false,
+    standalone: false
+})
+export class DegreeDayTotalPipe implements PipeTransform {
+
+  transform(values: Array<DetailDegreeDay>, sumBy: 'minutesBetween' | 'heatingDegreeDay' | 'coolingDegreeDay' | 'relativeHumidity' | 'dryBulbTemp' | 'wetBulbTemp' | 'dewPointTemp' | 'precipitation' | 'days'): number {
+    if (sumBy == 'minutesBetween') {
+      return _.sumBy(values, (degreeDay: DetailDegreeDay) => {
+        return degreeDay.minutesBetween;
+      });
+    } else if (sumBy == 'days') {
+      let totalMinutes: number = _.sumBy(values, (degreeDay: DetailDegreeDay) => {
+        return degreeDay.minutesBetween;
+      });
+      return totalMinutes / 1440;
+    } else {
+      let weatherDataSelection: WeatherDataSelection;
+      if (sumBy == 'coolingDegreeDay') {
+        weatherDataSelection = 'CDD';
+      } else if (sumBy == 'heatingDegreeDay') {
+        weatherDataSelection = 'HDD';
+      } else if (sumBy == 'dryBulbTemp') {
+        weatherDataSelection = 'dryBulbTemp';
+      } else if (sumBy == 'relativeHumidity') {
+        weatherDataSelection = 'relativeHumidity';
+      } else if (sumBy == 'wetBulbTemp') {
+        weatherDataSelection = 'wetBulbTemp';
+      } else if (sumBy == 'dewPointTemp') {
+        weatherDataSelection = 'dewPointTemp';
+      } else if (sumBy == 'precipitation') {
+        weatherDataSelection = 'precipitation';
+      }
+      return getDegreeDayAmount(values, weatherDataSelection);
+    }
+  }
+
+}

@@ -1,0 +1,151 @@
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbFacilityReport, EmissionFactorsReportSettings } from '@data/models/idbModels/facilityReport';
+import { EGridService } from '@shared/helper-services/e-grid.service';
+import { EmissionsRate, SubregionEmissions } from '@data/models/eGridEmissions';
+import { getEmissionsRate, getFuelEmissionsOutputRate } from '@domain/calculations/emissions-calculations/emissions';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
+import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
+import { getMobileFuelTypes } from '@shared/fuel-options/getFuelTypeOptions';
+import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
+
+@Component({
+  selector: 'app-facility-emission-factors-report-results',
+  standalone: false,
+
+  templateUrl: './facility-emission-factors-report-results.component.html',
+  styleUrl: './facility-emission-factors-report-results.component.css'
+})
+export class FacilityEmissionFactorsReportResultsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  facilityReport: IdbFacilityReport;
+  emissionFactorsReportSettings: EmissionFactorsReportSettings;
+  facilityReportSub: Subscription;
+  print: boolean;
+  printSub: Subscription;
+
+  facility: IdbFacility;
+  facilityMeters: Array<IdbUtilityMeter>;
+  customFuels: Array<IdbCustomFuel>;
+  electricityMeters: Array<string> = [];
+  emissionDataElectricity: Array<EmissionElectricity> = [];
+  emissionData: Array<EmissionOthers> = [];
+
+  constructor(
+    private dataEvaluationService: DataEvaluationService,
+    private eGridService: EGridService,
+    private injector: Injector
+  ) {
+  }
+
+  ngOnInit() {
+    this.customFuels = [...this.accountWorkspaceStore.customFuels()];
+    this.facilityReportSub = toObservable(this.accountWorkspaceStore.selectedFacilityReport, { injector: this.injector }).subscribe(report => {
+      this.facilityReport = report;
+      this.facilityMeters = this.accountWorkspaceQuery.getFacilityMeters(this.facilityReport.facilityId);
+      this.emissionFactorsReportSettings = this.facilityReport.emissionFactorsReportSettings;
+      this.calculateFacilitiesSummary();
+    });
+    this.printSub = this.dataEvaluationService.print.subscribe(print => {
+      this.print = print;
+    });
+  }
+
+  ngOnDestroy() {
+    this.facilityReportSub.unsubscribe();
+    this.printSub.unsubscribe();
+  }
+
+  calculateFacilitiesSummary() {
+    this.facility = this.accountWorkspaceStore.selectedFacility();
+    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
+
+    this.facilityMeters.forEach(meter => {
+      if (meter.source === 'Electricity') {
+        this.electricityMeters.push(meter.name);
+      }
+      if (meter.source === 'Electricity' && this.emissionDataElectricity.length === 0) {
+        for (let year = this.emissionFactorsReportSettings.startYear; year <= this.emissionFactorsReportSettings.endYear; year++) {
+          let emissionsRate = getEmissionsRate(this.facility.eGridSubregion, year, co2EmissionsRates);
+          if (emissionsRate) {
+            this.emissionDataElectricity.push({
+              source: meter.source,
+              year: year,
+              marketRate: emissionsRate.marketRate,
+              locationRate: emissionsRate.locationRate,
+              directEmissionsRate: emissionsRate.directEmissionsRate
+            });
+          }
+        }
+      }
+      if (meter.source == 'Natural Gas' || (meter.source == 'Other Fuels' && meter.scope != 2) || meter.source == 'Other Energy') {
+        let emissionsOutputRate = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, this.customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
+        let selectedUnit;
+        if (meter.source == 'Other Fuels') {
+          selectedUnit = meter.vehicleCollectionUnit;
+        }
+        else {
+          selectedUnit = meter.energyUnit;
+        }
+        this.emissionData.push({
+          meterName: meter.name,
+          source: meter.source,
+          fuelValue: meter.fuel ? meter.fuel : '',
+          CO2: emissionsOutputRate.CO2,
+          CH4: emissionsOutputRate.CH4,
+          N2O: emissionsOutputRate.N2O,
+          unit: selectedUnit
+        });
+      }
+
+      if (meter.source == 'Other Fuels' && meter.scope == 2) {
+        let fuelOptions: Array<FuelTypeOption> = getMobileFuelTypes(meter.vehicleCategory, meter.vehicleType, this.customFuels);
+        let meterFuel: FuelTypeOption = fuelOptions.find(option => {
+          return option.value == meter.vehicleFuel
+        });
+
+        let selectedUnit;
+        if (meterFuel.isOnRoad) {
+          selectedUnit = meter.vehicleDistanceUnit;
+        } else {
+          selectedUnit = meter.vehicleCollectionUnit;
+        }
+
+        this.emissionData.push({
+          meterName: meter.name,
+          source: meter.source,
+          fuelValue: meterFuel.value,
+          CO2: meterFuel.CO2,
+          CH4: meterFuel.CH4,
+          N2O: meterFuel.N2O,
+          unit: selectedUnit
+        });
+      }
+    });
+  }
+}
+
+export interface EmissionElectricity {
+  source: string;
+  year: number;
+  marketRate: EmissionsRate;
+  locationRate: EmissionsRate;
+  directEmissionsRate: boolean;
+}
+
+export interface EmissionOthers {
+  meterName: string;
+  source: string;
+  fuelValue: string;
+  CO2: number;
+  CH4: number;
+  N2O: number;
+  unit: string;
+}

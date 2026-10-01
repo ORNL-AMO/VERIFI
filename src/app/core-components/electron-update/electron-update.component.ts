@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ElectronService } from '../../electron/electron.service';
+import { ElectronService } from '@platform/electron/electron.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { SharedDataService } from '@shared/helper-services/shared-data.service';
 
 @Component({
     selector: 'app-electron-update',

@@ -1,4 +1,4 @@
-import { FuelTypeOption } from "./fuelTypeOption";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 
 //Onsite = stationary values
 export const MobileTransportOnsiteOptions: Array<FuelTypeOption> = [

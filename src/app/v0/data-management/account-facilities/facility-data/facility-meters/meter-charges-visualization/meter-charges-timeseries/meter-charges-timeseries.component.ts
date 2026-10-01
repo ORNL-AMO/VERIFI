@@ -1,0 +1,108 @@
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
+import { PlotlyService } from 'angular-plotly.js';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import * as _ from 'lodash';
+import { getDateFromMeterData } from '@shared/dateHelperFunctions';
+@Component({
+  selector: 'app-meter-charges-timeseries',
+  standalone: false,
+  templateUrl: './meter-charges-timeseries.component.html',
+  styleUrl: './meter-charges-timeseries.component.css'
+})
+export class MeterChargesTimeseriesComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  @Input({ required: true }) meter: IdbUtilityMeter;
+
+  @ViewChild('chargesTimeseries', { static: false }) chargesTimeseries: ElementRef;
+
+  constructor(
+    private plotlyService: PlotlyService
+
+  ) { }
+
+
+  ngOnChanges() {
+    this.drawChart();
+  }
+
+  ngAfterViewInit() {
+    this.drawChart();
+  }
+
+  drawChart() {
+    if (this.chargesTimeseries) {
+
+      let meterData: Array<IdbUtilityMeterData> = this.accountWorkspaceQuery.getMeterData(this.meter.guid);
+      meterData = _.sortBy(meterData, (data: IdbUtilityMeterData) => getDateFromMeterData(data).getTime(), 'desc');
+
+      var data = [
+        {
+          type: "scatter",
+          mode: "lines+markers",
+          name: 'Total Cost',
+          x: meterData.map(data => { return getDateFromMeterData(data) }),
+          y: meterData.map(data => { return data.totalCost }),
+          line: { width: 3 },
+          hovertemplate: 'Date: %{x}<br>Cost: $%{y}<extra></extra>',
+        }
+      ];
+
+      this.meter.charges.forEach(charge => {
+        data.push(
+          {
+            type: "scatter",
+            mode: "lines+markers",
+            name: charge.name,
+            x: meterData.map(data => { return getDateFromMeterData(data) }),
+            y: meterData.map(data => {
+              let meterDataCharge = data.charges.find(c => { return c.chargeGuid == charge.guid });
+              if (meterDataCharge) {
+                return meterDataCharge.chargeAmount
+              } else {
+                return undefined
+              }
+            }),
+            line: { width: 3 },
+            hovertemplate: 'Date: %{x}<br>' + charge.name + ': $%{y}<extra></extra>',
+          })
+      })
+
+
+      let height: number = 400;
+      var layout = {
+        height: height,
+        autosize: true,
+        plot_bgcolor: "#e7f1f2",
+        paper_bgcolor: "#e7f1f2",
+        legend: {
+          orientation: "h"
+        },
+        xaxis: {
+          hoverformat: "%b, %Y"
+        },
+        yaxis: {
+          title: {
+            text: 'Cost ($)',
+            font: {
+              size: 16,
+              weight: "bold"
+            },
+            standoff: 18
+          },
+          automargin: true,
+        },
+        margin: { r: 0, t: 50 }
+      };
+      var config = {
+        displaylogo: false,
+        responsive: true,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'drawcircle', 'drawrect', 'eraseshape'],
+      };
+      this.plotlyService.newPlot(this.chargesTimeseries.nativeElement, data, layout, config);
+    }
+
+  }
+}

@@ -1,0 +1,28 @@
+@if (!destroyToast) {
+  @if (deletingMessaging) {
+    <div class="card card-toast alert" [ngClass]="{'alert-info': !deletionError, 'alert-danger': deletionError}" [@toast]="showToast"
+      (mouseup)="finishDrag()" (drag)="mouseDown($event)">
+      <div class="card-header d-flex w-100 align-items-center">
+        <div>
+          @if (deletionError) {
+            <i class="fa fa-triangle-exclamation item-left me-2"></i>
+            Account Deletion Stopped
+          } @else {
+            <i class="fa fa-info-circle item-left me-2"></i>
+            {{deletingMessaging.message}}
+          }
+        </div>
+      </div>
+      <div class="card-body">
+        @if (deletionError) {
+          <p>{{deletionError.message}}</p>
+          <button type="button" class="btn btn-danger" (click)="retryDelete()">Retry Account Deletion</button>
+        } @else {
+          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar bg-success" [ngStyle]="{'width.%': deletingMessaging.percent}"></div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+}

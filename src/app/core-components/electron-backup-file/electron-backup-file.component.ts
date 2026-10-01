@@ -1,16 +1,21 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
-import { ElectronService } from 'src/app/electron/electron.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
-import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
-import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { ChangeDetectorRef, Component, inject, Injector } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
+import { ElectronService } from '@platform/electron/electron.service';
+import { BackupImportCoordinator } from '@data/backup/backup-import-coordinator.service';
+import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.service';
+import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { LoadingService } from '../loading/loading.service';
-import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
+import { DeleteDataService } from '@data/indexedDB/delete-data.service';
+import { BackupFile } from '@data/models/backup-file';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbElectronBackup } from '@data/models/idbModels/electronBackup';
+import { PreparedBackupFile } from '@data/backup/backup-preparation.service';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountCommandHandler } from '@data/account-workspace/handlers/account-command-handler.service';
+import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -19,10 +24,12 @@ import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
   standalone: false
 })
 export class ElectronBackupFileComponent {
-
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   latestBackupFileSub: Subscription;
-  latestBackupFile: BackupFile;
+  backupStatusSub: Subscription;
+  reviewRequestedSub: Subscription;
+  latestBackupFile: PreparedBackupFile;
   account: IdbAccount;
   accountSub: Subscription;
   showModal: boolean = false;
@@ -32,29 +39,35 @@ export class ElectronBackupFileComponent {
   differingBackups: boolean = false;
   electronBackup: IdbElectronBackup;
   forceModal: boolean = false;
+  backupStatus: AutomaticBackupStatus = 'disabled';
+  showArchiveDecision: boolean = false;
+  private pendingArchiveDecision: boolean = false;
   constructor(private electronService: ElectronService,
-    private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
-    private electronBackupsDbService: ElectronBackupsDbService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService,
-    private backupDataService: BackupDataService,
+    private backupExportCoordinator: BackupExportCoordinator,
+    private backupImportCoordinator: BackupImportCoordinator,
     private loadingService: LoadingService,
     private cd: ChangeDetectorRef,
-    private deleteDataService: DeleteDataService) {
+    private deleteDataService: DeleteDataService,
+    private commandBoundary: WorkspaceCommandBoundary,
+    private accountHandler: AccountCommandHandler,
+    private backupGateway: ElectronBackupFileGateway,
+    private injector: Injector) {
 
   }
 
   ngOnInit() {
     this.isElectron = this.electronService.isElectron;
     if (this.electronService.isElectron) {
-      this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.accountSub = toObservable(this.accountWorkspaceStore.account, { injector: this.injector }).subscribe(val => {
         //initialize account or account change
         if (val) {
           if (!this.account || (this.account.guid != val.guid)) {
+            this.pendingArchiveDecision = false;
             this.account = val;
             if (this.account) {
-              this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
+              this.electronBackup = this.automaticBackupsService.accountBackups.find(backup => {
                 return backup.accountId == this.account.guid
               });
               this.archiveOption = this.account.archiveOption;
@@ -64,14 +77,30 @@ export class ElectronBackupFileComponent {
         }
       });
 
-      this.latestBackupFileSub = this.electronService.accountLatestBackupFile.subscribe(val => {
+      this.latestBackupFileSub = this.automaticBackupsService.latestBackupFile.subscribe(val => {
         this.latestBackupFile = val;
-        if (this.latestBackupFile) {
-          if (this.archiveOption == 'always') {
-            this.createArchive();
-          }
-          this.checkShowModal();
+        if (!val) {
+          this.pendingArchiveDecision = false;
+        } else if (this.backupStatus == 'checking') {
+          this.pendingArchiveDecision = true;
         }
+        if (val && this.archiveOption == 'always' && this.backupStatus == 'checking') {
+          void this.createArchive();
+        }
+        this.checkShowModal();
+      });
+
+      this.backupStatusSub = this.automaticBackupsService.status.subscribe(status => {
+        this.backupStatus = status;
+        this.electronBackup = this.automaticBackupsService.accountBackups.find(backup => {
+          return backup.accountId == this.account?.guid
+        });
+        this.checkShowModal();
+      });
+
+      this.reviewRequestedSub = this.automaticBackupsService.reviewRequested.subscribe(requested => {
+        this.forceModal = requested;
+        this.checkShowModal();
       });
     }
 
@@ -81,76 +110,77 @@ export class ElectronBackupFileComponent {
     if (this.electronService.isElectron) {
       this.accountSub.unsubscribe();
       this.latestBackupFileSub.unsubscribe();
+      this.backupStatusSub.unsubscribe();
+      this.reviewRequestedSub.unsubscribe();
     }
   }
 
   checkShowModal() {
-    if (this.account && this.electronBackup && this.latestBackupFile) {
-      if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
-        this.differingBackups = true;
-        this.showModal = true;
-      } else {
-        this.differingBackups = false;
-      }
-      if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
-        this.showModal = true;
-      }
-      if (this.showModal == false) {
-        this.automaticBackupsService.initializingAccount = false;
-      }
-      if (this.automaticBackupsService.forceModal == true) {
-        this.forceModal = true;
-        this.showModal = true;
-      } else {
-        this.forceModal = false;
-      }
+    if (this.account && this.latestBackupFile) {
+      this.electronBackup = this.automaticBackupsService.accountBackups.find(backup => {
+        return backup.accountId == this.account.guid
+      });
+      this.differingBackups = this.backupStatus === 'conflict';
+      const needsArchiveDecision = this.archiveOption == 'skip' || this.archiveOption == 'justOnce';
+      this.showArchiveDecision = this.differingBackups || (needsArchiveDecision && this.pendingArchiveDecision) || this.forceModal;
+      this.showModal = this.differingBackups || this.showArchiveDecision || this.forceModal;
       this.cd.detectChanges();
-    } else if (this.latestBackupFile) {
-      this.automaticBackupsService.initializingAccount = false;
+    } else if (this.backupStatus === 'error' || this.backupStatus === 'disabled') {
+      this.showArchiveDecision = false;
+      this.showModal = false;
+      this.cd.detectChanges();
     }
   }
 
   hideModal() {
+    this.automaticBackupsService.clearReviewRequest();
+    this.pendingArchiveDecision = false;
+    this.showArchiveDecision = false;
     this.showModal = false;
-    this.automaticBackupsService.initializingAccount = false;
-    this.automaticBackupsService.forceModal = false;
   }
 
   async confirmActions() {
     if (this.archiveOption == 'justOnce' || ((this.account.archiveOption != this.archiveOption) && this.archiveOption == 'always')) {
-      this.createArchive();
+      await this.createArchive();
     }
 
     let needUpdate: boolean = this.account.archiveOption != this.archiveOption;
     if (this.differingBackups) {
       if (this.overwriteOption == 'overwriteFile') {
-        this.automaticBackupsService.overwriteFile();
+        await this.automaticBackupsService.overwriteFile();
       } else if (this.overwriteOption == 'updateAccount') {
         this.showModal = false;
         this.loadingService.setContext('electron-overwrite-account');
         this.loadingService.setTitle('Overwriting Account');
-        this.deleteDataService.pauseDelete.next(true);
-        this.account.deleteAccount = true;
-        await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
-        let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-        this.accountDbService.allAccounts.next(accounts);
-
-        let backupPath: string = this.account.dataBackupFilePath;
-        let sharedFileAuthor: string = this.account.sharedFileAuthor;
-        let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-        this.backupDataService.accountBackupMessages();
-        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile, -1);
-        newAccount.dataBackupFilePath = backupPath;
-        newAccount.sharedFileAuthor = sharedFileAuthor;
-        newAccount.isSharedBackupFile = isSharedBackupFile;
-
-        await this.dbChangesService.updateAccount(newAccount);
-        await this.dbChangesService.selectAccount(newAccount, false);
-        this.deleteDataService.pauseDelete.next(false);
-        this.deleteDataService.gatherAndDelete();
-        needUpdate = false;
-
-        this.loadingService.isLoadingComplete.next(true);
+        this.deleteDataService.suspendQueuedDeletion();
+        try {
+          let backupPath: string = this.account.dataBackupFilePath;
+          let sharedFileAuthor: string = this.account.sharedFileAuthor;
+          let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
+          const newAccount = await this.backupImportCoordinator.replaceActiveAccount(this.latestBackupFile);
+          await this.commandBoundary.execute(
+            { entityKind: 'account', changeKind: 'update', entityGuid: newAccount.guid, label: 'Saving account' ,
+              publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
+            () => this.accountHandler.update({
+              ...newAccount,
+              dataBackupFilePath: backupPath,
+              sharedFileAuthor: sharedFileAuthor,
+              isSharedBackupFile: isSharedBackupFile
+            }, newAccount.guid)
+          );
+          const replacement = {
+            ...newAccount,
+            dataBackupFilePath: backupPath,
+            sharedFileAuthor: sharedFileAuthor,
+            isSharedBackupFile: isSharedBackupFile
+          };
+          await this.automaticBackupsService.addOrUpdateFile(this.latestBackupFile.dataBackupId, replacement.guid);
+          await this.automaticBackupsService.inspectCurrentAccountFile();
+          needUpdate = false;
+          this.loadingService.isLoadingComplete.next(true);
+        } finally {
+          await this.deleteDataService.resumeQueuedDeletion();
+        }
       }
     }
 
@@ -161,17 +191,23 @@ export class ElectronBackupFileComponent {
       } else {
         this.account.archiveOption = this.archiveOption;
       }
-      await this.dbChangesService.updateAccount(this.account);
+      await this.commandBoundary.execute(
+        { entityKind: 'account', changeKind: 'update', entityGuid: this.account.guid, label: 'Saving account' ,
+          publication: { mode: 'patch', buildPatch: value => ({ account: value }) }},
+        () => this.accountHandler.update({ ...this.account }, this.account.guid)
+      );
     }
 
     this.hideModal();
   }
 
 
-  createArchive() {
+  async createArchive() {
+    if (!this.account?.dataBackupFilePath) {
+      throw new Error('An attached backup file is required before creating an archive.');
+    }
     let dataBackupFilePath: string = this.account.dataBackupFilePath;
-    let archiveBackup: BackupFile = this.backupDataService.getAccountBackupFile();
-    archiveBackup.account = JSON.parse(JSON.stringify(archiveBackup.account));
+    let archiveBackup: BackupFile = this.backupExportCoordinator.buildActiveAccountBackup();
     let sub: string = dataBackupFilePath.substring(0, dataBackupFilePath.length - 5);
     let date: Date = new Date(archiveBackup.timeStamp);
 
@@ -183,8 +219,9 @@ export class ElectronBackupFileComponent {
     displayHours = displayHours ? displayHours : 12; // 0 should be 12
     let timeStr = `${displayHours}_${minutes.toString().padStart(2, '0')}_${ampm}`;
     let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear() + '_' + timeStr;
-    archiveBackup.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
-    this.electronService.sendSaveData(archiveBackup, true);
-    this.toastNotificationService.showToast('Archive Created', archiveBackup.account.dataBackupFilePath + ' created!', undefined, false, 'alert-success');
+    const archivePath = sub + '_' + dateStr + '.json';
+    await this.backupGateway.write(archivePath, archiveBackup);
+    this.toastNotificationService.showToast('Archive Created', archivePath + ' created!', undefined, false, 'alert-success');
   }
+
 }

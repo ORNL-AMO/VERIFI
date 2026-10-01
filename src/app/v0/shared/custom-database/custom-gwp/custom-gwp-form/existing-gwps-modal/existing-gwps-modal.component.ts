@@ -1,0 +1,39 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from '@data/models/globalWarmingPotentials';
+import { AssessmentReportVersion } from '@data/models/idbModels/account';
+
+@Component({
+    selector: 'app-existing-gwps-modal',
+    templateUrl: './existing-gwps-modal.component.html',
+    styleUrls: ['./existing-gwps-modal.component.css'],
+    standalone: false
+})
+export class ExistingGwpsModalComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Output('emitClose')
+  emitClose: EventEmitter<GlobalWarmingPotential> = new EventEmitter();
+
+  globalWarmingPotentials: Array<GlobalWarmingPotential> = GlobalWarmingPotentials;
+  displayModal: boolean = false;
+
+  assessmentReportVersion: AssessmentReportVersion = 'AR6';
+
+  ngOnInit() {
+    this.assessmentReportVersion = this.accountWorkspaceStore.account().assessmentReportVersion;
+    setTimeout(() => {
+      this.displayModal = true;
+    }, 100);
+  }
+
+
+  cancelSelectFuel() {
+    this.emitClose.emit(undefined);
+  }
+
+  selectOption(option: GlobalWarmingPotential) {
+    this.emitClose.emit(option);
+  }
+
+
+}

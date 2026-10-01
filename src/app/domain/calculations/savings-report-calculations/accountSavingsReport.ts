@@ -1,0 +1,99 @@
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "@data/models/analysis";
+import { PerformanceReport } from "../performance-report-calculations/performanceReport";
+import { IdbAccountAnalysisItem } from "@data/models/idbModels/accountAnalysisItem";
+import { IdbPredictorData } from "@data/models/idbModels/predictorData";
+import { IdbAccount } from "@data/models/idbModels/account";
+import { IdbFacility } from "@data/models/idbModels/facility";
+import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
+import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
+import { IdbPredictor } from "@data/models/idbModels/predictor";
+import { AnnualAccountAnalysisSummaryClass } from "../analysis-calculations/annualAccountAnalysisSummaryClass";
+import { IdbAccountReport } from "@data/models/idbModels/accountReport";
+import { getLatestMonthSummary, getSavingsReportAnnualAnalysisSummaries, getSavingsReportMonthlyAnalysisSummaryData } from "./sharedSavingsReport";
+import { AnnualAnalysisSummaryDataClass } from "../analysis-calculations/annualAnalysisSummaryDataClass";
+
+
+export class AccountSavingsReport {
+
+    performanceReport: PerformanceReport;
+    annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+    facilitySummaries: Array<{
+        facility: IdbFacility,
+        analysisItem: IdbAnalysisItem,
+        monthlySummaryData: Array<MonthlyAnalysisSummaryData>,
+        annualAnalysisSummaries: Array<AnnualAnalysisSummary>,
+        latestMonthSummary: MonthlyAnalysisSummaryData
+    }>;
+    latestMonthSummary: MonthlyAnalysisSummaryData;
+
+    constructor(
+        report: IdbAccountReport,
+        selectedAnalysisItem: IdbAccountAnalysisItem,
+        accountPredictorEntries: Array<IdbPredictorData>,
+        account: IdbAccount,
+        facilities: Array<IdbFacility>,
+        accountAnalysisItems: Array<IdbAnalysisItem>,
+        meters: Array<IdbUtilityMeter>,
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
+
+        this.performanceReport = new PerformanceReport(
+            selectedAnalysisItem.baselineYear,
+            report.endYear,
+            selectedAnalysisItem,
+            accountPredictorEntries,
+            account,
+            facilities,
+            accountAnalysisItems,
+            meters,
+            meterData,
+            accountPredictors
+        );
+        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(
+            selectedAnalysisItem,
+            account,
+            facilities,
+            accountPredictorEntries,
+            accountAnalysisItems,
+            false,
+            meters,
+            meterData,
+            accountPredictors,
+            { reportYear: report.endYear }
+        );
+        this.annualAnalysisSummaries = getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaryClass.getAnnualAnalysisSummaries(), report.endMonth, report.endYear);
+        this.monthlyAnalysisSummaryData = getSavingsReportMonthlyAnalysisSummaryData(annualAnalysisSummaryClass.monthlyAnalysisSummaryData, report.endMonth, report.endYear);
+        this.latestMonthSummary = getLatestMonthSummary(this.monthlyAnalysisSummaryData);
+        this.setFacilitySummaries(annualAnalysisSummaryClass, report, accountPredictorEntries, accountPredictors);
+    }
+
+    setFacilitySummaries(annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass, report: IdbAccountReport, accountPredictorEntries: Array<IdbPredictorData>, accountPredictors: Array<IdbPredictor>) {
+        this.facilitySummaries = new Array();
+        annualAnalysisSummaryClass.facilitySummaries.forEach(facilitySummary => {
+            let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = new Array();
+            let previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass> = new Array();
+            for (let year = facilitySummary.analysisItem.baselineYear; year <= report.endYear; year++) {
+                let annualSummaryData: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(
+                    facilitySummary.monthlySummaryData,
+                    year,
+                    accountPredictorEntries,
+                    facilitySummary.facility,
+                    previousYearsSummaryData,
+                    accountPredictors
+                );
+                previousYearsSummaryData.push(annualSummaryData);
+                annualAnalysisSummaries.push(annualSummaryData.getFormattedResult());
+            }
+            this.facilitySummaries.push({
+                facility: facilitySummary.facility,
+                analysisItem: facilitySummary.analysisItem,
+                monthlySummaryData: getSavingsReportMonthlyAnalysisSummaryData(facilitySummary.monthlySummaryData, report.endMonth, report.endYear),
+                annualAnalysisSummaries: getSavingsReportAnnualAnalysisSummaries(annualAnalysisSummaries, report.endMonth, report.endYear),
+                latestMonthSummary: getLatestMonthSummary(getSavingsReportMonthlyAnalysisSummaryData(facilitySummary.monthlySummaryData, report.endMonth, report.endYear))
+            });
+        });
+    }
+
+}

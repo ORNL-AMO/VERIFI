@@ -1,0 +1,78 @@
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { NgxIndexedDBService } from 'ngx-indexed-db';
+import { LoadingService } from '@app/core-components/loading/loading.service';
+import { IndexedDbAccessService } from './indexed-db-access.service';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class PredictorDataDbService {
+
+    constructor(private dbService: NgxIndexedDBService,
+        private loadingService: LoadingService,
+        private indexedDbAccess: IndexedDbAccessService) { }
+
+    getAll(): Observable<Array<IdbPredictorData>> {
+        return this.dbService.getAll('predictorData');
+    }
+
+    async getAllAccountPredictorData(accountId: string): Promise<Array<IdbPredictorData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorData>(
+            'predictorData',
+            'accountId',
+            accountId
+        );
+    }
+
+    getById(predictorDataId: number): Observable<IdbPredictorData> {
+        return this.dbService.getByKey('predictorData', predictorDataId);
+    }
+
+    getByIndex(indexName: string, indexValue: IDBValidKey): Observable<IdbPredictorData> {
+        return this.dbService.getByIndex('predictorData', indexName, indexValue);
+    }
+
+    getStoredByGuid(guid: string): Promise<IdbPredictorData | undefined> {
+        return this.indexedDbAccess.getByGuid<IdbPredictorData>('predictorData', guid);
+    }
+
+    getStoredPredictorData(predictorId: string): Promise<Array<IdbPredictorData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorData>(
+            'predictorData',
+            'predictorId',
+            predictorId
+        );
+    }
+
+    getStoredFacilityPredictorData(facilityId: string): Promise<Array<IdbPredictorData>> {
+        return this.indexedDbAccess.getAllByIndex<IdbPredictorData>(
+            'predictorData',
+            'facilityId',
+            facilityId
+        );
+    }
+
+    count() {
+        return this.dbService.count('predictorData');
+    }
+
+    addWithObservable(predictorData: IdbPredictorData): Observable<IdbPredictorData> {
+        return this.dbService.add('predictorData', predictorData);
+    }
+
+    updateWithObservable(predictorData: IdbPredictorData): Observable<IdbPredictorData> {
+        predictorData.modifiedDate = new Date();
+        return this.dbService.update('predictorData', predictorData);
+    }
+
+    deleteIndexWithObservable(predictorDataId: number): Observable<any> {
+        return this.dbService.delete('predictorData', predictorDataId)
+    }
+
+    async deleteAllFacilityPredictorData(facilityId: string) {
+        this.loadingService.setLoadingMessage('Deleting Facility Predictor Data...');
+        await this.indexedDbAccess.deleteAllByIndex('predictorData', 'facilityId', facilityId);
+    }
+}

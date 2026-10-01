@@ -27,11 +27,13 @@ This tool is written in the Angular framework (TypeScript) and uses Electron for
 
 If you plan to contribute code changes to this repository, please review the [contributing guidelines](CONTRIBUTING.md) first.
 
+AI-assisted contributors should also start with the repository [agent guide](AGENTS.md), [architecture overview](ARCHITECTURE.md), and [agent documentation index](docs/agents/README.md).
+
 ### Getting Started
 
 - We are using NodeJS [nodejs.org](https://nodejs.org/en/download). See [`package.json`](./package.json) for currently supported version.
 - This project was generated with [Angular CLI](https://github.com/angular/angular-cli), and is typically updated to latest versions of angular as often as is reasonable.
-- To install all required packages: `npm install`
+- To install all required packages from the lockfile: `npm ci`
 - When developing for web, run `npm run start` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ### Electron Development
@@ -45,6 +47,24 @@ If you plan to contribute code changes to this repository, please review the [co
 - General build for Electron: `npm run build`
 - Production Web Build: `npm run build-prod`
 - Production Electron Build: `npm run build-prod-electron`
+
+### Testing
+
+VERIFI uses Vitest for fast unit tests and Playwright with Chromium for tests that require native browser APIs such as IndexedDB and Web Workers.
+
+- Run fast unit tests in watch mode: `npm test`
+- Run fast unit tests once: `npm run test:ci`
+- Install Chromium before running browser tests locally: `npx playwright install chromium`
+- Run browser tests in Chromium: `npm run test:browser`
+- Run browser tests once in headless Chromium: `npm run test:browser:ci`
+- Run the complete CI test suite: `npm run test:all:ci`
+- Generate informational scoped coverage: `npm run test:coverage`
+
+Fast tests use the `.spec.ts` suffix. Tests that require a real browser use `.browser.spec.ts` and are kept out of the fast jsdom suite.
+
+Behavior-changing pull requests should add the lowest-cost meaningful automated coverage, or document why focused manual evidence is more appropriate. Creation-only specs do not count as coverage. Pull requests targeting `master` or `develop` run both the fast and browser suites in GitHub Actions.
+
+See the [testing guide](docs/testing.md) for the risk-based pull-request policy, test-layer decision table, coverage policy, and executable examples.
 
 ### Native Installers
 

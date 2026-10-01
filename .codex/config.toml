@@ -1,0 +1,2 @@
+# Keep responses compact without reducing reasoning effort.
+model_verbosity = "low"

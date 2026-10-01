@@ -1,4 +1,4 @@
-import { FuelTypeOption } from "./fuelTypeOption";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 
 export const StationarySolidOptions: Array<FuelTypeOption> = [
     {

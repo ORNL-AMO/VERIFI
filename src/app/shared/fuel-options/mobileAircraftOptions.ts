@@ -1,4 +1,4 @@
-import { FuelTypeOption } from "./fuelTypeOption";
+import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 
 //TODO: Fill missing values...
 export const MobileAircraftOptions: Array<FuelTypeOption> = [

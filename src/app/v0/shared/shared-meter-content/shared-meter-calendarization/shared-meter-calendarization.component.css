@@ -1,0 +1,18 @@
+
+.popup.calanderization{
+    top: 30px;
+    left: 35px;
+    right: 35px;
+    width: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.btn-label{
+    font-size: 16px;
+}
+
+.popup.annual-total {
+    width: min(800px, calc(100vw - 2rem));
+    left: max(1rem, calc(50% - 400px));
+}

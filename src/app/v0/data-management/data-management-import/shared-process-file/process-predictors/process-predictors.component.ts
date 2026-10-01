@@ -1,0 +1,146 @@
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, inject } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { DataManagementService } from '@v0/data-management/data-management.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { FileReference, getEmptyFileReference } from '@v0/data-management/data-management-import/import-services/upload-data-models';
+import { EditPredictorFormService } from '@v0/shared/shared-predictors-content/edit-predictor-form.service';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+
+@Component({
+  selector: 'app-process-predictors',
+  standalone: false,
+
+  templateUrl: './process-predictors.component.html',
+  styleUrl: './process-predictors.component.css'
+})
+export class ProcessPredictorsComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  fileReference: FileReference = getEmptyFileReference();
+  paramsSub: Subscription;
+  predictorsIncluded: boolean;
+  allPredictorsValid: boolean;
+
+  editPredictorForm: FormGroup;
+  editPredictor: IdbPredictor;
+  editPredictorFacility: IdbFacility;
+  editPredictorPrevGUID: string;
+
+  skipAll: boolean = false;
+  showExisting: boolean = false;
+  existingPredictorOptions: Array<IdbPredictor> = [];
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private dataManagementService: DataManagementService,
+    private editPredictorFormService: EditPredictorFormService
+  ) { }
+
+  ngOnInit(): void {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
+      let id: string = param['id'];
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
+      this.predictorsIncluded = this.fileReference.predictors.length != 0;
+      if (this.predictorsIncluded) {
+        this.fileReference.predictors.forEach(predictor => {
+          let form: FormGroup = this.editPredictorFormService.getFormFromPredictor(predictor);
+          predictor.isValid = form.valid;
+        });
+        this.setValidPredictors();
+      } else {
+        this.allPredictorsValid = true;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.paramsSub.unsubscribe();
+  }
+
+  setValidPredictors() {
+    let isAllValid: boolean = true;
+    this.fileReference.predictors.forEach(predictor => {
+      if (!predictor.isValid && !predictor.skipImport) {
+        isAllValid = false;
+      }
+    });
+    this.allPredictorsValid = isAllValid;
+  }
+
+  setEditPredictor(predictor: IdbPredictor) {
+    if (predictor.id == undefined) {
+      this.editPredictorPrevGUID = predictor.guid;
+    }
+    this.editPredictorFacility = this.fileReference.importFacilities.find(f => { return f.guid == predictor.guid });
+    this.editPredictor = predictor;
+    this.editPredictorForm = this.editPredictorFormService.getFormFromPredictor(predictor);
+  }
+
+  setSkipAll() {
+    this.fileReference.predictors.forEach(predictor => {
+      predictor.skipImport = this.skipAll;
+    });
+  }
+
+  cancelEdit() {
+    this.editPredictorForm = undefined;
+    this.editPredictor = undefined;
+    this.editPredictorFacility = undefined;
+  }
+
+  submitPredictor() {
+    let editPredictorIndex: number;
+    if (this.editPredictorPrevGUID) {
+      editPredictorIndex = this.fileReference.predictors.findIndex(filePredictor => { return filePredictor.guid == this.editPredictorPrevGUID });
+    } else {
+      editPredictorIndex = this.fileReference.predictors.findIndex(filePredictor => { return filePredictor.guid == this.editPredictor.guid });
+    }
+    this.editPredictorFormService.setPredictorDataFromForm(this.editPredictor, this.editPredictorForm);
+    this.fileReference.predictors[editPredictorIndex] = this.editPredictor;
+    this.fileReference.predictors[editPredictorIndex].isValid = this.editPredictorForm.valid;
+    this.setValidPredictors();
+    this.cancelEdit();
+  }
+
+  setShowExisting() {
+    let accountPredictors: Array<IdbPredictor> = [...this.accountWorkspaceStore.predictors()];
+    let facilityPredictors: Array<IdbPredictor> = accountPredictors.filter(p => { return p.facilityId == this.editPredictor.facilityId; });
+    let existingPredictorsInUse: Array<string> = this.fileReference.predictors.flatMap(predictor => {
+      return predictor.guid
+    });
+    this.existingPredictorOptions = facilityPredictors.filter(fPredictor => {
+      return !existingPredictorsInUse.includes(fPredictor.guid);
+    });
+    this.showExisting = true;
+  }
+
+  selectExistingPredictor(predictor: IdbPredictor) {
+    let importWizardName: string = this.editPredictor.importWizardName;
+    let previousId: string = this.editPredictor.guid;
+    this.editPredictor = predictor;
+    this.editPredictor.importWizardName = importWizardName;
+    this.editPredictorForm = this.editPredictorFormService.getFormFromPredictor(predictor);
+
+    let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.editPredictor.guid);
+    this.fileReference.predictorData.forEach(pData => {
+      if (pData.predictorId == previousId) {
+        pData.predictorId = predictor.guid;
+        //update with existing predictor data
+        let existingData: IdbPredictorData = facilityPredictorData.find(fpData => {
+          return fpData.year == pData.year && fpData.month == pData.month && fpData.predictorId == predictor.guid;
+        });
+        if (existingData) {
+          pData.id = existingData.id;
+        } else {
+          delete pData.id;
+        }
+      }
+    });
+    this.showExisting = false;
+  }
+}

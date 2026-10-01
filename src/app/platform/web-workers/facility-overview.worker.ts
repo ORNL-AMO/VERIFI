@@ -1,0 +1,57 @@
+/// <reference lib="webworker" />
+
+import { getCalanderizedMeterData } from "@domain/calculations/calanderization/calanderizeMeters";
+import { FacilityOverviewData } from "@domain/calculations/dashboard-calculations/facilityOverviewClass";
+import { UtilityUseAndCost } from "@domain/calculations/dashboard-calculations/useAndCostClass";
+import { CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
+import * as _ from 'lodash';
+
+addEventListener('message', ({ data }) => {
+    try {
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, [data.facility], data.assessmentReportVersion, data.customGWPs);
+        let dateRange: { endDate: Date, startDate: Date };
+        if (!data.dateRange) {
+            if (calanderizedMeters && calanderizedMeters.length > 0) {
+                let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+                let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+                let maxDate: Date;
+                let minDate: Date;
+                if (data.inOverview) {
+                    maxDate = new Date(latestData.year, latestData.monthNumValue);
+                    minDate = new Date(maxDate.getFullYear() - 1, maxDate.getMonth(), 1);
+                } else {
+                    let startData: MonthlyData = _.minBy(monthlyData, 'date');
+                    maxDate = new Date(latestData.year, latestData.monthNumValue);
+                    minDate = new Date(startData.year, startData.monthNumValue);
+                }
+                minDate.setMonth(minDate.getMonth() + 1);
+                dateRange = {
+                    endDate: maxDate,
+                    startDate: minDate
+                };
+            }
+        } else {
+            dateRange = data.dateRange;
+        }
+        let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, dateRange, data.facility);
+        let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(calanderizedMeters, dateRange);
+        let results = {
+            facilityOverviewData: facilityOverviewData,
+            utilityUseAndCost: utilityUseAndCost,
+            type: data.type,
+            error: false,
+            dateRange: dateRange,
+            calanderizedMeters: calanderizedMeters
+        }
+        postMessage(results);
+    } catch (err) {
+        console.log(err);
+        let results = {
+            facilityOverviewData: undefined,
+            utilityUseAndCost: undefined,
+            type: data.type,
+            error: true
+        }
+        postMessage(results);
+    }
+});

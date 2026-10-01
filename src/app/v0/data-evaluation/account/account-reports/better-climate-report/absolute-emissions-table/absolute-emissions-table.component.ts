@@ -1,0 +1,56 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, Input, inject } from '@angular/core';
+import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { BetterClimateReportSetup } from '@data/models/overview-report';
+
+@Component({
+    selector: 'app-absolute-emissions-table',
+    templateUrl: './absolute-emissions-table.component.html',
+    styleUrls: ['./absolute-emissions-table.component.css'],
+    standalone: false
+})
+export class AbsoluteEmissionsTableComponent {
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  @Input()
+  yearDetails: Array<BetterClimateYearDetails>;
+  @Input()
+  cellWidth: number;
+  @Input()
+  account: IdbAccount;
+  @Input()
+  betterClimateReportSetup: BetterClimateReportSetup;
+
+  hasStationary: boolean;
+  hasMobile: boolean;
+  hasFugitive: boolean;
+  hasProcess: boolean;
+  hasBiomass: boolean;
+  hasOtherScope2: boolean;
+  selectedReport: IdbAccountReport;
+
+  ngOnInit() {
+    this.hasStationary = this.yearDetails.find(detail => {
+      return detail.emissionsResults.stationaryEmissions != 0;
+    }) != undefined;
+    this.hasMobile = this.yearDetails.find(detail => {
+      return detail.emissionsResults.mobileTotalEmissions != 0;
+    }) != undefined;
+    this.hasFugitive = this.yearDetails.find(detail => {
+      return detail.emissionsResults.fugitiveEmissions != 0;
+    }) != undefined;
+    this.hasProcess = this.yearDetails.find(detail => {
+      return detail.emissionsResults.processEmissions != 0;
+    }) != undefined;
+    this.hasBiomass = this.yearDetails.find(detail => {
+      return detail.emissionsResults.totalBiogenicEmissions != 0;
+    }) != undefined;
+    this.hasOtherScope2 = this.yearDetails.find(detail => {
+      return detail.emissionsResults.otherScope2Emissions != 0;
+    }) != undefined;
+
+    this.selectedReport = this.accountWorkspaceStore.selectedAccountReport();
+  }
+
+}

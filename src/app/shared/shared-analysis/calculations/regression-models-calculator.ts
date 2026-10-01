@@ -1,14 +1,14 @@
 import * as jStat from 'jstat';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SEPValidation } from '@data/models/analysis';
+import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import * as _ from 'lodash';
-import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { checkSameMonth, checkSameMonthPredictorData } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
-import { getDateFromPredictorData } from '../../dateHelperFunctions';
+import { getFiscalYear } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { getLatestCompleteAnalysisYear, getMonthlyStartAndEndDate } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { checkSameMonth, checkSameMonthPredictorData } from '@shared/meter-date-helpers';
+import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 
 /**
  * Pure computation class — no Angular DI.

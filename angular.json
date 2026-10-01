@@ -8,14 +8,29 @@
       "schematics": {
         "@schematics/angular:component": {
           "standalone": false,
+          "skipTests": true,
           "type": "component"
         },
         "@schematics/angular:pipe": {
           "standalone": false,
+          "skipTests": true,
           "typeSeparator": "."
         },
         "@schematics/angular:service": {
+          "skipTests": true,
           "type": "service"
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true
+        },
+        "@schematics/angular:resolver": {
+          "skipTests": true
         },
         "@schematics/angular:module": {
           "standalone": false,
@@ -28,7 +43,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "index": "src/index.html",
             "polyfills": [
@@ -111,6 +126,35 @@
               "sourceMap": true,
               "namedChunks": true
             },
+            "testing": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "assets": [
+                "src/assets"
+              ],
+              "styles": [
+                "src/styles/styles.css",
+                "src/styles/sliderToggle.css",
+                "src/styles/meterDisplays.css",
+                "src/styles/contentTabs.css",
+                "src/styles/contentContainers.css",
+                "src/styles/sectionHeaders.css",
+                "src/styles/sidebar.css",
+                "src/styles/tables.css",
+                "src/styles/forms.css",
+                "src/styles/popupsWindows.css",
+                "src/styles/alerts.css",
+                "src/styles/htmlElements.css",
+                "src/styles/typography.css",
+                "src/styles/buttons.css",
+                "src/styles/banners.css",
+                "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                "src/styles/printing.css"
+              ],
+              "scripts": []
+            },
             "dev-srv": {
               "fileReplacements": [
                 {
@@ -186,36 +230,66 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
+            "buildTarget": "verifi:build:testing",
             "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/assets"
+            "reporters": [
+              "verbose"
             ],
-            "styles": [
-              "src/styles/styles.css",
-              "src/styles/sliderToggle.css",
-              "src/styles/meterDisplays.css",
-              "src/styles/contentTabs.css",
-              "src/styles/contentContainers.css",
-              "src/styles/sectionHeaders.css",
-              "src/styles/sidebar.css",
-              "src/styles/tables.css",
-              "src/styles/forms.css",
-              "src/styles/popupsWindows.css",
-              "src/styles/alerts.css",
-              "src/styles/htmlElements.css",
-              "src/styles/typography.css",
-              "src/styles/buttons.css",
-              "src/styles/banners.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "src/styles/printing.css"
+            "exclude": [
+              "**/*.browser.spec.ts"
+            ]
+          }
+        },
+        "test-browser": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "verifi:build:testing",
+            "tsConfig": "tsconfig.browser-spec.json",
+            "reporters": [
+              "verbose"
             ],
-            "scripts": [],
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            "include": [
+              "**/*.browser.spec.ts"
+            ],
+            "browsers": [
+              "chromium"
+            ]
+          }
+        },
+        "test-coverage": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "verifi:build:testing",
+            "tsConfig": "tsconfig.coverage-spec.json",
+            "runnerConfig": "vitest.coverage.config.ts",
+            "reporters": [
+              "verbose"
+            ],
+            "include": [
+              "**/*.spec.ts"
+            ],
+            "exclude": [
+              "src/app/web-workers/run-worker.browser.spec.ts"
+            ],
+            "browsers": [
+              "chromium"
+            ],
+            "coverage": true,
+            "coverageInclude": [
+              "src/app/calculations/**/*.ts",
+              "src/app/indexedDB/**/*.ts",
+              "src/app/web-workers/**/*.ts"
+            ],
+            "coverageExclude": [
+              "src/**/*.spec.ts",
+              "src/app/web-workers/testing/**"
+            ],
+            "coverageReporters": [
+              "text-summary",
+              "html"
+            ]
           }
         },
         "lint": {

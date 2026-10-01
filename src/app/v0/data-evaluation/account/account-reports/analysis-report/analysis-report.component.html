@@ -1,0 +1,37 @@
+@if (selectedReport) {
+@if (selectedReport.analysisReportSetup.includeProblemsInformation) {
+<div class="report" [ngClass]="{'print': print}">
+  @if (facilityAnalysisItems) {
+  <app-analysis-problems-information [executiveSummaryItems]="executiveSummaryItems"
+    [accountReport]="selectedReport"></app-analysis-problems-information>
+  }
+</div>
+}
+@if (selectedReport.analysisReportSetup.includeExecutiveSummary) {
+<div class="report" [ngClass]="{'print': print}">
+  @if (facilityAnalysisItems) {
+  <app-analysis-facility-report [accountReport]="selectedReport"
+    [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
+  }
+</div>
+}
+@if (selectedReport.analysisReportSetup.includeDataValidationTables) {
+<div class="report" [ngClass]="{'print': print}">
+  <app-analysis-data-validation-tables [executiveSummaryItems]="executiveSummaryItems" [accountReport]="selectedReport"
+    [isDataCheck]="false"></app-analysis-data-validation-tables>
+</div>
+}
+}
+
+
+@if (!facilityAnalysisItems) {
+<div class="w-100 justify-content-center">
+  <div class="pt-5">
+    <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
+  </div>
+</div>
+}
+
+@if (facilityAnalysisItems.length > 0) {
+<app-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf" (exportPdf)="onExportPdf()" (onExportPpt)="downloadPpt()"></app-print-report-button>
+}

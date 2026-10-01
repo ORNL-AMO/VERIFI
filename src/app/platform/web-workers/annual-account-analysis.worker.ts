@@ -1,0 +1,30 @@
+/// <reference lib="webworker" />
+
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "@data/models/analysis";
+import { AnnualAccountAnalysisSummaryClass } from "@domain/calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
+
+addEventListener('message', ({ data }) => {
+    try {
+        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(
+            data.accountAnalysisItem, data.account, data.accountFacilities, data.accountPredictorEntries,
+            data.allAccountAnalysisItems, data.calculateAllMonthlyData, data.meters, data.meterData,
+            data.accountPredictors, { reportYear: data.reportYear }
+        );
+        let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+        let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+        postMessage({
+            annualAnalysisSummaries: annualAnalysisSummaries,
+            monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
+            error: false,
+            facilitySummaries: annualAnalysisSummaryClass.facilitySummaries,
+            reportYear: annualAnalysisSummaryClass.reportYear
+        });
+    } catch (err) {
+        postMessage({
+            annualAnalysisSummaries: undefined,
+            monthlyAnalysisSummaryData: undefined,
+            error: true,
+            facilitySummaries: undefined
+        });
+    }
+});

@@ -1,5 +1,5 @@
-import type { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import type { IdbFacility } from 'src/app/models/idbModels/facility';
+import type { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
+import type { IdbFacility } from '@data/models/idbModels/facility';
 
 export const ORPHANED_MODEL_RECOVERY_NOTE =
   'Recovered as a user-defined model because the saved generated-model details were unavailable.';

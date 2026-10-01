@@ -1,0 +1,60 @@
+@let _analysisDisplay = analysisDisplay();
+@let _calculating = calculating();
+<div class="d-flex justify-content-between mb-2">
+  <div class="p-0">
+    @if (_analysisDisplay == 'table') {
+      <app-analysis-summary-table-filter [tableContext]="'monthGroup'" [group]="selectedGroup()"
+        [analysisItem]="analysisItem()">
+      </app-analysis-summary-table-filter>
+    }
+  </div>
+
+  <!--Items Per Page-->
+  <div class="d-flex">
+    @if (_analysisDisplay == 'table') {
+      <app-table-items-dropdown></app-table-items-dropdown>
+    }
+    <div class="btn-group ps-2">
+      <button class="btn toggle-btn" [ngClass]="{'active': _analysisDisplay == 'table'}"
+        (click)="setDataDisplay('table')">
+        <span class="fa fa-chevron-right"></span>
+        Table
+        <span class="fa fa-chevron-left"></span>
+      </button>
+      <button class="btn toggle-btn" [ngClass]="{'active': _analysisDisplay == 'graph'}"
+        (click)="setDataDisplay('graph')">
+        <span class="fa fa-chevron-right"></span>
+        Graph
+        <span class="fa fa-chevron-left"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+@if (_calculating == false) {
+  <div class="w-100">
+    @if (_analysisDisplay == 'table') {
+      <app-monthly-analysis-summary-table [analysisItem]="analysisItem()"
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary().monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage()"
+        [facilityOrAccount]="facility()" [predictorVariables]="monthlyAnalysisSummary().predictorVariables"
+        [printBlock]="'all'" [group]="selectedGroup()">
+      </app-monthly-analysis-summary-table>
+    }
+    @if (_analysisDisplay == 'graph') {
+      <app-monthly-analysis-summary-graph [analysisItem]="analysisItem()"
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary().monthlyAnalysisSummaryData" [facilityOrAccount]="facility()">
+      </app-monthly-analysis-summary-graph>
+    }
+    @if (_analysisDisplay == 'graph') {
+      <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem()"
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary().monthlyAnalysisSummaryData" [facilityOrAccount]="facility()"
+        [group]="selectedGroup()">
+      </app-monthly-analysis-summary-savings-graph>
+    }
+  </div>
+}
+
+@if (_calculating != false) {
+  <app-calculating-spinner [message]="'Calculating Monthly Results...'"
+  [error]="_calculating == 'error'"></app-calculating-spinner>
+}

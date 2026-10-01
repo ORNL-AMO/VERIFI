@@ -1,0 +1,60 @@
+import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
+import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { Component, inject, Injector } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { IdbFacility } from '@data/models/idbModels/facility';
+import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+
+@Component({
+  selector: 'app-meter-charges-visualization',
+  standalone: false,
+  templateUrl: './meter-charges-visualization.component.html',
+  styleUrl: './meter-charges-visualization.component.css'
+})
+export class MeterChargesVisualizationComponent {
+  private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
+  private readonly accountWorkspaceService = inject(AccountWorkspaceService);
+  private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  facility: IdbFacility;
+  facilitySub: Subscription;
+  utilityMeter: IdbUtilityMeter;
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
+    private injector: Injector
+
+  ) {
+
+  }
+
+  ngOnInit() {
+    this.facilitySub = toObservable(this.accountWorkspaceStore.selectedFacility, { injector: this.injector }).subscribe(facility => {
+      this.facility = facility;
+    });
+
+    this.activatedRoute.params.subscribe(params => {
+      let meterId: string = params['id'];
+      this.utilityMeter = this.accountWorkspaceQuery.getMeterByGuid(meterId);
+      if (this.utilityMeter) {
+        this.accountWorkspaceService.selectMeter((this.utilityMeter)?.guid);
+      } else {
+        this.goToMeterList();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.facilitySub.unsubscribe();
+    this.accountWorkspaceService.selectMeter(undefined);
+  }
+
+  goToMeterList() {
+    let selectedFacility: IdbFacility = this.accountWorkspaceStore.selectedFacility();
+    this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
+  }
+
+}

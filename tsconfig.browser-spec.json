@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/browser-spec",
+    "types": [
+      "vitest/globals",
+      "node"
+    ]
+  },
+  "include": [
+    "src/polyfills.ts",
+    "src/**/*.browser.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}
