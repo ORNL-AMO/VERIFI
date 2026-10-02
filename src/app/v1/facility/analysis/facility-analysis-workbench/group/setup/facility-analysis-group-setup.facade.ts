@@ -91,14 +91,14 @@ export class FacilityAnalysisGroupSetupFacade {
   }
 
   setAverageBaseload(amount: number | undefined): void {
-    this.updateGroup(group => { group.averagePercentBaseload = amount; }, false, amount !== undefined);
+    this.updateGroup(group => { group.averagePercentBaseload = amount; });
   }
 
   setMonthlyBaseload(month: number, amount: number | undefined): void {
     this.updateGroup(group => {
       const entry = group.monthlyPercentBaseload.find(item => item.monthNum === month);
       if (entry) entry.percent = amount;
-    }, false, amount !== undefined);
+    });
   }
 
   setAdjustmentYear(kind: AdjustmentKind, year: number | undefined): void {
@@ -152,7 +152,7 @@ export class FacilityAnalysisGroupSetupFacade {
   }
 
   setBankingYear(field: 'bankedAnalysisYear' | 'newBaselineYear', year: number | undefined): void {
-    this.updateGroup(group => { group[field] = year; }, true, !!year);
+    this.updateGroup(group => { group[field] = year; }, true);
   }
 
   private adjustmentDraft(kind: AdjustmentKind): WritableSignal<AdjustmentDraft> {
@@ -163,13 +163,19 @@ export class FacilityAnalysisGroupSetupFacade {
     return kind === 'dataAdjustments' ? this.dataAdjustmentEditorOpen : this.baselineAdjustmentEditorOpen;
   }
 
-  private updateGroup(update: (group: AnalysisGroup) => void, immediate = false, valid = true): void {
+  private updateGroup(update: (group: AnalysisGroup) => void, immediate = false): void {
     const groupGuid = this.groupContext.groupGuid();
     this.autosave.update(draft => {
       const group = draft.groups.find(item => item.idbGroupId === groupGuid);
       if (group) update(group);
       draft.isAnalysisVisited = false;
-    }, { immediate, valid });
+    }, {
+      immediate,
+      valid: draft => {
+        const group = draft.groups.find(item => item.idbGroupId === groupGuid);
+        return !!group && groupSetupDraftValid(group, draft.hasBanking);
+      }
+    });
   }
 }
 
@@ -183,4 +189,22 @@ export interface AdjustmentDraft {
 function validAdjustmentDraft(draft: AdjustmentDraft): boolean {
   const amount = Number(draft.amount);
   return !!draft.year && draft.amount.trim().length > 0 && Number.isFinite(amount) && amount > 0;
+}
+
+export function groupSetupDraftValid(group: AnalysisGroup, analysisHasBanking: boolean): boolean {
+  if (isSkippedAnalysisType(group.analysisType)) return true;
+  if ((group.analysisType === 'energyIntensity' || group.analysisType === 'modifiedEnergyIntensity')
+    && !group.predictorVariables.some(variable => variable.productionInAnalysis)) return false;
+  if (group.analysisType === 'modifiedEnergyIntensity') {
+    if (group.specifiedMonthlyPercentBaseload) {
+      if (group.monthlyPercentBaseload.length !== 12
+        || group.monthlyPercentBaseload.some(item => !Number.isFinite(item.percent))) return false;
+    } else if (!Number.isFinite(group.averagePercentBaseload)) return false;
+  }
+  if (analysisHasBanking && group.applyBanking) {
+    if (!Number.isFinite(group.bankedAnalysisYear) || !Number.isFinite(group.newBaselineYear)) return false;
+    if (group.bankedAnalysisYear >= group.newBaselineYear) return false;
+  }
+  return [...(group.dataAdjustments ?? []), ...(group.baselineAdjustmentsV2 ?? [])]
+    .every(adjustment => Number.isFinite(adjustment.year) && Number.isFinite(adjustment.amount) && adjustment.amount >= 0);
 }

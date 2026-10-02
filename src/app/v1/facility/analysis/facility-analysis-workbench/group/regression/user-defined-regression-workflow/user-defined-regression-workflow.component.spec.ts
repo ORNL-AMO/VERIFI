@@ -13,7 +13,7 @@ describe('UserDefinedRegressionWorkflowComponent', () => {
       predictorVariables: [{ id: 'production', name: 'Production', productionInAnalysis: true, regressionCoefficient: 3 }]
     } as AnalysisGroup);
     const facade = {
-      group, analysis: signal({ analysisCategory: 'energy', energyUnit: 'MMBtu' }),
+      group, analysis: signal({ analysisCategory: 'water', waterUnit: 'gal' }),
       months: [{ name: 'January', monthNumValue: 0 }, { name: 'December', monthNumValue: 11 }],
       yearOptions: signal([2024]), hasUserDefinedDataIssue: signal(false), generatedModels: signal([]),
       validation: { state: signal({ state: 'idle', source: 'user-defined' }), retry: vi.fn() },
@@ -28,6 +28,8 @@ describe('UserDefinedRegressionWorkflowComponent', () => {
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('.v1-user-regression__equation')?.textContent).toContain('2 + (3 × Production)');
+    expect(element.querySelector('.v1-user-regression__equation')?.textContent).toContain('Modeled Water');
+    expect(element.querySelector('.v1-user-regression__equation')?.getAttribute('aria-label')).toBe('Modeled Water equation');
     expect((element.querySelector('#model-start-month') as HTMLSelectElement).selectedOptions[0].textContent).toContain('January');
     expect(element.textContent).toContain('Selected duration: 12 months');
   });

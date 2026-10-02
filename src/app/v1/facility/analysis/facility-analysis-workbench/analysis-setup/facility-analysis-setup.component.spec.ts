@@ -9,7 +9,7 @@ import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-au
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { invalidateAllRegressionModels } from '../group/regression/regression-draft';
 import { FacilityAnalysisPeriodService } from './facility-analysis-period.service';
-import { compatibleBankingSources, FacilityAnalysisSetupComponent } from './facility-analysis-setup.component';
+import { analysisSetupDraftValid, compatibleBankingSources, FacilityAnalysisSetupComponent } from './facility-analysis-setup.component';
 
 describe('facility analysis setup behavior', () => {
   it('clears every persisted regression selection before unlocking setup', () => {
@@ -42,6 +42,17 @@ describe('facility analysis setup behavior', () => {
       { guid: 'other-facility', facilityId: 'facility-b', analysisCategory: 'energy', energyIsSource: true }
     ] as IdbAnalysisItem[];
     expect(compatibleBankingSources(analysis, candidates).map(item => item.guid)).toEqual(['match']);
+  });
+
+  it('keeps the complete setup invalid when a later banking edit fixes only its own field', () => {
+    const analysis = {
+      name: '', energyUnit: 'MMBtu', waterUnit: 'gal', baselineYear: 2024,
+      hasBanking: true, bankedAnalysisItemId: 'source-analysis'
+    } as IdbAnalysisItem;
+
+    expect(analysisSetupDraftValid(analysis)).toBe(false);
+    analysis.name = 'Energy Analysis';
+    expect(analysisSetupDraftValid(analysis)).toBe(true);
   });
 
   it('selects the saved baseline after complete-year options become available', () => {
@@ -97,6 +108,7 @@ describe('facility analysis setup behavior', () => {
     const updated = structuredClone(analysis);
     mutate(updated);
     expect(updated.baselineYear).toBe(2025);
-    expect(options).toEqual({ immediate: true, valid: true });
+    expect(options.immediate).toBe(true);
+    expect(options.valid(updated)).toBe(true);
   });
 });

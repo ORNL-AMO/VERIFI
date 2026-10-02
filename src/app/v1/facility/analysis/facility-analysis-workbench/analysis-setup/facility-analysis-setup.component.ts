@@ -69,47 +69,44 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
     effect(() => this.syncForm());
     const controls = this.form.controls;
     controls.name.valueChanges.pipe(takeUntilDestroyed()).subscribe(name => {
-      this.autosave.update(draft => { draft.name = name; }, { valid: controls.name.valid });
+      this.updateAnalysis(draft => { draft.name = name; });
     });
     controls.energyIsSource.valueChanges.pipe(takeUntilDestroyed()).subscribe(energyIsSource => {
       if (this.hasModels()) return;
       controls.bankedAnalysisItemId.setValue(null, { emitEvent: false });
-      this.autosave.update(draft => {
+      this.updateAnalysis(draft => {
         draft.energyIsSource = energyIsSource;
         draft.bankedAnalysisItemId = undefined;
-      }, { immediate: true });
+      }, true);
     });
     controls.energyUnit.valueChanges.pipe(takeUntilDestroyed()).subscribe(energyUnit => {
       if (this.hasModels()) return;
-      this.autosave.update(draft => { draft.energyUnit = energyUnit; }, { immediate: true, valid: controls.energyUnit.valid });
+      this.updateAnalysis(draft => { draft.energyUnit = energyUnit; }, true);
     });
     controls.waterUnit.valueChanges.pipe(takeUntilDestroyed()).subscribe(waterUnit => {
       if (this.hasModels()) return;
-      this.autosave.update(draft => { draft.waterUnit = waterUnit; }, { immediate: true, valid: controls.waterUnit.valid });
+      this.updateAnalysis(draft => { draft.waterUnit = waterUnit; }, true);
     });
     controls.baselineYear.valueChanges.pipe(takeUntilDestroyed()).subscribe(baselineYear => {
       if (this.hasModels() || baselineYear === null) return;
-      this.autosave.update(draft => { draft.baselineYear = baselineYear; }, {
-        immediate: true,
-        valid: controls.baselineYear.valid
-      });
+      this.updateAnalysis(draft => { draft.baselineYear = baselineYear; }, true);
     });
     controls.hasBanking.valueChanges.pipe(takeUntilDestroyed()).subscribe(hasBanking => {
       if (!hasBanking) controls.bankedAnalysisItemId.setValue(null, { emitEvent: false });
-      this.autosave.update(draft => {
+      this.updateAnalysis(draft => {
         draft.hasBanking = hasBanking;
         if (!hasBanking) draft.bankedAnalysisItemId = undefined;
-      }, { immediate: true });
+      }, true);
     });
     controls.bankedAnalysisItemId.valueChanges.pipe(takeUntilDestroyed()).subscribe(bankedAnalysisItemId => {
-      this.autosave.update(draft => {
+      this.updateAnalysis(draft => {
         draft.bankedAnalysisItemId = bankedAnalysisItemId || undefined;
-      }, { immediate: true, valid: controls.bankedAnalysisItemId.valid });
+      }, true);
     });
   }
 
   clearModels(): void {
-    this.autosave.update(invalidateAllRegressionModels, { immediate: true });
+    this.updateAnalysis(invalidateAllRegressionModels, true);
     this.closeClearModels();
   }
 
@@ -126,6 +123,10 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.closeClearModels();
+  }
+
+  private updateAnalysis(update: (draft: IdbAnalysisItem) => void, immediate = false): void {
+    this.autosave.update(update, { immediate, valid: analysisSetupDraftValid });
   }
 
   private syncForm(): void {
@@ -176,4 +177,13 @@ export function compatibleBankingSources(
     && candidate.facilityId === analysis.facilityId
     && candidate.analysisCategory === analysis.analysisCategory
     && (analysis.analysisCategory === 'water' || candidate.energyIsSource === analysis.energyIsSource));
+}
+
+export function analysisSetupDraftValid(analysis: IdbAnalysisItem): boolean {
+  return analysis.name.trim().length > 0
+    && analysis.name.length <= 120
+    && analysis.energyUnit.trim().length > 0
+    && analysis.waterUnit.trim().length > 0
+    && Number.isFinite(analysis.baselineYear)
+    && (!analysis.hasBanking || !!analysis.bankedAnalysisItemId?.trim());
 }

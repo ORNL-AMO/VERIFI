@@ -9,7 +9,7 @@ import { RegressionModelValidationService } from './regression-model-validation.
 import { FacilityAnalysisRegressionComponent, generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.component';
 import { RegressionCandidateStore } from './regression-candidate.store';
 import { convertRegressionGroupToUserDefined } from './regression-draft';
-import { FacilityAnalysisRegressionFacade } from './facility-analysis-regression.facade';
+import { FacilityAnalysisRegressionFacade, regressionDraftValid } from './facility-analysis-regression.facade';
 import { FacilityAnalysisRegressionController } from './facility-analysis-regression.controller';
 
 describe('facility analysis regression behavior', () => {
@@ -49,6 +49,23 @@ describe('facility analysis regression behavior', () => {
     } as AnalysisGroup)).toBe(false);
   });
 
+  it('keeps a user-defined draft invalid after an unrelated notes edit', () => {
+    const group = {
+      isGeneratedModel: false,
+      regressionConstant: 1,
+      regressionModelStartMonth: 0,
+      regressionStartYear: 2024,
+      regressionModelEndMonth: 11,
+      regressionEndYear: 2024,
+      regressionModelNotes: 'Updated note',
+      predictorVariables: [{ productionInAnalysis: true, regressionCoefficient: undefined }]
+    } as AnalysisGroup;
+
+    expect(regressionDraftValid(group)).toBe(false);
+    group.predictorVariables[0].regressionCoefficient = 2;
+    expect(regressionDraftValid(group)).toBe(true);
+  });
+
   it.each([
     {
       name: 'calendar year',
@@ -60,7 +77,7 @@ describe('facility analysis regression behavior', () => {
       facility: { fiscalYear: 'nonCalendarYear' as const, fiscalYearMonth: 6, fiscalYearCalendarEnd: true },
       expectedRange: [6, 2023, 5, 2024]
     }
-  ])('seeds a five-significant-digit user model and the $name date range', ({ facility, expectedRange }) => {
+  ])('seeds an exact user model and the $name date range', ({ facility, expectedRange }) => {
     const selectedModel = {
       modelId: 'model-1', modelYear: 2024, coef: [17485.54321, -6.8489342],
       predictorVariables: [{ id: 'weather', name: 'Weather' }]
@@ -75,8 +92,8 @@ describe('facility analysis regression behavior', () => {
       ]
     } as AnalysisGroup, selectedModel, facility, 2022);
 
-    expect(result.regressionConstant).toBe(17486);
-    expect(result.predictorVariables[0].regressionCoefficient).toBe(-6.8489);
+    expect(result.regressionConstant).toBe(17485.54321);
+    expect(result.predictorVariables[0].regressionCoefficient).toBe(-6.8489342);
     expect(result.predictorVariables[1].regressionCoefficient).toBe(0);
     expect([
       result.regressionModelStartMonth,

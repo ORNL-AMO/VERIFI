@@ -56,7 +56,7 @@
       @if (method === 'generated') {
         <p>Changing to generated models clears the user-defined equation. Generate and select a model to restore modeled results.</p>
       } @else if (selectedModel()) {
-        <p>The selected model’s constant and predictor coefficients will be carried into the user-defined model, preserving the modeled energy equation. Generated alternatives and the selected-model designation will be cleared.</p>
+        <p>The selected model’s constant and predictor coefficients will be carried into the user-defined model, preserving the {{ modeledQuantityLabel().toLowerCase() }} equation. Generated alternatives and the selected-model designation will be cleared.</p>
       } @else {
         <p>No generated model is selected. Changing methods clears the generated alternatives and opens an empty user-defined model.</p>
       }

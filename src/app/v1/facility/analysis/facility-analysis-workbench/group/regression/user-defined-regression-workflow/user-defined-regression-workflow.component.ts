@@ -5,6 +5,7 @@ import { RegressionModelValidationState, modelPeriodMonthCount, userDefinedValid
 import { formatRegressionNumber } from '../regression-number-format';
 import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
 import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
+import { modeledQuantityLabel } from '../regression-labels';
 
 @Component({
   selector: 'app-user-defined-regression-workflow',
@@ -22,6 +23,7 @@ export class UserDefinedRegressionWorkflowComponent {
   readonly yearOptions = this.workflow.yearOptions;
   readonly validationState = this.workflow.validation.state;
   readonly hasDataIssue = this.workflow.hasUserDefinedDataIssue;
+  readonly modeledQuantityLabel = computed(() => modeledQuantityLabel(this.analysis()?.analysisCategory));
 
   readonly rangeMonths = computed(() => modelPeriodMonthCount(this.group()));
   readonly formMessage = computed(() => userDefinedValidationMessage(this.group()));

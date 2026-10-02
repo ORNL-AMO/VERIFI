@@ -4,7 +4,7 @@ import { RegressionModelsService } from '@shared/shared-analysis/calculations/re
 import { Months } from '@shared/form-data/months';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { RegressionCandidateStore } from './regression-candidate.store';
-import { RegressionModelValidationService, modelPeriodMonthCount } from './regression-model-validation.service';
+import { RegressionModelValidationService, modelPeriodMonthCount, userDefinedValidationMessage } from './regression-model-validation.service';
 import { applySelectedRegressionModel, convertRegressionGroupToUserDefined, invalidateRegressionModel } from './regression-draft';
 import type { RegressionRangeField } from './facility-analysis-regression.controller';
 
@@ -112,16 +112,16 @@ export class FacilityAnalysisRegressionFacade {
     this.updateGroup(group => {
       group.maxModelVariables = value;
       invalidateRegressionModel(group);
-    }, true, value > 0);
+    }, true);
     this.clearCandidates();
   }
 
   setRange(field: RegressionRangeField, value: number | undefined): void {
-    this.updateGroup(group => { group[field] = value; }, false, value !== undefined);
+    this.updateGroup(group => { group[field] = value; });
   }
 
   setConstant(value: number | undefined): void {
-    this.updateGroup(group => { group.regressionConstant = value; }, false, value !== undefined);
+    this.updateGroup(group => { group.regressionConstant = value; });
   }
 
   setNotes(value: string): void {
@@ -132,7 +132,7 @@ export class FacilityAnalysisRegressionFacade {
     this.updateGroup(group => {
       const variable = group.predictorVariables.find(item => item.id === predictorId);
       if (variable) variable.regressionCoefficient = value;
-    }, false, value !== undefined);
+    });
   }
 
   async generateModels(): Promise<void> {
@@ -212,13 +212,19 @@ export class FacilityAnalysisRegressionFacade {
     this.generationController = undefined;
   }
 
-  private updateGroup(update: (group: AnalysisGroup) => void, immediate = false, valid = true): void {
+  private updateGroup(update: (group: AnalysisGroup) => void, immediate = false): void {
     const groupGuid = this.groupContext.groupGuid();
     this.autosave.update(draft => {
       const group = draft.groups.find(item => item.idbGroupId === groupGuid);
       if (group) update(group);
       draft.isAnalysisVisited = false;
-    }, { immediate, valid });
+    }, {
+      immediate,
+      valid: draft => {
+        const group = draft.groups.find(item => item.idbGroupId === groupGuid);
+        return !!group && regressionDraftValid(group);
+      }
+    });
   }
 
   private replaceGroup(updated: AnalysisGroup, immediate: boolean): void {
@@ -233,6 +239,12 @@ export function modelRangeMonthCount(group: AnalysisGroup): number {
 export function generatedConfigurationValid(group: AnalysisGroup): boolean {
   const selected = group.predictorVariables.filter(variable => variable.productionInAnalysis).length;
   return selected > 0 && (group.maxModelVariables ?? 0) > 0 && group.maxModelVariables <= selected;
+}
+
+export function regressionDraftValid(group: AnalysisGroup): boolean {
+  return group.isGeneratedModel
+    ? generatedConfigurationValid(group)
+    : userDefinedValidationMessage(group) === undefined;
 }
 
 function sameModel(first: JStatRegressionModel, second: JStatRegressionModel): boolean {

@@ -17,7 +17,7 @@ describe('RegressionModelReviewSlideoutComponent', () => {
       selectedModelId: 'current', predictorVariables: [{ id: 'production', name: 'Production' }]
     } as AnalysisGroup);
     fixture.componentRef.setInput('currentModel', { ...model, modelId: 'current', modelYear: 2023 });
-    fixture.componentRef.setInput('analysis', { analysisCategory: 'energy', energyUnit: 'MMBtu' } as IdbAnalysisItem);
+    fixture.componentRef.setInput('analysis', { analysisCategory: 'water', waterUnit: 'gal' } as IdbAnalysisItem);
     fixture.componentRef.setInput('validationState', { state: 'loading', source: 'generated' });
     fixture.detectChanges();
 
@@ -25,7 +25,8 @@ describe('RegressionModelReviewSlideoutComponent', () => {
     fixture.componentInstance.selected.subscribe(selected);
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('app-workspace-slideout')).not.toBeNull();
-    expect(element.textContent).toContain('Modeled Energy');
+    expect(element.textContent).toContain('Modeled Water');
+    expect(element.querySelector('.v1-regression-review__equation')?.getAttribute('aria-label')).toBe('Modeled Water equation');
     expect(element.textContent).toContain('1.2346 + (2.3457 × Production)');
     expect(element.textContent).toContain('0.91235');
     expect(element.textContent).toContain('Candidate model');

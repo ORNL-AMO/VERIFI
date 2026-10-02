@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, effect, inject } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -10,6 +10,7 @@ import { FacilityAnalysisRegressionFacade } from './facility-analysis-regression
 import { RegressionModelValidationService } from './regression-model-validation.service';
 import { UserDefinedRegressionWorkflowComponent } from './user-defined-regression-workflow/user-defined-regression-workflow.component';
 import { FacilityAnalysisRegressionController, RegressionMethod } from './facility-analysis-regression.controller';
+import { modeledQuantityLabel } from './regression-labels';
 
 export { generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.facade';
 
@@ -53,6 +54,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
   readonly yearOptions = this.workflow.yearOptions;
   readonly hasUserDefinedDataIssue = this.workflow.hasUserDefinedDataIssue;
   readonly reviewComparisonModel = this.workflow.reviewComparisonModel;
+  readonly modeledQuantityLabel = computed(() => modeledQuantityLabel(this.analysis()?.analysisCategory));
   constructor() {
     effect(() => this.controller.pendingChange() ? this.openConfirmationModal() : this.closeConfirmationModal());
   }

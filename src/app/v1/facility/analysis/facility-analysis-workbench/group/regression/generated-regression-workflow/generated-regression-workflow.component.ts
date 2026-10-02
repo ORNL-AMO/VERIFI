@@ -4,6 +4,7 @@ import { JStatRegressionModel } from '@data/models/analysis';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
 import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
+import { modeledQuantityLabel } from '../regression-labels';
 
 type ModelSort = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
 
@@ -27,6 +28,7 @@ export class GeneratedRegressionWorkflowComponent {
   readonly workflow = inject(FacilityAnalysisRegressionFacade);
   readonly controller = inject(FacilityAnalysisRegressionController);
   readonly group = this.workflow.group;
+  readonly modeledQuantityLabel = computed(() => modeledQuantityLabel(this.workflow.analysis()?.analysisCategory));
   readonly models = this.workflow.generatedModels;
   readonly generating = this.workflow.generating;
   readonly generationError = this.workflow.generationError;

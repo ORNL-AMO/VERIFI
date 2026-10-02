@@ -4,9 +4,9 @@
   @let comparisonModel = currentModel();
   @let reviewingCurrentModel = isCurrent();
   <div class="v1-regression-review">
-    <figure class="v1-regression-review__equation" aria-label="Modeled energy equation">
+    <figure class="v1-regression-review__equation" [attr.aria-label]="modeledQuantityLabel() + ' equation'">
       <p class="v1-regression-review__formula">
-        <span class="v1-regression-review__formula-label">Modeled Energy</span>
+        <span class="v1-regression-review__formula-label">{{ modeledQuantityLabel() }}</span>
         <span class="v1-regression-review__formula-equals">=</span>
         <strong>{{ equation() }}</strong>
       </p>

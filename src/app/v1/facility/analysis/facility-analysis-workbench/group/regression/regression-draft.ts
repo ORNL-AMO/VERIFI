@@ -1,7 +1,6 @@
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FiscalYearSettings, getUserDefinedModelDateRange } from '@shared/shared-analysis/calculations/regression-model-recovery';
-import { roundRegressionNumber } from './regression-number-format';
 
 /** Clears every persisted field derived from a generated regression model. */
 export function invalidateRegressionModel(group: AnalysisGroup): void {
@@ -47,7 +46,7 @@ export function convertRegressionGroupToUserDefined(
     models: undefined,
     dateModelsGenerated: undefined,
     regressionModelYear: modelYear,
-    regressionConstant: roundRegressionNumber(selectedModel?.coef[0] ?? group.regressionConstant),
+    regressionConstant: selectedModel?.coef[0] ?? group.regressionConstant,
     ...(dateRange ? {
       regressionModelStartMonth: dateRange.startMonth,
       regressionStartYear: dateRange.startYear,
@@ -59,7 +58,7 @@ export function convertRegressionGroupToUserDefined(
       const coefficient = selectedModel
         ? (coefficientIndex >= 0 ? selectedModel.coef[coefficientIndex + 1] : 0)
         : variable.regressionCoefficient;
-      return { ...variable, regressionCoefficient: roundRegressionNumber(coefficient) };
+      return { ...variable, regressionCoefficient: coefficient };
     })
   };
 }

@@ -70,7 +70,10 @@ export class FacilityAnalysisAutosaveService {
     });
   }
 
-  update(mutator: (draft: IdbAnalysisItem) => void, options: { immediate?: boolean; valid?: boolean } = {}): void {
+  update(
+    mutator: (draft: IdbAnalysisItem) => void,
+    options: { immediate?: boolean; valid?: boolean | ((draft: IdbAnalysisItem) => boolean) } = {}
+  ): void {
     const current = this.draftValue();
     if (!current) return;
     const next = cloneAnalysis(current);
@@ -80,7 +83,8 @@ export class FacilityAnalysisAutosaveService {
     this.draftValue.set(next);
     this.errorValue.set(undefined);
     this.clearDebounce();
-    if (options.valid === false) {
+    const valid = typeof options.valid === 'function' ? options.valid(next) : options.valid;
+    if (valid === false) {
       this.stateValue.set('invalid');
       return;
     }

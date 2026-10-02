@@ -6,6 +6,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { RegressionModelValidationComponent } from '../model-validation/regression-model-validation.component';
 import { RegressionModelValidationState, groupWithGeneratedModel } from '../regression-model-validation.service';
 import { formatRegressionNumber } from '../regression-number-format';
+import { modeledQuantityLabel } from '../regression-labels';
 
 @Component({
   selector: 'app-regression-model-review-slideout',
@@ -26,6 +27,7 @@ export class RegressionModelReviewSlideoutComponent {
   readonly retryRequested = output<void>();
 
   readonly isCurrent = computed(() => this.model().modelId === this.group().selectedModelId);
+  readonly modeledQuantityLabel = computed(() => modeledQuantityLabel(this.analysis().analysisCategory));
   readonly reviewGroup = computed(() => groupWithGeneratedModel(this.group(), this.model()));
   readonly coefficients = computed(() => this.model().predictorVariables.map((variable, index) => ({
     id: variable.id,

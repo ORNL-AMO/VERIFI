@@ -78,4 +78,15 @@ describe('FacilityAnalysisAutosaveService', () => {
     expect(service.state()).toBe('invalid');
     expect(execute).not.toHaveBeenCalled();
   });
+
+  it('evaluates validity against the complete updated draft', async () => {
+    service.update(draft => { draft.name = ''; }, { valid: draft => draft.name.trim().length > 0 });
+    service.update(draft => { draft.hasBanking = true; }, { valid: draft => draft.name.trim().length > 0 });
+
+    await vi.advanceTimersByTimeAsync(ANALYSIS_AUTOSAVE_DEBOUNCE_MS * 2);
+
+    expect(service.state()).toBe('invalid');
+    expect(service.draft()).toMatchObject({ name: '', hasBanking: true });
+    expect(execute).not.toHaveBeenCalled();
+  });
 });

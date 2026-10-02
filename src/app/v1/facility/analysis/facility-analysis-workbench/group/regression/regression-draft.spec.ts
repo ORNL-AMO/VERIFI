@@ -46,7 +46,7 @@ describe('regression draft transitions', () => {
     expect(group.selectedModelId).toBe('model-1');
   });
 
-  it('converts a selected generated equation to a rounded user-defined model', () => {
+  it('preserves the exact selected equation when converting to a user-defined model', () => {
     const group = populatedGroup();
     const selected = {
       modelId: 'model-1', modelYear: 2024, coef: [17485.54321, -6.8489342],
@@ -64,13 +64,13 @@ describe('regression draft transitions', () => {
       isGeneratedModel: false,
       selectedModelId: undefined,
       models: undefined,
-      regressionConstant: 17486,
+      regressionConstant: 17485.54321,
       regressionModelStartMonth: 0,
       regressionStartYear: 2024,
       regressionModelEndMonth: 11,
       regressionEndYear: 2024
     });
-    expect(result.predictorVariables[0].regressionCoefficient).toBe(-6.8489);
+    expect(result.predictorVariables[0].regressionCoefficient).toBe(-6.8489342);
   });
 });
 

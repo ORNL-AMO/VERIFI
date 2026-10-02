@@ -2,9 +2,9 @@
 <section class="v1-user-regression" aria-label="User-defined regression model">
   <div class="v1-user-regression__top">
     <ng-content select="[modeling-method]"></ng-content>
-    <figure class="v1-user-regression__equation" aria-label="Modeled energy equation">
+    <figure class="v1-user-regression__equation" [attr.aria-label]="modeledQuantityLabel() + ' equation'">
       <p>
-        <span class="v1-user-regression__equation-label">Modeled Energy</span>
+        <span class="v1-user-regression__equation-label">{{ modeledQuantityLabel() }}</span>
         <span class="v1-user-regression__equation-equals">=</span>
         <strong>{{ equation() }}</strong>
       </p>

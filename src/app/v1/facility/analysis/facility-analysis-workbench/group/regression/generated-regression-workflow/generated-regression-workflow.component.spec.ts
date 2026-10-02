@@ -21,7 +21,7 @@ describe('GeneratedRegressionWorkflowComponent', () => {
     group = signal<AnalysisGroup | undefined>(structuredClone(baseGroup));
     models = signal<readonly JStatRegressionModel[]>([]);
     facade = {
-      group, generatedModels: models, generating: signal(false), generationError: signal(undefined),
+      group, analysis: signal({ analysisCategory: 'energy' }), generatedModels: models, generating: signal(false), generationError: signal(undefined),
       configurationExpanded: signal(true), generatedThisSession: signal(false), maxVariableOptions: signal([1]),
       setPredictorSelected: vi.fn(), changeMaxVariables: vi.fn(), setConstant: vi.fn(), setRange: vi.fn(),
       setNotes: vi.fn(), setCoefficient: vi.fn(), changeMethod: vi.fn(), inspectModel: vi.fn(), clearReview: vi.fn(),
@@ -89,6 +89,13 @@ describe('GeneratedRegressionWorkflowComponent', () => {
     fixture.detectChanges();
     expect(element.textContent).toContain('Critical issue');
     expect(element.textContent).toContain('Validation issue');
+  });
+
+  it('uses the analysis category in the modeled equation heading', () => {
+    facade.analysis.set({ analysisCategory: 'water' });
+    models.set([model(2024)]);
+
+    expect((create().nativeElement as HTMLElement).textContent).toContain('Predictors and Modeled Water Equation');
   });
 
   function model(year: number): JStatRegressionModel {
