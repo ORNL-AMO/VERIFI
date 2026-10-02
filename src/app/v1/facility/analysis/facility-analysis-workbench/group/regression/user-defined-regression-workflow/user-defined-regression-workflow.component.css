@@ -1,0 +1,36 @@
+:host { display: block; }
+.v1-user-regression { display: grid; gap: var(--v1-space-3); }
+.v1-user-regression__top { display: grid; grid-template-columns: minmax(17rem, .8fr) minmax(0, 2fr); gap: var(--v1-space-4); align-items: stretch; }
+.v1-user-regression__equation { display: flex; align-items: center; min-width: 0; margin: 0; padding: .75rem .9rem; border-left: .25rem solid var(--v1-content-control); background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); }
+.v1-user-regression__equation p { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3em; min-width: 0; margin: 0; color: var(--v1-text); font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: clamp(1.05rem, 1.4vw, 1.3rem); line-height: 1.35; }
+.v1-user-regression__equation-label { font-style: italic; font-weight: 700; white-space: nowrap; }
+.v1-user-regression__equation-equals { color: var(--v1-content-control); font-weight: 800; }
+.v1-user-regression__equation strong { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.v1-user-regression__form { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(20rem, .85fr); padding-top: var(--v1-space-3); border-top: 1px solid var(--v1-divider); }
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.v1-user-regression__form > fieldset { display: grid; align-content: start; gap: var(--v1-space-2); }
+.v1-user-regression__form > fieldset:first-child { padding-right: 1.25rem; }
+.v1-user-regression__form > fieldset + fieldset { padding-left: 1.25rem; border-left: 1px solid var(--v1-divider); }
+.v1-user-regression__form > fieldset > legend { margin-bottom: var(--v1-space-2); font-size: 1rem; font-weight: 800; }
+.v1-user-regression__variable-head, .v1-user-regression__variable-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) minmax(8rem, .7fr); gap: var(--v1-space-2); align-items: center; }
+.v1-user-regression__variable-head { padding-bottom: .4rem; border-bottom: 1px solid var(--v1-divider); color: var(--v1-muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.v1-user-regression__variable-row { min-height: 2.75rem; padding-block: .35rem; border-bottom: 1px solid var(--v1-divider); }
+.v1-user-regression__variable-row > input[type='checkbox'] { justify-self: center; }
+.v1-user-regression__variable-row--constant > label { font-weight: 750; }
+.v1-user-regression__variable-row small { color: var(--v1-muted); }
+.v1-user-regression__details > label, .v1-user-regression__period label { display: grid; gap: .3rem; font-weight: 750; }
+.v1-user-regression__period { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-2); }
+.v1-user-regression__help, .v1-user-regression__form-message { margin: 0; color: var(--v1-muted); font-size: .8rem; }
+.v1-user-regression__help--error, .v1-user-regression__form-message { color: var(--v1-danger); font-weight: 750; }
+@media (max-width: 900px) {
+  .v1-user-regression__top,
+  .v1-user-regression__form { grid-template-columns: 1fr; }
+  .v1-user-regression__form > fieldset:first-child { padding-right: 0; padding-bottom: 1rem; }
+  .v1-user-regression__form > fieldset + fieldset { padding-top: 1rem; padding-left: 0; border-top: 1px solid var(--v1-divider); border-left: 0; }
+}
+@media (max-width: 560px) {
+  .v1-user-regression__period { grid-template-columns: 1fr; }
+  .v1-user-regression__variable-head { display: none; }
+  .v1-user-regression__variable-row { grid-template-columns: 2rem minmax(0, 1fr); }
+  .v1-user-regression__variable-row .form-control { grid-column: 2; }
+}

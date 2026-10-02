@@ -14,11 +14,11 @@
         <input
           id="v1-email-signup-input"
           type="email"
-          [value]="email.value"
+          [formControl]="email"
           placeholder="name@company.com"
           [attr.aria-invalid]="!!invalidEmailMessage"
           aria-describedby="v1-email-signup-message"
-          (input)="setEmail($event)">
+          (input)="setEmail()">
         <button type="submit" class="v1-btn v1-btn--primary">Subscribe</button>
       </div>
     </form>

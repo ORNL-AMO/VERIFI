@@ -22,8 +22,8 @@ export class ExistingGwpPickerComponent {
       .sort((a, b) => a.label.localeCompare(b.label));
   });
 
-  updateQuery(event: Event): void {
-    this.query.set((event.target as HTMLInputElement).value);
+  updateQuery(value: string): void {
+    this.query.set(value);
   }
 
   valueFor(option: GlobalWarmingPotential): number {

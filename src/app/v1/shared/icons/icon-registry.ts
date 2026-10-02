@@ -28,6 +28,7 @@ import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon';
 import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
 import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
+import CovariateIcon from '@hugeicons/core-free-icons/CovariateIcon';
 import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
@@ -56,8 +57,10 @@ import HumidityIcon from '@hugeicons/core-free-icons/HumidityIcon';
 import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon';
 import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
 import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
+import Link04Icon from '@hugeicons/core-free-icons/Link04Icon';
 import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
 import LockIcon from '@hugeicons/core-free-icons/LockIcon';
+import LockKeyholeIcon from '@hugeicons/core-free-icons/LockKeyholeIcon';
 import MicroscopeIcon from '@hugeicons/core-free-icons/MicroscopeIcon';
 import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
 import PackageIcon from '@hugeicons/core-free-icons/PackageIcon';
@@ -111,6 +114,7 @@ export const ICON_REGISTRY = {
   clock: Clock01Icon,
   cloudRain: CloudRainIcon,
   copy: Copy01Icon,
+  covariate: CovariateIcon,
   danger: CancelCircleIcon,
   database: DatabaseIcon,
   delete: Delete02Icon,
@@ -138,8 +142,10 @@ export const ICON_REGISTRY = {
   humidity: HumidityIcon,
   info: InformationCircleIcon,
   loading: Loading03Icon,
+  link: Link04Icon,
   location: Location01Icon,
   lock: LockIcon,
+  lockKeyhole: LockKeyholeIcon,
   meter: GaugeIcon,
   meterGroup: CombineIcon,
   meterGroupItem: GroupIcon,

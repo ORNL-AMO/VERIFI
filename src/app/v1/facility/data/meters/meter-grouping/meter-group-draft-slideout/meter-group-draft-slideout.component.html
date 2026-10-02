@@ -6,17 +6,17 @@
   <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
     <label>
       <span>Group name</span>
-      <input type="text" [value]="draft().name" [disabled]="saving" required (input)="setName($event)">
+      <input #groupName type="text" [value]="draft().name" [disabled]="saving" required (input)="setName(groupName.value)">
     </label>
 
     <label>
       <span>Group type</span>
-      <select
+      <select #groupType
         class="v1-select"
         [value]="draft().groupType"
         [disabled]="saving || assignedMeterCount > 0"
         required
-        (change)="setGroupType($event)">
+        (change)="setGroupType(groupType.value)">
         @for (type of groupTypes; track type) {
           <option [value]="type">{{ type }}</option>
         }
@@ -28,7 +28,7 @@
 
     <label>
       <span>Description</span>
-      <textarea rows="4" [value]="draft().description || ''" [disabled]="saving" (input)="setDescription($event)"></textarea>
+      <textarea #groupDescription rows="4" [value]="draft().description || ''" [disabled]="saving" (input)="setDescription(groupDescription.value)"></textarea>
     </label>
 
     <footer class="v1-meter-slideout-form__footer">

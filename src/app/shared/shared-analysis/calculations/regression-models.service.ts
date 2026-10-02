@@ -9,23 +9,17 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { AssessmentReportVersion } from '@data/models/idbModels/account';
 import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
-import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
 import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
+import { RegressionModelsWorkerRequest, RegressionModelsWorkerResponse } from '@platform/web-workers/regression-models-worker.contract';
+import { buildUserDefinedRegressionModel, calculateRegressionModels } from './regression-models-calculation';
+import { runWorker } from '@platform/web-workers/run-worker';
+import { firstValueFrom, fromEvent, takeUntil } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegressionModelsService {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
-
-  private currentWorker: Worker | null = null;
-
-
-  terminateCurrentWorker(): void {
-    this.currentWorker?.terminate();
-    this.currentWorker = null;
-  }
 
   generateModels(
     group: AnalysisGroup,
@@ -34,47 +28,32 @@ export class RegressionModelsService {
     meters: Array<IdbUtilityMeter>,
     meterData: Array<IdbUtilityMeterData>,
     facilityPredictorData: Array<IdbPredictorData>,
-    assessmentReportVersion: AssessmentReportVersion
+    assessmentReportVersion: AssessmentReportVersion,
+    signal?: AbortSignal
   ): Promise<Array<JStatRegressionModel>> {
-    this.terminateCurrentWorker();
+    const request: RegressionModelsWorkerRequest = {
+      group: structuredClone(group),
+      analysisItem: structuredClone(analysisItem),
+      facility,
+      meters,
+      meterData,
+      facilityPredictorData,
+      assessmentReportVersion
+    };
+    if (signal?.aborted) return Promise.reject(abortError());
+    if (typeof Worker === 'undefined') return Promise.resolve().then(() => calculateRegressionModels(request));
 
-    if (typeof Worker !== 'undefined') {
-      return new Promise((resolve, reject) => {
-        this.currentWorker = new Worker(
-          new URL('../../../platform/web-workers/regression-models.worker', import.meta.url)
-        );
-        this.currentWorker.onmessage = ({ data }) => {
-          this.terminateCurrentWorker();
-          if (!data.error) {
-            resolve(data.generatedModels);
-          } else {
-            reject(new Error('Worker error generating regression models'));
-          }
-        };
-        this.currentWorker.postMessage({
-          group: JSON.parse(JSON.stringify(group)),
-          analysisItem: JSON.parse(JSON.stringify(analysisItem)),
-          facility,
-          meters,
-          meterData,
-          facilityPredictorData,
-          assessmentReportVersion,
-        });
-      });
-    } else {
-      // Fallback: no Web Worker support
-      try {
-        const calanderizedMeters = getCalanderizedMeterData(
-          meters, meterData, facility, false,
-          { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) },
-          [], [], [facility], assessmentReportVersion, []
-        );
-        const calculator = new RegressionModelsCalculator(facilityPredictorData);
-        return Promise.resolve(calculator.getModels(group, calanderizedMeters, facility, analysisItem));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+    const worker = new Worker(new URL('../../../platform/web-workers/regression-models.worker', import.meta.url));
+    const response$ = signal
+      ? runWorker<RegressionModelsWorkerResponse>(worker, request).pipe(takeUntil(fromEvent(signal, 'abort')))
+      : runWorker<RegressionModelsWorkerResponse>(worker, request);
+    return firstValueFrom(response$).then(response => {
+      if (response.ok === false) throw new Error(response.message);
+      return [...response.generatedModels];
+    }).catch(error => {
+      if (signal?.aborted) throw abortError();
+      throw error;
+    });
   }
 
   applyGeneratedModelsToGroup(
@@ -132,49 +111,13 @@ export class RegressionModelsService {
   }
 
   getUserDefinedModel(selectedGroup: AnalysisGroup, selectedFacility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): JStatRegressionModel {
-    //report year is determined by the latest full year of data
-    let baselineYear: number = analysisItem.baselineYear;
-    let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(selectedFacility.guid);
-    const selectedPredictors = selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
-
-    let userModel: JStatRegressionModel = {
-      coef: [
-        selectedGroup.regressionConstant,
-        ...selectedPredictors.map(v => v.regressionCoefficient)
-      ],
-      R2: undefined,
-      SSE: undefined,
-      SSR: undefined,
-      SST: undefined,
-      adjust_R2: undefined,
-      df_model: undefined,
-      df_resid: undefined,
-      ybar: undefined,
-      t: {
-        se: undefined,
-        sigmaHat: undefined,
-        p: undefined
-      },
-      f: {
-        pvalue: undefined,
-        F_statistic: undefined
-      },
-      modelYear: selectedGroup.regressionModelYear,
-      predictorVariables: selectedPredictors,
-      modelId: undefined,
-      isValid: false,
-      modelPValue: undefined,
-      modelNotes: [selectedGroup.regressionModelNotes],
-      errorModeling: false,
-      SEPValidation: undefined,
-      SEPValidationPass: undefined,
-      dataValidationNotes: [''],
-      modelValidationNotes: [''],
-      isUserDefinedModel: true
-    };
-
-    const validatedModel = new RegressionModelsCalculator(facilityPredictorData).setModelVaildAndNotes(userModel, reportYear, selectedFacility, baselineYear, selectedGroup);
-    return validatedModel;
+    return buildUserDefinedRegressionModel(
+      selectedGroup,
+      selectedFacility,
+      analysisItem,
+      reportYear,
+      this.accountWorkspaceQuery.getFacilityPredictorData(selectedFacility.guid)
+    );
   }
 
   getGroupModelItem(group: AnalysisGroup, facility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): FacilityGroupAnalysisItem {
@@ -214,6 +157,10 @@ export class RegressionModelsService {
       baselineYear: analysisItem.baselineYear
     }
   }
+}
+
+function abortError(): DOMException {
+  return new DOMException('Regression model generation was cancelled.', 'AbortError');
 }
 
 export interface FacilityGroupAnalysisItem {

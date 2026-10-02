@@ -1,0 +1,33 @@
+:host { display: block; }
+.v1-regression-review { display: grid; gap: var(--v1-space-4); }
+.v1-regression-review section { display: grid; gap: var(--v1-space-2); padding-bottom: 1rem; border-bottom: 1px solid var(--v1-divider); }
+.v1-regression-review section.v1-regression-review__coefficients { padding-bottom: 0; border-bottom: 0; }
+.v1-regression-review h3, .v1-regression-review p, .v1-regression-review dl, .v1-regression-review figure { margin: 0; }
+.v1-regression-review h3 { font-size: 1rem; font-weight: 800; }
+.v1-regression-review__equation { padding: .75rem .9rem; border-left: .25rem solid var(--v1-content-control); background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); }
+.v1-regression-review__formula { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3em; color: var(--v1-text); font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: clamp(1.15rem, 1.6vw, 1.45rem); line-height: 1.35; }
+.v1-regression-review__formula-label { font-style: italic; font-weight: 700; white-space: nowrap; }
+.v1-regression-review__formula-equals { color: var(--v1-content-control); font-weight: 800; }
+.v1-regression-review__formula strong { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.v1-regression-review__status { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-2); }
+.v1-regression-review__current, .v1-chip { display: inline-flex; align-items: center; gap: .35rem; }
+.v1-regression-review__current { color: var(--v1-success); font-weight: 800; }
+.v1-regression-review__stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--v1-divider); border: 1px solid var(--v1-divider); }
+.v1-regression-review__stats div { padding: .7rem; background: var(--v1-surface); }
+.v1-regression-review__stats dt { color: var(--v1-muted); font-size: .75rem; font-weight: 750; }
+.v1-regression-review__stats dd { margin: .2rem 0 0; font-weight: 850; }
+.v1-regression-review__comparison { display: grid; border: 1px solid var(--v1-divider); }
+.v1-regression-review__comparison > div { display: grid; grid-template-columns: minmax(9rem, 1fr) repeat(2, minmax(7rem, .7fr)); gap: var(--v1-space-2); padding: .55rem .7rem; border-bottom: 1px solid var(--v1-divider); }
+.v1-regression-review__comparison > div:last-child { border-bottom: 0; }
+.v1-regression-review__comparison > div:first-child { background: var(--v1-panel); color: var(--v1-muted); font-size: .75rem; }
+.v1-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--v1-divider); background: var(--v1-surface); }
+.v1-table-scroll table { width: 100%; min-width: 32rem; margin: 0; border-collapse: collapse; }
+.v1-table-scroll th, .v1-table-scroll td { padding: .7rem .8rem; border-bottom: 1px solid var(--v1-divider); vertical-align: middle; }
+.v1-table-scroll thead th { background: var(--v1-panel); color: var(--v1-muted); font-size: .78rem; text-align: left; text-transform: uppercase; }
+.v1-table-scroll tbody tr:hover > * { background: color-mix(in srgb, var(--v1-content-control) 5%, var(--v1-surface)); }
+.v1-regression-review__number { text-align: right !important; font-variant-numeric: tabular-nums; }
+.v1-regression-review__footer { display: flex; justify-content: flex-end; gap: var(--v1-space-2); position: sticky; bottom: calc(-1 * var(--v1-space-4)); padding: var(--v1-space-3) 0 var(--v1-space-4); background: var(--v1-surface); }
+@media (max-width: 700px) {
+  .v1-regression-review__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v1-regression-review__status { align-items: flex-start; flex-direction: column; }
+}

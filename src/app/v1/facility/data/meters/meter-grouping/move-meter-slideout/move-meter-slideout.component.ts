@@ -37,8 +37,8 @@ export class MoveMeterSlideoutComponent implements OnChanges {
     }
   }
 
-  setTarget(event: Event): void {
-    this.selectedTargetId.set((event.target as HTMLSelectElement).value);
+  setTarget(value: string): void {
+    this.selectedTargetId.set(value);
   }
 
   isTargetAllowed(target: MeterGroupDropTarget): boolean {

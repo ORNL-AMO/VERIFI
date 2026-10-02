@@ -1,0 +1,14 @@
+@let currentAnalysis = analysis();
+@let facility = context.facility();
+@if (currentAnalysis && facility) {
+  <section class="v1-analysis-section" aria-label="Used by">
+    <div class="v1-analysis-section__heading"><p>Review workflows that consume this analysis before changing its baseline, models, or banking configuration.</p><span class="v1-chip">{{ totalDependencies() }} relationship(s)</span></div>
+    @if (totalDependencies() === 0) { <article class="v1-empty-state" role="status"><app-ui-icon name="check"></app-ui-icon><h3>No dependencies</h3><p>This analysis is not currently used by another saved workflow.</p></article> }
+    <div class="v1-used-by__grid">
+      <section class="v1-used-by__panel" aria-labelledby="account-analyses-heading"><h3 id="account-analyses-heading">Account analyses</h3>@if (linkedAccountAnalyses().length) { <ul>@for (item of linkedAccountAnalyses(); track item.guid) { <li><span><strong>{{ item.name || 'Untitled account analysis' }}</strong><small>Account analysis</small></span><span class="v1-chip">Destination coming in account-analysis workbench</span></li> }</ul> } @else { <p>None</p> }</section>
+      <section class="v1-used-by__panel" aria-labelledby="facility-reports-heading"><h3 id="facility-reports-heading">Facility reports</h3>@if (linkedReports().length) { <ul>@for (report of linkedReports(); track report.guid) { <li><span><strong>{{ report.name || 'Untitled facility report' }}</strong><small>Facility report</small></span><span class="v1-chip">Destination coming in Reports</span></li> }</ul> } @else { <p>None</p> }</section>
+      <section class="v1-used-by__panel" aria-labelledby="banking-source-heading"><h3 id="banking-source-heading">Banking source</h3>@if (bankingSource(); as source) { <ul><li><span><strong>{{ source.name }}</strong><small>Supplies banked savings to this analysis</small></span><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityAnalysisWorkbenchRoute(facility.guid, source.guid)">Open analysis</a></li></ul> } @else { <p>None</p> }</section>
+      <section class="v1-used-by__panel" aria-labelledby="banking-consumers-heading"><h3 id="banking-consumers-heading">Banking consumers</h3>@if (bankingConsumers().length) { <ul>@for (consumer of bankingConsumers(); track consumer.guid) { <li><span><strong>{{ consumer.name }}</strong><small>Uses this analysis as its banking source</small></span><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityAnalysisWorkbenchRoute(facility.guid, consumer.guid)">Open analysis</a></li> }</ul> } @else { <p>None</p> }</section>
+    </div>
+  </section>
+}

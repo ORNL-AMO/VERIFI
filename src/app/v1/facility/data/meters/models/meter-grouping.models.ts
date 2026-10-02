@@ -41,7 +41,7 @@ export interface MeterGroupDropTarget {
 
 export interface MeterDropEvent {
   readonly card: MeterCardView;
-  readonly target: MeterGroupDropTarget;
+  readonly destination: MeterGroupDropTarget;
 }
 
 export function buildMeterGroupSections(

@@ -1,0 +1,2 @@
+:host { display: block; } .v1-analysis-section { display: grid; gap: var(--v1-space-3); padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); } h3, h4, p { margin: 0; }
+.v1-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--v1-border); } .v1-table-scroll table { min-width: 82rem; margin: 0; } .v1-analysis-results__missing { background: color-mix(in srgb, var(--v1-warning) 12%, var(--v1-surface)); }

@@ -61,7 +61,7 @@
     } @else {
       <div class="v1-portfolio-settings__selection" aria-label="Portfolio facilities">
         <label class="v1-settings-choice v1-portfolio-settings__select-all">
-          <input type="checkbox" [checked]="allFacilitiesSelected()" [disabled]="actionsDisabled" (change)="toggleAllFacilities($any($event.target).checked)">
+          <input #allFacilities type="checkbox" [checked]="allFacilitiesSelected()" [disabled]="actionsDisabled" (change)="toggleAllFacilities(allFacilities.checked)">
           <span>Select all facilities</span>
         </label>
 
@@ -69,8 +69,8 @@
           @for (facility of facilitiesList; track facility.guid) {
             <article class="v1-portfolio-settings__facility" role="listitem">
               <label class="v1-settings-choice">
-                <input type="checkbox" [checked]="isSelected(facility.guid)" [disabled]="actionsDisabled"
-                  (change)="toggleFacility(facility.guid, $any($event.target).checked)">
+                <input #facilitySelected type="checkbox" [checked]="isSelected(facility.guid)" [disabled]="actionsDisabled"
+                  (change)="toggleFacility(facility.guid, facilitySelected.checked)">
                 <span>{{ facility.name }}</span>
               </label>
               <span>{{ facilityLocation(facility) }}</span>

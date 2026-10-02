@@ -26,7 +26,7 @@ describe('ImportStepperComponent', () => {
     expect(links.length).toBe(2);
     expect(links[0].getAttribute('href')).toBe('/v1/workspace/account/account-1/imports/file/draft-1/facilities');
     expect(links[1].getAttribute('aria-current')).toBe('step');
-    expect(element.querySelector('.is-complete .step-number')?.textContent).toContain('✓');
+    expect(element.querySelector('.is-complete .v1-workflow-stepper__number')?.textContent).toContain('✓');
     expect(element.querySelector('[aria-disabled="true"]')?.textContent).toContain('Review');
   });
 

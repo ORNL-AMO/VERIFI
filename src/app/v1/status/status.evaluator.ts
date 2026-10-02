@@ -252,7 +252,10 @@ function evaluateAnalyses(snapshot: AccountWorkspaceSnapshot, calendarizedMeters
       const entity = analysisGroupEntity(analysis, group, facility);
       const setupReasons = groupErrorReasons(errors);
       if (setupReasons.length > 0) {
-        findings.push(makeFinding('analysis-group.setup.invalid', 'error', 'configuration', entity, { reasons: setupReasons }));
+        findings.push(makeFinding('analysis-group.setup.invalid', 'error', 'configuration', entity, {
+          reasons: setupReasons,
+          analysisType: group.analysisType
+        }));
       }
       if (errors.hasInvalidRegressionModel) {
         findings.push(makeFinding('analysis-group.model.invalid', 'warning', 'quality', entity));

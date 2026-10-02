@@ -1,0 +1,49 @@
+@let currentGroup = group();
+<section class="v1-user-regression" aria-label="User-defined regression model">
+  <div class="v1-user-regression__top">
+    <ng-content select="[modeling-method]"></ng-content>
+    <figure class="v1-user-regression__equation" [attr.aria-label]="modeledQuantityLabel() + ' equation'">
+      <p>
+        <span class="v1-user-regression__equation-label">{{ modeledQuantityLabel() }}</span>
+        <span class="v1-user-regression__equation-equals">=</span>
+        <strong>{{ equation() }}</strong>
+      </p>
+    </figure>
+  </div>
+
+  <div class="v1-user-regression__form">
+    <fieldset class="v1-user-regression__variables">
+      <legend>Variables and coefficients</legend>
+      <div class="v1-user-regression__variable-head" aria-hidden="true"><span>Use</span><span>Predictor</span><span>Coefficient</span></div>
+      <div class="v1-user-regression__variable-row v1-user-regression__variable-row--constant">
+        <span aria-hidden="true"></span>
+        <label for="regression-constant">Constant</label>
+        <input id="regression-constant" class="form-control" type="number" step="any" [formControl]="controller.constant" />
+      </div>
+      @for (predictor of currentGroup.predictorVariables; track predictor.id) {
+        <div class="v1-user-regression__variable-row">
+          <input type="checkbox" [id]="'user-predictor-' + predictor.id" [formControl]="controller.predictorControl(predictor.id)" />
+          <label [for]="'user-predictor-' + predictor.id">{{ predictor.name }} @if (predictor.unit) { <small>({{ predictor.unit }})</small> }</label>
+          <label [for]="'coefficient-' + predictor.id" class="visually-hidden">{{ predictor.name }} coefficient</label>
+          <input [id]="'coefficient-' + predictor.id" class="form-control" type="number" step="any" [formControl]="controller.coefficientControl(predictor.id)" />
+        </div>
+      }
+      @if (!currentGroup.predictorVariables.length) { <p class="v1-user-regression__help">No predictors are available for this facility.</p> }
+    </fieldset>
+
+    <fieldset class="v1-user-regression__details">
+      <legend>Model period</legend>
+      <div class="v1-user-regression__period">
+        <label for="model-start-month">Start month<select id="model-start-month" class="v1-select form-select" [formControl]="controller.startMonth"><option [ngValue]="null">Select</option>@for (month of months; track month.monthNumValue) { <option [ngValue]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+        <label for="model-start-year">Start year<select id="model-start-year" class="v1-select form-select" [formControl]="controller.startYear"><option [ngValue]="null">Select</option>@for (year of yearOptions(); track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+        <label for="model-end-month">End month<select id="model-end-month" class="v1-select form-select" [formControl]="controller.endMonth"><option [ngValue]="null">Select</option>@for (month of months; track month.monthNumValue) { <option [ngValue]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+        <label for="model-end-year">End year<select id="model-end-year" class="v1-select form-select" [formControl]="controller.endYear"><option [ngValue]="null">Select</option>@for (year of yearOptions(); track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+      </div>
+      <p class="v1-user-regression__help" [class.v1-user-regression__help--error]="rangeComplete() && rangeMonths() < 12">@if (rangeComplete()) { Selected duration: {{ rangeMonths() }} month{{ rangeMonths() === 1 ? '' : 's' }}. At least 12 complete months are required. } @else { Select the complete start and end period. }</p>
+      @if (hasDataIssue() && rangeComplete() && rangeMonths() >= 12) { <p class="v1-user-regression__help v1-user-regression__help--error" role="alert">Meter or predictor data is incomplete for the selected model period.</p> }
+      <label for="regression-notes">Model notes<textarea id="regression-notes" class="form-control" rows="3" [formControl]="controller.notes"></textarea></label>
+    </fieldset>
+  </div>
+  @if (formMessage(); as message) { <p class="v1-user-regression__form-message" role="status">{{ message }}</p> }
+  <app-regression-model-validation [state]="validationState()" [analysis]="analysis()!" [group]="currentGroup" (retryRequested)="workflow.validation.retry()"></app-regression-model-validation>
+</section>

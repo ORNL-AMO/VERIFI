@@ -1,0 +1,65 @@
+@let currentGroup = group();
+@let currentAnalysis = analysis();
+@if (currentGroup && currentAnalysis) {
+  <section class="v1-regression" aria-label="Regression model">
+    @if (recoveryNotice()) { <p class="v1-regression__notice" role="status"><app-ui-icon name="info"></app-ui-icon>{{ recoveryNotice() }}</p> }
+
+    <div class="v1-regression__workflow">
+      @if (currentGroup.isGeneratedModel) {
+        <app-generated-regression-workflow>
+          <app-regression-method-control modeling-method></app-regression-method-control>
+        </app-generated-regression-workflow>
+      } @else {
+        <app-user-defined-regression-workflow>
+          <app-regression-method-control modeling-method></app-regression-method-control>
+        </app-user-defined-regression-workflow>
+      }
+    </div>
+  </section>
+
+  @if (inspectedModel(); as model) {
+    <app-regression-model-review-slideout
+      [model]="model"
+      [group]="currentGroup"
+      [analysis]="currentAnalysis"
+      [currentModel]="reviewComparisonModel()"
+      [validationState]="validation.state()"
+      (closed)="controller.closeReview()"
+      (selected)="controller.selectModel($event)"
+      (retryRequested)="validation.retry()">
+    </app-regression-model-review-slideout>
+  }
+
+}
+
+<ng-template #confirmationModal>
+  @let pending = controller.pendingChange();
+  @if (pendingMethod(); as method) {
+    <app-confirmation-dialog
+      [title]="method === 'generated' ? 'Use generated models?' : 'Use a user-defined model?'"
+      titleId="change-regression-method-title"
+      cancelAriaLabel="Cancel modeling method change"
+      [confirmLabel]="method === 'generated' ? 'Use generated models' : 'Use user-defined model'"
+      confirmIcon="refresh"
+      (confirmed)="confirmPendingChange()"
+      (cancelled)="cancelPendingConfirmation()">
+      @if (method === 'generated') {
+        <p>Changing to generated models clears the user-defined equation. Generate and select a model to restore modeled results.</p>
+      } @else if (selectedModel()) {
+        <p>The selected model’s constant and predictor coefficients will be carried into the user-defined model, preserving the {{ modeledQuantityLabel().toLowerCase() }} equation. Generated alternatives and the selected-model designation will be cleared.</p>
+      } @else {
+        <p>No generated model is selected. Changing methods clears the generated alternatives and opens an empty user-defined model.</p>
+      }
+    </app-confirmation-dialog>
+  }
+  @if (pending?.kind === 'predictor') {
+    <app-confirmation-dialog title="Change model predictors?" titleId="change-regression-predictor-title" cancelAriaLabel="Cancel predictor change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmPendingChange()" (cancelled)="cancelPendingConfirmation()">
+      <p>This predictor change invalidates the generated candidates and current selection. Downstream results will be recalculated.</p>
+    </app-confirmation-dialog>
+  }
+  @if (pending?.kind === 'maxVariables') {
+    <app-confirmation-dialog title="Change maximum variables?" titleId="change-regression-maximum-title" cancelAriaLabel="Cancel maximum variable change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmPendingChange()" (cancelled)="cancelPendingConfirmation()">
+      <p>Changing this setting invalidates the generated candidates and current selection. Downstream results will be recalculated.</p>
+    </app-confirmation-dialog>
+  }
+</ng-template>

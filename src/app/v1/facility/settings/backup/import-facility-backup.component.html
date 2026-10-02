@@ -32,13 +32,13 @@
       <app-ui-icon name="fileImport"></app-ui-icon>
       <strong>{{ selectedFileName || 'Choose facility backup file' }}</strong>
       <small>JSON facility backup exported from VERIFI</small>
-      <input
+      <input #backupInput
         id="v1-facility-backup-file"
         type="file"
         accept=".json,application/json"
         [disabled]="isImporting"
         aria-describedby="v1-import-facility-backup-description"
-        (change)="setImportFile($event)">
+        (change)="setImportFile(backupInput.files)">
     </label>
 
     @if (backupFileError) {

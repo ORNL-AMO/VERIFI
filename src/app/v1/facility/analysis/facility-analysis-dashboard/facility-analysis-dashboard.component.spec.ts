@@ -3,13 +3,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
-import { FacilityAnalysisActionsService } from '../facility-analysis-actions.service';
-import { FacilityAnalysisWorkspaceService } from '../facility-analysis-workspace.service';
-import { FacilityAnalysisCard } from '../facility-analysis.models';
+import { FacilityAnalysisActionsService } from './facility-analysis-actions.service';
+import { FacilityAnalysisWorkspaceService } from './facility-analysis-workspace.service';
+import { FacilityAnalysisCard } from './facility-analysis.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AnalysisBrowseCardComponent } from './analysis-browse-card/analysis-browse-card.component';
 import { AnalysisDraftSlideoutComponent } from './analysis-draft-slideout/analysis-draft-slideout.component';
 import { FacilityAnalysisDashboardComponent } from './facility-analysis-dashboard.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { TemplatePortal } from '@angular/cdk/portal';
 
 describe('FacilityAnalysisDashboardComponent', () => {
   let fixture: ComponentFixture<FacilityAnalysisDashboardComponent>;
@@ -24,10 +26,12 @@ describe('FacilityAnalysisDashboardComponent', () => {
     setActiveAnalysis: ReturnType<typeof vi.fn>;
     deleteAnalysis: ReturnType<typeof vi.fn>;
   };
+  let modalPortal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     cards = signal([makeCard('energy-a', 'Energy A', 'ready'), makeCard('water-b', 'Water B', 'warning', 'water')]);
     router = { navigate: vi.fn() };
+    modalPortal = { show: vi.fn(), hide: vi.fn() };
     actions = {
       categoryAvailable: vi.fn(() => true),
       activeEligibility: vi.fn(() => ({ allowed: true })),
@@ -48,6 +52,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
           workspaceError: signal(undefined), statusState: signal('ready')
         } },
         { provide: FacilityAnalysisActionsService, useValue: actions },
+        { provide: ModalPortalService, useValue: modalPortal },
         { provide: WorkspaceNavigationService, useValue: {
           facilityAnalysisWorkbenchRoute: vi.fn((facilityGuid: string, analysisGuid: string) => ['/analysis', facilityGuid, analysisGuid])
         } }
@@ -64,7 +69,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Energy A');
     expect(fixture.nativeElement.textContent).toContain('Water B');
 
-    component.search.set('does not exist');
+    component.filtersForm.controls.search.setValue('does not exist');
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No analyses match these filters');
@@ -73,10 +78,10 @@ describe('FacilityAnalysisDashboardComponent', () => {
 
   it('filters by category and status and orders attention first', () => {
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['water-b', 'energy-a']);
-    component.setCategoryFilter('energy');
+    component.filtersForm.controls.category.setValue('energy');
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['energy-a']);
-    component.setCategoryFilter('all');
-    component.setStatusFilter('warning');
+    component.filtersForm.controls.category.setValue('all');
+    component.filtersForm.controls.status.setValue('warning');
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['water-b']);
   });
 
@@ -125,26 +130,28 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/analysis', 'facility-a', 'copied-analysis']);
   });
 
-  it('keeps active confirmation open with a visible command error, then closes after retry', async () => {
+  it('keeps active confirmation open after a command error, then closes after retry', async () => {
     actions.setActiveAnalysis
       .mockRejectedValueOnce(new Error('Active selection failed.'))
       .mockResolvedValueOnce(undefined);
     browseCard(0).activeRequested.emit(cards()[0]);
     fixture.detectChanges();
 
-    buttonByText('Set active').click();
+    expect(modalPortal.show.mock.calls[0][0]).toBeInstanceOf(TemplatePortal);
+    await component.confirmActive();
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component.activeCandidate()).toBe(cards()[0]);
-    expect(activeDialog().textContent).toContain('Active selection failed.');
+    expect(component.actionError()).toBe('Active selection failed.');
 
-    buttonByText('Set active').click();
+    await component.confirmActive();
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(actions.setActiveAnalysis).toHaveBeenCalledTimes(2);
     expect(component.activeCandidate()).toBeUndefined();
+    expect(modalPortal.hide).toHaveBeenCalledOnce();
   });
 
   it('blocks deletion while downstream blockers remain', () => {
@@ -159,33 +166,32 @@ describe('FacilityAnalysisDashboardComponent', () => {
     browseCard(0).deleteRequested.emit(blocked);
     fixture.detectChanges();
 
-    const deleteButton = activeDialog().querySelector<HTMLButtonElement>('.v1-btn--danger');
-    expect(activeDialog().textContent).toContain('Remove this analysis from 1 facility report(s)');
-    expect(deleteButton?.disabled).toBe(true);
-    deleteButton?.click();
+    void component.confirmDelete();
     expect(actions.deleteAnalysis).not.toHaveBeenCalled();
   });
 
-  it('keeps deletion open with a visible command error, then closes after retry', async () => {
+  it('keeps deletion open after a command error, then closes after retry', async () => {
     actions.deleteAnalysis
       .mockRejectedValueOnce(new Error('Analysis deletion failed.'))
       .mockResolvedValueOnce(undefined);
     browseCard(0).deleteRequested.emit(cards()[0]);
     fixture.detectChanges();
 
-    buttonByText('Delete analysis').click();
+    expect(modalPortal.show.mock.calls[0][0]).toBeInstanceOf(TemplatePortal);
+    await component.confirmDelete();
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component.deleteCandidate()).toBe(cards()[0]);
-    expect(activeDialog().textContent).toContain('Analysis deletion failed.');
+    expect(component.actionError()).toBe('Analysis deletion failed.');
 
-    buttonByText('Delete analysis').click();
+    await component.confirmDelete();
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(actions.deleteAnalysis).toHaveBeenCalledTimes(2);
     expect(component.deleteCandidate()).toBeUndefined();
+    expect(modalPortal.hide).toHaveBeenCalledOnce();
   });
 
   function browseCard(index: number): AnalysisBrowseCardComponent {
@@ -199,11 +205,6 @@ describe('FacilityAnalysisDashboardComponent', () => {
     return button;
   }
 
-  function activeDialog(): HTMLElement {
-    const dialog = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[role="dialog"]');
-    if (!dialog) throw new Error('Expected an active dialog.');
-    return dialog;
-  }
 });
 
 function makeCard(

@@ -56,7 +56,10 @@ import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
 import { AccountAnalysisPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-placeholder/account-analysis-placeholder.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
-import { FacilityAnalysisWorkbenchPlaceholderComponent } from '@app/v1/facility/analysis/facility-analysis-workbench-placeholder/facility-analysis-workbench-placeholder.component';
+import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
+import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
+import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
+import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/shell/facility-analysis-results-shell.component';
 
 describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
@@ -91,16 +94,19 @@ describe('V1Routes facility data meters routes', () => {
     expect(facilityAnalysis?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'dashboard' }),
       expect.objectContaining({ path: 'dashboard', component: FacilityAnalysisDashboardComponent }),
-      expect.objectContaining({
-        path: 'workbench/:analysisGuid',
-        pathMatch: 'full',
-        redirectTo: 'workbench/:analysisGuid/setup'
-      }),
-      expect.objectContaining({
-        path: 'workbench/:analysisGuid/setup',
-        component: FacilityAnalysisWorkbenchPlaceholderComponent
-      })
+      expect.objectContaining({ path: 'workbench/:analysisGuid', component: FacilityAnalysisWorkbenchComponent })
     ]));
+    const workbench = facilityAnalysis?.children?.find(route => route.path === 'workbench/:analysisGuid');
+    expect(workbench?.canDeactivate).toEqual([unsavedChangesGuard]);
+    expect(workbench?.providers).toBeUndefined();
+    expect(workbench?.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: '', redirectTo: 'setup' }),
+      expect.objectContaining({ path: 'setup', component: FacilityAnalysisSetupComponent }),
+      expect.objectContaining({ path: 'group/:groupGuid', component: FacilityAnalysisGroupShellComponent }),
+      expect.objectContaining({ path: 'facility', component: FacilityAnalysisResultsShellComponent }),
+      expect.objectContaining({ path: 'used-by' })
+    ]));
+    expect(workbench?.children?.find(route => route.path === 'group/:groupGuid')?.providers).toBeUndefined();
   });
 
   it('routes Account Portfolio tabs as child workspaces', () => {

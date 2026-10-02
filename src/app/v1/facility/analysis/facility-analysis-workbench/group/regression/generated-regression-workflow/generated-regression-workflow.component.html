@@ -1,0 +1,133 @@
+<section class="v1-generated-regression" aria-label="Generate regression models">
+  <div class="v1-generated-regression__top">
+    <ng-content select="[modeling-method]"></ng-content>
+    @if (configurationExpanded()) {
+      <fieldset class="v1-generated-regression__configuration" [disabled]="generating()">
+        <legend>Generation settings</legend>
+        <div class="v1-generated-regression__settings">
+          <fieldset class="v1-generated-regression__predictors">
+            <legend>Predictors to include</legend>
+            <div class="v1-generated-regression__predictor-list">
+              @for (predictor of group().predictorVariables; track predictor.id) {
+                <label><input type="checkbox" [formControl]="controller.predictorControl(predictor.id)" /><span>{{ predictor.name }} @if (predictor.unit) { <small>({{ predictor.unit }})</small> }</span></label>
+              }
+            </div>
+            @if (!selectedPredictors().length) { <p class="v1-field-error" role="alert">Select at least one predictor.</p> }
+          </fieldset>
+          <label class="v1-generated-regression__maximum" for="maximum-model-variables">
+            <span>Maximum variables per model</span>
+            <select id="maximum-model-variables" class="v1-select form-select" [formControl]="controller.maxVariables">
+              @for (option of maxVariableOptions(); track option) { <option [ngValue]="option">{{ option }}</option> }
+            </select>
+            <small>Limits the number of predictors used in any one candidate model.</small>
+          </label>
+        </div>
+        <div class="v1-generated-regression__configuration-actions">
+          @if (models().length) { <button type="button" class="v1-btn v1-btn--ghost" (click)="configurationExpanded.set(false)">Cancel</button> }
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="generating() || !canGenerate()" (click)="generateModels()">
+            @if (generating()) {
+              <app-ui-icon name="loading" spin></app-ui-icon>Generating models…
+            } @else {
+              @if (models().length) { <app-ui-icon name="refresh"></app-ui-icon> }
+              {{ models().length ? 'Regenerate models' : 'Generate models' }}
+            }
+          </button>
+        </div>
+        @if (!canGenerate()) { <p class="v1-generated-regression__requirement">Choose at least one predictor and a valid maximum before generating models.</p> }
+      </fieldset>
+    } @else {
+      <div class="v1-generated-regression__summary">
+        <div><strong>Generation settings</strong><span>{{ generationSummary() }}</span></div>
+        <div class="v1-generated-regression__summary-actions">
+          <button type="button" class="v1-btn v1-btn--ghost v1-btn--sm" [disabled]="generating()" (click)="configurationExpanded.set(true)"><app-ui-icon name="edit"></app-ui-icon>Edit settings</button>
+          <button type="button" class="v1-btn v1-btn--primary v1-btn--sm" [disabled]="generating() || !canGenerate()" (click)="generateModels()">@if (generating()) { <app-ui-icon name="loading" spin></app-ui-icon>Generating… } @else { <app-ui-icon name="refresh"></app-ui-icon>Regenerate models }</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <p class="visually-hidden" role="status" aria-live="polite">@if (generating()) { Regression models are being generated. }</p>
+  @if (generationError()) {
+    <div class="v1-generated-regression__message v1-generated-regression__message--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ generationError() }} The previous selection was preserved.</span><button type="button" class="v1-btn v1-btn--secondary v1-btn--sm" (click)="generateModels()">Retry</button></div>
+  }
+  @if (persistedSelectionOnly()) {
+    <div class="v1-generated-regression__message" role="status"><app-ui-icon name="info"></app-ui-icon><span>The selected model is available. Regenerate models to rebuild the alternatives list.</span></div>
+  }
+
+  <section class="v1-generated-regression__results" aria-labelledby="generated-models-heading">
+    @if (models().length) {
+      <div class="v1-generated-regression__table-shell">
+        <div class="v1-generated-regression__filters" aria-label="Model filters">
+          <div class="v1-generated-regression__results-heading"><h3 id="generated-models-heading" tabindex="-1">Generated models</h3><p>{{ models().length }} available · {{ rows().length }} shown</p></div>
+          <div class="v1-generated-regression__filter-controls">
+            <label class="v1-generated-regression__year-filter" for="model-year-filter">
+              <span class="visually-hidden">Filter by model year</span>
+              <select id="model-year-filter" class="v1-select" [formControl]="controller.modelYearFilter">
+                <option value="all">All years</option>
+                @for (year of modelYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
+              </select>
+            </label>
+            <div class="v1-generated-regression__issue-filters">
+              <label><input type="checkbox" [formControl]="controller.showInvalid" /> Show models with critical issues</label>
+              <label><input type="checkbox" [formControl]="controller.showFailedValidation" /> Show models with validation issues</label>
+            </div>
+          </div>
+        </div>
+        @if (rows().length) {
+          <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Generated regression models">
+            <table>
+            <thead><tr>
+              <th scope="col" class="v1-generated-regression__current-column">Current</th>
+              <th scope="col" [attr.aria-sort]="sortField() === 'modelYear' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null"><button type="button" class="v1-generated-regression__sort" [class.active]="sortField() === 'modelYear'" (click)="sort('modelYear')">Model year<app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon></button></th>
+              <th scope="col">Predictors and {{ modeledQuantityLabel() }} Equation</th>
+              <th scope="col" class="v1-generated-regression__number" [attr.aria-sort]="sortField() === 'adjust_R2' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null"><button type="button" class="v1-generated-regression__sort" [class.active]="sortField() === 'adjust_R2'" (click)="sort('adjust_R2')">Adjusted R²<app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon></button></th>
+              <th scope="col" class="v1-generated-regression__number" [attr.aria-sort]="sortField() === 'R2' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null"><button type="button" class="v1-generated-regression__sort" [class.active]="sortField() === 'R2'" (click)="sort('R2')">R²<app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon></button></th>
+              <th scope="col" class="v1-generated-regression__number" [attr.aria-sort]="sortField() === 'modelPValue' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null"><button type="button" class="v1-generated-regression__sort" [class.active]="sortField() === 'modelPValue'" (click)="sort('modelPValue')">Model p-value<app-ui-icon [name]="sortDirection() === 'desc' ? 'sortDesc' : 'sortAsc'"></app-ui-icon></button></th>
+              @if (controller.showInvalidValue()) { <th scope="col" class="v1-generated-regression__issues-column">Critical issues</th> }
+              @if (controller.showFailedValidationValue()) { <th scope="col" class="v1-generated-regression__issues-column">Validation issues</th> }
+              <th scope="col">Validation</th><th scope="col" class="v1-generated-regression__actions"><span class="visually-hidden">Actions</span></th>
+            </tr></thead>
+            <tbody>
+              @for (row of rows(); track row.model.modelId) {
+                <tr [class.v1-generated-regression__selected-row]="row.model.modelId === group().selectedModelId">
+                  <td><label class="v1-generated-regression__radio"><input type="radio" name="selected-regression-model" [formControl]="controller.selectedModelId" [value]="row.model.modelId" [attr.disabled]="generating() || row.model.errorModeling ? true : null" /><span class="visually-hidden">Select model for {{ row.model.modelYear }}</span>@if (row.model.modelId === group().selectedModelId) { <span>Current</span> }</label></td>
+                  <td>{{ row.model.modelYear }}</td>
+                  <td><strong>{{ row.predictorSummary || 'No predictors' }}</strong><small>{{ row.equation }}</small></td>
+                  <td class="v1-generated-regression__number">{{ row.model.adjust_R2?.toFixed(4) ?? '—' }}</td><td class="v1-generated-regression__number">{{ row.model.R2?.toFixed(4) ?? '—' }}</td><td class="v1-generated-regression__number">{{ row.model.modelPValue?.toExponential(2) ?? '—' }}</td>
+                  @if (controller.showInvalidValue()) {
+                    <td class="v1-generated-regression__issues">
+                      @if (row.criticalIssues.length) {
+                        <ul>
+                          @for (issue of row.criticalIssues; track issue) { <li>{{ issue }}</li> }
+                        </ul>
+                      } @else { <span aria-label="No critical issues">—</span> }
+                    </td>
+                  }
+                  @if (controller.showFailedValidationValue()) {
+                    <td class="v1-generated-regression__issues">
+                      @if (row.validationIssues.length) {
+                        <ul>
+                          @for (issue of row.validationIssues; track issue) { <li>{{ issue }}</li> }
+                        </ul>
+                      } @else { <span aria-label="No validation issues">—</span> }
+                    </td>
+                  }
+                  <td><span class="v1-chip v1-chip--{{ row.valid ? 'success' : 'warning' }}"><app-ui-icon [name]="row.valid ? 'success' : 'warning'"></app-ui-icon>{{ row.valid ? 'Valid' : 'Review' }}</span></td>
+                  <td><button #reviewButton type="button" class="v1-btn v1-btn--secondary v1-btn--sm" (click)="controller.openReview(row.model, reviewButton)"><app-ui-icon name="monocle"></app-ui-icon>Review</button></td>
+                </tr>
+              }
+            </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="v1-generated-regression__empty" role="status"><app-ui-icon name="warning"></app-ui-icon><div><strong>No models match the current filters.</strong><p>Adjust the model year or issue filters to review other candidates.</p></div></div>
+        }
+      </div>
+    } @else {
+      <div class="v1-generated-regression__results-heading"><h3 id="generated-models-heading" tabindex="-1">Generated models</h3><p>0 available</p></div>
+      @if (!generating()) {
+        <div class="v1-generated-regression__empty" role="status"><app-ui-icon [name]="generatedThisSession() ? 'warning' : 'analysis'"></app-ui-icon><div><strong>{{ generatedThisSession() ? 'No models could be generated.' : 'No generated models yet.' }}</strong><p>{{ generatedThisSession() ? 'Review the selected predictors and maximum variables, then try again.' : 'Choose predictors and a maximum, then generate models.' }}</p></div></div>
+      }
+    }
+  </section>
+</section>

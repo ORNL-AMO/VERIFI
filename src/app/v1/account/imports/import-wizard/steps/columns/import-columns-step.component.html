@@ -21,10 +21,10 @@
         [connectedDropListIds]="dropListIds"
         [selectedIds]="state.selectedColumnIds()"
         [selectedCount]="state.selectedColumnCount()"
-        (columnDropped)="move($event.itemId, $event.target)"
+        (columnDropped)="move($event.itemId, $event.destination)"
         (selectionChanged)="state.setColumnSelected($event.itemId, $event.selected)"
         (moveSelectedRequested)="state.moveSelectedColumns($event)"
-        (moveRequested)="move($event.itemId, $event.target)">
+        (moveRequested)="move($event.itemId, $event.destination)">
       </app-import-column-lane>
     }
   </div>

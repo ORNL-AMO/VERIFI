@@ -46,9 +46,30 @@ describe('v1 status presentation catalog', () => {
     };
 
     expect(presentFindings([makeFinding('analysis.configuration.invalid', 'error', 'configuration', analysisEntity, { reasons: ['missingName'] })])[0].destination)
-      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', tab: 'setup' });
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'analysis', groupGuid: undefined, tab: 'setup' });
     expect(presentFindings([makeFinding('analysis-group.model.invalid', 'warning', 'quality', groupEntity)])[0].destination)
-      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', tab: 'setup' });
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'regression' });
+    const regressionSetup = presentFindings([makeFinding(
+      'analysis-group.setup.invalid',
+      'error',
+      'configuration',
+      groupEntity,
+      {
+        analysisType: 'regression',
+        reasons: ['missingRegressionConstant', 'missingRegressionModelYear', 'missingRegressionModelSelection', 'missingRegressionPredictorCoef']
+      }
+    )])[0];
+    expect(regressionSetup.title).toBe('Complete regression setup');
+    expect(regressionSetup.destination)
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'regression' });
+    expect(presentFindings([makeFinding(
+      'analysis-group.setup.invalid',
+      'error',
+      'configuration',
+      groupEntity,
+      { analysisType: 'regression', reasons: ['missingGroupMeters'] }
+    )])[0].destination)
+      .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'setup' });
   });
 
   it('sorts Todos by severity, record name, and rule code', () => {

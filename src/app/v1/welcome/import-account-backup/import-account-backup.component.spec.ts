@@ -64,7 +64,7 @@ describe('ImportAccountBackupComponent', () => {
   });
 });
 
-function fileEvent(name: string): Event {
+function fileEvent(name: string): FileList {
   const file = { name, text: vi.fn(async () => '{"origin":"VERIFI"}') };
-  return { target: { files: [file] } } as unknown as Event;
+  return [file] as unknown as FileList;
 }

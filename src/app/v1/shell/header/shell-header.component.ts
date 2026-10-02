@@ -95,6 +95,12 @@ export class ShellHeaderComponent {
     void this.navigation.openWorkspace(accountGuid);
   }
 
+  setBackgroundPattern(value: string): void {
+    if (this.patternOptions.some(option => option.id === value)) {
+      this.appearance.setBackgroundPattern(value as BackgroundPattern);
+    }
+  }
+
   closeAll(): void {
     this.isSettingsOpen = false;
     this.accountMenuOpen = false;

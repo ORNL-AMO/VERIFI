@@ -97,6 +97,9 @@ export class MeterWorkbenchComponent {
 
   constructor() {
     this.syncActiveTabFromRoute();
+    this.displayEnergyUnitControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.setDisplayEnergyUnit(value));
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -125,8 +128,7 @@ export class MeterWorkbenchComponent {
     }
   }
 
-  setDisplayEnergyUnit(event: Event): void {
-    const selectedValue = (event.target as HTMLSelectElement).value;
+  setDisplayEnergyUnit(selectedValue: string): void {
     const meter = this.workspace.selectedMeter();
     const facility = this.workspace.facility();
     if (!meter || !facility || !this.canEditDisplaySettings()) return;

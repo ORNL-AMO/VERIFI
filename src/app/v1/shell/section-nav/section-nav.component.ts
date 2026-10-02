@@ -9,6 +9,7 @@ import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import { StatusAttentionSummary } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
+import { buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
 
 type SettingsNavItem = {
   readonly id: string;
@@ -65,6 +66,18 @@ type ImportNavigationFile = {
   readonly currentStep: string;
   readonly active: boolean;
   readonly disabled: boolean;
+};
+
+type AnalysisNavigation = {
+  readonly name: string;
+  readonly steps: ReadonlyArray<{
+    readonly id: string;
+    readonly label: string;
+    readonly route: readonly string[];
+    readonly current: boolean;
+    readonly completed: boolean;
+    readonly canOpen: boolean;
+  }>;
 };
 
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
@@ -161,6 +174,25 @@ export class SectionNavComponent {
         disabled: navigationBlocked || draft.status === 'invalid' || draft.status === 'importing'
       };
     });
+  });
+  readonly activeAnalysisNavigation = computed<AnalysisNavigation | undefined>(() => {
+    const facility = this.navigation.facility();
+    const analysisGuid = this.navigation.activeAnalysisGuid();
+    if (!facility || !analysisGuid) return undefined;
+    const analysis = this.workspace.selectedFacilityAnalyses().find(item => item.guid === analysisGuid);
+    if (!analysis) return undefined;
+    const stages = buildAnalysisWorkbenchStages(facility.guid, analysis, this.workspace.facilityMeterGroups());
+    const scope = this.navigation.activeAnalysisStageScope();
+    const groupGuid = this.navigation.activeAnalysisGroupGuid();
+    const currentStageId = scope === 'group' && groupGuid ? `group:${groupGuid}` : scope ?? 'analysis';
+    const findings = this.status.items().filter(item =>
+      (item.entity.kind === 'facility-analysis' && item.entity.guid === analysisGuid)
+      || (item.entity.kind === 'analysis-group' && item.entity.guid.startsWith(`${analysisGuid}:`))
+    );
+    return {
+      name: analysis.name || 'Untitled analysis',
+      steps: buildAnalysisWorkbenchStageNavigation(stages, currentStageId, analysisGuid, findings)
+    };
   });
   readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
     const statusReady = this.status.state() === 'ready';

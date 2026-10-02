@@ -1,0 +1,63 @@
+<app-workspace-slideout title="Review regression model" [description]="'Model year ' + model().modelYear" size="large" (closed)="closed.emit()">
+  @let modelSummary = summary();
+  @let modelComparison = comparison();
+  @let comparisonModel = currentModel();
+  @let reviewingCurrentModel = isCurrent();
+  <div class="v1-regression-review">
+    <figure class="v1-regression-review__equation" [attr.aria-label]="modeledQuantityLabel() + ' equation'">
+      <p class="v1-regression-review__formula">
+        <span class="v1-regression-review__formula-label">{{ modeledQuantityLabel() }}</span>
+        <span class="v1-regression-review__formula-equals">=</span>
+        <strong>{{ equation() }}</strong>
+      </p>
+    </figure>
+
+    <div class="v1-regression-review__status">
+      <span class="v1-chip v1-chip--{{ model().isValid && model().SEPValidationPass ? 'success' : 'warning' }}"><app-ui-icon [name]="model().isValid && model().SEPValidationPass ? 'success' : 'warning'"></app-ui-icon>{{ model().isValid && model().SEPValidationPass ? 'Valid model' : 'Review required' }}</span>
+      @if (reviewingCurrentModel) {
+        <span class="v1-regression-review__current"><app-ui-icon name="success"></app-ui-icon>Current model</span>
+      } @else {
+        <span class="v1-chip v1-chip--info">Candidate model</span>
+      }
+    </div>
+
+    @if (!comparisonModel || reviewingCurrentModel) {
+      <section aria-labelledby="model-summary-heading">
+        <h3 id="model-summary-heading">Model summary</h3>
+        <dl class="v1-regression-review__stats">
+          <div><dt>Adjusted R²</dt><dd>{{ modelSummary.adjustedR2 }}</dd></div>
+          <div><dt>R²</dt><dd>{{ modelSummary.r2 }}</dd></div>
+          <div><dt>Model p-value</dt><dd>{{ modelSummary.pValue }}</dd></div>
+          <div><dt>Model year</dt><dd>{{ model().modelYear }}</dd></div>
+        </dl>
+      </section>
+    }
+
+    @if (comparisonModel && !reviewingCurrentModel) {
+      <section aria-labelledby="model-comparison-heading">
+        <h3 id="model-comparison-heading">Compare with current model</h3>
+        <div class="v1-regression-review__comparison">
+          <div><span>Measure</span><strong>Candidate</strong><strong>Current</strong></div>
+          <div><span>Model year</span><strong>{{ model().modelYear }}</strong><strong>{{ comparisonModel.modelYear }}</strong></div>
+          <div><span>Adjusted R²</span><strong>{{ modelComparison.candidate.adjustedR2 }}</strong><strong>{{ modelComparison.current.adjustedR2 }}</strong></div>
+          <div><span>R²</span><strong>{{ modelComparison.candidate.r2 }}</strong><strong>{{ modelComparison.current.r2 }}</strong></div>
+          <div><span>Model p-value</span><strong>{{ modelComparison.candidate.pValue }}</strong><strong>{{ modelComparison.current.pValue }}</strong></div>
+        </div>
+      </section>
+    }
+
+    <section class="v1-regression-review__coefficients" aria-labelledby="coefficient-heading">
+      <h3 id="coefficient-heading">Variables and coefficients</h3>
+      <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Regression coefficients">
+        <table><thead><tr><th scope="col">Term</th><th scope="col" class="v1-regression-review__number">Coefficient</th><th scope="col" class="v1-regression-review__number">Variable p-value</th></tr></thead><tbody><tr><th scope="row">Constant</th><td class="v1-regression-review__number">{{ modelSummary.constant }}</td><td class="v1-regression-review__number">—</td></tr>@for (item of coefficients(); track item.id) { <tr><th scope="row">{{ item.name }}</th><td class="v1-regression-review__number">{{ item.coefficient }}</td><td class="v1-regression-review__number">{{ item.pValue }}</td></tr> }</tbody></table>
+      </div>
+    </section>
+
+    <app-regression-model-validation [state]="validationState()" [analysis]="analysis()" [group]="reviewGroup()" (retryRequested)="retryRequested.emit()"></app-regression-model-validation>
+
+    <footer class="v1-regression-review__footer">
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="closed.emit()">Close</button>
+      @if (!reviewingCurrentModel) { <button type="button" class="v1-btn v1-btn--primary" (click)="selected.emit(model())">Select this model</button> }
+    </footer>
+  </div>
+</app-workspace-slideout>

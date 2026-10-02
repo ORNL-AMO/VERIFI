@@ -39,13 +39,13 @@
           <th scope="col">
             <div class="meter-reading-heading meter-reading-heading--decision">
               <label class="meter-reading-bulk-control">
-                <input
+                <input #allExistingReadings
                   type="checkbox"
                   class="meter-reading-checkbox"
                   [checked]="state.allExistingReadingsKept()"
                   [indeterminate]="state.someExistingReadingsKept() && !state.allExistingReadingsKept()"
                   [disabled]="!state.hasExistingReadings()"
-                  (change)="state.setAllSkipExistingReadings($any($event.target).checked)">
+                  (change)="state.setAllSkipExistingReadings(allExistingReadings.checked)">
                 <span>Keep current readings?</span>
               </label>
               <app-ui-tooltip
@@ -105,11 +105,11 @@
             <td class="meter-reading-keep">
               @if (row.existingReadings.count) {
                 <label class="meter-reading-checkbox-control">
-                  <input
+                  <input #keepExistingReading
                     type="checkbox"
                     class="meter-reading-checkbox"
                     [checked]="row.keepExisting"
-                    (change)="state.setSkipExistingReadings(row.meter.guid, $any($event.target).checked)">
+                    (change)="state.setSkipExistingReadings(row.meter.guid, keepExistingReading.checked)">
                   <span class="visually-hidden">Keep current readings for {{ row.meter.name }}</span>
                 </label>
               } @else {
@@ -129,11 +129,11 @@
         <p>Open each needs-attention count and exclude every invalid reading before continuing.</p>
       </div>
       <label class="meter-reading-acknowledgement__control">
-        <input
+        <input #acknowledgeInvalidReadings
           type="checkbox"
           class="meter-reading-checkbox"
           [checked]="state.draft().invalidMeterReadingsAcknowledged"
-          (change)="state.setInvalidReadingsAcknowledged($any($event.target).checked)">
+          (change)="state.setInvalidReadingsAcknowledged(acknowledgeInvalidReadings.checked)">
         <span>I acknowledge that excluded readings will not be uploaded.</span>
       </label>
     </div>

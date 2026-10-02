@@ -75,7 +75,7 @@ describe('ImportColumnLaneComponent', () => {
       item: { data: card }
     } as CdkDragDrop<readonly unknown[]>);
 
-    expect(emitted).toHaveBeenCalledWith({ itemId: card.id, target: 'Meters' });
+    expect(emitted).toHaveBeenCalledWith({ itemId: card.id, destination: 'Meters' });
   });
 
   it('ignores drops within the same lane', () => {

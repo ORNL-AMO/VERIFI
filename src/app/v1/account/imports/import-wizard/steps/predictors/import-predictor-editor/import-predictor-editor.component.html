@@ -14,11 +14,11 @@
             placement="bottom">
           </app-ui-tooltip>
         </div>
-        <select
+        <select #existingPredictor
           id="import-existing-predictor"
           class="v1-select"
           [value]="workingPredictor.guid === predictor.guid ? '' : workingPredictor.guid"
-          (change)="selectExisting($event)">
+          (change)="selectExisting(existingPredictor.value)">
           <option value="">Keep as a new Standard predictor</option>
           @for (option of existingOptions; track option.predictor.guid) {
             <option [value]="option.predictor.guid">{{ option.label }}</option>

@@ -31,14 +31,14 @@
     <form class="predictor-draft-form" (submit)="$event.preventDefault(); submit()">
       <div class="predictor-draft-form__grid">
         <label><span>Predictor name</span>
-          <input type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName($any($event.target).value)">
+          <input #predictorName type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName(predictorName.value)">
         </label>
         <label class="predictor-draft-form__check">
-          <input type="checkbox" [checked]="currentDraft.production" [disabled]="saving" (change)="setProduction($any($event.target).checked)">
+          <input #production type="checkbox" [checked]="currentDraft.production" [disabled]="saving" (change)="setProduction(production.checked)">
           <span>Is Production?</span>
         </label>
         <label><span>Unit <small>Optional</small></span>
-          <input type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit($any($event.target).value)">
+          <input #predictorUnit type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit(predictorUnit.value)">
         </label>
       </div>
       @if (error) {

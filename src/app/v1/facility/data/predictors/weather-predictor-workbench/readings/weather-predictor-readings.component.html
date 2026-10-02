@@ -42,7 +42,7 @@
         <div class="weather-readings__controls">
           <label class="weather-readings__control">
             <span>Rows</span>
-            <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+            <select #pageSizeSelect class="v1-select" [value]="pageSize()" (change)="setPageSize(pageSizeSelect.value)">
               @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
                 <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
               }
@@ -50,7 +50,7 @@
           </label>
           <label class="weather-readings__control">
             <span>Show</span>
-            <select class="v1-select" [value]="rowFilter()" (change)="setRowFilter($event)">
+            <select #rowFilterSelect class="v1-select" [value]="rowFilter()" (change)="setRowFilter(rowFilterSelect.value)">
               <option value="all">All months</option>
               <option value="attention">Needs attention</option>
             </select>
@@ -62,21 +62,21 @@
       <div class="weather-readings__range-actions">
         <label class="weather-readings__range-control">
           <span>Start month</span>
-          <input
+          <input #startMonthInput
             type="month"
             required
             [value]="startMonth()"
             [disabled]="rangeBusy"
-            (change)="setStartMonth($any($event.target).value)">
+            (change)="setStartMonth(startMonthInput.value)">
         </label>
         <label class="weather-readings__range-control">
           <span>End month</span>
-          <input
+          <input #endMonthInput
             type="month"
             required
             [value]="endMonth()"
             [disabled]="rangeBusy"
-            (change)="setEndMonth($any($event.target).value)">
+            (change)="setEndMonth(endMonthInput.value)">
         </label>
         <button
           type="button"

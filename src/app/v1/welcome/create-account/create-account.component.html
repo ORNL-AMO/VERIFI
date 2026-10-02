@@ -41,7 +41,7 @@
       }
     }
 
-    <form
+    <form [formGroup]="createForm"
       class="v1-form"
       aria-describedby="v1-create-account-description"
       (ngSubmit)="createAccount()">
@@ -71,13 +71,12 @@
         <input
           id="v1-account-name"
           type="text"
-          [value]="createForm.controls.name.value"
+          formControlName="name"
           maxlength="42"
           autocomplete="organization"
           [disabled]="isCreating || hasPendingStarterAccount"
           [attr.aria-invalid]="accountNameInvalid"
           aria-describedby="v1-account-name-error"
-          (input)="setAccountName($event)"
           (blur)="createForm.controls.name.markAsTouched()"
           placeholder="Ex: Cocoa Co.">
       </label>

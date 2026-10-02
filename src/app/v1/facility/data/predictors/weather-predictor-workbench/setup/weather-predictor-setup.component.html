@@ -24,25 +24,25 @@
     <div class="weather-setup__range">
       <label>
         <span>Start month</span>
-        <input
+        <input #startMonthInput
           type="month"
           required
           [value]="startMonth()"
           [disabled]="!canEditSetup"
           [attr.aria-invalid]="rangeError() ? 'true' : null"
           [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
-          (change)="setStartMonth($any($event.target).value)">
+          (change)="setStartMonth(startMonthInput.value)">
       </label>
       <label>
         <span>End month</span>
-        <input
+        <input #endMonthInput
           type="month"
           required
           [value]="endMonth()"
           [disabled]="!canEditSetup"
           [attr.aria-invalid]="rangeError() ? 'true' : null"
           [attr.aria-describedby]="rangeError() ? 'weather-range-error' : null"
-          (change)="setEndMonth($any($event.target).value)">
+          (change)="setEndMonth(endMonthInput.value)">
       </label>
     </div>
     @if (rangeError(); as error) {
@@ -71,11 +71,11 @@
           <div class="weather-setup__definition-grid">
             <label>
               <span>Weather type</span>
-              <select
+              <select #definitionType
                 class="v1-select"
                 [value]="definition.weatherDataType"
                 [disabled]="!canEditSetup"
-                (change)="setDefinitionType(definition.draftId, $any($event.target).value)">
+                (change)="setDefinitionType(definition.draftId, definitionType.value)">
                 @for (option of weatherTypes; track option.value) {
                   <option [attr.value]="option.value">
                     {{ option.label }}
@@ -85,7 +85,7 @@
             </label>
             <label>
               <span>Predictor name</span>
-              <input
+              <input #definitionName
                 type="text"
                 maxlength="100"
                 required
@@ -93,7 +93,7 @@
                 [disabled]="!canEditSetup"
                 [attr.aria-invalid]="errors?.name ? 'true' : null"
                 [attr.aria-describedby]="errors?.name ? definition.draftId + '-name-error' : null"
-                (input)="setDefinitionName(definition.draftId, $any($event.target).value)">
+                (input)="setDefinitionName(definition.draftId, definitionName.value)">
               @if (errors?.name) {
                 <small [id]="definition.draftId + '-name-error'" class="weather-setup__field-error">
                   Enter a predictor name of 100 characters or fewer.
@@ -103,14 +103,14 @@
             @if (definition.weatherDataType === 'HDD' || definition.weatherDataType === 'CDD') {
               <label>
                 <span>{{ definition.weatherDataType === 'HDD' ? 'Heating' : 'Cooling' }} base temperature (°F)</span>
-                <input
+                <input #definitionBase
                   type="number"
                   required
                   [value]="definition.baseTemperature"
                   [disabled]="!canEditSetup"
                   [attr.aria-invalid]="errors?.base ? 'true' : null"
                   [attr.aria-describedby]="errors?.base ? definition.draftId + '-base-error' : null"
-                  (change)="setDefinitionBase(definition.draftId, $any($event.target).value)">
+                  (change)="setDefinitionBase(definition.draftId, definitionBase.value)">
                 @if (errors?.base) {
                   <small [id]="definition.draftId + '-base-error'" class="weather-setup__field-error">
                     Enter a base temperature.

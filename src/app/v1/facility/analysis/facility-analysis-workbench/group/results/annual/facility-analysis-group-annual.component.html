@@ -1,0 +1,68 @@
+@let resultState = results.state();
+<section class="v1-analysis-section" aria-label="Annual results">
+  <app-analysis-result-toolbar
+    [description]="'Actual use, adjusted baseline, and savings in ' + (unit() || 'analysis units') + '.'"
+    ariaLabel="Annual result view"
+    [display]="display()"
+    (displayChanged)="displaySettings.setDisplay(displayKey(), $event)">
+    <app-analysis-result-column-chooser result-actions [options]="columnOptions"></app-analysis-result-column-chooser>
+  </app-analysis-result-toolbar>
+
+  <app-analysis-result-status
+    scope="group"
+    period="annual"
+    [state]="resultState"
+    [blocking]="groupContext.workbench.hasBlockingErrors()"
+    [rowCount]="rows().length">
+  </app-analysis-result-status>
+
+  @if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length && display() === 'graph') {
+    <app-meter-results-chart
+      [chartRows]="chartRows()"
+      [metrics]="chartMetrics"
+      defaultLeftMetricId="actual"
+      defaultRightMetricId="savings"
+      period="yearly"
+      ariaLabel="Group annual actual, modeled, and savings chart"
+      downloadFileName="group-annual-analysis">
+    </app-meter-results-chart>
+  } @else if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
+    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Group annual analysis results">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Year</th>
+            @if (columns().actualEnergy) { <th scope="col">Actual</th> }
+            @if (columns().adjusted) { <th scope="col">Adjusted</th> }
+            @if (columns().baselineAdjustment) { <th scope="col">Baseline adjustment</th> }
+            @if (columns().SEnPI) { <th scope="col">SEnPI</th> }
+            @if (columns().bankedSavings) { <th scope="col">Banked savings</th> }
+            @if (columns().savingsUnbanked) { <th scope="col">Unbanked savings</th> }
+            @if (columns().savings) { <th scope="col">Savings</th> }
+            @if (columns().totalSavingsPercentImprovement) { <th scope="col">Total improvement</th> }
+            @if (columns().cummulativeSavings) { <th scope="col">Cumulative savings</th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.year) {
+            <tr [class.v1-analysis-results__missing]="row.missingPredictorValue">
+              <th scope="row">
+                {{ row.year }}
+                @if (row.isBanked) { <span class="v1-chip">Banked</span> }
+              </th>
+              @if (columns().actualEnergy) { <td>{{ row.energyUse | number:'1.0-3' }}</td> }
+              @if (columns().adjusted) { <td>{{ row.adjusted | number:'1.0-3' }}</td> }
+              @if (columns().baselineAdjustment) { <td>{{ row.baselineAdjustment | number:'1.0-3' }}</td> }
+              @if (columns().SEnPI) { <td>{{ row.SEnPI | number:'1.0-3' }}</td> }
+              @if (columns().bankedSavings) { <td>{{ row.savingsBanked | number:'1.0-3' }}</td> }
+              @if (columns().savingsUnbanked) { <td>{{ row.savingsUnbanked | number:'1.0-3' }}</td> }
+              @if (columns().savings) { <td>{{ row.savings | number:'1.0-3' }}</td> }
+              @if (columns().totalSavingsPercentImprovement) { <td>{{ row.totalSavingsPercentImprovement | number:'1.0-2' }}%</td> }
+              @if (columns().cummulativeSavings) { <td>{{ row.cummulativeSavings | number:'1.0-3' }}</td> }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

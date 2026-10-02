@@ -12,12 +12,13 @@
         aria-label="Find facility, location, or type"
         placeholder="Find facility, location, or type"
         [value]="search()"
-        (input)="setSearch($any($event.target).value)">
+        #facilitySearch
+        (input)="setSearch(facilitySearch.value)">
     </div>
 
     <label>
       <span>Status</span>
-      <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+      <select #facilityStatus [value]="statusFilter()" (change)="setStatusFilter(facilityStatus.value)">
         <option value="all">All</option>
         <option value="attention">Needs setup</option>
         <option value="noMeters">No meters</option>
@@ -28,7 +29,7 @@
 
     <label>
       <span>Sort</span>
-      <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+      <select #facilitySort [value]="sortBy()" (change)="setSortBy(facilitySort.value)">
         <option value="attention">Setup first</option>
         <option value="facilityName">Facility name</option>
         <option value="modified">Latest activity</option>

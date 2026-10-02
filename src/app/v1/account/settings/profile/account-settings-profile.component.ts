@@ -5,6 +5,7 @@ import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from '@shared/
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
+import { formatUsPhoneNumber } from '@app/v1/shared/forms/phone-number';
 
 @Component({
   selector: 'app-account-settings-profile',
@@ -80,15 +81,9 @@ export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
     void this.saveProfile();
   }
 
-  formatPhone(event: Event): void {
+  formatPhone(value: string): void {
     if (this.form.controls['country'].value === 'US') {
-      let input = (event.target as HTMLInputElement).value.replace(/\D/g, '');
-      if (input.length > 3 && input.length <= 6) {
-        input = input.replace(/(\d{3})(\d+)/, '$1-$2');
-      } else if (input.length > 6) {
-        input = input.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3');
-      }
-      this.form.controls['contactPhone'].setValue(input.substring(0, 12), { emitEvent: false });
+      this.form.controls['contactPhone'].setValue(formatUsPhoneNumber(value), { emitEvent: false });
     }
     this.scheduleProfileSave();
   }

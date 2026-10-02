@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, inject } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
@@ -14,7 +14,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
   selector: 'app-create-account-panel',
   templateUrl: './create-account.component.html',
   styleUrls: ['./create-account.component.css'],
-  imports: [FormsModule, ModalFocusTrapDirective, IconComponent],
+  imports: [ReactiveFormsModule, ModalFocusTrapDirective, IconComponent],
   standalone: true
 })
 export class CreateAccountComponent {
@@ -69,10 +69,6 @@ export class CreateAccountComponent {
     if (!this.isCreating && !this.pendingStarterAccount) {
       this.selectedPath = path;
     }
-  }
-
-  setAccountName(event: Event): void {
-    this.createForm.controls.name.setValue((event.target as HTMLInputElement).value);
   }
 
   openCreatedAccount(): void {

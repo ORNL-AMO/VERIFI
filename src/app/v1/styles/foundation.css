@@ -1757,6 +1757,22 @@
   overflow: auto;
 }
 
+.v1-root .v1-workflow-stepper ol { display: grid; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+.v1-root .v1-workflow-stepper li { min-width: 0; }
+.v1-root .v1-workflow-stepper a,
+.v1-root .v1-workflow-stepper__blocked { display: flex; gap: .5rem; align-items: center; min-width: 0; min-height: 2.15rem; padding: .32rem .45rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); color: var(--v1-muted); font-size: .82rem; font-weight: 800; line-height: 1.2; text-decoration: none; }
+.v1-root .v1-workflow-stepper a:hover,
+.v1-root .v1-workflow-stepper a:focus-visible { border-color: color-mix(in srgb, var(--v1-content-control) 28%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); color: var(--v1-text); }
+.v1-root .v1-workflow-stepper .is-current a { border-color: color-mix(in srgb, var(--v1-content-control) 34%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface)); color: var(--v1-text); box-shadow: inset 3px 0 0 var(--v1-content-control); }
+.v1-root .v1-workflow-stepper .is-complete .v1-workflow-stepper__number { border-color: var(--v1-success); background: var(--v1-success); color: #fff; }
+.v1-root .v1-workflow-stepper .is-blocked { opacity: .55; }
+.v1-root .v1-workflow-stepper__number { display: inline-grid; flex: 0 0 1.45rem; width: 1.45rem; height: 1.45rem; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: .72rem; font-weight: 900; }
+.v1-root .v1-workflow-stepper__label { min-width: 0; overflow-wrap: anywhere; }
+
+.v1-root .v1-wizard-actions { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; gap: .75rem; margin-top: auto; padding: .75rem 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); box-shadow: 0 -.55rem 1rem color-mix(in srgb, var(--v1-shadow) 12%, transparent); }
+.v1-root .v1-wizard-actions__next { display: flex; gap: .75rem; align-items: center; justify-content: flex-end; min-width: 0; }
+.v1-root .v1-wizard-actions__requirement { max-width: 27rem; color: var(--v1-danger); font-size: .78rem; font-weight: 800; line-height: 1.25; text-align: right; }
+
 .v1-contrast-strong :is(
   .v1-btn,
   .v1-icon-btn,
@@ -1848,4 +1864,7 @@
   .v1-settings-grid--4 {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .v1-root .v1-wizard-actions { padding: .75rem; }
+  .v1-root .v1-wizard-actions__next { display: grid; justify-items: end; }
 }

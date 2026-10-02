@@ -592,7 +592,7 @@ describe('Facility settings routed components', () => {
     const fixture = TestBed.createComponent(ImportFacilityBackupComponent);
     fixture.detectChanges();
 
-    await fixture.componentInstance.setImportFile(fileInputEvent(JSON.stringify(facilityBackupFile())));
+    await fixture.componentInstance.setImportFile(fileList(JSON.stringify(facilityBackupFile())));
     await fixture.componentInstance.importBackupFile();
 
     expect(backupImportCoordinator.replaceFacility).toHaveBeenCalledWith(
@@ -615,7 +615,7 @@ describe('Facility settings routed components', () => {
     fixture.detectChanges();
     backupImportCoordinator.prepareTextBackup.mockReturnValueOnce({ ...facilityBackupFile(), backupFileType: 'Account' });
 
-    await fixture.componentInstance.setImportFile(fileInputEvent('{}'));
+    await fixture.componentInstance.setImportFile(fileList('{}'));
     fixture.detectChanges(false);
 
     expect(fixture.componentInstance.backupFileError).toContain('account backup');
@@ -667,13 +667,9 @@ function buttonByText<T>(fixture: ComponentFixture<T>, text: string): HTMLButton
     .find(button => button.textContent?.includes(text))!;
 }
 
-function fileInputEvent(text: string): Event {
+function fileList(text: string): FileList {
   const file = { name: 'facility-backup.json', text: vi.fn(async () => text) };
-  return {
-    target: {
-      files: [file]
-    }
-  } as unknown as Event;
+  return [file] as unknown as FileList;
 }
 
 function accountFixture(): IdbAccount {

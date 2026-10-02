@@ -1,0 +1,99 @@
+@let state = results.state();
+<section class="v1-analysis-section" aria-label="Facility annual results">
+  <app-analysis-result-toolbar
+    [description]="'Combined non-skipped group results in ' + (unit() || 'analysis units') + '.'"
+    ariaLabel="Facility annual result view"
+    [display]="display()"
+    (displayChanged)="displaySettings.setDisplay('facility:annual', $event)">
+  </app-analysis-result-toolbar>
+
+  <app-analysis-result-status
+    scope="facility"
+    period="annual"
+    [state]="state"
+    [blocking]="context.hasBlockingErrors()"
+    [rowCount]="rows().length">
+  </app-analysis-result-status>
+
+  @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length && display() === 'graph') {
+    <app-meter-results-chart
+      [chartRows]="chartRows()"
+      [metrics]="chartMetrics"
+      defaultLeftMetricId="actual"
+      defaultRightMetricId="savings"
+      period="yearly"
+      ariaLabel="Facility annual actual, adjusted, and savings chart"
+      downloadFileName="facility-annual-analysis">
+    </app-meter-results-chart>
+  } @else if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
+    <div class="v1-alert v1-alert--info" role="status">
+      <span>
+        Latest calculated result year: {{ state.reportYear || 'Unavailable' }}.
+        Fiscal-year boundaries follow
+        {{ context.facility()?.fiscalYear === 'nonCalendarYear' ? 'the facility non-calendar configuration' : 'calendar years' }}.
+      </span>
+    </div>
+    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Facility annual analysis results">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Actual</th>
+            <th scope="col">Adjusted</th>
+            <th scope="col">Baseline adjustment</th>
+            <th scope="col">SEnPI</th>
+            <th scope="col">Banked savings</th>
+            <th scope="col">Unbanked savings</th>
+            <th scope="col">Savings</th>
+            <th scope="col">Total improvement</th>
+            <th scope="col">Cumulative savings</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.year) {
+            <tr [class.v1-analysis-results__missing]="row.missingPredictorValue">
+              <th scope="row">
+                {{ row.year }}
+                @if (row.isBanked) { <span class="v1-chip">Banked</span> }
+              </th>
+              <td>{{ row.energyUse | number:'1.0-3' }}</td>
+              <td>{{ row.adjusted | number:'1.0-3' }}</td>
+              <td>{{ row.baselineAdjustment | number:'1.0-3' }}</td>
+              <td>{{ row.SEnPI | number:'1.0-3' }}</td>
+              <td>{{ row.savingsBanked | number:'1.0-3' }}</td>
+              <td>{{ row.savingsUnbanked | number:'1.0-3' }}</td>
+              <td>{{ row.savings | number:'1.0-3' }}</td>
+              <td>{{ row.totalSavingsPercentImprovement | number:'1.0-2' }}%</td>
+              <td>{{ row.cummulativeSavings | number:'1.0-3' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <section class="v1-analysis-results__breakdown" aria-labelledby="group-breakdown-heading">
+      <h4 id="group-breakdown-heading">Latest group savings breakdown</h4>
+      @if (groupBreakdown().length) {
+        <div class="v1-table-scroll">
+          <table class="table">
+            <thead>
+              <tr><th scope="col">Group</th><th scope="col">Year</th><th scope="col">Actual</th><th scope="col">Savings</th></tr>
+            </thead>
+            <tbody>
+              @for (group of groupBreakdown(); track group.id) {
+                <tr>
+                  <th scope="row">{{ group.name }}</th>
+                  <td>{{ group.year || '—' }}</td>
+                  <td>{{ group.actual | number:'1.0-3' }}</td>
+                  <td>{{ group.savings | number:'1.0-3' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p>No included group results are available.</p>
+      }
+    </section>
+  }
+</section>

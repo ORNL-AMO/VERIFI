@@ -132,7 +132,7 @@
                 </label>
                 <label class="v1-form__field">
                   <span>Contact phone</span>
-                  <input type="text" formControlName="contactPhone" maxlength="12" (input)="formatPhone($event)">
+                  <input #contactPhone type="text" formControlName="contactPhone" maxlength="12" (input)="formatPhone(contactPhone.value)">
                 </label>
               </div>
 

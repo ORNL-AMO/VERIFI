@@ -14,11 +14,11 @@
 
   <div class="import-drag-card__main">
     <label class="import-drag-card__select">
-      <input
+      <input #columnSelected
         type="checkbox"
         [checked]="selected"
         [attr.aria-label]="'Select ' + card.header"
-        (change)="selectedChange.emit($any($event.target).checked)">
+        (change)="selectedChange.emit(columnSelected.checked)">
       <span class="visually-hidden">Select {{ card.header }}</span>
     </label>
     <h3>{{ card.header }}</h3>

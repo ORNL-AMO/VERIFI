@@ -13,12 +13,13 @@
         aria-label="Find meter, facility, source, group, or status"
         placeholder="Find meter, facility, source, group, or status"
         [value]="search()"
-        (input)="setSearch($any($event.target).value)">
+        #meterSearch
+        (input)="setSearch(meterSearch.value)">
     </div>
 
     <label>
       <span>Status</span>
-      <select [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+      <select #meterStatus [value]="statusFilter()" (change)="setStatusFilter(meterStatus.value)">
         <option value="all">All</option>
         <option value="attention">Needs attention</option>
         <option value="noReadings">No readings</option>
@@ -29,7 +30,7 @@
 
     <label>
       <span>Sort</span>
-      <select [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+      <select #meterSort [value]="sortBy()" (change)="setSortBy(meterSort.value)">
         <option value="attention">Attention first</option>
         <option value="meterName">Meter name</option>
         <option value="facilityName">Facility name</option>

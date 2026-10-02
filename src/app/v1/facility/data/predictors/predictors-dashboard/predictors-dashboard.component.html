@@ -53,15 +53,15 @@
     <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four v1-predictors-browse__toolbar" aria-label="Predictor filters">
       <div class="v1-data-browse-search v1-predictors-browse__search">
         <span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span>
-        <input type="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status" [value]="search()" (input)="setSearch($any($event.target).value)">
+        <input #predictorSearch type="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status" [value]="search()" (input)="setSearch(predictorSearch.value)">
       </div>
-      <label><span>Status</span><select class="v1-select" [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+      <label><span>Status</span><select #statusSelect class="v1-select" [value]="statusFilter()" (change)="setStatusFilter(statusSelect.value)">
         <option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">Clear</option>
       </select></label>
-      <label><span>Type</span><select class="v1-select" [value]="typeFilter()" (change)="setTypeFilter($any($event.target).value)">
+      <label><span>Type</span><select #typeSelect class="v1-select" [value]="typeFilter()" (change)="setTypeFilter(typeSelect.value)">
         <option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option>
       </select></label>
-      <label><span>Sort</span><select class="v1-select" [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+      <label><span>Sort</span><select #sortSelect class="v1-select" [value]="sortBy()" (change)="setSortBy(sortSelect.value)">
         <option value="attention">Attention first</option><option value="predictorName">Predictor name</option><option value="latestReading">Latest reading</option>
       </select></label>
     </form>

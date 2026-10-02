@@ -1,0 +1,4 @@
+<section class="v1-analysis-results-shell" aria-label="Facility results">
+  <app-data-workbench-tabs [tabs]="tabs" [activeTab]="activeTab()" [attention]="tabAttention()" attentionDisplay="indicator" ariaLabel="Facility result sections" (tabSelected)="openTab($event)"></app-data-workbench-tabs>
+  <router-outlet></router-outlet>
+</section>

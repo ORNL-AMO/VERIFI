@@ -21,12 +21,12 @@
           <th scope="col">New / Existing</th>
           <th scope="col" class="predictor-review-include">
             <label class="predictor-review-bulk-control">
-              <input
+              <input #allIncluded
                 type="checkbox"
                 class="predictor-review-checkbox"
                 [checked]="state.allIncluded()"
                 [indeterminate]="state.someIncluded() && !state.allIncluded()"
-                (change)="state.setAllIncluded($any($event.target).checked)">
+                (change)="state.setAllIncluded(allIncluded.checked)">
               <span>Include</span>
             </label>
           </th>
