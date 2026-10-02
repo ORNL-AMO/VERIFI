@@ -7,7 +7,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { JStatRegressionModel } from '@data/models/analysis';
-import { normalizeAnalysisGroupModelStorage } from '@shared/shared-analysis/calculations/regression-model-recovery';
+import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 export interface BackupSnapshotBuilder {
   buildAccountBackup(snapshot: AccountWorkspaceSnapshot): BackupFile;
@@ -112,25 +112,16 @@ function trimAnalysisModels(
     return {
       ...structuredClone(item),
       groups: item.groups.map(group => {
-        const normalizedGroup = normalizeAnalysisGroupModelStorage(
+        const normalizedGroup = normalizeAnalysisGroupForAvailablePredictors(
           structuredClone(group),
+          predictorGuids,
           facility,
           item.baselineYear
         ).group;
-        const trimmedGroup = {
+        return {
           ...normalizedGroup,
           models: normalizedGroup.models?.map(model => getTrimmedModel(structuredClone(model)))
         };
-        trimmedGroup.predictorVariables = trimmedGroup.predictorVariables?.filter(
-          v => !v.id || predictorGuids.has(v.id)
-        );
-        trimmedGroup.models = trimmedGroup.models?.map(model => ({
-          ...model,
-          predictorVariables: model.predictorVariables?.filter(
-            v => !v.id || predictorGuids.has(v.id)
-          )
-        }));
-        return trimmedGroup;
       })
     };
   });

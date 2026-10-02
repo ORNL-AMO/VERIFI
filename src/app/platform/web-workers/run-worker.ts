@@ -1,5 +1,7 @@
 import { Observable } from 'rxjs';
 
+export const CALCULATION_WORKER_TIMEOUT_MS = 120_000;
+
 /**
  * Wraps a Web Worker call as a single-emission Observable.
  *
