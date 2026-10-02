@@ -7,6 +7,7 @@ import { EnergyUnitOptions, VolumeLiquidOptions } from '@shared/unitOptions';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
+import { invalidateAllRegressionModels } from '../regression/regression-draft';
 import { FacilityAnalysisAutosaveService } from '../facility-analysis-autosave.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -100,21 +101,9 @@ export class FacilityAnalysisSetupComponent {
   }
 
   clearModels(): void {
-    this.autosave.update(clearAllRegressionModels, { immediate: true });
+    this.autosave.update(invalidateAllRegressionModels, { immediate: true });
     this.showClearModels.set(false);
   }
-}
-
-export function clearAllRegressionModels(analysis: IdbAnalysisItem): void {
-  analysis.groups.forEach(group => {
-    group.models = undefined;
-    group.selectedModelId = undefined;
-    group.dateModelsGenerated = undefined;
-    group.regressionConstant = undefined;
-    group.regressionModelYear = undefined;
-    group.predictorVariables.forEach(variable => { variable.regressionCoefficient = undefined; });
-  });
-  analysis.isAnalysisVisited = false;
 }
 
 export function compatibleBankingSources(

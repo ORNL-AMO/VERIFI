@@ -6,8 +6,9 @@ import { RegressionModelsService } from '@shared/shared-analysis/calculations/re
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { RegressionModelValidationService } from './regression-model-validation.service';
-import { FacilityAnalysisRegressionComponent, buildUserDefinedGroup, generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.component';
+import { FacilityAnalysisRegressionComponent, generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.component';
 import { RegressionCandidateStore } from './regression-candidate.store';
+import { convertRegressionGroupToUserDefined } from './regression-draft';
 
 describe('facility analysis regression behavior', () => {
   it('requires at least twelve inclusive months for model generation', () => {
@@ -62,7 +63,7 @@ describe('facility analysis regression behavior', () => {
       modelId: 'model-1', modelYear: 2024, coef: [17485.54321, -6.8489342],
       predictorVariables: [{ id: 'weather', name: 'Weather' }]
     } as JStatRegressionModel;
-    const result = buildUserDefinedGroup({
+    const result = convertRegressionGroupToUserDefined({
       isGeneratedModel: true,
       selectedModelId: selectedModel.modelId,
       models: [selectedModel],

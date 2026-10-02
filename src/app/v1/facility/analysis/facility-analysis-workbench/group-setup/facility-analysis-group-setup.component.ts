@@ -6,6 +6,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { isSkippedAnalysisType } from '../facility-analysis-workbench.models';
+import { invalidateRegressionModel } from '../regression/regression-draft';
 
 @Component({ selector: 'app-facility-analysis-group-setup', standalone: true, imports: [RouterLink, IconComponent], templateUrl: './facility-analysis-group-setup.component.html', styleUrls: ['./facility-analysis-group-setup.component.css'] })
 export class FacilityAnalysisGroupSetupComponent {
@@ -171,7 +172,7 @@ export class FacilityAnalysisGroupSetupComponent {
 
   private applyAnalysisType(type: AnalysisType): void {
     this.updateGroup(group => {
-      clearGroupModels(group);
+      invalidateRegressionModel(group);
       group.analysisType = type;
       if (type !== 'regression') group.predictorVariables.forEach(variable => {
         if (!variable.production) variable.productionInAnalysis = false;
@@ -181,7 +182,7 @@ export class FacilityAnalysisGroupSetupComponent {
 
   private togglePredictor(predictorId: string): void {
     this.updateGroup(group => {
-      clearGroupModels(group);
+      invalidateRegressionModel(group);
       const variable = group.predictorVariables.find(item => item.id === predictorId);
       if (variable) variable.productionInAnalysis = !variable.productionInAnalysis;
     }, true);
@@ -214,15 +215,6 @@ type AdjustmentKind = 'dataAdjustments' | 'baselineAdjustmentsV2';
 interface AdjustmentDraft {
   readonly year?: number;
   readonly amount: string;
-}
-
-export function clearGroupModels(group: NonNullable<ReturnType<FacilityAnalysisGroupSetupComponent['group']>>): void {
-  group.models = undefined;
-  group.selectedModelId = undefined;
-  group.dateModelsGenerated = undefined;
-  group.regressionModelYear = undefined;
-  group.regressionConstant = undefined;
-  group.predictorVariables.forEach(variable => { variable.regressionCoefficient = undefined; });
 }
 
 function numericValue(event: Event): number | undefined {

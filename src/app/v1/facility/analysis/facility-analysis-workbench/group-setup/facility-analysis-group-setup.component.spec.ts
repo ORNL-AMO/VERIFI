@@ -1,5 +1,5 @@
 import { AnalysisGroup } from '@data/models/analysis';
-import { clearGroupModels } from './facility-analysis-group-setup.component';
+import { invalidateRegressionModel } from '../regression/regression-draft';
 
 describe('facility analysis group setup behavior', () => {
   it('clears model-derived fields without changing the selected analysis method', () => {
@@ -13,7 +13,7 @@ describe('facility analysis group setup behavior', () => {
       predictorVariables: [{ regressionCoefficient: 2 }]
     } as unknown as AnalysisGroup;
 
-    clearGroupModels(group);
+    invalidateRegressionModel(group);
 
     expect(group.analysisType).toBe('regression');
     expect(group).toMatchObject({

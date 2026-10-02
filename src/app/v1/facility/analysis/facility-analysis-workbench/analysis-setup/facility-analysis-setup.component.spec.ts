@@ -1,6 +1,7 @@
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { clearAllRegressionModels, compatibleBankingSources } from './facility-analysis-setup.component';
+import { compatibleBankingSources } from './facility-analysis-setup.component';
+import { invalidateAllRegressionModels } from '../regression/regression-draft';
 
 describe('facility analysis setup behavior', () => {
   it('clears every persisted regression selection before unlocking setup', () => {
@@ -13,7 +14,7 @@ describe('facility analysis setup behavior', () => {
       } as unknown as AnalysisGroup]
     } as IdbAnalysisItem;
 
-    clearAllRegressionModels(analysis);
+    invalidateAllRegressionModels(analysis);
 
     expect(analysis.groups[0]).toMatchObject({
       models: undefined, selectedModelId: undefined, dateModelsGenerated: undefined,

@@ -2,7 +2,6 @@ import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, compute
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
-import { FiscalYearSettings, getUserDefinedModelDateRange } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -12,8 +11,8 @@ import { GeneratedModelReviewRequest, GeneratedRegressionWorkflowComponent } fro
 import { UserDefinedRegressionWorkflowComponent, RegressionRangeField, RegressionUserField } from './user-defined-regression-workflow/user-defined-regression-workflow.component';
 import { RegressionModelReviewSlideoutComponent } from './model-review-slideout/regression-model-review-slideout.component';
 import { RegressionModelValidationService, modelPeriodMonthCount } from './regression-model-validation.service';
-import { roundRegressionNumber } from './regression-number-format';
 import { RegressionCandidateStore } from './regression-candidate.store';
+import { applySelectedRegressionModel, convertRegressionGroupToUserDefined, invalidateRegressionModel } from './regression-draft';
 
 @Component({
   selector: 'app-facility-analysis-regression',
@@ -229,7 +228,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
   selectModel(model: JStatRegressionModel): void {
     const group = this.group();
     if (!group) return;
-    this.replaceGroup(groupWithSelectedModel(group, model), true);
+    this.replaceGroup(applySelectedRegressionModel(group, model), true);
     this.closeReview();
   }
 
@@ -278,16 +277,11 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
     const fallbackYear = this.analysis()?.baselineYear;
     this.updateGroup(group => {
       if (!generated) {
-        Object.assign(group, buildUserDefinedGroup(group, selectedModel, facility, fallbackYear));
+        Object.assign(group, convertRegressionGroupToUserDefined(group, selectedModel, facility, fallbackYear));
         return;
       }
       group.isGeneratedModel = generated;
-      group.models = undefined;
-      group.selectedModelId = undefined;
-      group.dateModelsGenerated = undefined;
-      group.regressionConstant = undefined;
-      group.regressionModelYear = undefined;
-      group.predictorVariables.forEach(variable => { variable.regressionCoefficient = undefined; });
+      invalidateRegressionModel(group);
     }, true);
     this.candidateStore.clear(this.workbench.analysisGuid(), this.groupContext.groupGuid());
     this.generatedThisSession.set(false);
@@ -300,9 +294,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
     this.updateGroup(group => {
       const variable = group.predictorVariables.find(item => item.id === predictorId);
       if (variable) variable.productionInAnalysis = !variable.productionInAnalysis;
-      group.models = undefined;
-      group.selectedModelId = undefined;
-      group.dateModelsGenerated = undefined;
+      invalidateRegressionModel(group);
       const selectedCount = group.predictorVariables.filter(item => item.productionInAnalysis).length;
       if (group.maxModelVariables > selectedCount) group.maxModelVariables = Math.max(1, selectedCount);
     }, true);
@@ -314,12 +306,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
   private applyMaxVariables(value: number): void {
     this.updateGroup(group => {
       group.maxModelVariables = value;
-      group.models = undefined;
-      group.selectedModelId = undefined;
-      group.dateModelsGenerated = undefined;
-      group.regressionConstant = undefined;
-      group.regressionModelYear = undefined;
-      group.predictorVariables.forEach(variable => { variable.regressionCoefficient = undefined; });
+      invalidateRegressionModel(group);
     }, true, value > 0);
     this.candidateStore.clear(this.workbench.analysisGuid(), this.groupContext.groupGuid());
     this.generatedThisSession.set(false);
@@ -347,52 +334,6 @@ export function modelRangeMonthCount(group: AnalysisGroup): number {
 export function generatedConfigurationValid(group: AnalysisGroup): boolean {
   const selected = group.predictorVariables.filter(variable => variable.productionInAnalysis).length;
   return selected > 0 && (group.maxModelVariables ?? 0) > 0 && group.maxModelVariables <= selected;
-}
-
-export function buildUserDefinedGroup(
-  group: AnalysisGroup,
-  selectedModel: JStatRegressionModel | undefined,
-  facility: FiscalYearSettings | undefined,
-  fallbackYear: number | undefined
-): AnalysisGroup {
-  const modelYear = selectedModel?.modelYear ?? group.regressionModelYear;
-  const dateRange = getUserDefinedModelDateRange(modelYear, facility, fallbackYear);
-  return {
-    ...structuredClone(group),
-    isGeneratedModel: false,
-    selectedModelId: undefined,
-    models: undefined,
-    dateModelsGenerated: undefined,
-    regressionModelYear: modelYear,
-    regressionConstant: roundRegressionNumber(selectedModel?.coef[0] ?? group.regressionConstant),
-    ...(dateRange ? {
-      regressionModelStartMonth: dateRange.startMonth,
-      regressionStartYear: dateRange.startYear,
-      regressionModelEndMonth: dateRange.endMonth,
-      regressionEndYear: dateRange.endYear
-    } : {}),
-    predictorVariables: group.predictorVariables.map(variable => {
-      const coefficientIndex = selectedModel?.predictorVariables.findIndex(item => item.id === variable.id) ?? -1;
-      const coefficient = selectedModel
-        ? (coefficientIndex >= 0 ? selectedModel.coef[coefficientIndex + 1] : 0)
-        : variable.regressionCoefficient;
-      return { ...variable, regressionCoefficient: roundRegressionNumber(coefficient) };
-    })
-  };
-}
-
-function groupWithSelectedModel(group: AnalysisGroup, model: JStatRegressionModel): AnalysisGroup {
-  return {
-    ...structuredClone(group),
-    selectedModelId: model.modelId,
-    regressionConstant: model.coef[0],
-    regressionModelYear: model.modelYear,
-    models: [structuredClone(model)],
-    predictorVariables: group.predictorVariables.map(variable => {
-      const index = model.predictorVariables.findIndex(item => item.id === variable.id);
-      return { ...variable, regressionCoefficient: index >= 0 ? model.coef[index + 1] : 0 };
-    })
-  };
 }
 
 function numericValue(raw: string): number | undefined {
