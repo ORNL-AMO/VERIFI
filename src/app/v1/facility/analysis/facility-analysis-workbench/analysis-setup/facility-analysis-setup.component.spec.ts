@@ -1,7 +1,7 @@
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { compatibleBankingSources } from './facility-analysis-setup.component';
-import { invalidateAllRegressionModels } from '../regression/regression-draft';
+import { invalidateAllRegressionModels } from '../group/regression/regression-draft';
 
 describe('facility analysis setup behavior', () => {
   it('clears every persisted regression selection before unlocking setup', () => {

@@ -9,10 +9,10 @@ import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-work
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, findingsForAnalysisStage, stageHasBlockingErrors } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
-import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
-import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from './facility-analysis-results.service';
-import { FacilityAnalysisResultsDisplayService } from './facility-analysis-results-display.service';
-import { RegressionCandidateStore } from './regression/regression-candidate.store';
+import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './editing/facility-analysis-autosave.service';
+import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from './results/calculation/facility-analysis-results.service';
+import { FacilityAnalysisResultsDisplayService } from './results/presentation/facility-analysis-results-display.service';
+import { RegressionCandidateStore } from './group/regression/regression-candidate.store';
 
 @Component({
   selector: 'app-facility-analysis-workbench',

@@ -6,10 +6,10 @@ import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AnalysisBrowseCardComponent } from './analysis-browse-card/analysis-browse-card.component';
-import { FacilityAnalysisWorkspaceService } from '../facility-analysis-workspace.service';
-import { FacilityAnalysisCard } from '../facility-analysis.models';
+import { FacilityAnalysisWorkspaceService } from './facility-analysis-workspace.service';
+import { FacilityAnalysisCard } from './facility-analysis.models';
 import { AnalysisDraftSlideoutComponent } from './analysis-draft-slideout/analysis-draft-slideout.component';
-import { FacilityAnalysisActionsService } from '../facility-analysis-actions.service';
+import { FacilityAnalysisActionsService } from './facility-analysis-actions.service';
 import { AnalysisCategory } from '@data/models/analysis';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';

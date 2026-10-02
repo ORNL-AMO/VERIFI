@@ -2,9 +2,9 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
+import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisGroupContext } from './facility-analysis-group-context.service';
-import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 
 describe('FacilityAnalysisGroupContext', () => {
   it('resolves the selected group from direct links and parameter changes', () => {

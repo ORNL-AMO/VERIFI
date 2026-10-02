@@ -4,7 +4,7 @@ import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspac
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 
 export type AnalysisAutosaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'invalid' | 'error';
 export const ANALYSIS_AUTOSAVE_DEBOUNCE_MS = 650;

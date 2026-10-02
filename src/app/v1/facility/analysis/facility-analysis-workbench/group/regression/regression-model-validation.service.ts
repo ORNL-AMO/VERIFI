@@ -158,7 +158,7 @@ export function runRegressionModelValidation(
 ): Observable<RegressionValidationWorkerResponse> {
   return typeof Worker !== 'undefined'
     ? runWorker<RegressionValidationWorkerResponse>(
-      new Worker(new URL('../../../../../platform/web-workers/regression-validation.worker', import.meta.url)),
+      new Worker(new URL('../../../../../../platform/web-workers/regression-validation.worker', import.meta.url)),
       request
     )
     : defer(() => of({ ok: true as const, value: calculateRegressionValidation(request) }));

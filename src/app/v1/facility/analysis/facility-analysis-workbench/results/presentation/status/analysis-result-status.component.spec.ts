@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FacilityAnalysisResultState } from '../facility-analysis-results.service';
+import { FacilityAnalysisResultState } from '../../calculation/facility-analysis-results.service';
 import { AnalysisResultStatusComponent } from './analysis-result-status.component';
 
 describe('analysis result status', () => {

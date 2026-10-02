@@ -58,8 +58,8 @@ import { AccountAnalysisPlaceholderComponent } from '@app/v1/account/analysis/ac
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
-import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group-shell/facility-analysis-group-shell.component';
-import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-results-shell/facility-analysis-results-shell.component';
+import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
+import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/shell/facility-analysis-results-shell.component';
 
 describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {

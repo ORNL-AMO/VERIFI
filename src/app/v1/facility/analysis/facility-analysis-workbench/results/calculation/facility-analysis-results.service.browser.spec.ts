@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { of } from 'rxjs';
-import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
-import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
+import { FacilityAnalysisWorkbenchContext } from '../../facility-analysis-workbench-context.service';
+import { FacilityAnalysisAutosaveService } from '../../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
 
 describe('FacilityAnalysisResultsService browser Worker lifecycle', () => {

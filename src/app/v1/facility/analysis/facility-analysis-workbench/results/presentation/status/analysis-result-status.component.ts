@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { FacilityAnalysisResultState } from '../facility-analysis-results.service';
+import { FacilityAnalysisResultState } from '../../calculation/facility-analysis-results.service';
 
 export type AnalysisResultScope = 'facility' | 'group';
 export type AnalysisResultPeriod = 'annual' | 'monthly';

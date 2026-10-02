@@ -4,8 +4,8 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
-import { AnalysisWorkbenchTabId, buildAnalysisWorkbenchTabAttention, isSkippedAnalysisType, tabsForAnalysisGroup } from '../facility-analysis-workbench.models';
+import { FacilityAnalysisWorkbenchContext } from '../../facility-analysis-workbench-context.service';
+import { AnalysisWorkbenchTabId, buildAnalysisWorkbenchTabAttention, isSkippedAnalysisType, tabsForAnalysisGroup } from '../../facility-analysis-workbench.models';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 
 @Component({

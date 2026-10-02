@@ -5,7 +5,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { ANALYSIS_AUTOSAVE_DEBOUNCE_MS, FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 
 describe('FacilityAnalysisAutosaveService', () => {

@@ -11,8 +11,8 @@ import { runWorker } from '@platform/web-workers/run-worker';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { Observable, catchError, concat, defer, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
-import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
-import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
+import { FacilityAnalysisWorkbenchContext } from '../../facility-analysis-workbench-context.service';
+import { FacilityAnalysisAutosaveService } from '../../editing/facility-analysis-autosave.service';
 import { analysisDependencyClosure, facilityAnalysisResultsFingerprint, projectFacilityPredictorInputs } from './facility-analysis-results-request';
 
 export interface FacilityAnalysisGroupResult {
@@ -139,7 +139,7 @@ export class FacilityAnalysisResultsService {
   ): Observable<FacilityAnalysisResultState> {
     const response$ = typeof Worker !== 'undefined'
       ? runWorker<FacilityAnalysisResultsWorkerResponse>(
-        new Worker(new URL('../../../../platform/web-workers/facility-analysis-results.worker', import.meta.url)),
+        new Worker(new URL('../../../../../../platform/web-workers/facility-analysis-results.worker', import.meta.url)),
         request
       )
       : defer(() => of<FacilityAnalysisResultsWorkerResponse>({

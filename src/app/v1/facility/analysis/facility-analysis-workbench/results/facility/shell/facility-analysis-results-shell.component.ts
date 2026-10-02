@@ -3,8 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
-import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
-import { AnalysisWorkbenchTab, buildAnalysisWorkbenchTabAttention } from '../facility-analysis-workbench.models';
+import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
+import { AnalysisWorkbenchTab, buildAnalysisWorkbenchTabAttention } from '../../../facility-analysis-workbench.models';
 
 @Component({
   selector: 'app-facility-analysis-results-shell',

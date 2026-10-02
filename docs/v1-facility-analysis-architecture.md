@@ -8,6 +8,24 @@ The feature lives under [`src/app/v1/facility/analysis`](../src/app/v1/facility/
 
 Production v1 code must not import v0 presentation or services. A calculation helper belongs outside v1 only when it is deterministic and genuinely shared with another application surface. IndexedDB records remain the durable source of truth; view services and facades are route-scoped projections over those records.
 
+The feature is organized by workflow ownership:
+
+```text
+facility/analysis/
+  facility-analysis-dashboard/       inventory, commands, cards, and dashboard projections
+  facility-analysis-workbench/
+    editing/                          draft autosave lifecycle
+    analysis-setup/                   analysis-wide settings
+    group/                            group context, setup, regression, and group results
+    results/
+      calculation/                    request projection, fingerprinting, and Worker coordination
+      presentation/                   shared result views, display settings, status, and toolbar
+      facility/                       facility annual/monthly result routes
+    used-by/                          downstream dependency presentation
+```
+
+Keep specs beside the implementation they protect. Do not introduce broad feature-level `components`, `services`, `models`, or `specs` buckets; add code to the workflow that owns it. Each Angular component keeps its class, template, styles, and spec in its own component folder.
+
 ## Route and ownership model
 
 The dashboard lists analyses and performs create, copy, activate, and delete commands. Opening an analysis creates one workbench component instance for the route `/v1/workspace/facility/:facilityGuid/analysis/workbench/:analysisGuid`.
@@ -115,7 +133,7 @@ Calendarization is already coordinated at workspace scope for facility results. 
 
 ## Results presentation
 
-Result pages are projections, not calculation owners. They read `FacilityAnalysisResultsService.state`, derive their rows, and pass those rows to tables or charts. Shared result status and toolbar components live in `result-presentation`; page-specific tables remain explicit so columns and formulas are easy to inspect.
+Result pages are projections, not calculation owners. They read `FacilityAnalysisResultsService.state`, derive their rows, and pass those rows to tables or charts. Shared result status and toolbar components live under `results/presentation`; page-specific tables remain explicit so columns and formulas are easy to inspect.
 
 Future results pages should be added below the existing group or facility result shells. They should consume the coordinator’s current result or add a clearly named projection to it. Add a new Worker only when the calculation has a genuinely different input and lifecycle boundary—not merely because a new tab needs another presentation.
 

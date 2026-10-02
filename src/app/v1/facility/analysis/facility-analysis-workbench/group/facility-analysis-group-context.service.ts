@@ -1,8 +1,8 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
-import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
+import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 
 @Injectable()
 export class FacilityAnalysisGroupContext {

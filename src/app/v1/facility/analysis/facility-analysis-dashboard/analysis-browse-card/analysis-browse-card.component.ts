@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
 import { ResourceBrowseCardAction } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
-import { FacilityAnalysisCard } from '../../facility-analysis.models';
-import { buildFacilityAnalysisResourceView } from '../../facility-analysis-card.view';
+import { FacilityAnalysisCard } from '../facility-analysis.models';
+import { buildFacilityAnalysisResourceView } from './facility-analysis-card.view';
 
 @Component({
   selector: 'app-analysis-browse-card',

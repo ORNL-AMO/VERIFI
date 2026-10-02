@@ -1,5 +1,5 @@
 import { ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
-import { FacilityAnalysisCard } from './facility-analysis.models';
+import { FacilityAnalysisCard } from '../facility-analysis.models';
 
 export function buildFacilityAnalysisResourceView(
   card: FacilityAnalysisCard,
