@@ -115,7 +115,7 @@ Missing a fingerprint input can publish stale results. Including volatile displa
 
 Regression uses two distinct Worker operations:
 
-1. Model generation calendarizes the group inputs and returns candidate models. `FacilityAnalysisRegressionFacade` cancels a superseded generation with `AbortController`. Candidates go into `RegressionCandidateStore`; selecting one applies a deliberate draft transition and autosaves the analysis.
+1. Model generation calendarizes the group inputs and returns candidate models for the inclusive range from the effective baseline year through the latest complete analysis year. It does not generate pre-baseline candidates. `FacilityAnalysisRegressionFacade` cancels a superseded generation with `AbortController`. Candidates go into `RegressionCandidateStore`; selecting one applies a deliberate draft transition and autosaves the analysis.
 2. Model validation sends the candidate, optional selected-model comparison, raw inputs, and analysis context through one validation Worker. The Worker calendarizes once and calculates both monthly series from the same snapshot. A new edit or inspected model unsubscribes and terminates the old Worker.
 
 User-defined model construction is a shared pure function used by the synchronous service and validation calculation. Generated-to-user-defined conversion, model invalidation, and selection are centralized in `regression-draft.ts`; pages must not clear model fields ad hoc.

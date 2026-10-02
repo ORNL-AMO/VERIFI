@@ -38,9 +38,7 @@ export class RegressionModelsCalculator {
 
       let models: Array<JStatRegressionModel> = new Array();
 
-      const dataYears = _.uniq(allMeterData.map(d => getFiscalYear(new Date(d.date), facility)));
-      let startYear: number = dataYears.length > 0 ? Math.min(...dataYears) : baselineYear;
-      while (startYear <= endYear) {
+      for (const startYear of getRegressionModelYears(baselineYear, endYear)) {
         let modelDateRange: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, startYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {
           let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(modelDateRange.baselineDate, modelDateRange.endDate, allMeterData, variableIdCombo, analysisItem.analysisCategory);
@@ -124,7 +122,6 @@ export class RegressionModelsCalculator {
             });
           }
         });
-        startYear++;
       }
       return models;
     } else {
@@ -413,4 +410,9 @@ export class RegressionModelsCalculator {
     });
     return { SEPNotes, SEPValidation };
   }
+}
+
+export function getRegressionModelYears(baselineYear: number, reportYear: number): number[] {
+  if (!Number.isFinite(baselineYear) || !Number.isFinite(reportYear) || reportYear < baselineYear) return [];
+  return Array.from({ length: reportYear - baselineYear + 1 }, (_, index) => baselineYear + index);
 }
