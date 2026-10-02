@@ -9,6 +9,7 @@ import { RegressionModelValidationService } from './regression-model-validation.
 import { FacilityAnalysisRegressionComponent, generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.component';
 import { RegressionCandidateStore } from './regression-candidate.store';
 import { convertRegressionGroupToUserDefined } from './regression-draft';
+import { FacilityAnalysisRegressionFacade } from './facility-analysis-regression.facade';
 
 describe('facility analysis regression behavior', () => {
   it('requires at least twelve inclusive months for model generation', () => {
@@ -128,7 +129,7 @@ describe('facility analysis regression behavior', () => {
       ]
     });
     TestBed.overrideComponent(FacilityAnalysisRegressionComponent, {
-      set: { providers: [{ provide: RegressionModelValidationService, useValue: validation }] }
+      set: { providers: [FacilityAnalysisRegressionFacade, { provide: RegressionModelValidationService, useValue: validation }] }
     });
     await TestBed.compileComponents();
     const fixture = TestBed.createComponent(FacilityAnalysisRegressionComponent);
