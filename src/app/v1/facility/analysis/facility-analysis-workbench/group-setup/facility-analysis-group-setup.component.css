@@ -57,9 +57,6 @@ h2, h3, p { margin: 0; }
 .v1-analysis-group-setup__banking-years { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-3); }
 .v1-analysis-group-setup__banking-years label { display: grid; gap: .3rem; }
 .v1-field-error { color: var(--v1-danger); font-weight: 800; }
-.v1-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 1rem; background: rgba(0, 0, 0, .55); }
-.v1-confirm-dialog { display: grid; gap: var(--v1-space-4); width: min(34rem, 100%); padding: 1.25rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); box-shadow: var(--v1-shadow-lg); }
-.v1-confirm-dialog footer { display: flex; justify-content: flex-end; gap: var(--v1-space-2); }
 @media (max-width: 980px) {
   .v1-analysis-group-setup__configuration { grid-template-columns: 1fr; }
   .v1-analysis-group-setup__configuration > .v1-analysis-group-setup__meters { grid-column: 1; }

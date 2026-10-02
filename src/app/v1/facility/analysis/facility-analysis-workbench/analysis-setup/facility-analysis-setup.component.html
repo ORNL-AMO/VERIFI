@@ -57,19 +57,25 @@
 
     @if (hasModels()) {
       <div class="v1-analysis-setup__model-lock" role="status">
-        <button type="button" class="v1-btn v1-btn--secondary" (click)="showClearModels.set(true)"><app-ui-icon name="lockKeyhole"></app-ui-icon> Clear models to edit</button>
+        <button type="button" class="v1-btn v1-btn--secondary" (click)="requestClearModels()"><app-ui-icon name="lockKeyhole"></app-ui-icon> Clear models to edit</button>
         <span id="analysis-model-lock-message">Boundary, baseline, and display unit settings are locked because one or more regression models use them.</span>
       </div>
     }
   </section>
 
-  @if (showClearModels()) {
-    <div class="v1-modal-backdrop" role="presentation">
-      <section class="v1-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="clear-models-title" aria-describedby="clear-models-description">
-        <h2 id="clear-models-title">Clear regression models?</h2>
-        <p id="clear-models-description">This clears generated and selected models for every group in {{ analysis.name }}. It can change linked account analyses, reports, and banking results.</p>
-        <footer><button type="button" class="v1-btn v1-btn--secondary" (click)="showClearModels.set(false)">Cancel</button><button type="button" class="v1-btn v1-btn--danger" (click)="clearModels()">Clear models</button></footer>
-      </section>
-    </div>
-  }
 }
+
+<ng-template #clearModelsModal>
+  @if (draft(); as analysis) {
+    <app-confirmation-dialog
+      title="Clear regression models?"
+      titleId="clear-models-title"
+      cancelAriaLabel="Cancel clearing regression models"
+      confirmLabel="Clear models"
+      confirmIcon="delete"
+      (confirmed)="clearModels()"
+      (cancelled)="closeClearModels()">
+      <p>This clears generated and selected models for every group in {{ analysis.name }}. It can change linked account analyses, reports, and banking results.</p>
+    </app-confirmation-dialog>
+  }
+</ng-template>

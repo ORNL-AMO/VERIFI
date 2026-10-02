@@ -1,4 +1,5 @@
-import { Component, WritableSignal, computed, inject, signal } from '@angular/core';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, WritableSignal, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AnalysisType } from '@data/models/analysis';
 import { buildMeterCards } from '@app/v1/facility/data/meters/models';
@@ -7,13 +8,20 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { isSkippedAnalysisType } from '../facility-analysis-workbench.models';
 import { invalidateRegressionModel } from '../regression/regression-draft';
+import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 
-@Component({ selector: 'app-facility-analysis-group-setup', standalone: true, imports: [RouterLink, IconComponent], templateUrl: './facility-analysis-group-setup.component.html', styleUrls: ['./facility-analysis-group-setup.component.css'] })
-export class FacilityAnalysisGroupSetupComponent {
+@Component({ selector: 'app-facility-analysis-group-setup', standalone: true, imports: [RouterLink, IconComponent, ConfirmationDialogComponent], templateUrl: './facility-analysis-group-setup.component.html', styleUrls: ['./facility-analysis-group-setup.component.css'] })
+export class FacilityAnalysisGroupSetupComponent implements OnDestroy {
+  @ViewChild('modelInputConfirmation', { static: true }) private modelInputConfirmation!: TemplateRef<unknown>;
+
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workbench = this.groupContext.workbench;
   readonly autosave = this.groupContext.autosave;
+  private readonly modalPortal = inject(ModalPortalService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+  private confirmationOpen = false;
   readonly group = this.groupContext.group;
   readonly analysis = this.autosave.draft;
   readonly pendingType = signal<AnalysisType | undefined>(undefined);
@@ -74,25 +82,39 @@ export class FacilityAnalysisGroupSetupComponent {
 
   requestAnalysisType(type: AnalysisType): void {
     if (type === this.group()?.analysisType) return;
-    if (this.hasModels()) this.pendingType.set(type);
+    if (this.hasModels()) {
+      this.pendingType.set(type);
+      this.openConfirmation();
+    }
     else this.applyAnalysisType(type);
   }
 
   confirmTypeChange(): void {
     const type = this.pendingType();
     if (type) this.applyAnalysisType(type);
-    this.pendingType.set(undefined);
+    this.closeConfirmation();
   }
 
   requestPredictor(predictorId: string): void {
-    if (this.hasModels()) this.pendingPredictorId.set(predictorId);
+    if (this.hasModels()) {
+      this.pendingPredictorId.set(predictorId);
+      this.openConfirmation();
+    }
     else this.togglePredictor(predictorId);
   }
 
   confirmPredictorChange(): void {
     const predictorId = this.pendingPredictorId();
     if (predictorId) this.togglePredictor(predictorId);
-    this.pendingPredictorId.set(undefined);
+    this.closeConfirmation();
+  }
+
+  cancelModelInputChange(): void {
+    this.closeConfirmation();
+  }
+
+  ngOnDestroy(): void {
+    this.closeConfirmation();
   }
 
   setLegacyBaseloadMode(event: Event): void {
@@ -207,6 +229,19 @@ export class FacilityAnalysisGroupSetupComponent {
       if (group) update(group);
       draft.isAnalysisVisited = false;
     }, { immediate, valid });
+  }
+
+  private openConfirmation(): void {
+    this.confirmationOpen = true;
+    this.modalPortal.show(new TemplatePortal(this.modelInputConfirmation, this.viewContainerRef));
+  }
+
+  private closeConfirmation(): void {
+    this.pendingType.set(undefined);
+    this.pendingPredictorId.set(undefined);
+    if (!this.confirmationOpen) return;
+    this.confirmationOpen = false;
+    this.modalPortal.hide();
   }
 }
 

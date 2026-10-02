@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -11,19 +12,25 @@ import { invalidateAllRegressionModels } from '../regression/regression-draft';
 import { FacilityAnalysisAutosaveService } from '../facility-analysis-autosave.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 
 @Component({
   selector: 'app-facility-analysis-setup',
   standalone: true,
-  imports: [FormsModule, RouterLink, IconComponent],
+  imports: [FormsModule, RouterLink, IconComponent, ConfirmationDialogComponent],
   templateUrl: './facility-analysis-setup.component.html',
   styleUrls: ['./facility-analysis-setup.component.css']
 })
-export class FacilityAnalysisSetupComponent {
+export class FacilityAnalysisSetupComponent implements OnDestroy {
+  @ViewChild('clearModelsModal', { static: true }) private clearModelsModal!: TemplateRef<unknown>;
+
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly navigation = inject(WorkspaceNavigationService);
   private readonly calendarization = inject(WorkspaceCalendarizationService);
+  private readonly modalPortal = inject(ModalPortalService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly calendarizationBase = toSignal(this.calendarization.calendarizeBase(), { initialValue: { state: 'idle' as const, meters: [] } });
   readonly showClearModels = signal(false);
   readonly energyUnits = EnergyUnitOptions;
@@ -102,7 +109,22 @@ export class FacilityAnalysisSetupComponent {
 
   clearModels(): void {
     this.autosave.update(invalidateAllRegressionModels, { immediate: true });
+    this.closeClearModels();
+  }
+
+  requestClearModels(): void {
+    this.showClearModels.set(true);
+    this.modalPortal.show(new TemplatePortal(this.clearModelsModal, this.viewContainerRef));
+  }
+
+  closeClearModels(): void {
+    if (!this.showClearModels()) return;
     this.showClearModels.set(false);
+    this.modalPortal.hide();
+  }
+
+  ngOnDestroy(): void {
+    this.closeClearModels();
   }
 }
 

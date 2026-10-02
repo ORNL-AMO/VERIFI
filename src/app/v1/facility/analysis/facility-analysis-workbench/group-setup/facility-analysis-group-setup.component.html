@@ -195,7 +195,17 @@
     }
   </section>
 
-  @if (pendingType() || pendingPredictorId()) {
-    <div class="v1-modal-backdrop" role="presentation"><section class="v1-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="change-model-input-title"><h2 id="change-model-input-title">Clear generated models?</h2><p>This change invalidates the group’s generated and selected regression models. Results and downstream consumers will be recalculated.</p><footer><button type="button" class="v1-btn v1-btn--secondary" (click)="pendingType.set(undefined); pendingPredictorId.set(undefined)">Cancel</button><button type="button" class="v1-btn v1-btn--danger" (click)="pendingType() ? confirmTypeChange() : confirmPredictorChange()">Clear models and continue</button></footer></section></div>
-  }
 }
+
+<ng-template #modelInputConfirmation>
+  <app-confirmation-dialog
+    title="Clear generated models?"
+    titleId="change-model-input-title"
+    cancelAriaLabel="Cancel model input change"
+    confirmLabel="Clear models and continue"
+    confirmIcon="refresh"
+    (confirmed)="pendingType() ? confirmTypeChange() : confirmPredictorChange()"
+    (cancelled)="cancelModelInputChange()">
+    <p>This change invalidates the group’s generated and selected regression models. Results and downstream consumers will be recalculated.</p>
+  </app-confirmation-dialog>
+</ng-template>
