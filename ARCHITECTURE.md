@@ -94,6 +94,8 @@ Pure TypeScript calculations live under [`src/app/domain/calculations`](src/app/
 
 Compute-heavy operations use workers under [`src/app/platform/web-workers`](src/app/platform/web-workers). [`run-worker.ts`](src/app/platform/web-workers/run-worker.ts) wraps a Worker in an RxJS observable, posts one structured-cloneable payload, emits one result or error, and terminates the worker during teardown. Each worker imports calculation code and owns its request/result contract.
 
+Account-scoped worker jobs capture one `AccountWorkspaceSnapshot` and its revision. Import or account-switch loading cancels active jobs and clears published results; late responses may publish only when their account GUID, workspace revision, request ID, and snapshot still match the active workspace. Calendarization exposes explicit `idle`, `loading`, `ready`, and `error` state, and status validation consumes only a matching `ready` result. Interactive calculation workers time out after two minutes and expose a retry that rebuilds the request from the current snapshot without persistence writes.
+
 When changing calculation inputs or outputs:
 
 1. Update the pure calculation and deterministic unit tests.

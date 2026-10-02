@@ -1,11 +1,11 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { CalanderizationService } from '@shared/helper-services/calanderization.service';
+import { CalanderizationService, CalendarizationState } from '@shared/helper-services/calanderization.service';
 import { AnalysisSetupErrors, GroupAnalysisErrors } from '@data/models/validation';
 import { AccountAnalysisSetupErrors } from '@data/models/accountAnalysis';
 import { emptyAnalysisSetupErrors } from '@domain/calculations/status-check-calculations/validation/analysisValidation';
@@ -17,6 +17,7 @@ import { emptyAccountAnalysisSetupErrors } from '@domain/calculations/status-che
 })
 export class AccountStatusCheckService implements OnDestroy {
     accountStatusCheck: BehaviorSubject<AccountStatusCheck | undefined> = new BehaviorSubject<AccountStatusCheck | undefined>(undefined);
+    calendarizationState: BehaviorSubject<CalendarizationState>;
 
     selectedFacilityStatusCheck$: Observable<FacilityStatusCheck | undefined>;
 
@@ -26,6 +27,7 @@ export class AccountStatusCheckService implements OnDestroy {
         private accountWorkspaceStore: AccountWorkspaceStore,
         private calanderizationService: CalanderizationService
     ) {
+        this.calendarizationState = this.calanderizationService.calendarizationState;
         this.selectedFacilityStatusCheck$ = combineLatest([
             this.accountStatusCheck,
             toObservable(this.accountWorkspaceStore.selectedFacility)
@@ -37,13 +39,20 @@ export class AccountStatusCheckService implements OnDestroy {
 
         this.sub = combineLatest([
             toObservable(this.accountWorkspaceStore.snapshot),
-            this.calanderizationService.calanderizedMeters
-        ]).pipe(
-            debounceTime(300)
-        ).subscribe(([
+            this.calendarizationState
+        ]).subscribe(([
             snapshot,
-            calendarizedMeters
+            calendarizationState
         ]) => {
+            if (!snapshot
+                || calendarizationState.status !== 'ready'
+                || calendarizationState.workspaceSnapshot !== snapshot
+                || calendarizationState.accountGuid !== snapshot.account.guid
+                || calendarizationState.workspaceRevision !== this.accountWorkspaceStore.revision()) {
+                this.accountStatusCheck.next(undefined);
+                return;
+            }
+            const calendarizedMeters = calendarizationState.calanderizedMeters;
             const account = snapshot?.account;
             const facilities = snapshot ? [...snapshot.facilities] : undefined;
             const meters = snapshot ? [...snapshot.meters] : undefined;
@@ -109,6 +118,10 @@ export class AccountStatusCheckService implements OnDestroy {
 
     getAccountAnalysisErrorsByAnalysisId(analysisId: string): AccountAnalysisSetupErrors {
         return this.accountStatusCheck.getValue()?.getAccountAnalysisErrorsByAnalysisId(analysisId) ?? emptyAccountAnalysisSetupErrors();
+    }
+
+    retryCalendarization(): void {
+        this.calanderizationService.recalculateCurrentWorkspace();
     }
 
     private isCollectionForAccount<T>(items: Array<T>, accountId: string, getAccountId: (item: T) => string): boolean {
