@@ -6,18 +6,21 @@ describe('FacilityAnalysisResultsService projection', () => {
     const monthly = [{ year: 2025, month: 0, savings: 1.23456789 }] as any;
     const groups = [{ group: { idbGroupId: 'group-a' }, annualAnalysisSummaryData: annual, monthlyAnalysisSummaryData: monthly }] as any;
     expect(normalizeFacilityAnalysisWorkerResponse({
-      itemId: 'analysis-a', annualAnalysisSummaries: annual,
-      monthlyAnalysisSummaryData: monthly, groupSummaries: groups, reportYear: 2025, error: false
-    }, 'analysis-a', 4)).toEqual({
-      state: 'ready', analysisGuid: 'analysis-a', revision: 4,
+      ok: true,
+      value: { itemId: 'analysis-a', annualAnalysisSummaries: annual,
+        monthlyAnalysisSummaryData: monthly, groupSummaries: groups, reportYear: 2025 }
+    }, 'analysis-a', 'fingerprint-a')).toEqual({
+      state: 'ready', analysisGuid: 'analysis-a', fingerprint: 'fingerprint-a',
       annual, monthly, groups, reportYear: 2025
     });
   });
 
   it('rejects stale and incomplete Worker responses', () => {
     expect(normalizeFacilityAnalysisWorkerResponse({
-      itemId: 'other', annualAnalysisSummaries: [], monthlyAnalysisSummaryData: [], groupSummaries: [], error: false
-    }, 'analysis-a', 5)).toMatchObject({ state: 'error', analysisGuid: 'analysis-a', revision: 5 });
-    expect(normalizeFacilityAnalysisWorkerResponse({ error: true }, 'analysis-a', 5)).toMatchObject({ state: 'error' });
+      ok: true,
+      value: { itemId: 'other', annualAnalysisSummaries: [], monthlyAnalysisSummaryData: [], groupSummaries: [] }
+    }, 'analysis-a', 'fingerprint-a')).toMatchObject({ state: 'error', analysisGuid: 'analysis-a', fingerprint: 'fingerprint-a' });
+    expect(normalizeFacilityAnalysisWorkerResponse({ ok: false, message: 'failed' }, 'analysis-a', 'fingerprint-a'))
+      .toMatchObject({ state: 'error', message: 'failed' });
   });
 });

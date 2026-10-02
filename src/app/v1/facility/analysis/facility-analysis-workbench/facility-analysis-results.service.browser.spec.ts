@@ -1,7 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { of } from 'rxjs';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './facility-analysis-results.service';
 
 describe('FacilityAnalysisResultsService browser Worker lifecycle', () => {
@@ -18,28 +21,37 @@ describe('FacilityAnalysisResultsService browser Worker lifecycle', () => {
     TestBed.resetTestingModule();
   });
 
-  it('terminates superseded calculations and never publishes their stale result', async () => {
-    const revision = signal(1);
-    const analysis = signal({ guid: 'analysis-a', groups: [] } as IdbAnalysisItem);
+  it('ignores display-only changes and terminates a calculation when relevant inputs change', async () => {
+    const analysis = signal(analysisFixture());
     const empty = signal<any[]>([]);
+    const base = { state: 'ready' as const, accountGuid: 'account-a', inputFingerprint: 'base-a', meters: [] };
     TestBed.configureTestingModule({ providers: [
       FacilityAnalysisResultsService,
+      { provide: FacilityAnalysisAutosaveService, useValue: { state: signal('saved') } },
+      {
+        provide: WorkspaceCalendarizationService,
+        useValue: {
+          calendarizeBase: () => of(base),
+          currentInputFingerprint: signal('base-a'),
+          project: () => ({ state: 'ready', accountGuid: 'account-a', inputFingerprint: 'base-a', meters: [] })
+        }
+      },
       {
         provide: FacilityAnalysisWorkbenchContext,
         useValue: {
           analysis,
-          facility: signal({ guid: 'facility-a' }),
-          account: signal({ guid: 'account-a', assessmentReportVersion: 'AR6' }),
+          facility: signal({
+            guid: 'facility-a', fiscalYear: 'calendarYear', fiscalYearMonth: 0,
+            fiscalYearCalendarEnd: true
+          }),
+          status: { state: signal('ready') },
           hasBlockingErrors: signal(false),
           workspace: {
-            revision,
             isReady: signal(true),
             facilityMeters: empty,
-            facilityMeterData: empty,
             predictorData: empty,
             predictors: empty,
-            facilityAnalyses: signal([analysis()]),
-            customGWPs: empty
+            facilityAnalyses: signal([analysis()])
           }
         }
       }
@@ -49,23 +61,83 @@ describe('FacilityAnalysisResultsService browser Worker lifecycle', () => {
     expect(service.state().state).toBe('loading');
     const first = FakeWorker.instances[0];
 
-    revision.set(2);
+    analysis.set({ ...analysis(), name: 'Renamed analysis', modifiedDate: new Date() });
     await settleSignals();
-    expect(first.terminate).toHaveBeenCalled();
+    expect(FakeWorker.instances).toHaveLength(1);
+    expect(first.terminate).not.toHaveBeenCalled();
+
+    analysis.set({ ...analysis(), baselineYear: 2021 });
+    await settleSignals();
+    expect(first.terminate).toHaveBeenCalledOnce();
     const second = FakeWorker.instances[1];
 
     first.emitMessage(completeResponse('analysis-a', 2024));
     expect(service.state().state).toBe('loading');
     second.emitMessage(completeResponse('analysis-a', 2025));
-    expect(service.state()).toMatchObject({ state: 'ready', revision: 2, reportYear: 2025 });
-    expect(second.terminate).toHaveBeenCalled();
+    expect(service.state()).toMatchObject({ state: 'ready', reportYear: 2025 });
+    expect(second.terminate).toHaveBeenCalledOnce();
+  });
+
+  it('waits for stable autosave and status inputs before starting a Worker', async () => {
+    const analysis = signal(analysisFixture());
+    const autosaveState = signal<'dirty' | 'saved'>('dirty');
+    const statusState = signal<'evaluating' | 'ready'>('evaluating');
+    const empty = signal<any[]>([]);
+    const base = { state: 'ready' as const, accountGuid: 'account-a', inputFingerprint: 'base-a', meters: [] };
+    TestBed.configureTestingModule({ providers: [
+      FacilityAnalysisResultsService,
+      { provide: FacilityAnalysisAutosaveService, useValue: { state: autosaveState } },
+      {
+        provide: WorkspaceCalendarizationService,
+        useValue: {
+          calendarizeBase: () => of(base), currentInputFingerprint: signal('base-a'),
+          project: () => ({ state: 'ready', accountGuid: 'account-a', inputFingerprint: 'base-a', meters: [] })
+        }
+      },
+      {
+        provide: FacilityAnalysisWorkbenchContext,
+        useValue: {
+          analysis,
+          facility: signal({ guid: 'facility-a', fiscalYear: 'calendarYear', fiscalYearMonth: 0, fiscalYearCalendarEnd: true }),
+          status: { state: statusState }, hasBlockingErrors: signal(false),
+          workspace: {
+            isReady: signal(true), facilityMeters: empty, predictorData: empty,
+            predictors: empty, facilityAnalyses: signal([analysis()])
+          }
+        }
+      }
+    ] });
+    const service = TestBed.inject(FacilityAnalysisResultsService);
+    await settleSignals();
+    expect(service.state()).toMatchObject({ state: 'waiting', reason: 'autosave' });
+    expect(FakeWorker.instances).toHaveLength(0);
+
+    statusState.set('ready');
+    await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(0);
+
+    autosaveState.set('saved');
+    await settleSignals();
+    expect(service.state().state).toBe('loading');
+    expect(FakeWorker.instances).toHaveLength(1);
   });
 });
 
+function analysisFixture(): IdbAnalysisItem {
+  return {
+    guid: 'analysis-a', accountId: 'account-a', facilityId: 'facility-a', name: 'Analysis A',
+    analysisCategory: 'energy', energyIsSource: false, energyUnit: 'MMBtu', waterUnit: 'gal',
+    groups: [], baselineYear: 2020, hasBanking: false, bankedAnalysisItemId: undefined
+  } as IdbAnalysisItem;
+}
+
 function completeResponse(itemId: string, reportYear: number): unknown {
   return {
-    itemId, reportYear, error: false,
-    annualAnalysisSummaries: [], monthlyAnalysisSummaryData: [], groupSummaries: []
+    ok: true,
+    value: {
+      itemId, reportYear,
+      annualAnalysisSummaries: [], monthlyAnalysisSummaryData: [], groupSummaries: []
+    }
   };
 }
 

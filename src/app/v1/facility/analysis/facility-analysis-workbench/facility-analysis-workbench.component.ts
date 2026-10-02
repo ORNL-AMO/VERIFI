@@ -133,7 +133,7 @@ export interface FacilityAnalysisResultFacts {
 
 export function facilityAnalysisResultFacts(state: FacilityAnalysisResultState): FacilityAnalysisResultFacts {
   if (state.state !== 'ready') {
-    return { pending: state.state === 'loading' };
+    return { pending: state.state === 'loading' || state.state === 'waiting' };
   }
   const latestCompleteYear = state.reportYear ?? state.annual.reduce<number | undefined>(
     (latest, summary) => latest === undefined || summary.year > latest ? summary.year : latest,

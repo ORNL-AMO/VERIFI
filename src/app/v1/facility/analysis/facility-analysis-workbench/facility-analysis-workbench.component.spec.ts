@@ -15,7 +15,7 @@ describe('facility analysis workbench navigation', () => {
 
   it('projects the latest complete year and its total savings improvement into the header facts', () => {
     expect(facilityAnalysisResultFacts({
-      state: 'ready', analysisGuid: 'analysis-a', revision: 1, reportYear: 2025,
+      state: 'ready', analysisGuid: 'analysis-a', fingerprint: 'fingerprint-a', reportYear: 2025,
       annual: [
         { year: 2024, totalSavingsPercentImprovement: 4.2 },
         { year: 2025, totalSavingsPercentImprovement: 8.75 }
@@ -30,7 +30,7 @@ describe('facility analysis workbench navigation', () => {
 
   it('reports pending facts without carrying stale calculated values', () => {
     expect(facilityAnalysisResultFacts({
-      state: 'loading', analysisGuid: 'analysis-a', revision: 2
+      state: 'loading', analysisGuid: 'analysis-a', fingerprint: 'fingerprint-b'
     })).toEqual({ pending: true });
   });
 });

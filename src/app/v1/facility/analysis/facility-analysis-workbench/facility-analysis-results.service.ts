@@ -1,13 +1,19 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
-import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { AnnualFacilityAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
-import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { calculateFacilityAnalysisResults } from '@domain/calculations/analysis-calculations/facility-analysis-results-calculation';
+import {
+  FacilityAnalysisResultsWorkerRequest,
+  FacilityAnalysisResultsWorkerResponse,
+  FacilityAnalysisResultsValue
+} from '@platform/web-workers/facility-analysis-results-worker.contract';
 import { runWorker } from '@platform/web-workers/run-worker';
-import { Observable, catchError, concat, defer, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
+import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
+import { Observable, catchError, concat, defer, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
+import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
+import { analysisDependencyClosure, facilityAnalysisResultsFingerprint } from './facility-analysis-results-request';
 
 export interface FacilityAnalysisGroupResult {
   readonly group: AnalysisGroup;
@@ -15,58 +21,60 @@ export interface FacilityAnalysisGroupResult {
   readonly annualAnalysisSummaryData: readonly AnnualAnalysisSummary[];
 }
 
+export type FacilityAnalysisWaitingReason = 'workspace' | 'autosave' | 'status' | 'blocked' | 'calendarization';
+
 export type FacilityAnalysisResultState =
-  | { readonly state: 'idle'; readonly analysisGuid?: string; readonly revision?: number }
-  | { readonly state: 'loading'; readonly analysisGuid: string; readonly revision: number }
+  | { readonly state: 'idle'; readonly analysisGuid?: string }
+  | { readonly state: 'waiting'; readonly analysisGuid: string; readonly reason: FacilityAnalysisWaitingReason }
+  | { readonly state: 'loading'; readonly analysisGuid: string; readonly fingerprint: string }
   | {
-    readonly state: 'ready'; readonly analysisGuid: string; readonly revision: number;
+    readonly state: 'ready'; readonly analysisGuid: string; readonly fingerprint: string;
     readonly annual: readonly AnnualAnalysisSummary[];
     readonly monthly: readonly MonthlyAnalysisSummaryData[];
     readonly groups: readonly FacilityAnalysisGroupResult[];
     readonly reportYear?: number;
   }
-  | { readonly state: 'error'; readonly analysisGuid: string; readonly revision: number; readonly message: string };
+  | { readonly state: 'error'; readonly analysisGuid: string; readonly fingerprint: string; readonly message: string };
 
-interface ResultInput {
-  readonly key: string;
-  readonly revision: number;
-  readonly analysis?: IdbAnalysisItem;
-  readonly ready: boolean;
-}
-
-interface WorkerResponse {
-  readonly annualAnalysisSummaries?: AnnualAnalysisSummary[];
-  readonly monthlyAnalysisSummaryData?: MonthlyAnalysisSummaryData[];
-  readonly groupSummaries?: FacilityAnalysisGroupResult[];
-  readonly reportYear?: number;
-  readonly itemId?: string;
-  readonly error?: boolean;
-}
+type ResultInput =
+  | { readonly key: string; readonly state: 'idle'; readonly analysisGuid?: string }
+  | { readonly key: string; readonly state: 'waiting'; readonly analysisGuid: string; readonly reason: FacilityAnalysisWaitingReason }
+  | {
+    readonly key: string;
+    readonly state: 'ready';
+    readonly analysisGuid: string;
+    readonly fingerprint: string;
+    readonly request: FacilityAnalysisResultsWorkerRequest;
+  };
 
 @Injectable()
 export class FacilityAnalysisResultsService {
   private readonly context = inject(FacilityAnalysisWorkbenchContext);
-  private readonly input = computed<ResultInput>(() => {
-    const analysis = this.context.analysis();
-    const revision = this.context.workspace.revision();
-    const ready = !!analysis && !!this.context.facility() && !!this.context.account()
-      && this.context.workspace.isReady() && !this.context.hasBlockingErrors();
-    return {
-      key: `${analysis?.guid ?? ''}:${revision}:${ready}`,
-      revision,
-      analysis,
-      ready
-    };
+  private readonly autosave = inject(FacilityAnalysisAutosaveService);
+  private readonly calendarization = inject(WorkspaceCalendarizationService);
+  private readonly calendarizationBase = toSignal(this.calendarization.calendarizeBase(), {
+    initialValue: IDLE_WORKSPACE_CALENDARIZATION
   });
+  private readonly cache = new Map<string, FacilityAnalysisResultState & { readonly state: 'ready' }>();
+  private readonly input = computed<ResultInput>(() => this.buildInput());
   private readonly stateStream = toObservable(this.input).pipe(
     distinctUntilChanged((first, second) => first.key === second.key),
     switchMap(input => {
-      if (!input.ready || !input.analysis) {
-        return of<FacilityAnalysisResultState>({ state: 'idle', analysisGuid: input.analysis?.guid, revision: input.revision });
+      if (input.state === 'idle') return of<FacilityAnalysisResultState>({ state: 'idle', analysisGuid: input.analysisGuid });
+      if (input.state === 'waiting') {
+        return of<FacilityAnalysisResultState>({ state: 'waiting', analysisGuid: input.analysisGuid, reason: input.reason });
       }
+      const cached = this.cache.get(input.fingerprint);
+      if (cached) return of(cached);
       return concat(
-        of<FacilityAnalysisResultState>({ state: 'loading', analysisGuid: input.analysis.guid, revision: input.revision }),
-        this.calculate(input.analysis, input.revision)
+        of<FacilityAnalysisResultState>({ state: 'loading', analysisGuid: input.analysisGuid, fingerprint: input.fingerprint }),
+        this.calculate(input.request, input.fingerprint).pipe(tap(state => {
+          if (state.state !== 'ready') return;
+          for (const [key, value] of this.cache) {
+            if (value.analysisGuid === state.analysisGuid) this.cache.delete(key);
+          }
+          this.cache.set(input.fingerprint, state);
+        }))
       );
     })
   );
@@ -77,34 +85,68 @@ export class FacilityAnalysisResultsService {
     return state.state === 'ready' ? state.groups.find(item => item.group.idbGroupId === groupGuid) : undefined;
   };
 
-  private calculate(analysis: IdbAnalysisItem, revision: number): Observable<FacilityAnalysisResultState> {
-    const facility = this.context.facility()!;
-    const account = this.context.account()!;
-    const payload = {
+  private buildInput(): ResultInput {
+    const analysis = this.context.analysis();
+    if (!analysis) return { key: 'idle', state: 'idle' };
+    const analysisGuid = analysis.guid;
+    if (!this.context.workspace.isReady()) return waiting(analysisGuid, 'workspace');
+    if (!['idle', 'saved'].includes(this.autosave.state())) return waiting(analysisGuid, 'autosave');
+    if (this.context.status.state() !== 'ready') return waiting(analysisGuid, 'status');
+    if (this.context.hasBlockingErrors()) return waiting(analysisGuid, 'blocked');
+
+    const facility = this.context.facility();
+    const base = this.calendarizationBase();
+    if (!facility || base.state !== 'ready' || base.inputFingerprint !== this.calendarization.currentInputFingerprint()) {
+      return waiting(analysisGuid, 'calendarization');
+    }
+    const dependencies = analysisDependencyClosure(analysis, this.context.workspace.facilityAnalyses());
+    const groupIds = new Set(dependencies.flatMap(item => item.groups.map(group => group.idbGroupId)));
+    const meterGuids = this.context.workspace.facilityMeters()
+      .filter(meter => groupIds.has(meter.groupId))
+      .map(meter => meter.guid);
+    const projection = this.calendarization.project(base, {
+      context: { kind: 'facility', guid: facility.guid },
+      meterGuids,
+      energyUnit: analysis.energyUnit,
+      waterUnit: analysis.waterUnit,
+      energyIsSource: analysis.energyIsSource,
+      includeEmissions: false
+    });
+    if (projection.state !== 'ready') return waiting(analysisGuid, 'calendarization');
+
+    const request: FacilityAnalysisResultsWorkerRequest = {
       analysisItem: structuredClone(analysis),
-      facility,
-      meters: [...this.context.workspace.facilityMeters()],
-      meterData: [...this.context.workspace.facilityMeterData()],
+      facility: structuredClone(facility),
+      calanderizedMeters: projection.meters,
       accountPredictorEntries: [...this.context.workspace.predictorData()],
-      calculateAllMonthlyData: false,
       accountPredictors: [...this.context.workspace.predictors()],
-      accountAnalysisItems: [...this.context.workspace.facilityAnalyses()],
-      includeGroupSummaries: true,
-      assessmentReportVersion: account.assessmentReportVersion,
-      customGWPs: [...this.context.workspace.customGWPs()]
+      accountAnalysisItems: dependencies,
+      calculateAllMonthlyData: false,
+      includeGroupSummaries: true
     };
+    const fingerprint = facilityAnalysisResultsFingerprint(request);
+    return { key: `ready:${fingerprint}`, state: 'ready', analysisGuid, fingerprint, request };
+  }
+
+  private calculate(
+    request: FacilityAnalysisResultsWorkerRequest,
+    fingerprint: string
+  ): Observable<FacilityAnalysisResultState> {
     const response$ = typeof Worker !== 'undefined'
-      ? runWorker<WorkerResponse>(
-        new Worker(new URL('../../../../platform/web-workers/annual-facility-analysis.worker', import.meta.url)),
-        payload
+      ? runWorker<FacilityAnalysisResultsWorkerResponse>(
+        new Worker(new URL('../../../../platform/web-workers/facility-analysis-results.worker', import.meta.url)),
+        request
       )
-      : defer(() => of(calculateFacilityAnalysisSynchronously(payload)));
+      : defer(() => of<FacilityAnalysisResultsWorkerResponse>({
+        ok: true,
+        value: calculateFacilityAnalysisResults(request)
+      }));
     return response$.pipe(
-      map(response => normalizeFacilityAnalysisWorkerResponse(response, analysis.guid, revision)),
+      map(response => normalizeFacilityAnalysisWorkerResponse(response, request.analysisItem.guid, fingerprint)),
       catchError(error => of({
         state: 'error' as const,
-        analysisGuid: analysis.guid,
-        revision,
+        analysisGuid: request.analysisItem.guid,
+        fingerprint,
         message: error instanceof Error ? error.message : 'Facility analysis calculation failed.'
       }))
     );
@@ -112,42 +154,33 @@ export class FacilityAnalysisResultsService {
 }
 
 export function normalizeFacilityAnalysisWorkerResponse(
-  response: WorkerResponse,
+  response: FacilityAnalysisResultsWorkerResponse,
   analysisGuid: string,
-  revision: number
+  fingerprint: string
 ): FacilityAnalysisResultState {
-  if (response.error || (response.itemId && response.itemId !== analysisGuid)
-    || !response.annualAnalysisSummaries || !response.monthlyAnalysisSummaryData || !response.groupSummaries) {
-    return { state: 'error', analysisGuid, revision, message: 'Facility analysis calculation failed.' };
+  if (response.ok === false) return { state: 'error', analysisGuid, fingerprint, message: response.message };
+  return normalizeFacilityAnalysisValue(response.value, analysisGuid, fingerprint);
+}
+
+function normalizeFacilityAnalysisValue(
+  value: FacilityAnalysisResultsValue,
+  analysisGuid: string,
+  fingerprint: string
+): FacilityAnalysisResultState {
+  if (value.itemId !== analysisGuid) {
+    return { state: 'error', analysisGuid, fingerprint, message: 'Facility analysis calculation returned a stale result.' };
   }
   return {
     state: 'ready',
     analysisGuid,
-    revision,
-    annual: response.annualAnalysisSummaries,
-    monthly: response.monthlyAnalysisSummaryData,
-    groups: response.groupSummaries,
-    reportYear: response.reportYear
+    fingerprint,
+    annual: value.annualAnalysisSummaries,
+    monthly: value.monthlyAnalysisSummaryData,
+    groups: value.groupSummaries,
+    reportYear: value.reportYear
   };
 }
 
-function calculateFacilityAnalysisSynchronously(payload: any): WorkerResponse {
-  const calanderizedMeters = getCalanderizedMeterData(
-    payload.meters, payload.meterData, payload.facility, false,
-    { energyIsSource: payload.analysisItem.energyIsSource, neededUnits: getNeededUnits(payload.analysisItem) },
-    [], [], [payload.facility], payload.assessmentReportVersion, payload.customGWPs
-  );
-  const calculation = new AnnualFacilityAnalysisSummaryClass(
-    payload.analysisItem, payload.facility, calanderizedMeters, payload.accountPredictorEntries,
-    payload.calculateAllMonthlyData, payload.accountPredictors, payload.accountAnalysisItems,
-    payload.includeGroupSummaries
-  );
-  return {
-    annualAnalysisSummaries: calculation.getAnnualAnalysisSummaries(),
-    monthlyAnalysisSummaryData: calculation.monthlyAnalysisSummaryData,
-    groupSummaries: calculation.groupSummaries,
-    reportYear: calculation.reportYear,
-    itemId: payload.analysisItem.guid,
-    error: false
-  };
+function waiting(analysisGuid: string, reason: FacilityAnalysisWaitingReason): ResultInput {
+  return { key: `waiting:${analysisGuid}:${reason}`, state: 'waiting', analysisGuid, reason };
 }
