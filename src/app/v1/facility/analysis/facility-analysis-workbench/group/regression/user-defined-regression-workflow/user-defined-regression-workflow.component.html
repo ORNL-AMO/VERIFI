@@ -18,14 +18,14 @@
       <div class="v1-user-regression__variable-row v1-user-regression__variable-row--constant">
         <span aria-hidden="true"></span>
         <label for="regression-constant">Constant</label>
-        <input id="regression-constant" class="form-control" type="number" step="any" [value]="currentGroup.regressionConstant ?? ''" (input)="valueChanged.emit({ field: 'regressionConstant', event: $event })" />
+        <input id="regression-constant" class="form-control" type="number" step="any" [formControl]="controller.constant" />
       </div>
       @for (predictor of currentGroup.predictorVariables; track predictor.id) {
         <div class="v1-user-regression__variable-row">
-          <input type="checkbox" [id]="'user-predictor-' + predictor.id" [checked]="predictor.productionInAnalysis" (change)="predictorToggled.emit(predictor.id)" />
+          <input type="checkbox" [id]="'user-predictor-' + predictor.id" [formControl]="controller.predictorControl(predictor.id)" />
           <label [for]="'user-predictor-' + predictor.id">{{ predictor.name }} @if (predictor.unit) { <small>({{ predictor.unit }})</small> }</label>
           <label [for]="'coefficient-' + predictor.id" class="visually-hidden">{{ predictor.name }} coefficient</label>
-          <input [id]="'coefficient-' + predictor.id" class="form-control" type="number" step="any" [disabled]="!predictor.productionInAnalysis" [value]="predictor.productionInAnalysis ? predictor.regressionCoefficient ?? '' : ''" (input)="coefficientChanged.emit({ predictorId: predictor.id, event: $event })" />
+          <input [id]="'coefficient-' + predictor.id" class="form-control" type="number" step="any" [formControl]="controller.coefficientControl(predictor.id)" />
         </div>
       }
       @if (!currentGroup.predictorVariables.length) { <p class="v1-user-regression__help">No predictors are available for this facility.</p> }
@@ -34,16 +34,16 @@
     <fieldset class="v1-user-regression__details">
       <legend>Model period</legend>
       <div class="v1-user-regression__period">
-        <label for="model-start-month">Start month<select id="model-start-month" class="v1-select form-select" (change)="rangeChanged.emit({ field: 'regressionModelStartMonth', event: $event })"><option value="" [selected]="currentGroup.regressionModelStartMonth == null">Select</option>@for (month of months(); track month.monthNumValue) { <option [value]="month.monthNumValue" [selected]="currentGroup.regressionModelStartMonth === month.monthNumValue">{{ month.name }}</option> }</select></label>
-        <label for="model-start-year">Start year<select id="model-start-year" class="v1-select form-select" (change)="rangeChanged.emit({ field: 'regressionStartYear', event: $event })"><option value="" [selected]="currentGroup.regressionStartYear == null">Select</option>@for (year of yearOptions(); track year) { <option [value]="year" [selected]="currentGroup.regressionStartYear === year">{{ year }}</option> }</select></label>
-        <label for="model-end-month">End month<select id="model-end-month" class="v1-select form-select" (change)="rangeChanged.emit({ field: 'regressionModelEndMonth', event: $event })"><option value="" [selected]="currentGroup.regressionModelEndMonth == null">Select</option>@for (month of months(); track month.monthNumValue) { <option [value]="month.monthNumValue" [selected]="currentGroup.regressionModelEndMonth === month.monthNumValue">{{ month.name }}</option> }</select></label>
-        <label for="model-end-year">End year<select id="model-end-year" class="v1-select form-select" (change)="rangeChanged.emit({ field: 'regressionEndYear', event: $event })"><option value="" [selected]="currentGroup.regressionEndYear == null">Select</option>@for (year of yearOptions(); track year) { <option [value]="year" [selected]="currentGroup.regressionEndYear === year">{{ year }}</option> }</select></label>
+        <label for="model-start-month">Start month<select id="model-start-month" class="v1-select form-select" [formControl]="controller.startMonth"><option [ngValue]="null">Select</option>@for (month of months; track month.monthNumValue) { <option [ngValue]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+        <label for="model-start-year">Start year<select id="model-start-year" class="v1-select form-select" [formControl]="controller.startYear"><option [ngValue]="null">Select</option>@for (year of yearOptions(); track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
+        <label for="model-end-month">End month<select id="model-end-month" class="v1-select form-select" [formControl]="controller.endMonth"><option [ngValue]="null">Select</option>@for (month of months; track month.monthNumValue) { <option [ngValue]="month.monthNumValue">{{ month.name }}</option> }</select></label>
+        <label for="model-end-year">End year<select id="model-end-year" class="v1-select form-select" [formControl]="controller.endYear"><option [ngValue]="null">Select</option>@for (year of yearOptions(); track year) { <option [ngValue]="year">{{ year }}</option> }</select></label>
       </div>
       <p class="v1-user-regression__help" [class.v1-user-regression__help--error]="rangeComplete() && rangeMonths() < 12">@if (rangeComplete()) { Selected duration: {{ rangeMonths() }} month{{ rangeMonths() === 1 ? '' : 's' }}. At least 12 complete months are required. } @else { Select the complete start and end period. }</p>
       @if (hasDataIssue() && rangeComplete() && rangeMonths() >= 12) { <p class="v1-user-regression__help v1-user-regression__help--error" role="alert">Meter or predictor data is incomplete for the selected model period.</p> }
-      <label for="regression-notes">Model notes<textarea id="regression-notes" class="form-control" rows="3" [value]="currentGroup.regressionModelNotes || ''" (input)="valueChanged.emit({ field: 'regressionModelNotes', event: $event })"></textarea></label>
+      <label for="regression-notes">Model notes<textarea id="regression-notes" class="form-control" rows="3" [formControl]="controller.notes"></textarea></label>
     </fieldset>
   </div>
   @if (formMessage(); as message) { <p class="v1-user-regression__form-message" role="status">{{ message }}</p> }
-  <app-regression-model-validation [state]="validationState()" [analysis]="analysis()" [group]="currentGroup" (retryRequested)="validationRetryRequested.emit()"></app-regression-model-validation>
+  <app-regression-model-validation [state]="validationState()" [analysis]="analysis()!" [group]="currentGroup" (retryRequested)="workflow.validation.retry()"></app-regression-model-validation>
 </section>

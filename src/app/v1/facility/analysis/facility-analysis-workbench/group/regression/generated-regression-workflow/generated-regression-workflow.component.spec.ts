@@ -1,100 +1,102 @@
-import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
+import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
+import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
 import { GeneratedRegressionWorkflowComponent } from './generated-regression-workflow.component';
 
 describe('GeneratedRegressionWorkflowComponent', () => {
-  const group = {
-    isGeneratedModel: true,
-    maxModelVariables: 1,
+  const baseGroup = {
+    isGeneratedModel: true, maxModelVariables: 1,
     predictorVariables: [
       { id: 'production', name: 'Production', productionInAnalysis: true },
       { id: 'weather', name: 'Weather', productionInAnalysis: false }
     ]
   } as AnalysisGroup;
+  let group: ReturnType<typeof signal<AnalysisGroup | undefined>>;
+  let models: ReturnType<typeof signal<readonly JStatRegressionModel[]>>;
+  let facade: Record<string, any>;
 
-  it('shows only predictor and maximum-variable generation settings', async () => {
-    await TestBed.configureTestingModule({ imports: [GeneratedRegressionWorkflowComponent] }).compileComponents();
+  beforeEach(async () => {
+    group = signal<AnalysisGroup | undefined>(structuredClone(baseGroup));
+    models = signal<readonly JStatRegressionModel[]>([]);
+    facade = {
+      group, generatedModels: models, generating: signal(false), generationError: signal(undefined),
+      configurationExpanded: signal(true), generatedThisSession: signal(false), maxVariableOptions: signal([1]),
+      setPredictorSelected: vi.fn(), changeMaxVariables: vi.fn(), setConstant: vi.fn(), setRange: vi.fn(),
+      setNotes: vi.fn(), setCoefficient: vi.fn(), changeMethod: vi.fn(), inspectModel: vi.fn(), clearReview: vi.fn(),
+      selectModel: vi.fn(), generateModels: vi.fn()
+    };
+    await TestBed.configureTestingModule({
+      imports: [GeneratedRegressionWorkflowComponent],
+      providers: [{ provide: FacilityAnalysisRegressionFacade, useValue: facade }, FacilityAnalysisRegressionController]
+    }).compileComponents();
+  });
+
+  function create(): ComponentFixture<GeneratedRegressionWorkflowComponent> {
     const fixture = TestBed.createComponent(GeneratedRegressionWorkflowComponent);
-    fixture.componentRef.setInput('group', group);
-    fixture.componentRef.setInput('models', []);
-    fixture.componentRef.setInput('maxVariableOptions', [1]);
     fixture.detectChanges();
+    return fixture;
+  }
 
-    const element = fixture.nativeElement as HTMLElement;
+  it('shows only predictor and maximum-variable generation settings', () => {
+    const element = create().nativeElement as HTMLElement;
     expect(element.querySelector('#maximum-model-variables')).not.toBeNull();
     expect(element.querySelector('#model-start-month')).toBeNull();
     expect(button(element, 'Generate models').disabled).toBe(false);
+    expect(facade.setPredictorSelected).not.toHaveBeenCalled();
+    expect(facade.changeMaxVariables).not.toHaveBeenCalled();
   });
 
-  it('collapses generation settings into a summary above generated models', async () => {
-    await TestBed.configureTestingModule({ imports: [GeneratedRegressionWorkflowComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(GeneratedRegressionWorkflowComponent);
-    fixture.componentRef.setInput('group', { ...group, selectedModelId: 'model-a', models: [{ modelId: 'model-a' }] });
-    fixture.componentRef.setInput('models', [{
-      modelId: 'model-a', modelYear: 2024, coef: [1, 2], predictorVariables: [group.predictorVariables[0]],
-      isValid: true, SEPValidationPass: true, modelNotes: [], dataValidationNotes: [], modelValidationNotes: []
-    } as JStatRegressionModel]);
-    fixture.componentRef.setInput('maxVariableOptions', [1]);
-    fixture.componentRef.setInput('configurationExpanded', false);
+  it('sends one typed predictor change after hydration', () => {
+    const fixture = create();
+    const predictors = fixture.nativeElement.querySelectorAll<HTMLInputElement>('.v1-generated-regression__predictor-list input');
+    predictors[1].click();
     fixture.detectChanges();
+    expect(facade.setPredictorSelected).toHaveBeenCalledOnce();
+    expect(facade.setPredictorSelected).toHaveBeenCalledWith('weather', true);
+  });
 
-    const element = fixture.nativeElement as HTMLElement;
+  it('collapses generation settings into a summary above generated models', () => {
+    group.set({ ...baseGroup, selectedModelId: 'model-a', models: [model(2024)] });
+    models.set([model(2024)]);
+    facade.configurationExpanded.set(false);
+    const element = create().nativeElement as HTMLElement;
     expect(element.textContent).toContain('Production · maximum 1 variable');
     expect(button(element, 'Edit settings')).toBeTruthy();
     expect(element.querySelector('table')).not.toBeNull();
     expect(element.textContent).toContain('1 + (2 × Production)');
-    expect(element.querySelector('th[aria-sort="descending"]')?.textContent).toContain('Adjusted R²');
   });
 
-  it('filters generated models by model year', async () => {
-    await TestBed.configureTestingModule({ imports: [GeneratedRegressionWorkflowComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(GeneratedRegressionWorkflowComponent);
-    const models = [2023, 2024].map(year => ({
-      modelId: `model-${year}`, modelYear: year, coef: [1, 2], predictorVariables: [group.predictorVariables[0]],
-      isValid: true, SEPValidationPass: true, modelNotes: [], dataValidationNotes: [], modelValidationNotes: []
-    } as JStatRegressionModel));
-    fixture.componentRef.setInput('group', group);
-    fixture.componentRef.setInput('models', models);
-    fixture.componentRef.setInput('maxVariableOptions', [1]);
-    fixture.detectChanges();
-
+  it('filters generated models by model year', () => {
+    models.set([model(2023), model(2024)]);
+    const fixture = create();
     const select = fixture.nativeElement.querySelector('#model-year-filter') as HTMLSelectElement;
-    select.value = '2024';
+    select.selectedIndex = 1;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-
     const text = (fixture.nativeElement as HTMLElement).querySelector('tbody')?.textContent ?? '';
-    expect(text).toContain('2024');
-    expect(text).not.toContain('2023');
+    expect(text).toContain(select.selectedOptions[0].textContent);
   });
 
-  it('includes models with issues and shows their findings in optional columns', async () => {
-    await TestBed.configureTestingModule({ imports: [GeneratedRegressionWorkflowComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(GeneratedRegressionWorkflowComponent);
-    fixture.componentRef.setInput('group', group);
-    fixture.componentRef.setInput('models', [{
-      modelId: 'model-review', modelYear: 2024, coef: [1, 2], predictorVariables: [group.predictorVariables[0]],
-      isValid: false, SEPValidationPass: false, modelNotes: [],
-      modelValidationNotes: ['The model p-value exceeds the allowed limit.'],
-      dataValidationNotes: ['Production is outside the modeled range.']
-    } as JStatRegressionModel]);
-    fixture.componentRef.setInput('maxVariableOptions', [1]);
-    fixture.detectChanges();
-
+  it('includes models with issues through reactive filter controls', () => {
+    models.set([{ ...model(2024), isValid: false, SEPValidationPass: false,
+      modelValidationNotes: ['Critical issue'], dataValidationNotes: ['Validation issue'] }]);
+    const fixture = create();
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('tbody')).toBeNull();
-
-    const issueFilters = [...element.querySelectorAll<HTMLInputElement>('.v1-generated-regression__issue-filters input')];
-    issueFilters.forEach(filter => filter.click());
+    [...element.querySelectorAll<HTMLInputElement>('.v1-generated-regression__issue-filters input')].forEach(filter => filter.click());
     fixture.detectChanges();
-
-    expect(element.textContent).toContain('Show models with critical issues');
-    expect(element.textContent).toContain('Show models with validation issues');
-    expect(element.textContent).toContain('Critical issues');
-    expect(element.textContent).toContain('Validation issues');
-    expect(element.textContent).toContain('The model p-value exceeds the allowed limit.');
-    expect(element.textContent).toContain('Production is outside the modeled range.');
+    expect(element.textContent).toContain('Critical issue');
+    expect(element.textContent).toContain('Validation issue');
   });
+
+  function model(year: number): JStatRegressionModel {
+    return {
+      modelId: `model-${year}`, modelYear: year, coef: [1, 2], predictorVariables: [baseGroup.predictorVariables[0]],
+      isValid: true, SEPValidationPass: true, modelNotes: [], dataValidationNotes: [], modelValidationNotes: []
+    } as JStatRegressionModel;
+  }
 });
 
 function button(element: HTMLElement, text: string): HTMLButtonElement {

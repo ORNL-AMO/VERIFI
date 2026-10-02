@@ -1,33 +1,27 @@
-import { Component, computed, input, output } from '@angular/core';
-import { AnalysisGroup } from '@data/models/analysis';
-import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { Component, computed, inject } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { RegressionModelValidationComponent } from '../model-validation/regression-model-validation.component';
 import { RegressionModelValidationState, modelPeriodMonthCount, userDefinedValidationMessage } from '../regression-model-validation.service';
 import { formatRegressionNumber } from '../regression-number-format';
-
-export type RegressionRangeField = 'regressionModelStartMonth' | 'regressionStartYear' | 'regressionModelEndMonth' | 'regressionEndYear';
-export type RegressionUserField = 'regressionConstant' | 'regressionModelNotes';
+import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
+import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
 
 @Component({
   selector: 'app-user-defined-regression-workflow',
   standalone: true,
-  imports: [RegressionModelValidationComponent],
+  imports: [RegressionModelValidationComponent, ReactiveFormsModule],
   templateUrl: './user-defined-regression-workflow.component.html',
   styleUrls: ['./user-defined-regression-workflow.component.css']
 })
 export class UserDefinedRegressionWorkflowComponent {
-  readonly group = input.required<AnalysisGroup>();
-  readonly analysis = input.required<IdbAnalysisItem>();
-  readonly months = input.required<readonly { readonly name: string; readonly monthNumValue: number }[]>();
-  readonly yearOptions = input.required<readonly number[]>();
-  readonly validationState = input.required<RegressionModelValidationState>();
-  readonly hasDataIssue = input(false);
-
-  readonly predictorToggled = output<string>();
-  readonly coefficientChanged = output<{ predictorId: string; event: Event }>();
-  readonly rangeChanged = output<{ field: RegressionRangeField; event: Event }>();
-  readonly valueChanged = output<{ field: RegressionUserField; event: Event }>();
-  readonly validationRetryRequested = output<void>();
+  readonly workflow = inject(FacilityAnalysisRegressionFacade);
+  readonly controller = inject(FacilityAnalysisRegressionController);
+  readonly group = this.workflow.group;
+  readonly analysis = this.workflow.analysis;
+  readonly months = this.workflow.months;
+  readonly yearOptions = this.workflow.yearOptions;
+  readonly validationState = this.workflow.validation.state;
+  readonly hasDataIssue = this.workflow.hasUserDefinedDataIssue;
 
   readonly rangeMonths = computed(() => modelPeriodMonthCount(this.group()));
   readonly formMessage = computed(() => userDefinedValidationMessage(this.group()));

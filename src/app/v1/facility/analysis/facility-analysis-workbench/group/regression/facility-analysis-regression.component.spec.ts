@@ -10,6 +10,7 @@ import { FacilityAnalysisRegressionComponent, generatedConfigurationValid, model
 import { RegressionCandidateStore } from './regression-candidate.store';
 import { convertRegressionGroupToUserDefined } from './regression-draft';
 import { FacilityAnalysisRegressionFacade } from './facility-analysis-regression.facade';
+import { FacilityAnalysisRegressionController } from './facility-analysis-regression.controller';
 
 describe('facility analysis regression behavior', () => {
   it('requires at least twelve inclusive months for model generation', () => {
@@ -129,17 +130,19 @@ describe('facility analysis regression behavior', () => {
       ]
     });
     TestBed.overrideComponent(FacilityAnalysisRegressionComponent, {
-      set: { providers: [FacilityAnalysisRegressionFacade, { provide: RegressionModelValidationService, useValue: validation }] }
+      set: { providers: [FacilityAnalysisRegressionFacade, FacilityAnalysisRegressionController, { provide: RegressionModelValidationService, useValue: validation }] }
     });
     await TestBed.compileComponents();
     const fixture = TestBed.createComponent(FacilityAnalysisRegressionComponent);
     fixture.detectChanges();
 
     fixture.componentInstance.requestMethod(false);
+    fixture.detectChanges();
 
     expect(modalPortal.show).toHaveBeenCalledOnce();
     expect(modalPortal.show.mock.calls[0][0]).toBeInstanceOf(TemplatePortal);
     fixture.componentInstance.cancelPendingConfirmation();
+    fixture.detectChanges();
     expect(modalPortal.hide).toHaveBeenCalledOnce();
   });
 });

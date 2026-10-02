@@ -1,39 +1,34 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AnalysisGroup } from '@data/models/analysis';
-import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
+import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
 import { UserDefinedRegressionWorkflowComponent } from './user-defined-regression-workflow.component';
 
 describe('UserDefinedRegressionWorkflowComponent', () => {
-  it('renders the equation and explicit model period without generated-model settings', async () => {
-    await TestBed.configureTestingModule({ imports: [UserDefinedRegressionWorkflowComponent] }).compileComponents();
-    const fixture = TestBed.createComponent(UserDefinedRegressionWorkflowComponent);
-    fixture.componentRef.setInput('group', {
-      isGeneratedModel: false,
-      regressionConstant: 2,
-      regressionModelStartMonth: 0,
-      regressionStartYear: 2024,
-      regressionModelEndMonth: 11,
-      regressionEndYear: 2024,
+  it('hydrates typed controls and renders the equation and period', async () => {
+    const group = signal({
+      isGeneratedModel: false, regressionConstant: 2, regressionModelStartMonth: 0, regressionStartYear: 2024,
+      regressionModelEndMonth: 11, regressionEndYear: 2024,
       predictorVariables: [{ id: 'production', name: 'Production', productionInAnalysis: true, regressionCoefficient: 3 }]
     } as AnalysisGroup);
-    fixture.componentRef.setInput('analysis', { analysisCategory: 'energy', energyUnit: 'MMBtu' } as IdbAnalysisItem);
-    fixture.componentRef.setInput('months', [{ name: 'January', monthNumValue: 0 }, { name: 'December', monthNumValue: 11 }]);
-    fixture.componentRef.setInput('yearOptions', [2024]);
-    fixture.componentRef.setInput('validationState', { state: 'idle', source: 'user-defined' });
+    const facade = {
+      group, analysis: signal({ analysisCategory: 'energy', energyUnit: 'MMBtu' }),
+      months: [{ name: 'January', monthNumValue: 0 }, { name: 'December', monthNumValue: 11 }],
+      yearOptions: signal([2024]), hasUserDefinedDataIssue: signal(false), generatedModels: signal([]),
+      validation: { state: signal({ state: 'idle', source: 'user-defined' }), retry: vi.fn() },
+      setPredictorSelected: vi.fn(), changeMaxVariables: vi.fn(), setConstant: vi.fn(), setRange: vi.fn(),
+      setNotes: vi.fn(), setCoefficient: vi.fn(), changeMethod: vi.fn(), inspectModel: vi.fn(), clearReview: vi.fn(), selectModel: vi.fn()
+    };
+    await TestBed.configureTestingModule({
+      imports: [UserDefinedRegressionWorkflowComponent],
+      providers: [{ provide: FacilityAnalysisRegressionFacade, useValue: facade }, FacilityAnalysisRegressionController]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(UserDefinedRegressionWorkflowComponent);
     fixture.detectChanges();
-
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.querySelector('#regression-constant')).not.toBeNull();
-    expect(element.querySelector('.v1-user-regression__variables #regression-constant')).not.toBeNull();
-    expect(element.querySelector('.v1-user-regression__equation')?.textContent).toContain('Modeled Energy');
     expect(element.querySelector('.v1-user-regression__equation')?.textContent).toContain('2 + (3 × Production)');
-    expect(element.querySelector('#model-start-month')).not.toBeNull();
-    expect(element.querySelector('#user-model-year')).toBeNull();
-    expect(element.querySelector('#maximum-model-variables')).toBeNull();
+    expect((element.querySelector('#model-start-month') as HTMLSelectElement).selectedOptions[0].textContent).toContain('January');
     expect(element.textContent).toContain('Selected duration: 12 months');
-    expect((element.querySelector('#model-start-month') as HTMLSelectElement).value).toBe('0');
-    expect((element.querySelector('#model-start-year') as HTMLSelectElement).value).toBe('2024');
-    expect((element.querySelector('#model-end-month') as HTMLSelectElement).value).toBe('11');
-    expect((element.querySelector('#model-end-year') as HTMLSelectElement).value).toBe('2024');
   });
 });

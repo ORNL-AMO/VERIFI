@@ -6,7 +6,7 @@ import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context
 import { RegressionCandidateStore } from './regression-candidate.store';
 import { RegressionModelValidationService, modelPeriodMonthCount } from './regression-model-validation.service';
 import { applySelectedRegressionModel, convertRegressionGroupToUserDefined, invalidateRegressionModel } from './regression-draft';
-import { RegressionRangeField, RegressionUserField } from './user-defined-regression-workflow/user-defined-regression-workflow.component';
+import type { RegressionRangeField } from './facility-analysis-regression.controller';
 
 /** Owns regression workflow state and data transitions for one workbench group route. */
 @Injectable()
@@ -97,10 +97,10 @@ export class FacilityAnalysisRegressionFacade {
     this.recoveryNotice.set(undefined);
   }
 
-  togglePredictor(predictorId: string): void {
+  setPredictorSelected(predictorId: string, selected: boolean): void {
     this.updateGroup(group => {
       const variable = group.predictorVariables.find(item => item.id === predictorId);
-      if (variable) variable.productionInAnalysis = !variable.productionInAnalysis;
+      if (variable) variable.productionInAnalysis = selected;
       invalidateRegressionModel(group);
       const selectedCount = group.predictorVariables.filter(item => item.productionInAnalysis).length;
       if (group.maxModelVariables > selectedCount) group.maxModelVariables = Math.max(1, selectedCount);
@@ -116,21 +116,19 @@ export class FacilityAnalysisRegressionFacade {
     this.clearCandidates();
   }
 
-  setRange(field: RegressionRangeField, event: Event): void {
-    const rawValue = (event.target as HTMLSelectElement).value;
-    const value = rawValue === '' ? undefined : Number(rawValue);
+  setRange(field: RegressionRangeField, value: number | undefined): void {
     this.updateGroup(group => { group[field] = value; }, false, value !== undefined);
   }
 
-  setUserValue(field: RegressionUserField, event: Event): void {
-    const input = event.target as HTMLInputElement | HTMLTextAreaElement;
-    const value = field === 'regressionModelNotes' ? input.value : numericValue(input.value);
-    this.updateGroup(group => { (group as any)[field] = value; }, false,
-      field === 'regressionModelNotes' || value !== undefined);
+  setConstant(value: number | undefined): void {
+    this.updateGroup(group => { group.regressionConstant = value; }, false, value !== undefined);
   }
 
-  setCoefficient(predictorId: string, event: Event): void {
-    const value = numericValue((event.target as HTMLInputElement).value);
+  setNotes(value: string): void {
+    this.updateGroup(group => { group.regressionModelNotes = value; });
+  }
+
+  setCoefficient(predictorId: string, value: number | undefined): void {
     this.updateGroup(group => {
       const variable = group.predictorVariables.find(item => item.id === predictorId);
       if (variable) variable.regressionCoefficient = value;
@@ -235,12 +233,6 @@ export function modelRangeMonthCount(group: AnalysisGroup): number {
 export function generatedConfigurationValid(group: AnalysisGroup): boolean {
   const selected = group.predictorVariables.filter(variable => variable.productionInAnalysis).length;
   return selected > 0 && (group.maxModelVariables ?? 0) > 0 && group.maxModelVariables <= selected;
-}
-
-function numericValue(raw: string): number | undefined {
-  if (!raw.trim()) return undefined;
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : undefined;
 }
 
 function sameModel(first: JStatRegressionModel, second: JStatRegressionModel): boolean {

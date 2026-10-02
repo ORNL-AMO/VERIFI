@@ -4,64 +4,25 @@
   <section class="v1-regression" aria-label="Regression model">
     @if (recoveryNotice()) { <p class="v1-regression__notice" role="status"><app-ui-icon name="info"></app-ui-icon>{{ recoveryNotice() }}</p> }
 
+    <fieldset class="v1-regression__method v1-regression__method--inline" [disabled]="generating()">
+      <legend>Modeling method</legend>
+      <div class="v1-regression__method-options">
+        <label [class.v1-regression__method-option--active]="controller.method.value === 'generated'">
+          <input type="radio" name="regression-method" value="generated" [formControl]="controller.method" />
+          <span><strong>Generate models</strong></span>
+        </label>
+        <label [class.v1-regression__method-option--active]="controller.method.value === 'userDefined'">
+          <input type="radio" name="regression-method" value="userDefined" [formControl]="controller.method" />
+          <span><strong>User-defined model</strong></span>
+        </label>
+      </div>
+    </fieldset>
+
     <div class="v1-regression__workflow">
       @if (currentGroup.isGeneratedModel) {
-        <app-generated-regression-workflow
-          [group]="currentGroup"
-          [models]="generatedModels()"
-          [generating]="generating()"
-          [generationError]="generationError()"
-          [configurationExpanded]="configurationExpanded()"
-          [generatedThisSession]="generatedThisSession()"
-          [maxVariableOptions]="maxVariableOptions()"
-          (predictorToggled)="requestPredictorToggle($event)"
-          (maxVariablesChanged)="requestMaxVariables($event)"
-          (generateRequested)="generateModels()"
-          (editRequested)="configurationExpanded.set(true)"
-          (collapseRequested)="configurationExpanded.set(false)"
-          (modelSelected)="selectModel($event)"
-          (modelReviewRequested)="openReview($event)">
-          <fieldset modeling-method class="v1-regression__method v1-regression__method--inline">
-            <legend>Modeling method</legend>
-            <div class="v1-regression__method-options">
-              <label class="v1-regression__method-option--active">
-                <input type="radio" name="regression-method" checked [disabled]="generating()" (change)="requestMethod(true)" />
-                <span><strong>Generate models</strong></span>
-              </label>
-              <label>
-                <input type="radio" name="regression-method" [disabled]="generating()" (change)="requestMethod(false)" />
-                <span><strong>User-defined model</strong></span>
-              </label>
-            </div>
-          </fieldset>
-        </app-generated-regression-workflow>
+        <app-generated-regression-workflow></app-generated-regression-workflow>
       } @else {
-        <app-user-defined-regression-workflow
-          [group]="currentGroup"
-          [analysis]="currentAnalysis"
-          [months]="months"
-          [yearOptions]="yearOptions()"
-          [validationState]="validation.state()"
-          [hasDataIssue]="hasUserDefinedDataIssue()"
-          (predictorToggled)="requestPredictorToggle($event)"
-          (coefficientChanged)="setCoefficient($event)"
-          (rangeChanged)="setRange($event)"
-          (valueChanged)="setUserValue($event)"
-          (validationRetryRequested)="validation.retry()">
-          <fieldset modeling-method class="v1-regression__method v1-regression__method--inline">
-            <legend>Modeling method</legend>
-            <div class="v1-regression__method-options">
-              <label>
-                <input type="radio" name="regression-method" [disabled]="generating()" (change)="requestMethod(true)" />
-                <span><strong>Generate models</strong></span>
-              </label>
-              <label class="v1-regression__method-option--active">
-                <input type="radio" name="regression-method" checked [disabled]="generating()" (change)="requestMethod(false)" />
-                <span><strong>User-defined model</strong></span>
-              </label>
-            </div>
-          </fieldset>
-        </app-user-defined-regression-workflow>
+        <app-user-defined-regression-workflow></app-user-defined-regression-workflow>
       }
     </div>
   </section>
@@ -73,8 +34,8 @@
       [analysis]="currentAnalysis"
       [currentModel]="reviewComparisonModel()"
       [validationState]="validation.state()"
-      (closed)="closeReview()"
-      (selected)="selectModel($event)"
+      (closed)="controller.closeReview()"
+      (selected)="controller.selectModel($event)"
       (retryRequested)="validation.retry()">
     </app-regression-model-review-slideout>
   }
@@ -82,16 +43,17 @@
 }
 
 <ng-template #confirmationModal>
-  @if (pendingMethod() !== undefined) {
+  @let pending = controller.pendingChange();
+  @if (pendingMethod(); as method) {
     <app-confirmation-dialog
-      [title]="pendingMethod() ? 'Use generated models?' : 'Use a user-defined model?'"
+      [title]="method === 'generated' ? 'Use generated models?' : 'Use a user-defined model?'"
       titleId="change-regression-method-title"
       cancelAriaLabel="Cancel modeling method change"
-      [confirmLabel]="pendingMethod() ? 'Use generated models' : 'Use user-defined model'"
+      [confirmLabel]="method === 'generated' ? 'Use generated models' : 'Use user-defined model'"
       confirmIcon="refresh"
-      (confirmed)="confirmMethodChange()"
+      (confirmed)="confirmPendingChange()"
       (cancelled)="cancelPendingConfirmation()">
-      @if (pendingMethod()) {
+      @if (method === 'generated') {
         <p>Changing to generated models clears the user-defined equation. Generate and select a model to restore modeled results.</p>
       } @else if (selectedModel()) {
         <p>The selected model’s constant and predictor coefficients will be carried into the user-defined model, preserving the modeled energy equation. Generated alternatives and the selected-model designation will be cleared.</p>
@@ -100,13 +62,13 @@
       }
     </app-confirmation-dialog>
   }
-  @if (pendingPredictorId()) {
-    <app-confirmation-dialog title="Change model predictors?" titleId="change-regression-predictor-title" cancelAriaLabel="Cancel predictor change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmPredictorChange()" (cancelled)="cancelPendingConfirmation()">
+  @if (pending?.kind === 'predictor') {
+    <app-confirmation-dialog title="Change model predictors?" titleId="change-regression-predictor-title" cancelAriaLabel="Cancel predictor change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmPendingChange()" (cancelled)="cancelPendingConfirmation()">
       <p>This predictor change invalidates the generated candidates and current selection. Downstream results will be recalculated.</p>
     </app-confirmation-dialog>
   }
-  @if (pendingMaxVariables() !== undefined) {
-    <app-confirmation-dialog title="Change maximum variables?" titleId="change-regression-maximum-title" cancelAriaLabel="Cancel maximum variable change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmMaxVariablesChange()" (cancelled)="cancelPendingConfirmation()">
+  @if (pending?.kind === 'maxVariables') {
+    <app-confirmation-dialog title="Change maximum variables?" titleId="change-regression-maximum-title" cancelAriaLabel="Cancel maximum variable change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmPendingChange()" (cancelled)="cancelPendingConfirmation()">
       <p>Changing this setting invalidates the generated candidates and current selection. Downstream results will be recalculated.</p>
     </app-confirmation-dialog>
   }

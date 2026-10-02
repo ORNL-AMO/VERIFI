@@ -1,13 +1,11 @@
-import { Component, computed, input, output, signal } from '@angular/core';
-import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
+import { Component, computed, inject, signal } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { JStatRegressionModel } from '@data/models/analysis';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
+import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
 
 type ModelSort = 'adjust_R2' | 'modelYear' | 'R2' | 'modelPValue';
-
-export interface GeneratedModelReviewRequest {
-  readonly model: JStatRegressionModel;
-  readonly trigger: HTMLElement;
-}
 
 interface GeneratedModelRow {
   readonly model: JStatRegressionModel;
@@ -21,30 +19,20 @@ interface GeneratedModelRow {
 @Component({
   selector: 'app-generated-regression-workflow',
   standalone: true,
-  imports: [IconComponent],
+  imports: [IconComponent, ReactiveFormsModule],
   templateUrl: './generated-regression-workflow.component.html',
   styleUrls: ['./generated-regression-workflow.component.css']
 })
 export class GeneratedRegressionWorkflowComponent {
-  readonly group = input.required<AnalysisGroup>();
-  readonly models = input.required<readonly JStatRegressionModel[]>();
-  readonly generating = input(false);
-  readonly generationError = input<string | undefined>();
-  readonly configurationExpanded = input(true);
-  readonly generatedThisSession = input(false);
-  readonly maxVariableOptions = input.required<readonly number[]>();
-
-  readonly predictorToggled = output<string>();
-  readonly maxVariablesChanged = output<Event>();
-  readonly generateRequested = output<void>();
-  readonly editRequested = output<void>();
-  readonly collapseRequested = output<void>();
-  readonly modelSelected = output<JStatRegressionModel>();
-  readonly modelReviewRequested = output<GeneratedModelReviewRequest>();
-
-  readonly showInvalid = signal(false);
-  readonly showFailedValidation = signal(false);
-  readonly modelYear = signal<number | 'all'>('all');
+  readonly workflow = inject(FacilityAnalysisRegressionFacade);
+  readonly controller = inject(FacilityAnalysisRegressionController);
+  readonly group = this.workflow.group;
+  readonly models = this.workflow.generatedModels;
+  readonly generating = this.workflow.generating;
+  readonly generationError = this.workflow.generationError;
+  readonly configurationExpanded = this.workflow.configurationExpanded;
+  readonly generatedThisSession = this.workflow.generatedThisSession;
+  readonly maxVariableOptions = this.workflow.maxVariableOptions;
   readonly sortField = signal<ModelSort>('adjust_R2');
   readonly sortDirection = signal<'asc' | 'desc'>('desc');
   readonly selectedPredictors = computed(() => this.group().predictorVariables.filter(variable => variable.productionInAnalysis));
@@ -68,10 +56,10 @@ export class GeneratedRegressionWorkflowComponent {
     && this.models()[0].modelId === this.group().selectedModelId);
   readonly rows = computed<readonly GeneratedModelRow[]>(() => {
     let models = [...this.models()];
-    const modelYear = this.modelYear();
+    const modelYear = this.controller.modelYearFilterValue();
     if (modelYear !== 'all') models = models.filter(model => model.modelYear === modelYear);
-    if (!this.showInvalid()) models = models.filter(model => model.isValid);
-    if (!this.showFailedValidation()) models = models.filter(model => model.SEPValidationPass === true);
+    if (!this.controller.showInvalidValue()) models = models.filter(model => model.isValid);
+    if (!this.controller.showFailedValidationValue()) models = models.filter(model => model.SEPValidationPass === true);
     const selected = this.models().find(model => model.modelId === this.group().selectedModelId);
     if (selected && (modelYear === 'all' || selected.modelYear === modelYear)
       && !models.some(model => model.modelId === selected.modelId)) models.unshift(selected);
@@ -94,14 +82,7 @@ export class GeneratedRegressionWorkflowComponent {
     else { this.sortField.set(field); this.sortDirection.set('desc'); }
   }
 
-  setModelYear(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.modelYear.set(value === 'all' ? 'all' : Number(value));
-  }
-
-  requestReview(model: JStatRegressionModel, event: Event): void {
-    this.modelReviewRequested.emit({ model, trigger: event.currentTarget as HTMLElement });
-  }
+  generateModels(): void { void this.workflow.generateModels(); }
 }
 
 function regressionEquation(model: JStatRegressionModel): string {
