@@ -78,39 +78,34 @@ export class FacilityAnalysisGroupSetupFacade {
     }, true);
   }
 
-  togglePredictor(predictorId: string): void {
+  setPredictorSelected(predictorId: string, selected: boolean): void {
     this.updateGroup(group => {
       invalidateRegressionModel(group);
       const variable = group.predictorVariables.find(item => item.id === predictorId);
-      if (variable) variable.productionInAnalysis = !variable.productionInAnalysis;
+      if (variable) variable.productionInAnalysis = selected;
     }, true);
   }
 
-  setLegacyBaseloadMode(event: Event): void {
-    const monthly = (event.target as HTMLSelectElement).value === 'monthly';
+  setLegacyBaseloadMode(monthly: boolean): void {
     this.updateGroup(group => { group.specifiedMonthlyPercentBaseload = monthly; }, true);
   }
 
-  setAverageBaseload(event: Event): void {
-    const amount = numericValue(event);
+  setAverageBaseload(amount: number | undefined): void {
     this.updateGroup(group => { group.averagePercentBaseload = amount; }, false, amount !== undefined);
   }
 
-  setMonthlyBaseload(month: number, event: Event): void {
-    const amount = numericValue(event);
+  setMonthlyBaseload(month: number, amount: number | undefined): void {
     this.updateGroup(group => {
       const entry = group.monthlyPercentBaseload.find(item => item.monthNum === month);
       if (entry) entry.percent = amount;
     }, false, amount !== undefined);
   }
 
-  setAdjustmentYear(kind: AdjustmentKind, event: Event): void {
-    const year = Number((event.target as HTMLSelectElement).value) || undefined;
+  setAdjustmentYear(kind: AdjustmentKind, year: number | undefined): void {
     this.adjustmentDraft(kind).update(draft => ({ ...draft, year }));
   }
 
-  setAdjustmentAmount(kind: AdjustmentKind, event: Event): void {
-    const amount = (event.target as HTMLInputElement).value;
+  setAdjustmentAmount(kind: AdjustmentKind, amount: string): void {
     this.adjustmentDraft(kind).update(draft => ({ ...draft, amount }));
   }
 
@@ -135,8 +130,7 @@ export class FacilityAnalysisGroupSetupFacade {
     this.cancelAdjustmentEditor(kind);
   }
 
-  setAdjustment(kind: AdjustmentKind, year: number, event: Event): void {
-    const amount = numericValue(event);
+  setAdjustment(kind: AdjustmentKind, year: number, amount: number | undefined): void {
     this.updateGroup(group => {
       const adjustment = group[kind].find(item => item.year === year);
       if (adjustment) adjustment.amount = amount ?? 0;
@@ -147,8 +141,7 @@ export class FacilityAnalysisGroupSetupFacade {
     this.updateGroup(group => { group[kind] = group[kind].filter(item => item.year !== year); }, true);
   }
 
-  setApplyBanking(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
+  setApplyBanking(checked: boolean): void {
     this.updateGroup(group => {
       group.applyBanking = checked;
       if (!checked) {
@@ -158,8 +151,7 @@ export class FacilityAnalysisGroupSetupFacade {
     }, true);
   }
 
-  setBankingYear(field: 'bankedAnalysisYear' | 'newBaselineYear', event: Event): void {
-    const year = Number((event.target as HTMLSelectElement).value) || undefined;
+  setBankingYear(field: 'bankedAnalysisYear' | 'newBaselineYear', year: number | undefined): void {
     this.updateGroup(group => { group[field] = year; }, true, !!year);
   }
 
@@ -186,13 +178,6 @@ export type AdjustmentKind = 'dataAdjustments' | 'baselineAdjustmentsV2';
 export interface AdjustmentDraft {
   readonly year?: number;
   readonly amount: string;
-}
-
-function numericValue(event: Event): number | undefined {
-  const raw = (event.target as HTMLInputElement).value;
-  if (!raw.trim()) return undefined;
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : undefined;
 }
 
 function validAdjustmentDraft(draft: AdjustmentDraft): boolean {

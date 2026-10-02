@@ -69,7 +69,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Energy A');
     expect(fixture.nativeElement.textContent).toContain('Water B');
 
-    component.search.set('does not exist');
+    component.filtersForm.controls.search.setValue('does not exist');
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No analyses match these filters');
@@ -78,10 +78,10 @@ describe('FacilityAnalysisDashboardComponent', () => {
 
   it('filters by category and status and orders attention first', () => {
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['water-b', 'energy-a']);
-    component.setCategoryFilter('energy');
+    component.filtersForm.controls.category.setValue('energy');
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['energy-a']);
-    component.setCategoryFilter('all');
-    component.setStatusFilter('warning');
+    component.filtersForm.controls.category.setValue('all');
+    component.filtersForm.controls.status.setValue('warning');
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['water-b']);
   });
 

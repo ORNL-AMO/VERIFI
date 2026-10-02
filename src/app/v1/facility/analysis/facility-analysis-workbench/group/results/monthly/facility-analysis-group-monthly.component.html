@@ -5,20 +5,7 @@
     ariaLabel="Monthly result view"
     [display]="display()"
     (displayChanged)="displaySettings.setDisplay(displayKey(), $event)">
-    <details result-actions>
-      <summary class="v1-btn v1-btn--secondary">Choose columns</summary>
-      <div class="v1-analysis-results__column-menu">
-        @for (option of columnOptions; track option.id) {
-          <label>
-            <input
-              type="checkbox"
-              [checked]="$any(columns())[option.id]"
-              (change)="displaySettings.setColumn($any(option.id), $any($event.target).checked)" />
-            {{ option.label }}
-          </label>
-        }
-      </div>
-    </details>
+    <app-analysis-result-column-chooser result-actions [options]="columnOptions"></app-analysis-result-column-chooser>
   </app-analysis-result-toolbar>
 
   <app-analysis-result-status

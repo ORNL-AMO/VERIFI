@@ -7,8 +7,9 @@ import { FacilityAnalysisResultsDisplayService } from '../../../results/presenta
 import { ANALYSIS_CHART_METRICS, annualChartRows } from '../../../results/presentation/facility-analysis-result.view';
 import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
 import { AnalysisResultToolbarComponent } from '../../../results/presentation/toolbar/analysis-result-toolbar.component';
+import { AnalysisResultColumnChooserComponent } from '../../../results/presentation/column-chooser/analysis-result-column-chooser.component';
 
-@Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultToolbarComponent], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
+@Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultToolbarComponent, AnalysisResultColumnChooserComponent], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
 export class FacilityAnalysisGroupAnnualComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisResultsService);

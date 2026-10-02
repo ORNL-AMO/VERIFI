@@ -13,6 +13,8 @@ import { FacilityAnalysisActionsService } from './facility-analysis-actions.serv
 import { AnalysisCategory } from '@data/models/analysis';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 type AnalysisCategoryFilter = 'all' | 'energy' | 'water';
 type AnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
@@ -21,7 +23,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 @Component({
   selector: 'app-facility-analysis-dashboard',
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent],
+  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']
 })
@@ -36,10 +38,13 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   private confirmationKind: 'active' | 'delete' | undefined;
   readonly workspace = inject(FacilityAnalysisWorkspaceService);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly search = signal('');
-  readonly categoryFilter = signal<AnalysisCategoryFilter>('all');
-  readonly statusFilter = signal<AnalysisStatusFilter>('all');
-  readonly sortBy = signal<AnalysisSort>('attention');
+  readonly filtersForm = new FormGroup({
+    search: new FormControl('', { nonNullable: true }),
+    category: new FormControl<AnalysisCategoryFilter>('all', { nonNullable: true }),
+    status: new FormControl<AnalysisStatusFilter>('all', { nonNullable: true }),
+    sort: new FormControl<AnalysisSort>('attention', { nonNullable: true })
+  });
+  readonly filters = toSignal(this.filtersForm.valueChanges, { initialValue: this.filtersForm.getRawValue() });
   readonly detailsCard = signal<FacilityAnalysisCard | undefined>(undefined);
   readonly createOpen = signal(false);
   readonly saving = signal(false);
@@ -65,19 +70,16 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     .map(guid => this.workspace.cards().find(card => card.analysis.guid === guid))
     .filter((card): card is FacilityAnalysisCard => !!card));
   readonly filteredCards = computed(() => {
-    const search = this.search().trim().toLocaleLowerCase();
-    const category = this.categoryFilter();
-    const status = this.statusFilter();
+    const filters = this.filters();
+    const search = filters.search.trim().toLocaleLowerCase();
+    const category = filters.category;
+    const status = filters.status;
     return this.workspace.cards()
       .filter(card => !search || card.searchText.includes(search))
       .filter(card => category === 'all' || card.category === category)
       .filter(card => status === 'all' || (status === 'active' ? card.isActiveForReporting : card.status === status))
       .sort((first, second) => this.compareCards(first, second));
   });
-
-  setCategoryFilter(value: string): void { if (['all', 'energy', 'water'].includes(value)) this.categoryFilter.set(value as AnalysisCategoryFilter); }
-  setStatusFilter(value: string): void { if (['all', 'ready', 'warning', 'error', 'active'].includes(value)) this.statusFilter.set(value as AnalysisStatusFilter); }
-  setSort(value: string): void { if (['attention', 'modified', 'name', 'baseline'].includes(value)) this.sortBy.set(value as AnalysisSort); }
 
   open(card: FacilityAnalysisCard): void {
     const facility = this.workspace.facility();
@@ -190,9 +192,9 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   }
 
   private compareCards(first: FacilityAnalysisCard, second: FacilityAnalysisCard): number {
-    if (this.sortBy() === 'modified') return second.modifiedSortValue - first.modifiedSortValue || compareName(first, second);
-    if (this.sortBy() === 'name') return compareName(first, second);
-    if (this.sortBy() === 'baseline') return (first.analysis.baselineYear ?? Infinity) - (second.analysis.baselineYear ?? Infinity) || compareName(first, second);
+    if (this.filters().sort === 'modified') return second.modifiedSortValue - first.modifiedSortValue || compareName(first, second);
+    if (this.filters().sort === 'name') return compareName(first, second);
+    if (this.filters().sort === 'baseline') return (first.analysis.baselineYear ?? Infinity) - (second.analysis.baselineYear ?? Infinity) || compareName(first, second);
     return first.attentionRank - second.attentionRank || compareName(first, second);
   }
 }
