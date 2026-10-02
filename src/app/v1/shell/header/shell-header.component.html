@@ -131,10 +131,10 @@
           <label class="v1-settings__setting-row">
             <span class="v1-settings__label">Background</span>
             <select
-              class="v1-settings__select"
+              class="v1-select v1-settings__select"
               [value]="settings.backgroundPattern"
               #backgroundPattern
-              (change)="appearance.setBackgroundPattern(backgroundPattern.value)"
+              (change)="setBackgroundPattern(backgroundPattern.value)"
               aria-label="Background pattern">
               @for (option of patternOptions; track option.id) {
                 <option [value]="option.id">{{ option.label }}</option>

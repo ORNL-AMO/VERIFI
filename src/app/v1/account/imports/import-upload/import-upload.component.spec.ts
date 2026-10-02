@@ -91,15 +91,12 @@ describe('ImportUploadComponent', () => {
   it('uses the same workbook parser for selected and dropped Excel files', async () => {
     const selected = new File(['selected'], 'selected.xlsx');
     const dropped = new File(['dropped'], 'dropped.xlsm');
-    const input = { files: [selected], value: 'selected.xlsx' } as unknown as HTMLInputElement;
-
-    await component.filesSelected({ target: input } as unknown as Event);
+    await component.filesSelected([selected] as unknown as FileList);
     await component.filesDropped(dragEvent([dropped]));
 
     expect(parser.readFile).toHaveBeenNthCalledWith(1, selected);
     expect(parser.readFile).toHaveBeenNthCalledWith(2, dropped);
     expect(session.addDrafts).toHaveBeenCalledTimes(2);
-    expect(input.value).toBe('');
   });
 
   it('reports unsupported dropped files without passing them to the parser', async () => {

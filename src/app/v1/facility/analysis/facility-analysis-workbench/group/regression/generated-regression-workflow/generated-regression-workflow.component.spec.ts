@@ -50,7 +50,7 @@ describe('GeneratedRegressionWorkflowComponent', () => {
 
   it('sends one typed predictor change after hydration', () => {
     const fixture = create();
-    const predictors = fixture.nativeElement.querySelectorAll<HTMLInputElement>('.v1-generated-regression__predictor-list input');
+    const predictors = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLInputElement>('.v1-generated-regression__predictor-list input');
     predictors[1].click();
     fixture.detectChanges();
     expect(facade.setPredictorSelected).toHaveBeenCalledOnce();

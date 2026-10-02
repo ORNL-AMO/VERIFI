@@ -29,6 +29,7 @@ export class FacilityAnalysisRegressionController {
   readonly endMonth = new FormControl<number | null>(null);
   readonly endYear = new FormControl<number | null>(null);
   readonly notes = new FormControl('', { nonNullable: true });
+  readonly selectedModelId = new FormControl<string | null>(null);
   readonly modelYearFilter = new FormControl<number | 'all'>('all', { nonNullable: true });
   readonly showInvalid = new FormControl(false, { nonNullable: true });
   readonly showFailedValidation = new FormControl(false, { nonNullable: true });
@@ -65,6 +66,12 @@ export class FacilityAnalysisRegressionController {
     this.bindRange(this.endYear, 'regressionEndYear');
     this.notes.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(value => { if (!this.syncing) this.workflow.setNotes(value); });
+    this.selectedModelId.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(modelId => {
+        if (this.syncing || !modelId) return;
+        const model = this.workflow.generatedModels().find(candidate => candidate.modelId === modelId);
+        if (model && modelId !== this.workflow.group()?.selectedModelId) this.workflow.selectModel(model);
+      });
   }
 
   predictorControl(predictorId: string): FormControl<boolean> {
@@ -139,6 +146,7 @@ export class FacilityAnalysisRegressionController {
     this.endMonth.setValue(group.regressionModelEndMonth ?? null, { emitEvent: false });
     this.endYear.setValue(group.regressionEndYear ?? null, { emitEvent: false });
     this.notes.setValue(group.regressionModelNotes ?? '', { emitEvent: false });
+    this.selectedModelId.setValue(group.selectedModelId ?? null, { emitEvent: false });
     for (const predictor of group.predictorVariables) {
       const selected = this.predictorControl(predictor.id);
       selected.setValue(!!predictor.productionInAnalysis, { emitEvent: false });

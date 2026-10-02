@@ -13,7 +13,7 @@ describe('MeterDraftSlideoutComponent', () => {
     expect(findButton(fixture, 'Add meter')?.disabled).toBe(true);
 
     setInput(fixture, 'input', 'Boiler Gas');
-    fixture.componentInstance.setSource({ target: { value: 'Natural Gas' } } as unknown as Event);
+    fixture.componentInstance.setSource('Natural Gas');
     fixture.detectChanges();
     submitForm(fixture);
 

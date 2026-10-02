@@ -177,7 +177,7 @@ export class MeterGroupingComponent implements OnDestroy {
   }
 
   onMeterDropped(event: MeterDropEvent): void {
-    void this.moveMeter(event.card, event.target);
+    void this.moveMeter(event.card, event.destination);
   }
 
   assignedMeterCount(group: IdbUtilityMeterGroup): number {

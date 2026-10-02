@@ -44,6 +44,6 @@ export class MeterGroupLaneComponent {
     if (event.previousContainer === event.container || !this.canWrite || !this.canDrop(event.item.data, this.target)) {
       return;
     }
-    this.meterDropped.emit({ card: event.item.data, target: this.target });
+    this.meterDropped.emit({ card: event.item.data, destination: this.target });
   }
 }

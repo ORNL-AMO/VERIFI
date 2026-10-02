@@ -219,7 +219,7 @@ describe('MeterWorkbenchComponent', () => {
 
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    fixture.componentInstance.setDisplayEnergyUnit({ target: { value: 'GJ' } } as unknown as Event);
+    fixture.componentInstance.setDisplayEnergyUnit('GJ');
     await fixture.whenStable();
 
     expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.objectContaining({ displayEnergyUnit: 'GJ' }), 'account-a');
@@ -241,7 +241,7 @@ describe('MeterWorkbenchComponent', () => {
     const meterHandler = TestBed.inject(MeterCommandHandler) as unknown as { updateMeter: ReturnType<typeof vi.fn> };
 
     fixture.detectChanges();
-    fixture.componentInstance.setDisplayEnergyUnit({ target: { value: 'kWh' } } as unknown as Event);
+    fixture.componentInstance.setDisplayEnergyUnit('kWh');
     await fixture.whenStable();
 
     expect(meterHandler.updateMeter).toHaveBeenCalledWith(expect.any(Object), 'account-a');

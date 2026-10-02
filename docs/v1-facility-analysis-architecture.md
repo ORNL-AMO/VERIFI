@@ -43,11 +43,11 @@ The workbench owns the services that must survive child-tab navigation:
 
 Each group route creates `FacilityAnalysisGroupContext`. It resolves the group, group meters, meter-group metadata, and group findings. Setup and Regression then create page-specific facades:
 
-- `FacilityAnalysisGroupSetupFacade` owns setup projections and analysis-draft mutations. Its component owns confirmations and UI events.
-- `FacilityAnalysisRegressionFacade` owns candidate generation, model selection, regression draft transitions, and validation coordination. Its component owns confirmations, slideout focus, and UI events.
+- `FacilityAnalysisGroupSetupController` owns the typed setup forms, dynamic predictor controls, adjustment-editor state, and pending confirmations. `FacilityAnalysisGroupSetupFacade` owns setup projections and typed analysis-draft mutations.
+- `FacilityAnalysisRegressionController` owns the typed regression controls, generated-model table filters, the discriminated pending-change state, and review focus restoration. `FacilityAnalysisRegressionFacade` owns candidate generation, model selection, regression draft transitions, and validation coordination.
 - `RegressionModelValidationService` owns debouncing, cancellation, and the validation Worker state for the active Regression page.
 
-Keep a component focused on rendering and direct interaction. Put multi-step state transitions, calculation requests, and derived domain projections in the route-scoped facade or coordinator. Put deterministic transformations in plain functions with direct unit tests.
+Controllers are provided at their owning route and are the only layer that synchronizes editable draft state into form controls. Hydration and dynamic-control rebuilding use `emitEvent: false`; distinct user-value subscriptions translate `null` form values into optional domain values and issue one typed facade command. A component renders the controller state and invokes direct UI actions. Put domain transitions, calculation requests, and derived domain projections in the route-scoped facade or coordinator. Put deterministic transformations in plain functions with direct unit tests. Facades do not import presentation-component types or accept DOM events.
 
 ## Persisted and transient state
 
@@ -63,6 +63,8 @@ Every draft transition clones before mutation and marks `isAnalysisVisited` fals
 The workbench header and Analysis Setup both read the editable draft for analysis-wide settings. `FacilityAnalysisPeriodService` derives complete years from the shared canonical calendarization, independently of group readiness and the result Worker. This keeps baseline and latest-complete-year facts available during setup without starting calculation work that cannot yet succeed.
 
 Generated regression candidates, pending confirmation choices, open editors, selected result views, loading flags, and Worker subscriptions are transient. Do not add them to IndexedDB records merely to preserve navigation state.
+
+Analysis Setup, Group Setup, Regression, dashboard filters, create-analysis controls, and result-column preferences are reactive forms. Annual and monthly pages share one result-column chooser rather than duplicating preference controls. A control synchronization must never be used as evidence of a user edit; only emitted, deduplicated user changes may invalidate models, autosave drafts, or request calculation work.
 
 ## Result calculation orchestration
 

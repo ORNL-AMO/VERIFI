@@ -90,7 +90,7 @@
             <tbody>
               @for (row of rows(); track row.model.modelId) {
                 <tr [class.v1-generated-regression__selected-row]="row.model.modelId === group().selectedModelId">
-                  <td><label class="v1-generated-regression__radio"><input type="radio" name="selected-regression-model" [checked]="row.model.modelId === group().selectedModelId" [disabled]="generating() || row.model.errorModeling" (change)="controller.selectModel(row.model)" /><span class="visually-hidden">Select model for {{ row.model.modelYear }}</span>@if (row.model.modelId === group().selectedModelId) { <span>Current</span> }</label></td>
+                  <td><label class="v1-generated-regression__radio"><input type="radio" name="selected-regression-model" [formControl]="controller.selectedModelId" [value]="row.model.modelId" [attr.disabled]="generating() || row.model.errorModeling ? true : null" /><span class="visually-hidden">Select model for {{ row.model.modelYear }}</span>@if (row.model.modelId === group().selectedModelId) { <span>Current</span> }</label></td>
                   <td>{{ row.model.modelYear }}</td>
                   <td><strong>{{ row.predictorSummary || 'No predictors' }}</strong><small>{{ row.equation }}</small></td>
                   <td class="v1-generated-regression__number">{{ row.model.adjust_R2?.toFixed(4) ?? '—' }}</td><td class="v1-generated-regression__number">{{ row.model.R2?.toFixed(4) ?? '—' }}</td><td class="v1-generated-regression__number">{{ row.model.modelPValue?.toExponential(2) ?? '—' }}</td>
