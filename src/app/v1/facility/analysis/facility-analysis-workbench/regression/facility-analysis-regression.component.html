@@ -1,66 +1,113 @@
 @let currentGroup = group();
-@if (currentGroup) {
-  <section class="v1-analysis-section" aria-label="Regression model">
-    @if (currentGroup.selectedModelId) { <p class="v1-regression__selection-status" role="status"><app-ui-icon name="check"></app-ui-icon> Model selected</p> }
+@let currentAnalysis = analysis();
+@if (currentGroup && currentAnalysis) {
+  <section class="v1-regression" aria-label="Regression model">
+    @if (recoveryNotice()) { <p class="v1-regression__notice" role="status"><app-ui-icon name="info"></app-ui-icon>{{ recoveryNotice() }}</p> }
 
-    <div class="v1-regression__configuration">
-      <section class="v1-regression__panel" aria-labelledby="model-method-heading">
-        <h4 id="model-method-heading">Method and variables</h4>
-        <label for="regression-method">Model method</label>
-        <select id="regression-method" class="v1-select form-select" [value]="currentGroup.isGeneratedModel ? 'generated' : 'user'" (change)="setMethod($event)"><option value="generated">Generated models</option><option value="user">User-defined model</option></select>
-
-        <fieldset><legend>Predictors</legend>
-          @for (predictor of currentGroup.predictorVariables; track predictor.id) { <label class="v1-regression__check"><input type="checkbox" [checked]="predictor.productionInAnalysis" (change)="togglePredictor(predictor.id)" /><span>{{ predictor.name }} @if (predictor.unit) { <small>({{ predictor.unit }})</small> }</span></label> }
-        </fieldset>
-        @if (!selectedPredictors().length) { <p class="v1-field-error" role="alert">Select at least one predictor.</p> }
-
-        @if (currentGroup.isGeneratedModel) {
-          <label for="maximum-model-variables">Maximum variables</label>
-          <select id="maximum-model-variables" class="v1-select form-select" [value]="currentGroup.maxModelVariables" [disabled]="!maxVariableOptions().length" (change)="setMaxVariables($event)">@for (option of maxVariableOptions(); track option) { <option [value]="option">{{ option }}</option> }</select>
-        }
-      </section>
-
-      <section class="v1-regression__panel" aria-labelledby="model-period-heading">
-        <h4 id="model-period-heading">Model period</h4>
-        <div class="v1-regression__period-grid">
-          <label for="model-start-month">Start month<select id="model-start-month" class="v1-select form-select" [value]="currentGroup.regressionModelStartMonth ?? ''" (change)="setRange('regressionModelStartMonth', $event)"><option value="">Select</option>@for (month of months; track month.monthNumValue) { <option [value]="month.monthNumValue">{{ month.name }}</option> }</select></label>
-          <label for="model-start-year">Start year<select id="model-start-year" class="v1-select form-select" [value]="currentGroup.regressionStartYear ?? ''" (change)="setRange('regressionStartYear', $event)"><option value="">Select</option>@for (year of yearOptions(); track year) { <option [value]="year">{{ year }}</option> }</select></label>
-          <label for="model-end-month">End month<select id="model-end-month" class="v1-select form-select" [value]="currentGroup.regressionModelEndMonth ?? ''" (change)="setRange('regressionModelEndMonth', $event)"><option value="">Select</option>@for (month of months; track month.monthNumValue) { <option [value]="month.monthNumValue">{{ month.name }}</option> }</select></label>
-          <label for="model-end-year">End year<select id="model-end-year" class="v1-select form-select" [value]="currentGroup.regressionEndYear ?? ''" (change)="setRange('regressionEndYear', $event)"><option value="">Select</option>@for (year of yearOptions(); track year) { <option [value]="year">{{ year }}</option> }</select></label>
-        </div>
-        <p [class.v1-field-error]="rangeMonths() < 12">Selected duration: {{ rangeMonths() }} month(s). At least 12 complete months are required.</p>
-      </section>
+    <div class="v1-regression__workflow">
+      @if (currentGroup.isGeneratedModel) {
+        <app-generated-regression-workflow
+          [group]="currentGroup"
+          [models]="generatedModels()"
+          [generating]="generating()"
+          [generationError]="generationError()"
+          [configurationExpanded]="configurationExpanded()"
+          [generatedThisSession]="generatedThisSession()"
+          [maxVariableOptions]="maxVariableOptions()"
+          (predictorToggled)="requestPredictorToggle($event)"
+          (maxVariablesChanged)="requestMaxVariables($event)"
+          (generateRequested)="generateModels()"
+          (editRequested)="configurationExpanded.set(true)"
+          (collapseRequested)="configurationExpanded.set(false)"
+          (modelSelected)="selectModel($event)"
+          (modelReviewRequested)="openReview($event)">
+          <fieldset modeling-method class="v1-regression__method v1-regression__method--inline">
+            <legend>Modeling method</legend>
+            <div class="v1-regression__method-options">
+              <label class="v1-regression__method-option--active">
+                <input type="radio" name="regression-method" checked [disabled]="generating()" (change)="requestMethod(true)" />
+                <span><strong>Generate models</strong></span>
+              </label>
+              <label>
+                <input type="radio" name="regression-method" [disabled]="generating()" (change)="requestMethod(false)" />
+                <span><strong>User-defined model</strong></span>
+              </label>
+            </div>
+          </fieldset>
+        </app-generated-regression-workflow>
+      } @else {
+        <app-user-defined-regression-workflow
+          [group]="currentGroup"
+          [analysis]="currentAnalysis"
+          [months]="months"
+          [yearOptions]="yearOptions()"
+          [validationState]="validation.state()"
+          [hasDataIssue]="hasUserDefinedDataIssue()"
+          (predictorToggled)="requestPredictorToggle($event)"
+          (coefficientChanged)="setCoefficient($event)"
+          (rangeChanged)="setRange($event)"
+          (valueChanged)="setUserValue($event)"
+          (validationRetryRequested)="validation.retry()">
+          <fieldset modeling-method class="v1-regression__method v1-regression__method--inline">
+            <legend>Modeling method</legend>
+            <div class="v1-regression__method-options">
+              <label>
+                <input type="radio" name="regression-method" [disabled]="generating()" (change)="requestMethod(true)" />
+                <span><strong>Generate models</strong></span>
+              </label>
+              <label class="v1-regression__method-option--active">
+                <input type="radio" name="regression-method" checked [disabled]="generating()" (change)="requestMethod(false)" />
+                <span><strong>User-defined model</strong></span>
+              </label>
+            </div>
+          </fieldset>
+        </app-user-defined-regression-workflow>
+      }
     </div>
-
-    @if (currentGroup.isGeneratedModel) {
-      <section class="v1-regression__panel" aria-labelledby="generated-models-heading">
-        <div class="v1-analysis-section__heading"><div><h4 id="generated-models-heading">Generated models</h4><p>{{ generatedModels().length }} model(s) available; {{ visibleModels().length }} shown.</p></div><div class="v1-regression__actions"><button type="button" class="v1-btn v1-btn--primary" [disabled]="generating() || !generatedConfigurationValid()" (click)="generateModels()">@if (generating()) { <app-ui-icon name="loading" spin></app-ui-icon> Generating… } @else { Generate models }</button>@if (currentGroup.selectedModelId) { <button type="button" class="v1-btn v1-btn--secondary" (click)="clearSelection()">Clear selection</button> }</div></div>
-        @if (generationError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ generationError() }} The previously selected model has been preserved.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="generateModels()">Retry</button></div> }
-        <div class="v1-regression__filters" aria-label="Model filters"><label><input type="checkbox" [checked]="showInvalid()" (change)="showInvalid.set(!showInvalid())" /> Show statistically invalid</label><label><input type="checkbox" [checked]="showFailedValidation()" (change)="showFailedValidation.set(!showFailedValidation())" /> Show failed range validation</label></div>
-        @if (generatedModels().length === 0 && !generating()) { <div class="v1-empty-state" role="status"><app-ui-icon name="analysis"></app-ui-icon><h4>No generated models</h4><p>Complete the model period and predictor selection, then generate models.</p></div> }
-        @if (generatedModels().length > 0) {
-          <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Generated regression models">
-            <table class="table"><thead><tr><th scope="col">Selected</th><th scope="col"><button type="button" (click)="sort('modelYear')">Year</button></th><th scope="col"><button type="button" (click)="sort('adjust_R2')">Adjusted R²</button></th><th scope="col"><button type="button" (click)="sort('R2')">R²</button></th><th scope="col"><button type="button" (click)="sort('modelPValue')">Model p-value</button></th><th scope="col">Validity</th><th scope="col">Actions</th></tr></thead><tbody>
-              @for (model of visibleModels(); track model.modelId) { <tr [class.v1-regression__selected-row]="model.modelId === currentGroup.selectedModelId"><td>@if (model.modelId === currentGroup.selectedModelId) { <span class="visually-hidden">Selected</span><app-ui-icon name="check"></app-ui-icon> }</td><td>{{ model.modelYear }}</td><td>{{ model.adjust_R2?.toFixed(4) ?? '—' }}</td><td>{{ model.R2?.toFixed(4) ?? '—' }}</td><td>{{ model.modelPValue?.toExponential(2) ?? '—' }}</td><td><span class="v1-chip v1-chip--{{ model.isValid && model.SEPValidationPass ? 'success' : 'warning' }}">{{ model.isValid && model.SEPValidationPass ? 'Valid' : 'Review' }}</span></td><td><button type="button" class="v1-btn v1-btn--ghost" (click)="inspectedModel.set(model)">Inspect</button><button type="button" class="v1-btn v1-btn--secondary" (click)="selectModel(model)">Select</button></td></tr> }
-            </tbody></table>
-          </div>
-        }
-      </section>
-    } @else {
-      <section class="v1-regression__panel" aria-labelledby="user-model-heading">
-        <h4 id="user-model-heading">User-defined equation</h4>
-        <div class="v1-regression__user-grid"><label for="user-model-year">Model year<select id="user-model-year" class="v1-select form-select" [value]="currentGroup.regressionModelYear ?? ''" (change)="setUserValue('regressionModelYear', $event)"><option value="">Select</option>@for (year of yearOptions(); track year) { <option [value]="year">{{ year }}</option> }</select></label><label for="regression-constant">Constant<input id="regression-constant" class="form-control" type="number" [value]="currentGroup.regressionConstant ?? ''" (input)="setUserValue('regressionConstant', $event)" /></label></div>
-        @for (predictor of selectedPredictors(); track predictor.id) { <label [for]="'coefficient-' + predictor.id">{{ predictor.name }} coefficient<input [id]="'coefficient-' + predictor.id" class="form-control" type="number" [value]="predictor.regressionCoefficient ?? ''" (input)="setCoefficient(predictor.id, $event)" /></label> }
-        <label for="regression-notes">Model notes</label><textarea id="regression-notes" class="form-control" rows="4" [value]="currentGroup.regressionModelNotes || ''" (input)="setUserValue('regressionModelNotes', $event)"></textarea>
-        <div class="v1-alert v1-alert--{{ userModelValid() ? 'success' : 'warning' }}" role="status"><app-ui-icon [name]="userModelValid() ? 'check' : 'warning'"></app-ui-icon><span>{{ userModelValid() ? 'The user-defined equation has all required values.' : 'Enter a model year, constant, selected predictor, and coefficient for every selected predictor.' }}</span></div>
-      </section>
-    }
   </section>
 
   @if (inspectedModel(); as model) {
-    <div class="v1-modal-backdrop" role="presentation"><section class="v1-confirm-dialog v1-regression__inspection" role="dialog" aria-modal="true" aria-labelledby="model-inspection-title"><div class="v1-analysis-section__heading"><h2 id="model-inspection-title">Model details</h2><button type="button" class="v1-btn v1-btn--ghost" aria-label="Close model details" (click)="inspectedModel.set(undefined)">Close</button></div><dl><div><dt>Model year</dt><dd>{{ model.modelYear }}</dd></div><div><dt>Adjusted R²</dt><dd>{{ model.adjust_R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>R²</dt><dd>{{ model.R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>p-value</dt><dd>{{ model.modelPValue?.toExponential(3) ?? 'Unavailable' }}</dd></div></dl><h3>Equation coefficients</h3><ol><li>Constant: {{ model.coef[0] }}</li>@for (predictor of model.predictorVariables; track predictor.id; let index = $index) { <li>{{ predictor.name }}: {{ model.coef[index + 1] }}</li> }</ol>@if (model.modelNotes?.length) { <h3>Notes</h3><ul>@for (note of model.modelNotes; track note) { <li>{{ note }}</li> }</ul> }<footer><button type="button" class="v1-btn v1-btn--primary" (click)="selectModel(model)">Select this model</button></footer></section></div>
+    <app-regression-model-review-slideout
+      [model]="model"
+      [group]="currentGroup"
+      [analysis]="currentAnalysis"
+      [currentModel]="reviewComparisonModel()"
+      [validationState]="validation.state()"
+      (closed)="closeReview()"
+      (selected)="selectModel($event)"
+      (retryRequested)="validation.retry()">
+    </app-regression-model-review-slideout>
   }
-  @if (comparisonModel(); as previousModel) {
-    <div class="v1-modal-backdrop" role="presentation"><section class="v1-confirm-dialog v1-regression__inspection" role="dialog" aria-modal="true" aria-labelledby="model-comparison-title"><div class="v1-analysis-section__heading"><div><p class="v1-eyebrow">Regeneration review</p><h2 id="model-comparison-title">Compare selected model</h2></div><button type="button" class="v1-btn v1-btn--ghost" aria-label="Close model comparison" (click)="comparisonModel.set(undefined)">Close</button></div><p>The regenerated equivalent differs from the model previously selected. Review the statistics before continuing.</p><div class="v1-regression__configuration"><section class="v1-regression__panel"><h3>Previous selection</h3><dl><div><dt>Adjusted R²</dt><dd>{{ previousModel.adjust_R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>R²</dt><dd>{{ previousModel.R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>p-value</dt><dd>{{ previousModel.modelPValue?.toExponential(3) ?? 'Unavailable' }}</dd></div></dl></section><section class="v1-regression__panel"><h3>Regenerated selection</h3><dl><div><dt>Adjusted R²</dt><dd>{{ selectedModel()?.adjust_R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>R²</dt><dd>{{ selectedModel()?.R2?.toFixed(5) ?? 'Unavailable' }}</dd></div><div><dt>p-value</dt><dd>{{ selectedModel()?.modelPValue?.toExponential(3) ?? 'Unavailable' }}</dd></div></dl></section></div><footer><button type="button" class="v1-btn v1-btn--primary" (click)="comparisonModel.set(undefined)">Keep regenerated selection</button></footer></section></div>
-  }
+
 }
+
+<ng-template #confirmationModal>
+  @if (pendingMethod() !== undefined) {
+    <app-confirmation-dialog
+      [title]="pendingMethod() ? 'Use generated models?' : 'Use a user-defined model?'"
+      titleId="change-regression-method-title"
+      cancelAriaLabel="Cancel modeling method change"
+      [confirmLabel]="pendingMethod() ? 'Use generated models' : 'Use user-defined model'"
+      confirmIcon="refresh"
+      (confirmed)="confirmMethodChange()"
+      (cancelled)="cancelPendingConfirmation()">
+      @if (pendingMethod()) {
+        <p>Changing to generated models clears the user-defined equation. Generate and select a model to restore modeled results.</p>
+      } @else if (selectedModel()) {
+        <p>The selected model’s constant and predictor coefficients will be carried into the user-defined model, preserving the modeled energy equation. Generated alternatives and the selected-model designation will be cleared.</p>
+      } @else {
+        <p>No generated model is selected. Changing methods clears the generated alternatives and opens an empty user-defined model.</p>
+      }
+    </app-confirmation-dialog>
+  }
+  @if (pendingPredictorId()) {
+    <app-confirmation-dialog title="Change model predictors?" titleId="change-regression-predictor-title" cancelAriaLabel="Cancel predictor change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmPredictorChange()" (cancelled)="cancelPendingConfirmation()">
+      <p>This predictor change invalidates the generated candidates and current selection. Downstream results will be recalculated.</p>
+    </app-confirmation-dialog>
+  }
+  @if (pendingMaxVariables() !== undefined) {
+    <app-confirmation-dialog title="Change maximum variables?" titleId="change-regression-maximum-title" cancelAriaLabel="Cancel maximum variable change" confirmLabel="Clear models and continue" confirmIcon="refresh" (confirmed)="confirmMaxVariablesChange()" (cancelled)="cancelPendingConfirmation()">
+      <p>Changing this setting invalidates the generated candidates and current selection. Downstream results will be recalculated.</p>
+    </app-confirmation-dialog>
+  }
+</ng-template>

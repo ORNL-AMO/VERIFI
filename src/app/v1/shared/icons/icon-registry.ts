@@ -28,6 +28,7 @@ import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon';
 import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
 import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
+import CovariateIcon from '@hugeicons/core-free-icons/CovariateIcon';
 import DatabaseIcon from '@hugeicons/core-free-icons/DatabaseIcon';
 import Delete02Icon from '@hugeicons/core-free-icons/Delete02Icon';
 import Download04Icon from '@hugeicons/core-free-icons/Download04Icon';
@@ -113,6 +114,7 @@ export const ICON_REGISTRY = {
   clock: Clock01Icon,
   cloudRain: CloudRainIcon,
   copy: Copy01Icon,
+  covariate: CovariateIcon,
   danger: CancelCircleIcon,
   database: DatabaseIcon,
   delete: Delete02Icon,

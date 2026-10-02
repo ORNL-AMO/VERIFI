@@ -32,7 +32,7 @@ export type AnalysisWorkbenchAttention = Readonly<Record<string, StatusAttention
 export type AnalysisWorkbenchTabAttention = Readonly<Partial<Record<AnalysisWorkbenchTabId, StatusAttentionSummary>>>;
 
 export const ANALYSIS_GROUP_SETUP_TAB: AnalysisWorkbenchTab = { id: 'setup', label: 'Setup', icon: 'settings' };
-export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'analysis' };
+export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'covariate' };
 export const ANALYSIS_GROUP_ANNUAL_TAB: AnalysisWorkbenchTab = { id: 'annual', label: 'Annual', icon: 'calendar' };
 export const ANALYSIS_GROUP_MONTHLY_TAB: AnalysisWorkbenchTab = { id: 'monthly', label: 'Monthly', icon: 'table' };
 

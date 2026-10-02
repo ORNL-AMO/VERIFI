@@ -1,0 +1,66 @@
+@let validationState = state();
+<section class="v1-regression-validation" aria-labelledby="model-validation-heading">
+  <div class="v1-regression-validation__heading">
+    <div>
+      <h3 id="model-validation-heading">Model validation</h3>
+      <p>Compare the model range with baseline and latest complete-year predictor values.</p>
+    </div>
+    @if (validationState.state === 'ready') {
+      <span class="v1-chip v1-chip--{{ passed() ? 'success' : 'warning' }}">
+        <app-ui-icon [name]="passed() ? 'success' : 'warning'"></app-ui-icon>
+        {{ passed() ? 'Validation passed' : 'Review validation' }}
+      </span>
+    }
+  </div>
+
+  @if (validationState.state === 'idle') {
+    <p class="v1-regression-validation__state" role="status">Validation updates automatically after changes are saved.</p>
+  } @else if (validationState.state === 'invalid') {
+    <p class="v1-regression-validation__state" role="status">
+      <app-ui-icon name="info"></app-ui-icon>{{ validationState.message }}
+    </p>
+  } @else if (validationState.state === 'loading') {
+    <p class="v1-regression-validation__state" role="status" aria-live="polite">
+      <app-ui-icon name="loading" spin></app-ui-icon>Updating model validation…
+    </p>
+  } @else if (validationState.state === 'error') {
+    <div class="v1-regression-validation__state v1-regression-validation__state--error" role="alert">
+      <app-ui-icon name="warning"></app-ui-icon>
+      <span>{{ validationState.message }}</span>
+      <button type="button" class="v1-btn v1-btn--secondary v1-btn--sm" (click)="retryRequested.emit()">Retry</button>
+    </div>
+  } @else {
+    @if (validationState.model.modelValidationNotes?.length || validationState.model.dataValidationNotes?.length || validationState.model.modelNotes?.length) {
+      <div class="v1-regression-validation__findings" aria-label="Model validation findings">
+        @for (issue of validationState.model.modelValidationNotes ?? []; track issue) { <p class="v1-regression-validation__finding v1-regression-validation__finding--danger"><app-ui-icon name="danger"></app-ui-icon><span><strong>Critical:</strong> {{ issue }}</span></p> }
+        @for (issue of validationState.model.dataValidationNotes ?? []; track issue) { <p class="v1-regression-validation__finding v1-regression-validation__finding--warning"><app-ui-icon name="warning"></app-ui-icon><span><strong>Validation:</strong> {{ issue }}</span></p> }
+        @for (note of validationState.model.modelNotes ?? []; track note) { <p class="v1-regression-validation__finding"><app-ui-icon name="info"></app-ui-icon><span>{{ note }}</span></p> }
+      </div>
+    }
+
+    @if (validationRows().length) {
+      <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Predictor range validation">
+        <table>
+          <thead><tr><th scope="col">Validation measure</th>@for (row of validationRows(); track row.predictorVariable) { <th scope="col" class="v1-regression-validation__number">{{ row.predictorVariable }}</th> }</tr></thead>
+          <tbody>
+            <tr><th scope="row">Latest complete-year mean</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number">{{ row.meanReportYearDisplay }}</td> }</tr>
+            <tr><th scope="row">Baseline-year mean</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number">{{ row.meanBaselineYearDisplay }}</td> }</tr>
+            <tr><th scope="row">Model minimum</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number" [class.v1-regression-validation__failed]="!row.modelMinValid">{{ row.modelMinDisplay }} @if (!row.modelMinValid) { <span class="visually-hidden">Failed validation</span><app-ui-icon name="warning"></app-ui-icon> }</td> }</tr>
+            <tr><th scope="row">Model maximum</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number" [class.v1-regression-validation__failed]="!row.modelMaxValid">{{ row.modelMaxDisplay }} @if (!row.modelMaxValid) { <span class="visually-hidden">Failed validation</span><app-ui-icon name="warning"></app-ui-icon> }</td> }</tr>
+            <tr><th scope="row">Model average − 3 standard deviations</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number" [class.v1-regression-validation__failed]="!row.modelMinus3StdDevValid">{{ row.modelMinus3StdDevDisplay }} @if (!row.modelMinus3StdDevValid) { <span class="visually-hidden">Failed validation</span><app-ui-icon name="warning"></app-ui-icon> }</td> }</tr>
+            <tr><th scope="row">Model average + 3 standard deviations</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number" [class.v1-regression-validation__failed]="!row.modelPlus3StdDevValid">{{ row.modelPlus3StdDevDisplay }} @if (!row.modelPlus3StdDevValid) { <span class="visually-hidden">Failed validation</span><app-ui-icon name="warning"></app-ui-icon> }</td> }</tr>
+          </tbody>
+          <tfoot><tr><th scope="row">Result</th>@for (row of validationRows(); track row.predictorVariable) { <td class="v1-regression-validation__number"><span class="v1-chip v1-chip--{{ row.isValid ? 'success' : 'warning' }}"><app-ui-icon [name]="row.isValid ? 'success' : 'warning'"></app-ui-icon>{{ row.isValid ? 'Pass' : 'Review' }}</span></td> }</tr></tfoot>
+        </table>
+      </div>
+    } @else {
+      <p class="v1-regression-validation__state">No predictor range validation is available for this model.</p>
+    }
+
+    @if (chartOption(); as option) {
+      <div class="v1-regression-validation__chart-region" role="region" aria-label="Actual and modeled consumption chart">
+        <div class="v1-regression-validation__chart" [appV1ECharts]="option"></div>
+      </div>
+    }
+  }
+</section>
