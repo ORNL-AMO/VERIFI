@@ -83,11 +83,11 @@
               </td>
               <td class="reading-review-exclude">
                 <label class="reading-review-checkbox-control">
-                  <input
+                  <input #readingExcluded
                     type="checkbox"
                     class="reading-review-checkbox"
                     [checked]="detail.excluded"
-                    (change)="exclusionChanged.emit({ index: detail.index, excluded: $any($event.target).checked })">
+                    (change)="exclusionChanged.emit({ index: detail.index, excluded: readingExcluded.checked })">
                   <span class="visually-hidden">Exclude the invalid reading dated {{ detail.dateLabel }}</span>
                 </label>
               </td>

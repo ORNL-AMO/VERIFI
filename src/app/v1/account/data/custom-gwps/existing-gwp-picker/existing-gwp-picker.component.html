@@ -15,7 +15,7 @@
     <span>Search standard GWPs</span>
     <div>
       <app-ui-icon name="search"></app-ui-icon>
-      <input type="search" [value]="query()" (input)="updateQuery($event)" placeholder="Search by name">
+      <input #queryInput type="search" [value]="query()" (input)="updateQuery(queryInput.value)" placeholder="Search by name">
     </div>
   </label>
 

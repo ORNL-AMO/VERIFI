@@ -57,8 +57,7 @@ export class ImportPredictorEditorComponent implements OnChanges {
     if (changes['existingPredictors']) this.prepareExistingOptions();
   }
 
-  selectExisting(event: Event): void {
-    const guid = (event.target as HTMLSelectElement).value;
+  selectExisting(guid: string): void {
     if (!guid) {
       this.setWorkingPredictor(this.predictor);
       return;

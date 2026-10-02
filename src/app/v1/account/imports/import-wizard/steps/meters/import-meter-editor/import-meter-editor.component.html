@@ -14,7 +14,7 @@
             placement="bottom">
           </app-ui-tooltip>
         </div>
-        <select id="import-existing-meter" class="v1-select" [value]="workingMeter.guid === meter.guid ? '' : workingMeter.guid" (change)="selectExisting($event)">
+        <select #existingMeter id="import-existing-meter" class="v1-select" [value]="workingMeter.guid === meter.guid ? '' : workingMeter.guid" (change)="selectExisting(existingMeter.value)">
           <option value="">Keep as a new meter</option>
           @for (existing of existingMeters; track existing.guid) {
             <option [value]="existing.guid">{{ existing.name }}</option>

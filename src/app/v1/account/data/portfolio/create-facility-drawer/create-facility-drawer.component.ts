@@ -8,6 +8,7 @@ import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from '@shared/
 import { SettingsFormService } from '@shared/settings-forms/settings-form.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { PortfolioFacilityDraft, PortfolioFacilityService } from '@app/v1/account/data/portfolio/portfolio-facility.service';
+import { formatUsPhoneNumber } from '@app/v1/shared/forms/phone-number';
 
 @Component({
   selector: 'app-create-portfolio-facility-drawer',
@@ -72,15 +73,9 @@ export class CreateFacilityDrawerComponent {
     }
   }
 
-  formatPhone(event: Event): void {
+  formatPhone(value: string): void {
     if (this.form.controls['country'].value === 'US') {
-      let input = (event.target as HTMLInputElement).value.replace(/\D/g, '');
-      if (input.length > 3 && input.length <= 6) {
-        input = input.replace(/(\d{3})(\d+)/, '$1-$2');
-      } else if (input.length > 6) {
-        input = input.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3');
-      }
-      this.form.controls['contactPhone'].setValue(input.substring(0, 12), { emitEvent: false });
+      this.form.controls['contactPhone'].setValue(formatUsPhoneNumber(value), { emitEvent: false });
     }
   }
 

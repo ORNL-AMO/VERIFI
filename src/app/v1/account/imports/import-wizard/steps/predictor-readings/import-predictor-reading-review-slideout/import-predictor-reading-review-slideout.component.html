@@ -76,11 +76,11 @@
               </td>
               <td class="predictor-reading-review-exclude">
                 <label class="predictor-reading-review-checkbox-control">
-                  <input
+                  <input #readingExcluded
                     type="checkbox"
                     class="predictor-reading-review-checkbox"
                     [checked]="detail.excluded"
-                    (change)="exclusionChanged.emit({ index: detail.index, excluded: $any($event.target).checked })">
+                    (change)="exclusionChanged.emit({ index: detail.index, excluded: readingExcluded.checked })">
                   <span class="visually-hidden">Exclude the invalid predictor reading for {{ detail.monthLabel }}</span>
                 </label>
               </td>

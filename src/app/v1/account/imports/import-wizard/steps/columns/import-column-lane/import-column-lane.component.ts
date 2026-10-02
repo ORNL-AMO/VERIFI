@@ -17,10 +17,10 @@ export class ImportColumnLaneComponent {
   @Input() connectedDropListIds: string[] = [];
   @Input() selectedIds: readonly string[] = [];
   @Input() selectedCount = 0;
-  @Output() columnDropped = new EventEmitter<{ itemId: string; target: ColumnTarget }>();
+  @Output() columnDropped = new EventEmitter<{ itemId: string; destination: ColumnTarget }>();
   @Output() selectionChanged = new EventEmitter<{ itemId: string; selected: boolean }>();
   @Output() moveSelectedRequested = new EventEmitter<ColumnTarget>();
-  @Output() moveRequested = new EventEmitter<{ itemId: string; target: ColumnTarget }>();
+  @Output() moveRequested = new EventEmitter<{ itemId: string; destination: ColumnTarget }>();
 
   get dropListId(): string {
     return `import-column-${this.lane.target.replace(/\s+/g, '-').toLocaleLowerCase()}`;
@@ -36,6 +36,6 @@ export class ImportColumnLaneComponent {
 
   drop(event: CdkDragDrop<readonly unknown[]>): void {
     if (event.previousContainer === event.container) return;
-    this.columnDropped.emit({ itemId: event.item.data.id, target: this.lane.target });
+    this.columnDropped.emit({ itemId: event.item.data.id, destination: this.lane.target });
   }
 }

@@ -133,7 +133,8 @@
             <select
               class="v1-settings__select"
               [value]="settings.backgroundPattern"
-              (change)="appearance.setBackgroundPattern($any($event.target).value)"
+              #backgroundPattern
+              (change)="appearance.setBackgroundPattern(backgroundPattern.value)"
               aria-label="Background pattern">
               @for (option of patternOptions; track option.id) {
                 <option [value]="option.id">{{ option.label }}</option>

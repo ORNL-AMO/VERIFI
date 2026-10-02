@@ -59,8 +59,7 @@ export class ImportMeterEditorComponent implements OnChanges {
     }
   }
 
-  selectExisting(event: Event): void {
-    const guid = (event.target as HTMLSelectElement).value;
+  selectExisting(guid: string): void {
     if (!guid) {
       this.setWorkingMeter(this.meter);
       return;

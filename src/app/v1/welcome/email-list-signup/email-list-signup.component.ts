@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { EmailListSubscribeService } from '@shared/email-list-subscribe/email-list-subscribe.service';
@@ -9,7 +9,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
   selector: 'app-email-list-signup',
   templateUrl: './email-list-signup.component.html',
   styleUrls: ['./email-list-signup.component.css'],
-  imports: [FormsModule, IconComponent],
+  imports: [ReactiveFormsModule, IconComponent],
   standalone: true
 })
 export class EmailListSignupComponent {
@@ -19,8 +19,7 @@ export class EmailListSignupComponent {
   readonly submittedStatus = toSignal(this.emailSubscribeService.submittedStatus, { initialValue: undefined });
   invalidEmailMessage = '';
 
-  setEmail(event: Event): void {
-    this.email.setValue((event.target as HTMLInputElement).value);
+  setEmail(): void {
     this.checkValid();
   }
 

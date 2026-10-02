@@ -14,7 +14,7 @@
   <div class="existing-fuel-picker__filters">
     <label>
       <span>Fuel category</span>
-      <select [value]="groupId()" (change)="setGroup($any($event.target).value)">
+      <select #groupSelect [value]="groupId()" (change)="setGroup(groupSelect.value)">
         @for (groupOption of groups; track groupOption.id) {
           <option [value]="groupOption.id">{{ groupOption.label }}</option>
         }
@@ -22,7 +22,7 @@
     </label>
     <label>
       <span>Find fuel</span>
-      <input type="search" placeholder="Search fuel names" [value]="search()" (input)="setSearch($any($event.target).value)">
+      <input #fuelSearch type="search" placeholder="Search fuel names" [value]="search()" (input)="setSearch(fuelSearch.value)">
     </label>
   </div>
 

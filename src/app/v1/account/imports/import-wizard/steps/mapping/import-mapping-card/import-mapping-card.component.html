@@ -14,11 +14,11 @@
 
   <div class="import-drag-card__main">
     <label class="import-drag-card__select">
-      <input
+      <input #mappingSelected
         type="checkbox"
         [checked]="selected"
         [attr.aria-label]="'Select ' + card.label"
-        (change)="selectedChange.emit($any($event.target).checked)">
+        (change)="selectedChange.emit(mappingSelected.checked)">
       <span class="visually-hidden">Select {{ card.label }}</span>
     </label>
     <h3>{{ card.label }}</h3>

@@ -72,11 +72,8 @@ export class ImportUploadComponent implements OnInit, OnDestroy, HasUnsavedChang
     if (this.hasUnsavedChanges() || this.isNavigationBlocked()) event.preventDefault();
   }
 
-  async filesSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const files = [...(input.files ?? [])];
-    await this.processFiles(files);
-    input.value = '';
+  async filesSelected(files: FileList | null): Promise<void> {
+    await this.processFiles([...(files ?? [])]);
   }
 
   dragEntered(event: DragEvent): void {

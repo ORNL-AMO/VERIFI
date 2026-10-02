@@ -44,7 +44,7 @@
           [card]="card"
           [selected]="selected(card.id)"
           (selectedChange)="selectionChanged.emit({ itemId: card.id, selected: $event })"
-          (moveRequested)="moveRequested.emit({ itemId: card.id, target: $event })">
+          (moveRequested)="moveRequested.emit({ itemId: card.id, destination: $event })">
         </app-import-column-card>
       }
     }

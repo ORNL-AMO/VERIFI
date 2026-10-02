@@ -4,11 +4,11 @@
     <h3>{{ equipment.name }} <small>{{ equipment.id ? 'Update' : 'New' }}</small></h3>
     @for (group of state.compatibleMeterGroups(equipmentIndex); track group.guid) {
       <label class="check-row">
-        <input
+        <input #groupIncluded
           type="checkbox"
           [checked]="equipment.utilityMeterGroupIds.includes(group.guid)"
           [disabled]="state.meterGroupSourceConflict(equipmentIndex, group.guid)"
-          (change)="state.toggleEquipmentMeterGroup(equipmentIndex, group.guid, $any($event.target).checked)">
+          (change)="state.toggleEquipmentMeterGroup(equipmentIndex, group.guid, groupIncluded.checked)">
         {{ group.name }}
         @if (state.meterGroupSourceConflict(equipmentIndex, group.guid)) { <span>— source already linked</span> }
       </label>
