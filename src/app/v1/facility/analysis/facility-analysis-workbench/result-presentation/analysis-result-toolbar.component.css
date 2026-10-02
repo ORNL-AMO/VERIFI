@@ -1,0 +1,9 @@
+:host { display: block; }
+.v1-analysis-results__toolbar,
+.v1-analysis-results__actions { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); }
+.v1-analysis-results__toolbar p { margin: 0; }
+.v1-analysis-results__actions { justify-content: flex-end; }
+@media (max-width: 760px) {
+  .v1-analysis-results__toolbar,
+  .v1-analysis-results__actions { align-items: stretch; flex-direction: column; }
+}

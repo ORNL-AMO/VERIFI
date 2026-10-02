@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
-import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { FacilityAnalysisResultsService } from '../facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from '../facility-analysis-results-display.service';
 import { ANALYSIS_CHART_METRICS, monthlyChartRows } from '../facility-analysis-result.view';
+import { AnalysisResultStatusComponent } from '../result-presentation/analysis-result-status.component';
+import { AnalysisResultToolbarComponent } from '../result-presentation/analysis-result-toolbar.component';
 
-@Component({ selector: 'app-facility-analysis-group-monthly', standalone: true, imports: [CommonModule, IconComponent, MeterResultsChartComponent], templateUrl: './facility-analysis-group-monthly.component.html', styleUrls: ['./facility-analysis-group-monthly.component.css'] })
+@Component({ selector: 'app-facility-analysis-group-monthly', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultToolbarComponent], templateUrl: './facility-analysis-group-monthly.component.html', styleUrls: ['./facility-analysis-group-monthly.component.css'] })
 export class FacilityAnalysisGroupMonthlyComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisResultsService);

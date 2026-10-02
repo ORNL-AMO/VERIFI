@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
-import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from '../facility-analysis-results-display.service';
 import { ANALYSIS_CHART_METRICS, annualChartRows } from '../facility-analysis-result.view';
 import { isSkippedAnalysisType } from '../facility-analysis-workbench.models';
+import { AnalysisResultStatusComponent } from '../result-presentation/analysis-result-status.component';
+import { AnalysisResultToolbarComponent } from '../result-presentation/analysis-result-toolbar.component';
 
-@Component({ selector: 'app-facility-analysis-annual', standalone: true, imports: [CommonModule, IconComponent, MeterResultsChartComponent], templateUrl: './facility-analysis-annual.component.html', styleUrls: ['./facility-analysis-annual.component.css'] })
+@Component({ selector: 'app-facility-analysis-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultToolbarComponent], templateUrl: './facility-analysis-annual.component.html', styleUrls: ['./facility-analysis-annual.component.css'] })
 export class FacilityAnalysisAnnualComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly results = inject(FacilityAnalysisResultsService);

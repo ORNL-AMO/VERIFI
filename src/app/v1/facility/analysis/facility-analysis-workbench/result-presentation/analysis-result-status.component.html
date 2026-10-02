@@ -1,0 +1,45 @@
+@if (blocking) {
+  <article class="v1-empty-state" role="alert">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <h4>{{ scope === 'facility' ? 'Facility results are blocked' : 'Results are blocked' }}</h4>
+    <p>
+      {{ scope === 'facility'
+        ? 'Correct every blocking analysis and group finding before calculating facility totals.'
+        : 'Correct the analysis and group setup errors before viewing results.' }}
+    </p>
+  </article>
+} @else if (state.state === 'waiting') {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="loading" spin></app-ui-icon>
+    <h4>Preparing {{ scope === 'facility' ? 'facility' : periodLabel }} results</h4>
+    <p>Waiting for saved, validated calendarization inputs.</p>
+  </article>
+} @else if (state.state === 'loading') {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="loading" spin></app-ui-icon>
+    <h4>Calculating {{ scope === 'facility' ? 'facility totals' : periodLabel + ' results' }}</h4>
+    <p>
+      {{ scope === 'facility'
+        ? 'All group results are being recalculated for the current revision.'
+        : 'Previous results were cleared while this revision is calculated.' }}
+    </p>
+  </article>
+} @else if (state.state === 'error') {
+  <article class="v1-empty-state" role="alert">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <h4>{{ scope === 'facility' ? 'Facility results could not be calculated' : 'Results could not be calculated' }}</h4>
+    <p>{{ state.message }}</p>
+  </article>
+} @else if (state.state === 'ready' && rowCount === 0) {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="calendar"></app-ui-icon>
+    <h4>{{ period === 'annual' ? 'No complete annual results' : 'No monthly results' }}</h4>
+    <p>
+      {{ scope === 'facility'
+        ? 'Complete the required meter and predictor data.'
+        : period === 'annual'
+          ? 'Complete meter and predictor data for at least one analysis year.'
+          : 'Complete meter and predictor data to calculate this group.' }}
+    </p>
+  </article>
+}

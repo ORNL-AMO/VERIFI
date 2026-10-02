@@ -1,14 +1,78 @@
 @let state = results.state();
 <section class="v1-analysis-section" aria-label="Facility monthly results">
-  <div class="v1-analysis-results__toolbar"><p>Combined non-skipped group results in {{ unit() || 'analysis units' }}.</p><div class="v1-segmented" role="group" aria-label="Facility monthly result view"><button type="button" class="v1-segmented__btn" [attr.aria-pressed]="display() === 'table'" (click)="displaySettings.setDisplay('facility:monthly', 'table')"><app-ui-icon name="table"></app-ui-icon> Table</button><button type="button" class="v1-segmented__btn" [attr.aria-pressed]="display() === 'graph'" (click)="displaySettings.setDisplay('facility:monthly', 'graph')"><app-ui-icon name="chartLine"></app-ui-icon> Graph</button></div></div>
-  @if (context.hasBlockingErrors()) { <article class="v1-empty-state" role="alert"><app-ui-icon name="warning"></app-ui-icon><h4>Facility results are blocked</h4><p>Correct every blocking analysis and group finding before calculating facility totals.</p></article> }
-  @else if (state.state === 'waiting') { <article class="v1-empty-state" role="status"><app-ui-icon name="loading" spin></app-ui-icon><h4>Preparing facility results</h4><p>Waiting for saved, validated calendarization inputs.</p></article> }
-  @else if (state.state === 'loading') { <article class="v1-empty-state" role="status"><app-ui-icon name="loading" spin></app-ui-icon><h4>Calculating facility totals</h4><p>All group results are being recalculated for the current revision.</p></article> }
-  @else if (state.state === 'error') { <article class="v1-empty-state" role="alert"><app-ui-icon name="warning"></app-ui-icon><h4>Facility results could not be calculated</h4><p>{{ state.message }}</p></article> }
-  @else if (state.state === 'ready' && rows().length === 0) { <article class="v1-empty-state" role="status"><app-ui-icon name="calendar"></app-ui-icon><h4>No monthly results</h4><p>Complete the required meter and predictor data.</p></article> }
-  @else if (state.state === 'ready' && display() === 'graph') { <app-meter-results-chart [chartRows]="chartRows()" [metrics]="chartMetrics" defaultLeftMetricId="actual" defaultRightMetricId="savings" period="monthly" ariaLabel="Facility monthly actual, modeled, and savings chart" downloadFileName="facility-monthly-analysis"></app-meter-results-chart> }
-  @else if (state.state === 'ready') {
-    @if (hasMissingValues()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="warning"></app-ui-icon><span>Some months contain incomplete predictor data. Review the affected group results before using these totals.</span></div> }
-    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Facility monthly analysis results"><table class="table"><thead><tr><th scope="col">Month</th><th scope="col">Fiscal year</th><th scope="col">Actual</th><th scope="col">Modeled</th><th scope="col">Adjusted</th><th scope="col">Baseline adjustment</th><th scope="col">SEnPI</th><th scope="col">Banked savings</th><th scope="col">Unbanked savings</th><th scope="col">Savings</th><th scope="col">YTD savings</th><th scope="col">Rolling savings</th><th scope="col">Rolling improvement</th></tr></thead><tbody>@for (row of rows(); track row.date) { <tr [class.v1-analysis-results__missing]="row.missingValueWarning"><th scope="row">{{ row.date | date:'MMM y' }} @if (row.isBanked) { <span class="v1-chip">Banked</span> }</th><td>{{ row.fiscalYear }}</td><td>{{ row.energyUse | number:'1.0-3' }}</td><td>{{ row.modeledEnergy | number:'1.0-3' }}</td><td>{{ row.adjusted | number:'1.0-3' }}</td><td>{{ row.baselineAdjustment | number:'1.0-3' }}</td><td>{{ row.SEnPI | number:'1.0-3' }}</td><td>{{ row.savingsBanked | number:'1.0-3' }}</td><td>{{ row.savingsUnbanked | number:'1.0-3' }}</td><td>{{ row.savings | number:'1.0-3' }}</td><td>{{ row.yearToDateSavings | number:'1.0-3' }}</td><td>{{ row.rollingSavings | number:'1.0-3' }}</td><td>{{ row.rolling12MonthImprovement | number:'1.0-2' }}%</td></tr> }</tbody></table></div>
+  <app-analysis-result-toolbar
+    [description]="'Combined non-skipped group results in ' + (unit() || 'analysis units') + '.'"
+    ariaLabel="Facility monthly result view"
+    [display]="display()"
+    (displayChanged)="displaySettings.setDisplay('facility:monthly', $event)">
+  </app-analysis-result-toolbar>
+
+  <app-analysis-result-status
+    scope="facility"
+    period="monthly"
+    [state]="state"
+    [blocking]="context.hasBlockingErrors()"
+    [rowCount]="rows().length">
+  </app-analysis-result-status>
+
+  @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length && display() === 'graph') {
+    <app-meter-results-chart
+      [chartRows]="chartRows()"
+      [metrics]="chartMetrics"
+      defaultLeftMetricId="actual"
+      defaultRightMetricId="savings"
+      period="monthly"
+      ariaLabel="Facility monthly actual, modeled, and savings chart"
+      downloadFileName="facility-monthly-analysis">
+    </app-meter-results-chart>
+  } @else if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
+    @if (hasMissingValues()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <span>Some months contain incomplete predictor data. Review the affected group results before using these totals.</span>
+      </div>
+    }
+    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Facility monthly analysis results">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Month</th>
+            <th scope="col">Fiscal year</th>
+            <th scope="col">Actual</th>
+            <th scope="col">Modeled</th>
+            <th scope="col">Adjusted</th>
+            <th scope="col">Baseline adjustment</th>
+            <th scope="col">SEnPI</th>
+            <th scope="col">Banked savings</th>
+            <th scope="col">Unbanked savings</th>
+            <th scope="col">Savings</th>
+            <th scope="col">YTD savings</th>
+            <th scope="col">Rolling savings</th>
+            <th scope="col">Rolling improvement</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.date) {
+            <tr [class.v1-analysis-results__missing]="row.missingValueWarning">
+              <th scope="row">
+                {{ row.date | date:'MMM y' }}
+                @if (row.isBanked) { <span class="v1-chip">Banked</span> }
+              </th>
+              <td>{{ row.fiscalYear }}</td>
+              <td>{{ row.energyUse | number:'1.0-3' }}</td>
+              <td>{{ row.modeledEnergy | number:'1.0-3' }}</td>
+              <td>{{ row.adjusted | number:'1.0-3' }}</td>
+              <td>{{ row.baselineAdjustment | number:'1.0-3' }}</td>
+              <td>{{ row.SEnPI | number:'1.0-3' }}</td>
+              <td>{{ row.savingsBanked | number:'1.0-3' }}</td>
+              <td>{{ row.savingsUnbanked | number:'1.0-3' }}</td>
+              <td>{{ row.savings | number:'1.0-3' }}</td>
+              <td>{{ row.yearToDateSavings | number:'1.0-3' }}</td>
+              <td>{{ row.rollingSavings | number:'1.0-3' }}</td>
+              <td>{{ row.rolling12MonthImprovement | number:'1.0-2' }}%</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </section>
