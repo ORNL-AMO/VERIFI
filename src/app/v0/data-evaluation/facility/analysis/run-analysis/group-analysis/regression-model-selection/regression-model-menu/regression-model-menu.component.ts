@@ -50,6 +50,7 @@ type RegressionMenuForm = FormGroup<{
   standalone: false
 })
 export class RegressionModelMenuComponent {
+  private modelGenerationController: AbortController | undefined;
   private readonly accountWorkspaceService = inject(AccountWorkspaceService);
   private readonly commandBoundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
@@ -310,7 +311,7 @@ export class RegressionModelMenuComponent {
   }
 
   ngOnDestroy(): void {
-    this.regressionModelsService.terminateCurrentWorker();
+    this.modelGenerationController?.abort();
   }
 
   // --- Persistence ---
@@ -377,6 +378,9 @@ export class RegressionModelMenuComponent {
   }
 
   async generateModels() {
+    this.modelGenerationController?.abort();
+    const controller = new AbortController();
+    this.modelGenerationController = controller;
     const group = _.cloneDeep(this.group());
     const _analysisItem = this.analysisItem();
     const _selectedFacility = this.selectedFacility();
@@ -393,10 +397,13 @@ export class RegressionModelMenuComponent {
 
     try {
       const generatedModels = await this.regressionModelsService.generateModels(
-        group, _analysisItem, _selectedFacility, _meters, _meterData, _predictorData, assessmentReportVersion
+        group, _analysisItem, _selectedFacility, _meters, _meterData, _predictorData, assessmentReportVersion,
+        controller.signal
       );
+      if (controller.signal.aborted) return;
       await this.handleGenerateResult(generatedModels, group, previousSelectedModelId, previousSelectedModel);
     } catch {
+      if (controller.signal.aborted) return;
       this.modelingError.set(true);
       this.generatingModels.set(false);
     }

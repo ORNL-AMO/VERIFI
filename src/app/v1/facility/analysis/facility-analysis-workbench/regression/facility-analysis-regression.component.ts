@@ -40,6 +40,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private generationToken = 0;
+  private generationController: AbortController | undefined;
   private reviewTrigger: HTMLElement | undefined;
   private confirmationModalOpen = false;
 
@@ -191,6 +192,9 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
     const account = this.workbench.account();
     if (!group || !analysis || !facility || !account || !generatedConfigurationValid(group)) return;
     const token = ++this.generationToken;
+    this.generationController?.abort();
+    const controller = new AbortController();
+    this.generationController = controller;
     const priorSelectedId = group.selectedModelId;
     const priorSelectedModel = group.models?.find(model => model.modelId === priorSelectedId);
     this.generating.set(true);
@@ -200,7 +204,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
       const models = await this.regressionModels.generateModels(
         structuredClone(group), structuredClone(analysis), facility,
         [...this.workbench.workspace.facilityMeters()], [...this.workbench.workspace.facilityMeterData()],
-        [...this.workbench.workspace.facilityPredictorData()], account.assessmentReportVersion ?? 'AR6'
+        [...this.workbench.workspace.facilityPredictorData()], account.assessmentReportVersion ?? 'AR6', controller.signal
       );
       if (token !== this.generationToken) return;
       const result = this.regressionModels.applyGeneratedModelsToGroup(
@@ -219,7 +223,9 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
       }
       queueMicrotask(() => document.getElementById('generated-models-heading')?.focus());
     } catch (error) {
-      if (token === this.generationToken) this.generationError.set(error instanceof Error ? error.message : 'Regression models could not be generated.');
+      if (token === this.generationToken && !controller.signal.aborted) {
+        this.generationError.set(error instanceof Error ? error.message : 'Regression models could not be generated.');
+      }
     } finally {
       if (token === this.generationToken) this.generating.set(false);
     }
@@ -254,7 +260,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.generationToken += 1;
-    this.regressionModels.terminateCurrentWorker();
+    this.generationController?.abort();
     this.closeConfirmationModal();
   }
 
@@ -271,7 +277,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
 
   private applyMethod(generated: boolean): void {
     this.generationToken += 1;
-    this.regressionModels.terminateCurrentWorker();
+    this.generationController?.abort();
     const selectedModel = generated ? undefined : this.selectedModel();
     const facility = this.workbench.facility();
     const fallbackYear = this.analysis()?.baselineYear;

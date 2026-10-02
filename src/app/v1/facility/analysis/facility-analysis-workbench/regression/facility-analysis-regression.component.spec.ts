@@ -123,7 +123,7 @@ describe('facility analysis regression behavior', () => {
           }
         },
         { provide: RegressionCandidateStore, useValue: { modelsFor: vi.fn(() => []), set: vi.fn(), clear: vi.fn() } },
-        { provide: RegressionModelsService, useValue: { terminateCurrentWorker: vi.fn() } },
+        { provide: RegressionModelsService, useValue: {} },
         { provide: ModalPortalService, useValue: modalPortal }
       ]
     });
