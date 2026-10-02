@@ -44,11 +44,7 @@ export class AccountStatusCheckService implements OnDestroy {
             snapshot,
             calendarizationState
         ]) => {
-            if (!snapshot
-                || calendarizationState.status !== 'ready'
-                || calendarizationState.workspaceSnapshot !== snapshot
-                || calendarizationState.accountGuid !== snapshot.account.guid
-                || calendarizationState.workspaceRevision !== this.accountWorkspaceStore.revision()) {
+            if (!snapshot || !this.calanderizationService.isReadyForCurrentWorkspace(calendarizationState)) {
                 this.accountStatusCheck.next(undefined);
                 return;
             }

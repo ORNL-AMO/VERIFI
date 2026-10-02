@@ -8,7 +8,7 @@ import { IdbUtilityMeter } from "@data/models/idbModels/utilityMeter";
 import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "@shared/fuel-options/stationaryOtherEnergyOptions";
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "@shared/unitOptions";
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export function getGUID(): string {
     return Math.random().toString(36).substr(2, 9);

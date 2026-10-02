@@ -8,6 +8,7 @@ import { CalanderizationService, CalendarizationState } from './calanderization.
 describe('AccountStatusCheckService', () => {
   let calendarizationState: BehaviorSubject<CalendarizationState>;
   let retry: ReturnType<typeof vi.fn>;
+  let workspaceStore: AccountWorkspaceStore;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -19,10 +20,22 @@ describe('AccountStatusCheckService', () => {
         AccountStatusCheckService,
         {
           provide: CalanderizationService,
-          useValue: { calendarizationState, recalculateCurrentWorkspace: retry }
+          useValue: {
+            calendarizationState,
+            recalculateCurrentWorkspace: retry,
+            isReadyForCurrentWorkspace: (state: CalendarizationState) => {
+              const snapshot = workspaceStore.snapshot();
+              return state.status === 'ready'
+                && !!snapshot
+                && state.workspaceSnapshot === snapshot
+                && state.accountGuid === snapshot.account.guid
+                && state.workspaceRevision === workspaceStore.revision();
+            }
+          }
         }
       ]
     });
+    workspaceStore = TestBed.inject(AccountWorkspaceStore);
   });
 
   afterEach(() => {

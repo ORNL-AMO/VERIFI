@@ -16,8 +16,12 @@ import { timeout } from 'rxjs/operators';
 export type CalendarizationState =
   | { status: 'idle' }
   | CalendarizationRequestState<'loading'>
-  | (CalendarizationRequestState<'ready'> & { calanderizedMeters: Array<CalanderizedMeter> })
+  | CalendarizationReadyState
   | (CalendarizationRequestState<'error'> & { message: string });
+
+export type CalendarizationReadyState = CalendarizationRequestState<'ready'> & {
+  calanderizedMeters: Array<CalanderizedMeter>;
+};
 
 interface CalendarizationRequestState<TStatus extends 'loading' | 'ready' | 'error'> {
   status: TStatus;
@@ -218,6 +222,23 @@ export class CalanderizationService implements OnDestroy {
 
   getAccountCalanderizedMeters(): Array<CalanderizedMeter> {
     return this.calanderizedMeters.getValue();
+  }
+
+  isReadyForCurrentWorkspace(
+    state: CalendarizationState = this.calendarizationState.value
+  ): state is CalendarizationReadyState {
+    const snapshot = this.accountWorkspaceStore.snapshot();
+    return state.status === 'ready'
+      && !!snapshot
+      && state.workspaceSnapshot === snapshot
+      && state.accountGuid === snapshot.account.guid
+      && state.workspaceRevision === this.accountWorkspaceStore.revision();
+  }
+
+  getReadyCalanderizedMetersByFacilityID(facilityID: string): Array<CalanderizedMeter> | undefined {
+    const state = this.calendarizationState.value;
+    if (!this.isReadyForCurrentWorkspace(state)) return undefined;
+    return state.calanderizedMeters.filter(cMeter => cMeter.meter.facilityId === facilityID);
   }
 
   getCalanderizedMetersByFacilityID(facilityID: string): Array<CalanderizedMeter> {

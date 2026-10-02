@@ -103,6 +103,26 @@ describe('CalanderizationService', () => {
     expect(worker.terminate).toHaveBeenCalledOnce();
     expect(service.calendarizationState.value.status).toBe('error');
   });
+
+  it('only exposes facility meters from a ready result matching the current workspace', () => {
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const service = TestBed.inject(CalanderizationService);
+    store.publish(createSnapshot('account-a'));
+    TestBed.flushEffects();
+
+    expect(service.getReadyCalanderizedMetersByFacilityID('facility-a')).toBeUndefined();
+
+    const result = {
+      meter: { guid: 'meter-a', facilityId: 'facility-a' }
+    } as any;
+    FakeWorker.instances[0].dispatchMessage({ error: false, calanderizedMeters: [result] });
+
+    expect(service.getReadyCalanderizedMetersByFacilityID('facility-a')).toEqual([result]);
+
+    store.beginLoad(true);
+    TestBed.flushEffects();
+    expect(service.getReadyCalanderizedMetersByFacilityID('facility-a')).toBeUndefined();
+  });
 });
 
 function createSnapshot(accountGuid: string): AccountWorkspaceSnapshot {
