@@ -1,4 +1,6 @@
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
+import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { FacilityAnalysisResultsWorkerRequest } from '@platform/web-workers/facility-analysis-results-worker.contract';
 
 export function analysisDependencyClosure(
@@ -52,6 +54,17 @@ export function facilityAnalysisResultsFingerprint(request: FacilityAnalysisResu
     hash = Math.imul(hash, 16777619);
   }
   return `${request.analysisItem.guid}:${(hash >>> 0).toString(16)}:${value.length}`;
+}
+
+export function projectFacilityPredictorInputs(
+  facilityGuid: string,
+  entries: readonly IdbPredictorData[],
+  predictors: readonly IdbPredictor[]
+): { readonly entries: readonly IdbPredictorData[]; readonly predictors: readonly IdbPredictor[] } {
+  return {
+    entries: entries.filter(entry => entry.facilityId === facilityGuid),
+    predictors: predictors.filter(predictor => predictor.facilityId === facilityGuid)
+  };
 }
 
 function calculationAnalysis(analysis: IdbAnalysisItem): object {

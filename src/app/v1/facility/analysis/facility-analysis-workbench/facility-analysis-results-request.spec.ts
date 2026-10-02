@@ -1,6 +1,6 @@
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityAnalysisResultsWorkerRequest } from '@platform/web-workers/facility-analysis-results-worker.contract';
-import { analysisDependencyClosure, facilityAnalysisResultsFingerprint } from './facility-analysis-results-request';
+import { analysisDependencyClosure, facilityAnalysisResultsFingerprint, projectFacilityPredictorInputs } from './facility-analysis-results-request';
 
 describe('facility analysis result requests', () => {
   it('excludes display metadata while retaining calculation settings in the fingerprint', () => {
@@ -25,6 +25,23 @@ describe('facility analysis result requests', () => {
 
     expect(analysisDependencyClosure(first, [first, second, third]).map(item => item.guid))
       .toEqual(['first', 'second', 'third']);
+  });
+
+  it('projects predictor inputs to the selected facility before fingerprinting and calculation', () => {
+    const projection = projectFacilityPredictorInputs(
+      'facility-a',
+      [
+        { guid: 'entry-a', facilityId: 'facility-a', predictorId: 'predictor-a' },
+        { guid: 'entry-b', facilityId: 'facility-b', predictorId: 'predictor-b' }
+      ] as any,
+      [
+        { guid: 'predictor-a', facilityId: 'facility-a' },
+        { guid: 'predictor-b', facilityId: 'facility-b' }
+      ] as any
+    );
+
+    expect(projection.entries.map(entry => entry.guid)).toEqual(['entry-a']);
+    expect(projection.predictors.map(predictor => predictor.guid)).toEqual(['predictor-a']);
   });
 });
 

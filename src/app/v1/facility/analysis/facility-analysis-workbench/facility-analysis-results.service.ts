@@ -13,7 +13,7 @@ import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/w
 import { Observable, catchError, concat, defer, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
-import { analysisDependencyClosure, facilityAnalysisResultsFingerprint } from './facility-analysis-results-request';
+import { analysisDependencyClosure, facilityAnalysisResultsFingerprint, projectFacilityPredictorInputs } from './facility-analysis-results-request';
 
 export interface FacilityAnalysisGroupResult {
   readonly group: AnalysisGroup;
@@ -113,13 +113,18 @@ export class FacilityAnalysisResultsService {
       includeEmissions: false
     });
     if (projection.state !== 'ready') return waiting(analysisGuid, 'calendarization');
+    const predictorInputs = projectFacilityPredictorInputs(
+      facility.guid,
+      this.context.workspace.predictorData(),
+      this.context.workspace.predictors()
+    );
 
     const request: FacilityAnalysisResultsWorkerRequest = {
       analysisItem: structuredClone(analysis),
       facility: structuredClone(facility),
       calanderizedMeters: projection.meters,
-      accountPredictorEntries: [...this.context.workspace.predictorData()],
-      accountPredictors: [...this.context.workspace.predictors()],
+      accountPredictorEntries: predictorInputs.entries,
+      accountPredictors: predictorInputs.predictors,
       accountAnalysisItems: dependencies,
       calculateAllMonthlyData: false,
       includeGroupSummaries: true
