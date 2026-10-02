@@ -1,12 +1,10 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { EnergyUnitOptions, VolumeLiquidOptions } from '@shared/unitOptions';
-import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { invalidateAllRegressionModels } from '../group/regression/regression-draft';
 import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
@@ -14,11 +12,12 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+import { FacilityAnalysisPeriodService } from './facility-analysis-period.service';
 
 @Component({
   selector: 'app-facility-analysis-setup',
   standalone: true,
-  imports: [FormsModule, RouterLink, IconComponent, ConfirmationDialogComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent],
   templateUrl: './facility-analysis-setup.component.html',
   styleUrls: ['./facility-analysis-setup.component.css']
 })
@@ -27,37 +26,29 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
 
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
+  private readonly period = inject(FacilityAnalysisPeriodService);
   readonly navigation = inject(WorkspaceNavigationService);
-  private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
-  private readonly calendarizationBase = toSignal(this.calendarization.calendarizeBase(), { initialValue: { state: 'idle' as const, meters: [] } });
   readonly showClearModels = signal(false);
   readonly energyUnits = EnergyUnitOptions;
   readonly waterUnits = VolumeLiquidOptions;
+  readonly form = new FormGroup({
+    name: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(120), Validators.pattern(/\S/)]
+    }),
+    energyIsSource: new FormControl(false, { nonNullable: true }),
+    energyUnit: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    waterUnit: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    baselineYear: new FormControl<number | null>(null, { validators: [Validators.required] }),
+    hasBanking: new FormControl(false, { nonNullable: true }),
+    bankedAnalysisItemId: new FormControl<string | null>(null)
+  });
   readonly draft = this.autosave.draft;
+  readonly baselineYears = this.period.baselineYears;
+  readonly latestCompleteYear = this.period.latestCompleteYear;
   readonly hasModels = computed(() => this.draft()?.groups.some(group => (group.models?.length ?? 0) > 0) ?? false);
-  readonly projection = computed(() => {
-    const base = this.calendarizationBase();
-    const facility = this.context.facility();
-    const analysis = this.draft();
-    if (base.state !== 'ready' || !facility || !analysis) return undefined;
-    return this.calendarization.project(base, {
-      context: { kind: 'facility', guid: facility.guid },
-      energyUnit: analysis.energyUnit,
-      waterUnit: analysis.waterUnit,
-      energyIsSource: analysis.energyIsSource,
-      includeEmissions: false
-    });
-  });
-  readonly baselineYears = computed(() => {
-    const analysis = this.draft();
-    const facility = this.context.facility();
-    const projection = this.projection();
-    if (!analysis || !facility || projection?.state !== 'ready') return [];
-    return getYearsWithFullDataAnalysis([...projection.meters], analysis, facility);
-  });
-  readonly latestCompleteYear = computed(() => Math.max(...this.baselineYears(), 0) || undefined);
   readonly baselineGoalWarning = computed(() => {
     const analysis = this.draft();
     const facility = this.context.facility();
@@ -73,38 +64,48 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
     const analysis = this.draft();
     return analysis ? compatibleBankingSources(analysis, this.context.analyses()) : [];
   });
-  setName(event: Event): void {
-    const name = (event.target as HTMLInputElement).value;
-    this.autosave.update(draft => { draft.name = name; }, { valid: name.trim().length > 0 });
-  }
 
-  setBoundary(energyIsSource: boolean): void {
-    if (this.hasModels()) return;
-    this.autosave.update(draft => { draft.energyIsSource = energyIsSource; draft.bankedAnalysisItemId = undefined; }, { immediate: true });
-  }
-
-  setValue(field: 'energyUnit' | 'waterUnit', value: string): void {
-    if (this.hasModels()) return;
-    this.autosave.update(draft => { draft[field] = value; }, { immediate: true, valid: !!value });
-  }
-
-  setBaseline(event: Event): void {
-    if (this.hasModels()) return;
-    const baselineYear = Number((event.target as HTMLSelectElement).value);
-    this.autosave.update(draft => { draft.baselineYear = baselineYear; }, { immediate: true, valid: Number.isFinite(baselineYear) });
-  }
-
-  setHasBanking(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.autosave.update(draft => {
-      draft.hasBanking = checked;
-      if (!checked) draft.bankedAnalysisItemId = undefined;
-    }, { immediate: true });
-  }
-
-  setBankingSource(event: Event): void {
-    const guid = (event.target as HTMLSelectElement).value || undefined;
-    this.autosave.update(draft => { draft.bankedAnalysisItemId = guid; }, { immediate: true, valid: !this.draft()?.hasBanking || !!guid });
+  constructor() {
+    effect(() => this.syncForm());
+    const controls = this.form.controls;
+    controls.name.valueChanges.pipe(takeUntilDestroyed()).subscribe(name => {
+      this.autosave.update(draft => { draft.name = name; }, { valid: controls.name.valid });
+    });
+    controls.energyIsSource.valueChanges.pipe(takeUntilDestroyed()).subscribe(energyIsSource => {
+      if (this.hasModels()) return;
+      controls.bankedAnalysisItemId.setValue(null, { emitEvent: false });
+      this.autosave.update(draft => {
+        draft.energyIsSource = energyIsSource;
+        draft.bankedAnalysisItemId = undefined;
+      }, { immediate: true });
+    });
+    controls.energyUnit.valueChanges.pipe(takeUntilDestroyed()).subscribe(energyUnit => {
+      if (this.hasModels()) return;
+      this.autosave.update(draft => { draft.energyUnit = energyUnit; }, { immediate: true, valid: controls.energyUnit.valid });
+    });
+    controls.waterUnit.valueChanges.pipe(takeUntilDestroyed()).subscribe(waterUnit => {
+      if (this.hasModels()) return;
+      this.autosave.update(draft => { draft.waterUnit = waterUnit; }, { immediate: true, valid: controls.waterUnit.valid });
+    });
+    controls.baselineYear.valueChanges.pipe(takeUntilDestroyed()).subscribe(baselineYear => {
+      if (this.hasModels() || baselineYear === null) return;
+      this.autosave.update(draft => { draft.baselineYear = baselineYear; }, {
+        immediate: true,
+        valid: controls.baselineYear.valid
+      });
+    });
+    controls.hasBanking.valueChanges.pipe(takeUntilDestroyed()).subscribe(hasBanking => {
+      if (!hasBanking) controls.bankedAnalysisItemId.setValue(null, { emitEvent: false });
+      this.autosave.update(draft => {
+        draft.hasBanking = hasBanking;
+        if (!hasBanking) draft.bankedAnalysisItemId = undefined;
+      }, { immediate: true });
+    });
+    controls.bankedAnalysisItemId.valueChanges.pipe(takeUntilDestroyed()).subscribe(bankedAnalysisItemId => {
+      this.autosave.update(draft => {
+        draft.bankedAnalysisItemId = bankedAnalysisItemId || undefined;
+      }, { immediate: true, valid: controls.bankedAnalysisItemId.valid });
+    });
   }
 
   clearModels(): void {
@@ -126,6 +127,45 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.closeClearModels();
   }
+
+  private syncForm(): void {
+    const analysis = this.draft();
+    const hasModels = this.hasModels();
+    const baselineYears = this.baselineYears();
+    const hasBankingSources = this.eligibleBankingSources().length > 0;
+    if (!analysis) {
+      this.form.disable({ emitEvent: false });
+      return;
+    }
+
+    syncControlValue(this.form.controls.name, analysis.name);
+    syncControlValue(this.form.controls.energyIsSource, analysis.energyIsSource);
+    syncControlValue(this.form.controls.energyUnit, analysis.energyUnit);
+    syncControlValue(this.form.controls.waterUnit, analysis.waterUnit);
+    // Reapply this value when the async year options change so the select accessor can match it.
+    syncControlValue(this.form.controls.baselineYear, analysis.baselineYear || null, true);
+    syncControlValue(this.form.controls.hasBanking, analysis.hasBanking);
+    syncControlValue(this.form.controls.bankedAnalysisItemId, analysis.bankedAnalysisItemId || null);
+
+    setControlDisabled(this.form.controls.energyIsSource, hasModels);
+    setControlDisabled(this.form.controls.energyUnit, hasModels);
+    setControlDisabled(this.form.controls.waterUnit, hasModels);
+    setControlDisabled(this.form.controls.baselineYear, hasModels || baselineYears.length === 0);
+    setControlDisabled(this.form.controls.hasBanking, !hasBankingSources);
+    setControlDisabled(this.form.controls.name, false);
+    setControlDisabled(this.form.controls.bankedAnalysisItemId, !analysis.hasBanking);
+    this.form.controls.bankedAnalysisItemId.setValidators(analysis.hasBanking ? [Validators.required] : []);
+    this.form.controls.bankedAnalysisItemId.updateValueAndValidity({ emitEvent: false });
+  }
+}
+
+function setControlDisabled(control: AbstractControl, disabled: boolean): void {
+  if (disabled && control.enabled) control.disable({ emitEvent: false });
+  if (!disabled && control.disabled) control.enable({ emitEvent: false });
+}
+
+function syncControlValue<T>(control: FormControl<T>, value: T, force = false): void {
+  if (force || !Object.is(control.value, value)) control.setValue(value, { emitEvent: false });
 }
 
 export function compatibleBankingSources(

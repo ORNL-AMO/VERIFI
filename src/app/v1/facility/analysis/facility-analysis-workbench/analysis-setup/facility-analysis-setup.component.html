@@ -1,35 +1,35 @@
 @let analysis = draft();
 @let facility = context.facility();
 @if (analysis && facility) {
-  <section class="v1-analysis-section" aria-label="Analysis setup">
+  <form class="v1-analysis-section" aria-label="Analysis setup" [formGroup]="form">
     <div class="v1-analysis-setup__grid">
       <section class="v1-analysis-setup__panel" aria-label="Analysis details">
         <label for="analysis-name">Name</label>
-        <input id="analysis-name" class="form-control" [value]="analysis.name" maxlength="120" required (input)="setName($event)" [attr.aria-invalid]="!analysis.name.trim()" />
-        @if (!analysis.name.trim()) { <p class="v1-field-error" role="alert">Enter an analysis name.</p> }
+        <input id="analysis-name" class="form-control" formControlName="name" maxlength="120" required [attr.aria-invalid]="form.controls.name.invalid" />
+        @if (form.controls.name.invalid) { <p class="v1-field-error" role="alert">Enter an analysis name.</p> }
 
         @if (analysis.analysisCategory === 'energy') {
-          <fieldset [disabled]="hasModels()"><legend>Analysis boundary</legend>
-            <label><input type="radio" name="energy-boundary" [checked]="analysis.energyIsSource" (change)="setBoundary(true)" /> Source energy</label>
-            <label><input type="radio" name="energy-boundary" [checked]="!analysis.energyIsSource" (change)="setBoundary(false)" /> Site energy</label>
+          <fieldset><legend>Analysis boundary</legend>
+            <label><input type="radio" formControlName="energyIsSource" [value]="true" /> Source energy</label>
+            <label><input type="radio" formControlName="energyIsSource" [value]="false" /> Site energy</label>
           </fieldset>
           <label for="analysis-energy-unit">Display unit</label>
-          <select id="analysis-energy-unit" class="v1-select form-select" [ngModel]="analysis.energyUnit" [disabled]="hasModels()" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null" (ngModelChange)="setValue('energyUnit', $event)">
-            @for (option of energyUnits; track option.value) { <option [ngValue]="option.value" [innerHTML]="option.display"></option> }
+          <select id="analysis-energy-unit" class="v1-select form-select" formControlName="energyUnit" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null">
+            @for (option of energyUnits; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }
           </select>
         } @else {
           <label for="analysis-water-unit">Display unit</label>
-          <select id="analysis-water-unit" class="v1-select form-select" [ngModel]="analysis.waterUnit" [disabled]="hasModels()" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null" (ngModelChange)="setValue('waterUnit', $event)">
-            @for (option of waterUnits; track option.value) { <option [ngValue]="option.value" [innerHTML]="option.display"></option> }
+          <select id="analysis-water-unit" class="v1-select form-select" formControlName="waterUnit" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null">
+            @for (option of waterUnits; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }
           </select>
         }
       </section>
 
       <section class="v1-analysis-setup__panel" aria-label="Analysis period">
         <label for="analysis-baseline-year">Baseline year</label>
-        <select id="analysis-baseline-year" class="v1-select form-select" [value]="analysis.baselineYear || ''" [disabled]="hasModels() || !baselineYears().length" (change)="setBaseline($event)">
-          <option value="" disabled>Select a complete year</option>
-          @for (year of baselineYears(); track year) { <option [value]="year">{{ year }}</option> }
+        <select id="analysis-baseline-year" class="v1-select form-select" formControlName="baselineYear">
+          <option [ngValue]="null" disabled>Select a complete year</option>
+          @for (year of baselineYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
         </select>
         @if (!baselineYears().length) { <p class="v1-analysis-setup__notice v1-analysis-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No complete baseline years are available. Correct meter and predictor data before continuing.</span></p> }
         @if (baselineGoalWarning()) { <p class="v1-analysis-setup__notice" role="status"><app-ui-icon name="info"></app-ui-icon><span>{{ baselineGoalWarning() }}</span></p> }
@@ -44,12 +44,12 @@
 
     <section class="v1-analysis-setup__panel v1-analysis-setup__banking" aria-labelledby="analysis-banking-heading">
       <div><p class="v1-eyebrow">Optional</p><h2 id="analysis-banking-heading">Banking</h2></div>
-      <label class="v1-analysis-setup__toggle"><input type="checkbox" [checked]="analysis.hasBanking" [disabled]="!eligibleBankingSources().length" (change)="setHasBanking($event)" /> Use an earlier analysis as the banking source</label>
+      <label class="v1-analysis-setup__toggle"><input type="checkbox" formControlName="hasBanking" /> Use an earlier analysis as the banking source</label>
       @if (!eligibleBankingSources().length) { <p class="v1-analysis-setup__guidance">No compatible analysis is available for this facility, category, and energy basis.</p> }
-      @if (analysis.hasBanking) {
+      @if (form.controls.hasBanking.value) {
         <label for="analysis-banking-source">Banking source analysis</label>
-        <select id="analysis-banking-source" class="v1-select form-select" [value]="analysis.bankedAnalysisItemId || ''" (change)="setBankingSource($event)">
-          <option value="" disabled>Select an analysis</option>
+        <select id="analysis-banking-source" class="v1-select form-select" formControlName="bankedAnalysisItemId">
+          <option [ngValue]="null" disabled>Select an analysis</option>
           @for (candidate of eligibleBankingSources(); track candidate.guid) { <option [value]="candidate.guid">{{ candidate.name }} (baseline {{ candidate.baselineYear }})</option> }
         </select>
       }
@@ -61,7 +61,7 @@
         <span id="analysis-model-lock-message">Boundary, baseline, and display unit settings are locked because one or more regression models use them.</span>
       </div>
     }
-  </section>
+  </form>
 
 }
 

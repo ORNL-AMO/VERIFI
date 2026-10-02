@@ -13,6 +13,7 @@ import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './editin
 import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from './results/calculation/facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from './results/presentation/facility-analysis-results-display.service';
 import { RegressionCandidateStore } from './group/regression/regression-candidate.store';
+import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysis-period.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -20,6 +21,7 @@ import { RegressionCandidateStore } from './group/regression/regression-candidat
   providers: [
     FacilityAnalysisWorkbenchContext,
     FacilityAnalysisAutosaveService,
+    FacilityAnalysisPeriodService,
     FacilityAnalysisResultsService,
     FacilityAnalysisResultsDisplayService,
     RegressionCandidateStore
@@ -35,6 +37,7 @@ export class FacilityAnalysisWorkbenchComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
+  readonly period = inject(FacilityAnalysisPeriodService);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly activeStageId = this.activeStageState.asReadonly();
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
@@ -67,7 +70,11 @@ export class FacilityAnalysisWorkbenchComponent {
       ['saving', 'invalid', 'error'].includes(this.autosave.state())
     ).map(stage => ({ ...stage, attention: attention[stage.id] }));
   });
-  readonly resultFacts = computed(() => facilityAnalysisResultFacts(this.results.state()));
+  readonly resultFacts = computed(() => facilityAnalysisResultFacts(
+    this.results.state(),
+    this.autosave.state(),
+    this.context.hasBlockingErrors()
+  ));
   readonly dependencyMessage = computed(() => {
     const analysis = this.context.analysis();
     if (!analysis) return undefined;
@@ -126,27 +133,40 @@ export class FacilityAnalysisWorkbenchComponent {
 }
 
 export interface FacilityAnalysisResultFacts {
-  readonly latestCompleteYear?: number;
   readonly totalSavingsPercentImprovement?: number;
-  readonly pending: boolean;
+  readonly unavailableMessage?: string;
 }
 
-export function facilityAnalysisResultFacts(state: FacilityAnalysisResultState): FacilityAnalysisResultFacts {
+export function facilityAnalysisResultFacts(
+  state: FacilityAnalysisResultState,
+  autosaveState: AnalysisAutosaveState = 'saved',
+  hasBlockingErrors = false
+): FacilityAnalysisResultFacts {
   if (state.state !== 'ready') {
-    return { pending: state.state === 'loading' || state.state === 'waiting' };
+    if (hasBlockingErrors || (state.state === 'waiting' && state.reason === 'blocked')) {
+      return { unavailableMessage: 'Setup incomplete' };
+    }
+    if (state.state === 'loading') return { unavailableMessage: 'Calculating…' };
+    if (state.state === 'error') return { unavailableMessage: 'Calculation failed' };
+    if (state.state === 'waiting' && state.reason === 'autosave') {
+      if (autosaveState === 'invalid') return { unavailableMessage: 'Setup incomplete' };
+      if (autosaveState === 'error') return { unavailableMessage: 'Save failed' };
+      return { unavailableMessage: 'Waiting for save…' };
+    }
+    if (state.state === 'waiting') return { unavailableMessage: 'Preparing data…' };
+    return { unavailableMessage: 'Unavailable' };
   }
-  const latestCompleteYear = state.reportYear ?? state.annual.reduce<number | undefined>(
+  const reportYear = state.reportYear ?? state.annual.reduce<number | undefined>(
     (latest, summary) => latest === undefined || summary.year > latest ? summary.year : latest,
     undefined
   );
-  const latestSummary = state.annual.find(summary => summary.year === latestCompleteYear);
+  const latestSummary = state.annual.find(summary => summary.year === reportYear);
   const totalSavingsPercentImprovement = latestSummary?.totalSavingsPercentImprovement;
   return {
-    latestCompleteYear,
     totalSavingsPercentImprovement: Number.isFinite(totalSavingsPercentImprovement)
       ? totalSavingsPercentImprovement
       : undefined,
-    pending: false
+    unavailableMessage: Number.isFinite(totalSavingsPercentImprovement) ? undefined : 'Unavailable'
   };
 }
 

@@ -36,6 +36,7 @@ The workbench owns the services that must survive child-tab navigation:
 | --- | --- | --- |
 | `FacilityAnalysisWorkbenchContext` | Resolves the selected account, facility, analysis, meter groups, stages, and status findings from the workspace | One analysis workbench route |
 | `FacilityAnalysisAutosaveService` | Maintains committed and editable analysis copies, debounces valid edits, persists through the command boundary, and exposes navigation state | One analysis workbench route |
+| `FacilityAnalysisPeriodService` | Projects the canonical calendarization for the editable draft and supplies the shared baseline-year choices and latest complete year to setup and header views | One analysis workbench route |
 | `FacilityAnalysisResultsService` | Decides when result work is valid, builds the calculation request, cancels stale work, and caches the latest matching result | One analysis workbench route |
 | `FacilityAnalysisResultsDisplayService` | Owns table/graph selection and the user’s result-column preferences | One analysis workbench route; column preferences persist in v1 local storage |
 | `RegressionCandidateStore` | Holds generated, uncommitted regression candidates by analysis and group GUID | One analysis workbench route; never persisted directly |
@@ -59,11 +60,13 @@ The autosave service keeps two copies:
 
 Every draft transition clones before mutation and marks `isAnalysisVisited` false. Valid edits become `dirty`, then `saving`, then `saved`. Invalid form edits remain in the draft with state `invalid` and do not start persistence or result calculation. A failed write becomes `error` and can be retried or discarded.
 
+The workbench header and Analysis Setup both read the editable draft for analysis-wide settings. `FacilityAnalysisPeriodService` derives complete years from the shared canonical calendarization, independently of group readiness and the result Worker. This keeps baseline and latest-complete-year facts available during setup without starting calculation work that cannot yet succeed.
+
 Generated regression candidates, pending confirmation choices, open editors, selected result views, loading flags, and Worker subscriptions are transient. Do not add them to IndexedDB records merely to preserve navigation state.
 
 ## Result calculation orchestration
 
-Result calculation is coordinated from one workbench-scoped service rather than from individual result components. Annual, monthly, group, facility, header-fact, and future results views consume the same result state.
+Result calculation is coordinated from one workbench-scoped service rather than from individual result components. Annual, monthly, group, facility, result-dependent header facts, and future results views consume the same result state. Setup facts such as baseline and latest complete year use the editable draft and canonical calendarization instead, because they do not require valid group models or a result Worker.
 
 The data flow is:
 
