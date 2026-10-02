@@ -12,6 +12,7 @@ import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './facility-analysis-autosave.service';
 import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from './facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from './facility-analysis-results-display.service';
+import { RegressionCandidateStore } from './regression/regression-candidate.store';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -20,7 +21,8 @@ import { FacilityAnalysisResultsDisplayService } from './facility-analysis-resul
     FacilityAnalysisWorkbenchContext,
     FacilityAnalysisAutosaveService,
     FacilityAnalysisResultsService,
-    FacilityAnalysisResultsDisplayService
+    FacilityAnalysisResultsDisplayService,
+    RegressionCandidateStore
   ],
   imports: [RouterOutlet, RouterLink, DecimalPipe, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent],
   templateUrl: './facility-analysis-workbench.component.html',

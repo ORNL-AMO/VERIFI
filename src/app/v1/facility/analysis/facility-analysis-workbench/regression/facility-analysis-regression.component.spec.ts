@@ -2,12 +2,12 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
-import { RegressionModelStateService } from '@data/account-workspace/regression-model-state.service';
 import { RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { RegressionModelValidationService } from './regression-model-validation.service';
 import { FacilityAnalysisRegressionComponent, buildUserDefinedGroup, generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.component';
+import { RegressionCandidateStore } from './regression-candidate.store';
 
 describe('facility analysis regression behavior', () => {
   it('requires at least twelve inclusive months for model generation', () => {
@@ -113,6 +113,7 @@ describe('facility analysis regression behavior', () => {
             findings: signal([]),
             autosave: { draft: analysis, update: vi.fn() },
             workbench: {
+              analysisGuid: signal('analysis-1'),
               account: signal(undefined), facility: signal(undefined),
               workspace: {
                 facilityMeters: signal([]), facilityMeterData: signal([]), facilityPredictorData: signal([])
@@ -120,7 +121,7 @@ describe('facility analysis regression behavior', () => {
             }
           }
         },
-        { provide: RegressionModelStateService, useValue: { modelsByGroup: signal({ 'group-1': [] }), setForGroup: vi.fn() } },
+        { provide: RegressionCandidateStore, useValue: { modelsFor: vi.fn(() => []), set: vi.fn(), clear: vi.fn() } },
         { provide: RegressionModelsService, useValue: { terminateCurrentWorker: vi.fn() } },
         { provide: ModalPortalService, useValue: modalPortal }
       ]

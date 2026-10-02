@@ -1,7 +1,6 @@
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
-import { RegressionModelStateService } from '@data/account-workspace/regression-model-state.service';
 import { RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
 import { FiscalYearSettings, getUserDefinedModelDateRange } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -14,6 +13,7 @@ import { UserDefinedRegressionWorkflowComponent, RegressionRangeField, Regressio
 import { RegressionModelReviewSlideoutComponent } from './model-review-slideout/regression-model-review-slideout.component';
 import { RegressionModelValidationService, modelPeriodMonthCount } from './regression-model-validation.service';
 import { roundRegressionNumber } from './regression-number-format';
+import { RegressionCandidateStore } from './regression-candidate.store';
 
 @Component({
   selector: 'app-facility-analysis-regression',
@@ -36,7 +36,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
   readonly autosave = this.groupContext.autosave;
   readonly workbench = this.groupContext.workbench;
   readonly validation = inject(RegressionModelValidationService);
-  private readonly modelState = inject(RegressionModelStateService);
+  private readonly candidateStore = inject(RegressionCandidateStore);
   private readonly regressionModels = inject(RegressionModelsService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
@@ -57,7 +57,10 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
   readonly pendingPredictorId = signal<string | undefined>(undefined);
   readonly pendingMaxVariables = signal<number | undefined>(undefined);
   readonly recoveryNotice = signal<string | undefined>(undefined);
-  readonly generatedModels = computed(() => this.modelState.modelsByGroup()[this.groupContext.groupGuid()] ?? []);
+  readonly generatedModels = computed(() => this.candidateStore.modelsFor(
+    this.workbench.analysisGuid(),
+    this.groupContext.groupGuid()
+  ));
   readonly selectedModel = computed(() => this.generatedModels().find(model => model.modelId === this.group()?.selectedModelId)
     ?? this.group()?.models?.find(model => model.modelId === this.group()?.selectedModelId));
   readonly selectedPredictors = computed(() => this.group()?.predictorVariables.filter(variable => variable.productionInAnalysis) ?? []);
@@ -86,8 +89,9 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
 
   private readonly seedModelState = effect(() => {
     const group = this.group();
-    if (group?.models?.length && !this.modelState.modelsByGroup()[group.idbGroupId]) {
-      this.modelState.setForGroup(group.idbGroupId, group.models);
+    const analysisGuid = this.workbench.analysisGuid();
+    if (group?.models?.length && this.candidateStore.modelsFor(analysisGuid, group.idbGroupId).length === 0) {
+      this.candidateStore.set(analysisGuid, group.idbGroupId, group.models);
       if (group.isGeneratedModel) this.configurationExpanded.set(false);
     }
   });
@@ -203,7 +207,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
       const result = this.regressionModels.applyGeneratedModelsToGroup(
         group, models, priorSelectedId, priorSelectedModel, facility, analysis.baselineYear
       );
-      this.modelState.setForGroup(group.idbGroupId, models);
+      this.candidateStore.set(this.workbench.analysisGuid(), group.idbGroupId, models);
       this.replaceGroup(result.updatedGroup, true);
       this.generatedThisSession.set(true);
       this.configurationExpanded.set(models.length === 0 || !result.updatedGroup.isGeneratedModel);
@@ -285,7 +289,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
       group.regressionModelYear = undefined;
       group.predictorVariables.forEach(variable => { variable.regressionCoefficient = undefined; });
     }, true);
-    this.modelState.setForGroup(this.groupContext.groupGuid(), []);
+    this.candidateStore.clear(this.workbench.analysisGuid(), this.groupContext.groupGuid());
     this.generatedThisSession.set(false);
     this.configurationExpanded.set(true);
     this.generationError.set(undefined);
@@ -302,7 +306,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
       const selectedCount = group.predictorVariables.filter(item => item.productionInAnalysis).length;
       if (group.maxModelVariables > selectedCount) group.maxModelVariables = Math.max(1, selectedCount);
     }, true);
-    this.modelState.setForGroup(this.groupContext.groupGuid(), []);
+    this.candidateStore.clear(this.workbench.analysisGuid(), this.groupContext.groupGuid());
     this.generatedThisSession.set(false);
     this.configurationExpanded.set(true);
   }
@@ -317,7 +321,7 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
       group.regressionModelYear = undefined;
       group.predictorVariables.forEach(variable => { variable.regressionCoefficient = undefined; });
     }, true, value > 0);
-    this.modelState.setForGroup(this.groupContext.groupGuid(), []);
+    this.candidateStore.clear(this.workbench.analysisGuid(), this.groupContext.groupGuid());
     this.generatedThisSession.set(false);
     this.configurationExpanded.set(true);
   }
