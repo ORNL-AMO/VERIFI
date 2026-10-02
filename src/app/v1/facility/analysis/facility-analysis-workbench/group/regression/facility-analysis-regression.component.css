@@ -1,17 +1,4 @@
 :host { display: block; }
 .v1-regression { display: grid; border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); }
-.v1-regression__method { min-width: 0; margin: 0 0 var(--v1-space-4); padding: 0 0 var(--v1-space-4); border: 0; border-bottom: 1px solid var(--v1-divider); }
-.v1-regression__method--inline { height: 100%; margin: 0; padding: 0 var(--v1-space-4) 0 0; border-right: 1px solid var(--v1-divider); border-bottom: 0; }
-.v1-regression__method > legend { margin-bottom: var(--v1-space-2); font-size: 1rem; font-weight: 800; }
-.v1-regression__method-options { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; width: min(25rem, 100%); }
-.v1-regression__method-options label { display: flex; align-items: center; gap: .55rem; width: 100%; padding: .6rem .8rem; border: 1px solid var(--v1-border); cursor: pointer; }
-.v1-regression__method-options label:first-child { border-radius: var(--v1-radius) var(--v1-radius) 0 0; }
-.v1-regression__method-options label:last-child { margin-top: -1px; border-radius: 0 0 var(--v1-radius) var(--v1-radius); }
-.v1-regression__method-option--active { position: relative; z-index: 1; border-color: var(--v1-content-control) !important; background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); }
-.v1-regression__method-options input { margin: 0; }
-.v1-regression__method-options strong { font-weight: 800; }
 .v1-regression__workflow { min-width: 0; padding: 1rem; }
 .v1-regression__notice { display: flex; align-items: center; gap: var(--v1-space-2); margin: 0; padding: .65rem 1rem; border-bottom: 1px solid var(--v1-divider); color: var(--v1-muted); }
-@media (max-width: 700px) {
-  .v1-regression__method--inline { height: auto; padding: 0 0 var(--v1-space-4); border-right: 0; border-bottom: 1px solid var(--v1-divider); }
-}

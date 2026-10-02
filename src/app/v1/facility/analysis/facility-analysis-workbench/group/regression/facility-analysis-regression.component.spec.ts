@@ -153,7 +153,11 @@ describe('facility analysis regression behavior', () => {
     const fixture = TestBed.createComponent(FacilityAnalysisRegressionComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.requestMethod(false);
+    const methodControl = (fixture.nativeElement as HTMLElement)
+      .querySelector('.v1-generated-regression__top > app-regression-method-control');
+    expect(methodControl).not.toBeNull();
+    const methodOptions = methodControl!.querySelectorAll<HTMLInputElement>('input[type="radio"]');
+    methodOptions[1].click();
     fixture.detectChanges();
 
     expect(modalPortal.show).toHaveBeenCalledOnce();

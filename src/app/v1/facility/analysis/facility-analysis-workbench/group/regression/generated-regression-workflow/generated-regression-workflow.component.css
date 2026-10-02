@@ -58,8 +58,10 @@ legend, .v1-generated-regression h3, .v1-generated-regression p { margin: 0; }
 .v1-generated-regression__empty strong { color: var(--v1-text); }
 .v1-generated-regression__empty p { margin-top: .25rem; }
 .v1-field-error { color: var(--v1-danger); font-size: .82rem; font-weight: 750; }
+@media (max-width: 900px) {
+  .v1-generated-regression__top { grid-template-columns: 1fr; }
+}
 @media (max-width: 760px) {
-  .v1-generated-regression__top,
   .v1-generated-regression__settings, .v1-generated-regression__predictor-list { grid-template-columns: 1fr; }
   .v1-generated-regression__summary { align-items: flex-start; flex-direction: column; }
   .v1-generated-regression__summary-actions { width: 100%; justify-content: flex-start; }

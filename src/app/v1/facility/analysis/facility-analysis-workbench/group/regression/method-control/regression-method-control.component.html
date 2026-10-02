@@ -1,0 +1,13 @@
+<fieldset class="v1-regression-method" [disabled]="generating()">
+  <legend>Modeling method</legend>
+  <div class="v1-regression-method__options">
+    <label [class.v1-regression-method__option--active]="controller.method.value === 'generated'">
+      <input type="radio" name="regression-method" value="generated" [formControl]="controller.method" />
+      <span><strong>Generate models</strong></span>
+    </label>
+    <label [class.v1-regression-method__option--active]="controller.method.value === 'userDefined'">
+      <input type="radio" name="regression-method" value="userDefined" [formControl]="controller.method" />
+      <span><strong>User-defined model</strong></span>
+    </label>
+  </div>
+</fieldset>

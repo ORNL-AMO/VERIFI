@@ -1,6 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -11,6 +10,7 @@ import { RegressionModelValidationService } from './regression-model-validation.
 import { UserDefinedRegressionWorkflowComponent } from './user-defined-regression-workflow/user-defined-regression-workflow.component';
 import { FacilityAnalysisRegressionController, RegressionMethod } from './facility-analysis-regression.controller';
 import { modeledQuantityLabel } from './regression-labels';
+import { RegressionMethodControlComponent } from './method-control/regression-method-control.component';
 
 export { generatedConfigurationValid, modelRangeMonthCount } from './facility-analysis-regression.facade';
 
@@ -22,8 +22,8 @@ export { generatedConfigurationValid, modelRangeMonthCount } from './facility-an
     ConfirmationDialogComponent,
     GeneratedRegressionWorkflowComponent,
     UserDefinedRegressionWorkflowComponent,
-    RegressionModelReviewSlideoutComponent
-    , ReactiveFormsModule
+    RegressionModelReviewSlideoutComponent,
+    RegressionMethodControlComponent
   ],
   providers: [RegressionModelValidationService, FacilityAnalysisRegressionFacade, FacilityAnalysisRegressionController],
   templateUrl: './facility-analysis-regression.component.html',
@@ -61,7 +61,6 @@ export class FacilityAnalysisRegressionComponent implements OnDestroy {
 
   confirmPendingChange(): void { this.controller.confirmPendingChange(); }
   cancelPendingConfirmation(): void { this.controller.cancelPendingChange(); }
-  requestMethod(generated: boolean): void { this.controller.method.setValue(generated ? 'generated' : 'userDefined'); }
   pendingMethod(): RegressionMethod | undefined {
     const pending = this.controller.pendingChange();
     return pending?.kind === 'method' ? pending.value : undefined;

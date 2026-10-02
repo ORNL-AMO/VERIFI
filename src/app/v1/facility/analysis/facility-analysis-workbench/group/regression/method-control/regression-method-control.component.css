@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  min-width: 0;
+  height: 100%;
+  padding-right: var(--v1-space-4);
+  border-right: 1px solid var(--v1-divider);
+}
+
+.v1-regression-method { min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; }
+.v1-regression-method > legend { margin-bottom: var(--v1-space-2); font-size: 1rem; font-weight: 800; }
+.v1-regression-method__options { display: flex; flex-direction: column; align-items: stretch; width: min(25rem, 100%); }
+.v1-regression-method__options label { display: flex; align-items: center; gap: .55rem; width: 100%; padding: .6rem .8rem; border: 1px solid var(--v1-border); cursor: pointer; }
+.v1-regression-method__options label:first-child { border-radius: var(--v1-radius) var(--v1-radius) 0 0; }
+.v1-regression-method__options label:last-child { margin-top: -1px; border-radius: 0 0 var(--v1-radius) var(--v1-radius); }
+.v1-regression-method__option--active { position: relative; z-index: 1; border-color: var(--v1-content-control) !important; background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); }
+.v1-regression-method__options input { margin: 0; }
+.v1-regression-method__options strong { font-weight: 800; }
+
+@media (max-width: 900px) {
+  :host { height: auto; padding: 0 0 var(--v1-space-4); border-right: 0; border-bottom: 1px solid var(--v1-divider); }
+}
