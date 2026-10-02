@@ -6,10 +6,10 @@
       <section class="weather-maintenance__setup" aria-labelledby="weather-maintenance-range">
         <header><p>Source range</p><h2 id="weather-maintenance-range">Select monthly data to maintain</h2></header>
         <div class="weather-maintenance__grid">
-          <label><span>Start month</span><input type="month" [value]="startMonth()" [disabled]="saving" (change)="startMonth.set($any($event.target).value)"></label>
-          <label><span>End month</span><input type="month" [value]="endMonth()" [disabled]="saving" (change)="endMonth.set($any($event.target).value)"></label>
+          <label><span>Start month</span><input #startMonthInput type="month" [value]="startMonth()" [disabled]="saving" (change)="startMonth.set(startMonthInput.value)"></label>
+          <label><span>End month</span><input #endMonthInput type="month" [value]="endMonth()" [disabled]="saving" (change)="endMonth.set(endMonthInput.value)"></label>
           <label class="weather-maintenance__wide"><span>Check existing calculated entries</span>
-            <select class="v1-select" [value]="sourceCheck()" [disabled]="saving" (change)="setSourceCheck($any($event.target).value)">
+            <select #sourceCheckSelect class="v1-select" [value]="sourceCheck()" [disabled]="saving" (change)="setSourceCheck(sourceCheckSelect.value)">
               <option value="none">Do not check existing entries</option>
               <option value="last-six">Check the latest six entries</option>
               <option value="all">Check all entries</option>

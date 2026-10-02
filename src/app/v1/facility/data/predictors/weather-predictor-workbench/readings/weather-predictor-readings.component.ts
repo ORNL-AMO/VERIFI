@@ -336,13 +336,12 @@ export class WeatherPredictorReadingsComponent implements HasUnsavedChanges, OnD
   }
 
   cancelDelete(): void { if (!this.saving()) this.closeDelete(); }
-  setPageSize(event: Event): void {
-    this.pageSize.set(Number((event.target as HTMLSelectElement).value));
+  setPageSize(value: string): void {
+    this.pageSize.set(Number(value));
     this.currentPage.set(1);
   }
 
-  setRowFilter(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  setRowFilter(value: string): void {
     this.rowFilter.set(value === 'attention' ? 'attention' : 'all');
     this.currentPage.set(1);
   }

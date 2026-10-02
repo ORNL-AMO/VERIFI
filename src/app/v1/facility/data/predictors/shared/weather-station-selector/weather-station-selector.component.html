@@ -41,13 +41,13 @@
       <form class="weather-station-selector__search" (submit)="$event.preventDefault(); search()">
         <label for="weather-location-search">Location</label>
         <div>
-          <input
+          <input #locationQuery
             id="weather-location-search"
             type="search"
             [value]="query()"
             [disabled]="disabled || searchingLocations() || searchingStations()"
             placeholder="City, state, or address"
-            (input)="setQuery($any($event.target).value)">
+            (input)="setQuery(locationQuery.value)">
           <button type="submit" class="v1-btn v1-btn--secondary" [disabled]="disabled || !query().trim() || searchingLocations() || searchingStations()">
             <app-ui-icon [name]="searchingLocations() ? 'loading' : 'search'" [spin]="searchingLocations()"></app-ui-icon>
             Search

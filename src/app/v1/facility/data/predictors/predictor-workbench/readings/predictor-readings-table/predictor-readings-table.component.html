@@ -18,7 +18,7 @@
       <div class="predictor-readings-table__controls">
         <label>
           <span>Rows</span>
-          <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+          <select #pageSizeSelect class="v1-select" [value]="pageSize()" (change)="setPageSize(pageSizeSelect.value)">
             @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
               <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
             }
@@ -26,7 +26,7 @@
         </label>
         <label>
           <span>Filter</span>
-          <select class="v1-select" [value]="filter()" (change)="setFilter($event)">
+          <select #filterSelect class="v1-select" [value]="filter()" (change)="setFilter(filterSelect.value)">
             <option value="all">All entries</option>
             <option value="attention" [disabled]="!view.hasAttention">Needs attention</option>
           </select>
@@ -56,9 +56,9 @@
           <thead>
             <tr>
               <th class="predictor-readings-table__select">
-                <input type="checkbox" aria-label="Select visible predictor readings"
+                <input #allVisible type="checkbox" aria-label="Select visible predictor readings"
                   [checked]="allVisibleSelected()" [disabled]="!canAct || displayed.length === 0"
-                  (change)="toggleVisible($event)">
+                  (change)="toggleVisible(allVisible.checked)">
               </th>
               <th>
                 <button type="button" class="predictor-readings-table__sort" [class.active]="sortColumn() === 'month'" (click)="requestSort('month')">

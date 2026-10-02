@@ -64,8 +64,8 @@ export class MeterGroupWorkbenchTableComponent {
     this.currentPage.set(1);
   }
 
-  setPageSize(event: Event): void {
-    this.pageSize.set(Number((event.target as HTMLSelectElement).value));
+  setPageSize(value: string): void {
+    this.pageSize.set(Number(value));
     this.currentPage.set(1);
   }
 

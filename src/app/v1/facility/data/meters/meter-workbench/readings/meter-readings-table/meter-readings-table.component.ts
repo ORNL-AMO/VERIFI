@@ -177,8 +177,7 @@ export class MeterReadingsTableComponent {
     this.hoveredColumnId.set(columnId);
   }
 
-  toggleVisible(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
+  toggleVisible(checked: boolean): void {
     const next = new Set(this.selectedGuidsState());
     this.displayedRows().forEach(row => {
       if (checked) {
@@ -200,13 +199,13 @@ export class MeterReadingsTableComponent {
     return this.selectedGuidsState().has(guid);
   }
 
-  setPageSize(event: Event): void {
-    this.pageSize.set(Number((event.target as HTMLSelectElement).value));
+  setPageSize(value: string): void {
+    this.pageSize.set(Number(value));
     this.currentPage.set(1);
   }
 
-  setFilterOption(event: Event): void {
-    this.filterOption.set((event.target as HTMLSelectElement).value as MeterReadingFilterOption);
+  setFilterOption(value: string): void {
+    this.filterOption.set(value as MeterReadingFilterOption);
     this.currentPage.set(1);
     this.selectedGuidsState.set(new Set<string>());
   }

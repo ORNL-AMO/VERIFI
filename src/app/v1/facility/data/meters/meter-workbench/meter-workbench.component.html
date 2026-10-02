@@ -81,8 +81,7 @@
               <select
                 id="v1-meter-display-energy-unit"
                 class="v1-select v1-meter-workbench-header__unit-select"
-                [formControl]="displayEnergyUnitControl"
-                (change)="setDisplayEnergyUnit($event)">
+                [formControl]="displayEnergyUnitControl">
                 @for (option of energyUnitOptions(); track option.value) {
                   <option [value]="option.value">
                     {{ option.value }}

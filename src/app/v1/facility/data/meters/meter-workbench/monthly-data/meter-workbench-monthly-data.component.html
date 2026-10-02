@@ -47,7 +47,7 @@
       </div>
       <label class="v1-meter-monthly-data__control">
         <span>Rows</span>
-        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+        <select #pageSizeSelect class="v1-select" [value]="pageSize()" (change)="setPageSize(pageSizeSelect.value)">
           @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
             <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
           }

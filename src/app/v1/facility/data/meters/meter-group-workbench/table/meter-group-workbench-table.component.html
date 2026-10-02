@@ -20,7 +20,7 @@
     <div class="v1-meter-group-results-table__controls" aria-label="Results table controls">
       <label class="v1-meter-group-results-table__control">
         <span>Rows</span>
-        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+        <select #pageSizeSelect class="v1-select" [value]="pageSize()" (change)="setPageSize(pageSizeSelect.value)">
           @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
             <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
           }

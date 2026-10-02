@@ -26,7 +26,7 @@
       }
       <label class="meter-readings-table__control">
         <span>Rows</span>
-        <select class="v1-select" [value]="pageSize()" (change)="setPageSize($event)">
+        <select #pageSizeSelect class="v1-select" [value]="pageSize()" (change)="setPageSize(pageSizeSelect.value)">
           @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
             <option [value]="pageSizeOption">{{ pageSizeOption }}</option>
           }
@@ -35,7 +35,7 @@
       @if (_view.hasEstimatedReadings) {
         <label class="meter-readings-table__control">
           <span>Filter</span>
-          <select class="v1-select" [value]="filterOption()" (change)="setFilterOption($event)">
+          <select #filterSelect class="v1-select" [value]="filterOption()" (change)="setFilterOption(filterSelect.value)">
             <option value="all">All</option>
             <option value="estimated">Estimated Readings</option>
           </select>
@@ -87,12 +87,12 @@
         <tr>
           @if (!copyingTable()) {
             <th class="meter-readings-table__select">
-              <input
+              <input #allVisible
                 type="checkbox"
                 aria-label="Select visible readings"
                 [checked]="allVisibleChecked()"
                 [disabled]="!canAct || _displayedRows.length === 0"
-                (change)="toggleVisible($event)">
+                (change)="toggleVisible(allVisible.checked)">
             </th>
           }
           @for (column of _columns; track column.column.id) {

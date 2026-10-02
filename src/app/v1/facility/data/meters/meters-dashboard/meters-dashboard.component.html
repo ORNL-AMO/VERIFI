@@ -68,18 +68,18 @@
           <span class="input-group-text">
             <app-ui-icon name="search"></app-ui-icon>
           </span>
-          <input
+          <input #meterSearch
             id="v1-facility-meter-search"
             type="search"
             aria-label="Find meter, source, group, or status"
             placeholder="Find meter, source, group, or status"
             [value]="search()"
-            (input)="setSearch($any($event.target).value)">
+            (input)="setSearch(meterSearch.value)">
         </div>
 
         <label>
           <span>Status</span>
-          <select class="v1-select" [value]="statusFilter()" (change)="setStatusFilter($any($event.target).value)">
+          <select #statusSelect class="v1-select" [value]="statusFilter()" (change)="setStatusFilter(statusSelect.value)">
             <option value="all">All</option>
             <option value="attention">Needs attention</option>
             <option value="noReadings">No readings</option>
@@ -90,7 +90,7 @@
 
         <label>
           <span>Sort</span>
-          <select class="v1-select" [value]="sortBy()" (change)="setSortBy($any($event.target).value)">
+          <select #sortSelect class="v1-select" [value]="sortBy()" (change)="setSortBy(sortSelect.value)">
             <option value="attention">Attention first</option>
             <option value="meterName">Meter name</option>
             <option value="latestReading">Latest reading</option>

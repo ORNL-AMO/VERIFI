@@ -42,16 +42,16 @@ export class MeterGroupDraftSlideoutComponent implements OnChanges {
     }
   }
 
-  setName(event: Event): void {
-    this.patch({ name: (event.target as HTMLInputElement).value });
+  setName(value: string): void {
+    this.patch({ name: value });
   }
 
-  setGroupType(event: Event): void {
-    this.patch({ groupType: (event.target as HTMLSelectElement).value as MeterGroupType });
+  setGroupType(value: string): void {
+    this.patch({ groupType: value as MeterGroupType });
   }
 
-  setDescription(event: Event): void {
-    this.patch({ description: (event.target as HTMLTextAreaElement).value });
+  setDescription(value: string): void {
+    this.patch({ description: value });
   }
 
   submit(): void {

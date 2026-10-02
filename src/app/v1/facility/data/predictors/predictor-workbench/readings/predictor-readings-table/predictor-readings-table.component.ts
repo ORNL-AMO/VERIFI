@@ -75,19 +75,18 @@ export class PredictorReadingsTableComponent {
     this.currentPage.set(1);
   }
 
-  setPageSize(event: Event): void {
-    this.pageSize.set(Number((event.target as HTMLSelectElement).value));
+  setPageSize(value: string): void {
+    this.pageSize.set(Number(value));
     this.currentPage.set(1);
   }
 
-  setFilter(event: Event): void {
-    this.filter.set((event.target as HTMLSelectElement).value as PredictorReadingFilter);
+  setFilter(value: string): void {
+    this.filter.set(value as PredictorReadingFilter);
     this.currentPage.set(1);
     this.selectedGuidsState.set(new Set<string>());
   }
 
-  toggleVisible(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
+  toggleVisible(checked: boolean): void {
     const next = new Set(this.selectedGuidsState());
     this.displayedRows().forEach(row => checked ? next.add(row.reading.guid) : next.delete(row.reading.guid));
     this.selectedGuidsState.set(next);

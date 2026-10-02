@@ -6,7 +6,7 @@
   <form class="weather-month-editor" (submit)="$event.preventDefault(); save()">
     <label>
       <span>Month</span>
-      <input type="month" required [value]="month()" [disabled]="saving || mode === 'edit'" (change)="setMonth($any($event.target).value)">
+      <input #monthInput type="month" required [value]="month()" [disabled]="saving || mode === 'edit'" (change)="setMonth(monthInput.value)">
     </label>
     @if (mode === 'add' && calculating) {
       <div class="v1-alert v1-alert--info" role="status">
@@ -44,11 +44,11 @@
             <span>{{ column.predictor.name }} <small>{{ column.typeLabel }}</small></span>
           </label>
           <div class="input-group weather-month-editor__input-group">
-            <input class="v1-input" [id]="'weather-month-value-' + $index" type="number" step="any" required
+            <input #readingValue class="v1-input" [id]="'weather-month-value-' + $index" type="number" step="any" required
               [placeholder]="calculating ? 'Calculating…' : ''"
               [value]="values()[column.predictor.guid]"
               [disabled]="saving || calculating || (mode === 'add' && !overridden)"
-              (input)="setValue(column.predictor.guid, $any($event.target).value)">
+              (input)="setValue(column.predictor.guid, readingValue.value)">
             <span class="input-group-text">{{ column.unit }}</span>
             @if (mode === 'add') {
               <button type="button" class="weather-month-editor__override"

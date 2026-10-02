@@ -47,9 +47,8 @@ export class ImportFacilityBackupComponent {
     }
   }
 
-  async setImportFile(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  async setImportFile(files: FileList | null): Promise<void> {
+    const file = files?.[0];
     this.backupFile = undefined;
     this.backupFileError = '';
     this.selectedFileName = file?.name || '';

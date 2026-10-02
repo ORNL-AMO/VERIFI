@@ -6,12 +6,12 @@
   <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
     <label>
       <span>Meter name</span>
-      <input type="text" [value]="draft().name" [disabled]="saving" required (input)="setName($event)">
+      <input #meterName type="text" [value]="draft().name" [disabled]="saving" required (input)="setName(meterName.value)">
     </label>
 
     <label>
       <span>Source</span>
-      <select class="v1-select" [value]="draft().source" [disabled]="saving" required (change)="setSource($event)">
+      <select #meterSource class="v1-select" [value]="draft().source" [disabled]="saving" required (change)="setSource(meterSource.value)">
         @for (source of sources; track source) {
           <option [value]="source">{{ source }}</option>
         }
@@ -20,7 +20,7 @@
 
     <label>
       <span>Group</span>
-      <select class="v1-select" [value]="draft().groupId || ''" [disabled]="saving" (change)="setGroup($event)">
+      <select #meterGroup class="v1-select" [value]="draft().groupId || ''" [disabled]="saving" (change)="setGroup(meterGroup.value)">
         <option value="">Ungrouped</option>
         @for (group of groups; track group.guid) {
           <option [value]="group.guid" [disabled]="!isGroupAllowed(group)">

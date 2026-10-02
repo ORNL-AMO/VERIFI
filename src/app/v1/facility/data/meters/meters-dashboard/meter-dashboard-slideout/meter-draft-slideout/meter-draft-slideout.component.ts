@@ -34,12 +34,12 @@ export class MeterDraftSlideoutComponent {
     && canAssignSourceToGroup(this.draft().source, this.selectedGroup())
   );
 
-  setName(event: Event): void {
-    this.patch({ name: (event.target as HTMLInputElement).value });
+  setName(value: string): void {
+    this.patch({ name: value });
   }
 
-  setSource(event: Event): void {
-    const source = (event.target as HTMLSelectElement).value as MeterSource;
+  setSource(value: string): void {
+    const source = value as MeterSource;
     const group = this.selectedGroup();
     this.patch({
       source,
@@ -47,8 +47,8 @@ export class MeterDraftSlideoutComponent {
     });
   }
 
-  setGroup(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value || undefined;
+  setGroup(selectedValue: string): void {
+    const value = selectedValue || undefined;
     this.patch({ groupId: value });
   }
 
