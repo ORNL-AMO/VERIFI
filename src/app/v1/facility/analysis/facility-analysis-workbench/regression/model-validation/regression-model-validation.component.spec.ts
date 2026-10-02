@@ -15,7 +15,7 @@ describe('RegressionModelValidationComponent', () => {
     } as AnalysisGroup);
     fixture.componentRef.setInput('state', {
       state: 'ready', source: 'generated',
-      model: { modelId: 'candidate', SEPValidation: [] } as unknown as JStatRegressionModel,
+      model: { modelId: 'candidate', modelYear: 2024, SEPValidation: [] } as unknown as JStatRegressionModel,
       monthly: [{ date, fiscalYear: 2024, energyUse: 14, modeledEnergy: 10 } as MonthlyAnalysisSummaryData],
       comparison: {
         model: { modelId: 'selected' } as JStatRegressionModel,

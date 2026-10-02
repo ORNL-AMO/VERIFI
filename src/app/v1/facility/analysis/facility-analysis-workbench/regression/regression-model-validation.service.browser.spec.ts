@@ -1,5 +1,6 @@
 import { firstValueFrom } from 'rxjs';
-import { runRegressionModelValidation, runRegressionModelValidationPair } from './regression-model-validation.service';
+import { RegressionValidationWorkerRequest } from '@platform/web-workers/regression-validation-worker.contract';
+import { runRegressionModelValidation } from './regression-model-validation.service';
 
 describe('regression model validation browser Worker lifecycle', () => {
   let originalWorker: typeof Worker;
@@ -12,43 +13,65 @@ describe('regression model validation browser Worker lifecycle', () => {
 
   afterEach(() => { globalThis.Worker = originalWorker; });
 
-  it('posts the existing monthly-group payload and terminates after a result', async () => {
-    const payload = { selectedGroup: { idbGroupId: 'group-a' }, analysisItem: { guid: 'analysis-a' }, reportYear: 2025 };
+  it('posts the complete validation payload and terminates after a result', async () => {
+    const payload = validationRequest();
     const result = firstValueFrom(runRegressionModelValidation(payload));
     const worker = FakeValidationWorker.instances[0];
     expect(worker.payload).toEqual(payload);
 
-    worker.emitMessage({ error: false, monthlyAnalysisSummary: { monthlyAnalysisSummaryData: [] } });
-    await expect(result).resolves.toEqual({ error: false, monthlyAnalysisSummary: { monthlyAnalysisSummaryData: [] } });
+    const response = { ok: true, value: { reportYear: 2025, model: { modelId: 'candidate' }, monthly: [] } };
+    worker.emitMessage(response);
+    await expect(result).resolves.toEqual(response);
     expect(worker.terminate).toHaveBeenCalledOnce();
   });
 
   it('terminates a superseded validation subscription', () => {
-    const subscription = runRegressionModelValidation({ selectedGroup: {}, analysisItem: {} }).subscribe();
+    const subscription = runRegressionModelValidation(validationRequest()).subscribe();
     const worker = FakeValidationWorker.instances[0];
     subscription.unsubscribe();
     expect(worker.terminate).toHaveBeenCalledOnce();
   });
 
-  it('calculates candidate and selected-model comparison series independently', async () => {
-    const result = firstValueFrom(runRegressionModelValidationPair(
-      { selectedGroup: { selectedModelId: 'candidate' } },
-      { selectedGroup: { selectedModelId: 'selected' } }
-    ));
-    expect(FakeValidationWorker.instances).toHaveLength(2);
-    expect(FakeValidationWorker.instances[0].payload).toEqual({ selectedGroup: { selectedModelId: 'candidate' } });
-    expect(FakeValidationWorker.instances[1].payload).toEqual({ selectedGroup: { selectedModelId: 'selected' } });
+  it('sends candidate and selected-model comparison through one worker', async () => {
+    const payload = validationRequest(true);
+    const result = firstValueFrom(runRegressionModelValidation(payload));
+    expect(FakeValidationWorker.instances).toHaveLength(1);
+    expect(FakeValidationWorker.instances[0].payload).toEqual(payload);
 
-    const candidateResponse = { error: false, monthlyAnalysisSummary: { monthlyAnalysisSummaryData: [{ modeledEnergy: 10 }] } };
-    const selectedResponse = { error: false, monthlyAnalysisSummary: { monthlyAnalysisSummaryData: [{ modeledEnergy: 12 }] } };
-    FakeValidationWorker.instances[0].emitMessage(candidateResponse);
-    FakeValidationWorker.instances[1].emitMessage(selectedResponse);
+    const response = {
+      ok: true,
+      value: {
+        reportYear: 2025,
+        model: { modelId: 'candidate' },
+        monthly: [{ modeledEnergy: 10 }],
+        comparison: { model: { modelId: 'selected' }, monthly: [{ modeledEnergy: 12 }] }
+      }
+    };
+    FakeValidationWorker.instances[0].emitMessage(response);
 
-    await expect(result).resolves.toEqual([candidateResponse, selectedResponse]);
+    await expect(result).resolves.toEqual(response);
     expect(FakeValidationWorker.instances[0].terminate).toHaveBeenCalledOnce();
-    expect(FakeValidationWorker.instances[1].terminate).toHaveBeenCalledOnce();
   });
 });
+
+function validationRequest(withComparison = false): RegressionValidationWorkerRequest {
+  return {
+    source: 'generated',
+    group: { idbGroupId: 'group-a' },
+    model: { modelId: 'candidate' },
+    comparison: withComparison
+      ? { group: { idbGroupId: 'group-a' }, model: { modelId: 'selected' } }
+      : undefined,
+    analysisItem: { guid: 'analysis-a' },
+    facility: { guid: 'facility-a' },
+    meters: [],
+    meterData: [],
+    facilityPredictorData: [],
+    accountPredictorEntries: [],
+    accountAnalysisItems: [],
+    assessmentReportVersion: 'AR6'
+  } as unknown as RegressionValidationWorkerRequest;
+}
 
 class FakeValidationWorker {
   static instances: FakeValidationWorker[] = [];

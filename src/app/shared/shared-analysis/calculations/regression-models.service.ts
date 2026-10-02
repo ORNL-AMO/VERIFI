@@ -11,7 +11,7 @@ import { AssessmentReportVersion } from '@data/models/idbModels/account';
 import { RegressionModelsCalculator } from '@shared/shared-analysis/calculations/regression-models-calculator';
 import { convertOrphanedGeneratedModelToUserDefined, findEquivalentRegressionModel, getSelectedRegressionModel } from '@shared/shared-analysis/calculations/regression-model-recovery';
 import { RegressionModelsWorkerRequest, RegressionModelsWorkerResponse } from '@platform/web-workers/regression-models-worker.contract';
-import { calculateRegressionModels } from './regression-models-calculation';
+import { buildUserDefinedRegressionModel, calculateRegressionModels } from './regression-models-calculation';
 import { runWorker } from '@platform/web-workers/run-worker';
 import { firstValueFrom, fromEvent, takeUntil } from 'rxjs';
 
@@ -111,49 +111,13 @@ export class RegressionModelsService {
   }
 
   getUserDefinedModel(selectedGroup: AnalysisGroup, selectedFacility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): JStatRegressionModel {
-    //report year is determined by the latest full year of data
-    let baselineYear: number = analysisItem.baselineYear;
-    let facilityPredictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getFacilityPredictorData(selectedFacility.guid);
-    const selectedPredictors = selectedGroup.predictorVariables.filter(v => v.productionInAnalysis);
-
-    let userModel: JStatRegressionModel = {
-      coef: [
-        selectedGroup.regressionConstant,
-        ...selectedPredictors.map(v => v.regressionCoefficient)
-      ],
-      R2: undefined,
-      SSE: undefined,
-      SSR: undefined,
-      SST: undefined,
-      adjust_R2: undefined,
-      df_model: undefined,
-      df_resid: undefined,
-      ybar: undefined,
-      t: {
-        se: undefined,
-        sigmaHat: undefined,
-        p: undefined
-      },
-      f: {
-        pvalue: undefined,
-        F_statistic: undefined
-      },
-      modelYear: selectedGroup.regressionModelYear,
-      predictorVariables: selectedPredictors,
-      modelId: undefined,
-      isValid: false,
-      modelPValue: undefined,
-      modelNotes: [selectedGroup.regressionModelNotes],
-      errorModeling: false,
-      SEPValidation: undefined,
-      SEPValidationPass: undefined,
-      dataValidationNotes: [''],
-      modelValidationNotes: [''],
-      isUserDefinedModel: true
-    };
-
-    const validatedModel = new RegressionModelsCalculator(facilityPredictorData).setModelVaildAndNotes(userModel, reportYear, selectedFacility, baselineYear, selectedGroup);
-    return validatedModel;
+    return buildUserDefinedRegressionModel(
+      selectedGroup,
+      selectedFacility,
+      analysisItem,
+      reportYear,
+      this.accountWorkspaceQuery.getFacilityPredictorData(selectedFacility.guid)
+    );
   }
 
   getGroupModelItem(group: AnalysisGroup, facility: IdbFacility, analysisItem: IdbAnalysisItem, reportYear: number): FacilityGroupAnalysisItem {

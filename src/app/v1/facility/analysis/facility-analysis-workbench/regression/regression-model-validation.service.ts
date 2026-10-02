@@ -1,13 +1,14 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { MonthlyAnalysisSummaryClass } from '@domain/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
-import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
-import { getLatestCompleteAnalysisYear } from '@domain/calculations/shared-calculations/calculationsHelpers';
-import { getNeededUnits } from '@domain/calculations/shared-calculations/calanderizationFunctions';
+import { calculateRegressionValidation } from '@domain/calculations/analysis-calculations/regression-validation-calculation';
+import {
+  RegressionValidationSource,
+  RegressionValidationWorkerRequest,
+  RegressionValidationWorkerResponse
+} from '@platform/web-workers/regression-validation-worker.contract';
 import { runWorker } from '@platform/web-workers/run-worker';
-import { RegressionModelsService } from '@shared/shared-analysis/calculations/regression-models.service';
-import { Observable, Subscription, defer, forkJoin, of } from 'rxjs';
+import { Observable, Subscription, defer, of } from 'rxjs';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 
 export const REGRESSION_VALIDATION_DEBOUNCE_MS = 650;
@@ -28,8 +29,6 @@ export type RegressionModelValidationState =
   }
   | { readonly state: 'error'; readonly source: RegressionValidationSource; readonly message: string };
 
-export type RegressionValidationSource = 'user-defined' | 'generated';
-
 interface ValidationRequest {
   readonly source: RegressionValidationSource;
   readonly group: AnalysisGroup;
@@ -40,15 +39,9 @@ interface ValidationRequest {
   };
 }
 
-export interface MonthlyGroupWorkerResponse {
-  readonly monthlyAnalysisSummary?: { readonly monthlyAnalysisSummaryData?: MonthlyAnalysisSummaryData[] };
-  readonly error?: boolean;
-}
-
 @Injectable()
 export class RegressionModelValidationService {
   private readonly context = inject(FacilityAnalysisGroupContext);
-  private readonly regressionModels = inject(RegressionModelsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly stateValue = signal<RegressionModelValidationState>({ state: 'idle' });
   private debounceHandle: ReturnType<typeof setTimeout> | undefined;
@@ -59,7 +52,7 @@ export class RegressionModelValidationService {
   readonly state = this.stateValue.asReadonly();
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.cancel());
+    this.destroyRef.onDestroy(() => this.cancelPendingCalculation());
   }
 
   scheduleUserDefined(group: AnalysisGroup): void {
@@ -81,10 +74,7 @@ export class RegressionModelValidationService {
       group: groupWithGeneratedModel(group, model),
       model: structuredClone(model),
       comparison: comparisonModel && comparisonModel.modelId !== model.modelId
-        ? {
-          group: groupWithGeneratedModel(group, comparisonModel),
-          model: structuredClone(comparisonModel)
-        }
+        ? { group: groupWithGeneratedModel(group, comparisonModel), model: structuredClone(comparisonModel) }
         : undefined
     };
     this.lastRequest = request;
@@ -105,83 +95,50 @@ export class RegressionModelValidationService {
   }
 
   private calculate(request: ValidationRequest): void {
-    const analysis = this.context.autosave.draft();
-    const facility = this.context.workbench.facility();
-    const account = this.context.workbench.account();
-    if (!analysis || !facility || !account) {
+    const workerRequest = this.buildWorkerRequest(request);
+    if (!workerRequest) {
       this.stateValue.set({ state: 'error', source: request.source, message: 'Model validation is unavailable.' });
       return;
     }
-
     const version = ++this.requestVersion;
     this.stateValue.set({ state: 'loading', source: request.source });
-    try {
-      const { chartAnalysis, modelAnalysis } = validationAnalysisCopies(analysis, request.source, request.group);
-      const calanderizedMeters = getCalanderizedMeterData(
-        [...this.context.workbench.workspace.facilityMeters()],
-        [...this.context.workbench.workspace.facilityMeterData()],
-        facility,
-        false,
-        { energyIsSource: chartAnalysis.energyIsSource, neededUnits: getNeededUnits(chartAnalysis) },
-        [], [], [facility], account.assessmentReportVersion, []
-      );
-      const reportYear = getLatestCompleteAnalysisYear(
-        [request.group], calanderizedMeters,
-        [...this.context.workbench.workspace.facilityPredictorData()], [facility]
-      );
-      const model = request.model ?? this.regressionModels.getUserDefinedModel(
-        request.group, facility, modelAnalysis, reportYear
-      );
-      const payload = this.workerPayload(request.group, chartAnalysis, reportYear);
-      const comparisonPayload = request.comparison
-        ? this.workerPayload(request.comparison.group, chartAnalysis, reportYear)
-        : undefined;
-      const calculation$ = runRegressionModelValidationPair(payload, comparisonPayload);
-
-      this.activeCalculation = calculation$.subscribe({
-        next: ([response, comparisonResponse]) => {
-          if (version !== this.requestVersion) return;
-          const monthly = response.monthlyAnalysisSummary?.monthlyAnalysisSummaryData;
-          const comparisonMonthly = comparisonResponse?.monthlyAnalysisSummary?.monthlyAnalysisSummaryData;
-          if (response.error || !monthly || (request.comparison && (comparisonResponse?.error || !comparisonMonthly))) {
-            this.stateValue.set({ state: 'error', source: request.source, message: 'Model validation could not be calculated.' });
-            return;
-          }
-          this.stateValue.set({
-            state: 'ready', source: request.source, model, monthly,
-            comparison: request.comparison && comparisonMonthly
-              ? { model: request.comparison.model, monthly: comparisonMonthly }
-              : undefined
-          });
-        },
-        error: error => {
-          if (version !== this.requestVersion) return;
-          this.stateValue.set({
-            state: 'error', source: request.source,
-            message: error instanceof Error ? error.message : 'Model validation could not be calculated.'
-          });
+    this.activeCalculation = runRegressionModelValidation(workerRequest).subscribe({
+      next: response => {
+        if (version !== this.requestVersion) return;
+        if (response.ok === false) {
+          this.stateValue.set({ state: 'error', source: request.source, message: response.message });
+          return;
         }
-      });
-    } catch (error) {
-      if (version !== this.requestVersion) return;
-      this.stateValue.set({
-        state: 'error', source: request.source,
-        message: error instanceof Error ? error.message : 'Model validation could not be calculated.'
-      });
-    }
+        this.stateValue.set({ state: 'ready', source: request.source, ...response.value });
+      },
+      error: error => {
+        if (version !== this.requestVersion) return;
+        this.stateValue.set({
+          state: 'error', source: request.source,
+          message: error instanceof Error ? error.message : 'Model validation could not be calculated.'
+        });
+      }
+    });
   }
 
-  private workerPayload(group: AnalysisGroup, analysis: IdbAnalysisItem, reportYear: number): Record<string, unknown> {
+  private buildWorkerRequest(request: ValidationRequest): RegressionValidationWorkerRequest | undefined {
+    const analysis = this.context.autosave.draft();
+    const facility = this.context.workbench.facility();
+    const account = this.context.workbench.account();
+    if (!analysis || !facility || !account) return undefined;
     return {
-      selectedGroup: structuredClone(group),
+      source: request.source,
+      group: structuredClone(request.group),
+      model: request.model ? structuredClone(request.model) : undefined,
+      comparison: request.comparison ? structuredClone(request.comparison) : undefined,
       analysisItem: structuredClone(analysis),
-      facility: this.context.workbench.facility(),
+      facility: structuredClone(facility),
       meters: [...this.context.workbench.workspace.facilityMeters()],
       meterData: [...this.context.workbench.workspace.facilityMeterData()],
+      facilityPredictorData: [...this.context.workbench.workspace.facilityPredictorData()],
       accountPredictorEntries: [...this.context.workbench.workspace.predictorData()],
       accountAnalysisItems: [...this.context.workbench.workspace.facilityAnalyses()],
-      assessmentReportVersion: this.context.workbench.account()?.assessmentReportVersion,
-      reportYear
+      assessmentReportVersion: account.assessmentReportVersion ?? 'AR6'
     };
   }
 
@@ -194,29 +151,17 @@ export class RegressionModelValidationService {
     this.activeCalculation?.unsubscribe();
     this.activeCalculation = undefined;
   }
-
-  private cancel(): void {
-    this.cancelPendingCalculation();
-  }
 }
 
-export function runRegressionModelValidation(payload: Record<string, unknown>): Observable<MonthlyGroupWorkerResponse> {
+export function runRegressionModelValidation(
+  request: RegressionValidationWorkerRequest
+): Observable<RegressionValidationWorkerResponse> {
   return typeof Worker !== 'undefined'
-    ? runWorker<MonthlyGroupWorkerResponse>(
-      new Worker(new URL('../../../../../platform/web-workers/monthly-group-analysis.worker', import.meta.url)),
-      payload
+    ? runWorker<RegressionValidationWorkerResponse>(
+      new Worker(new URL('../../../../../platform/web-workers/regression-validation.worker', import.meta.url)),
+      request
     )
-    : defer(() => of(calculateMonthlySynchronously(payload)));
-}
-
-export function runRegressionModelValidationPair(
-  payload: Record<string, unknown>,
-  comparisonPayload?: Record<string, unknown>
-): Observable<readonly [MonthlyGroupWorkerResponse, MonthlyGroupWorkerResponse | undefined]> {
-  return forkJoin([
-    runRegressionModelValidation(payload),
-    comparisonPayload ? runRegressionModelValidation(comparisonPayload) : of(undefined)
-  ]);
+    : defer(() => of({ ok: true as const, value: calculateRegressionValidation(request) }));
 }
 
 export function userDefinedValidationMessage(group: AnalysisGroup): string | undefined {
@@ -266,20 +211,4 @@ export function groupWithGeneratedModel(group: AnalysisGroup, model: JStatRegres
     };
   });
   return clone;
-}
-
-function calculateMonthlySynchronously(payload: any): MonthlyGroupWorkerResponse {
-  const calanderizedMeters = getCalanderizedMeterData(
-    payload.meters, payload.meterData, payload.facility, false,
-    { energyIsSource: payload.analysisItem.energyIsSource, neededUnits: getNeededUnits(payload.analysisItem) },
-    [], [], [payload.facility], payload.assessmentReportVersion, []
-  );
-  return {
-    monthlyAnalysisSummary: new MonthlyAnalysisSummaryClass(
-      payload.selectedGroup, payload.analysisItem, payload.facility, calanderizedMeters,
-      payload.accountPredictorEntries, false, payload.accountAnalysisItems,
-      { reportYear: payload.reportYear }
-    ).getResults(),
-    error: false
-  };
 }
