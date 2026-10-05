@@ -247,6 +247,7 @@
           "options": {
             "buildTarget": "verifi:build:testing",
             "tsConfig": "tsconfig.browser-spec.json",
+            "runnerConfig": "vitest.browser.config.ts",
             "reporters": [
               "verbose"
             ],

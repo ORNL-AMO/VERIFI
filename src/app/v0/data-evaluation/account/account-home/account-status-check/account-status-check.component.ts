@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AccountStatusCheck } from '@domain/calculations/status-check-calculations/accountStatusCheck';
 import { FacilityStatusCheck } from '@domain/calculations/status-check-calculations/facilityStatusCheck';
 import { AccountStatusCheckService } from '@shared/helper-services/account-status-check.service';
+import { CalendarizationState } from '@shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-account-status-check',
@@ -18,6 +19,10 @@ export class AccountStatusCheckComponent {
   accountStatusCheck: Signal<AccountStatusCheck> = toSignal(
     this.accountStatusCheckService.accountStatusCheck,
     { initialValue: undefined }
+  );
+  calendarizationState: Signal<CalendarizationState> = toSignal(
+    this.accountStatusCheckService.calendarizationState,
+    { initialValue: { status: 'idle' } }
   );
 
   orderedFacilityChecks: Signal<Array<FacilityStatusCheck>> = computed(() => {
@@ -34,5 +39,9 @@ export class AccountStatusCheckComponent {
 
   goToFacility(fc: FacilityStatusCheck) {
     this.router.navigateByUrl(`/data-evaluation/facility/${fc.facility.guid}/home`);
+  }
+
+  retryStatusCheck(): void {
+    this.accountStatusCheckService.retryCalendarization();
   }
 }

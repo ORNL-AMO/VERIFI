@@ -150,7 +150,7 @@
           @for (pVal of model.t.p; track pVal; let index = $index) {
           <span>
             @if (index != 0) {
-            <span class="no-break">{{model.predictorVariables[index-1].name}}: {{pVal
+            <span class="no-break">{{model.predictorVariables[index-1]?.name ?? 'Unavailable predictor'}}: {{pVal
               | number:'0.2-2'}}
               <br>
             </span>
@@ -183,7 +183,7 @@
             }
             @if (index != 0) {
             <span>({{coefVal|
-              regressionNumber}}*{{model.predictorVariables[index-1].name}})</span>
+              regressionNumber}}*{{model.predictorVariables[index-1]?.name ?? 'Unavailable predictor'}})</span>
             } @if (model.coef && index != model.coef.length-1) {
             <span> +</span>
             }

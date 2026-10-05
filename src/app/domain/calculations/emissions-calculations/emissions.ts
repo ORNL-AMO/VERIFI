@@ -1,6 +1,6 @@
 import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsRate, EmissionsResults, SubregionEmissions } from "@data/models/eGridEmissions";
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { MeterPhase, MeterSource } from "@data/models/constantsAndTypes";
 import { FuelTypeOption } from "@shared/fuel-options/fuelTypeOption";
 import { getFuelTypeOptions, getMobileFuelTypes } from "@shared/fuel-options/getFuelTypeOptions";

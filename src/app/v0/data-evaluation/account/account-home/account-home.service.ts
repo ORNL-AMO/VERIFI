@@ -6,6 +6,15 @@ import { BehaviorSubject } from 'rxjs';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
+export type CalculationStatus = boolean | 'error';
+export type CombinedCalculationState = 'loading' | 'ready' | 'error';
+
+export function getCombinedCalculationState(primary: CalculationStatus, overview: CalculationStatus): CombinedCalculationState {
+  if (primary === true || overview === true) return 'loading';
+  if (primary === 'error' || overview === 'error') return 'error';
+  return 'ready';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,9 +27,9 @@ export class AccountHomeService {
   monthlyEnergyAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   annualWaterAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyWaterAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  calculatingEnergy: BehaviorSubject<boolean | 'error'>;
-  calculatingWater: BehaviorSubject<boolean | 'error'>;
-  calculatingOverview: BehaviorSubject<boolean | 'error'>;
+  calculatingEnergy: BehaviorSubject<CalculationStatus>;
+  calculatingWater: BehaviorSubject<CalculationStatus>;
+  calculatingOverview: BehaviorSubject<CalculationStatus>;
   accountOverviewData: BehaviorSubject<AccountOverviewData>;
 
   constructor() {
@@ -28,43 +37,49 @@ export class AccountHomeService {
     this.monthlyEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
     this.annualWaterAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyWaterAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
-    this.calculatingEnergy = new BehaviorSubject<boolean | 'error'>(true);
-    this.calculatingWater = new BehaviorSubject<boolean | 'error'>(true);
-    this.calculatingOverview = new BehaviorSubject<boolean | 'error'>(true);
+    this.calculatingEnergy = new BehaviorSubject<CalculationStatus>(true);
+    this.calculatingWater = new BehaviorSubject<CalculationStatus>(true);
+    this.calculatingOverview = new BehaviorSubject<CalculationStatus>(true);
     this.accountOverviewData = new BehaviorSubject<AccountOverviewData>(undefined);
     this.latestEnergyAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
     this.latestWaterAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
   }
 
-  setLatestEnergyAnalysisItem(analysisItemId: string) {
-    let analysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
+  setLatestEnergyAnalysisItem(analysisItemId: string, workspaceAnalysisItems?: readonly IdbAccountAnalysisItem[]): IdbAccountAnalysisItem | undefined {
+    let analysisItems: Array<IdbAccountAnalysisItem> = [...(workspaceAnalysisItems ?? this.accountWorkspaceStore.accountAnalyses())];
+    let selectedAnalysisItem: IdbAccountAnalysisItem;
     if (analysisItemId) {
-      let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
+      selectedAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
       this.latestEnergyAnalysisItem.next(selectedAnalysisItem);
     } else {
       let energyAnalysisItems: Array<IdbAccountAnalysisItem> = analysisItems.filter(item => { return item.analysisCategory == 'energy' });
       if (energyAnalysisItems.length > 0) {
-        this.latestEnergyAnalysisItem.next(_.maxBy(energyAnalysisItems, 'modifiedDate'));
+        selectedAnalysisItem = _.maxBy(energyAnalysisItems, 'modifiedDate');
+        this.latestEnergyAnalysisItem.next(selectedAnalysisItem);
       }
       else {
         this.latestEnergyAnalysisItem.next(undefined);
       }
     }
+    return selectedAnalysisItem;
   }
 
-  setLatestWaterAnalysisItem(analysisItemId: string) {
-    let analysisItems: Array<IdbAccountAnalysisItem> = [...this.accountWorkspaceStore.accountAnalyses()];
+  setLatestWaterAnalysisItem(analysisItemId: string, workspaceAnalysisItems?: readonly IdbAccountAnalysisItem[]): IdbAccountAnalysisItem | undefined {
+    let analysisItems: Array<IdbAccountAnalysisItem> = [...(workspaceAnalysisItems ?? this.accountWorkspaceStore.accountAnalyses())];
+    let selectedAnalysisItem: IdbAccountAnalysisItem;
     if (analysisItemId) {
-      let selectedAnalysisItem: IdbAccountAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
+      selectedAnalysisItem = analysisItems.find(item => { return item.guid == analysisItemId });
       this.latestWaterAnalysisItem.next(selectedAnalysisItem);
     } else {
       let waterAnalysisItems: Array<IdbAccountAnalysisItem> = analysisItems.filter(item => { return item.analysisCategory == 'water' });
       if (waterAnalysisItems.length > 0) {
-        this.latestWaterAnalysisItem.next(_.maxBy(waterAnalysisItems, 'modifiedDate'));
+        selectedAnalysisItem = _.maxBy(waterAnalysisItems, 'modifiedDate');
+        this.latestWaterAnalysisItem.next(selectedAnalysisItem);
       }
       else {
         this.latestWaterAnalysisItem.next(undefined);
       }
     }
+    return selectedAnalysisItem;
   }
 }

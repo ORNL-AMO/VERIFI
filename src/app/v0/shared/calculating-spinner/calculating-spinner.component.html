@@ -19,7 +19,10 @@
 }
 
 @if (error) {
-  <div class="alert alert-danger">
-    An error occurred during calculations.
+  <div class="alert alert-danger d-flex align-items-center justify-content-between gap-3" role="alert">
+    <span>An error occurred during calculations.</span>
+    @if (retryable) {
+      <button type="button" class="btn btn-sm btn-outline-danger" (click)="retry.emit()">Retry</button>
+    }
   </div>
 }
