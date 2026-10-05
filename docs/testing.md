@@ -113,7 +113,7 @@ Representative executable patterns already exist for a [pure calculation](../src
 
 Install Chromium once with `npx playwright install chromium` when it is not available locally.
 
-GitHub Actions runs `npm run test:all:ci` for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. The same test job gates downstream release workflows.
+GitHub Actions runs `npm run test:all:ci` for pull requests targeting `master` or `develop`, pushes to those branches, and manual dispatch. The same test job gates downstream release workflows. Pull requests and branch builds also validate package/lockfile version consistency, while changes targeting `master` must increase the version by SemVer precedence and wait for the preceding commit's matching release tag and successful CI/CD run. Production web publication additionally requires the complete desktop release to succeed; see the [release process](release-process.md) for the promotion process, hotfix path, job graph, and failure behavior.
 
 The agent validation helper inspects changed tracked files from `git diff --name-only HEAD` plus untracked files. It is advisory: follow its selected commands by default, and add broader checks only for concrete risk, an explicit pre-PR/release request, or a boundary the helper cannot infer from filenames.
 

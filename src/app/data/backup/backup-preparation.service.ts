@@ -4,6 +4,7 @@ import { FutureDataVersionError, InvalidDataVersionError, validateDataVersion } 
 import { DATA_MIGRATIONS } from '@data/indexedDB/data-migrations/data-migration.registry';
 import { CURRENT_DATA_VERSION, MigrationData } from '@data/indexedDB/data-migrations/data-migration.models';
 import { StatusWarningDismissal } from '@data/models/status-warning-dismissal';
+import { normalizeAnalysisGroupForAvailablePredictors } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
 export type PreparedBackupFile = BackupFile & { dataVersion: typeof CURRENT_DATA_VERSION };
 
@@ -228,25 +229,18 @@ function validateCoreRelationships(backup: BackupFile): void {
   'Energy-use equipment references a missing energy-use or meter group.');
 
   for (const analysis of backup.facilityAnalysisItems) {
-    for (const group of analysis.groups ?? []) {
+    const facility = facilities.find(item => item.guid === analysis.facilityId);
+    analysis.groups = (analysis.groups ?? []).map(group => {
       if (group.idbGroupId && !groupIds.has(group.idbGroupId)) {
         throw new BackupRelationshipError('An analysis references a missing meter group.');
       }
-      if (group.predictorVariables) {
-        group.predictorVariables = group.predictorVariables.filter(
-          variable => !variable.id || predictorIds.has(variable.id)
-        );
-      }
-      if (group.models) {
-        for (const model of group.models) {
-          if (model.predictorVariables) {
-            model.predictorVariables = model.predictorVariables.filter(
-              variable => !variable.id || predictorIds.has(variable.id)
-            );
-          }
-        }
-      }
-    }
+      return normalizeAnalysisGroupForAvailablePredictors(
+        group,
+        predictorIds,
+        facility,
+        analysis.baselineYear
+      ).group;
+    });
   }
 }
 

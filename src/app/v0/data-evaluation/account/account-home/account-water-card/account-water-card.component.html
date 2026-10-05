@@ -1,19 +1,21 @@
-@let _calculatingWater = calculatingWater();
-@let _calculatingOverview = calculatingOverview();
 @let _monthlyWaterAnalysisData = monthlyWaterAnalysisData();
 @let _annualWaterAnalysisSummary = annualWaterAnalysisSummary();
 @let _accountOverviewData = accountOverviewData();
 @let _carouselIndex = carouselIndex();
 @let _latestWaterAnalysisItem = latestWaterAnalysisItem();
 @let _account = account();
+@let _calculationLoading = calculationLoading();
+@let _calculationError = calculationError();
+@let _calculationReady = calculationReady();
 
 <div class="card">
   <div class="card-body">
     <div class="row">
       <div class="col-12">
         <app-account-water-reduction-goal></app-account-water-reduction-goal>
-        @if (_calculatingWater != false) {
-        <app-calculating-spinner [message]="'Calculating Water...'" [error]="_calculatingWater == 'error'">
+        @if (_calculationLoading || _calculationError) {
+        <app-calculating-spinner [message]="'Calculating Water...'" [error]="_calculationError"
+          [retryable]="_calculationError" (retry)="retryCalculations()">
         </app-calculating-spinner>
         }
         @let setupErrors = _latestWaterAnalysisItem.guid | invalidAccountAnalysis;
@@ -26,7 +28,7 @@
       <div class="col-12">
         <hr>
       </div>
-      @if (_calculatingWater == false && _calculatingOverview == false && _monthlyWaterAnalysisData &&
+      @if (_calculationReady && _monthlyWaterAnalysisData &&
       _annualWaterAnalysisSummary && _accountOverviewData) {
       <div class="col-12">
         @if (_carouselIndex == 0) {

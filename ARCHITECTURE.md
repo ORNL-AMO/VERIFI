@@ -102,6 +102,8 @@ The v1 facility-analysis workbench reuses that canonical calendarization result.
 
 Compute-heavy operations use workers under [`src/app/platform/web-workers`](src/app/platform/web-workers). [`run-worker.ts`](src/app/platform/web-workers/run-worker.ts) wraps a Worker in an RxJS observable, posts one structured-cloneable payload, emits one result or error, and terminates the worker during teardown. Each worker imports calculation code and owns its request/result contract.
 
+Account-scoped worker jobs capture one `AccountWorkspaceSnapshot` and its revision. Import or account-switch loading cancels active jobs and clears published results; late responses may publish only when their account GUID, workspace revision, request ID, and snapshot still match the active workspace. Calendarization exposes explicit `idle`, `loading`, `ready`, and `error` state, and status validation consumes only a matching `ready` result. Interactive calculation workers time out after two minutes and expose a retry that rebuilds the request from the current snapshot without persistence writes.
+
 When changing calculation inputs or outputs:
 
 1. Update the pure calculation and deterministic unit tests.
@@ -181,7 +183,7 @@ Test targets are configured in `angular.json` and exposed through `package.json`
 - Playwright with Chromium runs `*.browser.spec.ts` tests for IndexedDB, Web Workers, and other browser-native behavior.
 - `npm run test:all:ci` runs both suites.
 
-The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. Web deployment builds `develop` for development and `master` for production. Desktop packaging runs for `master` and creates platform installers through Electron Builder.
+The current GitHub workflow runs on pushes to `master` and `develop`, plus manual dispatch. Tests gate the downstream QA, web, and desktop jobs. A release-policy job keeps package and lockfile versions aligned, requires each new `master` version to advance by SemVer precedence, and verifies that the preceding release tag points to the preceding commit with a successful completed CI/CD run. Development web builds deploy after tests. On `master`, the web build and desktop release run in parallel, but production web deployment waits for both the web artifact and the complete desktop workflow, including draft GitHub Release creation pinned to the run's immutable commit. Production work is serialized, and the preceding-release guard prevents out-of-order publication because GitHub concurrency does not guarantee FIFO ordering. See the [release process](docs/release-process.md) for the human promotion process, hotfix path, job graph, artifact contracts, and failure behavior.
 
 Agents and contributors must run the relevant local checks before opening a pull request; do not assume a pull-request event will run the workflow.
 Agents can use `npm run validate:agent -- --mode plan` to select a compact risk-based validation plan from the current diff before running final checks.
