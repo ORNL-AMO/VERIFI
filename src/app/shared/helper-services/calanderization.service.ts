@@ -1,23 +1,49 @@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Injectable, inject, computed } from '@angular/core';
+import { computed, Injectable, inject, OnDestroy } from '@angular/core';
 import * as _ from 'lodash';
 import { CalanderizationFilters, CalanderizedMeter } from '@data/models/calanderization';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { getIsEnergyMeter } from '@shared/sharedHelperFunctions';
-import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getAllYearsWithData, getYearsWithFullData } from '@domain/calculations/shared-calculations/calculationsHelpers';
-import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
+import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { CALCULATION_WORKER_TIMEOUT_MS, runWorker } from '@platform/web-workers/run-worker';
+import { timeout } from 'rxjs/operators';
+
+export type CalendarizationState =
+  | { status: 'idle' }
+  | CalendarizationRequestState<'loading'>
+  | CalendarizationReadyState
+  | (CalendarizationRequestState<'error'> & { message: string });
+
+export type CalendarizationReadyState = CalendarizationRequestState<'ready'> & {
+  calanderizedMeters: Array<CalanderizedMeter>;
+};
+
+interface CalendarizationRequestState<TStatus extends 'loading' | 'ready' | 'error'> {
+  status: TStatus;
+  accountGuid: string;
+  workspaceRevision: number;
+  requestId: number;
+  workspaceSnapshot: AccountWorkspaceSnapshot;
+}
+
+interface CalendarizationWorkerResult {
+  calanderizedMeters?: Array<CalanderizedMeter>;
+  error: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class CalanderizationService {
+export class CalanderizationService implements OnDestroy {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
-
+  private workspaceSub: Subscription;
+  private workerSub?: Subscription;
+  private requestId = 0;
 
   calanderizedDataFilters: BehaviorSubject<CalanderizationFilters>;
   displayGraphEnergy: "bar" | "scatter" | null = "bar";
@@ -29,7 +55,8 @@ export class CalanderizationService {
   //is not considered in this calanderizedMeters object.
   //when needing energy use, calculate at the place using the results
   calanderizedMeters: BehaviorSubject<Array<CalanderizedMeter>>;
-  calanderizationWorker: Worker;
+  calendarizationState: BehaviorSubject<CalendarizationState>;
+
   constructor() {
     this.calanderizedDataFilters = new BehaviorSubject({
       selectedSources: [],
@@ -40,54 +67,178 @@ export class CalanderizationService {
     });
 
     this.calanderizedMeters = new BehaviorSubject([]);
+    this.calendarizationState = new BehaviorSubject<CalendarizationState>({ status: 'idle' });
 
-    toObservable(computed(() => [...this.accountWorkspaceStore.meterData()])).subscribe(meterData => {
-      if (meterData) {
-        this.setCalanderizedMeterData(meterData);
+    const workspaceCalculationState = computed(() => ({
+      status: this.accountWorkspaceStore.status(),
+      snapshot: this.accountWorkspaceStore.snapshot(),
+      revision: this.accountWorkspaceStore.revision()
+    }), {
+      equal: (previous, current) => previous.status === current.status
+        && previous.snapshot === current.snapshot
+        && previous.revision === current.revision
+    });
+    this.workspaceSub = toObservable(workspaceCalculationState).subscribe(workspace => {
+      if (workspace.status === 'ready' && workspace.snapshot) {
+        this.startCalendarization(workspace.snapshot, workspace.revision);
+      } else if ((workspace.status === 'loading' || workspace.status === 'switching') && workspace.snapshot) {
+        this.waitForWorkspaceReplacement(workspace.snapshot, workspace.revision);
+      } else {
+        this.cancelWorker();
+        this.calanderizedMeters.next([]);
+        this.calendarizationState.next({ status: 'idle' });
       }
     });
   }
 
-  setCalanderizedMeterData(accountMeterData: Array<IdbUtilityMeterData>) {
-    let meters: Array<IdbUtilityMeter> = [...this.accountWorkspaceStore.meters()];
-    let account: IdbAccount = this.accountWorkspaceStore.account();
-    let accountFacilities: Array<IdbFacility> = [...this.accountWorkspaceStore.facilities()];
+  ngOnDestroy(): void {
+    this.workspaceSub.unsubscribe();
+    this.cancelWorker();
+  }
+
+  recalculateCurrentWorkspace(): void {
+    const snapshot = this.accountWorkspaceStore.snapshot();
+    if (snapshot && this.accountWorkspaceStore.status() === 'ready') {
+      this.startCalendarization(snapshot, this.accountWorkspaceStore.revision());
+    }
+  }
+
+  private startCalendarization(snapshot: AccountWorkspaceSnapshot, workspaceRevision: number): void {
+    this.cancelWorker();
+    const requestId = this.requestId;
+    const accountGuid = snapshot.account.guid;
+    const meters: Array<IdbUtilityMeter> = [...snapshot.meters];
+    const accountFacilities: Array<IdbFacility> = [...snapshot.facilities];
+
+    this.calanderizedMeters.next([]);
+    this.calendarizationState.next({
+      status: 'loading',
+      accountGuid,
+      workspaceRevision,
+      requestId,
+      workspaceSnapshot: snapshot
+    });
 
     if (typeof Worker !== 'undefined') {
-      if(this.calanderizationWorker){
-        this.calanderizationWorker.terminate();
-      }
-      this.calanderizationWorker = new Worker(new URL('../../platform/web-workers/calanderization.worker', import.meta.url));
-      this.calanderizationWorker.onmessage = ({ data }) => {
-        this.calanderizationWorker.terminate();
-        if (!data.error) {
-          this.calanderizedMeters.next(data.calanderizedMeters);
-        } else {
-          console.log('Error in calanderization worker');
-          this.calanderizedMeters.next([]);
-        }
-      };
-      this.calanderizationWorker.postMessage({
+      const worker = new Worker(new URL('../../platform/web-workers/calanderization.worker', import.meta.url));
+      this.workerSub = runWorker<CalendarizationWorkerResult>(worker, {
         meters: meters,
-        allMeterData: accountMeterData,
-        accountOrFacility: account,
+        allMeterData: [...snapshot.meterData],
+        accountOrFacility: snapshot.account,
         monthDisplayShort: false,
         calanderizationOptions: undefined,
         co2Emissions: [],
         customFuels: [],
         facilities: accountFacilities,
-        assessmentReportVersion: account.assessmentReportVersion,
+        assessmentReportVersion: snapshot.account.assessmentReportVersion,
         customGWPs: []
+      }).pipe(
+        timeout(CALCULATION_WORKER_TIMEOUT_MS)
+      ).subscribe({
+        next: data => {
+          if (!this.isCurrentRequest(requestId, workspaceRevision, snapshot)) return;
+          if (data.error || !data.calanderizedMeters) {
+            this.publishError(requestId, workspaceRevision, snapshot);
+            return;
+          }
+          this.calanderizedMeters.next(data.calanderizedMeters);
+          this.calendarizationState.next({
+            status: 'ready',
+            accountGuid,
+            workspaceRevision,
+            requestId,
+            workspaceSnapshot: snapshot,
+            calanderizedMeters: data.calanderizedMeters
+          });
+        },
+        error: () => this.publishError(requestId, workspaceRevision, snapshot)
       });
-
     } else {
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, accountMeterData, account, false, undefined, [], [], accountFacilities, account.assessmentReportVersion, []);
-      this.calanderizedMeters.next(calanderizedMeters);
+      try {
+        const calanderizedMeters = getCalanderizedMeterData(
+          meters,
+          [...snapshot.meterData],
+          snapshot.account,
+          false,
+          undefined,
+          [],
+          [],
+          accountFacilities,
+          snapshot.account.assessmentReportVersion,
+          []
+        );
+        if (!this.isCurrentRequest(requestId, workspaceRevision, snapshot)) return;
+        this.calanderizedMeters.next(calanderizedMeters);
+        this.calendarizationState.next({
+          status: 'ready',
+          accountGuid,
+          workspaceRevision,
+          requestId,
+          workspaceSnapshot: snapshot,
+          calanderizedMeters
+        });
+      } catch {
+        this.publishError(requestId, workspaceRevision, snapshot);
+      }
     }
+  }
+
+  private waitForWorkspaceReplacement(snapshot: AccountWorkspaceSnapshot, workspaceRevision: number): void {
+    this.cancelWorker();
+    this.calanderizedMeters.next([]);
+    this.calendarizationState.next({
+      status: 'loading',
+      accountGuid: snapshot.account.guid,
+      workspaceRevision,
+      requestId: this.requestId,
+      workspaceSnapshot: snapshot
+    });
+  }
+
+  private cancelWorker(): void {
+    this.requestId++;
+    this.workerSub?.unsubscribe();
+    this.workerSub = undefined;
+  }
+
+  private isCurrentRequest(requestId: number, workspaceRevision: number, snapshot: AccountWorkspaceSnapshot): boolean {
+    return requestId === this.requestId
+      && workspaceRevision === this.accountWorkspaceStore.revision()
+      && this.accountWorkspaceStore.snapshot() === snapshot;
+  }
+
+  private publishError(requestId: number, workspaceRevision: number, snapshot: AccountWorkspaceSnapshot): void {
+    if (!this.isCurrentRequest(requestId, workspaceRevision, snapshot)) return;
+    this.calanderizedMeters.next([]);
+    this.calendarizationState.next({
+      status: 'error',
+      accountGuid: snapshot.account.guid,
+      workspaceRevision,
+      requestId,
+      workspaceSnapshot: snapshot,
+      message: 'VERIFI could not finish checking calendarized meter data.'
+    });
   }
 
   getAccountCalanderizedMeters(): Array<CalanderizedMeter> {
     return this.calanderizedMeters.getValue();
+  }
+
+  isReadyForCurrentWorkspace(
+    state: CalendarizationState = this.calendarizationState.value
+  ): state is CalendarizationReadyState {
+    const snapshot = this.accountWorkspaceStore.snapshot();
+    return state.status === 'ready'
+      && !!snapshot
+      && state.workspaceSnapshot === snapshot
+      && state.accountGuid === snapshot.account.guid
+      && state.workspaceRevision === this.accountWorkspaceStore.revision();
+  }
+
+  getReadyCalanderizedMetersByFacilityID(facilityID: string): Array<CalanderizedMeter> | undefined {
+    const state = this.calendarizationState.value;
+    if (!this.isReadyForCurrentWorkspace(state)) return undefined;
+    return state.calanderizedMeters.filter(cMeter => cMeter.meter.facilityId === facilityID);
   }
 
   getCalanderizedMetersByFacilityID(facilityID: string): Array<CalanderizedMeter> {

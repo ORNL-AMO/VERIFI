@@ -110,20 +110,27 @@ describe('BackupPreparationService', () => {
     expect(() => service.prepare(wrongAccount)).toThrow(BackupRelationshipError);
   });
 
-  it('strips stale predictor variable references from analysis groups instead of rejecting the backup', () => {
+  it('recovers a selected regression model that references a missing predictor', () => {
     const input = accountBackup() as any;
     input.predictors.push({ guid: 'pred-live', accountId: 'account', facilityId: 'facility' });
     input.facilityAnalysisItems.push({
-      guid: 'analysis', accountId: 'account', facilityId: 'facility',
+      guid: 'analysis', accountId: 'account', facilityId: 'facility', baselineYear: 2024,
       groups: [
         {
+          analysisType: 'regression',
+          isGeneratedModel: true,
+          selectedModelId: 'm1',
+          regressionModelYear: 2024,
+          regressionConstant: 10,
           predictorVariables: [
-            { id: 'pred-live', name: 'Live' },
-            { id: 'pred-deleted', name: 'Deleted' }
+            { id: 'pred-live', name: 'Live', regressionCoefficient: 2 },
+            { id: 'pred-deleted', name: 'Deleted', regressionCoefficient: 3 }
           ],
           models: [
             {
               modelId: 'm1',
+              coef: [10, 2, 3],
+              t: { p: [0.01, 0.02, 0.03] },
               predictorVariables: [
                 { id: 'pred-live', name: 'Live' },
                 { id: 'pred-deleted', name: 'Deleted' }
@@ -136,7 +143,33 @@ describe('BackupPreparationService', () => {
     const prepared = service.prepare(input);
     const group = prepared.facilityAnalysisItems[0].groups[0];
     expect(group.predictorVariables.map((v: any) => v.id)).toEqual(['pred-live']);
-    expect(group.models[0].predictorVariables.map((v: any) => v.id)).toEqual(['pred-live']);
+    expect(group.isGeneratedModel).toBe(false);
+    expect(group.selectedModelId).toBeUndefined();
+    expect(group.models).toBeUndefined();
+    expect(group.regressionModelNotes).toContain('Recovered as a user-defined model');
+  });
+
+  it('preserves a structurally consistent regression model', () => {
+    const input = accountBackup() as any;
+    input.predictors.push({ guid: 'pred-live', accountId: 'account', facilityId: 'facility' });
+    input.facilityAnalysisItems.push({
+      guid: 'analysis', accountId: 'account', facilityId: 'facility', baselineYear: 2024,
+      groups: [{
+        analysisType: 'regression', isGeneratedModel: true, selectedModelId: 'm1',
+        predictorVariables: [{ id: 'pred-live', name: 'Live' }],
+        models: [{
+          modelId: 'm1', coef: [10, 2], t: { p: [0.01, 0.02] },
+          predictorVariables: [{ id: 'pred-live', name: 'Live' }]
+        }]
+      }]
+    });
+
+    const group = service.prepare(input).facilityAnalysisItems[0].groups[0];
+
+    expect(group.isGeneratedModel).toBe(true);
+    expect(group.selectedModelId).toBe('m1');
+    expect(group.models).toHaveLength(1);
+    expect(group.models[0].predictorVariables[0].name).toBe('Live');
   });
 
   it('extracts every facility-scoped collection without cross-facility records', () => {

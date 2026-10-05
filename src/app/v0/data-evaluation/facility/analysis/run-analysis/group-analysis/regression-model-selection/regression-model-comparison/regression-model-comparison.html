@@ -30,7 +30,7 @@
               @for (pVal of changedModel.oldModel.t.p; track $index) {
               @if ($index != 0) {
               <span class="no-break">
-                {{changedModel.oldModel.predictorVariables[$index-1].name}}:
+                {{changedModel.oldModel.predictorVariables[$index-1]?.name ?? 'Unavailable predictor'}}:
                 {{pVal | number:'0.2-2'}}
                 <br>
               </span>
@@ -52,7 +52,7 @@
               <span>{{coefVal | regressionNumber}}</span>
               }
               @if ($index != 0) {
-              <span>({{coefVal | regressionNumber}}*{{changedModel.oldModel.predictorVariables[$index-1].name}})</span>
+              <span>({{coefVal | regressionNumber}}*{{changedModel.oldModel.predictorVariables[$index-1]?.name ?? 'Unavailable predictor'}})</span>
               }
               @if ($index != changedModel.oldModel.coef.length-1) {
               <span> +</span>
@@ -79,7 +79,7 @@
               @for (pVal of changedModel.newModel.t.p; track $index) {
               @if ($index != 0) {
               <span class="no-break">
-                {{changedModel.newModel.predictorVariables[$index-1].name}}:
+                {{changedModel.newModel.predictorVariables[$index-1]?.name ?? 'Unavailable predictor'}}:
                 {{pVal | number:'0.2-2'}}
                 <br>
               </span>
@@ -101,7 +101,7 @@
               <span>{{coefVal | regressionNumber}}</span>
               }
               @if ($index != 0) {
-              <span>({{coefVal | regressionNumber}}*{{changedModel.newModel.predictorVariables[$index-1].name}})</span>
+              <span>({{coefVal | regressionNumber}}*{{changedModel.newModel.predictorVariables[$index-1]?.name ?? 'Unavailable predictor'}})</span>
               }
               @if ($index != changedModel.newModel.coef.length-1) {
               <span> +</span>

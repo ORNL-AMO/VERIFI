@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { IdbUtilityMeterData } from "@data/models/idbModels/utilityMeterData";
 import { isMeterInvalid } from "@domain/calculations/status-check-calculations/validation/meterValidation";
 import { STATUS_CHECK_OPTIONS, StatusCheckAction, DataStalenessMonths, computeDataOutdated } from "./statusCheckModels";
+import { getLatestMeterDataDate } from "@shared/dateHelperFunctions";
 
 export class MeterStatusCheck {
 
@@ -12,6 +13,7 @@ export class MeterStatusCheck {
     meterName: string;
     isMeterValid: boolean;
     lastDateEntry: Date;
+    lastRawReadingDate: Date;
     hasDuplicateEntries: boolean;
     duplicateEntryDates: Array<Date>;
     hasNoData: boolean;
@@ -39,6 +41,7 @@ export class MeterStatusCheck {
         this.groupId = meter.groupId;
         this.meterName = meter.name;
         this.hasNoData = meterReadings.length === 0;
+        this.lastRawReadingDate = getLatestMeterDataDate(meterReadings);
         this.hasNoCalendarizationMethod = !meter.meterReadingDataApplication;
         this.isMeterNoLongerInUse = meter.noLongerInUse;
         this.setHasNegativeReadings(meter, meterReadings);
@@ -214,12 +217,16 @@ export class MeterStatusCheck {
                 });
             } else if (!this.isDataCurrent && facilityLatestEntry && this.lastDateEntry) {
                 const latestLabel = this.monthLabel(facilityLatestEntry.month, facilityLatestEntry.year);
-
                 const dataLabel = this.monthLabel(this.lastDateEntry.getMonth() + 1, this.lastDateEntry.getFullYear());
+                const latestBillLabel = this.lastRawReadingDate?.toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
                 this.actions.push({
                     label: 'Update meter data for ' + meter.name,
                     url: baseUrl + '/meter-data',
-                    description: `Facility data runs through ${latestLabel} but this meter has data through ${dataLabel}.`,
+                    description: `Facility calculations are complete through ${latestLabel}. This meter is complete through ${dataLabel}.${latestBillLabel ? ` Latest bill entered: ${latestBillLabel}.` : ''}`,
                     facilityId: meter.facilityId,
                     type: 'meter',
                     status: 'warning',
