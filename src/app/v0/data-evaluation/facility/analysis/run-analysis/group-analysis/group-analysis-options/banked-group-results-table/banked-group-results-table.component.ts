@@ -56,11 +56,7 @@ export class BankedGroupResultsTableComponent implements OnChanges {
     }
 
     this.setModelYear(bankedAnalysisGroup);
-    if (!this.groupSummary || this.groupSummary.group.idbGroupId !== this.selectedGroup.idbGroupId) {
-      this.runAnalysis();
-    } else {
-      this.setBankedSavings();
-    }
+    this.runAnalysis();
   }
 
   ngOnDestroy() {

@@ -23,6 +23,8 @@ export function isBankedGroupConfigurationComplete(
 ): boolean {
   const bankedGroup = getBankedAnalysisGroup(analysisItem, group, bankedAnalysisItem);
   return !!bankedGroup
+    && bankedGroup.analysisType !== 'skip'
+    && bankedGroup.analysisType !== 'skipAnalysis'
     && Number.isFinite(group.bankedAnalysisYear)
     && Number.isFinite(group.newBaselineYear)
     && group.bankedAnalysisYear < group.newBaselineYear;

@@ -5,6 +5,7 @@ import { getBankedAnalysisGroup, isBankedGroupConfigurationComplete } from './ba
 describe('banking configuration', () => {
   const group = (overrides: Partial<AnalysisGroup> = {}): AnalysisGroup => ({
     idbGroupId: 'group-1',
+    analysisType: 'absoluteEnergyConsumption',
     applyBanking: true,
     bankedAnalysisYear: 2019,
     newBaselineYear: 2020,
@@ -40,6 +41,8 @@ describe('banking configuration', () => {
     ['invalid year order', group({ bankedAnalysisYear: 2020, newBaselineYear: 2020 }), bankedAnalysis()],
     ['missing banked group', group(), bankedAnalysis({ groups: [] })],
     ['missing banked analysis', group(), undefined],
+    ['skipped banked group', group(), bankedAnalysis({ groups: [group({ analysisType: 'skip' })] })],
+    ['banked group configured to skip analysis', group(), bankedAnalysis({ groups: [group({ analysisType: 'skipAnalysis' })] })],
   ])('rejects %s', (_label, selectedGroup, selectedBankedAnalysis) => {
     const selectedAnalysis = analysis({ groups: [selectedGroup] });
 
