@@ -13,6 +13,7 @@ import { ElectronUpdateComponent } from './core-components/electron-update/elect
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { SharedRouterGuardModalComponent } from '@shared/shared-router-guard-modal/shared-router-guard-modal.component';
+import { StartupErrorComponent } from './application-lifecycle/startup-error/startup-error.component';
 
 @NgModule({
     declarations: [
@@ -20,7 +21,8 @@ import { SharedRouterGuardModalComponent } from '@shared/shared-router-guard-mod
         LoadingComponent,
         ElectronUpdateComponent,
         ElectronBackupFileComponent,
-        SharedRouterGuardModalComponent
+        SharedRouterGuardModalComponent,
+        StartupErrorComponent
     ],
     bootstrap: [AppComponent],
     imports: [

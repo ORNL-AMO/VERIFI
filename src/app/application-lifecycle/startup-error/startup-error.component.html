@@ -1,0 +1,53 @@
+<section class="alert alert-danger startup-error-panel m-4" role="alert" aria-live="assertive">
+  <h1 class="h4">Application data could not be initialized</h1>
+  <p>{{ error.message }}</p>
+  <p class="mb-3"><strong>Failed step:</strong> {{ error.step }}</p>
+  <button class="btn btn-primary me-2" type="button" (click)="retryStartup()" [disabled]="recoveryBusy">Retry</button>
+  <a class="btn btn-outline-secondary me-2" routerLink="/feedback">Feedback</a>
+  <a class="btn btn-outline-secondary" routerLink="/privacy">Privacy</a>
+
+  @if (error.step === 'migrations') {
+    <div class="recovery-panel mt-4 pt-4 border-top border-danger-subtle">
+      <h2 class="h5">Recover your stored data</h2>
+      <p>
+        Save a recovery snapshot before resetting VERIFI. The file contains data from every account and may
+        contain sensitive business information. Store and share it securely.
+      </p>
+      <p>
+        After saving the snapshot, contact the VERIFI help desk at
+        <a href="mailto:verifi-help@ornl.gov">verifi-help&#64;ornl.gov</a> for assistance recovering your data.
+        Do not reset the database until the help desk confirms that your snapshot can be used.
+      </p>
+      <button class="btn btn-outline-primary" type="button"
+        (click)="exportRecoverySnapshot()" [disabled]="recoveryBusy">
+        @if (recoveryStatus === 'exporting') { Saving recovery snapshot... } @else { Save recovery snapshot }
+      </button>
+
+      @if (recoveryMessage) {
+        <p class="mt-3 mb-0" role="status" aria-live="polite"
+          [class.text-danger]="recoveryStatus === 'failed' || recoveryStatus === 'reset-failed'"
+          [class.text-success]="recoveryStatus === 'exported'">
+          {{ recoveryMessage }}
+        </p>
+      }
+
+      @if (recoveryExported && !showResetConfirmation) {
+        <button class="btn btn-outline-danger mt-3" type="button"
+          (click)="requestDatabaseReset()" [disabled]="recoveryBusy">
+          Reset local database
+        </button>
+      }
+
+      @if (showResetConfirmation) {
+        <div class="alert alert-warning mt-3 mb-0" role="alert">
+          <h3 class="h6">Permanently remove the local database?</h3>
+          <p>This cannot be undone. Continue only after keeping the downloaded recovery snapshot in a safe location.</p>
+          <button class="btn btn-secondary me-2" type="button" (click)="cancelDatabaseReset()">Cancel</button>
+          <button class="btn btn-danger" type="button" (click)="confirmDatabaseReset()">
+            Reset database and restart
+          </button>
+        </div>
+      }
+    </div>
+  }
+</section>

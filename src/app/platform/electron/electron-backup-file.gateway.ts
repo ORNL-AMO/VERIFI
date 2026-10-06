@@ -50,10 +50,14 @@ export class ElectronBackupFileGateway {
   }
 
   async write(path: string, backup: BackupFile): Promise<void> {
+    return this.writeJson(path, backup);
+  }
+
+  async writeJson(path: string, value: object): Promise<void> {
     if (!this.isAvailable || !path) {
       throw new Error('A backup file path is required.');
     }
-    const result = await window['electronAPI'].invoke('backup:write', { path, backup }) as BackupGatewayWriteResult;
+    const result = await window['electronAPI'].invoke('backup:write', { path, backup: value }) as BackupGatewayWriteResult;
     if (!result?.ok) {
       throw new Error(result?.error ?? 'VERIFI could not write the backup file.');
     }
