@@ -14,6 +14,10 @@ The feature is organized by workflow ownership:
 facility/analysis/
   facility-analysis-dashboard/       inventory, commands, cards, and dashboard projections
   facility-analysis-workbench/
+    header/                           analysis identity, facts, save state, and status presentation
+    navigation/                       route-stage state, prerequisites, and navigation commands
+    stage-navigation/                 sticky workflow and contextual tab presentation
+    footer/                           Back, Continue, and Finish presentation
     editing/                          draft autosave lifecycle
     analysis-setup/                   analysis-wide settings
     group/                            group context, setup, regression, and group results
@@ -40,6 +44,9 @@ The workbench owns the services that must survive child-tab navigation:
 | `FacilityAnalysisResultsService` | Decides when result work is valid, builds the calculation request, cancels stale work, and caches the latest matching result | One analysis workbench route |
 | `FacilityAnalysisResultsDisplayService` | Owns table/graph selection and the user’s result-column preferences | One analysis workbench route; column preferences persist in v1 local storage |
 | `RegressionCandidateStore` | Holds generated, uncommitted regression candidates by analysis and group GUID | One analysis workbench route; never persisted directly |
+| `FacilityAnalysisWorkbenchNavigationService` | Tracks the active stage and contextual tab, projects completion and availability, guards locked deep links, and owns Back/Continue/Finish commands | One analysis workbench route |
+
+The workbench route component is the provider and guard boundary. Its header, workflow navigation, and footer are focused child components that inject the route-scoped services directly. The header and both workflow/contextual tab rows share one sticky stack; group and facility result shells retain only route context, canonical fallback behavior, empty states, and their child outlets.
 
 Each group route creates `FacilityAnalysisGroupContext`. It resolves the group, group meters, meter-group metadata, and group findings. Setup and Regression then create page-specific facades:
 
@@ -146,7 +153,9 @@ Future results pages should be added below the existing group or facility result
 
 Destructive setup and model changes use `TemplatePortal`, `ModalPortalService`, and `ConfirmationDialogComponent`. Feature components own the pending action and explanatory copy; the shell owns stacking, focus trapping, Escape handling, and backdrop behavior.
 
-The workbench footer uses autosave and stage-local status to decide whether Back, Continue, or Finish is available. Route guards are a final safety boundary, not the primary save mechanism. Group tabs are derived from the selected analysis method: Regression appears only for regression groups, and result tabs are hidden for skipped groups.
+Analysis Setup and group completion are status-ready projections with no blocking errors; warnings remain visible but do not prevent completion. Setup is always available. Once Setup is complete, every group becomes available and groups may be completed in any order. Facility Results becomes available only after every group is complete. Used By is informational and ignores workflow prerequisites, although transient autosave navigation locks still apply. Locked group and Facility Results deep links redirect to the first unmet prerequisite.
+
+The footer follows displayed stage order without making groups sequential prerequisites. Continue moves from Setup to the first group, between listed groups even when the current group remains incomplete, from the last group to Facility Results only when all groups are complete, and then to Used By. Back selects the nearest previous available stage. Route guards are a final safety boundary, not the primary save mechanism. Contextual group tabs are derived from the selected analysis method: Regression appears only for regression groups, and result tabs are hidden for skipped groups.
 
 ## Testing and debugging map
 

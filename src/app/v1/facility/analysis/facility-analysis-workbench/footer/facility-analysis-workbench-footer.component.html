@@ -2,8 +2,8 @@
   <button
     type="button"
     class="v1-btn v1-btn--quiet"
-    [disabled]="autosave.isBlocked()"
-    [attr.aria-describedby]="autosave.isBlocked() && workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
+    [disabled]="workflow.navigationBlocked()"
+    [attr.aria-describedby]="workflow.navigationBlocked() && workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
     (click)="workflow.back()">
     <app-ui-icon name="chevronLeft"></app-ui-icon> Back
   </button>

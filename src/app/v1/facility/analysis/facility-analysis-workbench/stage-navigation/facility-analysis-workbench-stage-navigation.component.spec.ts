@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
@@ -23,6 +24,14 @@ describe('FacilityAnalysisWorkbenchStageNavigationComponent', () => {
                 id: 'group:group-a', kind: 'group', label: 'Group A', route: ['/group-a'],
                 current: false, completed: true, canOpen: false,
                 attention: { total: 2, errorCount: 1, warningCount: 1, state: 'error' }
+              },
+              {
+                id: 'facility', kind: 'facility', label: 'Facility Results', route: ['/facility'],
+                current: false, completed: false, canOpen: false
+              },
+              {
+                id: 'used-by', kind: 'used-by', label: 'Used By', route: ['/used-by'],
+                current: false, completed: false, canOpen: true
               }
             ]),
             contextTabs: signal([]),
@@ -44,6 +53,12 @@ describe('FacilityAnalysisWorkbenchStageNavigationComponent', () => {
     expect(stages[1].classList).toContain('is-blocked');
     expect(stages[1].querySelector('[aria-disabled="true"]')).not.toBeNull();
     expect(stages[1].textContent).toContain('2 issues');
+    expect(fixture.nativeElement.querySelector('.v1-analysis-workbench__stage-number')).toBeNull();
+    expect(stages[0].textContent).toContain('Not complete');
+    expect(stages[1].textContent).toContain('Complete');
+    const icons = fixture.debugElement.queryAll(By.css('.v1-analysis-workbench__stage-marker app-ui-icon'))
+      .map(element => element.componentInstance.name);
+    expect(icons).toEqual(['success', 'chartLine', 'link']);
   });
 
   it('renders and delegates the current stage contextual tabs', () => {

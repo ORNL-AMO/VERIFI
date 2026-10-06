@@ -25,6 +25,7 @@ export interface AnalysisWorkbenchStage {
 export interface AnalysisWorkbenchStageNavigation extends AnalysisWorkbenchStage {
   readonly current: boolean;
   readonly completed: boolean;
+  readonly available: boolean;
   readonly canOpen: boolean;
 }
 
@@ -107,16 +108,33 @@ export function buildAnalysisWorkbenchStageNavigation(
   currentStageId: string,
   analysisGuid: string,
   findings: readonly StatusItem[],
-  navigationBlocked = false
+  navigationBlocked = false,
+  statusReady = true
 ): readonly AnalysisWorkbenchStageNavigation[] {
   const currentIndex = stages.findIndex(stage => stage.id === currentStageId);
-  const firstBlockingIndex = stages.findIndex(stage => stageHasBlockingErrors(stage, analysisGuid, findings));
+  const completion = new Map(stages.map(stage => [
+    stage.id,
+    statusReady
+      && (stage.kind === 'analysis' || stage.kind === 'group')
+      && !stageHasBlockingErrors(stage, analysisGuid, findings)
+  ]));
+  const setupComplete = completion.get('analysis') === true;
+  const groupStages = stages.filter(stage => stage.kind === 'group');
+  const groupsComplete = groupStages.length > 0 && groupStages.every(stage => completion.get(stage.id) === true);
   return stages.map((stage, index) => ({
     ...stage,
     current: index === currentIndex,
-    completed: currentIndex > index && !stageHasBlockingErrors(stage, analysisGuid, findings),
-    canOpen: index === currentIndex || (!navigationBlocked
-      && (firstBlockingIndex < 0 || index <= firstBlockingIndex))
+    completed: completion.get(stage.id) === true,
+    available: stage.kind === 'analysis'
+      || stage.kind === 'used-by'
+      || (stage.kind === 'group' && setupComplete)
+      || (stage.kind === 'facility' && setupComplete && groupsComplete),
+    canOpen: index === currentIndex || (!navigationBlocked && (
+      stage.kind === 'analysis'
+      || stage.kind === 'used-by'
+      || (stage.kind === 'group' && setupComplete)
+      || (stage.kind === 'facility' && setupComplete && groupsComplete)
+    ))
   }));
 }
 

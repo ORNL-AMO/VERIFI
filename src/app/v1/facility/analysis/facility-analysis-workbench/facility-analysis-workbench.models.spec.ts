@@ -60,7 +60,7 @@ describe('facility analysis workbench models', () => {
     expect(findingsForAnalysisStage(stages[4], analysis.guid, findings)).toEqual([]);
   });
 
-  it('builds matching sidebar and workbench stage navigation with fixed ordering and blocking', () => {
+  it('unlocks all groups after setup and keeps facility results locked until every group is complete', () => {
     const stages = buildAnalysisWorkbenchStages('facility-a', analysis, meterGroups);
     const firstGroupError = finding('analysis-group', 'analysis-a:group-a');
     const navigation = buildAnalysisWorkbenchStageNavigation(stages, 'group:group-a', analysis.guid, [firstGroupError]);
@@ -69,9 +69,44 @@ describe('facility analysis workbench models', () => {
       'Analysis Setup', 'First group', 'Second group', 'Facility Results', 'Used By'
     ]);
     expect(navigation.map(stage => stage.current)).toEqual([false, true, false, false, false]);
-    expect(navigation.map(stage => stage.canOpen)).toEqual([true, true, false, false, false]);
+    expect(navigation.map(stage => stage.completed)).toEqual([true, false, true, false, false]);
+    expect(navigation.map(stage => stage.available)).toEqual([true, true, true, false, true]);
+    expect(navigation.map(stage => stage.canOpen)).toEqual([true, true, true, false, true]);
     expect(buildAnalysisWorkbenchStageNavigation(stages, 'analysis', analysis.guid, [], true)
       .map(stage => stage.canOpen)).toEqual([true, false, false, false, false]);
+  });
+
+  it('waits for ready status, ignores warnings for completion, and unlocks results after all groups complete', () => {
+    const stages = buildAnalysisWorkbenchStages('facility-a', analysis, meterGroups);
+    const warning = { ...finding('analysis-group', 'analysis-a:group-a'), severity: 'warning' as const };
+    const waiting = buildAnalysisWorkbenchStageNavigation(stages, 'analysis', analysis.guid, [], false, false);
+    expect(waiting.map(stage => stage.completed)).toEqual([false, false, false, false, false]);
+    expect(waiting.map(stage => stage.available)).toEqual([true, false, false, false, true]);
+
+    const ready = buildAnalysisWorkbenchStageNavigation(stages, 'analysis', analysis.guid, [warning]);
+    expect(ready.map(stage => stage.completed)).toEqual([true, true, true, false, false]);
+    expect(ready.map(stage => stage.available)).toEqual([true, true, true, true, true]);
+  });
+
+  it('keeps groups and results locked when analysis setup has a blocking error while Used By stays available', () => {
+    const stages = buildAnalysisWorkbenchStages('facility-a', analysis, meterGroups);
+    const navigation = buildAnalysisWorkbenchStageNavigation(
+      stages,
+      'analysis',
+      analysis.guid,
+      [finding('facility-analysis', analysis.guid)]
+    );
+
+    expect(navigation.map(stage => stage.available)).toEqual([true, false, false, false, true]);
+  });
+
+  it('keeps Facility Results locked when an analysis has no groups', () => {
+    const emptyAnalysis = { guid: 'analysis-empty', groups: [] } as unknown as IdbAnalysisItem;
+    const stages = buildAnalysisWorkbenchStages('facility-a', emptyAnalysis, []);
+    const navigation = buildAnalysisWorkbenchStageNavigation(stages, 'analysis', emptyAnalysis.guid, []);
+
+    expect(navigation.map(stage => stage.completed)).toEqual([true, false, false]);
+    expect(navigation.map(stage => stage.available)).toEqual([true, false, true]);
   });
 
   it('shows group attention at the stage and exact destination subtab', () => {

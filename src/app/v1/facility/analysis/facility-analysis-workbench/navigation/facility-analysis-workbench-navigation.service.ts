@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -32,14 +32,13 @@ export class FacilityAnalysisWorkbenchNavigationService {
   readonly activeContextTabId = this.activeContextTabState.asReadonly();
   readonly stageIndex = computed(() => this.context.stages().findIndex(stage => stage.id === this.activeStageId()));
   readonly currentStage = computed(() => this.context.stages()[this.stageIndex()]);
-  readonly previousStage = computed(() => this.context.stages()[this.stageIndex() - 1]);
-  readonly nextStage = computed(() => this.context.stages()[this.stageIndex() + 1]);
   readonly currentStageHasBlockingErrors = computed(() => stageHasBlockingErrors(
     this.currentStage(), this.context.analysisGuid(), this.context.findings()
   ));
   readonly currentStageFindings = computed(() => findingsForAnalysisStage(
     this.currentStage(), this.context.analysisGuid(), this.context.findings()
   ));
+  readonly navigationBlocked = computed(() => ['saving', 'invalid', 'error'].includes(this.autosave.state()));
   readonly stages = computed(() => {
     const stages = this.context.stages();
     const attention = buildAnalysisWorkbenchStageAttention(
@@ -52,9 +51,16 @@ export class FacilityAnalysisWorkbenchNavigationService {
       this.activeStageId(),
       this.context.analysisGuid(),
       this.context.findings(),
-      ['saving', 'invalid', 'error'].includes(this.autosave.state())
+      this.navigationBlocked(),
+      this.context.status.state() === 'ready'
     ).map(stage => ({ ...stage, attention: attention[stage.id] }));
   });
+  readonly currentNavigationStage = computed(() => this.stages().find(stage => stage.id === this.activeStageId()));
+  readonly previousStage = computed(() => this.stages()
+    .slice(0, this.stageIndex())
+    .reverse()
+    .find(stage => stage.available));
+  readonly nextStage = computed(() => this.stages()[this.stageIndex() + 1]);
   readonly contextTabs = computed<readonly AnalysisWorkbenchTab[]>(() => {
     const stage = this.currentStage();
     if (stage?.kind === 'facility') return ANALYSIS_FACILITY_TABS;
@@ -75,9 +81,23 @@ export class FacilityAnalysisWorkbenchNavigationService {
     );
   });
   readonly requirement = computed(() => analysisNavigationRequirement(
-    this.autosave.state(), this.currentStageHasBlockingErrors(), !!this.nextStage()
+    this.autosave.state(),
+    this.currentStage()?.kind,
+    this.currentStageHasBlockingErrors(),
+    this.nextStage()?.kind,
+    this.nextStage()?.available
   ));
   readonly disabled = computed(() => !!this.requirement());
+  private readonly redirectLockedStageEffect = effect(() => {
+    if (this.context.status.state() !== 'ready') return;
+    const current = this.currentNavigationStage();
+    if (!current || current.available) return;
+    const setup = this.stages().find(stage => stage.kind === 'analysis');
+    const fallback = current.kind === 'facility' && setup?.completed
+      ? this.stages().find(stage => stage.kind === 'group' && !stage.completed) ?? setup
+      : setup;
+    if (fallback) void this.router.navigate(fallback.route, { replaceUrl: true });
+  });
 
   constructor() {
     this.syncActiveStage(this.router.url);
@@ -88,6 +108,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
   }
 
   back(): void {
+    if (this.navigationBlocked()) return;
     const previous = this.previousStage();
     if (previous) {
       void this.router.navigate(previous.route);
@@ -98,11 +119,13 @@ export class FacilityAnalysisWorkbenchNavigationService {
   }
 
   continue(): void {
+    if (this.disabled()) return;
     const next = this.nextStage();
     if (next) void this.router.navigate(next.route);
   }
 
   finish(): void {
+    if (this.disabled()) return;
     const facility = this.context.facility();
     if (facility) void this.router.navigate(this.workspaceNavigation.facilityAnalysisRoute(facility.guid));
   }
@@ -127,12 +150,25 @@ function activeAnalysisWorkbenchTabId(url: string): AnalysisWorkbenchTabId {
 
 export function analysisNavigationRequirement(
   autosaveState: AnalysisAutosaveState,
+  currentStageKind: 'analysis' | 'group' | 'facility' | 'used-by' | undefined,
   currentStageHasBlockingErrors: boolean,
-  hasNextStage: boolean
+  nextStageKind: 'analysis' | 'group' | 'facility' | 'used-by' | undefined,
+  nextStageAvailable: boolean | undefined
 ): string | undefined {
   if (autosaveState === 'saving') return 'Saving changes before navigation is available.';
   if (autosaveState === 'invalid') return 'Fix the validation errors before continuing.';
   if (autosaveState === 'error') return 'Retry or discard the unsaved changes before continuing.';
-  if (hasNextStage && currentStageHasBlockingErrors) return 'Resolve the errors in this stage before continuing.';
+  if (currentStageKind === 'analysis' && currentStageHasBlockingErrors) {
+    return 'Resolve the errors in Analysis Setup before continuing.';
+  }
+  if (currentStageKind === 'analysis' && nextStageKind === 'group' && nextStageAvailable === false) {
+    return 'Checking analysis status before navigation is available.';
+  }
+  if (currentStageKind === 'analysis' && nextStageKind === 'facility' && nextStageAvailable === false) {
+    return 'Add and complete an analysis group before viewing Facility Results.';
+  }
+  if (currentStageKind === 'group' && nextStageKind === 'facility' && nextStageAvailable === false) {
+    return 'Complete all analysis groups before viewing Facility Results.';
+  }
   return undefined;
 }

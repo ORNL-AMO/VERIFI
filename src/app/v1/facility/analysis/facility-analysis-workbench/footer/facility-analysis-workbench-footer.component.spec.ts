@@ -1,7 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisWorkbenchFooterComponent } from './facility-analysis-workbench-footer.component';
 
@@ -12,11 +11,11 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchFooterComponent],
       providers: [
-        { provide: FacilityAnalysisAutosaveService, useValue: { isBlocked: signal(true) } },
         {
           provide: FacilityAnalysisWorkbenchNavigationService,
           useValue: {
             requirement: signal('Saving changes before navigation is available.'),
+            navigationBlocked: signal(true),
             disabled: signal(true),
             nextStage: signal({ id: 'group:group-a' }),
             back,
@@ -48,11 +47,11 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchFooterComponent],
       providers: [
-        { provide: FacilityAnalysisAutosaveService, useValue: { isBlocked: signal(false) } },
         {
           provide: FacilityAnalysisWorkbenchNavigationService,
           useValue: {
             requirement: signal(undefined),
+            navigationBlocked: signal(false),
             disabled: signal(false),
             nextStage: signal({ id: 'group:group-a' }),
             back,
@@ -71,5 +70,33 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     buttons[1].click();
     expect(back).toHaveBeenCalledOnce();
     expect(continueNavigation).toHaveBeenCalledOnce();
+  });
+
+  it('renders Finish on the last stage and delegates the action', () => {
+    const finish = vi.fn();
+    TestBed.configureTestingModule({
+      imports: [FacilityAnalysisWorkbenchFooterComponent],
+      providers: [
+        {
+          provide: FacilityAnalysisWorkbenchNavigationService,
+          useValue: {
+            requirement: signal(undefined),
+            navigationBlocked: signal(false),
+            disabled: signal(false),
+            nextStage: signal(undefined),
+            back: vi.fn(),
+            continue: vi.fn(),
+            finish
+          }
+        }
+      ]
+    });
+    const fixture = TestBed.createComponent(FacilityAnalysisWorkbenchFooterComponent);
+    fixture.detectChanges();
+
+    const buttons = fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
+    expect(buttons[1].textContent).toContain('Finish');
+    buttons[1].click();
+    expect(finish).toHaveBeenCalledOnce();
   });
 });
