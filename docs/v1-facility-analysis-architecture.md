@@ -72,7 +72,7 @@ The workbench header and Analysis Setup both read the editable draft for analysi
 
 Generated regression candidates, pending confirmation choices, open editors, loading flags, and Worker subscriptions are transient. Do not add them to IndexedDB records merely to preserve navigation state.
 
-Analysis Setup, Group Setup, Regression, dashboard filters, create-analysis controls, and result-column preferences are reactive forms. Annual and monthly pages share one result-column chooser rather than duplicating preference controls. A control synchronization must never be used as evidence of a user edit; only emitted, deduplicated user changes may invalidate models, autosave drafts, or request calculation work.
+Analysis Setup, Group Setup, Regression, dashboard filters, create-analysis controls, and result-column preferences are reactive forms. Annual and monthly pages open the same result-column slideout, which presents both Annual and Monthly option sections and applies their shared preferences together. A control synchronization must never be used as evidence of a user edit; only emitted, deduplicated user changes may invalidate models, autosave drafts, or request calculation work.
 
 ## Result calculation orchestration
 
@@ -150,7 +150,7 @@ Calendarization is already coordinated at workspace scope for facility results. 
 
 ## Results presentation
 
-Result pages are projections, not calculation owners. Facility pages read `FacilityAnalysisResultsService.state`; group pages read `FacilityAnalysisGroupResultsService.state`. Each scope offers Annual, Monthly Table, and Monthly Chart. Annual displays its chart and table together, while monthly routes keep the dense table and chart in separate tabs. Existing `/monthly` deep links redirect canonically to `/monthly-table`. Shared result status and toolbar components live under `results/presentation`; page-specific tables remain explicit so columns and formulas are easy to inspect.
+Result pages are projections, not calculation owners. Facility pages read `FacilityAnalysisResultsService.state`; group pages read `FacilityAnalysisGroupResultsService.state`. Each scope offers Annual, Monthly Table, and Monthly Chart. Annual displays its table first, followed by the v0-equivalent Actual-versus-Calculated and Annual-versus-Total-improvement charts; monthly routes keep the dense table and chart in separate tabs. Result tables use the v0 analysis display-rounding rules and omit banked and unbanked savings when banking is disabled. Existing `/monthly` deep links redirect canonically to `/monthly-table`. Shared result status and toolbar components live under `results/presentation`; page-specific tables remain explicit so columns and formulas are easy to inspect.
 
 Future results pages should be added below the existing group or facility result shells. They should consume the coordinator’s current result or add a clearly named projection to it. Add a new Worker only when the calculation has a genuinely different input and lifecycle boundary—not merely because a new tab needs another presentation.
 

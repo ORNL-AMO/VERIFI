@@ -4,7 +4,11 @@
 @let currentCostMetric = costMetric();
 @let zoomAvailable = canZoom();
 
-<section class="v1-meter-results-chart" [class.v1-meter-results-chart--joins-following]="joinsFollowingSection" [attr.aria-label]="ariaLabel">
+<section
+  class="v1-meter-results-chart"
+  [class.v1-meter-results-chart--joins-following]="joinsFollowingSection"
+  [class.v1-meter-results-chart--embedded]="embedded"
+  [attr.aria-label]="ariaLabel">
   @if (currentState === 'loading') {
     <article class="v1-empty-state" role="status">
       <app-ui-icon name="loading" spin></app-ui-icon>
@@ -19,37 +23,39 @@
     </article>
   } @else {
     <div class="v1-meter-results-chart__controls" aria-label="Chart controls">
-      <div class="v1-meter-results-chart__series-controls">
-        @if (currentUtilityMetric) {
-          <div class="v1-meter-results-chart__control-group" role="group" [attr.aria-label]="currentUtilityMetric.label + ' display'">
-            <span>{{ currentUtilityMetric.label }}</span>
-            <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'off'" [attr.aria-pressed]="utilityDisplay() === 'off'" [title]="'Hide ' + currentUtilityMetric.label" [attr.aria-label]="'Hide ' + currentUtilityMetric.label" (click)="setUtilityDisplay('off')">
-              <app-ui-icon name="viewHidden"></app-ui-icon>
-            </button>
-            <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'bar'" [attr.aria-pressed]="utilityDisplay() === 'bar'" [title]="'Show ' + currentUtilityMetric.label + ' as bars'" [attr.aria-label]="'Show ' + currentUtilityMetric.label + ' as bars'" (click)="setUtilityDisplay('bar')">
-              <app-ui-icon name="barChart"></app-ui-icon>
-            </button>
-            <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'line'" [attr.aria-pressed]="utilityDisplay() === 'line'" [title]="'Show ' + currentUtilityMetric.label + ' as line'" [attr.aria-label]="'Show ' + currentUtilityMetric.label + ' as line'" (click)="setUtilityDisplay('line')">
-              <app-ui-icon name="chartLine"></app-ui-icon>
-            </button>
-          </div>
-        }
+      @if (showSeriesControls) {
+        <div class="v1-meter-results-chart__series-controls">
+          @if (currentUtilityMetric) {
+            <div class="v1-meter-results-chart__control-group" role="group" [attr.aria-label]="currentUtilityMetric.label + ' display'">
+              <span>{{ currentUtilityMetric.label }}</span>
+              <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'off'" [attr.aria-pressed]="utilityDisplay() === 'off'" [title]="'Hide ' + currentUtilityMetric.label" [attr.aria-label]="'Hide ' + currentUtilityMetric.label" (click)="setUtilityDisplay('off')">
+                <app-ui-icon name="viewHidden"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'bar'" [attr.aria-pressed]="utilityDisplay() === 'bar'" [title]="'Show ' + currentUtilityMetric.label + ' as bars'" [attr.aria-label]="'Show ' + currentUtilityMetric.label + ' as bars'" (click)="setUtilityDisplay('bar')">
+                <app-ui-icon name="barChart"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn" [class.active]="utilityDisplay() === 'line'" [attr.aria-pressed]="utilityDisplay() === 'line'" [title]="'Show ' + currentUtilityMetric.label + ' as line'" [attr.aria-label]="'Show ' + currentUtilityMetric.label + ' as line'" (click)="setUtilityDisplay('line')">
+                <app-ui-icon name="chartLine"></app-ui-icon>
+              </button>
+            </div>
+          }
 
-        @if (currentCostMetric) {
-          <div class="v1-meter-results-chart__control-group" role="group" [attr.aria-label]="currentCostMetric.label + ' display'">
-            <span>{{ currentCostMetric.label }}</span>
-            <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'off'" [attr.aria-pressed]="costDisplay() === 'off'" [title]="'Hide ' + currentCostMetric.label" [attr.aria-label]="'Hide ' + currentCostMetric.label" (click)="setCostDisplay('off')">
-              <app-ui-icon name="viewHidden"></app-ui-icon>
-            </button>
-            <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'bar'" [attr.aria-pressed]="costDisplay() === 'bar'" [title]="'Show ' + currentCostMetric.label + ' as bars'" [attr.aria-label]="'Show ' + currentCostMetric.label + ' as bars'" (click)="setCostDisplay('bar')">
-              <app-ui-icon name="barChart"></app-ui-icon>
-            </button>
-            <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'line'" [attr.aria-pressed]="costDisplay() === 'line'" [title]="'Show ' + currentCostMetric.label + ' as line'" [attr.aria-label]="'Show ' + currentCostMetric.label + ' as line'" (click)="setCostDisplay('line')">
-              <app-ui-icon name="chartLine"></app-ui-icon>
-            </button>
-          </div>
-        }
-      </div>
+          @if (currentCostMetric) {
+            <div class="v1-meter-results-chart__control-group" role="group" [attr.aria-label]="currentCostMetric.label + ' display'">
+              <span>{{ currentCostMetric.label }}</span>
+              <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'off'" [attr.aria-pressed]="costDisplay() === 'off'" [title]="'Hide ' + currentCostMetric.label" [attr.aria-label]="'Hide ' + currentCostMetric.label" (click)="setCostDisplay('off')">
+                <app-ui-icon name="viewHidden"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'bar'" [attr.aria-pressed]="costDisplay() === 'bar'" [title]="'Show ' + currentCostMetric.label + ' as bars'" [attr.aria-label]="'Show ' + currentCostMetric.label + ' as bars'" (click)="setCostDisplay('bar')">
+                <app-ui-icon name="barChart"></app-ui-icon>
+              </button>
+              <button type="button" class="v1-icon-btn" [class.active]="costDisplay() === 'line'" [attr.aria-pressed]="costDisplay() === 'line'" [title]="'Show ' + currentCostMetric.label + ' as line'" [attr.aria-label]="'Show ' + currentCostMetric.label + ' as line'" (click)="setCostDisplay('line')">
+                <app-ui-icon name="chartLine"></app-ui-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
 
       <div class="v1-meter-results-chart__action-controls">
         <button type="button" class="v1-icon-btn" title="Zoom in" aria-label="Zoom in" [disabled]="!zoomAvailable" (click)="zoomIn()">

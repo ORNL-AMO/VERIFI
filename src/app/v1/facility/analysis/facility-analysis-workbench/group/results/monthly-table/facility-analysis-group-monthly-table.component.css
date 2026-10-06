@@ -1,6 +1,19 @@
 :host { display: block; }
 .v1-analysis-section { display: grid; gap: var(--v1-space-3); padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0 0 var(--v1-radius) var(--v1-radius); background: var(--v1-surface); }
 p { margin: 0; }
-.v1-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--v1-border); }
-.v1-table-scroll table { min-width: 82rem; margin: 0; }
+.v1-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-surface); }
+.v1-analysis-results-table { width: 100%; min-width: 82rem; border-collapse: collapse; color: var(--v1-text); font-size: .88rem; }
+.v1-analysis-results-table th,
+.v1-analysis-results-table td { padding: .6rem .7rem; border-bottom: 1px solid var(--v1-divider); text-align: right; vertical-align: middle; white-space: nowrap; }
+.v1-analysis-results-table thead th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .76rem; font-weight: 900; text-transform: uppercase; }
+.v1-analysis-results-table__section-row th { padding-top: .45rem; padding-bottom: .45rem; background: var(--v1-surface); border-bottom-color: var(--v1-border); }
+.v1-analysis-results-table__section-row .v1-analysis-results-table__section-heading { --analysis-results-section-accent: var(--v1-content-control); border-right: 1px solid color-mix(in srgb, var(--analysis-results-section-accent) 45%, var(--v1-border)); border-left: 1px solid color-mix(in srgb, var(--analysis-results-section-accent) 45%, var(--v1-border)); background: color-mix(in srgb, var(--analysis-results-section-accent) 14%, var(--v1-surface)); color: var(--v1-text); font-size: .72rem; letter-spacing: 0; text-align: left; }
+.v1-analysis-results-table__section-heading--predictors { --analysis-results-section-accent: var(--v1-success); }
+.v1-analysis-results-table__section-heading--improvement { --analysis-results-section-accent: var(--v1-action); }
+.v1-analysis-results-table th:first-child,
+.v1-analysis-results-table td:first-child { text-align: left; }
+.v1-analysis-results-table tbody th { color: var(--v1-text); font-weight: 800; text-transform: none; }
+.v1-analysis-results-table tbody tr:not(.v1-analysis-results__missing):hover { background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); }
+.v1-analysis-results-table tbody tr:last-child > * { border-bottom: 0; }
+.v1-analysis-results-table td { font-variant-numeric: tabular-nums; }
 .v1-analysis-results__missing { background: color-mix(in srgb, var(--v1-warning) 12%, var(--v1-surface)); }

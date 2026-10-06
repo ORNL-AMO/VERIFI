@@ -1,0 +1,60 @@
+<button type="button" class="v1-btn v1-btn--quiet" (click)="openSlideout()">
+  <app-ui-icon name="settingsSliders"></app-ui-icon>
+  Choose Columns
+</button>
+
+@if (open()) {
+  <app-workspace-slideout
+    title="Choose columns"
+    description="Choose the fields shown in annual and monthly result tables."
+    (closed)="closeSlideout()">
+    <form class="analysis-result-columns" (submit)="$event.preventDefault(); apply()">
+      <div class="analysis-result-columns__quick-actions">
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="showAll()">Show All</button>
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="hideAll()">Hide All</button>
+        <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="useDefaults()">Use Defaults</button>
+      </div>
+
+      <section class="analysis-result-columns__section" aria-labelledby="annual-result-columns-heading">
+        <h3 id="annual-result-columns-heading">Annual table</h3>
+        @for (option of annualOptions(); track option.id) {
+          <label class="analysis-result-columns__check">
+            <input type="checkbox" [formControl]="control(option.id)">
+            <span>{{ option.label }}</span>
+          </label>
+        }
+      </section>
+
+      @if (predictorVariables().length) {
+        <section class="analysis-result-columns__section" aria-labelledby="predictor-result-columns-heading">
+          <h3 id="predictor-result-columns-heading">Production variables</h3>
+          <p>Variables used in the analysis are selected by default.</p>
+          @for (predictor of predictorVariables(); track predictor.id) {
+            <label class="analysis-result-columns__check">
+              <input type="checkbox" [formControl]="predictorControl(predictor.id)">
+              <span>{{ predictor.name }}@if (predictor.productionInAnalysis) { <span aria-label="Used in analysis"> *</span> }</span>
+            </label>
+          }
+        </section>
+      }
+
+      <section class="analysis-result-columns__section" aria-labelledby="monthly-result-columns-heading">
+        <h3 id="monthly-result-columns-heading">Monthly table</h3>
+        @for (option of monthlyOptions(); track option.id) {
+          <label class="analysis-result-columns__check">
+            <input type="checkbox" [formControl]="control(option.id)">
+            <span>{{ option.label }}</span>
+          </label>
+        }
+      </section>
+
+      <footer class="analysis-result-columns__footer">
+        <button type="button" class="v1-btn v1-btn--quiet" (click)="closeSlideout()">Cancel</button>
+        <button type="submit" class="v1-btn v1-btn--primary">
+          <app-ui-icon name="check"></app-ui-icon>
+          Apply
+        </button>
+      </footer>
+    </form>
+  </app-workspace-slideout>
+}

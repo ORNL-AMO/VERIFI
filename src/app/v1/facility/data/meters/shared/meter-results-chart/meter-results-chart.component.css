@@ -17,6 +17,13 @@
   border-bottom-left-radius: 0;
 }
 
+.v1-meter-results-chart--embedded {
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
 .v1-meter-results-chart__controls {
   display: flex;
   flex-wrap: wrap;

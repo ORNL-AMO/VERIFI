@@ -37,6 +37,12 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() metrics: readonly MeterResultsChartMetric[] = [];
   @Input() defaultLeftMetricId?: string;
   @Input() defaultRightMetricId?: string;
+  @Input() defaultLeftDisplay: MeterChartSeriesDisplay = 'line';
+  @Input() defaultRightDisplay: MeterChartSeriesDisplay = 'line';
+  @Input() sharedYAxis = false;
+  @Input() yAxisTitle?: string;
+  @Input() allowNegativeValues = false;
+  @Input() showSeriesControls = true;
   @Input() period: MeterResultsPeriod = 'monthly';
   @Input() state: MeterChartState = 'ready';
   @Input() ariaLabel = 'Meter results chart';
@@ -48,6 +54,7 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() emptyDescription = 'Add meter data to see charted results.';
   @Input() downloadFileName = 'meter-results-chart';
   @Input() joinsFollowingSection = false;
+  @Input() embedded = false;
 
   @ViewChild(EChartsChartDirective) chartDirective?: EChartsChartDirective;
 
@@ -95,7 +102,7 @@ export class MeterResultsChartComponent implements OnChanges {
       periodLabel: row.periodLabel,
       cells: metrics.map(metric => ({
         metricId: metric.id,
-        valueLabel: formatChartTooltipValue(chartValue(row, metric.id), !!metric.currency)
+        valueLabel: formatChartTooltipValue(chartValue(row, metric.id), !!metric.currency, metric.unit)
       }))
     }));
   });
@@ -112,7 +119,7 @@ export class MeterResultsChartComponent implements OnChanges {
     const series: Array<Record<string, unknown>> = [];
 
     if (utilityMetric && this.utilityDisplay() !== 'off') {
-      yAxis.push(metricAxis(utilityMetric));
+      yAxis.push(metricAxis(utilityMetric, this.yAxisTitle, this.allowNegativeValues));
       series.push({
         name: utilityMetric.label,
         type: this.utilityDisplay(),
@@ -125,11 +132,13 @@ export class MeterResultsChartComponent implements OnChanges {
     }
 
     if (costMetric && this.costDisplay() !== 'off') {
-      yAxis.push(metricAxis(costMetric));
+      if (!this.sharedYAxis || yAxis.length === 0) {
+        yAxis.push(metricAxis(costMetric, this.yAxisTitle, this.allowNegativeValues));
+      }
       series.push({
         name: costMetric.label,
         type: this.costDisplay(),
-        yAxisIndex: yAxis.length - 1,
+        yAxisIndex: this.sharedYAxis ? 0 : yAxis.length - 1,
         data: rows.map(row => chartValue(row, costMetric.id)),
         smooth: this.costDisplay() === 'line' && rows.length > 2,
         itemStyle: { color: 'var(--v1-chart-series-3)' },
@@ -170,6 +179,12 @@ export class MeterResultsChartComponent implements OnChanges {
     }
     if (changes['metrics'] || changes['defaultLeftMetricId'] || changes['defaultRightMetricId']) {
       this.syncMetricSelections();
+    }
+    if (changes['defaultLeftDisplay']) {
+      this.utilityDisplay.set(this.defaultLeftDisplay);
+    }
+    if (changes['defaultRightDisplay']) {
+      this.costDisplay.set(this.defaultRightDisplay);
     }
     if (changes['chartRows'] && !this.canZoom()) {
       this.resetZoom();
@@ -245,14 +260,22 @@ function coerceMetricId(
   return metricId && metrics.some(metric => metric.id === metricId) ? metricId : undefined;
 }
 
-function metricAxis(metric: MeterResultsChartMetric): Record<string, unknown> {
+function metricAxis(
+  metric: MeterResultsChartMetric,
+  title: string | undefined,
+  allowNegativeValues: boolean
+): Record<string, unknown> {
   const axis: Record<string, unknown> = {
     type: 'value',
-    name: metric.unit ? `${metric.label} (${metric.unit})` : metric.label,
-    min: 0
+    name: title ?? (metric.unit ? `${metric.label} (${metric.unit})` : metric.label)
   };
+  if (!allowNegativeValues) {
+    axis['min'] = 0;
+  }
   if (metric.currency) {
     axis['axisLabel'] = { formatter: '${value}' };
+  } else if (metric.unit === '%') {
+    axis['axisLabel'] = { formatter: '{value}%' };
   }
   return axis;
 }
@@ -295,14 +318,14 @@ function formatChartTooltip(
     .filter(isTooltipParam)
     .map(param => {
       const metric = metrics.find(item => item.label === param.seriesName);
-      const value = formatChartTooltipValue(param.value, metric?.currency);
+      const value = formatChartTooltipValue(param.value, metric?.currency, metric?.unit);
       return `<div>${param.marker ?? ''}${escapeHtml(param.seriesName ?? '')}: ${escapeHtml(value)}</div>`;
     })
     .join('');
   return `${header}${rows}`;
 }
 
-function formatChartTooltipValue(value: unknown, currency = false): string {
+function formatChartTooltipValue(value: unknown, currency = false, unit?: string): string {
   const numericValue = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(numericValue)) {
     return String(value ?? '');
@@ -314,6 +337,9 @@ function formatChartTooltipValue(value: unknown, currency = false): string {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(numericValue);
+  }
+  if (unit === '%') {
+    return `${numericValue.toLocaleString(undefined, { maximumFractionDigits: 3 })}%`;
   }
   return Math.round(numericValue).toLocaleString();
 }

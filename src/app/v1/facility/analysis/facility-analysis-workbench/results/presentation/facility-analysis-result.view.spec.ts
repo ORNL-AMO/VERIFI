@@ -1,10 +1,10 @@
-import { annualChartRows, monthlyChartRows } from './facility-analysis-result.view';
+import { annualUseChartRows, monthlyChartRows } from './facility-analysis-result.view';
 
 describe('facility analysis result views', () => {
   it('keeps zero and negative annual values in chart projections', () => {
-    expect(annualChartRows([{ year: 2024, energyUse: 0, adjusted: -2, savings: 0 } as any])).toEqual([{
+    expect(annualUseChartRows([{ year: 2024, energyUse: 0, adjusted: -2 } as any])).toEqual([{
       periodKey: '2024', periodLabel: '2024', sortValue: 2024,
-      values: { actual: 0, modeled: -2, savings: 0 }
+      values: { actual: 0, calculated: -2 }
     }]);
   });
 
@@ -18,14 +18,14 @@ describe('facility analysis result views', () => {
     {
       label: 'energy regression output',
       annual: { year: 2025, energyUse: 987654.3210987, adjusted: 1023456.7890123, savings: 35802.4679136 },
-      expected: { actual: 987654.3210987, modeled: 1023456.7890123, savings: 35802.4679136 }
+      expected: { actual: 987654.3210987, calculated: 1023456.7890123 }
     },
     {
       label: 'water absolute-consumption output',
       annual: { year: 2024, energyUse: 0.00000125, adjusted: 0.0000015, savings: 0.00000025 },
-      expected: { actual: 0.00000125, modeled: 0.0000015, savings: 0.00000025 }
+      expected: { actual: 0.00000125, calculated: 0.0000015 }
     }
   ])('matches representative v0 $label values at full precision', ({ annual, expected }) => {
-    expect(annualChartRows([annual as any])[0].values).toEqual(expected);
+    expect(annualUseChartRows([annual as any])[0].values).toEqual(expected);
   });
 });
