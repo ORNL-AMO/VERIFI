@@ -27,11 +27,15 @@ describe('StartupErrorComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('shows recovery actions and help desk instructions only for migration failures', () => {
+  it('hides recovery actions for non-migration failures', () => {
     renderError('database');
-    expect(fixture.nativeElement.querySelector('.recovery-panel')).toBeNull();
 
+    expect(fixture.nativeElement.querySelector('.recovery-panel')).toBeNull();
+  });
+
+  it('shows recovery actions and help desk instructions for migration failures', () => {
     renderError('migrations');
+
     expect(buttonNamed('Save recovery snapshot')).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain('sensitive business information');
     const helpDeskLink: HTMLAnchorElement = fixture.nativeElement.querySelector(
@@ -105,7 +109,7 @@ describe('StartupErrorComponent', () => {
   });
 
   function renderError(step: 'database' | 'migrations'): void {
-    component.error = startupError(step);
+    fixture.componentRef.setInput('error', startupError(step));
     fixture.detectChanges();
   }
 
