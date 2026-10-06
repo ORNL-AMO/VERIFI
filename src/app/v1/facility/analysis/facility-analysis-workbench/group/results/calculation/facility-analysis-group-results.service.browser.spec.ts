@@ -75,15 +75,15 @@ describe('FacilityAnalysisGroupResultsService browser Worker lifecycle', () => {
 function configure(options: {
   otherGroupBlocked?: boolean;
   facilityReady?: boolean;
-  findings?: any[];
+  findings?: readonly any[];
   autosaveState?: 'dirty' | 'saved';
   statusState?: 'evaluating' | 'ready';
   calendarReady?: boolean;
 }) {
   const analysis = signal(analysisFixture());
-  const findings = signal<any[]>(options.findings ?? (options.otherGroupBlocked
+  const findings = signal<any[]>([...(options.findings ?? (options.otherGroupBlocked
     ? [finding('analysis-group', 'analysis-a:group-b')]
-    : []));
+    : []))]);
   const globalBlocking = computed(() => findings().some(item => item.severity === 'error'));
   const empty = signal<any[]>([]);
   const base = options.calendarReady === false
