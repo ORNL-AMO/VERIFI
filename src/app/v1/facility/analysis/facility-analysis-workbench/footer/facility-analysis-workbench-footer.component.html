@@ -1,0 +1,36 @@
+<footer class="v1-wizard-actions" aria-label="Analysis workflow navigation">
+  <button
+    type="button"
+    class="v1-btn v1-btn--quiet"
+    [disabled]="autosave.isBlocked()"
+    [attr.aria-describedby]="autosave.isBlocked() && workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
+    (click)="workflow.back()">
+    <app-ui-icon name="chevronLeft"></app-ui-icon> Back
+  </button>
+  <div class="v1-wizard-actions__next">
+    <span
+      id="v1-analysis-navigation-requirement"
+      class="v1-wizard-actions__requirement"
+      role="status"
+      aria-live="polite">{{ workflow.requirement() || '' }}</span>
+    @if (workflow.nextStage()) {
+      <button
+        type="button"
+        class="v1-btn v1-btn--action"
+        [disabled]="workflow.disabled()"
+        [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
+        (click)="workflow.continue()">
+        Continue <app-ui-icon name="chevronRight"></app-ui-icon>
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="v1-btn v1-btn--action"
+        [disabled]="workflow.disabled()"
+        [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
+        (click)="workflow.finish()">
+        Finish <app-ui-icon name="check"></app-ui-icon>
+      </button>
+    }
+  </div>
+</footer>

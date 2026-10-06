@@ -1,0 +1,13 @@
+:host { z-index: 7; display: block; align-self: stretch; min-width: 0; margin: -.55rem 0; }
+.v1-analysis-workbench__stage-tabs { box-sizing: border-box; width: auto; min-width: 0; max-width: none; padding: .35rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); box-shadow: 0 .45rem 1rem color-mix(in srgb, var(--v1-shadow) 18%, transparent); overflow-x: auto; }
+.v1-analysis-workbench__stage-tabs ol { display: flex; justify-content: flex-start; gap: .25rem; box-sizing: border-box; width: max-content; min-width: 100%; margin: 0; padding: 0; list-style: none; }
+.v1-analysis-workbench__stage-tabs li { min-width: 0; }
+.v1-analysis-workbench__stage-tabs a, .v1-analysis-workbench__stage-disabled { display: flex; gap: .45rem; align-items: center; min-height: 2.25rem; padding: .35rem .65rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); color: var(--v1-muted); font-size: .82rem; font-weight: 800; line-height: 1.2; text-decoration: none; white-space: nowrap; }
+.v1-analysis-workbench__stage-tabs a:hover, .v1-analysis-workbench__stage-tabs a:focus-visible { border-color: color-mix(in srgb, var(--v1-content-control) 30%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); color: var(--v1-text); }
+.v1-analysis-workbench__stage-tabs .is-current a { border-color: color-mix(in srgb, var(--v1-content-control) 40%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 10%, var(--v1-surface)); color: var(--v1-text); }
+.v1-analysis-workbench__stage-tabs .is-complete .v1-analysis-workbench__stage-number { border-color: var(--v1-success); color: var(--v1-success); }
+.v1-analysis-workbench__stage-tabs .is-blocked { opacity: .55; }
+.v1-analysis-workbench__stage-number { display: inline-grid; flex: 0 0 1.45rem; width: 1.45rem; height: 1.45rem; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: .72rem; font-weight: 900; }
+.v1-analysis-workbench__stage-attention { display: inline-grid; flex: 0 0 1.2rem; width: 1.2rem; height: 1.2rem; place-items: center; border: 1px solid transparent; border-radius: 50%; color: #fff; font-size: .72rem; font-weight: 900; line-height: 1; }
+.v1-analysis-workbench__stage-attention--error { background: var(--v1-danger); }
+.v1-analysis-workbench__stage-attention--warning { border-color: color-mix(in srgb, var(--v1-warning) 65%, #000); background: color-mix(in srgb, var(--v1-warning) 35%, #ffd166); color: #211600; }

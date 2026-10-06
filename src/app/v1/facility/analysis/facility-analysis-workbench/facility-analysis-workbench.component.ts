@@ -10,6 +10,8 @@ import { RegressionCandidateStore } from './group/regression/regression-candidat
 import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysis-period.service';
 import { FacilityAnalysisWorkbenchNavigationService } from './navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisWorkbenchHeaderComponent } from './header/facility-analysis-workbench-header.component';
+import { FacilityAnalysisWorkbenchStageNavigationComponent } from './stage-navigation/facility-analysis-workbench-stage-navigation.component';
+import { FacilityAnalysisWorkbenchFooterComponent } from './footer/facility-analysis-workbench-footer.component';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -23,7 +25,14 @@ import { FacilityAnalysisWorkbenchHeaderComponent } from './header/facility-anal
     RegressionCandidateStore,
     FacilityAnalysisWorkbenchNavigationService
   ],
-  imports: [RouterOutlet, RouterLink, IconComponent, FacilityAnalysisWorkbenchHeaderComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    IconComponent,
+    FacilityAnalysisWorkbenchHeaderComponent,
+    FacilityAnalysisWorkbenchStageNavigationComponent,
+    FacilityAnalysisWorkbenchFooterComponent
+  ],
   templateUrl: './facility-analysis-workbench.component.html',
   styleUrls: ['./facility-analysis-workbench.component.css']
 })
@@ -31,7 +40,6 @@ export class FacilityAnalysisWorkbenchComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
-  readonly workflow = inject(FacilityAnalysisWorkbenchNavigationService);
 
   hasUnsavedChanges(): boolean { return this.autosave.isDirty(); }
   isNavigationBlocked(): boolean { return this.autosave.isBlocked(); }

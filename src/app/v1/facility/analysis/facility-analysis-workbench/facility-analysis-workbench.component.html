@@ -21,59 +21,11 @@
     <app-facility-analysis-workbench-header></app-facility-analysis-workbench-header>
   </div>
 
-  <nav class="v1-analysis-workbench__stage-tabs" aria-label="Analysis workflow stages">
-    <ol>
-      @for (stage of workflow.stages(); track stage.id; let index = $index) {
-        <li [class.is-current]="stage.current" [class.is-complete]="stage.completed" [class.is-blocked]="!stage.canOpen">
-          @if (stage.canOpen) {
-            <a [routerLink]="stage.route" [attr.aria-current]="stage.current ? 'step' : null">
-              <span class="v1-analysis-workbench__stage-number" aria-hidden="true">{{ index + 1 }}</span>
-              <span>{{ stage.label }}</span>
-              @if (stage.attention; as attention) {
-                <span class="v1-analysis-workbench__stage-attention v1-analysis-workbench__stage-attention--{{ attention.state }}" [attr.title]="attention.total + ' active status checks in ' + stage.label">
-                  <span aria-hidden="true">!</span>
-                  <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
-                </span>
-              }
-            </a>
-          } @else {
-            <span class="v1-analysis-workbench__stage-disabled" aria-disabled="true">
-              <span class="v1-analysis-workbench__stage-number" aria-hidden="true">{{ index + 1 }}</span>
-              <span>{{ stage.label }}</span>
-              @if (stage.attention; as attention) {
-                <span class="v1-analysis-workbench__stage-attention v1-analysis-workbench__stage-attention--{{ attention.state }}" [attr.title]="attention.total + ' active status checks in ' + stage.label">
-                  <span aria-hidden="true">!</span>
-                  <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
-                </span>
-              }
-            </span>
-          }
-        </li>
-      }
-    </ol>
-  </nav>
+  <app-facility-analysis-workbench-stage-navigation></app-facility-analysis-workbench-stage-navigation>
 
   <main class="v1-analysis-workbench__content" aria-labelledby="v1-analysis-workbench-title">
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="v1-wizard-actions" aria-label="Analysis workflow navigation">
-    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="autosave.isBlocked()" (click)="workflow.back()">
-      <app-ui-icon name="chevronLeft"></app-ui-icon> Back
-    </button>
-    <div class="v1-wizard-actions__next">
-      @if (workflow.requirement(); as message) {
-        <span id="v1-analysis-navigation-requirement" class="v1-wizard-actions__requirement" role="status">{{ message }}</span>
-      }
-      @if (workflow.nextStage()) {
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="workflow.disabled()" [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null" (click)="workflow.continue()">
-          Continue <app-ui-icon name="chevronRight"></app-ui-icon>
-        </button>
-      } @else {
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="workflow.disabled()" [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null" (click)="workflow.finish()">
-          Finish <app-ui-icon name="check"></app-ui-icon>
-        </button>
-      }
-    </div>
-  </footer>
+  <app-facility-analysis-workbench-footer></app-facility-analysis-workbench-footer>
 }

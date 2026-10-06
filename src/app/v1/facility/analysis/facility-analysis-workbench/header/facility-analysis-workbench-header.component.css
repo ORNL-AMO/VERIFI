@@ -11,3 +11,4 @@
 .v1-analysis-workbench__status-notes button { align-self: center; padding: 0; border: 0; background: transparent; color: var(--v1-link); font: inherit; font-size: .8rem; font-weight: 800; text-decoration: underline; cursor: pointer; }
 .v1-analysis-workbench__status-notes button:hover, .v1-analysis-workbench__status-notes button:focus-visible { color: var(--v1-text); }
 @media (max-width: 640px) { .v1-analysis-workbench__status-notes li { grid-template-columns: 1rem minmax(0, 1fr); } .v1-analysis-workbench__status-notes button { grid-column: 2; justify-self: start; } }
+@media (max-width: 760px) { .v1-analysis-workbench__save-state { flex-basis: 100%; justify-content: flex-start; min-width: 0; white-space: normal; } }
