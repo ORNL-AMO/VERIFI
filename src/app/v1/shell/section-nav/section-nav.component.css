@@ -214,6 +214,26 @@
   margin-left: .55rem;
 }
 
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker {
+  display: inline-grid;
+  flex: 0 0 1.45rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker.is-complete {
+  border-color: transparent;
+  color: var(--v1-success);
+}
+
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker .v1-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
 .v1-nav__label {
   color: var(--v1-muted);
   font-size: .72rem;
