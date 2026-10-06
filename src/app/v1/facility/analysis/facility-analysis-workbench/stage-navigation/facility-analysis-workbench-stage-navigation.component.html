@@ -7,12 +7,22 @@
       <li [class.is-current]="stage.current" [class.is-complete]="stage.completed" [class.is-blocked]="!stage.canOpen">
         @if (stage.canOpen) {
           <a [routerLink]="stage.route" [attr.aria-current]="stage.current ? 'step' : null">
-            <span class="v1-analysis-workbench__stage-marker" [class.is-complete]="stage.completed">
+            <span
+              class="v1-analysis-workbench__stage-marker"
+              [class.is-complete]="stage.completed"
+              [class.has-blocking-errors]="stage.hasBlockingErrors">
               @if (stage.kind === 'analysis' || stage.kind === 'group') {
-                @if (stage.completed) { <app-ui-icon name="success"></app-ui-icon> }
-                <span class="visually-hidden">{{ stage.completed ? 'Complete' : 'Not complete' }}</span>
+                @if (stage.completed) {
+                  <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                  <span class="visually-hidden">Complete</span>
+                } @else if (stage.hasBlockingErrors) {
+                  <app-ui-icon name="badgeAlert"></app-ui-icon>
+                  <span class="visually-hidden">Has blocking errors</span>
+                } @else {
+                  <span class="visually-hidden">Not complete</span>
+                }
               } @else if (stage.kind === 'facility') {
-                <app-ui-icon name="chartLine"></app-ui-icon>
+                <app-ui-icon name="chartAnalysis"></app-ui-icon>
                 <span class="visually-hidden">Results</span>
               } @else {
                 <app-ui-icon name="link"></app-ui-icon>
@@ -21,20 +31,32 @@
             </span>
             <span>{{ stage.label }}</span>
             @if (stage.attention; as attention) {
-              <span class="v1-analysis-workbench__stage-attention v1-analysis-workbench__stage-attention--{{ attention.state }}" [attr.title]="attention.total + ' active status checks in ' + stage.label">
-                <span aria-hidden="true">!</span>
-                <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
-              </span>
+              @if (!stage.hasBlockingErrors) {
+                <span class="v1-analysis-workbench__stage-attention v1-analysis-workbench__stage-attention--{{ attention.state }}" [attr.title]="attention.total + ' active status checks in ' + stage.label">
+                  <span aria-hidden="true">!</span>
+                  <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                </span>
+              }
             }
           </a>
         } @else {
           <span class="v1-analysis-workbench__stage-disabled" aria-disabled="true">
-            <span class="v1-analysis-workbench__stage-marker" [class.is-complete]="stage.completed">
+            <span
+              class="v1-analysis-workbench__stage-marker"
+              [class.is-complete]="stage.completed"
+              [class.has-blocking-errors]="stage.hasBlockingErrors">
               @if (stage.kind === 'analysis' || stage.kind === 'group') {
-                @if (stage.completed) { <app-ui-icon name="success"></app-ui-icon> }
-                <span class="visually-hidden">{{ stage.completed ? 'Complete' : 'Not complete' }}</span>
+                @if (stage.completed) {
+                  <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                  <span class="visually-hidden">Complete</span>
+                } @else if (stage.hasBlockingErrors) {
+                  <app-ui-icon name="badgeAlert"></app-ui-icon>
+                  <span class="visually-hidden">Has blocking errors</span>
+                } @else {
+                  <span class="visually-hidden">Not complete</span>
+                }
               } @else if (stage.kind === 'facility') {
-                <app-ui-icon name="chartLine"></app-ui-icon>
+                <app-ui-icon name="chartAnalysis"></app-ui-icon>
                 <span class="visually-hidden">Results</span>
               } @else {
                 <app-ui-icon name="link"></app-ui-icon>
@@ -43,10 +65,12 @@
             </span>
             <span>{{ stage.label }}</span>
             @if (stage.attention; as attention) {
-              <span class="v1-analysis-workbench__stage-attention v1-analysis-workbench__stage-attention--{{ attention.state }}" [attr.title]="attention.total + ' active status checks in ' + stage.label">
-                <span aria-hidden="true">!</span>
-                <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
-              </span>
+              @if (!stage.hasBlockingErrors) {
+                <span class="v1-analysis-workbench__stage-attention v1-analysis-workbench__stage-attention--{{ attention.state }}" [attr.title]="attention.total + ' active status checks in ' + stage.label">
+                  <span aria-hidden="true">!</span>
+                  <span class="visually-hidden">{{ attention.total }} issues: {{ attention.errorCount }} errors, {{ attention.warningCount }} warnings</span>
+                </span>
+              }
             }
           </span>
         }
@@ -60,6 +84,7 @@
     [activeTab]="workflow.activeContextTabId()"
     [attention]="workflow.contextTabAttention()"
     attentionDisplay="indicator"
+    level="secondary"
     [ariaLabel]="workflow.currentStage()?.kind === 'group' ? 'Meter group analysis sections' : 'Facility result sections'"
     (tabSelected)="workflow.openContextTab($event)">
   </app-data-workbench-tabs>

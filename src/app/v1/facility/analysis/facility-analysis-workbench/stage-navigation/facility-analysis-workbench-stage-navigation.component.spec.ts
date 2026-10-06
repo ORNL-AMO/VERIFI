@@ -18,20 +18,20 @@ describe('FacilityAnalysisWorkbenchStageNavigationComponent', () => {
             stages: signal([
               {
                 id: 'analysis', kind: 'analysis', label: 'Analysis Setup', route: ['/setup'],
-                current: true, completed: false, canOpen: true
+                current: true, completed: true, hasBlockingErrors: false, canOpen: true
               },
               {
                 id: 'group:group-a', kind: 'group', label: 'Group A', route: ['/group-a'],
-                current: false, completed: true, canOpen: false,
+                current: false, completed: false, hasBlockingErrors: true, canOpen: false,
                 attention: { total: 2, errorCount: 1, warningCount: 1, state: 'error' }
               },
               {
                 id: 'facility', kind: 'facility', label: 'Facility Results', route: ['/facility'],
-                current: false, completed: false, canOpen: false
+                current: false, completed: false, hasBlockingErrors: true, canOpen: false
               },
               {
                 id: 'used-by', kind: 'used-by', label: 'Used By', route: ['/used-by'],
-                current: false, completed: false, canOpen: true
+                current: false, completed: false, hasBlockingErrors: false, canOpen: true
               }
             ]),
             contextTabs: signal([]),
@@ -49,16 +49,15 @@ describe('FacilityAnalysisWorkbenchStageNavigationComponent', () => {
     const stages = fixture.nativeElement.querySelectorAll('li') as NodeListOf<HTMLElement>;
     expect(stages[0].classList).toContain('is-current');
     expect(stages[0].querySelector('[aria-current="step"]')).not.toBeNull();
-    expect(stages[1].classList).toContain('is-complete');
     expect(stages[1].classList).toContain('is-blocked');
     expect(stages[1].querySelector('[aria-disabled="true"]')).not.toBeNull();
-    expect(stages[1].textContent).toContain('2 issues');
+    expect(stages[1].textContent).toContain('Has blocking errors');
+    expect(stages[1].querySelector('.v1-analysis-workbench__stage-attention')).toBeNull();
     expect(fixture.nativeElement.querySelector('.v1-analysis-workbench__stage-number')).toBeNull();
-    expect(stages[0].textContent).toContain('Not complete');
-    expect(stages[1].textContent).toContain('Complete');
+    expect(stages[0].textContent).toContain('Complete');
     const icons = fixture.debugElement.queryAll(By.css('.v1-analysis-workbench__stage-marker app-ui-icon'))
       .map(element => element.componentInstance.name);
-    expect(icons).toEqual(['success', 'chartLine', 'link']);
+    expect(icons).toEqual(['checkmarkBadge', 'badgeAlert', 'chartAnalysis', 'link']);
   });
 
   it('renders and delegates the current stage contextual tabs', () => {
@@ -88,6 +87,7 @@ describe('FacilityAnalysisWorkbenchStageNavigationComponent', () => {
 
     const contextualTabs = fixture.nativeElement.querySelector('app-data-workbench-tabs') as HTMLElement;
     expect(contextualTabs).not.toBeNull();
+    expect(contextualTabs.querySelector('nav')?.classList).toContain('v1-data-tabs--secondary');
     expect(contextualTabs.querySelector('[aria-current="page"]')?.textContent).toContain('Annual');
     (contextualTabs.querySelector('button') as HTMLButtonElement).click();
     expect(openContextTab).toHaveBeenCalledWith('setup');

@@ -204,7 +204,7 @@ describe('SectionNavComponent', () => {
       .toEqual(['Complete', 'Complete', 'Complete', 'Results', 'Dependencies']);
     const icons = fixture.debugElement.queryAll(By.css('.v1-nav__analysis-workflow .v1-workflow-stepper__marker app-ui-icon'))
       .map(element => element.componentInstance.name);
-    expect(icons).toEqual(['success', 'success', 'success', 'chartLine', 'link']);
+    expect(icons).toEqual(['checkmarkBadge', 'checkmarkBadge', 'checkmarkBadge', 'chartAnalysis', 'link']);
   });
 
   it('shows an accessible empty marker for an incomplete analysis stage', () => {
@@ -238,9 +238,11 @@ describe('SectionNavComponent', () => {
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
     const current = fixture.nativeElement.querySelector('[aria-current="step"]') as HTMLElement;
+    const icons = fixture.debugElement.queryAll(By.css('.v1-nav__analysis-workflow .v1-workflow-stepper__marker app-ui-icon'))
+      .map(element => element.componentInstance.name);
 
-    expect(current.textContent).toContain('Not complete');
-    expect(current.querySelector('.v1-workflow-stepper__marker app-ui-icon')).toBeNull();
+    expect(current.textContent).toContain('Has blocking errors');
+    expect(icons).toContain('badgeAlert');
   });
 
   it('shows account settings navigation only when the Settings rail section is active', () => {

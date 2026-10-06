@@ -1,4 +1,7 @@
-<nav class="v1-data-tabs v1-data-tabs--connected" [attr.aria-label]="ariaLabel">
+<nav
+  class="v1-data-tabs v1-data-tabs--connected"
+  [class.v1-data-tabs--secondary]="level === 'secondary'"
+  [attr.aria-label]="ariaLabel">
   @for (tab of tabs; track tab.id) {
     @let tabAttention = attention[tab.id];
     <button

@@ -70,6 +70,7 @@ describe('facility analysis workbench models', () => {
     ]);
     expect(navigation.map(stage => stage.current)).toEqual([false, true, false, false, false]);
     expect(navigation.map(stage => stage.completed)).toEqual([true, false, true, false, false]);
+    expect(navigation.map(stage => stage.hasBlockingErrors)).toEqual([false, true, false, true, false]);
     expect(navigation.map(stage => stage.available)).toEqual([true, true, true, false, true]);
     expect(navigation.map(stage => stage.canOpen)).toEqual([true, true, true, false, true]);
     expect(buildAnalysisWorkbenchStageNavigation(stages, 'analysis', analysis.guid, [], true)

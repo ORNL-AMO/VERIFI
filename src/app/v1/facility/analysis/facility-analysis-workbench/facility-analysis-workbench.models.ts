@@ -25,6 +25,7 @@ export interface AnalysisWorkbenchStage {
 export interface AnalysisWorkbenchStageNavigation extends AnalysisWorkbenchStage {
   readonly current: boolean;
   readonly completed: boolean;
+  readonly hasBlockingErrors: boolean;
   readonly available: boolean;
   readonly canOpen: boolean;
 }
@@ -112,11 +113,15 @@ export function buildAnalysisWorkbenchStageNavigation(
   statusReady = true
 ): readonly AnalysisWorkbenchStageNavigation[] {
   const currentIndex = stages.findIndex(stage => stage.id === currentStageId);
+  const blockingErrors = new Map(stages.map(stage => [
+    stage.id,
+    stageHasBlockingErrors(stage, analysisGuid, findings)
+  ]));
   const completion = new Map(stages.map(stage => [
     stage.id,
     statusReady
       && (stage.kind === 'analysis' || stage.kind === 'group')
-      && !stageHasBlockingErrors(stage, analysisGuid, findings)
+      && !blockingErrors.get(stage.id)
   ]));
   const setupComplete = completion.get('analysis') === true;
   const groupStages = stages.filter(stage => stage.kind === 'group');
@@ -125,6 +130,7 @@ export function buildAnalysisWorkbenchStageNavigation(
     ...stage,
     current: index === currentIndex,
     completed: completion.get(stage.id) === true,
+    hasBlockingErrors: blockingErrors.get(stage.id) === true,
     available: stage.kind === 'analysis'
       || stage.kind === 'used-by'
       || (stage.kind === 'group' && setupComplete)

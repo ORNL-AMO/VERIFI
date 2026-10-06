@@ -216,17 +216,18 @@
 
 .v1-nav__analysis-workflow .v1-workflow-stepper__marker {
   display: inline-grid;
-  flex: 0 0 1.45rem;
-  width: 1.45rem;
-  height: 1.45rem;
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
   place-items: center;
-  border: 1px solid currentColor;
-  border-radius: 50%;
 }
 
 .v1-nav__analysis-workflow .v1-workflow-stepper__marker.is-complete {
-  border-color: transparent;
   color: var(--v1-success);
+}
+
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker.has-blocking-errors {
+  color: var(--v1-danger);
 }
 
 .v1-nav__analysis-workflow .v1-workflow-stepper__marker .v1-icon {

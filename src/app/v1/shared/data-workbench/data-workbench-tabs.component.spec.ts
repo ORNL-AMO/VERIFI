@@ -37,12 +37,14 @@ describe('DataWorkbenchTabsComponent', () => {
     fixture.componentRef.setInput('activeTab', 'regression');
     fixture.componentRef.setInput('ariaLabel', 'Analysis sections');
     fixture.componentRef.setInput('attentionDisplay', 'indicator');
+    fixture.componentRef.setInput('level', 'secondary');
     fixture.componentRef.setInput('attention', {
       regression: { total: 2, errorCount: 1, warningCount: 1, state: 'error' }
     });
     fixture.detectChanges();
 
     const indicator = fixture.nativeElement.querySelector('.v1-data-tabs__attention') as HTMLElement;
+    expect(fixture.nativeElement.querySelector('nav').classList).toContain('v1-data-tabs--secondary');
     expect(indicator.textContent).toContain('!');
     expect(indicator.textContent).toContain('2 issues');
   });

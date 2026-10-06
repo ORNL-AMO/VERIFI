@@ -1,3 +1,16 @@
+.v1-data-tabs--secondary {
+  background: color-mix(in srgb, var(--v1-panel) 72%, var(--v1-bg));
+}
+
+.v1-data-tabs--secondary .v1-data-tabs__tab {
+  font-size: .82rem;
+  line-height: 1.2;
+}
+
+.v1-data-tabs--secondary .v1-data-tabs__tab--active {
+  box-shadow: inset 0 -2px 0 var(--v1-content-control);
+}
+
 .v1-data-tabs__attention {
   display: inline-flex;
   align-items: center;
