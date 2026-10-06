@@ -2,9 +2,7 @@
 <section class="v1-analysis-section" aria-label="Monthly table results">
   <app-analysis-result-toolbar
     [description]="'Actual and modeled use, predictors, adjustments, and savings in ' + (unit() || 'analysis units') + '.'"
-    ariaLabel="Monthly table results"
-    display="table"
-    [showViewToggle]="false">
+    ariaLabel="Monthly table results">
     <app-analysis-result-column-chooser result-actions [options]="columnOptions"></app-analysis-result-column-chooser>
   </app-analysis-result-toolbar>
 

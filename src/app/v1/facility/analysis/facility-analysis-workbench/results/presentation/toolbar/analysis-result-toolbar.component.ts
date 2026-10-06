@@ -1,19 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IconComponent } from '@app/v1/shared/icons/icon.component';
-import { AnalysisResultDisplay } from '../facility-analysis-results-display.service';
+import { Component, Input } from '@angular/core';
 
-/** Shared table/graph controls for facility-analysis result pages. */
+/** Shared description and action header for facility-analysis result pages. */
 @Component({
   selector: 'app-analysis-result-toolbar',
   standalone: true,
-  imports: [IconComponent],
   templateUrl: './analysis-result-toolbar.component.html',
   styleUrls: ['./analysis-result-toolbar.component.css']
 })
 export class AnalysisResultToolbarComponent {
   @Input({ required: true }) description = '';
   @Input({ required: true }) ariaLabel = '';
-  @Input({ required: true }) display: AnalysisResultDisplay = 'table';
-  @Input() showViewToggle = true;
-  @Output() readonly displayChanged = new EventEmitter<AnalysisResultDisplay>();
 }

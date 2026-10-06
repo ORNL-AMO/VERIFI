@@ -1,26 +1,6 @@
-<div class="v1-analysis-results__toolbar">
+<div class="v1-analysis-results__toolbar" [attr.aria-label]="ariaLabel">
   <p>{{ description }}</p>
   <div class="v1-analysis-results__actions">
-    @if (showViewToggle) {
-    <div class="v1-segmented" role="group" [attr.aria-label]="ariaLabel">
-      <button
-        type="button"
-        class="v1-segmented__btn"
-        [attr.aria-pressed]="display === 'table'"
-        (click)="displayChanged.emit('table')">
-        <app-ui-icon name="table"></app-ui-icon>
-        Table
-      </button>
-      <button
-        type="button"
-        class="v1-segmented__btn"
-        [attr.aria-pressed]="display === 'graph'"
-        (click)="displayChanged.emit('graph')">
-        <app-ui-icon name="chartLine"></app-ui-icon>
-        Graph
-      </button>
-    </div>
-    }
     <ng-content select="[result-actions]"></ng-content>
   </div>
 </div>

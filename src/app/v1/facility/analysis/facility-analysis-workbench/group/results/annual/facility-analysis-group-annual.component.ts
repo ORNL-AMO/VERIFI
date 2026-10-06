@@ -14,8 +14,6 @@ export class FacilityAnalysisGroupAnnualComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
-  readonly displayKey = computed(() => `group:${this.groupContext.groupGuid()}:annual`);
-  readonly display = computed(() => this.displaySettings.display(this.displayKey()));
   readonly columns = this.displaySettings.columns;
   readonly groupResult = computed(() => this.results.selectedGroup(this.groupContext.groupGuid()));
   readonly rows = computed(() => this.groupResult()?.annualAnalysisSummaryData ?? []);

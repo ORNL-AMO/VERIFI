@@ -1,22 +1,22 @@
 @let resultState = results.state();
-<section class="v1-analysis-section" aria-label="Annual results">
-  <app-analysis-result-toolbar
-    [description]="'Actual use, adjusted baseline, and savings in ' + (unit() || 'analysis units') + '.'"
-    ariaLabel="Annual result view"
-    [display]="display()"
-    (displayChanged)="displaySettings.setDisplay(displayKey(), $event)">
-    <app-analysis-result-column-chooser result-actions [options]="columnOptions"></app-analysis-result-column-chooser>
-  </app-analysis-result-toolbar>
+<section class="v1-analysis-results-page" aria-label="Annual results">
+  <div class="v1-analysis-results-page__intro" [class.v1-analysis-results-page__intro--standalone]="groupContext.workbench.hasBlockingErrors() || resultState.state !== 'ready' || !rows().length">
+    <app-analysis-result-toolbar
+      [description]="'Actual use, adjusted baseline, and savings in ' + (unit() || 'analysis units') + '.'"
+      ariaLabel="Annual results">
+      <app-analysis-result-column-chooser result-actions [options]="columnOptions"></app-analysis-result-column-chooser>
+    </app-analysis-result-toolbar>
 
-  <app-analysis-result-status
-    scope="group"
-    period="annual"
-    [state]="resultState"
-    [blocking]="groupContext.workbench.hasBlockingErrors()"
-    [rowCount]="rows().length">
-  </app-analysis-result-status>
+    <app-analysis-result-status
+      scope="group"
+      period="annual"
+      [state]="resultState"
+      [blocking]="groupContext.workbench.hasBlockingErrors()"
+      [rowCount]="rows().length">
+    </app-analysis-result-status>
+  </div>
 
-  @if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length && display() === 'graph') {
+  @if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
     <app-meter-results-chart
       [chartRows]="chartRows()"
       [metrics]="chartMetrics"
@@ -24,11 +24,12 @@
       defaultRightMetricId="savings"
       period="yearly"
       ariaLabel="Group annual actual, modeled, and savings chart"
-      downloadFileName="group-annual-analysis">
+      downloadFileName="group-annual-analysis"
+      [joinsFollowingSection]="true">
     </app-meter-results-chart>
-  } @else if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
-    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Group annual analysis results">
-      <table class="table">
+    <section class="v1-analysis-results-page__table" aria-label="Group annual analysis table">
+      <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Group annual analysis results">
+        <table class="table">
         <thead>
           <tr>
             <th scope="col">Year</th>
@@ -62,7 +63,8 @@
             </tr>
           }
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </section>
   }
 </section>
