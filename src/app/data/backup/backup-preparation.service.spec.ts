@@ -69,6 +69,14 @@ describe('BackupPreparationService', () => {
     expect(() => service.prepare(wrongAccount)).toThrow(BackupRelationshipError);
   });
 
+  it('rejects recovery snapshots as normal account backups', () => {
+    expect(() => service.prepare({
+      format: 'VERIFI IndexedDB Recovery',
+      formatVersion: 1,
+      snapshotId: 'recovery'
+    })).toThrow(InvalidBackupError);
+  });
+
   it('recovers a selected regression model that references a missing predictor', () => {
     const input = accountBackup() as any;
     input.predictors.push({ guid: 'pred-live', accountId: 'account', facilityId: 'facility' });

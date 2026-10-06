@@ -1,0 +1,7 @@
+.startup-error-panel {
+  max-width: 56rem;
+}
+
+.recovery-panel {
+  color: var(--bs-body-color);
+}
