@@ -1,19 +1,17 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
+import { Component, computed, inject } from '@angular/core';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, findingsForAnalysisStage, stageHasBlockingErrors } from './facility-analysis-workbench.models';
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
-import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from './editing/facility-analysis-autosave.service';
+import { FacilityAnalysisAutosaveService } from './editing/facility-analysis-autosave.service';
 import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from './results/calculation/facility-analysis-results.service';
 import { FacilityAnalysisResultsDisplayService } from './results/presentation/facility-analysis-results-display.service';
 import { RegressionCandidateStore } from './group/regression/regression-candidate.store';
 import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysis-period.service';
+import { FacilityAnalysisWorkbenchNavigationService } from './navigation/facility-analysis-workbench-navigation.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -24,7 +22,8 @@ import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysi
     FacilityAnalysisPeriodService,
     FacilityAnalysisResultsService,
     FacilityAnalysisResultsDisplayService,
-    RegressionCandidateStore
+    RegressionCandidateStore,
+    FacilityAnalysisWorkbenchNavigationService
   ],
   imports: [RouterOutlet, RouterLink, DecimalPipe, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent],
   templateUrl: './facility-analysis-workbench.component.html',
@@ -32,44 +31,17 @@ import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysi
 })
 export class FacilityAnalysisWorkbenchComponent {
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly activeStageState = signal(activeAnalysisWorkbenchStageId(this.router.url));
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly period = inject(FacilityAnalysisPeriodService);
   readonly results = inject(FacilityAnalysisResultsService);
-  readonly activeStageId = this.activeStageState.asReadonly();
+  readonly workflow = inject(FacilityAnalysisWorkbenchNavigationService);
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
     label: analysis.name || 'Untitled analysis',
     icon: 'analysis' as const
   })));
-  readonly stageIndex = computed(() => this.context.stages().findIndex(stage => stage.id === this.activeStageId()));
-  readonly currentStage = computed(() => this.context.stages()[this.stageIndex()]);
-  readonly previousStage = computed(() => this.context.stages()[this.stageIndex() - 1]);
-  readonly nextStage = computed(() => this.context.stages()[this.stageIndex() + 1]);
-  readonly currentStageHasBlockingErrors = computed(() => stageHasBlockingErrors(
-    this.currentStage(), this.context.analysisGuid(), this.context.findings()
-  ));
-  readonly currentStageFindings = computed(() => findingsForAnalysisStage(
-    this.currentStage(), this.context.analysisGuid(), this.context.findings()
-  ));
-  readonly stageNavigation = computed(() => {
-    const stages = this.context.stages();
-    const attention = buildAnalysisWorkbenchStageAttention(
-      stages,
-      this.context.analysisGuid(),
-      this.context.findings()
-    );
-    return buildAnalysisWorkbenchStageNavigation(
-      stages,
-      this.activeStageId(),
-      this.context.analysisGuid(),
-      this.context.findings(),
-      ['saving', 'invalid', 'error'].includes(this.autosave.state())
-    ).map(stage => ({ ...stage, attention: attention[stage.id] }));
-  });
   readonly resultFacts = computed(() => facilityAnalysisResultFacts(
     this.results.state(),
     this.autosave.state(),
@@ -85,51 +57,13 @@ export class FacilityAnalysisWorkbenchComponent {
     const bankingConsumerCount = this.context.analyses().filter(item => item.bankedAnalysisItemId === analysis.guid).length;
     return facilityAnalysisDependencyMessage(accountAnalysisCount, reportCount, bankingConsumerCount);
   });
-  readonly navigationRequirement = computed(() => analysisNavigationRequirement(
-    this.autosave.state(), this.currentStageHasBlockingErrors(), !!this.nextStage()
-  ));
-  readonly navigationDisabled = computed(() => !!this.navigationRequirement());
-
-  constructor() {
-    this.syncActiveStage(this.router.url);
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(event => this.syncActiveStage(event.urlAfterRedirects));
-  }
-
   switchAnalysis(analysisGuid: string): void {
     const facility = this.context.facility();
     if (facility) void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, analysisGuid));
   }
 
-  back(): void {
-    const previous = this.previousStage();
-    if (previous) {
-      void this.router.navigate(previous.route);
-      return;
-    }
-    const facility = this.context.facility();
-    if (facility) void this.router.navigate(this.navigation.facilityAnalysisRoute(facility.guid));
-  }
-
-  continue(): void {
-    const next = this.nextStage();
-    if (next) void this.router.navigate(next.route);
-  }
-
-  finish(): void {
-    const facility = this.context.facility();
-    if (facility) void this.router.navigate(this.navigation.facilityAnalysisRoute(facility.guid));
-  }
-
   hasUnsavedChanges(): boolean { return this.autosave.isDirty(); }
   isNavigationBlocked(): boolean { return this.autosave.isBlocked(); }
-
-  private syncActiveStage(url: string): void {
-    const stageId = activeAnalysisWorkbenchStageId(url);
-    this.activeStageState.set(stageId);
-  }
 }
 
 export interface FacilityAnalysisResultFacts {
@@ -168,18 +102,6 @@ export function facilityAnalysisResultFacts(
       : undefined,
     unavailableMessage: Number.isFinite(totalSavingsPercentImprovement) ? undefined : 'Unavailable'
   };
-}
-
-export function analysisNavigationRequirement(
-  autosaveState: AnalysisAutosaveState,
-  currentStageHasBlockingErrors: boolean,
-  hasNextStage: boolean
-): string | undefined {
-  if (autosaveState === 'saving') return 'Saving changes before navigation is available.';
-  if (autosaveState === 'invalid') return 'Fix the validation errors before continuing.';
-  if (autosaveState === 'error') return 'Retry or discard the unsaved changes before continuing.';
-  if (hasNextStage && currentStageHasBlockingErrors) return 'Resolve the errors in this stage before continuing.';
-  return undefined;
 }
 
 export function facilityAnalysisDependencyMessage(

@@ -105,9 +105,9 @@
         </ul>
       }
 
-      @if (currentStageFindings().length) {
+      @if (workflow.currentStageFindings().length) {
         <ul class="v1-data-workbench-status-notes v1-analysis-workbench__status-notes" aria-label="Analysis status items">
-          @for (finding of currentStageFindings(); track finding.id) {
+          @for (finding of workflow.currentStageFindings(); track finding.id) {
             <li [class.v1-analysis-workbench__status-note--error]="finding.severity === 'error'">
               <app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon>
               <span><strong>{{ finding.title }}</strong> {{ finding.description }}</span>
@@ -123,7 +123,7 @@
 
   <nav class="v1-analysis-workbench__stage-tabs" aria-label="Analysis workflow stages">
     <ol>
-      @for (stage of stageNavigation(); track stage.id; let index = $index) {
+      @for (stage of workflow.stages(); track stage.id; let index = $index) {
         <li [class.is-current]="stage.current" [class.is-complete]="stage.completed" [class.is-blocked]="!stage.canOpen">
           @if (stage.canOpen) {
             <a [routerLink]="stage.route" [attr.aria-current]="stage.current ? 'step' : null">
@@ -158,19 +158,19 @@
   </main>
 
   <footer class="v1-wizard-actions" aria-label="Analysis workflow navigation">
-    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="autosave.isBlocked()" (click)="back()">
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="autosave.isBlocked()" (click)="workflow.back()">
       <app-ui-icon name="chevronLeft"></app-ui-icon> Back
     </button>
     <div class="v1-wizard-actions__next">
-      @if (navigationRequirement(); as message) {
+      @if (workflow.requirement(); as message) {
         <span id="v1-analysis-navigation-requirement" class="v1-wizard-actions__requirement" role="status">{{ message }}</span>
       }
-      @if (nextStage()) {
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="navigationDisabled()" [attr.aria-describedby]="navigationRequirement() ? 'v1-analysis-navigation-requirement' : null" (click)="continue()">
+      @if (workflow.nextStage()) {
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="workflow.disabled()" [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null" (click)="workflow.continue()">
           Continue <app-ui-icon name="chevronRight"></app-ui-icon>
         </button>
       } @else {
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="navigationDisabled()" [attr.aria-describedby]="navigationRequirement() ? 'v1-analysis-navigation-requirement' : null" (click)="finish()">
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="workflow.disabled()" [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null" (click)="workflow.finish()">
           Finish <app-ui-icon name="check"></app-ui-icon>
         </button>
       }
