@@ -31,12 +31,17 @@ describe('ElectronBackupFileGateway', () => {
     await expect(gateway.exists('/tmp/account.json')).resolves.toBe(true);
     await expect(gateway.read('/tmp/account.json')).resolves.toEqual({ origin: 'VERIFI' });
     await expect(gateway.write('/tmp/account.json', { origin: 'VERIFI' } as any)).resolves.toBeUndefined();
+    await expect(gateway.writeJson('/tmp/recovery.json', { format: 'recovery' })).resolves.toBeUndefined();
 
     expect(invoke).toHaveBeenCalledWith('backup:exists', { path: '/tmp/account.json' });
     expect(invoke).toHaveBeenCalledWith('backup:read', { path: '/tmp/account.json' });
     expect(invoke).toHaveBeenCalledWith('backup:write', {
       path: '/tmp/account.json',
       backup: { origin: 'VERIFI' }
+    });
+    expect(invoke).toHaveBeenCalledWith('backup:write', {
+      path: '/tmp/recovery.json',
+      backup: { format: 'recovery' }
     });
   });
 });

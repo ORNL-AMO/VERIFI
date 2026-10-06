@@ -42,7 +42,9 @@ describe('version zero to one migration', () => {
 
     expect(first.data.deprecatedPredictorData).toEqual([]);
     expect(first.data.predictors).toHaveLength(1);
+    expect(first.data.predictors[0]).not.toHaveProperty('id');
     expect(first.data.predictorData[0]).toMatchObject({ predictorId: 'old-predictor', year: 2024, month: 3, amount: 10 });
+    expect(first.data.predictorData[0]).not.toHaveProperty('id');
     expect(second.changedCollections).toEqual([]);
     expect(second.data).toEqual(first.data);
   });
