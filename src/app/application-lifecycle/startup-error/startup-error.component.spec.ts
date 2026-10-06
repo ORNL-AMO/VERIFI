@@ -86,12 +86,12 @@ describe('StartupErrorComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('/tmp/recovery.json');
   });
 
-  it('requires a second destructive confirmation and reports reset failure', async () => {
+  it('requires a second destructive confirmation and reports reset or restart failure neutrally', async () => {
     renderError('migrations');
     migrationRecovery.exportSnapshot.mockResolvedValue({
       status: 'saved', snapshot: { snapshotId: 'snapshot' }, fileName: 'recovery.json'
     });
-    databaseReset.resetAndRestart.mockResolvedValue(false);
+    databaseReset.resetAndRestart.mockRejectedValue(new Error('Restart failed after the database was deleted.'));
     buttonNamed('Save recovery snapshot').click();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -105,7 +105,8 @@ describe('StartupErrorComponent', () => {
     fixture.detectChanges();
 
     expect(databaseReset.resetAndRestart).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('existing data remains in place');
+    expect(fixture.nativeElement.textContent).toContain('Keep the recovery snapshot in a safe location');
+    expect(fixture.nativeElement.textContent).not.toContain('existing data remains in place');
   });
 
   function renderError(step: 'database' | 'migrations'): void {

@@ -90,7 +90,7 @@ export class StartupErrorComponent {
     }
     if (this.recoveryStatus === 'resetting') {
       this.recoveryStatus = 'reset-failed';
-      this.recoveryMessage = 'VERIFI could not reset the local database. Your existing data remains in place.';
+      this.recoveryMessage = 'VERIFI could not complete the reset and restart process. Keep the recovery snapshot in a safe location, then restart or reload VERIFI. Contact the VERIFI help desk if the problem continues.';
     }
   }
 

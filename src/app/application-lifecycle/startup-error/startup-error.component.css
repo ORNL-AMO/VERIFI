@@ -1,5 +1,7 @@
 .startup-error-panel {
   max-width: 56rem;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
 }
 
 .recovery-panel {
