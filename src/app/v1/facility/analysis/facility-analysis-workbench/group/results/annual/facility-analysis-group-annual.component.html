@@ -1,6 +1,6 @@
 @let resultState = results.state();
 <section class="v1-analysis-results-page" aria-label="Annual results">
-  <div class="v1-analysis-results-page__intro" [class.v1-analysis-results-page__intro--standalone]="groupContext.workbench.hasBlockingErrors() || resultState.state !== 'ready' || !rows().length">
+  <div class="v1-analysis-results-page__intro" [class.v1-analysis-results-page__intro--standalone]="results.hasBlockingErrors() || resultState.state !== 'ready' || !rows().length">
     <app-analysis-result-toolbar
       [description]="'Actual use, adjusted baseline, and savings in ' + (unit() || 'analysis units') + '.'"
       ariaLabel="Annual results">
@@ -11,12 +11,12 @@
       scope="group"
       period="annual"
       [state]="resultState"
-      [blocking]="groupContext.workbench.hasBlockingErrors()"
+      [blocking]="results.hasBlockingErrors()"
       [rowCount]="rows().length">
     </app-analysis-result-status>
   </div>
 
-  @if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
+  @if (!results.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
     <app-meter-results-chart
       [chartRows]="chartRows()"
       [metrics]="chartMetrics"

@@ -6,11 +6,12 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../../facility-analysis-workbench-context.service';
 import { AnalysisWorkbenchTabId, isSkippedAnalysisType } from '../../facility-analysis-workbench.models';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
+import { FacilityAnalysisGroupResultsService } from '../results/calculation/facility-analysis-group-results.service';
 
 @Component({
   selector: 'app-facility-analysis-group-shell',
   standalone: true,
-  providers: [FacilityAnalysisGroupContext],
+  providers: [FacilityAnalysisGroupContext, FacilityAnalysisGroupResultsService],
   imports: [RouterOutlet, IconComponent],
   templateUrl: './facility-analysis-group-shell.component.html',
   styleUrls: ['./facility-analysis-group-shell.component.css']

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { FacilityAnalysisGroupContext } from '../../facility-analysis-group-context.service';
-import { FacilityAnalysisResultsService } from '../../../results/calculation/facility-analysis-results.service';
+import { FacilityAnalysisGroupResultsService } from '../calculation/facility-analysis-group-results.service';
 import { FacilityAnalysisResultsDisplayService } from '../../../results/presentation/facility-analysis-results-display.service';
 import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
 import { AnalysisResultToolbarComponent } from '../../../results/presentation/toolbar/analysis-result-toolbar.component';
@@ -16,11 +16,13 @@ import { AnalysisResultColumnChooserComponent } from '../../../results/presentat
 })
 export class FacilityAnalysisGroupMonthlyTableComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
-  readonly results = inject(FacilityAnalysisResultsService);
+  readonly results = inject(FacilityAnalysisGroupResultsService);
   readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
   readonly columns = this.displaySettings.columns;
-  readonly groupResult = computed(() => this.results.selectedGroup(this.groupContext.groupGuid()));
-  readonly rows = computed(() => this.groupResult()?.monthlyAnalysisSummaryData ?? []);
+  readonly rows = computed(() => {
+    const state = this.results.state();
+    return state.state === 'ready' ? state.monthly : [];
+  });
   readonly rowViews = computed(() => this.rows().map(row => ({
     row,
     predictors: Object.fromEntries((row.predictorUsage ?? []).map(item => [item.predictorId, item.usage]))

@@ -9,11 +9,11 @@
     scope="group"
     period="monthly"
     [state]="resultState"
-    [blocking]="groupContext.workbench.hasBlockingErrors()"
+    [blocking]="results.hasBlockingErrors()"
     [rowCount]="rows().length">
   </app-analysis-result-status>
 
-  @if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
+  @if (!results.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
     <app-meter-results-chart
       [chartRows]="chartRows()"
       [metrics]="chartMetrics"
