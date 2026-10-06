@@ -6,11 +6,16 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import {
+  ANALYSIS_FACILITY_TABS,
+  AnalysisWorkbenchTab,
+  AnalysisWorkbenchTabId,
   activeAnalysisWorkbenchStageId,
   buildAnalysisWorkbenchStageAttention,
   buildAnalysisWorkbenchStageNavigation,
+  buildAnalysisWorkbenchTabAttention,
   findingsForAnalysisStage,
-  stageHasBlockingErrors
+  stageHasBlockingErrors,
+  tabsForAnalysisGroup
 } from '../facility-analysis-workbench.models';
 
 @Injectable()
@@ -21,8 +26,10 @@ export class FacilityAnalysisWorkbenchNavigationService {
   private readonly autosave = inject(FacilityAnalysisAutosaveService);
   private readonly workspaceNavigation = inject(WorkspaceNavigationService);
   private readonly activeStageState = signal(activeAnalysisWorkbenchStageId(this.router.url));
+  private readonly activeContextTabState = signal<AnalysisWorkbenchTabId>(activeAnalysisWorkbenchTabId(this.router.url));
 
   readonly activeStageId = this.activeStageState.asReadonly();
+  readonly activeContextTabId = this.activeContextTabState.asReadonly();
   readonly stageIndex = computed(() => this.context.stages().findIndex(stage => stage.id === this.activeStageId()));
   readonly currentStage = computed(() => this.context.stages()[this.stageIndex()]);
   readonly previousStage = computed(() => this.context.stages()[this.stageIndex() - 1]);
@@ -47,6 +54,25 @@ export class FacilityAnalysisWorkbenchNavigationService {
       this.context.findings(),
       ['saving', 'invalid', 'error'].includes(this.autosave.state())
     ).map(stage => ({ ...stage, attention: attention[stage.id] }));
+  });
+  readonly contextTabs = computed<readonly AnalysisWorkbenchTab[]>(() => {
+    const stage = this.currentStage();
+    if (stage?.kind === 'facility') return ANALYSIS_FACILITY_TABS;
+    if (stage?.kind !== 'group' || !stage.groupGuid) return [];
+    const analysis = this.autosave.draft() || this.context.analysis();
+    return tabsForAnalysisGroup(analysis?.groups.find(group => group.idbGroupId === stage.groupGuid));
+  });
+  readonly contextTabAttention = computed(() => {
+    const stage = this.currentStage();
+    const tabs = this.contextTabs();
+    if (!stage || !tabs.length || (stage.kind !== 'group' && stage.kind !== 'facility')) return {};
+    return buildAnalysisWorkbenchTabAttention(
+      tabs,
+      this.context.analysisGuid(),
+      stage.kind,
+      this.context.findings(),
+      stage.groupGuid
+    );
   });
   readonly requirement = computed(() => analysisNavigationRequirement(
     this.autosave.state(), this.currentStageHasBlockingErrors(), !!this.nextStage()
@@ -81,9 +107,22 @@ export class FacilityAnalysisWorkbenchNavigationService {
     if (facility) void this.router.navigate(this.workspaceNavigation.facilityAnalysisRoute(facility.guid));
   }
 
+  openContextTab(tabId: string): void {
+    const stage = this.currentStage();
+    if (!stage || !this.contextTabs().some(tab => tab.id === tabId)) return;
+    void this.router.navigate([...stage.route.slice(0, -1), tabId]);
+  }
+
   private syncActiveStage(url: string): void {
     this.activeStageState.set(activeAnalysisWorkbenchStageId(url));
+    this.activeContextTabState.set(activeAnalysisWorkbenchTabId(url));
   }
+}
+
+function activeAnalysisWorkbenchTabId(url: string): AnalysisWorkbenchTabId {
+  const segments = url.split(/[?#]/, 1)[0].split('/');
+  const tabId = segments[segments.length - 1];
+  return tabId === 'regression' || tabId === 'annual' || tabId === 'monthly' ? tabId : 'setup';
 }
 
 export function analysisNavigationRequirement(

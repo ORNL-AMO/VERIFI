@@ -1,18 +1,17 @@
-import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../../facility-analysis-workbench-context.service';
-import { AnalysisWorkbenchTabId, buildAnalysisWorkbenchTabAttention, isSkippedAnalysisType, tabsForAnalysisGroup } from '../../facility-analysis-workbench.models';
+import { AnalysisWorkbenchTabId, isSkippedAnalysisType } from '../../facility-analysis-workbench.models';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 
 @Component({
   selector: 'app-facility-analysis-group-shell',
   standalone: true,
   providers: [FacilityAnalysisGroupContext],
-  imports: [RouterOutlet, DataWorkbenchTabsComponent, IconComponent],
+  imports: [RouterOutlet, IconComponent],
   templateUrl: './facility-analysis-group-shell.component.html',
   styleUrls: ['./facility-analysis-group-shell.component.css']
 })
@@ -25,15 +24,6 @@ export class FacilityAnalysisGroupShellComponent {
   readonly groupGuid = this.groupContext.groupGuid;
   readonly group = this.groupContext.group;
   readonly meterGroup = this.groupContext.meterGroup;
-  readonly tabs = computed(() => tabsForAnalysisGroup(this.group()));
-  readonly tabAttention = computed(() => buildAnalysisWorkbenchTabAttention(
-    this.tabs(),
-    this.context.analysisGuid(),
-    'group',
-    this.groupContext.findings(),
-    this.groupGuid()
-  ));
-  readonly activeTab = this.activeTabState.asReadonly();
   private readonly canonicalRouteEffect = effect(() => {
     const facility = this.context.facility();
     const analysis = this.context.analysis();
@@ -55,19 +45,6 @@ export class FacilityAnalysisGroupShellComponent {
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => this.syncActiveTab());
-  }
-
-  openTab(tab: string): void {
-    if (!isAnalysisWorkbenchTab(tab)) return;
-    const facility = this.context.facility();
-    const analysis = this.context.analysis();
-    const group = this.group();
-    if (facility && analysis && group && this.tabs().some(item => item.id === tab)) {
-      void this.router.navigate([
-        '/v1', 'workspace', 'facility', facility.guid, 'analysis', 'workbench', analysis.guid,
-        'group', group.idbGroupId, tab
-      ]);
-    }
   }
 
   private syncActiveTab(): void {

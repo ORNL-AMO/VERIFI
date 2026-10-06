@@ -35,6 +35,10 @@ export const ANALYSIS_GROUP_SETUP_TAB: AnalysisWorkbenchTab = { id: 'setup', lab
 export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'covariate' };
 export const ANALYSIS_GROUP_ANNUAL_TAB: AnalysisWorkbenchTab = { id: 'annual', label: 'Annual', icon: 'calendar' };
 export const ANALYSIS_GROUP_MONTHLY_TAB: AnalysisWorkbenchTab = { id: 'monthly', label: 'Monthly', icon: 'table' };
+export const ANALYSIS_FACILITY_TABS: readonly AnalysisWorkbenchTab[] = [
+  ANALYSIS_GROUP_ANNUAL_TAB,
+  ANALYSIS_GROUP_MONTHLY_TAB
+];
 
 export function isSkippedAnalysisType(type: AnalysisType): boolean {
   return type === 'skip' || type === 'skipAnalysis';

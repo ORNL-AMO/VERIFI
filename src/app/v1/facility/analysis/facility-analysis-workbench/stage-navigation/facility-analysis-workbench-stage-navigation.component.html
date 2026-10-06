@@ -1,4 +1,7 @@
-<nav class="v1-analysis-workbench__stage-tabs" aria-label="Analysis workflow stages">
+<nav
+  class="v1-analysis-workbench__stage-tabs"
+  [class.v1-analysis-workbench__stage-tabs--with-context]="workflow.contextTabs().length > 0"
+  aria-label="Analysis workflow stages">
   <ol>
     @for (stage of workflow.stages(); track stage.id; let index = $index) {
       <li [class.is-current]="stage.current" [class.is-complete]="stage.completed" [class.is-blocked]="!stage.canOpen">
@@ -29,3 +32,13 @@
     }
   </ol>
 </nav>
+@if (workflow.contextTabs().length) {
+  <app-data-workbench-tabs
+    [tabs]="workflow.contextTabs()"
+    [activeTab]="workflow.activeContextTabId()"
+    [attention]="workflow.contextTabAttention()"
+    attentionDisplay="indicator"
+    [ariaLabel]="workflow.currentStage()?.kind === 'group' ? 'Meter group analysis sections' : 'Facility result sections'"
+    (tabSelected)="workflow.openContextTab($event)">
+  </app-data-workbench-tabs>
+}
