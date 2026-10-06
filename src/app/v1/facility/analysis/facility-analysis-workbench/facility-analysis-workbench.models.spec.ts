@@ -22,13 +22,15 @@ describe('facility analysis workbench models', () => {
   });
 
   it('shows regression and results only when the group supports them', () => {
-    expect(tabsForAnalysisGroup(regression).map(tab => tab.id)).toEqual(['setup', 'regression', 'annual', 'monthly']);
+    expect(tabsForAnalysisGroup(regression).map(tab => tab.id)).toEqual([
+      'setup', 'regression', 'annual', 'monthly-table', 'monthly-chart'
+    ]);
     expect(tabsForAnalysisGroup(skipped).map(tab => tab.id)).toEqual(['setup']);
   });
 
   it('resolves a workflow stage from every canonical route family', () => {
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/setup')).toBe('analysis');
-    expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/group/group%20a/monthly')).toBe('group:group a');
+    expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/group/group%20a/monthly-chart')).toBe('group:group a');
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/facility/annual')).toBe('facility');
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/used-by')).toBe('used-by');
   });

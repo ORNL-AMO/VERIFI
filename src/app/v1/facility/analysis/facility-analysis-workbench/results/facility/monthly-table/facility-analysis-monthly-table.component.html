@@ -1,10 +1,10 @@
 @let state = results.state();
-<section class="v1-analysis-section" aria-label="Facility monthly results">
+<section class="v1-analysis-section" aria-label="Facility monthly table results">
   <app-analysis-result-toolbar
     [description]="'Combined non-skipped group results in ' + (unit() || 'analysis units') + '.'"
-    ariaLabel="Facility monthly result view"
-    [display]="display()"
-    (displayChanged)="displaySettings.setDisplay('facility:monthly', $event)">
+    ariaLabel="Facility monthly table results"
+    display="table"
+    [showViewToggle]="false">
   </app-analysis-result-toolbar>
 
   <app-analysis-result-status
@@ -15,17 +15,7 @@
     [rowCount]="rows().length">
   </app-analysis-result-status>
 
-  @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length && display() === 'graph') {
-    <app-meter-results-chart
-      [chartRows]="chartRows()"
-      [metrics]="chartMetrics"
-      defaultLeftMetricId="actual"
-      defaultRightMetricId="savings"
-      period="monthly"
-      ariaLabel="Facility monthly actual, modeled, and savings chart"
-      downloadFileName="facility-monthly-analysis">
-    </app-meter-results-chart>
-  } @else if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
+  @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
     @if (hasMissingValues()) {
       <div class="v1-alert v1-alert--warning" role="status">
         <span>Some months contain incomplete predictor data. Review the affected group results before using these totals.</span>

@@ -14,5 +14,6 @@ export class AnalysisResultToolbarComponent {
   @Input({ required: true }) description = '';
   @Input({ required: true }) ariaLabel = '';
   @Input({ required: true }) display: AnalysisResultDisplay = 'table';
+  @Input() showViewToggle = true;
   @Output() readonly displayChanged = new EventEmitter<AnalysisResultDisplay>();
 }

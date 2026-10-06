@@ -1,0 +1,29 @@
+@let resultState = results.state();
+<section class="v1-analysis-section" aria-label="Monthly chart results">
+  <app-analysis-result-toolbar
+    [description]="'Actual and modeled use, adjustments, and savings in ' + (unit() || 'analysis units') + '.'"
+    ariaLabel="Monthly chart results"
+    display="graph"
+    [showViewToggle]="false">
+  </app-analysis-result-toolbar>
+
+  <app-analysis-result-status
+    scope="group"
+    period="monthly"
+    [state]="resultState"
+    [blocking]="groupContext.workbench.hasBlockingErrors()"
+    [rowCount]="rows().length">
+  </app-analysis-result-status>
+
+  @if (!groupContext.workbench.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
+    <app-meter-results-chart
+      [chartRows]="chartRows()"
+      [metrics]="chartMetrics"
+      defaultLeftMetricId="actual"
+      defaultRightMetricId="savings"
+      period="monthly"
+      ariaLabel="Group monthly actual, modeled, and savings chart"
+      downloadFileName="group-monthly-analysis">
+    </app-meter-results-chart>
+  }
+</section>

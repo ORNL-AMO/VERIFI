@@ -31,7 +31,7 @@ export class FacilityAnalysisGroupShellComponent {
     if (!facility || !analysis || !group) return;
     const tab = this.activeTabState();
     if ((tab === 'regression' && group.analysisType !== 'regression')
-      || ((tab === 'annual' || tab === 'monthly') && isSkippedAnalysisType(group.analysisType))) {
+      || ((tab === 'annual' || tab === 'monthly-table' || tab === 'monthly-chart') && isSkippedAnalysisType(group.analysisType))) {
       void this.router.navigate([
         '/v1', 'workspace', 'facility', facility.guid, 'analysis', 'workbench', analysis.guid,
         'group', group.idbGroupId, 'setup'
@@ -56,5 +56,9 @@ export class FacilityAnalysisGroupShellComponent {
 }
 
 function isAnalysisWorkbenchTab(value: unknown): value is AnalysisWorkbenchTabId {
-  return value === 'setup' || value === 'regression' || value === 'annual' || value === 'monthly';
+  return value === 'setup'
+    || value === 'regression'
+    || value === 'annual'
+    || value === 'monthly-table'
+    || value === 'monthly-chart';
 }

@@ -153,8 +153,8 @@ describe('WorkspaceNavigationService', () => {
     expect(service.facilityAnalysisGroupRoute('facility-a', 'analysis-a', 'group-a', 'regression')).toEqual([
       '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'group', 'group-a', 'regression'
     ]);
-    expect(service.facilityAnalysisResultsRoute('facility-a', 'analysis-a', 'monthly')).toEqual([
-      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'facility', 'monthly'
+    expect(service.facilityAnalysisResultsRoute('facility-a', 'analysis-a', 'monthly-chart')).toEqual([
+      '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'facility', 'monthly-chart'
     ]);
     expect(service.facilityMeterRoute('facility-a', 'meter-a', 'readings')).toEqual([
       '/v1',
@@ -414,8 +414,8 @@ describe('WorkspaceNavigationService', () => {
 
     router.events.next(new NavigationEnd(
       3,
-      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/group/group%20a/monthly',
-      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/group/group%20a/monthly'
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/group/group%20a/monthly-table',
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis%20a/group/group%20a/monthly-table'
     ));
     expect(service.activeAnalysisStageScope()).toBe('group');
     expect(service.activeAnalysisGroupGuid()).toBe('group a');

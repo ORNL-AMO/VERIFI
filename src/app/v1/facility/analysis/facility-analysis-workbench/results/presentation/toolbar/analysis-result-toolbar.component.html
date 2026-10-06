@@ -1,6 +1,7 @@
 <div class="v1-analysis-results__toolbar">
   <p>{{ description }}</p>
   <div class="v1-analysis-results__actions">
+    @if (showViewToggle) {
     <div class="v1-segmented" role="group" [attr.aria-label]="ariaLabel">
       <button
         type="button"
@@ -19,6 +20,7 @@
         Graph
       </button>
     </div>
+    }
     <ng-content select="[result-actions]"></ng-content>
   </div>
 </div>

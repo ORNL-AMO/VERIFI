@@ -145,7 +145,12 @@ export class FacilityAnalysisWorkbenchNavigationService {
 function activeAnalysisWorkbenchTabId(url: string): AnalysisWorkbenchTabId {
   const segments = url.split(/[?#]/, 1)[0].split('/');
   const tabId = segments[segments.length - 1];
-  return tabId === 'regression' || tabId === 'annual' || tabId === 'monthly' ? tabId : 'setup';
+  return tabId === 'regression'
+    || tabId === 'annual'
+    || tabId === 'monthly-table'
+    || tabId === 'monthly-chart'
+    ? tabId
+    : 'setup';
 }
 
 export function analysisNavigationRequirement(

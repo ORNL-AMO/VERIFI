@@ -1,0 +1,29 @@
+@let state = results.state();
+<section class="v1-analysis-section" aria-label="Facility monthly chart results">
+  <app-analysis-result-toolbar
+    [description]="'Combined non-skipped group results in ' + (unit() || 'analysis units') + '.'"
+    ariaLabel="Facility monthly chart results"
+    display="graph"
+    [showViewToggle]="false">
+  </app-analysis-result-toolbar>
+
+  <app-analysis-result-status
+    scope="facility"
+    period="monthly"
+    [state]="state"
+    [blocking]="context.hasBlockingErrors()"
+    [rowCount]="rows().length">
+  </app-analysis-result-status>
+
+  @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
+    <app-meter-results-chart
+      [chartRows]="chartRows()"
+      [metrics]="chartMetrics"
+      defaultLeftMetricId="actual"
+      defaultRightMetricId="savings"
+      period="monthly"
+      ariaLabel="Facility monthly actual, modeled, and savings chart"
+      downloadFileName="facility-monthly-analysis">
+    </app-meter-results-chart>
+  }
+</section>

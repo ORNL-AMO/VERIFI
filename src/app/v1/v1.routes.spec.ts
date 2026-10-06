@@ -60,6 +60,10 @@ import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/fa
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
 import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/shell/facility-analysis-results-shell.component';
+import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-table/facility-analysis-group-monthly-table.component';
+import { FacilityAnalysisGroupMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-chart/facility-analysis-group-monthly-chart.component';
+import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-table/facility-analysis-monthly-table.component';
+import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
 
 describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
@@ -107,6 +111,28 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'used-by' })
     ]));
     expect(workbench?.children?.find(route => route.path === 'group/:groupGuid')?.providers).toBeUndefined();
+
+    const groupChildren = workbench?.children?.find(route => route.path === 'group/:groupGuid')?.children ?? [];
+    expect(groupChildren.find(route => route.path === 'monthly-table')).toMatchObject({
+      component: FacilityAnalysisGroupMonthlyTableComponent,
+      data: { analysisScope: 'group', analysisTab: 'monthly-table' }
+    });
+    expect(groupChildren.find(route => route.path === 'monthly-chart')).toMatchObject({
+      component: FacilityAnalysisGroupMonthlyChartComponent,
+      data: { analysisScope: 'group', analysisTab: 'monthly-chart' }
+    });
+    expect(groupChildren.find(route => route.path === 'monthly')).toMatchObject({ redirectTo: 'monthly-table' });
+
+    const facilityChildren = workbench?.children?.find(route => route.path === 'facility')?.children ?? [];
+    expect(facilityChildren.find(route => route.path === 'monthly-table')).toMatchObject({
+      component: FacilityAnalysisMonthlyTableComponent,
+      data: { analysisScope: 'facility', analysisTab: 'monthly-table' }
+    });
+    expect(facilityChildren.find(route => route.path === 'monthly-chart')).toMatchObject({
+      component: FacilityAnalysisMonthlyChartComponent,
+      data: { analysisScope: 'facility', analysisTab: 'monthly-chart' }
+    });
+    expect(facilityChildren.find(route => route.path === 'monthly')).toMatchObject({ redirectTo: 'monthly-table' });
   });
 
   it('routes Account Portfolio tabs as child workspaces', () => {

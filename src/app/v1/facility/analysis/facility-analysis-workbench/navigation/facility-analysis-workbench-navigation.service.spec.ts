@@ -67,10 +67,11 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
     events.next(new NavigationEnd(
       1,
       '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/setup',
-      '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/group/group-a/monthly'
+      '/v1/workspace/facility/facility-a/analysis/workbench/analysis-a/group/group-a/monthly-chart'
     ));
 
     expect(navigation.activeStageId()).toBe('group:group-a');
+    expect(navigation.activeContextTabId()).toBe('monthly-chart');
   });
 
   it('redirects locked facility results to the first incomplete group', () => {
