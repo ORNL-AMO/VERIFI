@@ -1,6 +1,5 @@
 @let facility = context.facility();
 @let analysis = context.analysis();
-@let facts = resultFacts();
 
 @if (!facility) {
   <article class="v1-empty-state" role="status">
@@ -18,107 +17,8 @@
     </a>
   </article>
 } @else {
-  @let displayedAnalysis = autosave.draft() || analysis;
   <div class="v1-data-workbench-sticky v1-analysis-workbench__sticky">
-    <header class="v1-data-workbench-header v1-analysis-workbench__header">
-      <nav class="v1-data-workbench-breadcrumb" aria-label="Facility analysis breadcrumb">
-        <ol>
-          <li>{{ context.account()?.name || 'Account' }}</li>
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li>{{ facility.name || 'Facility' }}</li>
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Analyses</a></li>
-        </ol>
-      </nav>
-
-      <div class="v1-data-workbench-title-row">
-        <div class="v1-data-workbench-title">
-          <h1 id="v1-analysis-workbench-title">
-            <app-ui-icon name="analysis"></app-ui-icon>
-            <app-data-workbench-resource-switcher
-              [resources]="analysisResources()"
-              [selectedId]="displayedAnalysis.guid"
-              [currentLabel]="displayedAnalysis.name || 'Untitled analysis'"
-              ariaLabel="Switch facility analysis"
-              (resourceSelected)="switchAnalysis($event)">
-            </app-data-workbench-resource-switcher>
-          </h1>
-        </div>
-        <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
-          <span
-            class="v1-analysis-workbench__save-state"
-            [class.v1-analysis-workbench__save-state--saved]="autosave.state() === 'saved'"
-            [class.v1-analysis-workbench__save-state--error]="autosave.state() === 'error' || autosave.state() === 'invalid'"
-            aria-live="polite">
-            @switch (autosave.state()) {
-              @case ('idle') { Changes save automatically. }
-              @case ('dirty') { <app-ui-icon name="clock"></app-ui-icon> Changes save automatically. }
-              @case ('saving') { <app-ui-icon name="loading" spin></app-ui-icon> Saving… }
-              @case ('saved') { <app-ui-icon name="check"></app-ui-icon> Saved. }
-              @case ('invalid') { <app-ui-icon name="warning"></app-ui-icon> Fix validation errors. }
-              @case ('error') { <app-ui-icon name="warning"></app-ui-icon> Save failed. }
-            }
-          </span>
-          <span class="v1-chip">{{ displayedAnalysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span>
-          <span class="v1-chip v1-chip--{{ context.hasBlockingErrors() ? 'danger' : 'success' }}">
-            <app-ui-icon [name]="context.hasBlockingErrors() ? 'warning' : 'success'"></app-ui-icon>
-            {{ context.hasBlockingErrors() ? 'Needs attention' : 'No Issues' }}
-          </span>
-          <app-data-workbench-facts-toggle #factsToggle controls="v1-analysis-workbench-facts"></app-data-workbench-facts-toggle>
-        </div>
-      </div>
-
-      @if (autosave.error()) {
-        <div class="v1-alert v1-alert--danger v1-analysis-workbench__save-error" role="alert">
-          <app-ui-icon name="warning"></app-ui-icon>
-          <span>{{ autosave.error() }}</span>
-          <button type="button" class="v1-btn v1-btn--secondary" (click)="autosave.retry()">Retry</button>
-          <button type="button" class="v1-btn v1-btn--ghost" (click)="autosave.discard()">Discard changes</button>
-        </div>
-      }
-
-      <div id="v1-analysis-workbench-facts" [hidden]="!factsToggle.expanded()">
-        <dl class="v1-data-workbench-facts">
-          <div><dt>Baseline</dt><dd>{{ displayedAnalysis.baselineYear || 'Not selected' }}</dd></div>
-          <div><dt>Latest complete year</dt><dd>{{ period.latestCompleteYear() ?? 'Unavailable' }}</dd></div>
-          <div><dt>Basis</dt><dd>{{ displayedAnalysis.analysisCategory === 'energy' ? (displayedAnalysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }}</dd></div>
-          <div><dt>Units</dt><dd>{{ displayedAnalysis.analysisCategory === 'water' ? displayedAnalysis.waterUnit : displayedAnalysis.energyUnit }}</dd></div>
-          <div>
-            <dt>Total savings % improvement</dt>
-            <dd>
-              @if (facts.totalSavingsPercentImprovement !== undefined) {
-                {{ facts.totalSavingsPercentImprovement | number:'1.0-2' }}%
-              } @else {
-                {{ facts.unavailableMessage }}
-              }
-            </dd>
-          </div>
-        </dl>
-      </div>
-
-      @if (dependencyMessage(); as message) {
-        <ul class="v1-data-workbench-status-notes" aria-label="Downstream dependencies">
-          <li>
-            <app-ui-icon name="link"></app-ui-icon>
-            <span>{{ message }}</span>
-          </li>
-        </ul>
-      }
-
-      @if (workflow.currentStageFindings().length) {
-        <ul class="v1-data-workbench-status-notes v1-analysis-workbench__status-notes" aria-label="Analysis status items">
-          @for (finding of workflow.currentStageFindings(); track finding.id) {
-            <li [class.v1-analysis-workbench__status-note--error]="finding.severity === 'error'">
-              <app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon>
-              <span><strong>{{ finding.title }}</strong> {{ finding.description }}</span>
-              @if (finding.destination.kind !== 'unavailable') {
-                <button type="button" (click)="context.status.navigateTo(finding)">Review</button>
-              }
-            </li>
-          }
-        </ul>
-      }
-    </header>
+    <app-facility-analysis-workbench-header></app-facility-analysis-workbench-header>
   </div>
 
   <nav class="v1-analysis-workbench__stage-tabs" aria-label="Analysis workflow stages">
