@@ -57,11 +57,15 @@ export function isSkippedAnalysisType(type: AnalysisType): boolean {
   return type === 'skip' || type === 'skipAnalysis';
 }
 
-export function tabsForAnalysisGroup(group: AnalysisGroup | undefined, bankingAvailable = false): readonly AnalysisWorkbenchTab[] {
+export function tabsForAnalysisGroup(
+  group: AnalysisGroup | undefined,
+  analysisHasBanking = false,
+  bankingAvailable = false
+): readonly AnalysisWorkbenchTab[] {
   if (!group || isSkippedAnalysisType(group.analysisType)) return [ANALYSIS_GROUP_SETUP_TAB];
   return [
     ANALYSIS_GROUP_SETUP_TAB,
-    ...(group.applyBanking ? [{
+    ...(analysisHasBanking && group.applyBanking ? [{
       ...ANALYSIS_GROUP_BANKING_TAB,
       disabled: !bankingAvailable,
       disabledReason: bankingAvailable ? undefined : 'Complete valid banking options in Setup to view Banked Savings.'

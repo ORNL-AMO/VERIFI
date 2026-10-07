@@ -26,12 +26,13 @@ describe('facility analysis workbench models', () => {
       'setup', 'regression', 'annual', 'monthly-table', 'monthly-chart'
     ]);
     const bankedRegression = { ...regression, applyBanking: true };
-    expect(tabsForAnalysisGroup(bankedRegression, true).map(tab => tab.id)).toEqual([
+    expect(tabsForAnalysisGroup(bankedRegression, true, true).map(tab => tab.id)).toEqual([
       'setup', 'banking', 'regression', 'annual', 'monthly-table', 'monthly-chart'
     ]);
-    const unavailableBankingTab = tabsForAnalysisGroup(bankedRegression).find(tab => tab.id === 'banking');
+    expect(tabsForAnalysisGroup(bankedRegression, false, true).some(tab => tab.id === 'banking')).toBe(false);
+    const unavailableBankingTab = tabsForAnalysisGroup(bankedRegression, true).find(tab => tab.id === 'banking');
     expect(unavailableBankingTab).toMatchObject({ label: 'Banked Savings', disabled: true });
-    expect(tabsForAnalysisGroup(bankedRegression, true).find(tab => tab.id === 'banking')?.disabled).toBe(false);
+    expect(tabsForAnalysisGroup(bankedRegression, true, true).find(tab => tab.id === 'banking')?.disabled).toBe(false);
     expect(tabsForAnalysisGroup(skipped).map(tab => tab.id)).toEqual(['setup']);
     expect(ANALYSIS_FACILITY_TABS.map(tab => tab.id)).toEqual([
       'annual', 'monthly-table', 'monthly-chart', 'group-contributions'

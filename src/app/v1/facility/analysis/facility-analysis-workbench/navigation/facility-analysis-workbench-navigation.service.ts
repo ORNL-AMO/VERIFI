@@ -70,7 +70,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
     if (stage?.kind !== 'group' || !stage.groupGuid) return [];
     const analysis = this.autosave.draft() || this.context.analysis();
     const group = analysis?.groups.find(item => item.idbGroupId === stage.groupGuid);
-    return tabsForAnalysisGroup(group, bankingTabAvailable(
+    return tabsForAnalysisGroup(group, analysis?.hasBanking === true, bankingTabAvailable(
       analysis,
       group,
       this.context.analyses(),
