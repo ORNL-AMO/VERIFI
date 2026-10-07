@@ -3,6 +3,8 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { StatusAttentionSummary } from '@app/v1/status/status.models';
 
+let nextTabsId = 0;
+
 export interface DataWorkbenchTab {
   readonly id: string;
   readonly label: string;
@@ -19,6 +21,7 @@ export interface DataWorkbenchTab {
   imports: [IconComponent]
 })
 export class DataWorkbenchTabsComponent {
+  readonly idPrefix = `v1-data-tabs-${++nextTabsId}`;
   @Input({ required: true }) tabs: ReadonlyArray<DataWorkbenchTab> = [];
   @Input({ required: true }) activeTab = '';
   @Input({ required: true }) ariaLabel = 'Workbench sections';
@@ -26,4 +29,9 @@ export class DataWorkbenchTabsComponent {
   @Input() attentionDisplay: 'count' | 'indicator' = 'count';
   @Input() level: 'primary' | 'secondary' = 'primary';
   @Output() readonly tabSelected = new EventEmitter<string>();
+
+  selectTab(tab: DataWorkbenchTab): void {
+    if (tab.disabled) return;
+    this.tabSelected.emit(tab.id);
+  }
 }

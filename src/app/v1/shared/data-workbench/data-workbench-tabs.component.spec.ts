@@ -63,8 +63,16 @@ describe('DataWorkbenchTabsComponent', () => {
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('aria-disabled')).toBe('true');
     expect(button.title).toContain('Complete valid banking options');
+    expect(button.tabIndex).toBe(0);
+    const descriptionId = button.getAttribute('aria-describedby');
+    expect(descriptionId).toBeTruthy();
+    expect(fixture.nativeElement.querySelector(`#${descriptionId}`)?.textContent)
+      .toContain('Complete valid banking options');
+    button.focus();
+    expect(document.activeElement).toBe(button);
     button.click();
     expect(selected).not.toHaveBeenCalled();
   });
