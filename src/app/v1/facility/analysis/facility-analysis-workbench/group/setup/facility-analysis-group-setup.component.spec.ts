@@ -94,7 +94,8 @@ describe('facility analysis group setup behavior', () => {
   it('renders locked banking controls with an option to clear models, warnings, and the savings preview', () => {
     const group = {
       idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: [],
-      specifiedMonthlyPercentBaseload: false, monthlyPercentBaseload: [], dataAdjustments: [], baselineAdjustmentsV2: [],
+      specifiedMonthlyPercentBaseload: false, monthlyPercentBaseload: [],
+      dataAdjustments: [{ year: 2023, amount: 10 }], baselineAdjustmentsV2: [],
       applyBanking: true, bankedAnalysisYear: 2022, newBaselineYear: 2024
     } as AnalysisGroup;
     const sourceGroup = { ...group, analysisType: 'regression', regressionModelYear: 2023, isGeneratedModel: true } as AnalysisGroup;
@@ -107,7 +108,7 @@ describe('facility analysis group setup behavior', () => {
       workbench: { facility: signal({ guid: 'facility-a' }) },
       group: signal(group), analysis: signal(analysis),
       dataAdjustmentDraft: signal({ amount: '' }), baselineAdjustmentDraft: signal({ amount: '' }),
-      dataAdjustmentEditorOpen: signal(false), baselineAdjustmentEditorOpen: signal(false),
+      dataAdjustmentEditorOpen: signal(true), baselineAdjustmentEditorOpen: signal(false),
       hasModels: signal(true), missingMeters: signal(false), meterStatusItems: signal([]),
       productionVariables: signal([]), selectedProductionCount: signal(0), isSkipped: signal(false),
       adjustmentYears: signal([2023, 2024]), availableDataAdjustmentYears: signal([2023, 2024]),
@@ -129,6 +130,7 @@ describe('facility analysis group setup behavior', () => {
       applyBanking: new FormControl({ value: true, disabled: true }, { nonNullable: true }),
       bankedAnalysisYear: new FormControl<number | null>({ value: 2022, disabled: true }),
       newBaselineYear: new FormControl<number | null>({ value: 2024, disabled: true }),
+      adjustmentControl: () => new FormControl(10, { nonNullable: true }),
       openAdjustmentEditor: vi.fn(), cancelAdjustmentEditor: vi.fn(), addAdjustment: vi.fn()
     };
     TestBed.configureTestingModule({
@@ -177,6 +179,12 @@ describe('facility analysis group setup behavior', () => {
     expect(newBaselineYearSelect.disabled).toBe(true);
     expect(newBaselineYearSelect.classList).toContain('v1-select');
     expect(newBaselineYearSelect.classList).not.toContain('form-select');
+    const themedSelects = fixture.nativeElement.querySelectorAll('select') as NodeListOf<HTMLSelectElement>;
+    const themedInputs = fixture.nativeElement.querySelectorAll('input[type="number"]') as NodeListOf<HTMLInputElement>;
+    expect(Array.from(themedSelects).every(select => select.classList.contains('v1-select'))).toBe(true);
+    expect(Array.from(themedSelects).every(select => !select.classList.contains('form-select'))).toBe(true);
+    expect(Array.from(themedInputs).every(input => input.classList.contains('v1-input'))).toBe(true);
+    expect(Array.from(themedInputs).every(input => !input.classList.contains('form-control'))).toBe(true);
     const unlockButton = Array.from(fixture.nativeElement.querySelectorAll('button'))
       .find((button: Element) => button.textContent?.includes('Clear models to edit')) as HTMLButtonElement;
     expect(unlockButton).toBeTruthy();

@@ -22,12 +22,12 @@
         @if (currentGroup.analysisType === 'modifiedEnergyIntensity') {
           <p class="v1-analysis-group-setup__notice" role="status"><app-ui-icon name="info"></app-ui-icon><span>This existing legacy method remains editable for compatibility, but it cannot be selected for a new configuration.</span></p>
           <label for="legacy-baseload-mode">Baseload method</label>
-          <select id="legacy-baseload-mode" class="v1-select form-select" [formControl]="controller.baseloadMode"><option value="average">Average percent baseload</option><option value="monthly">Percent baseload by month</option></select>
+          <select id="legacy-baseload-mode" class="v1-select" [formControl]="controller.baseloadMode"><option value="average">Average percent baseload</option><option value="monthly">Percent baseload by month</option></select>
           @if (!currentGroup.specifiedMonthlyPercentBaseload) {
-            <label for="legacy-average-baseload">Average baseload (%)</label><input id="legacy-average-baseload" class="form-control" type="number" min="0" max="100" [formControl]="controller.averageBaseload" />
+            <label for="legacy-average-baseload">Average baseload (%)</label><input id="legacy-average-baseload" class="v1-input" type="number" min="0" max="100" [formControl]="controller.averageBaseload" />
           } @else {
             <div class="v1-analysis-group-setup__months">
-              @for (entry of currentGroup.monthlyPercentBaseload; track entry.monthNum) { <label>Month {{ entry.monthNum + 1 }}<input class="form-control" type="number" min="0" max="100" [formControl]="controller.monthlyBaseloadControl(entry.monthNum)" /></label> }
+              @for (entry of currentGroup.monthlyPercentBaseload; track entry.monthNum) { <label>Month {{ entry.monthNum + 1 }}<input class="v1-input" type="number" min="0" max="100" [formControl]="controller.monthlyBaseloadControl(entry.monthNum)" /></label> }
             </div>
           }
         }
@@ -97,7 +97,7 @@
                     <strong>{{ adjustment.year }}</strong>
                     <label class="visually-hidden" [for]="'data-adjustment-' + adjustment.year">Data adjustment amount for {{ adjustment.year }}</label>
                     <div class="v1-analysis-group-setup__amount-control">
-                      <input [id]="'data-adjustment-' + adjustment.year" class="form-control" type="number" min="0" step="any" [formControl]="controller.adjustmentControl('dataAdjustments', adjustment.year)" />
+                      <input [id]="'data-adjustment-' + adjustment.year" class="v1-input" type="number" min="0" step="any" [formControl]="controller.adjustmentControl('dataAdjustments', adjustment.year)" />
                       <span>{{ adjustmentUnit() }}</span>
                     </div>
                     <button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove data adjustment for ' + adjustment.year" (click)="removeAdjustment('dataAdjustments', adjustment.year)"><app-ui-icon name="delete"></app-ui-icon><span class="visually-hidden">Remove</span></button>
@@ -111,13 +111,13 @@
               @if (dataAdjustmentEditorOpen()) {
                 <div class="v1-analysis-group-setup__adjustment-editor">
                   <label class="v1-analysis-group-setup__editor-year-label" for="new-data-adjustment-year">Year</label>
-                  <select id="new-data-adjustment-year" class="v1-select form-select v1-analysis-group-setup__editor-year" [formControl]="controller.dataAdjustmentYear">
+                  <select id="new-data-adjustment-year" class="v1-select v1-analysis-group-setup__editor-year" [formControl]="controller.dataAdjustmentYear">
                     <option [ngValue]="null">Select year</option>
                     @for (year of availableDataAdjustmentYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
                   </select>
                   <label class="v1-analysis-group-setup__editor-amount-label" for="new-data-adjustment-amount">Annual amount</label>
                   <div class="v1-analysis-group-setup__amount-control v1-analysis-group-setup__editor-amount">
-                    <input id="new-data-adjustment-amount" class="form-control" type="number" min="0" step="any" placeholder="Enter amount" [formControl]="controller.dataAdjustmentAmount" />
+                    <input id="new-data-adjustment-amount" class="v1-input" type="number" min="0" step="any" placeholder="Enter amount" [formControl]="controller.dataAdjustmentAmount" />
                     <span>{{ adjustmentUnit() }}</span>
                   </div>
                   <div class="v1-analysis-group-setup__editor-actions">
@@ -143,7 +143,7 @@
                     <strong>{{ adjustment.year }}</strong>
                     <label class="visually-hidden" [for]="'baseline-adjustment-' + adjustment.year">Baseline adjustment amount for {{ adjustment.year }}</label>
                     <div class="v1-analysis-group-setup__amount-control">
-                      <input [id]="'baseline-adjustment-' + adjustment.year" class="form-control" type="number" min="0" step="any" [formControl]="controller.adjustmentControl('baselineAdjustmentsV2', adjustment.year)" />
+                      <input [id]="'baseline-adjustment-' + adjustment.year" class="v1-input" type="number" min="0" step="any" [formControl]="controller.adjustmentControl('baselineAdjustmentsV2', adjustment.year)" />
                       <span>{{ adjustmentUnit() }}</span>
                     </div>
                     <button type="button" class="v1-btn v1-btn--ghost" [attr.aria-label]="'Remove baseline adjustment for ' + adjustment.year" (click)="removeAdjustment('baselineAdjustmentsV2', adjustment.year)"><app-ui-icon name="delete"></app-ui-icon><span class="visually-hidden">Remove</span></button>
@@ -157,13 +157,13 @@
               @if (baselineAdjustmentEditorOpen()) {
                 <div class="v1-analysis-group-setup__adjustment-editor">
                   <label class="v1-analysis-group-setup__editor-year-label" for="new-baseline-adjustment-year">Year</label>
-                  <select id="new-baseline-adjustment-year" class="v1-select form-select v1-analysis-group-setup__editor-year" [formControl]="controller.baselineAdjustmentYear">
+                  <select id="new-baseline-adjustment-year" class="v1-select v1-analysis-group-setup__editor-year" [formControl]="controller.baselineAdjustmentYear">
                     <option [ngValue]="null">Select year</option>
                     @for (year of availableBaselineAdjustmentYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
                   </select>
                   <label class="v1-analysis-group-setup__editor-amount-label" for="new-baseline-adjustment-amount">Annual amount</label>
                   <div class="v1-analysis-group-setup__amount-control v1-analysis-group-setup__editor-amount">
-                    <input id="new-baseline-adjustment-amount" class="form-control" type="number" min="0" step="any" placeholder="Enter amount" [formControl]="controller.baselineAdjustmentAmount" />
+                    <input id="new-baseline-adjustment-amount" class="v1-input" type="number" min="0" step="any" placeholder="Enter amount" [formControl]="controller.baselineAdjustmentAmount" />
                     <span>{{ adjustmentUnit() }}</span>
                   </div>
                   <div class="v1-analysis-group-setup__editor-actions">
