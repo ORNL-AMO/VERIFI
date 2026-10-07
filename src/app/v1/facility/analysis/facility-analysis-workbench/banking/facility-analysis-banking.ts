@@ -1,12 +1,24 @@
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { StatusItem } from '@app/v1/status/status.models';
-import { getBankedAnalysisGroup, isBankedGroupConfigurationComplete } from '@shared/shared-analysis/banking-configuration';
+import {
+  bankingDependencyIncludes,
+  bankingYearOptions,
+  evaluateBankedGroupConfiguration,
+  evaluateBankingSource,
+  getBankedAnalysisGroup,
+  isCompatibleBankingSource
+} from '@shared/shared-analysis/banking-configuration';
+
+export { bankingDependencyIncludes, bankingYearOptions } from '@shared/shared-analysis/banking-configuration';
 
 export type BankingSourceValidation = 'available' | 'warning' | 'unavailable';
 
 export interface BankingSourceOption {
-  readonly analysis: IdbAnalysisItem;
+  readonly sourceGuid: string;
+  readonly displayName: string;
+  readonly baselineYear?: number;
+  readonly analysis?: IdbAnalysisItem;
   readonly validation: BankingSourceValidation;
   readonly blockingReason?: string;
   readonly warnings: readonly string[];
@@ -25,61 +37,58 @@ export function bankingSourceOptions(
   candidates: readonly IdbAnalysisItem[],
   findings: readonly StatusItem[]
 ): readonly BankingSourceOption[] {
-  return candidates
-    .filter(candidate => candidate.guid !== current.guid
-      && candidate.facilityId === current.facilityId
-      && candidate.analysisCategory === current.analysisCategory
-      && (current.analysisCategory === 'water' || candidate.energyIsSource === current.energyIsSource))
+  const selectedGuid = current.bankedAnalysisItemId;
+  const visibleCandidates = candidates.filter(candidate => isCompatibleBankingSource(current, candidate)
+    || candidate.guid === selectedGuid);
+  const options: BankingSourceOption[] = visibleCandidates
     .map(candidate => {
       const candidateFindings = findings.filter(finding => finding.entity.guid === candidate.guid
         || finding.entity.guid.startsWith(`${candidate.guid}:`));
       const errors = candidateFindings.filter(finding => finding.severity === 'error');
       const warnings = candidateFindings.filter(finding => finding.severity === 'warning').map(finding => finding.title);
-      const cycle = bankingDependencyIncludes(candidate, current.guid, candidates);
+      const selection = evaluateBankingSource({
+        ...current,
+        hasBanking: true,
+        bankedAnalysisItemId: candidate.guid
+      }, candidates);
       const usableGroups = candidate.groups.filter(group => !isSkippedGroup(group));
-      const reason = cycle
-        ? 'Selecting this analysis would create a circular banking dependency.'
-        : errors.length
+      const reason = sourceIssueReason(selection.issue)
+        ?? (errors.length
           ? errors.map(error => error.title).join(' ')
           : usableGroups.length === 0
             ? 'This analysis has no usable groups.'
-            : undefined;
+            : undefined);
       return {
+        sourceGuid: candidate.guid,
+        displayName: candidate.name,
+        baselineYear: candidate.baselineYear,
         analysis: candidate,
         validation: reason ? 'unavailable' : warnings.length ? 'warning' : 'available',
         blockingReason: reason,
         warnings,
         usableGroups
       } satisfies BankingSourceOption;
-    })
-    .sort((first, second) => second.analysis.baselineYear - first.analysis.baselineYear
-      || first.analysis.name.localeCompare(second.analysis.name));
-}
-
-export function bankingDependencyIncludes(
-  source: IdbAnalysisItem,
-  targetGuid: string,
-  analyses: readonly IdbAnalysisItem[]
-): boolean {
-  const byGuid = new Map(analyses.map(analysis => [analysis.guid, analysis]));
-  const visited = new Set<string>();
-  let cursor: IdbAnalysisItem | undefined = source;
-  while (cursor?.hasBanking && cursor.bankedAnalysisItemId) {
-    if (cursor.bankedAnalysisItemId === targetGuid) return true;
-    if (visited.has(cursor.guid)) return true;
-    visited.add(cursor.guid);
-    cursor = byGuid.get(cursor.bankedAnalysisItemId);
+    });
+  if (selectedGuid && !candidates.some(candidate => candidate.guid === selectedGuid)) {
+    options.push({
+      sourceGuid: selectedGuid,
+      displayName: 'Previously selected analysis',
+      validation: 'unavailable',
+      blockingReason: 'The selected banking source no longer exists.',
+      warnings: [],
+      usableGroups: []
+    });
   }
-  return false;
+  return options.sort((first, second) => (second.baselineYear ?? -Infinity) - (first.baselineYear ?? -Infinity)
+    || first.displayName.localeCompare(second.displayName));
 }
 
 export function selectedBankingSource(
   analysis: IdbAnalysisItem | undefined,
   analyses: readonly IdbAnalysisItem[]
 ): IdbAnalysisItem | undefined {
-  return analysis?.bankedAnalysisItemId
-    ? analyses.find(item => item.guid === analysis.bankedAnalysisItemId)
-    : undefined;
+  const evaluation = evaluateBankingSource(analysis, analyses);
+  return evaluation.issue ? undefined : evaluation.source;
 }
 
 export function usableBankedGroup(
@@ -96,10 +105,11 @@ export function bankingTabAvailable(
   analysis: IdbAnalysisItem | undefined,
   group: AnalysisGroup | undefined,
   analyses: readonly IdbAnalysisItem[],
-  findings: readonly StatusItem[]
+  findings: readonly StatusItem[],
+  latestCompleteYear: number | undefined
 ): boolean {
   const source = selectedBankingSource(analysis, analyses);
-  if (!isBankedGroupConfigurationComplete(analysis, group, source) || !source) return false;
+  if (!evaluateBankedGroupConfiguration(analysis, group, analyses, latestCompleteYear).valid || !source) return false;
   return !bankingSourceHasBlockingErrors(analysis, source, findings);
 }
 
@@ -114,17 +124,6 @@ export function bankingSourceHasBlockingErrors(
     || finding.entity.guid.startsWith(`${source.guid}:`)
     || (finding.entity.guid === analysis.guid && hasEvidenceReason(finding.evidence['reasons'], 'bankingError'))
   ));
-}
-
-export function bankingYearOptions(
-  sourceBaselineYear: number | undefined,
-  analysisBaselineYear: number | undefined,
-  latestCompleteYear: number | undefined
-): { readonly appliedYears: readonly number[]; readonly newBaselineYears: readonly number[] } {
-  return {
-    appliedYears: yearRange(sourceBaselineYear ? sourceBaselineYear + 1 : undefined, latestCompleteYear),
-    newBaselineYears: yearRange(analysisBaselineYear, latestCompleteYear)
-  };
 }
 
 export function bankingPreviewReportYear(group: AnalysisGroup | undefined): number | undefined {
@@ -217,13 +216,18 @@ function isModelPeriod(group: AnalysisGroup, fiscalYear: number, date: Date | un
   return period >= start && period <= end;
 }
 
-function yearRange(start: number | undefined, end: number | undefined): readonly number[] {
-  if (!start || !end || start > end) return [];
-  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
-}
-
 function isSkippedGroup(group: AnalysisGroup): boolean {
   return group.analysisType === 'skip' || group.analysisType === 'skipAnalysis';
+}
+
+function sourceIssueReason(issue: ReturnType<typeof evaluateBankingSource>['issue']): string | undefined {
+  switch (issue) {
+    case 'cycle': return 'Selecting this analysis would create a circular banking dependency.';
+    case 'incompatible': return 'This analysis no longer matches the facility, category, or energy basis.';
+    case 'dependency-missing': return 'A banking source used by this analysis is no longer available.';
+    case 'missing': return 'The selected banking source no longer exists.';
+    default: return undefined;
+  }
 }
 
 function hasEvidenceReason(value: unknown, reason: string): boolean {

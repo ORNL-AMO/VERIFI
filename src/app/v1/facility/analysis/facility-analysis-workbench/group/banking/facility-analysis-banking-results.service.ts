@@ -18,10 +18,10 @@ import {
 } from '../results/calculation/facility-analysis-group-results-request';
 import {
   bankingPreviewReportYear,
-  bankingSourceHasBlockingErrors,
-  selectedBankingSource,
-  usableBankedGroup
+  bankingSourceHasBlockingErrors
 } from '../../banking/facility-analysis-banking';
+import { evaluateBankedGroupConfiguration } from '@shared/shared-analysis/banking-configuration';
+import { FacilityAnalysisPeriodService } from '../../analysis-setup/facility-analysis-period.service';
 
 export type FacilityAnalysisBankingResultState =
   | { readonly state: 'idle' }
@@ -44,15 +44,20 @@ export class FacilityAnalysisBankingResultsService {
   private readonly context = this.groupContext.workbench;
   private readonly autosave = this.groupContext.autosave;
   private readonly calendarization = inject(WorkspaceCalendarizationService);
+  private readonly period = inject(FacilityAnalysisPeriodService);
   private readonly calendarizationBase = toSignal(this.calendarization.calendarizeBase(), {
     initialValue: IDLE_WORKSPACE_CALENDARIZATION
   });
   private readonly cache = new Map<string, FacilityAnalysisBankingResultState & { readonly state: 'ready' }>();
 
-  readonly sourceAnalysis = computed(() => selectedBankingSource(this.autosave.draft(), this.context.analyses()));
-  readonly sourceGroup = computed(() => usableBankedGroup(
-    this.autosave.draft(), this.groupContext.group(), this.context.analyses()
+  private readonly configuration = computed(() => evaluateBankedGroupConfiguration(
+    this.autosave.draft(),
+    this.groupContext.group(),
+    this.context.analyses(),
+    this.period.groupLatestCompleteYear(this.groupContext.groupGuid())
   ));
+  readonly sourceAnalysis = computed(() => this.configuration().source);
+  readonly sourceGroup = computed(() => this.configuration().sourceGroup);
   readonly hasBlockingErrors = computed(() => {
     const current = this.autosave.draft();
     const source = this.sourceAnalysis();
@@ -91,9 +96,7 @@ export class FacilityAnalysisBankingResultsService {
     const sourceGroup = this.sourceGroup();
     const reportYear = bankingPreviewReportYear(group);
     if (!analysis || !group) return published({ state: 'idle' });
-    if (!analysis.hasBanking || !group.applyBanking || !source || !sourceGroup
-      || !Number.isFinite(group.bankedAnalysisYear) || !Number.isFinite(group.newBaselineYear)
-      || group.bankedAnalysisYear >= group.newBaselineYear || reportYear === undefined) {
+    if (!this.configuration().valid || !source || !sourceGroup || reportYear === undefined) {
       return published({ state: 'waiting', reason: 'configuration' });
     }
     if (!this.context.workspace.isReady()) return published({ state: 'waiting', reason: 'workspace' });

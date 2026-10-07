@@ -9,7 +9,8 @@ import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-au
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { invalidateAllRegressionModels } from '../group/regression/regression-draft';
 import { FacilityAnalysisPeriodService } from './facility-analysis-period.service';
-import { analysisSetupDraftValid, compatibleBankingSources, FacilityAnalysisSetupComponent } from './facility-analysis-setup.component';
+import { isCompatibleBankingSource } from '@shared/shared-analysis/banking-configuration';
+import { analysisSetupDraftValid, FacilityAnalysisSetupComponent } from './facility-analysis-setup.component';
 
 describe('facility analysis setup behavior', () => {
   it('clears every persisted regression selection before unlocking setup', () => {
@@ -41,18 +42,24 @@ describe('facility analysis setup behavior', () => {
       { guid: 'water', facilityId: 'facility-a', analysisCategory: 'water', energyIsSource: true },
       { guid: 'other-facility', facilityId: 'facility-b', analysisCategory: 'energy', energyIsSource: true }
     ] as IdbAnalysisItem[];
-    expect(compatibleBankingSources(analysis, candidates).map(item => item.guid)).toEqual(['match']);
+    expect(candidates.filter(candidate => isCompatibleBankingSource(analysis, candidate)).map(item => item.guid)).toEqual(['match']);
   });
 
   it('keeps the complete setup invalid when a later banking edit fixes only its own field', () => {
     const analysis = {
       name: '', energyUnit: 'MMBtu', waterUnit: 'gal', baselineYear: 2024,
-      hasBanking: true, bankedAnalysisItemId: 'source-analysis'
+      guid: 'current', facilityId: 'facility-a', analysisCategory: 'energy', energyIsSource: false,
+      hasBanking: true, bankedAnalysisItemId: 'source-analysis', groups: []
+    } as IdbAnalysisItem;
+    const source = {
+      ...analysis, guid: 'source-analysis', name: 'Source', hasBanking: false,
+      bankedAnalysisItemId: undefined, baselineYear: 2023,
+      groups: [{ idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption' }]
     } as IdbAnalysisItem;
 
-    expect(analysisSetupDraftValid(analysis)).toBe(false);
+    expect(analysisSetupDraftValid(analysis, [analysis, source], [])).toBe(false);
     analysis.name = 'Energy Analysis';
-    expect(analysisSetupDraftValid(analysis)).toBe(true);
+    expect(analysisSetupDraftValid(analysis, [analysis, source], [])).toBe(true);
   });
 
   it('selects the saved baseline after complete-year options become available', () => {

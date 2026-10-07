@@ -5,6 +5,7 @@ import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/
 import { of } from 'rxjs';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { FacilityAnalysisBankingResultsService } from './facility-analysis-banking-results.service';
+import { FacilityAnalysisPeriodService } from '../../analysis-setup/facility-analysis-period.service';
 
 describe('FacilityAnalysisBankingResultsService browser Worker lifecycle', () => {
   let originalWorker: typeof Worker;
@@ -192,6 +193,7 @@ function configure(options: {
   };
   TestBed.configureTestingModule({ providers: [
     FacilityAnalysisBankingResultsService,
+    { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } },
     {
       provide: FacilityAnalysisGroupContext,
       useValue: {

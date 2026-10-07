@@ -18,6 +18,7 @@ import {
   tabsForAnalysisGroup
 } from '../facility-analysis-workbench.models';
 import { bankingTabAvailable } from '../banking/facility-analysis-banking';
+import { FacilityAnalysisPeriodService } from '../analysis-setup/facility-analysis-period.service';
 
 @Injectable()
 export class FacilityAnalysisWorkbenchNavigationService {
@@ -26,6 +27,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
   private readonly context = inject(FacilityAnalysisWorkbenchContext);
   private readonly autosave = inject(FacilityAnalysisAutosaveService);
   private readonly workspaceNavigation = inject(WorkspaceNavigationService);
+  private readonly period = inject(FacilityAnalysisPeriodService);
   private readonly activeStageState = signal(activeAnalysisWorkbenchStageId(this.router.url));
   private readonly activeContextTabState = signal<AnalysisWorkbenchTabId>(activeAnalysisWorkbenchTabId(this.router.url));
 
@@ -69,7 +71,11 @@ export class FacilityAnalysisWorkbenchNavigationService {
     const analysis = this.autosave.draft() || this.context.analysis();
     const group = analysis?.groups.find(item => item.idbGroupId === stage.groupGuid);
     return tabsForAnalysisGroup(group, bankingTabAvailable(
-      analysis, group, this.context.analyses(), this.context.status.items()
+      analysis,
+      group,
+      this.context.analyses(),
+      this.context.status.items(),
+      this.period.groupLatestCompleteYear(stage.groupGuid)
     ));
   });
   readonly contextTabAttention = computed(() => {

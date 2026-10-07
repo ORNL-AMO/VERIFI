@@ -35,7 +35,7 @@ describe('facility analysis banking presentation', () => {
 
     const options = bankingSourceOptions(current, [current, older, newest, warning], findings);
 
-    expect(options.map(option => option.analysis.guid)).toEqual(['newest', 'warning', 'older']);
+    expect(options.map(option => option.sourceGuid)).toEqual(['newest', 'warning', 'older']);
     expect(options[0]).toMatchObject({ validation: 'unavailable', blockingReason: expect.stringContaining('circular') });
     expect(options[1]).toMatchObject({ validation: 'warning', warnings: ['Review model'] });
     expect(bankingDependencyIncludes(newest, current.guid, [current, newest])).toBe(true);
@@ -69,20 +69,21 @@ describe('facility analysis banking presentation', () => {
     const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source', groups: [currentGroup] });
     const source = analysis('source', { groups: [group()] });
 
-    expect(bankingTabAvailable(current, currentGroup, [current, source], [])).toBe(true);
+    expect(bankingTabAvailable(current, currentGroup, [current, source], [], 2024)).toBe(true);
     expect(bankingTabAvailable(current, currentGroup, [current, source], [{
       severity: 'error', entity: { guid: `${current.guid}:${currentGroup.idbGroupId}` },
       evidence: { reasons: ['missingRegressionModelSelection'] }
-    }] as any)).toBe(true);
+    }] as any, 2024)).toBe(true);
     expect(bankingTabAvailable(current, currentGroup, [current, source], [{
       severity: 'error', entity: { guid: source.guid }
-    }] as any)).toBe(false);
+    }] as any, 2024)).toBe(false);
     expect(bankingTabAvailable(current, currentGroup, [current, source], [{
       severity: 'error', entity: { guid: current.guid }, evidence: { reasons: ['bankingError'] }
-    }] as any)).toBe(false);
+    }] as any, 2024)).toBe(false);
     expect(bankingTabAvailable(current, currentGroup, [current, analysis('source', {
       groups: [group({ analysisType: 'skip' })]
-    })], [])).toBe(false);
+    })], [], 2024)).toBe(false);
+    expect(bankingTabAvailable(current, { ...currentGroup, bankedAnalysisYear: 2025 }, [current, source], [], 2024)).toBe(false);
   });
 
   it('projects the preview through the year before the new baseline and carries applied-year improvement', () => {

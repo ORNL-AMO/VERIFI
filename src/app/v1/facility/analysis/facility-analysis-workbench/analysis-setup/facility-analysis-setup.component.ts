@@ -74,7 +74,7 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
   readonly unavailableBankingSources = computed(() => this.bankingSourceCards().filter(option => option.validation === 'unavailable'));
   readonly selectedBankingSourceBlocked = computed(() => {
     const selected = this.draft()?.bankedAnalysisItemId;
-    return !!selected && this.bankingSourceCards().some(option => option.analysis.guid === selected && option.validation === 'unavailable');
+    return !!selected && this.bankingSourceCards().some(option => option.sourceGuid === selected && option.validation === 'unavailable');
   });
 
   constructor() {
@@ -138,7 +138,10 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
   }
 
   private updateAnalysis(update: (draft: IdbAnalysisItem) => void, immediate = false): void {
-    this.autosave.update(update, { immediate, valid: analysisSetupDraftValid });
+    this.autosave.update(update, {
+      immediate,
+      valid: draft => analysisSetupDraftValid(draft, this.context.analyses(), this.context.status.items())
+    });
   }
 
   private syncForm(): void {
@@ -255,21 +258,18 @@ function syncControlValue<T>(control: FormControl<T>, value: T, force = false): 
   if (force || !Object.is(control.value, value)) control.setValue(value, { emitEvent: false });
 }
 
-export function compatibleBankingSources(
+export function analysisSetupDraftValid(
   analysis: IdbAnalysisItem,
-  candidates: readonly IdbAnalysisItem[]
-): readonly IdbAnalysisItem[] {
-  return candidates.filter(candidate => candidate.guid !== analysis.guid
-    && candidate.facilityId === analysis.facilityId
-    && candidate.analysisCategory === analysis.analysisCategory
-    && (analysis.analysisCategory === 'water' || candidate.energyIsSource === analysis.energyIsSource));
-}
-
-export function analysisSetupDraftValid(analysis: IdbAnalysisItem): boolean {
+  analyses: readonly IdbAnalysisItem[],
+  findings: Parameters<typeof bankingSourceOptions>[2]
+): boolean {
+  const selectedSource = analysis.hasBanking
+    ? bankingSourceOptions(analysis, analyses, findings).find(option => option.sourceGuid === analysis.bankedAnalysisItemId)
+    : undefined;
   return analysis.name.trim().length > 0
     && analysis.name.length <= 120
     && analysis.energyUnit.trim().length > 0
     && analysis.waterUnit.trim().length > 0
     && Number.isFinite(analysis.baselineYear)
-    && (!analysis.hasBanking || !!analysis.bankedAnalysisItemId?.trim());
+    && (!analysis.hasBanking || (!!selectedSource && selectedSource.validation !== 'unavailable'));
 }

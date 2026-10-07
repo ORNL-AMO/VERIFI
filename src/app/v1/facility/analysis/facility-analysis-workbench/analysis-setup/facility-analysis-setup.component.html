@@ -52,17 +52,18 @@
       @if (form.controls.hasBanking.value) {
         <fieldset class="v1-analysis-setup__banking-sources">
           <legend>Banking source analysis</legend>
-          @for (option of availableBankingSources(); track option.analysis.guid) {
+          @for (option of availableBankingSources(); track option.sourceGuid) {
+            @if (option.analysis; as sourceAnalysis) {
             <div class="v1-analysis-setup__banking-card" [class.v1-analysis-setup__banking-card--warning]="option.validation === 'warning'">
               <label class="v1-analysis-setup__banking-card-heading">
-                <input class="v1-analysis-setup__source-radio" type="radio" formControlName="bankedAnalysisItemId" [value]="option.analysis.guid" />
-                <strong>{{ option.analysis.name }}</strong>
-                <span class="v1-chip">Baseline {{ option.analysis.baselineYear }}</span>
+                <input class="v1-analysis-setup__source-radio" type="radio" formControlName="bankedAnalysisItemId" [value]="option.sourceGuid" />
+                <strong>{{ option.displayName }}</strong>
+                <span class="v1-chip">Baseline {{ option.baselineYear }}</span>
                 @if (option.validation === 'available') { <span class="v1-chip v1-chip--success">Available</span> }
               </label>
               <span class="v1-analysis-setup__banking-card-summary">
-                {{ option.analysis.energyIsSource ? 'Source energy' : 'Site energy' }} ·
-                {{ option.analysis.analysisCategory === 'water' ? option.analysis.waterUnit : option.analysis.energyUnit }} ·
+                {{ sourceAnalysis.energyIsSource ? 'Source energy' : 'Site energy' }} ·
+                {{ sourceAnalysis.analysisCategory === 'water' ? sourceAnalysis.waterUnit : sourceAnalysis.energyUnit }} ·
                 {{ option.groupDetails.length === 1 ? '1 usable group' : option.groupDetails.length + ' usable groups' }}
               </span>
               <details class="v1-analysis-setup__banking-details">
@@ -89,17 +90,18 @@
               </details>
               @if (option.validation === 'warning') { <span class="v1-analysis-setup__banking-card-warning">Available with warnings: {{ option.warnings.join(', ') }}</span> }
             </div>
+            }
           }
         </fieldset>
         @if (unavailableBankingSources().length) {
           <section class="v1-analysis-setup__unavailable" aria-labelledby="unavailable-banking-heading">
             <h3 id="unavailable-banking-heading">Unavailable analyses</h3>
-            @for (option of unavailableBankingSources(); track option.analysis.guid) {
+            @for (option of unavailableBankingSources(); track option.sourceGuid) {
               <div class="v1-analysis-setup__banking-card v1-analysis-setup__banking-card--unavailable">
                 <label class="v1-analysis-setup__banking-card-heading">
-                  <input class="v1-analysis-setup__source-radio" type="radio" [checked]="analysis.bankedAnalysisItemId === option.analysis.guid" [disabled]="true" />
-                  <strong>{{ option.analysis.name }}</strong>
-                  <span class="v1-chip">Baseline {{ option.analysis.baselineYear }}</span>
+                  <input class="v1-analysis-setup__source-radio" type="radio" [checked]="analysis.bankedAnalysisItemId === option.sourceGuid" [disabled]="true" />
+                  <strong>{{ option.displayName }}</strong>
+                  @if (option.baselineYear !== undefined) { <span class="v1-chip">Baseline {{ option.baselineYear }}</span> }
                   <span class="v1-chip v1-chip--danger">Unavailable</span>
                 </label>
                 <span>{{ option.blockingReason }}</span>

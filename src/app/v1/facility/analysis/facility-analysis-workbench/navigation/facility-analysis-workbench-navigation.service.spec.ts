@@ -9,6 +9,7 @@ import { StatusItem } from '@app/v1/status/status.models';
 import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { AnalysisWorkbenchStage } from '../facility-analysis-workbench.models';
+import { FacilityAnalysisPeriodService } from '../analysis-setup/facility-analysis-period.service';
 import {
   FacilityAnalysisWorkbenchNavigationService,
   analysisNavigationRequirement
@@ -42,6 +43,7 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
             navigate: vi.fn()
           }
         },
+        { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } },
         {
           provide: FacilityAnalysisWorkbenchContext,
           useValue: {
@@ -172,6 +174,7 @@ function configureReadyNavigation(
           status: { state: signal('ready') }
         }
       },
+      { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } },
       {
         provide: FacilityAnalysisAutosaveService,
         useValue: { state: signal('saved'), draft: signal(analysis), isBlocked: signal(false) }

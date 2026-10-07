@@ -9,6 +9,7 @@ import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context
 import { FacilityAnalysisGroupResultsService } from '../results/calculation/facility-analysis-group-results.service';
 import { FacilityAnalysisBankingResultsService } from '../banking/facility-analysis-banking-results.service';
 import { bankingTabAvailable } from '../../banking/facility-analysis-banking';
+import { FacilityAnalysisPeriodService } from '../../analysis-setup/facility-analysis-period.service';
 
 @Component({
   selector: 'app-facility-analysis-group-shell',
@@ -27,6 +28,7 @@ export class FacilityAnalysisGroupShellComponent {
   readonly groupGuid = this.groupContext.groupGuid;
   readonly group = this.groupContext.group;
   readonly meterGroup = this.groupContext.meterGroup;
+  private readonly period = inject(FacilityAnalysisPeriodService);
   private readonly canonicalRouteEffect = effect(() => {
     const facility = this.context.facility();
     const analysis = this.groupContext.autosave.draft() || this.context.analysis();
@@ -34,7 +36,13 @@ export class FacilityAnalysisGroupShellComponent {
     if (!facility || !analysis || !group) return;
     const tab = this.activeTabState();
     if ((tab === 'regression' && group.analysisType !== 'regression')
-      || (tab === 'banking' && !bankingTabAvailable(analysis, group, this.context.analyses(), this.context.status.items()))
+      || (tab === 'banking' && !bankingTabAvailable(
+        analysis,
+        group,
+        this.context.analyses(),
+        this.context.status.items(),
+        this.period.groupLatestCompleteYear(group.idbGroupId)
+      ))
       || ((tab === 'annual' || tab === 'monthly-table' || tab === 'monthly-chart') && isSkippedAnalysisType(group.analysisType))) {
       void this.router.navigate([
         '/v1', 'workspace', 'facility', facility.guid, 'analysis', 'workbench', analysis.guid,
