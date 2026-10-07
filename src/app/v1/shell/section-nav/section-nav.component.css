@@ -214,6 +214,27 @@
   margin-left: .55rem;
 }
 
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker {
+  display: inline-grid;
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+}
+
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker.is-complete {
+  color: var(--v1-success);
+}
+
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker.has-blocking-errors {
+  color: var(--v1-danger);
+}
+
+.v1-nav__analysis-workflow .v1-workflow-stepper__marker .v1-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
 .v1-nav__label {
   color: var(--v1-muted);
   font-size: .72rem;

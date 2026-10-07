@@ -9,6 +9,7 @@ import ArrowUpWideNarrowIcon from '@hugeicons/core-free-icons/ArrowUpWideNarrowI
 import AsteriskIcon from '@hugeicons/core-free-icons/AsteriskIcon';
 import Attachment01Icon from '@hugeicons/core-free-icons/Attachment01Icon';
 import BarChartIcon from '@hugeicons/core-free-icons/BarChartIcon';
+import BadgeAlertIcon from '@hugeicons/core-free-icons/BadgeAlertIcon';
 import BriefcaseBusinessIcon from '@hugeicons/core-free-icons/BriefcaseBusinessIcon';
 import Building03Icon from '@hugeicons/core-free-icons/Building03Icon';
 import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
@@ -16,9 +17,11 @@ import CalendarCheckIcon from '@hugeicons/core-free-icons/CalendarCheckIcon';
 import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon';
 import CancelCircleIcon from '@hugeicons/core-free-icons/CancelCircleIcon';
 import ChartColumnIcon from '@hugeicons/core-free-icons/ChartColumnIcon';
+import ChartAnalysisIcon from '@hugeicons/core-free-icons/ChartAnalysisIcon';
 import ChartLineData01Icon from '@hugeicons/core-free-icons/ChartLineData01Icon';
 import CheckListIcon from '@hugeicons/core-free-icons/CheckListIcon';
 import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon';
+import CheckmarkBadge01Icon from '@hugeicons/core-free-icons/CheckmarkBadge01Icon';
 import CheckmarkSquare02Icon from '@hugeicons/core-free-icons/CheckmarkSquare02Icon';
 import ChevronDownIcon from '@hugeicons/core-free-icons/ChevronDownIcon';
 import ChevronLeftIcon from '@hugeicons/core-free-icons/ChevronLeftIcon';
@@ -99,10 +102,12 @@ export const ICON_REGISTRY = {
   arrowRight: ArrowRight01Icon,
   attachment: Attachment01Icon,
   barChart: BarChartIcon,
+  badgeAlert: BadgeAlertIcon,
   portfolio: BriefcaseBusinessIcon,
   calendar: Calendar03Icon,
   calendarCheck: CalendarCheckIcon,
   chartLine: ChartLineData01Icon,
+  chartAnalysis: ChartAnalysisIcon,
   check: CheckmarkSquare02Icon,
   chevronDown: ChevronDownIcon,
   chevronLeft: ChevronLeftIcon,
@@ -110,6 +115,7 @@ export const ICON_REGISTRY = {
   chevronUp: ChevronUpIcon,
   clearFilter: FilterRemoveIcon,
   checklist: CheckListIcon,
+  checkmarkBadge: CheckmarkBadge01Icon,
   close: Cancel01Icon,
   clock: Clock01Icon,
   cloudRain: CloudRainIcon,

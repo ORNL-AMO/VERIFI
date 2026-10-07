@@ -37,6 +37,7 @@ export {
 export {
   MeterDataColumn,
   MeterDataColumnId,
+  MeterResultsChartComparisonBand,
   MeterResultsChartMetric,
   MeterResultsChartRow,
   MeterResultsPeriod,

@@ -1,0 +1,129 @@
+@let resultState = results.state();
+@let visibleRows = displayedRows();
+@let columnSettings = columns();
+<section class="v1-analysis-section" aria-label="Monthly table results">
+  <div class="v1-analysis-results-table__controls" aria-label="Monthly table controls">
+    <label class="v1-analysis-results-table__page-size">
+      <span>Rows</span>
+      <select class="v1-select" [formControl]="pageSizeControl">
+        @for (pageSizeOption of pageSizeOptions; track pageSizeOption) {
+          <option [ngValue]="pageSizeOption">{{ pageSizeOption }}</option>
+        }
+      </select>
+    </label>
+    <app-analysis-result-column-chooser
+      period="monthly"
+      [hasBanking]="hasBanking()"
+      [predictorScopeId]="predictorScopeId()"
+      [predictorVariables]="availablePredictors()">
+    </app-analysis-result-column-chooser>
+  </div>
+
+  @if (results.hasBlockingErrors() || resultState.state !== 'ready' || !rows().length) {
+    <app-analysis-result-status
+      scope="group"
+      period="monthly"
+      [state]="resultState"
+      [blocking]="results.hasBlockingErrors()"
+      [rowCount]="rows().length">
+    </app-analysis-result-status>
+  }
+
+  @if (!results.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
+    @if (hasMissingValues()) {
+      <div class="v1-alert v1-alert--warning" role="status">
+        <span>Some months have missing predictor data. Missing values are treated according to the existing analysis calculation rules.</span>
+      </div>
+    }
+    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Group monthly analysis results">
+      <table #monthlyResultsTable class="v1-analysis-results-table" [class.copying-table]="copyingTable()">
+        <thead>
+          <tr class="v1-analysis-results-table__section-row">
+            <th colspan="2" aria-hidden="true"></th>
+            @if (useColumnCount()) {
+              <th class="v1-analysis-results-table__section-heading v1-analysis-results-table__section-heading--use" [class.v1-analysis-results-table__column-hover]="hoveredSection() === 'use'" [attr.colspan]="useColumnCount()">
+                {{ groupContext.autosave.draft()?.analysisCategory === 'water' ? 'Consumption' : 'Energy' }}@if (unit()) { <span> ({{ unit() }})</span> }
+              </th>
+            }
+            @if (predictorColumnCount()) {
+              <th class="v1-analysis-results-table__section-heading v1-analysis-results-table__section-heading--predictors" [class.v1-analysis-results-table__column-hover]="hoveredSection() === 'predictors'" [attr.colspan]="predictorColumnCount()">Production Variables</th>
+            }
+            @if (improvementColumnCount()) {
+              <th class="v1-analysis-results-table__section-heading v1-analysis-results-table__section-heading--improvement" [class.v1-analysis-results-table__column-hover]="hoveredSection() === 'improvement'" [attr.colspan]="improvementColumnCount()">Incremental Improvement</th>
+            }
+          </tr>
+          <tr>
+            <th class="v1-analysis-results-table__group--period" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'month'" (mouseenter)="setColumnHover('month', 'period')" (mouseleave)="setColumnHover()" scope="col">Month</th>
+            <th class="v1-analysis-results-table__group--period" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'fiscalYear'" (mouseenter)="setColumnHover('fiscalYear', 'period')" (mouseleave)="setColumnHover()" scope="col">Fiscal year</th>
+            @if (columnSettings.actualEnergy) { <th class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'actual'" (mouseenter)="setColumnHover('actual', 'use')" (mouseleave)="setColumnHover()" scope="col">Actual</th> }
+            @if (columnSettings.modeledEnergy) { <th class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'modeled'" (mouseenter)="setColumnHover('modeled', 'use')" (mouseleave)="setColumnHover()" scope="col">Modeled</th> }
+            @if (columnSettings.adjusted) { <th class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'adjusted'" (mouseenter)="setColumnHover('adjusted', 'use')" (mouseleave)="setColumnHover()" scope="col">Adjusted</th> }
+            @if (columnSettings.baselineAdjustmentForNormalization) { <th class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'baseline-normalization'" (mouseenter)="setColumnHover('baseline-normalization', 'use')" (mouseleave)="setColumnHover()" scope="col">Baseline adjustment for normalization</th> }
+            @if (columnSettings.baselineAdjustmentForOther) { <th class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'baseline-other'" (mouseenter)="setColumnHover('baseline-other', 'use')" (mouseleave)="setColumnHover()" scope="col">Baseline adjustment for other</th> }
+            @if (columnSettings.baselineAdjustment) { <th class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'baseline-total'" (mouseenter)="setColumnHover('baseline-total', 'use')" (mouseleave)="setColumnHover()" scope="col">Total baseline adjustment</th> }
+            @if (columnSettings.productionVariables) {
+              @for (predictor of predictorColumns(); track predictor.id) {
+                <th class="v1-analysis-results-table__group--predictors" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'predictor-' + predictor.id" (mouseenter)="setColumnHover('predictor-' + predictor.id, 'predictors')" (mouseleave)="setColumnHover()" scope="col">
+                  {{ predictor.name }}
+                  @if (predictor.unit) { <small>({{ predictor.unit }})</small> }
+                </th>
+              }
+            }
+            @if (columnSettings.SEnPI) { <th class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'senpi'" (mouseenter)="setColumnHover('senpi', 'improvement')" (mouseleave)="setColumnHover()" scope="col">SEnPI</th> }
+            @if (hasBanking() && columnSettings.bankedSavings) { <th class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'banked'" (mouseenter)="setColumnHover('banked', 'improvement')" (mouseleave)="setColumnHover()" scope="col">Banked savings</th> }
+            @if (hasBanking() && columnSettings.savingsUnbanked) { <th class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'unbanked'" (mouseenter)="setColumnHover('unbanked', 'improvement')" (mouseleave)="setColumnHover()" scope="col">Unbanked savings</th> }
+            @if (columnSettings.savings) { <th class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'savings'" (mouseenter)="setColumnHover('savings', 'improvement')" (mouseleave)="setColumnHover()" scope="col">Savings</th> }
+            @if (columnSettings.rollingSavings) { <th class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'rolling-savings'" (mouseenter)="setColumnHover('rolling-savings', 'improvement')" (mouseleave)="setColumnHover()" scope="col">Rolling savings</th> }
+            @if (columnSettings.rolling12MonthImprovement) { <th class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'rolling-improvement'" (mouseenter)="setColumnHover('rolling-improvement', 'improvement')" (mouseleave)="setColumnHover()" scope="col">Rolling 12-month improvement</th> }
+          </tr>
+        </thead>
+        <tbody>
+          @for (view of visibleRows; track view.row.date) {
+            <tr
+              [class.v1-analysis-results__missing]="view.row.missingValueWarning"
+              [class.v1-analysis-results__fiscal-year-end]="view.isFiscalYearEnd">
+              <th class="v1-analysis-results-table__group--period" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'month'" (mouseenter)="setColumnHover('month', 'period')" (mouseleave)="setColumnHover()" scope="row">
+                {{ view.row.date | date:'MMM y' }}
+                @if (view.row.isBanked) { <span class="v1-chip">Banked</span> }
+              </th>
+              <td class="v1-analysis-results-table__group--period" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'fiscalYear'" (mouseenter)="setColumnHover('fiscalYear', 'period')" (mouseleave)="setColumnHover()">{{ view.row.fiscalYear }}</td>
+              @if (columnSettings.actualEnergy) { <td class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'actual'" (mouseenter)="setColumnHover('actual', 'use')" (mouseleave)="setColumnHover()">{{ view.row.energyUse | analysisResultNumber }}</td> }
+              @if (columnSettings.modeledEnergy) { <td class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'modeled'" (mouseenter)="setColumnHover('modeled', 'use')" (mouseleave)="setColumnHover()">{{ view.row.modeledEnergy | analysisResultNumber }}</td> }
+              @if (columnSettings.adjusted) { <td class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'adjusted'" (mouseenter)="setColumnHover('adjusted', 'use')" (mouseleave)="setColumnHover()">{{ view.row.adjusted | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustmentForNormalization) { <td class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'baseline-normalization'" (mouseenter)="setColumnHover('baseline-normalization', 'use')" (mouseleave)="setColumnHover()">{{ view.row.baselineAdjustmentForNormalization | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustmentForOther) { <td class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'baseline-other'" (mouseenter)="setColumnHover('baseline-other', 'use')" (mouseleave)="setColumnHover()">{{ view.row.baselineAdjustmentForOtherV2 | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustment) { <td class="v1-analysis-results-table__group--use" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'baseline-total'" (mouseenter)="setColumnHover('baseline-total', 'use')" (mouseleave)="setColumnHover()">{{ view.row.baselineAdjustment | analysisResultNumber }}</td> }
+              @if (columnSettings.productionVariables) {
+                @for (predictor of predictorColumns(); track predictor.id) {
+                  <td class="v1-analysis-results-table__group--predictors" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'predictor-' + predictor.id" (mouseenter)="setColumnHover('predictor-' + predictor.id, 'predictors')" (mouseleave)="setColumnHover()">{{ view.predictors[predictor.id] | analysisResultNumber }}</td>
+                }
+              }
+              @if (columnSettings.SEnPI) { <td class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'senpi'" (mouseenter)="setColumnHover('senpi', 'improvement')" (mouseleave)="setColumnHover()">{{ view.row.SEnPI | analysisResultNumber }}</td> }
+              @if (hasBanking() && columnSettings.bankedSavings) { <td class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'banked'" (mouseenter)="setColumnHover('banked', 'improvement')" (mouseleave)="setColumnHover()">{{ view.row.savingsBanked | analysisResultNumber }}</td> }
+              @if (hasBanking() && columnSettings.savingsUnbanked) { <td class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'unbanked'" (mouseenter)="setColumnHover('unbanked', 'improvement')" (mouseleave)="setColumnHover()">{{ view.row.savingsUnbanked | analysisResultNumber }}</td> }
+              @if (columnSettings.savings) { <td class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'savings'" (mouseenter)="setColumnHover('savings', 'improvement')" (mouseleave)="setColumnHover()">{{ view.row.savings | analysisResultNumber }}</td> }
+              @if (columnSettings.rollingSavings) { <td class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'rolling-savings'" (mouseenter)="setColumnHover('rolling-savings', 'improvement')" (mouseleave)="setColumnHover()">{{ view.row.rollingSavings | analysisResultNumber }}</td> }
+              @if (columnSettings.rolling12MonthImprovement) { <td class="v1-analysis-results-table__group--improvement" [class.v1-analysis-results-table__column-hover]="hoveredColumnId() === 'rolling-improvement'" (mouseenter)="setColumnHover('rolling-improvement', 'improvement')" (mouseleave)="setColumnHover()">{{ view.row.rolling12MonthImprovement | number:'1.0-2' }}%</td> }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <footer class="v1-analysis-results-table__footer">
+      <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="copyTable()">
+        <app-ui-icon name="copy"></app-ui-icon>
+        Copy Table
+      </button>
+      @if (rowViews().length > pageSize()) {
+        <ngb-pagination
+          [collectionSize]="rowViews().length"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          [ellipses]="false"
+          [page]="currentPage()"
+          (pageChange)="currentPage.set($event)">
+        </ngb-pagination>
+      }
+    </footer>
+  }
+</section>

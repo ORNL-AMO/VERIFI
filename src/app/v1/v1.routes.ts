@@ -84,10 +84,13 @@ import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/f
 import { FacilityAnalysisGroupSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/setup/facility-analysis-group-setup.component';
 import { FacilityAnalysisRegressionComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/regression/facility-analysis-regression.component';
 import { FacilityAnalysisGroupAnnualComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/annual/facility-analysis-group-annual.component';
-import { FacilityAnalysisGroupMonthlyComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly/facility-analysis-group-monthly.component';
+import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-table/facility-analysis-group-monthly-table.component';
+import { FacilityAnalysisGroupMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-chart/facility-analysis-group-monthly-chart.component';
 import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/shell/facility-analysis-results-shell.component';
 import { FacilityAnalysisAnnualComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/annual/facility-analysis-annual.component';
-import { FacilityAnalysisMonthlyComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly/facility-analysis-monthly.component';
+import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-table/facility-analysis-monthly-table.component';
+import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
+import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
 import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
 
 export const V1Routes: Routes = [
@@ -360,7 +363,9 @@ export const V1Routes: Routes = [
                       { path: 'setup', component: FacilityAnalysisGroupSetupComponent, data: { analysisScope: 'group', analysisTab: 'setup' } },
                       { path: 'regression', component: FacilityAnalysisRegressionComponent, data: { analysisScope: 'group', analysisTab: 'regression' } },
                       { path: 'annual', component: FacilityAnalysisGroupAnnualComponent, data: { analysisScope: 'group', analysisTab: 'annual' } },
-                      { path: 'monthly', component: FacilityAnalysisGroupMonthlyComponent, data: { analysisScope: 'group', analysisTab: 'monthly' } },
+                      { path: 'monthly-table', component: FacilityAnalysisGroupMonthlyTableComponent, data: { analysisScope: 'group', analysisTab: 'monthly-table' } },
+                      { path: 'monthly-chart', component: FacilityAnalysisGroupMonthlyChartComponent, data: { analysisScope: 'group', analysisTab: 'monthly-chart' } },
+                      { path: 'monthly', pathMatch: 'full', redirectTo: 'monthly-table' },
                       { path: '**', redirectTo: 'setup' }
                     ]
                   },
@@ -370,7 +375,10 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'annual' },
                       { path: 'annual', component: FacilityAnalysisAnnualComponent, data: { analysisScope: 'facility', analysisTab: 'annual' } },
-                      { path: 'monthly', component: FacilityAnalysisMonthlyComponent, data: { analysisScope: 'facility', analysisTab: 'monthly' } },
+                      { path: 'monthly-table', component: FacilityAnalysisMonthlyTableComponent, data: { analysisScope: 'facility', analysisTab: 'monthly-table' } },
+                      { path: 'monthly-chart', component: FacilityAnalysisMonthlyChartComponent, data: { analysisScope: 'facility', analysisTab: 'monthly-chart' } },
+                      { path: 'group-contributions', component: FacilityAnalysisGroupContributionsComponent, data: { analysisScope: 'facility', analysisTab: 'group-contributions' } },
+                      { path: 'monthly', pathMatch: 'full', redirectTo: 'monthly-table' },
                       { path: '**', redirectTo: 'annual' }
                     ]
                   },

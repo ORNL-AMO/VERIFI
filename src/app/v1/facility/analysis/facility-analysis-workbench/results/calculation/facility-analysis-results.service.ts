@@ -80,10 +80,6 @@ export class FacilityAnalysisResultsService {
   );
 
   readonly state: Signal<FacilityAnalysisResultState> = toSignal(this.stateStream, { initialValue: { state: 'idle' } });
-  readonly selectedGroup = (groupGuid: string): FacilityAnalysisGroupResult | undefined => {
-    const state = this.state();
-    return state.state === 'ready' ? state.groups.find(item => item.group.idbGroupId === groupGuid) : undefined;
-  };
 
   private buildInput(): ResultInput {
     const analysis = this.context.analysis();

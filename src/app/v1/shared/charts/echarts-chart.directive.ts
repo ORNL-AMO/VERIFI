@@ -1,6 +1,17 @@
 import { AfterViewInit, Directive, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, inject } from '@angular/core';
 import * as echarts from 'echarts/core';
-import { BarChart, BarSeriesOption, LineChart, LineSeriesOption, ScatterChart, ScatterSeriesOption } from 'echarts/charts';
+import {
+  BarChart,
+  BarSeriesOption,
+  CustomChart,
+  CustomSeriesOption,
+  HeatmapChart,
+  HeatmapSeriesOption,
+  LineChart,
+  LineSeriesOption,
+  ScatterChart,
+  ScatterSeriesOption
+} from 'echarts/charts';
 import {
   DataZoomComponent,
   DataZoomComponentOption,
@@ -16,13 +27,17 @@ import {
   ToolboxComponentOption,
   TooltipComponent,
   TooltipComponentOption,
-  TransformComponent
+  TransformComponent,
+  VisualMapComponent,
+  VisualMapComponentOption
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECharts } from 'echarts/core';
 
 echarts.use([
   BarChart,
+  CustomChart,
+  HeatmapChart,
   LineChart,
   ScatterChart,
   DataZoomComponent,
@@ -33,11 +48,14 @@ echarts.use([
   ToolboxComponent,
   TooltipComponent,
   TransformComponent,
+  VisualMapComponent,
   CanvasRenderer
 ]);
 
 export type V1EChartsOption = echarts.ComposeOption<
   | BarSeriesOption
+  | CustomSeriesOption
+  | HeatmapSeriesOption
   | LineSeriesOption
   | ScatterSeriesOption
   | DataZoomComponentOption
@@ -47,6 +65,7 @@ export type V1EChartsOption = echarts.ComposeOption<
   | MarkAreaComponentOption
   | ToolboxComponentOption
   | TooltipComponentOption
+  | VisualMapComponentOption
 >;
 
 export interface V1EChartsDataZoomRange {

@@ -369,16 +369,58 @@
               </h2>
               <nav class="v1-workflow-stepper" [attr.aria-label]="'Analysis progress for ' + workflow.name">
                 <ol>
-                  @for (step of workflow.steps; track step.id; let index = $index) {
+                  @for (step of workflow.steps; track step.id) {
                     <li [class.is-current]="step.current" [class.is-complete]="step.completed" [class.is-blocked]="!step.canOpen">
                       @if (step.canOpen) {
                         <a [routerLink]="step.route" [attr.aria-current]="step.current ? 'step' : null">
-                          <span class="v1-workflow-stepper__number" aria-hidden="true">{{ step.completed ? '✓' : index + 1 }}</span>
+                          <span
+                            class="v1-workflow-stepper__marker"
+                            [class.is-complete]="step.completed"
+                            [class.has-blocking-errors]="step.hasBlockingErrors">
+                            @if (step.kind === 'analysis' || step.kind === 'group') {
+                              @if (step.completed) {
+                                <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                                <span class="visually-hidden">Complete</span>
+                              } @else if (step.hasBlockingErrors) {
+                                <app-ui-icon name="badgeAlert"></app-ui-icon>
+                                <span class="visually-hidden">Has blocking errors</span>
+                              } @else {
+                                <span class="visually-hidden">Not complete</span>
+                              }
+                            } @else if (step.kind === 'facility') {
+                              <app-ui-icon name="chartAnalysis"></app-ui-icon>
+                              <span class="visually-hidden">Results</span>
+                            } @else {
+                              <app-ui-icon name="link"></app-ui-icon>
+                              <span class="visually-hidden">Dependencies</span>
+                            }
+                          </span>
                           <span class="v1-workflow-stepper__label">{{ step.label }}</span>
                         </a>
                       } @else {
                         <span class="v1-workflow-stepper__blocked" aria-disabled="true">
-                          <span class="v1-workflow-stepper__number" aria-hidden="true">{{ index + 1 }}</span>
+                          <span
+                            class="v1-workflow-stepper__marker"
+                            [class.is-complete]="step.completed"
+                            [class.has-blocking-errors]="step.hasBlockingErrors">
+                            @if (step.kind === 'analysis' || step.kind === 'group') {
+                              @if (step.completed) {
+                                <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                                <span class="visually-hidden">Complete</span>
+                              } @else if (step.hasBlockingErrors) {
+                                <app-ui-icon name="badgeAlert"></app-ui-icon>
+                                <span class="visually-hidden">Has blocking errors</span>
+                              } @else {
+                                <span class="visually-hidden">Not complete</span>
+                              }
+                            } @else if (step.kind === 'facility') {
+                              <app-ui-icon name="chartAnalysis"></app-ui-icon>
+                              <span class="visually-hidden">Results</span>
+                            } @else {
+                              <app-ui-icon name="link"></app-ui-icon>
+                              <span class="visually-hidden">Dependencies</span>
+                            }
+                          </span>
                           <span class="v1-workflow-stepper__label">{{ step.label }}</span>
                         </span>
                       }

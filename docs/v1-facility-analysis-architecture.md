@@ -14,9 +14,13 @@ The feature is organized by workflow ownership:
 facility/analysis/
   facility-analysis-dashboard/       inventory, commands, cards, and dashboard projections
   facility-analysis-workbench/
+    header/                           analysis identity, facts, save state, and status presentation
+    navigation/                       route-stage state, prerequisites, and navigation commands
+    stage-navigation/                 sticky workflow and contextual tab presentation
+    footer/                           Back, Continue, and Finish presentation
     editing/                          draft autosave lifecycle
     analysis-setup/                   analysis-wide settings
-    group/                            group context, setup, regression, and group results
+    group/                            group context, setup, regression, and group-scoped results
     results/
       calculation/                    request projection, fingerprinting, and Worker coordination
       presentation/                   shared result views, display settings, status, and toolbar
@@ -37,15 +41,19 @@ The workbench owns the services that must survive child-tab navigation:
 | `FacilityAnalysisWorkbenchContext` | Resolves the selected account, facility, analysis, meter groups, stages, and status findings from the workspace | One analysis workbench route |
 | `FacilityAnalysisAutosaveService` | Maintains committed and editable analysis copies, debounces valid edits, persists through the command boundary, and exposes navigation state | One analysis workbench route |
 | `FacilityAnalysisPeriodService` | Projects the canonical calendarization for the editable draft and supplies the shared baseline-year choices and latest complete year to setup and header views | One analysis workbench route |
-| `FacilityAnalysisResultsService` | Decides when result work is valid, builds the calculation request, cancels stale work, and caches the latest matching result | One analysis workbench route |
-| `FacilityAnalysisResultsDisplayService` | Owns table/graph selection and the user’s result-column preferences | One analysis workbench route; column preferences persist in v1 local storage |
+| `FacilityAnalysisResultsService` | Decides when complete facility result work is valid, builds the calculation request, cancels stale work, and caches the latest matching result | One analysis workbench route |
+| `FacilityAnalysisResultsDisplayService` | Owns the user’s result-column preferences | One analysis workbench route; column preferences persist in v1 local storage |
 | `RegressionCandidateStore` | Holds generated, uncommitted regression candidates by analysis and group GUID | One analysis workbench route; never persisted directly |
+| `FacilityAnalysisWorkbenchNavigationService` | Tracks the active stage and contextual tab, projects completion and availability, guards locked deep links, and owns Back/Continue/Finish commands | One analysis workbench route |
+
+The workbench route component is the provider and guard boundary. Its header, workflow navigation, and footer are focused child components that inject the route-scoped services directly. The header and both workflow/contextual tab rows share one sticky stack; group and facility result shells retain only route context, canonical fallback behavior, empty states, and their child outlets.
 
 Each group route creates `FacilityAnalysisGroupContext`. It resolves the group, group meters, meter-group metadata, and group findings. Setup and Regression then create page-specific facades:
 
 - `FacilityAnalysisGroupSetupController` owns the typed setup forms, dynamic predictor controls, adjustment-editor state, and pending confirmations. `FacilityAnalysisGroupSetupFacade` owns setup projections and typed analysis-draft mutations.
 - `FacilityAnalysisRegressionController` owns the typed regression controls, generated-model table filters, the discriminated pending-change state, and review focus restoration. `FacilityAnalysisRegressionFacade` owns candidate generation, model selection, regression draft transitions, and validation coordination.
 - `RegressionModelValidationService` owns debouncing, cancellation, and the validation Worker state for the active Regression page.
+- `FacilityAnalysisGroupResultsService` survives navigation among Annual, Monthly Table, and Monthly Chart. It reuses a ready facility result when every group is valid; otherwise it calculates only the selected completed group and matching banking chain.
 
 Controllers are provided at their owning route and are the only layer that synchronizes editable draft state into form controls. Hydration and dynamic-control rebuilding use `emitEvent: false`; distinct user-value subscriptions translate `null` form values into optional domain values and issue one typed facade command. A component renders the controller state and invokes direct UI actions. Put domain transitions, calculation requests, and derived domain projections in the route-scoped facade or coordinator. Put deterministic transformations in plain functions with direct unit tests. Facades do not import presentation-component types or accept DOM events.
 
@@ -62,13 +70,15 @@ Every draft transition clones before mutation and marks `isAnalysisVisited` fals
 
 The workbench header and Analysis Setup both read the editable draft for analysis-wide settings. `FacilityAnalysisPeriodService` derives complete years from the shared canonical calendarization, independently of group readiness and the result Worker. This keeps baseline and latest-complete-year facts available during setup without starting calculation work that cannot yet succeed.
 
-Generated regression candidates, pending confirmation choices, open editors, selected result views, loading flags, and Worker subscriptions are transient. Do not add them to IndexedDB records merely to preserve navigation state.
+Generated regression candidates, pending confirmation choices, open editors, loading flags, and Worker subscriptions are transient. Do not add them to IndexedDB records merely to preserve navigation state.
 
-Analysis Setup, Group Setup, Regression, dashboard filters, create-analysis controls, and result-column preferences are reactive forms. Annual and monthly pages share one result-column chooser rather than duplicating preference controls. A control synchronization must never be used as evidence of a user edit; only emitted, deduplicated user changes may invalidate models, autosave drafts, or request calculation work.
+Analysis Setup, Group Setup, Regression, dashboard filters, create-analysis controls, and result-column preferences are reactive forms. Annual and monthly tables reuse the same result-column slideout component, but it presents only the options for the active period; production-variable columns remain visible. A control synchronization must never be used as evidence of a user edit; only emitted, deduplicated user changes may invalidate models, autosave drafts, or request calculation work.
 
 ## Result calculation orchestration
 
-Result calculation is coordinated from one workbench-scoped service rather than from individual result components. Annual, monthly, group, facility, result-dependent header facts, and future results views consume the same result state. Setup facts such as baseline and latest complete year use the editable draft and canonical calendarization instead, because they do not require valid group models or a result Worker.
+Facility result calculation is coordinated from one workbench-scoped service rather than from individual result components. Facility Annual, Facility Monthly Table, Facility Monthly Chart, Group Contributions, result-dependent header facts, and future facility views consume that state. Setup facts such as baseline and latest complete year use the editable draft and canonical calendarization instead, because they do not require valid group models or a result Worker.
+
+Group result calculation has a distinct readiness boundary. The group-route-scoped coordinator requires valid Analysis Setup and the selected group, but ignores blocking findings owned by other groups. When another group blocks the facility calculation, the coordinator projects only the selected group, its meters and predictors, and the matching groups from the transitive banking chain into a group-results Worker request. Its fingerprint likewise excludes unrelated groups. When the complete facility calculation is available, the group coordinator projects the selected group from that result instead of starting duplicate work.
 
 The data flow is:
 
@@ -85,7 +95,7 @@ workspace snapshot
   -> all result views project from that state
 ```
 
-The coordinator starts a Worker only when all of these invariants hold:
+The facility coordinator starts a Worker only when all of these invariants hold:
 
 - the workspace snapshot is ready;
 - autosave is `idle` or `saved`;
@@ -94,6 +104,8 @@ The coordinator starts a Worker only when all of these invariants hold:
 - the requested facility projection is ready.
 
 While an invariant is unresolved, the service publishes `waiting` with a reason instead of starting calculation work. Result components render `idle`, `waiting`, `loading`, `ready`, and `error` explicitly.
+
+The group coordinator applies the same workspace, autosave, status, and calendarization gates, but its blocking gate includes only Analysis Setup and the selected group. Warnings do not block either scope. A selected-group request is cancelled when its projected calculation fingerprint changes or the group becomes blocked.
 
 The request fingerprint includes the selected analysis’s calculation fields, its transitive banking dependencies, facility fiscal and unit settings, projected calendarized meters, predictors, predictor readings, and calculation options. Display metadata such as the analysis name and modified date is intentionally excluded. Therefore a rename reuses the current result, while a baseline, group, model, meter, predictor, unit, fiscal, or banking change replaces it.
 
@@ -138,7 +150,7 @@ Calendarization is already coordinated at workspace scope for facility results. 
 
 ## Results presentation
 
-Result pages are projections, not calculation owners. They read `FacilityAnalysisResultsService.state`, derive their rows, and pass those rows to tables or charts. Shared result status and toolbar components live under `results/presentation`; page-specific tables remain explicit so columns and formulas are easy to inspect.
+Result pages are projections, not calculation owners. Facility pages read `FacilityAnalysisResultsService.state`; group pages read `FacilityAnalysisGroupResultsService.state`. Both scopes offer Annual, Monthly Table, and Monthly Chart. Annual displays its table first, followed by the v0-equivalent Actual-versus-Calculated and Annual-versus-Total-improvement charts; monthly routes keep the dense table and chart in separate tabs. Facility Results also offers Group Contributions. That view starts with a diverging contribution heatmap, then groups its table rows by fiscal year, uses each year heading as a facility-total row, and indents the included groups beneath it. Heatmap rows are groups, columns are fiscal years labeled with their facility total, and a symmetric scale around zero uses green for savings and red for losses. The initial baseline year is omitted when its facility savings is zero. Contribution percentage is the group's annual savings divided by the facility's annual adjusted use, multiplied by 100; a zero adjusted value produces zero contribution rather than an invalid value. Result tables use the v0 analysis display-rounding rules and omit banked and unbanked savings when banking is disabled. Existing `/monthly` deep links redirect canonically to `/monthly-table`. Shared result status and toolbar components live under `results/presentation`; page-specific tables remain explicit so columns and formulas are easy to inspect.
 
 Future results pages should be added below the existing group or facility result shells. They should consume the coordinator’s current result or add a clearly named projection to it. Add a new Worker only when the calculation has a genuinely different input and lifecycle boundary—not merely because a new tab needs another presentation.
 
@@ -146,7 +158,9 @@ Future results pages should be added below the existing group or facility result
 
 Destructive setup and model changes use `TemplatePortal`, `ModalPortalService`, and `ConfirmationDialogComponent`. Feature components own the pending action and explanatory copy; the shell owns stacking, focus trapping, Escape handling, and backdrop behavior.
 
-The workbench footer uses autosave and stage-local status to decide whether Back, Continue, or Finish is available. Route guards are a final safety boundary, not the primary save mechanism. Group tabs are derived from the selected analysis method: Regression appears only for regression groups, and result tabs are hidden for skipped groups.
+Analysis Setup and group completion are status-ready projections with no blocking errors; warnings remain visible but do not prevent completion. Setup is always available. Once Setup is complete, every group becomes available and groups may be completed in any order. A completed group can display its own results even while another group is incomplete. Facility Results becomes available only after every group is complete. Used By is informational and ignores workflow prerequisites, although transient autosave navigation locks still apply. Locked group and Facility Results deep links redirect to the first unmet prerequisite.
+
+The footer follows displayed stage order without making groups sequential prerequisites. Continue moves from Setup to the first group, between listed groups even when the current group remains incomplete, from the last group to Facility Results only when all groups are complete, and then to Used By. Back selects the nearest previous available stage. Route guards are a final safety boundary, not the primary save mechanism. Contextual group tabs are derived from the selected analysis method: Regression appears only for regression groups, and result tabs are hidden for skipped groups.
 
 ## Testing and debugging map
 

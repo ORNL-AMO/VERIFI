@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
@@ -198,6 +199,50 @@ describe('SectionNavComponent', () => {
       .toEqual(['Analysis Setup', 'Natural Gas', 'Electricity', 'Facility Results', 'Used By']);
     expect(workflow.querySelector('[aria-current="step"]')?.textContent).toContain('Natural Gas');
     expect(workflow.querySelectorAll('a').length).toBe(5);
+    expect(workflow.querySelector('.v1-workflow-stepper__number')).toBeNull();
+    expect([...workflow.querySelectorAll('.v1-workflow-stepper__marker')].map(marker => marker.textContent?.trim()))
+      .toEqual(['Complete', 'Complete', 'Complete', 'Results', 'Dependencies']);
+    const icons = fixture.debugElement.queryAll(By.css('.v1-nav__analysis-workflow .v1-workflow-stepper__marker app-ui-icon'))
+      .map(element => element.componentInstance.name);
+    expect(icons).toEqual(['checkmarkBadge', 'checkmarkBadge', 'checkmarkBadge', 'chartAnalysis', 'link']);
+  });
+
+  it('shows an accessible empty marker for an incomplete analysis stage', () => {
+    activeSection.set('analysis');
+    activeDetail.set('workbench');
+    contextMode.set('facility');
+    selectedFacility.set({ guid: 'facility-a', name: 'Facility A' });
+    activeAnalysisGuid.set('analysis-a');
+    activeAnalysisGroupGuid.set('group-b');
+    activeAnalysisStageScope.set('group');
+    facilityMeterGroups.set([{ guid: 'group-b', name: 'Natural Gas' }]);
+    selectedFacilityAnalyses.set([{
+      guid: 'analysis-a',
+      name: 'FY 2025 Energy Analysis',
+      groups: [{ idbGroupId: 'group-b', analysisType: 'regression' }]
+    }]);
+    statusItems.set(presentFindings([makeFinding(
+      'analysis-group.setup.invalid',
+      'error',
+      'configuration',
+      {
+        kind: 'analysis-group',
+        guid: 'analysis-a:group-b',
+        name: 'Natural Gas',
+        accountGuid: 'account-a',
+        facilityGuid: 'facility-a'
+      },
+      { fields: ['analysisType'], analysisType: 'regression' }
+    )]));
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const current = fixture.nativeElement.querySelector('[aria-current="step"]') as HTMLElement;
+    const icons = fixture.debugElement.queryAll(By.css('.v1-nav__analysis-workflow .v1-workflow-stepper__marker app-ui-icon'))
+      .map(element => element.componentInstance.name);
+
+    expect(current.textContent).toContain('Has blocking errors');
+    expect(icons).toContain('badgeAlert');
   });
 
   it('shows account settings navigation only when the Settings rail section is active', () => {

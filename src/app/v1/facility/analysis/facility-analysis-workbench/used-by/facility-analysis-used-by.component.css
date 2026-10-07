@@ -1,4 +1,4 @@
-:host { display: block; } .v1-analysis-section { display: grid; gap: var(--v1-space-4); padding: 1rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); } h2, h3, p { margin: 0; }
+:host { display: block; } .v1-analysis-section { display: grid; gap: var(--v1-space-4); padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0 0 var(--v1-radius) var(--v1-radius); background: var(--v1-surface); } h2, h3, p { margin: 0; }
 .v1-analysis-section__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); }
 .v1-used-by__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-block: 1px solid var(--v1-divider); }
 .v1-used-by__panel { display: grid; align-content: start; gap: var(--v1-space-2); min-width: 0; padding-block: 1rem; }

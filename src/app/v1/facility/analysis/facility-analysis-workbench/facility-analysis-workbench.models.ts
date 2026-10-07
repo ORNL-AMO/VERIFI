@@ -5,7 +5,7 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 
-export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly';
+export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
 export type AnalysisWorkbenchStageKind = 'analysis' | 'group' | 'facility' | 'used-by';
 
 export interface AnalysisWorkbenchTab {
@@ -25,6 +25,8 @@ export interface AnalysisWorkbenchStage {
 export interface AnalysisWorkbenchStageNavigation extends AnalysisWorkbenchStage {
   readonly current: boolean;
   readonly completed: boolean;
+  readonly hasBlockingErrors: boolean;
+  readonly available: boolean;
   readonly canOpen: boolean;
 }
 
@@ -34,7 +36,19 @@ export type AnalysisWorkbenchTabAttention = Readonly<Partial<Record<AnalysisWork
 export const ANALYSIS_GROUP_SETUP_TAB: AnalysisWorkbenchTab = { id: 'setup', label: 'Setup', icon: 'settings' };
 export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'covariate' };
 export const ANALYSIS_GROUP_ANNUAL_TAB: AnalysisWorkbenchTab = { id: 'annual', label: 'Annual', icon: 'calendar' };
-export const ANALYSIS_GROUP_MONTHLY_TAB: AnalysisWorkbenchTab = { id: 'monthly', label: 'Monthly', icon: 'table' };
+export const ANALYSIS_GROUP_MONTHLY_TABLE_TAB: AnalysisWorkbenchTab = { id: 'monthly-table', label: 'Monthly Table', icon: 'table' };
+export const ANALYSIS_GROUP_MONTHLY_CHART_TAB: AnalysisWorkbenchTab = { id: 'monthly-chart', label: 'Monthly Chart', icon: 'chartLine' };
+export const ANALYSIS_FACILITY_GROUP_CONTRIBUTIONS_TAB: AnalysisWorkbenchTab = {
+  id: 'group-contributions',
+  label: 'Group Contributions',
+  icon: 'barChart'
+};
+export const ANALYSIS_FACILITY_TABS: readonly AnalysisWorkbenchTab[] = [
+  ANALYSIS_GROUP_ANNUAL_TAB,
+  ANALYSIS_GROUP_MONTHLY_TABLE_TAB,
+  ANALYSIS_GROUP_MONTHLY_CHART_TAB,
+  ANALYSIS_FACILITY_GROUP_CONTRIBUTIONS_TAB
+];
 
 export function isSkippedAnalysisType(type: AnalysisType): boolean {
   return type === 'skip' || type === 'skipAnalysis';
@@ -46,7 +60,8 @@ export function tabsForAnalysisGroup(group: AnalysisGroup | undefined): readonly
     ANALYSIS_GROUP_SETUP_TAB,
     ...(group.analysisType === 'regression' ? [ANALYSIS_GROUP_REGRESSION_TAB] : []),
     ANALYSIS_GROUP_ANNUAL_TAB,
-    ANALYSIS_GROUP_MONTHLY_TAB
+    ANALYSIS_GROUP_MONTHLY_TABLE_TAB,
+    ANALYSIS_GROUP_MONTHLY_CHART_TAB
   ];
 }
 
@@ -75,7 +90,7 @@ export function activeAnalysisWorkbenchStageId(url: string): string {
   const cleanUrl = url.split(/[?#]/, 1)[0];
   const groupMatch = /\/group\/([^/]+)\//.exec(cleanUrl);
   if (groupMatch) return `group:${decodeRoutePart(groupMatch[1])}`;
-  if (/\/facility\/(annual|monthly)$/.test(cleanUrl)) return 'facility';
+  if (/\/facility\/(annual|monthly(?:-table|-chart)?|group-contributions)$/.test(cleanUrl)) return 'facility';
   if (/\/used-by$/.test(cleanUrl)) return 'used-by';
   return 'analysis';
 }
@@ -103,16 +118,38 @@ export function buildAnalysisWorkbenchStageNavigation(
   currentStageId: string,
   analysisGuid: string,
   findings: readonly StatusItem[],
-  navigationBlocked = false
+  navigationBlocked = false,
+  statusReady = true
 ): readonly AnalysisWorkbenchStageNavigation[] {
   const currentIndex = stages.findIndex(stage => stage.id === currentStageId);
-  const firstBlockingIndex = stages.findIndex(stage => stageHasBlockingErrors(stage, analysisGuid, findings));
+  const blockingErrors = new Map(stages.map(stage => [
+    stage.id,
+    stageHasBlockingErrors(stage, analysisGuid, findings)
+  ]));
+  const completion = new Map(stages.map(stage => [
+    stage.id,
+    statusReady
+      && (stage.kind === 'analysis' || stage.kind === 'group')
+      && !blockingErrors.get(stage.id)
+  ]));
+  const setupComplete = completion.get('analysis') === true;
+  const groupStages = stages.filter(stage => stage.kind === 'group');
+  const groupsComplete = groupStages.length > 0 && groupStages.every(stage => completion.get(stage.id) === true);
   return stages.map((stage, index) => ({
     ...stage,
     current: index === currentIndex,
-    completed: currentIndex > index && !stageHasBlockingErrors(stage, analysisGuid, findings),
-    canOpen: index === currentIndex || (!navigationBlocked
-      && (firstBlockingIndex < 0 || index <= firstBlockingIndex))
+    completed: completion.get(stage.id) === true,
+    hasBlockingErrors: blockingErrors.get(stage.id) === true,
+    available: stage.kind === 'analysis'
+      || stage.kind === 'used-by'
+      || (stage.kind === 'group' && setupComplete)
+      || (stage.kind === 'facility' && setupComplete && groupsComplete),
+    canOpen: index === currentIndex || (!navigationBlocked && (
+      stage.kind === 'analysis'
+      || stage.kind === 'used-by'
+      || (stage.kind === 'group' && setupComplete)
+      || (stage.kind === 'facility' && setupComplete && groupsComplete)
+    ))
   }));
 }
 

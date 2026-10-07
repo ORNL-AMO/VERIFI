@@ -1,2 +1,2 @@
 :host { display: block; }
-.v1-analysis-results-shell { border-radius: var(--v1-radius); overflow: hidden; }
+.v1-analysis-results-shell { min-width: 0; }

@@ -1,0 +1,53 @@
+@let resultState = results.state();
+<section class="v1-analysis-results-page" aria-label="Monthly chart results">
+  @if (results.hasBlockingErrors() || resultState.state !== 'ready' || !rows().length) {
+    <div class="v1-analysis-results-page__intro">
+      <app-analysis-result-status
+        scope="group"
+        period="monthly"
+        [state]="resultState"
+        [blocking]="results.hasBlockingErrors()"
+        [rowCount]="rows().length">
+      </app-analysis-result-status>
+    </div>
+  }
+
+  @if (!results.hasBlockingErrors() && resultState.state === 'ready' && rows().length) {
+    <section class="v1-analysis-results-page__charts" aria-label="Group monthly analysis charts">
+      <div class="v1-analysis-results-page__chart">
+        <app-meter-results-chart
+          [chartRows]="useChartRows()"
+          [metrics]="useChartMetrics()"
+          [showAllMetrics]="true"
+          allMetricsDisplay="line"
+          [comparisonBand]="useComparisonBand"
+          [sharedYAxis]="true"
+          [yAxisTitle]="unit()"
+          [allowNegativeValues]="true"
+          [showSeriesControls]="false"
+          period="monthly"
+          ariaLabel="Group monthly actual and calculated use chart. Green indicates savings where calculated use exceeds actual use; red indicates actual use exceeds calculated use."
+          downloadFileName="group-monthly-use"
+          [embedded]="true">
+        </app-meter-results-chart>
+      </div>
+      <div class="v1-analysis-results-page__chart">
+        <app-meter-results-chart
+          [chartRows]="savingsChart().rows"
+          [metrics]="savingsChart().metrics"
+          [showAllMetrics]="true"
+          allMetricsDisplay="bar"
+          [stackSeries]="true"
+          [sharedYAxis]="true"
+          yAxisTitle="Percent Savings"
+          [allowNegativeValues]="true"
+          [showSeriesControls]="false"
+          period="monthly"
+          ariaLabel="Group monthly rolling savings chart"
+          downloadFileName="group-monthly-savings"
+          [embedded]="true">
+        </app-meter-results-chart>
+      </div>
+    </section>
+  }
+</section>

@@ -60,6 +60,14 @@ export interface MeterResultsChartMetric {
   readonly label: string;
   readonly unit?: string;
   readonly currency?: boolean;
+  readonly color?: string;
+}
+
+export interface MeterResultsChartComparisonBand {
+  readonly referenceMetricId: string;
+  readonly comparisonMetricId: string;
+  readonly comparisonAboveColor: string;
+  readonly referenceAboveColor: string;
 }
 
 export interface MeterResultsChartRow {

@@ -1,4 +1,4 @@
 :host { display: block; }
-.v1-regression { display: grid; border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); }
+.v1-regression { display: grid; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0 0 var(--v1-radius) var(--v1-radius); background: var(--v1-surface); }
 .v1-regression__workflow { min-width: 0; padding: 1rem; }
 .v1-regression__notice { display: flex; align-items: center; gap: var(--v1-space-2); margin: 0; padding: .65rem 1rem; border-bottom: 1px solid var(--v1-divider); color: var(--v1-muted); }

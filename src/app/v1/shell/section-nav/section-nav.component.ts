@@ -5,11 +5,15 @@ import { ImportStepDefinition, stepsForDraft } from '@app/v1/account/imports/imp
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { meterSourceIcon } from '@app/v1/facility/data/meters/models';
 import { buildWeatherStationGroups, predictorIcon } from '@app/v1/facility/data/predictors/models';
+import {
+  buildAnalysisWorkbenchStageNavigation,
+  buildAnalysisWorkbenchStages,
+  type AnalysisWorkbenchStageNavigation
+} from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import { StatusAttentionSummary } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
-import { buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.models';
 
 type SettingsNavItem = {
   readonly id: string;
@@ -70,14 +74,7 @@ type ImportNavigationFile = {
 
 type AnalysisNavigation = {
   readonly name: string;
-  readonly steps: ReadonlyArray<{
-    readonly id: string;
-    readonly label: string;
-    readonly route: readonly string[];
-    readonly current: boolean;
-    readonly completed: boolean;
-    readonly canOpen: boolean;
-  }>;
+  readonly steps: readonly AnalysisWorkbenchStageNavigation[];
 };
 
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
@@ -191,7 +188,14 @@ export class SectionNavComponent {
     );
     return {
       name: analysis.name || 'Untitled analysis',
-      steps: buildAnalysisWorkbenchStageNavigation(stages, currentStageId, analysisGuid, findings)
+      steps: buildAnalysisWorkbenchStageNavigation(
+        stages,
+        currentStageId,
+        analysisGuid,
+        findings,
+        false,
+        this.status.state() === 'ready'
+      )
     };
   });
   readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
