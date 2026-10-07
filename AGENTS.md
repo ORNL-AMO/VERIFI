@@ -61,6 +61,8 @@ Install Chromium once with `npx playwright install chromium` when browser tests 
 
 Use the mode and discoverable skill selected by the [task context index](docs/agents/context-index.md). Combine skills only when the task crosses their stated boundaries. Use Designer with Implementer for UI implementation; design-only work does not authorize code changes.
 
+When explicitly asked to open a pull request, follow the [GitHub PR creation guide](docs/agents/github-pr-creation.md). Use non-closing issue references by default because QA validates and closes issues; use automatic-closing keywords only when explicitly requested.
+
 ## Working rules
 
 - Diagnose before editing when the request asks for analysis, investigation, or review only.

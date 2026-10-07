@@ -58,7 +58,7 @@ All pull requests, regardless of the base branch, must include relevant document
 required tests.
 
 When your branch is ready, make a pull request to the develop branch of ORNL-AMO/VERIFI through the
-[GitHub web interface](https://github.com/ORNL-AMO/VERIFI/pulls). Pull requests must reference an issue number. If an issue does not yet exist, please create one.
+[GitHub web interface](https://github.com/ORNL-AMO/VERIFI/pulls), an authenticated GitHub CLI, or an explicitly authorized coding agent. Pull requests must reference an issue number. If an issue does not yet exist, please create one. Coding agents should follow the [GitHub PR creation guide](docs/agents/github-pr-creation.md).
 
 <!--TODO: Setup CLA
 When submitting a pull request, you
