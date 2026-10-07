@@ -64,13 +64,6 @@ export class FacilityAnalysisBankingComponent {
       ? this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, source.guid)
       : undefined;
   });
-  readonly annualRows = computed(() => {
-    const state = this.results.state();
-    const newBaselineYear = this.configuredGroup()?.newBaselineYear;
-    return state.state === 'ready' && typeof newBaselineYear === 'number' && Number.isFinite(newBaselineYear)
-      ? state.annual.filter(row => row.year < newBaselineYear)
-      : [];
-  });
   readonly monthlyRows = computed(() => {
     const state = this.results.state();
     const group = this.configuredGroup();
@@ -96,12 +89,16 @@ export class FacilityAnalysisBankingComponent {
   readonly legendMarkers = computed(() => uniqueMarkers(this.annualViews().flatMap(view => view.markers)));
   readonly category = computed(() => this.source()?.analysisCategory);
   readonly unit = computed(() => this.category() === 'water' ? this.source()?.waterUnit : this.source()?.energyUnit);
-  readonly annualUseRows = computed(() => annualUseChartRows(this.annualRows()));
+  readonly annualUseRows = computed(() => annualUseChartRows(this.annualViews().map(view => ({
+    ...view.summary,
+    isIntermediateBanked: view.transition
+  }))));
   readonly annualUseMetrics = computed(() => annualUseChartMetrics(this.category(), this.unit()));
   readonly annualImprovementRows = computed(() => annualImprovementChartRows(this.annualViews().map(view => ({
     ...view.summary,
+    isIntermediateBanked: view.transition,
     totalSavingsPercentImprovement: view.totalSavingsPercentImprovement ?? 0,
-    annualSavingsPercentImprovement: view.transition ? 0 : view.summary.annualSavingsPercentImprovement
+    annualSavingsPercentImprovement: view.summary.annualSavingsPercentImprovement
   }))));
   readonly annualImprovementMetrics = computed(() => annualImprovementChartMetrics(this.category()));
   readonly monthlyUseRows = computed(() => monthlyUseChartRows(this.monthlyRows()));

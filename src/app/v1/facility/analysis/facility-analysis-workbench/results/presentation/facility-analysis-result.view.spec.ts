@@ -1,4 +1,5 @@
 import {
+  annualImprovementChartRows,
   annualUseChartRows,
   facilityGroupContributionsView,
   monthlySavingsChartView,
@@ -11,6 +12,23 @@ describe('facility analysis result views', () => {
       periodKey: '2024', periodLabel: '2024', sortValue: 2024,
       values: { actual: 0, calculated: -2 }
     }]);
+  });
+
+  it('preserves transition actual and total values while leaving model-derived series unavailable', () => {
+    const annual = {
+      year: 2024, energyUse: 200, adjusted: 190, isIntermediateBanked: true,
+      annualSavingsPercentImprovement: 2, totalSavingsPercentImprovement: 8
+    } as any;
+    const monthly = {
+      date: new Date(2024, 0, 1), energyUse: 20, adjusted: 19, isIntermediateBanked: true
+    } as any;
+
+    expect(annualUseChartRows([annual])[0].values).toEqual({ actual: 200, calculated: null });
+    expect(annualImprovementChartRows([annual])[0].values).toEqual({
+      annualImprovement: null,
+      totalImprovement: 8
+    });
+    expect(monthlyUseChartRows([monthly])[0].values).toEqual({ actual: 20, calculated: null });
   });
 
   it('projects facility group contributions by year with v0 percentages at full precision', () => {
@@ -93,8 +111,8 @@ describe('facility analysis result views', () => {
         isIntermediateBanked: false, percentSavingsComparedToBaseline: 5
       },
       {
-        date: new Date(2025, 1, 1), rolling12MonthImprovement: -2, isBanked: false,
-        isIntermediateBanked: true, percentSavingsComparedToBaseline: 6
+        date: new Date(2025, 1, 1), rolling12MonthImprovement: -2, isBanked: true,
+        isIntermediateBanked: true, percentSavingsComparedToBaseline: 5
       }
     ] as any;
 
@@ -105,7 +123,25 @@ describe('facility analysis result views', () => {
     ]);
     expect(view.rows.map(row => row.values)).toEqual([
       { savings: 0, losses: 0, bankedSavings: 3, bankedLosses: 0 },
-      { savings: 0, losses: -2, bankedSavings: 5, bankedLosses: -2 }
+      { savings: 0, losses: 0, bankedSavings: 5, bankedLosses: 0 }
+    ]);
+  });
+
+  it('places a banked loss in one series and carries a negative applied value through transition', () => {
+    const rows = [
+      {
+        date: new Date(2025, 0, 1), rolling12MonthImprovement: -3, isBanked: true,
+        isIntermediateBanked: false, percentSavingsComparedToBaseline: -3
+      },
+      {
+        date: new Date(2025, 1, 1), rolling12MonthImprovement: 2, isBanked: true,
+        isIntermediateBanked: true, percentSavingsComparedToBaseline: -3
+      }
+    ] as any;
+
+    expect(monthlySavingsChartView(rows, true).rows.map(row => row.values)).toEqual([
+      { savings: 0, losses: 0, bankedSavings: 0, bankedLosses: -3 },
+      { savings: 0, losses: 0, bankedSavings: 0, bankedLosses: -3 }
     ]);
   });
 

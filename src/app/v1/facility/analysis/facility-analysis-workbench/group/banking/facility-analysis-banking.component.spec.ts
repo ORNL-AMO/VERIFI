@@ -134,8 +134,10 @@ describe('FacilityAnalysisBankingComponent', () => {
     expect(charts.map(chart => chart.chartRows.length)).toEqual([2, 2, 2, 2]);
     expect(charts[1].chartRows[1]).toMatchObject({
       periodLabel: '2024',
-      values: { annualImprovement: 0, totalImprovement: 9 }
+      values: { annualImprovement: null, totalImprovement: 9 }
     });
+    expect(charts[0].chartRows[1]).toMatchObject({ values: { calculated: null } });
+    expect(charts[2].chartRows[1]).toMatchObject({ values: { calculated: null } });
     expect(charts[3].chartRows[1]).toMatchObject({
       values: { bankedSavings: 4, bankedLosses: 0, savings: 0, losses: 0 }
     });

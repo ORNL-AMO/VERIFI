@@ -126,7 +126,7 @@ export class MeterResultsChartComponent implements OnChanges {
       periodLabel: row.periodLabel,
       cells: metrics.map(metric => ({
         metricId: metric.id,
-        valueLabel: formatChartTooltipValue(chartValue(row, metric.id), !!metric.currency, metric.unit)
+        valueLabel: formatChartAccessibleValue(chartValue(row, metric.id), !!metric.currency, metric.unit)
       }))
     }));
   });
@@ -161,6 +161,7 @@ export class MeterResultsChartComponent implements OnChanges {
           type: display,
           yAxisIndex: 0,
           data: rows.map(row => chartValue(row, metric.id)),
+          connectNulls: false,
           smooth: display === 'line' && rows.length > 2 && !comparisonBand,
           showSymbol: display === 'line',
           symbolSize: display === 'line' ? 7 : undefined,
@@ -178,6 +179,7 @@ export class MeterResultsChartComponent implements OnChanges {
         type: this.utilityDisplay(),
         yAxisIndex: 0,
         data: rows.map(row => chartValue(row, utilityMetric.id)),
+        connectNulls: false,
         smooth: this.utilityDisplay() === 'line' && rows.length > 2,
         itemStyle: { color: 'var(--v1-chart-series-1)' },
         lineStyle: { color: 'var(--v1-chart-series-1)', width: 3 },
@@ -194,6 +196,7 @@ export class MeterResultsChartComponent implements OnChanges {
         type: this.costDisplay(),
         yAxisIndex: this.sharedYAxis ? 0 : yAxis.length - 1,
         data: rows.map(row => chartValue(row, costMetric.id)),
+        connectNulls: false,
         smooth: this.costDisplay() === 'line' && rows.length > 2,
         itemStyle: { color: 'var(--v1-chart-series-3)' },
         lineStyle: { color: 'var(--v1-chart-series-3)', width: 3 },
@@ -325,9 +328,9 @@ function comparisonBandSeries(
   return {
     type: 'custom',
     coordinateSystem: 'cartesian2d',
-    data: rows.slice(0, -1).map((row, index) => {
+    data: rows.slice(0, -1).flatMap((row, index) => {
       const nextRow = rows[index + 1];
-      return [
+      const values = [
         index,
         chartValue(row, band.referenceMetricId),
         chartValue(row, band.comparisonMetricId),
@@ -335,6 +338,7 @@ function comparisonBandSeries(
         chartValue(nextRow, band.referenceMetricId),
         chartValue(nextRow, band.comparisonMetricId)
       ];
+      return values.slice(1).some(value => value === null) ? [] : [values];
     }),
     encode: { x: [0, 3], y: [1, 2, 4, 5] },
     itemStyle: {
@@ -422,6 +426,7 @@ function formatChartValueLabel(
   metric: MeterResultsChartMetric,
   compact: boolean
 ): string {
+  if (value === null || value === undefined) return '';
   const numericValue = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(numericValue)) return '';
   if (metric.unit === '%') {
@@ -484,12 +489,13 @@ function accessibleMetricLabel(metric: MeterResultsChartMetric): string {
   return metric.unit ? `${metric.label} (${metric.unit})` : metric.label;
 }
 
-function chartValue(row: MeterResultsChartRow, metricId: string): number {
-  return Number(row.values[metricId]) || 0;
+function chartValue(row: MeterResultsChartRow, metricId: string): number | null {
+  const value = row.values[metricId];
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 function metricLifetimeTotal(rows: readonly MeterResultsChartRow[], metricId: string): number {
-  return rows.reduce((total, row) => total + chartValue(row, metricId), 0);
+  return rows.reduce((total, row) => total + (chartValue(row, metricId) ?? 0), 0);
 }
 
 function alignDualYAxis(yAxis: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
@@ -524,6 +530,7 @@ function formatChartTooltip(
 }
 
 function formatChartTooltipValue(value: unknown, currency = false, unit?: string): string {
+  if (value === null || value === undefined) return '—';
   const numericValue = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(numericValue)) {
     return String(value ?? '');
@@ -540,6 +547,12 @@ function formatChartTooltipValue(value: unknown, currency = false, unit?: string
     return `${numericValue.toLocaleString(undefined, { maximumFractionDigits: 3 })}%`;
   }
   return Math.round(numericValue).toLocaleString();
+}
+
+function formatChartAccessibleValue(value: unknown, currency = false, unit?: string): string {
+  return value === null || value === undefined
+    ? 'Unavailable'
+    : formatChartTooltipValue(value, currency, unit);
 }
 
 function clampPercent(value: number, fallback: number): number {
