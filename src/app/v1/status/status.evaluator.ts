@@ -250,7 +250,15 @@ function evaluateAnalyses(snapshot: AccountWorkspaceSnapshot, calendarizedMeters
       groupErrors.push(errors);
       if (group.analysisType === 'skip' || group.analysisType === 'skipAnalysis') continue;
       const entity = analysisGroupEntity(analysis, group, facility);
-      const setupReasons = groupErrorReasons(errors);
+      const bankingSourceGroupInvalid = bankingSourceGroupIssue(analysis, group, snapshot.facilityAnalyses);
+      if (bankingSourceGroupInvalid) {
+        errors.hasSetupErrors = true;
+        errors.hasErrors = true;
+      }
+      const setupReasons = [
+        ...groupErrorReasons(errors),
+        ...(bankingSourceGroupInvalid ? [bankingSourceGroupInvalid] : [])
+      ];
       if (setupReasons.length > 0) {
         findings.push(makeFinding('analysis-group.setup.invalid', 'error', 'configuration', entity, {
           reasons: setupReasons,
@@ -279,7 +287,7 @@ function evaluateAnalyses(snapshot: AccountWorkspaceSnapshot, calendarizedMeters
       noGroups: analysis.groups.length === 0,
       missingBaselineYear: !validNumber(analysis.baselineYear),
       groupsHaveErrors: groupErrors.some(error => error.hasErrors),
-      bankingError: !!analysis.hasBanking && (!analysis.bankedAnalysisItemId || !snapshot.facilityAnalyses.some(item => item.guid === analysis.bankedAnalysisItemId))
+      bankingError: !!bankingSourceIssue(analysis, snapshot.facilityAnalyses)
     };
     errors.setupHasError = errors.missingName || errors.noGroups || errors.missingBaselineYear || baselineUnavailable
       || errors.baselineYearAfterMeterDataEnd || errors.baselineYearBeforeMeterDataStart || errors.bankingError;
@@ -290,6 +298,35 @@ function evaluateAnalyses(snapshot: AccountWorkspaceSnapshot, calendarizedMeters
       findings.push(makeFinding('analysis.configuration.invalid', 'error', 'configuration', facilityAnalysisEntity(analysis, facility), { reasons }));
     }
     if (groupWarning) facilityWarnings.add(analysis.guid);
+  }
+
+  // A consumer is invalid when any source in its transitive banking chain is invalid.
+  // Iterate to a fixed point so ordering in IndexedDB does not affect propagation.
+  for (let pass = 0; pass < snapshot.facilityAnalyses.length; pass++) {
+    let changed = false;
+    for (const analysis of snapshot.facilityAnalyses) {
+      if (!analysis.hasBanking || !analysis.bankedAnalysisItemId) continue;
+      const sourceErrors = facilityErrors.get(analysis.bankedAnalysisItemId);
+      const errors = facilityErrors.get(analysis.guid);
+      if (!sourceErrors?.hasError || !errors || errors.bankingError) continue;
+      errors.bankingError = true;
+      errors.setupHasError = true;
+      errors.hasError = true;
+      changed = true;
+      const facility = snapshot.facilities.find(item => item.guid === analysis.facilityId);
+      if (facility) {
+        const existingIndex = findings.findIndex(finding => finding.code === 'analysis.configuration.invalid'
+          && finding.entity.guid === analysis.guid);
+        const existing = existingIndex >= 0 ? findings[existingIndex] : undefined;
+        const existingReasons = Array.isArray(existing?.evidence['reasons']) ? existing.evidence['reasons'] as readonly string[] : [];
+        const finding = makeFinding('analysis.configuration.invalid', 'error', 'configuration', facilityAnalysisEntity(analysis, facility), {
+          reasons: [...new Set([...existingReasons, ...analysisErrorReasons(errors, false), 'bankingSourceInvalid'])]
+        });
+        if (existingIndex >= 0) findings[existingIndex] = finding;
+        else findings.push(finding);
+      }
+    }
+    if (!changed) break;
   }
 
   const accountErrors = new Map<string, ReturnType<typeof getAccountAnalysisSetupErrors>>();
@@ -597,6 +634,40 @@ function analysisErrorReasons(errors: AnalysisSetupErrors, baselineUnavailable: 
   ]);
   if (baselineUnavailable && !errors.missingBaselineYear) reasons.push('baselineUnavailable');
   return [...new Set(reasons)];
+}
+
+function bankingSourceIssue(analysis: IdbAnalysisItem, analyses: readonly IdbAnalysisItem[]): string | undefined {
+  if (!analysis.hasBanking) return undefined;
+  if (!analysis.bankedAnalysisItemId) return 'bankingSourceMissing';
+  const source = analyses.find(item => item.guid === analysis.bankedAnalysisItemId);
+  if (!source) return 'bankingSourceMissing';
+  if (source.guid === analysis.guid) return 'bankingSourceCycle';
+  if (source.facilityId !== analysis.facilityId || source.analysisCategory !== analysis.analysisCategory
+    || (analysis.analysisCategory === 'energy' && source.energyIsSource !== analysis.energyIsSource)) {
+    return 'bankingSourceIncompatible';
+  }
+  const visited = new Set([analysis.guid]);
+  let cursor: IdbAnalysisItem | undefined = source;
+  while (cursor?.hasBanking && cursor.bankedAnalysisItemId) {
+    if (visited.has(cursor.guid) || visited.has(cursor.bankedAnalysisItemId)) return 'bankingSourceCycle';
+    visited.add(cursor.guid);
+    cursor = analyses.find(item => item.guid === cursor!.bankedAnalysisItemId);
+    if (!cursor) return 'bankingSourceDependencyMissing';
+  }
+  return undefined;
+}
+
+function bankingSourceGroupIssue(
+  analysis: IdbAnalysisItem,
+  group: AnalysisGroup,
+  analyses: readonly IdbAnalysisItem[]
+): string | undefined {
+  if (!analysis.hasBanking || !group.applyBanking) return undefined;
+  const source = analyses.find(item => item.guid === analysis.bankedAnalysisItemId);
+  const sourceGroup = source?.groups.find(item => item.idbGroupId === group.idbGroupId);
+  return !sourceGroup || sourceGroup.analysisType === 'skip' || sourceGroup.analysisType === 'skipAnalysis'
+    ? 'bankingSourceGroupUnavailable'
+    : undefined;
 }
 
 function accountAnalysisErrorReasons(errors: ReturnType<typeof getAccountAnalysisSetupErrors>): string[] {

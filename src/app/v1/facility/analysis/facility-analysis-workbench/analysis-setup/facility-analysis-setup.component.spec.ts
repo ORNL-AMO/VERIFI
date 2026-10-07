@@ -75,7 +75,9 @@ describe('facility analysis setup behavior', () => {
                 energyReductionGoal: false, waterReductionGoal: false
               }
             }),
-            analyses: signal([analysis])
+            analyses: signal([analysis]),
+            meterGroups: signal([]),
+            status: { items: signal([]) }
           }
         },
         { provide: FacilityAnalysisAutosaveService, useValue: { draft: signal(analysis), update } },
@@ -96,7 +98,15 @@ describe('facility analysis setup behavior', () => {
     baselineYears.set([2022, 2023, 2024, 2025]);
     fixture.detectChanges();
 
+    const nameInput = fixture.nativeElement.querySelector('#analysis-name') as HTMLInputElement;
+    const energyUnitSelect = fixture.nativeElement.querySelector('#analysis-energy-unit') as HTMLSelectElement;
     const select = fixture.nativeElement.querySelector('#analysis-baseline-year') as HTMLSelectElement;
+    expect(nameInput.classList.contains('v1-input')).toBe(true);
+    expect(nameInput.classList.contains('form-control')).toBe(false);
+    expect(energyUnitSelect.classList.contains('v1-select')).toBe(true);
+    expect(energyUnitSelect.classList.contains('form-select')).toBe(false);
+    expect(select.classList.contains('v1-select')).toBe(true);
+    expect(select.classList.contains('form-select')).toBe(false);
     expect(select.selectedOptions[0]?.textContent?.trim()).toBe('2024');
     expect(update).not.toHaveBeenCalled();
 
@@ -110,5 +120,153 @@ describe('facility analysis setup behavior', () => {
     expect(updated.baselineYear).toBe(2025);
     expect(options.immediate).toBe(true);
     expect(options.valid(updated)).toBe(true);
+  });
+
+  it('renders selectable, warning, and unavailable banking source cards and preserves an invalid selection', () => {
+    const group = (overrides: Partial<AnalysisGroup> = {}) => ({
+      idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: [], models: [], ...overrides
+    } as AnalysisGroup);
+    const analysis = {
+      guid: 'current', facilityId: 'facility-a', name: 'Current', analysisCategory: 'energy',
+      energyIsSource: false, energyUnit: 'MMBtu', waterUnit: 'gal', baselineYear: 2024,
+      hasBanking: true, bankedAnalysisItemId: 'cycle', groups: [group()]
+    } as IdbAnalysisItem;
+    const available = {
+      ...analysis, guid: 'available', name: 'Available Source', baselineYear: 2023,
+      hasBanking: false, bankedAnalysisItemId: undefined,
+      groups: [
+        group({
+          analysisType: 'regression', selectedModelId: 'model-a', regressionModelYear: 2023,
+          predictorVariables: [{
+            id: 'production', name: 'Production', unit: 'units', production: true,
+            productionInAnalysis: true, regressionCoefficient: 2.5
+          }],
+          models: [{
+            modelId: 'model-a', modelYear: 2023, coef: [120, 2.5], adjust_R2: .9126,
+            t: {}, f: {}, isValid: true, modelPValue: .01, modelNotes: [],
+            SEPValidationPass: true, dataValidationNotes: [], modelValidationNotes: [],
+            predictorVariables: [{
+              id: 'production', name: 'Production', unit: 'units', production: true,
+              productionInAnalysis: true, regressionCoefficient: 2.5
+            }]
+          }]
+        }),
+        group({ idbGroupId: 'group-b', analysisType: 'absoluteEnergyConsumption' })
+      ]
+    } as IdbAnalysisItem;
+    const warning = { ...analysis, guid: 'warning', name: 'Warning Source', baselineYear: 2022, hasBanking: false, bankedAnalysisItemId: undefined };
+    const cycle = { ...analysis, guid: 'cycle', name: 'Circular Source', baselineYear: 2021, bankedAnalysisItemId: analysis.guid };
+    const update = vi.fn();
+    TestBed.configureTestingModule({
+      imports: [FacilityAnalysisSetupComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: FacilityAnalysisWorkbenchContext,
+          useValue: {
+            facility: signal({
+              guid: 'facility-a', fiscalYear: 'calendarYear', sustainabilityQuestions: {
+                energyReductionGoal: false, waterReductionGoal: false
+              }
+            }),
+            analyses: signal([analysis, available, warning, cycle]),
+            meterGroups: signal([
+              { guid: 'group-a', name: 'Electricity' },
+              { guid: 'group-b', name: 'Natural Gas' }
+            ]),
+            status: { items: signal([{ severity: 'warning', entity: { guid: warning.guid }, title: 'Review source model' }]) }
+          }
+        },
+        { provide: FacilityAnalysisAutosaveService, useValue: { draft: signal(analysis), update } },
+        {
+          provide: FacilityAnalysisPeriodService,
+          useValue: { baselineYears: signal([2024]), latestCompleteYear: signal(2025) }
+        },
+        { provide: WorkspaceNavigationService, useValue: { facilitySettingsRoute: () => ['/v1', 'settings'] } },
+        { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
+      ]
+    });
+    const fixture = TestBed.createComponent(FacilityAnalysisSetupComponent);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ');
+    expect(text).toContain('Available Source');
+    expect(text).toContain('Available');
+    expect(text).toContain('Electricity');
+    expect(text).toContain('Regression');
+    expect(text).toContain('Modeled energy = 120 + (2.5 × Production)');
+    const regressionDetails = Array.from(
+      fixture.nativeElement.querySelectorAll('.v1-analysis-setup__banking-group dl div') as NodeListOf<HTMLElement>
+    ).map((detail) => ({
+      label: detail.querySelector('dt')?.textContent?.trim(),
+      value: detail.querySelector('dd')?.textContent?.trim()
+    }));
+    expect(regressionDetails).toContainEqual({ label: 'Model year', value: '2023' });
+    expect(regressionDetails).toContainEqual({ label: 'Adjusted R²', value: '0.913' });
+    expect(text).toContain('Natural Gas');
+    expect(text).toContain('Absolute consumption');
+    expect(text).not.toContain('Includes banked savings');
+    const groupDetails = fixture.nativeElement.querySelector('.v1-analysis-setup__banking-details') as HTMLDetailsElement;
+    expect(groupDetails.open).toBe(false);
+    expect(groupDetails.querySelector('summary')?.textContent?.trim()).toBe('2 group details');
+    (groupDetails.querySelector('summary') as HTMLElement).click();
+    expect(groupDetails.open).toBe(true);
+    expect(text).toContain('Warning Source');
+    expect(text).toContain('Available with warnings: Review source model');
+    expect(text).toContain('Circular Source');
+    expect(text).toContain('would create a circular banking dependency');
+    expect(text).toContain('selected banking source is no longer available');
+    const invalidRadio = fixture.nativeElement.querySelector('.v1-analysis-setup__banking-card--unavailable input') as HTMLInputElement;
+    expect(invalidRadio.checked).toBe(true);
+    expect(invalidRadio.disabled).toBe(true);
+
+    const availableRadio = fixture.nativeElement.querySelector(
+      '.v1-analysis-setup__banking-sources .v1-analysis-setup__banking-card input[type="radio"]'
+    ) as HTMLInputElement;
+    expect(availableRadio).not.toBeNull();
+    availableRadio.click();
+    const [mutate] = update.mock.calls.at(-1)!;
+    const updated = structuredClone(analysis);
+    mutate(updated);
+    expect(updated.bankedAnalysisItemId).toBe('available');
+  });
+
+  it('locks banking controls while regression models exist', () => {
+    const analysis = {
+      guid: 'current', facilityId: 'facility-a', name: 'Current', analysisCategory: 'energy',
+      energyIsSource: false, energyUnit: 'MMBtu', waterUnit: 'gal', baselineYear: 2024,
+      hasBanking: true, bankedAnalysisItemId: 'source',
+      groups: [{ idbGroupId: 'group-a', analysisType: 'regression', predictorVariables: [], models: [{ modelId: 'model-a' }] }]
+    } as IdbAnalysisItem;
+    const source = {
+      ...analysis, guid: 'source', name: 'Source', hasBanking: false, bankedAnalysisItemId: undefined,
+      groups: [{ idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: [], models: [] }]
+    } as IdbAnalysisItem;
+    TestBed.configureTestingModule({
+      imports: [FacilityAnalysisSetupComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: FacilityAnalysisWorkbenchContext,
+          useValue: {
+            facility: signal({ guid: 'facility-a', fiscalYear: 'calendarYear', sustainabilityQuestions: {} }),
+            analyses: signal([analysis, source]), meterGroups: signal([]), status: { items: signal([]) }
+          }
+        },
+        { provide: FacilityAnalysisAutosaveService, useValue: { draft: signal(analysis), update: vi.fn() } },
+        { provide: FacilityAnalysisPeriodService, useValue: { baselineYears: signal([2024]), latestCompleteYear: signal(2025) } },
+        { provide: WorkspaceNavigationService, useValue: { facilitySettingsRoute: () => ['/v1', 'settings'] } },
+        { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
+      ]
+    });
+    const fixture = TestBed.createComponent(FacilityAnalysisSetupComponent);
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement.querySelector('input[formcontrolname="hasBanking"]') as HTMLInputElement).disabled).toBe(true);
+    const sourceRadio = fixture.nativeElement.querySelector(
+      '.v1-analysis-setup__banking-sources .v1-analysis-setup__banking-card input[type="radio"]'
+    ) as HTMLInputElement;
+    expect(sourceRadio.disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Banking settings are locked while regression models exist');
   });
 });

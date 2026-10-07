@@ -35,6 +35,15 @@ describe('banking configuration', () => {
     expect(getBankedAnalysisGroup(selectedAnalysis, selectedGroup, selectedBankedAnalysis)?.idbGroupId).toBe('group-1');
   });
 
+  it('finds the matching source group before banking is applied', () => {
+    const selectedGroup = group({ applyBanking: false });
+    const selectedAnalysis = analysis({ groups: [selectedGroup] });
+    const selectedBankedAnalysis = bankedAnalysis();
+
+    expect(getBankedAnalysisGroup(selectedAnalysis, selectedGroup, selectedBankedAnalysis)?.idbGroupId).toBe('group-1');
+    expect(isBankedGroupConfigurationComplete(selectedAnalysis, selectedGroup, selectedBankedAnalysis)).toBe(false);
+  });
+
   it.each([
     ['missing applied banking year', group({ bankedAnalysisYear: undefined }), bankedAnalysis()],
     ['missing new baseline year', group({ newBaselineYear: undefined }), bankedAnalysis()],

@@ -67,22 +67,22 @@
             <tr [class.v1-analysis-results__missing]="view.row.missingPredictorValue">
               <th scope="row">
                 {{ view.row.year }}
-                @if (view.row.isBanked) { <span class="v1-chip">Banked</span> }
+                <app-analysis-result-markers [markers]="view.markers"></app-analysis-result-markers>
               </th>
               @if (columnSettings.actualEnergy) { <td>{{ view.row.energyUse | analysisResultNumber }}</td> }
-              @if (columnSettings.adjusted) { <td>{{ view.row.adjusted | analysisResultNumber }}</td> }
+              @if (columnSettings.adjusted) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.adjusted | analysisResultNumber) }}</td> }
               @if (columnSettings.baselineAdjustmentForNormalization) { <td>{{ view.row.baselineAdjustmentForNormalization | analysisResultNumber }}</td> }
-              @if (columnSettings.baselineAdjustmentForOther) { <td>{{ view.row.baselineAdjustmentForOtherV2 | analysisResultNumber }}</td> }
-              @if (columnSettings.baselineAdjustment) { <td>{{ view.row.baselineAdjustment | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustmentForOther) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.baselineAdjustmentForOtherV2 | analysisResultNumber) }}</td> }
+              @if (columnSettings.baselineAdjustment) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.baselineAdjustment | analysisResultNumber) }}</td> }
               @if (columnSettings.productionVariables) {
                 @for (predictor of predictorColumns(); track predictor.id) {
                   <td>{{ view.predictors[predictor.id] | analysisResultNumber }}</td>
                 }
               }
-              @if (columnSettings.SEnPI) { <td>{{ view.row.SEnPI | analysisResultNumber }}</td> }
-              @if (hasBanking() && columnSettings.bankedSavings) { <td>{{ view.row.savingsBanked | analysisResultNumber }}</td> }
-              @if (hasBanking() && columnSettings.savingsUnbanked) { <td>{{ view.row.savingsUnbanked | analysisResultNumber }}</td> }
-              @if (columnSettings.savings) { <td>{{ view.row.savings | analysisResultNumber }}</td> }
+              @if (columnSettings.SEnPI) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.SEnPI | analysisResultNumber) }}</td> }
+              @if (hasBanking() && columnSettings.bankedSavings) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.savingsBanked | analysisResultNumber) }}</td> }
+              @if (hasBanking() && columnSettings.savingsUnbanked) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.savingsUnbanked | analysisResultNumber) }}</td> }
+              @if (columnSettings.savings) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.savings | analysisResultNumber) }}</td> }
               @if (columnSettings.totalSavingsPercentImprovement) { <td>{{ view.row.totalSavingsPercentImprovement | number:'1.0-2' }}%</td> }
               @if (columnSettings.newSavings) { <td>{{ view.row.newSavings | analysisResultNumber }}</td> }
               @if (columnSettings.annualSavingsPercentImprovement) { <td>{{ view.row.annualSavingsPercentImprovement | number:'1.0-2' }}%</td> }
@@ -92,6 +92,7 @@
         </tbody>
         </table>
       </div>
+      <app-analysis-result-marker-legend [markers]="legendMarkers()"></app-analysis-result-marker-legend>
     </section>
 
     <section class="v1-analysis-results-page__charts" aria-label="Group annual analysis charts">

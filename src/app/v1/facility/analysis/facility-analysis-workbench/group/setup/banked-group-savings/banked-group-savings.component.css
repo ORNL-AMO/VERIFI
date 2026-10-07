@@ -1,0 +1,13 @@
+:host { display: block; }
+.v1-banked-preview { border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.v1-banked-preview h3 { margin: 0; padding: .7rem .85rem; border-bottom: 1px solid var(--v1-divider); font-size: .95rem; }
+.v1-banked-preview__state { display: flex; gap: .4rem; align-items: center; margin: 0; padding: 1rem; color: var(--v1-muted); }
+.v1-banked-preview__state--error { color: var(--v1-danger); }
+.v1-table-scroll { overflow: auto; }
+table { width: 100%; min-width: 38rem; border-collapse: collapse; table-layout: fixed; }
+th, td { padding: .6rem .65rem; border-bottom: 1px solid var(--v1-divider); text-align: right; vertical-align: middle; }
+tbody th, td { white-space: nowrap; }
+th:first-child { text-align: left; }
+thead th { overflow-wrap: anywhere; background: var(--v1-content-block); color: var(--v1-muted); font-size: .68rem; line-height: 1.2; text-transform: uppercase; white-space: normal; }
+thead th:first-child { width: 6.5rem; }
+.v1-banked-preview__year { display: inline-flex; min-height: 1.25rem; align-items: center; line-height: 1.25; }

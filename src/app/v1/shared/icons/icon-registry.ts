@@ -9,6 +9,7 @@ import ArrowUpWideNarrowIcon from '@hugeicons/core-free-icons/ArrowUpWideNarrowI
 import AsteriskIcon from '@hugeicons/core-free-icons/AsteriskIcon';
 import Attachment01Icon from '@hugeicons/core-free-icons/Attachment01Icon';
 import BarChartIcon from '@hugeicons/core-free-icons/BarChartIcon';
+import BankIcon from '@hugeicons/core-free-icons/BankIcon';
 import BadgeAlertIcon from '@hugeicons/core-free-icons/BadgeAlertIcon';
 import BriefcaseBusinessIcon from '@hugeicons/core-free-icons/BriefcaseBusinessIcon';
 import Building03Icon from '@hugeicons/core-free-icons/Building03Icon';
@@ -68,6 +69,8 @@ import MicroscopeIcon from '@hugeicons/core-free-icons/MicroscopeIcon';
 import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
 import PackageIcon from '@hugeicons/core-free-icons/PackageIcon';
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
+import PaintRollerIcon from '@hugeicons/core-free-icons/PaintRollerIcon';
+import PiggyBankIcon from '@hugeicons/core-free-icons/PiggyBankIcon';
 import PieChartIcon from '@hugeicons/core-free-icons/PieChartIcon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
 import RainDropIcon from '@hugeicons/core-free-icons/RainDropIcon';
@@ -78,6 +81,7 @@ import ShippingLoadingIcon from '@hugeicons/core-free-icons/ShippingLoadingIcon'
 import Settings02Icon from '@hugeicons/core-free-icons/Settings02Icon';
 import SlidersHorizontalIcon from '@hugeicons/core-free-icons/SlidersHorizontalIcon';
 import SquareIcon from '@hugeicons/core-free-icons/SquareIcon';
+import StarIcon from '@hugeicons/core-free-icons/StarIcon';
 import TableIcon from '@hugeicons/core-free-icons/TableIcon';
 import ThermometerSnowflakeIcon from '@hugeicons/core-free-icons/ThermometerSnowflakeIcon';
 import ThermometerSunIcon from '@hugeicons/core-free-icons/ThermometerSunIcon';
@@ -102,6 +106,7 @@ export const ICON_REGISTRY = {
   arrowRight: ArrowRight01Icon,
   attachment: Attachment01Icon,
   barChart: BarChartIcon,
+  bank: BankIcon,
   badgeAlert: BadgeAlertIcon,
   portfolio: BriefcaseBusinessIcon,
   calendar: Calendar03Icon,
@@ -158,6 +163,8 @@ export const ICON_REGISTRY = {
   monocle: Monocle01Icon,
   overview: PieChartIcon,
   package: PackageIcon,
+  paintRoller: PaintRollerIcon,
+  piggyBank: PiggyBankIcon,
   predictor: ShippingLoadingIcon,
   otherEnergy: EnergyIcon,
   otherFuel: Fuel01Icon,
@@ -173,6 +180,7 @@ export const ICON_REGISTRY = {
   sortDesc: ArrowDownWideNarrowIcon,
   spreadsheetColumns: LayoutTable01Icon,
   square: SquareIcon,
+  star: StarIcon,
   success: CheckmarkCircle02Icon,
   table: TableIcon,
   tableColumns: ChartColumnIcon,

@@ -49,6 +49,57 @@ describe('calculateFacilityAnalysisGroupResults', () => {
     expect(() => calculateFacilityAnalysisGroupResults(request))
       .toThrowError('The selected analysis group is no longer available.');
   });
+
+  it('applies banked source savings to the new-baseline calculation', () => {
+    const currentGroup = groupFixture('absoluteEnergyConsumption');
+    currentGroup.applyBanking = true;
+    currentGroup.bankedAnalysisYear = 2021;
+    currentGroup.newBaselineYear = 2023;
+    const baseRequest = requestFixture(currentGroup);
+    const sourceGroup = groupFixture('absoluteEnergyConsumption');
+    const source = {
+      ...baseRequest.analysisItem,
+      guid: 'source-analysis',
+      name: 'Source analysis',
+      baselineYear: 2020,
+      groups: [sourceGroup]
+    } as IdbAnalysisItem;
+    const currentAnalysis = {
+      ...baseRequest.analysisItem,
+      baselineYear: 2023,
+      hasBanking: true,
+      bankedAnalysisItemId: source.guid,
+      groups: [currentGroup]
+    } as IdbAnalysisItem;
+    const request: FacilityAnalysisGroupResultsWorkerRequest = {
+      ...baseRequest,
+      analysisItem: currentAnalysis,
+      accountAnalysisItems: [currentAnalysis, source],
+      calanderizedMeters: [meterFixture(currentGroup.idbGroupId, true)],
+      reportYear: 2023
+    };
+
+    const result = calculateFacilityAnalysisGroupResults(request);
+
+    expect(result.annualAnalysisSummaryData).toEqual([
+      expect.objectContaining({
+        year: 2023,
+        savingsBanked: 144,
+        savingsUnbanked: 0,
+        isBanked: false,
+        isIntermediateBanked: false
+      })
+    ]);
+    expect(result.monthlyAnalysisSummaryData).toHaveLength(48);
+    expect(result.monthlyAnalysisSummaryData.some(row => row.isBanked)).toBe(true);
+    expect([...new Set(result.monthlyAnalysisSummaryData
+      .filter(row => row.isIntermediateBanked)
+      .map(row => row.fiscalYear))]).toEqual([2022]);
+    expect([...new Set(result.monthlyAnalysisSummaryData
+      .filter(row => row.isBanked && !row.isIntermediateBanked)
+      .map(row => row.fiscalYear))]).toEqual([2020, 2021]);
+    expect(result.monthlyAnalysisSummaryData.slice(-12).some(row => row.savingsBanked > 0)).toBe(true);
+  });
 });
 
 function requestFixture(group: AnalysisGroup, includePredictor = false): FacilityAnalysisGroupResultsWorkerRequest {
@@ -98,10 +149,11 @@ function predictorVariable(): AnalysisGroupPredictorVariable {
   };
 }
 
-function meterFixture(groupId: string): CalanderizedMeter {
+function meterFixture(groupId: string, include2022 = false): CalanderizedMeter {
   const monthlyData = [
     ...yearData(2020, 100),
-    ...yearData(2021, 80)
+    ...yearData(2021, 80),
+    ...(include2022 ? [...yearData(2022, 70), ...yearData(2023, 60)] : [])
   ];
   return {
     meter: {

@@ -44,7 +44,7 @@ export function getMonthlyStartAndEndDate(
             baselineDate = new Date(baselineYear, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(reportYear + 1, facilityOrAccount.fiscalYearMonth);
             if (analysisItem.hasBanking && group && group.applyBanking) {
-                bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
+                bankedAnalysisDate = new Date(group.bankedAnalysisYear + 1, facilityOrAccount.fiscalYearMonth);
             }
         }
     }

@@ -1,6 +1,6 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
+import { getLatestCompleteAnalysisYear, getYearsWithFullDataAnalysis } from '@domain/calculations/shared-calculations/calculationsHelpers';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
@@ -36,4 +36,18 @@ export class FacilityAnalysisPeriodService {
     return getYearsWithFullDataAnalysis([...projection.meters], analysis, facility);
   });
   readonly latestCompleteYear = computed(() => Math.max(...this.baselineYears(), 0) || undefined);
+
+  groupLatestCompleteYear(groupGuid: string): number | undefined {
+    const analysis = this.autosave.draft();
+    const facility = this.context.facility();
+    const projection = this.projection();
+    const group = analysis?.groups.find(item => item.idbGroupId === groupGuid);
+    if (!analysis || !facility || !group || projection?.state !== 'ready') return undefined;
+    return getLatestCompleteAnalysisYear(
+      [group],
+      [...projection.meters],
+      this.context.workspace.predictorData().filter(item => item.facilityId === facility.guid),
+      [facility]
+    );
+  }
 }

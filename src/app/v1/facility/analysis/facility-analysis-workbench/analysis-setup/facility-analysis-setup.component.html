@@ -5,7 +5,7 @@
     <div class="v1-analysis-setup__grid">
       <section class="v1-analysis-setup__panel" aria-label="Analysis details">
         <label for="analysis-name">Name</label>
-        <input id="analysis-name" class="form-control" formControlName="name" maxlength="120" required [attr.aria-invalid]="form.controls.name.invalid" />
+        <input id="analysis-name" class="v1-input" formControlName="name" maxlength="120" required [attr.aria-invalid]="form.controls.name.invalid" />
         @if (form.controls.name.invalid) { <p class="v1-field-error" role="alert">Enter an analysis name.</p> }
 
         @if (analysis.analysisCategory === 'energy') {
@@ -14,12 +14,12 @@
             <label><input type="radio" formControlName="energyIsSource" [value]="false" /> Site energy</label>
           </fieldset>
           <label for="analysis-energy-unit">Display unit</label>
-          <select id="analysis-energy-unit" class="v1-select form-select" formControlName="energyUnit" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null">
+          <select id="analysis-energy-unit" class="v1-select" formControlName="energyUnit" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null">
             @for (option of energyUnits; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }
           </select>
         } @else {
           <label for="analysis-water-unit">Display unit</label>
-          <select id="analysis-water-unit" class="v1-select form-select" formControlName="waterUnit" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null">
+          <select id="analysis-water-unit" class="v1-select" formControlName="waterUnit" [attr.aria-describedby]="hasModels() ? 'analysis-model-lock-message' : null">
             @for (option of waterUnits; track option.value) { <option [value]="option.value" [innerHTML]="option.display"></option> }
           </select>
         }
@@ -27,7 +27,7 @@
 
       <section class="v1-analysis-setup__panel" aria-label="Analysis period">
         <label for="analysis-baseline-year">Baseline year</label>
-        <select id="analysis-baseline-year" class="v1-select form-select" formControlName="baselineYear">
+        <select id="analysis-baseline-year" class="v1-select" formControlName="baselineYear">
           <option [ngValue]="null" disabled>Select a complete year</option>
           @for (year of baselineYears(); track year) { <option [ngValue]="year">{{ year }}</option> }
         </select>
@@ -45,13 +45,71 @@
     <section class="v1-analysis-setup__panel v1-analysis-setup__banking" aria-labelledby="analysis-banking-heading">
       <div><p class="v1-eyebrow">Optional</p><h2 id="analysis-banking-heading">Banking</h2></div>
       <label class="v1-analysis-setup__toggle"><input type="checkbox" formControlName="hasBanking" /> Use an earlier analysis as the banking source</label>
-      @if (!eligibleBankingSources().length) { <p class="v1-analysis-setup__guidance">No compatible analysis is available for this facility, category, and energy basis.</p> }
+      @if (hasModels()) {
+        <p class="v1-analysis-setup__guidance"><app-ui-icon name="lockKeyhole"></app-ui-icon> Banking settings are locked while regression models exist.</p>
+      }
+      @if (!availableBankingSources().length) { <p class="v1-analysis-setup__guidance">No compatible, valid analysis is available for this facility, category, and energy basis.</p> }
       @if (form.controls.hasBanking.value) {
-        <label for="analysis-banking-source">Banking source analysis</label>
-        <select id="analysis-banking-source" class="v1-select form-select" formControlName="bankedAnalysisItemId">
-          <option [ngValue]="null" disabled>Select an analysis</option>
-          @for (candidate of eligibleBankingSources(); track candidate.guid) { <option [value]="candidate.guid">{{ candidate.name }} (baseline {{ candidate.baselineYear }})</option> }
-        </select>
+        <fieldset class="v1-analysis-setup__banking-sources">
+          <legend>Banking source analysis</legend>
+          @for (option of availableBankingSources(); track option.analysis.guid) {
+            <div class="v1-analysis-setup__banking-card" [class.v1-analysis-setup__banking-card--warning]="option.validation === 'warning'">
+              <label class="v1-analysis-setup__banking-card-heading">
+                <input class="v1-analysis-setup__source-radio" type="radio" formControlName="bankedAnalysisItemId" [value]="option.analysis.guid" />
+                <strong>{{ option.analysis.name }}</strong>
+                <span class="v1-chip">Baseline {{ option.analysis.baselineYear }}</span>
+                @if (option.validation === 'available') { <span class="v1-chip v1-chip--success">Available</span> }
+              </label>
+              <span class="v1-analysis-setup__banking-card-summary">
+                {{ option.analysis.energyIsSource ? 'Source energy' : 'Site energy' }} ·
+                {{ option.analysis.analysisCategory === 'water' ? option.analysis.waterUnit : option.analysis.energyUnit }} ·
+                {{ option.groupDetails.length === 1 ? '1 usable group' : option.groupDetails.length + ' usable groups' }}
+              </span>
+              <details class="v1-analysis-setup__banking-details">
+                <summary>{{ option.groupDetails.length === 1 ? '1 group detail' : option.groupDetails.length + ' group details' }}</summary>
+                <div class="v1-analysis-setup__banking-groups" aria-label="Analysis groups">
+                  @for (group of option.groupDetails; track group.groupGuid) {
+                    <article class="v1-analysis-setup__banking-group">
+                      <header>
+                        <strong>{{ group.name }}</strong>
+                        <span class="v1-chip">{{ group.analysisMethod }}</span>
+                      </header>
+                      @if (group.regression; as regression) {
+                        <p class="v1-analysis-setup__banking-equation">Modeled energy = {{ regression.equation }}</p>
+                        <dl>
+                          <div><dt>Model year</dt><dd>{{ regression.modelYear }}</dd></div>
+                          <div><dt>Adjusted R²</dt><dd>{{ regression.adjustedR2 }}</dd></div>
+                        </dl>
+                      } @else if (group.predictors.length) {
+                        <p>Predictors: {{ group.predictors.join(', ') }}</p>
+                      }
+                    </article>
+                  }
+                </div>
+              </details>
+              @if (option.validation === 'warning') { <span class="v1-analysis-setup__banking-card-warning">Available with warnings: {{ option.warnings.join(', ') }}</span> }
+            </div>
+          }
+        </fieldset>
+        @if (unavailableBankingSources().length) {
+          <section class="v1-analysis-setup__unavailable" aria-labelledby="unavailable-banking-heading">
+            <h3 id="unavailable-banking-heading">Unavailable analyses</h3>
+            @for (option of unavailableBankingSources(); track option.analysis.guid) {
+              <div class="v1-analysis-setup__banking-card v1-analysis-setup__banking-card--unavailable">
+                <label class="v1-analysis-setup__banking-card-heading">
+                  <input class="v1-analysis-setup__source-radio" type="radio" [checked]="analysis.bankedAnalysisItemId === option.analysis.guid" [disabled]="true" />
+                  <strong>{{ option.analysis.name }}</strong>
+                  <span class="v1-chip">Baseline {{ option.analysis.baselineYear }}</span>
+                  <span class="v1-chip v1-chip--danger">Unavailable</span>
+                </label>
+                <span>{{ option.blockingReason }}</span>
+              </div>
+            }
+          </section>
+        }
+        @if (selectedBankingSourceBlocked()) {
+          <p class="v1-analysis-setup__notice v1-analysis-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>The selected banking source is no longer available. Choose an available source or turn banking off.</span></p>
+        }
       }
     </section>
 

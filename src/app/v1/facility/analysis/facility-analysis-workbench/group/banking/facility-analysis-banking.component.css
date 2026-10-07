@@ -1,0 +1,39 @@
+:host { display: block; }
+.v1-banking-results { display: grid; }
+.v1-banking-results > * { border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); }
+.v1-banking-results > *:last-child { border-radius: 0 0 var(--v1-radius) var(--v1-radius); }
+.v1-banking-results__context { display: grid; gap: var(--v1-space-3); padding: var(--v1-space-4); }
+.v1-banking-results__context h2, .v1-banking-results__context p { margin: 0; }
+.v1-banking-results__summary { display: grid; grid-template-columns: minmax(14rem, auto) minmax(0, 1fr) auto; align-items: start; gap: 1rem 2rem; }
+.v1-banking-results__source { min-width: 0; }
+.v1-banking-results__source-link { display: inline-flex; align-items: center; gap: .45rem; color: var(--v1-content-control); font-size: 1.15rem; font-weight: 800; line-height: 1.25; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .18em; }
+.v1-banking-results__source-link:hover { color: var(--v1-content-control); text-decoration-thickness: 2px; }
+.v1-banking-results__source-link:focus-visible { border-radius: var(--v1-radius-sm); outline: 3px solid color-mix(in srgb, var(--v1-content-control) 55%, transparent); outline-offset: 3px; }
+.v1-banking-results__context dl { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem 2rem; margin: 0; }
+.v1-banking-results__context dl div { display: grid; gap: .15rem; }
+.v1-banking-results__context dt { color: var(--v1-muted); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.v1-banking-results__context dd { margin: 0; font-weight: 800; }
+.v1-banking-results__inspect { align-self: center; justify-self: end; white-space: nowrap; }
+.v1-banking-results__equation { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem; padding: .75rem .9rem; border-left: .25rem solid var(--v1-content-control); background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); color: var(--v1-text); font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: clamp(1.15rem, 1.6vw, 1.45rem); line-height: 1.35; }
+.v1-banking-results__equation > span:first-child { font-style: italic; font-weight: 700; }
+.v1-banking-results__equation > span:nth-child(2) { color: var(--v1-content-control); font-weight: 800; }
+.v1-banking-results__equation strong { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.v1-empty-state { margin: 0; padding: 2rem; text-align: center; }
+.v1-table-scroll { overflow: auto; }
+table { width: 100%; min-width: 52rem; border-collapse: collapse; }
+th, td { padding: .65rem .75rem; border-bottom: 1px solid var(--v1-divider); text-align: right; vertical-align: middle; }
+th:first-child { text-align: left; }
+thead th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .76rem; text-transform: uppercase; }
+.v1-banking-results__year { display: inline-flex; min-height: 1.25rem; align-items: center; line-height: 1.25; }
+.v1-banking-results__charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--v1-space-4); }
+.v1-banking-results__charts > * { min-width: 0; }
+.v1-banking-results__charts > * + * { padding-left: var(--v1-space-4); border-left: 1px solid var(--v1-divider); }
+@media (max-width: 900px) {
+  .v1-banking-results__summary { grid-template-columns: minmax(12rem, auto) minmax(0, 1fr); }
+  .v1-banking-results__inspect { grid-column: 1 / -1; justify-self: start; }
+  .v1-banking-results__charts { grid-template-columns: 1fr; }
+  .v1-banking-results__charts > * + * { padding-top: var(--v1-space-4); padding-left: 0; border-top: 1px solid var(--v1-divider); border-left: 0; }
+}
+@media (max-width: 640px) {
+  .v1-banking-results__summary { grid-template-columns: 1fr; }
+}

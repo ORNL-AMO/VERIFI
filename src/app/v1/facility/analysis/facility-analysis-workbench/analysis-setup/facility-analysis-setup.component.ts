@@ -13,6 +13,8 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FacilityAnalysisPeriodService } from './facility-analysis-period.service';
+import { BankingSourceOption, bankingSourceOptions } from '../banking/facility-analysis-banking';
+import { AnalysisGroup, AnalysisType, JStatRegressionModel } from '@data/models/analysis';
 
 @Component({
   selector: 'app-facility-analysis-setup',
@@ -60,9 +62,19 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
       ? `This baseline does not match the facility ${analysis.analysisCategory} goal baseline (${goalYear}). Goal reports cannot use this analysis until they match.`
       : undefined;
   });
-  readonly eligibleBankingSources = computed(() => {
+  readonly bankingSources = computed(() => {
     const analysis = this.draft();
-    return analysis ? compatibleBankingSources(analysis, this.context.analyses()) : [];
+    return analysis ? bankingSourceOptions(analysis, this.context.analyses(), this.context.status.items()) : [];
+  });
+  readonly bankingSourceCards = computed<readonly BankingSourceCardView[]>(() => this.bankingSources().map(option => ({
+    ...option,
+    groupDetails: bankingSourceGroupViews(option, this.context.meterGroups())
+  })));
+  readonly availableBankingSources = computed(() => this.bankingSourceCards().filter(option => option.validation !== 'unavailable'));
+  readonly unavailableBankingSources = computed(() => this.bankingSourceCards().filter(option => option.validation === 'unavailable'));
+  readonly selectedBankingSourceBlocked = computed(() => {
+    const selected = this.draft()?.bankedAnalysisItemId;
+    return !!selected && this.bankingSourceCards().some(option => option.analysis.guid === selected && option.validation === 'unavailable');
   });
 
   constructor() {
@@ -133,7 +145,7 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
     const analysis = this.draft();
     const hasModels = this.hasModels();
     const baselineYears = this.baselineYears();
-    const hasBankingSources = this.eligibleBankingSources().length > 0;
+    const hasBankingSources = this.availableBankingSources().length > 0;
     if (!analysis) {
       this.form.disable({ emitEvent: false });
       return;
@@ -152,12 +164,86 @@ export class FacilityAnalysisSetupComponent implements OnDestroy {
     setControlDisabled(this.form.controls.energyUnit, hasModels);
     setControlDisabled(this.form.controls.waterUnit, hasModels);
     setControlDisabled(this.form.controls.baselineYear, hasModels || baselineYears.length === 0);
-    setControlDisabled(this.form.controls.hasBanking, !hasBankingSources);
+    setControlDisabled(this.form.controls.hasBanking, hasModels || (!hasBankingSources && !analysis.hasBanking));
     setControlDisabled(this.form.controls.name, false);
-    setControlDisabled(this.form.controls.bankedAnalysisItemId, !analysis.hasBanking);
+    setControlDisabled(this.form.controls.bankedAnalysisItemId, hasModels || !analysis.hasBanking);
     this.form.controls.bankedAnalysisItemId.setValidators(analysis.hasBanking ? [Validators.required] : []);
     this.form.controls.bankedAnalysisItemId.updateValueAndValidity({ emitEvent: false });
   }
+}
+
+export function analysisMethodLabel(type: AnalysisType): string {
+  if (type === 'absoluteEnergyConsumption') return 'Absolute consumption';
+  if (type === 'energyIntensity') return 'Classic intensity';
+  if (type === 'modifiedEnergyIntensity') return 'Modified intensity';
+  if (type === 'regression') return 'Regression';
+  return 'Skipped';
+}
+
+export interface BankingSourceGroupView {
+  readonly groupGuid: string;
+  readonly name: string;
+  readonly analysisMethod: string;
+  readonly predictors: readonly string[];
+  readonly regression?: {
+    readonly equation: string;
+    readonly modelYear: string;
+    readonly adjustedR2: string;
+  };
+}
+
+interface BankingSourceCardView extends BankingSourceOption {
+  readonly groupDetails: readonly BankingSourceGroupView[];
+}
+
+export function bankingSourceGroupViews(
+  option: BankingSourceOption,
+  meterGroups: readonly { readonly guid: string; readonly name: string }[]
+): readonly BankingSourceGroupView[] {
+  const groupNames = new Map(meterGroups.map(group => [group.guid, group.name]));
+  return option.usableGroups.map(group => {
+    const selectedModel = group.models?.find(model => model.modelId === group.selectedModelId);
+    const predictors = selectedModel?.predictorVariables
+      ?? group.predictorVariables.filter(variable => variable.productionInAnalysis);
+    return {
+      groupGuid: group.idbGroupId,
+      name: groupNames.get(group.idbGroupId) ?? group.idbGroupId,
+      analysisMethod: analysisMethodLabel(group.analysisType),
+      predictors: predictors.map(variable => variable.name),
+      regression: group.analysisType === 'regression' ? {
+        equation: regressionEquation(group, selectedModel),
+        modelYear: formatModelYear(selectedModel?.modelYear ?? group.regressionModelYear),
+        adjustedR2: formatRegressionValue(selectedModel?.adjust_R2, 3)
+      } : undefined
+    };
+  });
+}
+
+function regressionEquation(group: AnalysisGroup, selectedModel: JStatRegressionModel | undefined): string {
+  if (selectedModel) {
+    return [
+      formatRegressionValue(selectedModel.coef?.[0]),
+      ...selectedModel.predictorVariables.map((variable, index) =>
+        `(${formatRegressionValue(selectedModel.coef?.[index + 1])} × ${variable.name})`)
+    ].join(' + ');
+  }
+  return [
+    formatRegressionValue(group.regressionConstant),
+    ...group.predictorVariables
+      .filter(variable => variable.productionInAnalysis)
+      .map(variable => `(${formatRegressionValue(variable.regressionCoefficient)} × ${variable.name})`)
+  ].join(' + ');
+}
+
+function formatModelYear(value: number | undefined): string {
+  return Number.isFinite(value) ? String(value) : '—';
+}
+
+function formatRegressionValue(value: number | undefined, fractionDigits?: number): string {
+  if (!Number.isFinite(value)) return '—';
+  return Number(value).toLocaleString(undefined, fractionDigits === undefined
+    ? { maximumSignificantDigits: 6 }
+    : { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits });
 }
 
 function setControlDisabled(control: AbstractControl, disabled: boolean): void {

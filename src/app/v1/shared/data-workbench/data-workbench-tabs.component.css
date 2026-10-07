@@ -11,6 +11,11 @@
   box-shadow: inset 0 -2px 0 var(--v1-content-control);
 }
 
+.v1-data-tabs__tab:disabled {
+  cursor: not-allowed;
+  opacity: .52;
+}
+
 .v1-data-tabs__attention {
   display: inline-flex;
   align-items: center;

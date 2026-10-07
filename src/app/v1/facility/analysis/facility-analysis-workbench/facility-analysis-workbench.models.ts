@@ -5,13 +5,15 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 
-export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
+export type AnalysisWorkbenchTabId = 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
 export type AnalysisWorkbenchStageKind = 'analysis' | 'group' | 'facility' | 'used-by';
 
 export interface AnalysisWorkbenchTab {
   readonly id: AnalysisWorkbenchTabId;
   readonly label: string;
   readonly icon: IconName;
+  readonly disabled?: boolean;
+  readonly disabledReason?: string;
 }
 
 export interface AnalysisWorkbenchStage {
@@ -34,6 +36,7 @@ export type AnalysisWorkbenchAttention = Readonly<Record<string, StatusAttention
 export type AnalysisWorkbenchTabAttention = Readonly<Partial<Record<AnalysisWorkbenchTabId, StatusAttentionSummary>>>;
 
 export const ANALYSIS_GROUP_SETUP_TAB: AnalysisWorkbenchTab = { id: 'setup', label: 'Setup', icon: 'settings' };
+export const ANALYSIS_GROUP_BANKING_TAB: AnalysisWorkbenchTab = { id: 'banking', label: 'Banked Savings', icon: 'bank' };
 export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regression', label: 'Regression', icon: 'covariate' };
 export const ANALYSIS_GROUP_ANNUAL_TAB: AnalysisWorkbenchTab = { id: 'annual', label: 'Annual', icon: 'calendar' };
 export const ANALYSIS_GROUP_MONTHLY_TABLE_TAB: AnalysisWorkbenchTab = { id: 'monthly-table', label: 'Monthly Table', icon: 'table' };
@@ -54,10 +57,15 @@ export function isSkippedAnalysisType(type: AnalysisType): boolean {
   return type === 'skip' || type === 'skipAnalysis';
 }
 
-export function tabsForAnalysisGroup(group: AnalysisGroup | undefined): readonly AnalysisWorkbenchTab[] {
+export function tabsForAnalysisGroup(group: AnalysisGroup | undefined, bankingAvailable = false): readonly AnalysisWorkbenchTab[] {
   if (!group || isSkippedAnalysisType(group.analysisType)) return [ANALYSIS_GROUP_SETUP_TAB];
   return [
     ANALYSIS_GROUP_SETUP_TAB,
+    ...(group.applyBanking ? [{
+      ...ANALYSIS_GROUP_BANKING_TAB,
+      disabled: !bankingAvailable,
+      disabledReason: bankingAvailable ? undefined : 'Complete valid banking options in Setup to view Banked Savings.'
+    }] : []),
     ...(group.analysisType === 'regression' ? [ANALYSIS_GROUP_REGRESSION_TAB] : []),
     ANALYSIS_GROUP_ANNUAL_TAB,
     ANALYSIS_GROUP_MONTHLY_TABLE_TAB,

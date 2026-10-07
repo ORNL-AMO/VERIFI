@@ -57,6 +57,37 @@ describe('FacilityAnalysisGroupMonthlyTableComponent', () => {
     expect(component.currentPage()).toBe(1);
     expect(component.displayedRows()).toHaveLength(24);
   });
+
+  it('renders banked, savings, transition, and model markers and suppresses transition-derived values', () => {
+    const context = TestBed.inject(FacilityAnalysisGroupContext) as any;
+    context.group.set({
+      idbGroupId: 'group-a', analysisType: 'regression', isGeneratedModel: true,
+      regressionModelYear: 2024, predictorVariables: []
+    });
+    context.autosave.draft.set({ analysisCategory: 'energy', energyUnit: 'MMBtu', hasBanking: true });
+    const rows = [
+      {
+        date: new Date(2024, 0, 1), fiscalYear: 2024, energyUse: 10, modeledEnergy: 11, adjusted: 11,
+        predictorUsage: [], isBanked: true, isIntermediateBanked: false, savingsBanked: 2,
+        rollingSavings: 2, rolling12MonthImprovement: 2, missingValueWarning: false
+      },
+      {
+        date: new Date(2024, 1, 1), fiscalYear: 2024, energyUse: 12, modeledEnergy: 98765, adjusted: 98765,
+        predictorUsage: [], isBanked: true, isIntermediateBanked: true, savingsBanked: 0,
+        rollingSavings: 3, rolling12MonthImprovement: 3, missingValueWarning: false
+      }
+    ];
+    (TestBed.inject(FacilityAnalysisGroupResultsService) as any).state.set({ state: 'ready', monthly: rows });
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ');
+    expect(text).toContain('Banked source period');
+    expect(text).toContain('Banked savings added');
+    expect(text).toContain('Transition period');
+    expect(text).toContain('Model period');
+    expect(text).toContain('—');
+    expect(text).not.toContain('98,765');
+  });
 });
 
 function selectPageSize(host: HTMLElement, value: number): void {

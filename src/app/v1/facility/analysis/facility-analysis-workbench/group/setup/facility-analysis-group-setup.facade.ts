@@ -5,6 +5,8 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { isSkippedAnalysisType } from '../../facility-analysis-workbench.models';
 import { invalidateRegressionModel } from '../regression/regression-draft';
+import { FacilityAnalysisPeriodService } from '../../analysis-setup/facility-analysis-period.service';
+import { bankingYearOptions, selectedBankingSource, usableBankedGroup } from '../../banking/facility-analysis-banking';
 
 /** Owns group-setup derived state and draft mutations; the component owns view interaction. */
 @Injectable()
@@ -13,6 +15,7 @@ export class FacilityAnalysisGroupSetupFacade {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workbench = this.groupContext.workbench;
   readonly autosave = this.groupContext.autosave;
+  private readonly period = inject(FacilityAnalysisPeriodService);
   readonly group = this.groupContext.group;
   readonly analysis = this.autosave.draft;
   readonly dataAdjustmentDraft = signal<AdjustmentDraft>({ amount: '' });
@@ -45,6 +48,29 @@ export class FacilityAnalysisGroupSetupFacade {
     const baseline = this.analysis()?.baselineYear;
     if (!baseline) return [];
     return Array.from({ length: Math.max(new Date().getFullYear() - baseline + 1, 1) }, (_, index) => baseline + index);
+  });
+  readonly bankingSource = computed(() => selectedBankingSource(this.analysis(), this.workbench.analyses()));
+  readonly bankedGroup = computed(() => usableBankedGroup(this.analysis(), this.group(), this.workbench.analyses()));
+  readonly latestCompleteGroupYear = computed(() => this.period.groupLatestCompleteYear(this.groupContext.groupGuid()));
+  readonly bankingYears = computed(() => bankingYearOptions(
+    this.bankingSource()?.baselineYear,
+    this.analysis()?.baselineYear,
+    this.latestCompleteGroupYear()
+  ));
+  readonly bankingUnavailableReason = computed(() => {
+    if (!this.bankingSource()) return 'Select a valid banking source in Analysis Setup.';
+    if (!this.bankedGroup()) return 'The banking source does not contain a usable matching meter group.';
+    if (!this.latestCompleteGroupYear()) return 'This group does not have a complete year of meter and predictor data.';
+    return undefined;
+  });
+  readonly bankingModelYearWarning = computed(() => {
+    const group = this.group();
+    const sourceGroup = this.bankedGroup();
+    return group?.applyBanking && sourceGroup?.analysisType === 'regression'
+      && Number.isFinite(sourceGroup.regressionModelYear) && Number.isFinite(group.bankedAnalysisYear)
+      && sourceGroup.regressionModelYear > group.bankedAnalysisYear
+      ? `The source model year (${sourceGroup.regressionModelYear}) is after the applied banking year (${group.bankedAnalysisYear}). Review the source model before relying on these results.`
+      : undefined;
   });
   readonly availableDataAdjustmentYears = computed(() => {
     const used = new Set(this.group()?.dataAdjustments.map(item => item.year) ?? []);
@@ -142,6 +168,7 @@ export class FacilityAnalysisGroupSetupFacade {
   }
 
   setApplyBanking(checked: boolean): void {
+    if (checked && this.bankingUnavailableReason()) return;
     this.updateGroup(group => {
       group.applyBanking = checked;
       if (!checked) {
@@ -153,6 +180,10 @@ export class FacilityAnalysisGroupSetupFacade {
 
   setBankingYear(field: 'bankedAnalysisYear' | 'newBaselineYear', year: number | undefined): void {
     this.updateGroup(group => { group[field] = year; }, true);
+  }
+
+  clearModels(): void {
+    this.updateGroup(group => { invalidateRegressionModel(group); }, true);
   }
 
   private adjustmentDraft(kind: AdjustmentKind): WritableSignal<AdjustmentDraft> {

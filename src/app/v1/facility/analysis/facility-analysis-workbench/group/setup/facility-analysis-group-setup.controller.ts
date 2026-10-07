@@ -7,7 +7,8 @@ import { AdjustmentKind, FacilityAnalysisGroupSetupFacade } from './facility-ana
 
 export type GroupSetupPendingChange =
   | { readonly kind: 'analysisType'; readonly value: AnalysisType }
-  | { readonly kind: 'predictor'; readonly predictorId: string; readonly selected: boolean };
+  | { readonly kind: 'predictor'; readonly predictorId: string; readonly selected: boolean }
+  | { readonly kind: 'clearModels' };
 
 @Injectable()
 export class FacilityAnalysisGroupSetupController {
@@ -91,7 +92,10 @@ export class FacilityAnalysisGroupSetupController {
     this.pendingChange.set(undefined);
     if (pending?.kind === 'analysisType') this.setup.changeAnalysisType(pending.value);
     if (pending?.kind === 'predictor') this.setup.setPredictorSelected(pending.predictorId, pending.selected);
+    if (pending?.kind === 'clearModels') this.setup.clearModels();
   }
+
+  requestClearModels(): void { this.pendingChange.set({ kind: 'clearModels' }); }
 
   cancelPendingChange(): void { this.pendingChange.set(undefined); this.syncFromGroup(); }
 
@@ -135,8 +139,12 @@ export class FacilityAnalysisGroupSetupController {
       for (const entry of group[kind]) this.adjustmentControl(kind, entry.year).setValue(entry.amount, { emitEvent: false });
     }
     const locked = this.setup.hasModels();
-    for (const control of [this.applyBanking, this.bankedAnalysisYear, this.newBaselineYear]) {
-      locked ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
+    const unavailable = !!this.setup.bankingUnavailableReason();
+    locked || (unavailable && !group.applyBanking)
+      ? this.applyBanking.disable({ emitEvent: false })
+      : this.applyBanking.enable({ emitEvent: false });
+    for (const control of [this.bankedAnalysisYear, this.newBaselineYear]) {
+      locked || unavailable ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
     }
     this.syncing = false;
   }

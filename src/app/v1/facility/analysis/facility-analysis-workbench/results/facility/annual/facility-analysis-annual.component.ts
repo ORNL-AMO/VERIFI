@@ -14,8 +14,10 @@ import { AnalysisResultNumberPipe } from '../../presentation/number/analysis-res
 import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
 import { FacilityAnalysisResultsDisplayService } from '../../presentation/facility-analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
+import { annualResultMarkers, AnalysisResultMarker } from '../../../banking/facility-analysis-banking';
+import { AnalysisResultMarkerLegendComponent, AnalysisResultMarkersComponent } from '../../presentation/result-markers/analysis-result-markers.component';
 
-@Component({ selector: 'app-facility-analysis-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe], templateUrl: './facility-analysis-annual.component.html', styleUrls: ['./facility-analysis-annual.component.css'] })
+@Component({ selector: 'app-facility-analysis-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent], templateUrl: './facility-analysis-annual.component.html', styleUrls: ['./facility-analysis-annual.component.css'] })
 export class FacilityAnalysisAnnualComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly results = inject(FacilityAnalysisResultsService);
@@ -33,10 +35,12 @@ export class FacilityAnalysisAnnualComponent {
   readonly hasBanking = computed(() => this.context.analysis()?.hasBanking === true);
   readonly rowViews = computed(() => this.rows().map(row => ({
     row,
+    markers: this.facilityAnnualMarkers(row.year),
     predictors: Object.fromEntries(
       (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
     ) as Readonly<Record<string, number>>
   })));
+  readonly legendMarkers = computed(() => uniqueMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly predictorScopeId = computed(() => `facility:${this.context.analysisGuid()}`);
   readonly availablePredictors = computed<AnalysisGroupPredictorVariable[]>(() => this.context.workspace.facilityPredictors().map(predictor => ({
     id: predictor.guid,
@@ -84,4 +88,18 @@ export class FacilityAnalysisAnnualComponent {
   readonly useChartYAxisTitle = computed(() => this.context.analysis()?.analysisCategory === 'water'
     ? `Consumption${this.unit() ? ` (${this.unit()})` : ''}`
     : `Energy Use${this.unit() ? ` (${this.unit()})` : ''}`);
+
+  private facilityAnnualMarkers(year: number): readonly AnalysisResultMarker[] {
+    const state = this.results.state();
+    if (state.state !== 'ready') return [];
+    return uniqueMarkers((state.groups ?? []).flatMap(result => {
+      const row = result.annualAnalysisSummaryData.find(item => item.year === year);
+      return row ? annualResultMarkers(row) : [];
+    }));
+  }
+}
+
+function uniqueMarkers(markers: readonly AnalysisResultMarker[]): readonly AnalysisResultMarker[] {
+  const present = new Set(markers);
+  return (['banked-source', 'banked-savings', 'transition'] as const).filter(marker => present.has(marker));
 }

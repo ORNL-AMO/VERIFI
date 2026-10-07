@@ -9,7 +9,7 @@ export function getBankedAnalysisGroup(
   if (!analysisItem?.hasBanking
     || !analysisItem.bankedAnalysisItemId
     || bankedAnalysisItem?.guid !== analysisItem.bankedAnalysisItemId
-    || !group?.applyBanking) {
+    || !group) {
     return undefined;
   }
 
@@ -22,7 +22,8 @@ export function isBankedGroupConfigurationComplete(
   bankedAnalysisItem: IdbAnalysisItem | undefined
 ): boolean {
   const bankedGroup = getBankedAnalysisGroup(analysisItem, group, bankedAnalysisItem);
-  return !!bankedGroup
+  return !!group?.applyBanking
+    && !!bankedGroup
     && bankedGroup.analysisType !== 'skip'
     && bankedGroup.analysisType !== 'skipAnalysis'
     && Number.isFinite(group.bankedAnalysisYear)

@@ -7,6 +7,8 @@ export interface DataWorkbenchTab {
   readonly id: string;
   readonly label: string;
   readonly icon: IconName;
+  readonly disabled?: boolean;
+  readonly disabledReason?: string;
 }
 
 @Component({

@@ -1,0 +1,77 @@
+@let state = results.state();
+@let sourceAnalysis = source();
+@let bankedGroup = sourceGroup();
+@let currentGroup = configuredGroup();
+<section class="v1-banking-results" aria-label="Banking results">
+  @if (sourceAnalysis && bankedGroup && currentGroup) {
+    <header class="v1-banking-results__context">
+      <div class="v1-banking-results__summary">
+        <div class="v1-banking-results__source">
+          <p class="v1-eyebrow">Banking source</p>
+          @if (sourceRoute(); as route) {
+            <h2><a class="v1-banking-results__source-link" [routerLink]="route"><app-ui-icon name="link"></app-ui-icon>{{ sourceAnalysis.name }}</a></h2>
+          } @else {
+            <h2>{{ sourceAnalysis.name }}</h2>
+          }
+        </div>
+        <dl>
+          <div><dt>Applied through</dt><dd>{{ currentGroup.bankedAnalysisYear }}</dd></div>
+          <div><dt>New baseline</dt><dd>{{ currentGroup.newBaselineYear }}</dd></div>
+          <div><dt>Method</dt><dd>{{ bankedGroup.analysisType === 'regression' ? 'Regression' : bankedGroup.analysisType === 'energyIntensity' ? 'Classic intensity' : 'Absolute consumption' }}</dd></div>
+          @if (bankedGroup.analysisType === 'regression') {
+            <div>
+              <dt>Model</dt>
+              <dd>{{ bankedGroup.isGeneratedModel ? 'Generated · ' + bankedGroup.regressionModelYear : 'User-defined' }}</dd>
+            </div>
+          }
+        </dl>
+        @if (selectedModel()) {
+          <button #inspectButton type="button" class="v1-btn v1-btn--secondary v1-btn--sm v1-banking-results__inspect" (click)="inspectSelectedModel(inspectButton)"><app-ui-icon name="monocle"></app-ui-icon>Inspect model</button>
+        }
+      </div>
+      @if (regressionEquation(); as equation) {
+        <p class="v1-banking-results__equation"><span>{{ modeledQuantityLabel() }}</span><span>=</span><strong>{{ equation }}</strong></p>
+      }
+    </header>
+  }
+
+  @if (state.state !== 'ready') {
+    <article class="v1-empty-state" [attr.role]="state.state === 'error' || results.hasBlockingErrors() ? 'alert' : 'status'">
+      <app-ui-icon [name]="state.state === 'error' || results.hasBlockingErrors() ? 'warning' : 'loading'" [spin]="!results.hasBlockingErrors() && (state.state === 'loading' || state.state === 'waiting')"></app-ui-icon>
+      <h3>{{ results.hasBlockingErrors() ? 'Banking results are blocked' : state.state === 'error' ? 'Banking results could not be calculated' : state.state === 'waiting' && state.reason === 'configuration' ? 'Complete banking configuration' : 'Preparing banking results' }}</h3>
+      <p>{{ state.state === 'error' ? state.message : results.hasBlockingErrors() ? 'Resolve validation errors in the selected source analysis before calculating banking results.' : 'Waiting for saved, validated calendarization inputs.' }}</p>
+    </article>
+  } @else if (!annualViews().length) {
+    <article class="v1-empty-state" role="status"><app-ui-icon name="calendar"></app-ui-icon><h3>No banking results</h3><p>No complete source years are available before the new baseline.</p></article>
+  } @else {
+    <section class="v1-banking-results__table" aria-label="Source annual results">
+      <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Banking source annual results">
+        <table><thead><tr><th scope="col">Year</th><th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Total savings improvement</th><th scope="col">Annual savings improvement</th><th scope="col">Cumulative savings</th></tr></thead>
+          <tbody>@for (view of annualViews(); track view.summary.year) { <tr><th scope="row"><span class="v1-banking-results__year"><span>{{ view.summary.year }}</span><app-analysis-result-markers [markers]="view.markers"></app-analysis-result-markers></span></th><td>{{ view.summary.energyUse | analysisResultNumber }}</td><td>{{ view.transition ? '—' : (view.summary.adjusted | analysisResultNumber) }}</td><td>{{ view.totalSavingsPercentImprovement == null ? '—' : (view.totalSavingsPercentImprovement | number:'1.0-2') + '%' }}</td><td>{{ view.transition ? '—' : (view.summary.annualSavingsPercentImprovement | number:'1.0-2') + '%' }}</td><td>{{ view.summary.cummulativeSavings == null ? '—' : (view.summary.cummulativeSavings | analysisResultNumber) }}</td></tr> }</tbody>
+        </table>
+      </div>
+      <app-analysis-result-marker-legend [markers]="legendMarkers()"></app-analysis-result-marker-legend>
+    </section>
+
+    <section class="v1-banking-results__charts" aria-label="Banking annual charts">
+      <app-meter-results-chart [chartRows]="annualUseRows()" [metrics]="annualUseMetrics()" defaultLeftMetricId="actual" defaultRightMetricId="calculated" defaultLeftDisplay="bar" defaultRightDisplay="bar" [sharedYAxis]="true" [yAxisTitle]="unit()" [allowNegativeValues]="true" [showSeriesControls]="false" [showValueLabels]="true" period="yearly" ariaLabel="Banking annual actual and calculated use chart" downloadFileName="banking-annual-use" [embedded]="true"></app-meter-results-chart>
+      <app-meter-results-chart [chartRows]="annualImprovementRows()" [metrics]="annualImprovementMetrics()" defaultLeftMetricId="annualImprovement" defaultRightMetricId="totalImprovement" [sharedYAxis]="true" yAxisTitle="Percent Improvement" [allowNegativeValues]="true" [showSeriesControls]="false" [showValueLabels]="true" period="yearly" ariaLabel="Banking annual and total improvement chart" downloadFileName="banking-annual-improvement" [embedded]="true"></app-meter-results-chart>
+    </section>
+    <section class="v1-banking-results__charts" aria-label="Banking monthly charts">
+      <app-meter-results-chart [chartRows]="monthlyUseRows()" [metrics]="monthlyUseMetrics()" [showAllMetrics]="true" allMetricsDisplay="line" [comparisonBand]="useComparisonBand" [sharedYAxis]="true" [yAxisTitle]="unit()" [allowNegativeValues]="true" [showSeriesControls]="false" period="monthly" ariaLabel="Banking monthly actual and calculated use chart" downloadFileName="banking-monthly-use" [embedded]="true"></app-meter-results-chart>
+      <app-meter-results-chart [chartRows]="monthlySavings().rows" [metrics]="monthlySavings().metrics" [showAllMetrics]="true" allMetricsDisplay="bar" [stackSeries]="true" [sharedYAxis]="true" yAxisTitle="Percent Savings" [allowNegativeValues]="true" [showSeriesControls]="false" period="monthly" ariaLabel="Banking monthly rolling savings chart" downloadFileName="banking-monthly-savings" [embedded]="true"></app-meter-results-chart>
+    </section>
+  }
+</section>
+
+@if (inspectedModel(); as model) {
+  @if (sourceAnalysis && bankedGroup) {
+    <app-regression-model-review-slideout
+      [model]="model"
+      [group]="bankedGroup"
+      [analysis]="sourceAnalysis"
+      [validationState]="reviewValidationState()"
+      (closed)="closeModelReview()">
+    </app-regression-model-review-slideout>
+  }
+}

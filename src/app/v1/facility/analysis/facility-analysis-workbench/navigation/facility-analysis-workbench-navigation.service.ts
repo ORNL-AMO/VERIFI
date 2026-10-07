@@ -17,6 +17,7 @@ import {
   stageHasBlockingErrors,
   tabsForAnalysisGroup
 } from '../facility-analysis-workbench.models';
+import { bankingTabAvailable } from '../banking/facility-analysis-banking';
 
 @Injectable()
 export class FacilityAnalysisWorkbenchNavigationService {
@@ -66,7 +67,10 @@ export class FacilityAnalysisWorkbenchNavigationService {
     if (stage?.kind === 'facility') return ANALYSIS_FACILITY_TABS;
     if (stage?.kind !== 'group' || !stage.groupGuid) return [];
     const analysis = this.autosave.draft() || this.context.analysis();
-    return tabsForAnalysisGroup(analysis?.groups.find(group => group.idbGroupId === stage.groupGuid));
+    const group = analysis?.groups.find(item => item.idbGroupId === stage.groupGuid);
+    return tabsForAnalysisGroup(group, bankingTabAvailable(
+      analysis, group, this.context.analyses(), this.context.status.items()
+    ));
   });
   readonly contextTabAttention = computed(() => {
     const stage = this.currentStage();
@@ -132,7 +136,8 @@ export class FacilityAnalysisWorkbenchNavigationService {
 
   openContextTab(tabId: string): void {
     const stage = this.currentStage();
-    if (!stage || !this.contextTabs().some(tab => tab.id === tabId)) return;
+    const tab = this.contextTabs().find(item => item.id === tabId);
+    if (!stage || !tab || tab.disabled) return;
     void this.router.navigate([...stage.route.slice(0, -1), tabId]);
   }
 
@@ -146,6 +151,7 @@ function activeAnalysisWorkbenchTabId(url: string): AnalysisWorkbenchTabId {
   const segments = url.split(/[?#]/, 1)[0].split('/');
   const tabId = segments[segments.length - 1];
   return tabId === 'regression'
+    || tabId === 'banking'
     || tabId === 'annual'
     || tabId === 'monthly-table'
     || tabId === 'monthly-chart'
