@@ -68,6 +68,62 @@ describe('MeterResultsChartComponent', () => {
     expect(component.costDisplay()).toBe('line');
   });
 
+  it('renders every supplied metric as a stacked series when requested', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('showAllMetrics', true);
+    fixture.componentRef.setInput('allMetricsDisplay', 'bar');
+    fixture.componentRef.setInput('stackSeries', true);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const option = component.chartOption() as Record<string, any>;
+
+    expect(component.visibleMetrics().map(metric => metric.id)).toEqual(['utility', 'cost', 'emissions']);
+    expect(option.series.map((series: { name: string; type: string; stack?: string }) => [
+      series.name, series.type, series.stack
+    ])).toEqual([
+      ['Total Energy', 'bar', 'results'],
+      ['Total Cost', 'bar', 'results'],
+      ['Total Emissions', 'bar', 'results']
+    ]);
+    expect(option.yAxis).toHaveLength(1);
+  });
+
+  it('fills the comparison band according to which line is higher', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('showAllMetrics', true);
+    fixture.componentRef.setInput('comparisonBand', {
+      referenceMetricId: 'utility',
+      comparisonMetricId: 'cost',
+      comparisonAboveColor: 'var(--v1-success)',
+      referenceAboveColor: 'var(--v1-danger)'
+    });
+    fixture.detectChanges();
+
+    const option = fixture.componentInstance.chartOption() as Record<string, any>;
+    const [comparisonAbove, referenceAbove, ...lines] = option.series;
+    const comparisonData = comparisonAbove.data[0];
+    const renderApi = {
+      value: (dimension: number) => comparisonData[dimension],
+      coord: ([x, y]: [number, number]) => [x * 100, y],
+      style: (style: Record<string, unknown>) => style
+    };
+
+    expect(comparisonAbove).toMatchObject({
+      type: 'custom',
+      itemStyle: { color: 'var(--v1-success)', opacity: 0.18 }
+    });
+    expect(referenceAbove).toMatchObject({
+      type: 'custom',
+      itemStyle: { color: 'var(--v1-danger)', opacity: 0.18 }
+    });
+    expect(comparisonAbove.renderItem({}, renderApi)?.shape.points).toEqual([
+      [0, 10], [100, 12], [100, 24], [0, 20]
+    ]);
+    expect(referenceAbove.renderItem({}, renderApi)).toBeUndefined();
+    expect(lines.every((series: { smooth?: boolean }) => series.smooth === false)).toBe(true);
+  });
+
   it.each([
     ['monthly', 'all values are zero', [0, 0, 0]],
     ['monthly', 'values net to zero', [20, -20, 0]],

@@ -19,7 +19,7 @@ export class FacilityAnalysisGroupAnnualComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisGroupResultsService);
   readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
-  readonly columns = this.displaySettings.columns;
+  readonly columns = this.displaySettings.annualColumns;
   readonly rows = computed(() => {
     const state = this.results.state();
     return state.state === 'ready' ? state.annual : [];

@@ -6,7 +6,7 @@
 @if (open()) {
   <app-workspace-slideout
     title="Choose columns"
-    description="Choose the fields shown in annual and monthly result tables."
+    [description]="'Choose the fields shown in the ' + period() + ' result table.'"
     (closed)="closeSlideout()">
     <form class="analysis-result-columns" (submit)="$event.preventDefault(); apply()">
       <div class="analysis-result-columns__quick-actions">
@@ -15,9 +15,9 @@
         <button type="button" class="v1-btn v1-btn--sm v1-btn--quiet" (click)="useDefaults()">Use Defaults</button>
       </div>
 
-      <section class="analysis-result-columns__section" aria-labelledby="annual-result-columns-heading">
-        <h3 id="annual-result-columns-heading">Annual table</h3>
-        @for (option of annualOptions(); track option.id) {
+      <section class="analysis-result-columns__section" aria-labelledby="result-columns-heading">
+        <h3 id="result-columns-heading">{{ period() === 'annual' ? 'Annual' : 'Monthly' }} table</h3>
+        @for (option of viewOptions(); track option.id) {
           <label class="analysis-result-columns__check">
             <input type="checkbox" [formControl]="control(option.id)">
             <span>{{ option.label }}</span>
@@ -37,16 +37,6 @@
           }
         </section>
       }
-
-      <section class="analysis-result-columns__section" aria-labelledby="monthly-result-columns-heading">
-        <h3 id="monthly-result-columns-heading">Monthly table</h3>
-        @for (option of monthlyOptions(); track option.id) {
-          <label class="analysis-result-columns__check">
-            <input type="checkbox" [formControl]="control(option.id)">
-            <span>{{ option.label }}</span>
-          </label>
-        }
-      </section>
 
       <footer class="analysis-result-columns__footer">
         <button type="button" class="v1-btn v1-btn--quiet" (click)="closeSlideout()">Cancel</button>

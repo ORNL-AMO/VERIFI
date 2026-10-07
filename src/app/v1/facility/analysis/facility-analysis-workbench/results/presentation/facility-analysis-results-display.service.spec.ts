@@ -10,8 +10,11 @@ describe('FacilityAnalysisResultsDisplayService', () => {
       { provide: LocalStorageService, useValue: { retrieve: vi.fn(), store } }
     ] });
     const service = TestBed.inject(FacilityAnalysisResultsDisplayService);
-    service.setColumn('modeledEnergy', false);
-    expect(service.columns().modeledEnergy).toBe(false);
-    expect(store).toHaveBeenCalledWith(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, expect.objectContaining({ modeledEnergy: false }));
+    service.setColumn('monthly', 'modeledEnergy', false);
+    expect(service.monthlyColumns().modeledEnergy).toBe(false);
+    expect(service.annualColumns().modeledEnergy).toBe(true);
+    expect(store).toHaveBeenCalledWith(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, expect.objectContaining({
+      monthly: expect.objectContaining({ modeledEnergy: false })
+    }));
   });
 });

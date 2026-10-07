@@ -2,7 +2,7 @@ import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { StatusItem } from '@app/v1/status/status.models';
-import { activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages, buildAnalysisWorkbenchTabAttention, findingsForAnalysisStage, stageHasBlockingErrors, tabsForAnalysisGroup } from './facility-analysis-workbench.models';
+import { ANALYSIS_FACILITY_TABS, activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages, buildAnalysisWorkbenchTabAttention, findingsForAnalysisStage, stageHasBlockingErrors, tabsForAnalysisGroup } from './facility-analysis-workbench.models';
 
 describe('facility analysis workbench models', () => {
   const regression = { idbGroupId: 'group-b', analysisType: 'regression' } as AnalysisGroup;
@@ -26,12 +26,16 @@ describe('facility analysis workbench models', () => {
       'setup', 'regression', 'annual', 'monthly-table', 'monthly-chart'
     ]);
     expect(tabsForAnalysisGroup(skipped).map(tab => tab.id)).toEqual(['setup']);
+    expect(ANALYSIS_FACILITY_TABS.map(tab => tab.id)).toEqual([
+      'annual', 'monthly-table', 'monthly-chart', 'group-contributions'
+    ]);
   });
 
   it('resolves a workflow stage from every canonical route family', () => {
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/setup')).toBe('analysis');
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/group/group%20a/monthly-chart')).toBe('group:group a');
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/facility/annual')).toBe('facility');
+    expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/facility/group-contributions')).toBe('facility');
     expect(activeAnalysisWorkbenchStageId('/v1/workspace/facility/f/analysis/workbench/a/used-by')).toBe('used-by');
   });
 

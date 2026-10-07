@@ -3,6 +3,12 @@ import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/mode
 import { LocalStorageService } from 'ngx-webstorage';
 
 export const ANALYSIS_TABLE_COLUMNS_STORAGE_KEY = 'v1AnalysisTableColumns';
+export type AnalysisResultTablePeriod = 'annual' | 'monthly';
+
+interface StoredAnalysisTableColumns {
+  readonly annual: Partial<AnalysisTableColumns>;
+  readonly monthly: Partial<AnalysisTableColumns>;
+}
 
 export const DEFAULT_ANALYSIS_TABLE_COLUMNS: AnalysisTableColumns = {
   incrementalImprovement: false,
@@ -33,36 +39,50 @@ export const DEFAULT_ANALYSIS_TABLE_COLUMNS: AnalysisTableColumns = {
 
 @Injectable()
 export class FacilityAnalysisResultsDisplayService {
-  private readonly columnsValue = signal<AnalysisTableColumns>(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS));
-  readonly columns = this.columnsValue.asReadonly();
+  private readonly annualColumnsValue = signal<AnalysisTableColumns>(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS));
+  private readonly monthlyColumnsValue = signal<AnalysisTableColumns>(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS));
+  readonly annualColumns = this.annualColumnsValue.asReadonly();
+  readonly monthlyColumns = this.monthlyColumnsValue.asReadonly();
 
   constructor(private readonly localStorage: LocalStorageService) {
-    const stored = localStorage.retrieve(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY) as Partial<AnalysisTableColumns> | undefined;
-    if (stored) this.columnsValue.set({ ...structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS), ...stored });
+    const stored = localStorage.retrieve(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY) as Partial<AnalysisTableColumns> | StoredAnalysisTableColumns | undefined;
+    if (!stored) return;
+    if (isPeriodScopedColumns(stored)) {
+      this.annualColumnsValue.set({ ...structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS), ...stored.annual, productionVariables: true });
+      this.monthlyColumnsValue.set({ ...structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS), ...stored.monthly, productionVariables: true });
+    } else {
+      const migrated = { ...structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS), ...stored, productionVariables: true };
+      this.annualColumnsValue.set(structuredClone(migrated));
+      this.monthlyColumnsValue.set(structuredClone(migrated));
+    }
   }
 
-  setColumn(column: keyof AnalysisTableColumns, visible: boolean): void {
-    const value = this.columnsValue()[column];
+  columns(period: AnalysisResultTablePeriod): AnalysisTableColumns {
+    return this.columnsValue(period)();
+  }
+
+  setColumn(period: AnalysisResultTablePeriod, column: keyof AnalysisTableColumns, visible: boolean): void {
+    if (column === 'productionVariables') return;
+    const value = this.columns(period)[column];
     if (typeof value !== 'boolean') return;
-    const updated = { ...this.columnsValue(), [column]: visible };
-    this.columnsValue.set(updated);
-    this.localStorage.store(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, updated);
+    this.setColumnsValue(period, { ...this.columns(period), [column]: visible });
+    this.persist();
   }
 
-  setColumns(columns: Readonly<Partial<AnalysisTableColumns>>): void {
-    const updated = { ...this.columnsValue() };
+  setColumns(period: AnalysisResultTablePeriod, columns: Readonly<Partial<AnalysisTableColumns>>): void {
+    const updated = { ...this.columns(period) };
     for (const [column, visible] of Object.entries(columns)) {
       const columnId = column as keyof AnalysisTableColumns;
-      if (typeof updated[columnId] === 'boolean' && typeof visible === 'boolean') {
+      if (columnId !== 'productionVariables' && typeof updated[columnId] === 'boolean' && typeof visible === 'boolean') {
         Object.assign(updated, { [columnId]: visible });
       }
     }
-    this.columnsValue.set(updated);
-    this.localStorage.store(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, updated);
+    this.setColumnsValue(period, updated);
+    this.persist();
   }
 
-  syncPredictors(scopeId: string, predictors: readonly AnalysisGroupPredictorVariable[]): void {
-    const current = this.columnsValue();
+  syncPredictors(period: AnalysisResultTablePeriod, scopeId: string, predictors: readonly AnalysisGroupPredictorVariable[]): void {
+    const current = this.columns(period);
     const existing = current.predictorGroupId === scopeId
       ? new Map(current.predictors.map(item => [item.predictor.id, item]))
       : new Map();
@@ -70,7 +90,7 @@ export class FacilityAnalysisResultsDisplayService {
       const previous = existing.get(predictor.id);
       return {
         predictor: { ...predictor },
-        display: previous?.display ?? (predictor.productionInAnalysis && current.productionVariables),
+        display: previous?.display ?? predictor.productionInAnalysis,
         usedInAnalysis: predictor.productionInAnalysis
       };
     });
@@ -88,12 +108,12 @@ export class FacilityAnalysisResultsDisplayService {
       return;
     }
     const updated = { ...current, predictors: selections, predictorGroupId: scopeId };
-    this.columnsValue.set(updated);
-    this.localStorage.store(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, updated);
+    this.setColumnsValue(period, updated);
+    this.persist();
   }
 
-  setPredictorVisibility(scopeId: string, visibility: Readonly<Record<string, boolean>>): void {
-    const current = this.columnsValue();
+  setPredictorVisibility(period: AnalysisResultTablePeriod, scopeId: string, visibility: Readonly<Record<string, boolean>>): void {
+    const current = this.columns(period);
     if (current.predictorGroupId !== scopeId) {
       return;
     }
@@ -104,7 +124,26 @@ export class FacilityAnalysisResultsDisplayService {
         display: visibility[item.predictor.id] ?? item.display
       }))
     };
-    this.columnsValue.set(updated);
-    this.localStorage.store(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, updated);
+    this.setColumnsValue(period, updated);
+    this.persist();
   }
+
+  private columnsValue(period: AnalysisResultTablePeriod) {
+    return period === 'annual' ? this.annualColumnsValue : this.monthlyColumnsValue;
+  }
+
+  private setColumnsValue(period: AnalysisResultTablePeriod, value: AnalysisTableColumns): void {
+    this.columnsValue(period).set(value);
+  }
+
+  private persist(): void {
+    this.localStorage.store(ANALYSIS_TABLE_COLUMNS_STORAGE_KEY, {
+      annual: this.annualColumns(),
+      monthly: this.monthlyColumns()
+    } satisfies StoredAnalysisTableColumns);
+  }
+}
+
+function isPeriodScopedColumns(value: Partial<AnalysisTableColumns> | StoredAnalysisTableColumns): value is StoredAnalysisTableColumns {
+  return 'annual' in value && 'monthly' in value;
 }

@@ -3,7 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AnalysisGroupPredictorVariable, AnalysisTableColumns } from '@data/models/analysis';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
-import { DEFAULT_ANALYSIS_TABLE_COLUMNS, FacilityAnalysisResultsDisplayService } from '../facility-analysis-results-display.service';
+import { AnalysisResultTablePeriod, DEFAULT_ANALYSIS_TABLE_COLUMNS, FacilityAnalysisResultsDisplayService } from '../facility-analysis-results-display.service';
 
 export interface AnalysisResultColumnOption {
   readonly id: keyof AnalysisTableColumns;
@@ -16,7 +16,6 @@ const ANNUAL_COLUMN_OPTIONS: readonly AnalysisResultColumnOption[] = [
   { id: 'baselineAdjustmentForNormalization', label: 'Baseline adjustment for normalization' },
   { id: 'baselineAdjustmentForOther', label: 'Baseline adjustment for other' },
   { id: 'baselineAdjustment', label: 'Total baseline adjustment' },
-  { id: 'productionVariables', label: 'Production variables' },
   { id: 'SEnPI', label: 'SEnPI' },
   { id: 'bankedSavings', label: 'Banked savings' },
   { id: 'savingsUnbanked', label: 'Unbanked savings' },
@@ -34,7 +33,6 @@ const MONTHLY_COLUMN_OPTIONS: readonly AnalysisResultColumnOption[] = [
   { id: 'baselineAdjustmentForNormalization', label: 'Baseline adjustment for normalization' },
   { id: 'baselineAdjustmentForOther', label: 'Baseline adjustment for other' },
   { id: 'baselineAdjustment', label: 'Total baseline adjustment' },
-  { id: 'productionVariables', label: 'Production variables' },
   { id: 'SEnPI', label: 'SEnPI' },
   { id: 'bankedSavings', label: 'Banked savings' },
   { id: 'savingsUnbanked', label: 'Unbanked savings' },
@@ -51,6 +49,7 @@ const MONTHLY_COLUMN_OPTIONS: readonly AnalysisResultColumnOption[] = [
   styleUrls: ['./analysis-result-column-chooser.component.css']
 })
 export class AnalysisResultColumnChooserComponent {
+  readonly period = input<AnalysisResultTablePeriod>('annual');
   readonly hasBanking = input(false);
   readonly showModeled = input(true);
   readonly predictorScopeId = input('');
@@ -59,6 +58,7 @@ export class AnalysisResultColumnChooserComponent {
   readonly annualOptions = computed(() => this.optionsForBanking(ANNUAL_COLUMN_OPTIONS));
   readonly monthlyOptions = computed(() => this.optionsForBanking(MONTHLY_COLUMN_OPTIONS)
     .filter(option => this.showModeled() || option.id !== 'modeledEnergy'));
+  readonly viewOptions = computed(() => this.period() === 'annual' ? this.annualOptions() : this.monthlyOptions());
 
   private readonly display = inject(FacilityAnalysisResultsDisplayService);
   private readonly controls = new Map<keyof AnalysisTableColumns, FormControl<boolean>>();
@@ -66,7 +66,7 @@ export class AnalysisResultColumnChooserComponent {
 
   openSlideout(): void {
     this.syncPredictors();
-    const columns = this.display.columns();
+    const columns = this.display.columns(this.period());
     for (const option of this.allOptions()) {
       this.control(option.id).setValue(columns[option.id] === true, { emitEvent: false });
     }
@@ -85,10 +85,10 @@ export class AnalysisResultColumnChooserComponent {
     for (const option of this.allOptions()) {
       Object.assign(columns, { [option.id]: this.control(option.id).value });
     }
-    this.display.setColumns(columns);
+    this.display.setColumns(this.period(), columns);
     const scopeId = this.predictorScopeId();
     if (scopeId) {
-      this.display.setPredictorVisibility(scopeId, Object.fromEntries(
+      this.display.setPredictorVisibility(this.period(), scopeId, Object.fromEntries(
         this.predictorVariables().map(predictor => [predictor.id, this.predictorControl(predictor.id).value])
       ));
     }
@@ -132,8 +132,7 @@ export class AnalysisResultColumnChooserComponent {
   }
 
   private allOptions(): readonly AnalysisResultColumnOption[] {
-    return [...this.annualOptions(), ...this.monthlyOptions()]
-      .filter((option, index, options) => options.findIndex(candidate => candidate.id === option.id) === index);
+    return this.viewOptions();
   }
 
   private optionsForBanking(options: readonly AnalysisResultColumnOption[]): readonly AnalysisResultColumnOption[] {
@@ -153,6 +152,6 @@ export class AnalysisResultColumnChooserComponent {
 
   private syncPredictors(): void {
     const scopeId = this.predictorScopeId();
-    if (scopeId) this.display.syncPredictors(scopeId, this.predictorVariables());
+    if (scopeId) this.display.syncPredictors(this.period(), scopeId, this.predictorVariables());
   }
 }

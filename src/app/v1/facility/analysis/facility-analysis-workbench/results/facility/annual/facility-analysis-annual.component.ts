@@ -9,7 +9,6 @@ import {
   annualUseChartMetrics,
   annualUseChartRows
 } from '../../presentation/facility-analysis-result.view';
-import { isSkippedAnalysisType } from '../../../facility-analysis-workbench.models';
 import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
 import { AnalysisResultNumberPipe } from '../../presentation/number/analysis-result-number.pipe';
 import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
@@ -21,7 +20,7 @@ export class FacilityAnalysisAnnualComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
-  readonly columns = this.displaySettings.columns;
+  readonly columns = this.displaySettings.annualColumns;
   readonly rows = computed(() => {
     const state = this.results.state();
     return state.state === 'ready' ? state.annual : [];
@@ -76,13 +75,4 @@ export class FacilityAnalysisAnnualComponent {
   readonly useChartYAxisTitle = computed(() => this.context.analysis()?.analysisCategory === 'water'
     ? `Consumption${this.unit() ? ` (${this.unit()})` : ''}`
     : `Energy Use${this.unit() ? ` (${this.unit()})` : ''}`);
-  readonly groupBreakdown = computed(() => {
-    const state = this.results.state();
-    if (state.state !== 'ready') return [];
-    return state.groups.filter(item => !isSkippedAnalysisType(item.group.analysisType)).map(item => {
-      const latest = item.annualAnalysisSummaryData[item.annualAnalysisSummaryData.length - 1];
-      const name = this.context.meterGroups().find(group => group.guid === item.group.idbGroupId)?.name ?? item.group.idbGroupId;
-      return { id: item.group.idbGroupId, name, year: latest?.year, actual: latest?.energyUse ?? 0, savings: latest?.savings ?? 0 };
-    });
-  });
 }

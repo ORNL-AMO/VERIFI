@@ -64,6 +64,7 @@ import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/facility/ana
 import { FacilityAnalysisGroupMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-chart/facility-analysis-group-monthly-chart.component';
 import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-table/facility-analysis-monthly-table.component';
 import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
+import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
 
 describe('V1Routes facility data meters routes', () => {
   beforeEach(() => {
@@ -131,6 +132,10 @@ describe('V1Routes facility data meters routes', () => {
     expect(facilityChildren.find(route => route.path === 'monthly-chart')).toMatchObject({
       component: FacilityAnalysisMonthlyChartComponent,
       data: { analysisScope: 'facility', analysisTab: 'monthly-chart' }
+    });
+    expect(facilityChildren.find(route => route.path === 'group-contributions')).toMatchObject({
+      component: FacilityAnalysisGroupContributionsComponent,
+      data: { analysisScope: 'facility', analysisTab: 'group-contributions' }
     });
     expect(facilityChildren.find(route => route.path === 'monthly')).toMatchObject({ redirectTo: 'monthly-table' });
   });

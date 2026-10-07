@@ -5,7 +5,7 @@ import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 
-export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
+export type AnalysisWorkbenchTabId = 'setup' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
 export type AnalysisWorkbenchStageKind = 'analysis' | 'group' | 'facility' | 'used-by';
 
 export interface AnalysisWorkbenchTab {
@@ -38,10 +38,16 @@ export const ANALYSIS_GROUP_REGRESSION_TAB: AnalysisWorkbenchTab = { id: 'regres
 export const ANALYSIS_GROUP_ANNUAL_TAB: AnalysisWorkbenchTab = { id: 'annual', label: 'Annual', icon: 'calendar' };
 export const ANALYSIS_GROUP_MONTHLY_TABLE_TAB: AnalysisWorkbenchTab = { id: 'monthly-table', label: 'Monthly Table', icon: 'table' };
 export const ANALYSIS_GROUP_MONTHLY_CHART_TAB: AnalysisWorkbenchTab = { id: 'monthly-chart', label: 'Monthly Chart', icon: 'chartLine' };
+export const ANALYSIS_FACILITY_GROUP_CONTRIBUTIONS_TAB: AnalysisWorkbenchTab = {
+  id: 'group-contributions',
+  label: 'Group Contributions',
+  icon: 'barChart'
+};
 export const ANALYSIS_FACILITY_TABS: readonly AnalysisWorkbenchTab[] = [
   ANALYSIS_GROUP_ANNUAL_TAB,
   ANALYSIS_GROUP_MONTHLY_TABLE_TAB,
-  ANALYSIS_GROUP_MONTHLY_CHART_TAB
+  ANALYSIS_GROUP_MONTHLY_CHART_TAB,
+  ANALYSIS_FACILITY_GROUP_CONTRIBUTIONS_TAB
 ];
 
 export function isSkippedAnalysisType(type: AnalysisType): boolean {
@@ -84,7 +90,7 @@ export function activeAnalysisWorkbenchStageId(url: string): string {
   const cleanUrl = url.split(/[?#]/, 1)[0];
   const groupMatch = /\/group\/([^/]+)\//.exec(cleanUrl);
   if (groupMatch) return `group:${decodeRoutePart(groupMatch[1])}`;
-  if (/\/facility\/(annual|monthly(?:-table|-chart)?)$/.test(cleanUrl)) return 'facility';
+  if (/\/facility\/(annual|monthly(?:-table|-chart)?|group-contributions)$/.test(cleanUrl)) return 'facility';
   if (/\/used-by$/.test(cleanUrl)) return 'used-by';
   return 'analysis';
 }

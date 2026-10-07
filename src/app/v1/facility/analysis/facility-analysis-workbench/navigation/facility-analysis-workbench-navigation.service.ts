@@ -149,6 +149,7 @@ function activeAnalysisWorkbenchTabId(url: string): AnalysisWorkbenchTabId {
     || tabId === 'annual'
     || tabId === 'monthly-table'
     || tabId === 'monthly-chart'
+    || tabId === 'group-contributions'
     ? tabId
     : 'setup';
 }

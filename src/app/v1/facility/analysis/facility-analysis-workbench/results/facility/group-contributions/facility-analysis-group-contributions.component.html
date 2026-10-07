@@ -1,0 +1,85 @@
+@let state = results.state();
+@let contributions = view();
+<section class="v1-analysis-contributions" aria-label="Facility group contributions">
+  @if (context.hasBlockingErrors() || state.state !== 'ready' || !rows().length) {
+    <div class="v1-analysis-contributions__intro">
+      <app-analysis-result-status
+        scope="facility"
+        period="annual"
+        [state]="state"
+        [blocking]="context.hasBlockingErrors()"
+        [rowCount]="rows().length">
+      </app-analysis-result-status>
+    </div>
+  }
+
+  @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
+    @if (hasContributionData()) {
+      <section class="v1-analysis-contributions__chart" aria-label="Group contribution chart">
+        <div class="v1-analysis-contributions__chart-actions">
+          <h2>Group Contributions by Fiscal Year</h2>
+          <button
+            type="button"
+            class="v1-icon-btn"
+            title="Download PNG"
+            aria-label="Download group contribution heatmap as PNG"
+            (click)="downloadHeatmap()">
+            <app-ui-icon name="download"></app-ui-icon>
+          </button>
+        </div>
+        <div class="v1-analysis-contributions__chart-scroll" tabindex="0" role="region" aria-label="Scrollable group contribution heatmap">
+          <div
+            #contributionHeatmap
+            class="v1-analysis-contributions__heatmap"
+            [style.height.px]="heatmapHeight()"
+            [style.min-width.px]="heatmapWidth()"
+            [appV1ECharts]="heatmapOption()"
+            role="img"
+            aria-label="Group percent contribution heatmap by fiscal year. Green indicates savings and red indicates losses.">
+          </div>
+        </div>
+      </section>
+
+      <section class="v1-analysis-contributions__table" aria-label="Group contribution table">
+        <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Group contributions by fiscal year">
+          <table class="v1-analysis-contributions-table">
+            <thead>
+              <tr>
+                <th scope="col">Group / Fiscal Year</th>
+                <th scope="col">Savings@if (unit()) { <small> ({{ unit() }})</small> }</th>
+                <th scope="col">% Savings</th>
+                <th scope="col">% Contribution</th>
+              </tr>
+            </thead>
+            @for (year of contributions.years; track year.year) {
+              <tbody>
+                <tr class="v1-analysis-contributions-table__year">
+                  <th scope="rowgroup">Fiscal Year {{ year.year }} Total</th>
+                  <td [class.is-negative]="year.totalSavings < 0">{{ year.totalSavings | analysisResultNumber }}</td>
+                  <td [class.is-negative]="year.totalSavingsPercent < 0">{{ year.totalSavingsPercent | number:'1.0-3' }}%</td>
+                  <td [class.is-negative]="year.totalContributionPercent < 0">{{ year.totalContributionPercent | number:'1.0-3' }}%</td>
+                </tr>
+                @for (group of year.groups; track group.groupId) {
+                  <tr>
+                    <th scope="row">{{ group.groupName }}</th>
+                    <td [class.is-negative]="group.savings < 0">{{ group.savings | analysisResultNumber }}</td>
+                    <td [class.is-negative]="group.savingsPercent < 0">{{ group.savingsPercent | number:'1.0-3' }}%</td>
+                    <td [class.is-negative]="group.contributionPercent < 0">{{ group.contributionPercent | number:'1.0-3' }}%</td>
+                  </tr>
+                }
+              </tbody>
+            }
+          </table>
+        </div>
+      </section>
+    } @else {
+      <section class="v1-analysis-contributions__empty">
+        <article class="v1-empty-state" role="status">
+          <app-ui-icon name="meterGroup"></app-ui-icon>
+          <h2>No group contribution results</h2>
+          <p>Post-baseline results from at least one included analysis group are needed for this comparison.</p>
+        </article>
+      </section>
+    }
+  }
+</section>

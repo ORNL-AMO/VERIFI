@@ -1,27 +1,53 @@
 @let state = results.state();
-<section class="v1-analysis-section" aria-label="Facility monthly chart results">
-  <app-analysis-result-toolbar
-    [description]="'Combined non-skipped group results in ' + (unit() || 'analysis units') + '.'"
-    ariaLabel="Facility monthly chart results">
-  </app-analysis-result-toolbar>
-
-  <app-analysis-result-status
-    scope="facility"
-    period="monthly"
-    [state]="state"
-    [blocking]="context.hasBlockingErrors()"
-    [rowCount]="rows().length">
-  </app-analysis-result-status>
+<section class="v1-analysis-results-page" aria-label="Facility monthly chart results">
+  @if (context.hasBlockingErrors() || state.state !== 'ready' || !rows().length) {
+    <div class="v1-analysis-results-page__intro">
+      <app-analysis-result-status
+        scope="facility"
+        period="monthly"
+        [state]="state"
+        [blocking]="context.hasBlockingErrors()"
+        [rowCount]="rows().length">
+      </app-analysis-result-status>
+    </div>
+  }
 
   @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
-    <app-meter-results-chart
-      [chartRows]="chartRows()"
-      [metrics]="chartMetrics"
-      defaultLeftMetricId="actual"
-      defaultRightMetricId="savings"
-      period="monthly"
-      ariaLabel="Facility monthly actual, modeled, and savings chart"
-      downloadFileName="facility-monthly-analysis">
-    </app-meter-results-chart>
+    <section class="v1-analysis-results-page__charts" aria-label="Facility monthly analysis charts">
+      <div class="v1-analysis-results-page__chart">
+        <app-meter-results-chart
+          [chartRows]="useChartRows()"
+          [metrics]="useChartMetrics()"
+          [showAllMetrics]="true"
+          allMetricsDisplay="line"
+          [comparisonBand]="useComparisonBand"
+          [sharedYAxis]="true"
+          [yAxisTitle]="unit()"
+          [allowNegativeValues]="true"
+          [showSeriesControls]="false"
+          period="monthly"
+          ariaLabel="Facility monthly actual and calculated use chart. Green indicates savings where calculated use exceeds actual use; red indicates actual use exceeds calculated use."
+          downloadFileName="facility-monthly-use"
+          [embedded]="true">
+        </app-meter-results-chart>
+      </div>
+      <div class="v1-analysis-results-page__chart">
+        <app-meter-results-chart
+          [chartRows]="savingsChart().rows"
+          [metrics]="savingsChart().metrics"
+          [showAllMetrics]="true"
+          allMetricsDisplay="bar"
+          [stackSeries]="true"
+          [sharedYAxis]="true"
+          yAxisTitle="Percent Savings"
+          [allowNegativeValues]="true"
+          [showSeriesControls]="false"
+          period="monthly"
+          ariaLabel="Facility monthly rolling savings chart"
+          downloadFileName="facility-monthly-savings"
+          [embedded]="true">
+        </app-meter-results-chart>
+      </div>
+    </section>
   }
 </section>

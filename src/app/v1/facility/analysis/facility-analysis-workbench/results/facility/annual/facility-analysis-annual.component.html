@@ -16,6 +16,7 @@
     <section class="v1-analysis-results-page__table" aria-label="Facility annual analysis table">
       <div class="v1-analysis-results-page__table-actions" aria-label="Annual table controls">
         <app-analysis-result-column-chooser
+          period="annual"
           [hasBanking]="hasBanking()"
           [showModeled]="false"
           [predictorScopeId]="predictorScopeId()"
@@ -41,24 +42,24 @@
           </tr>
           <tr>
             <th scope="col">Year</th>
-            @if (columns().actualEnergy) { <th scope="col">Actual</th> }
-            @if (columns().adjusted) { <th scope="col">Adjusted</th> }
-            @if (columns().baselineAdjustmentForNormalization) { <th scope="col">Baseline adjustment for normalization</th> }
-            @if (columns().baselineAdjustmentForOther) { <th scope="col">Baseline adjustment for other</th> }
-            @if (columns().baselineAdjustment) { <th scope="col">Total baseline adjustment</th> }
+            @if (columns().actualEnergy) { <th class="v1-analysis-results-table__group--use" scope="col">Actual</th> }
+            @if (columns().adjusted) { <th class="v1-analysis-results-table__group--use" scope="col">Adjusted</th> }
+            @if (columns().baselineAdjustmentForNormalization) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for normalization</th> }
+            @if (columns().baselineAdjustmentForOther) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for other</th> }
+            @if (columns().baselineAdjustment) { <th class="v1-analysis-results-table__group--use" scope="col">Total baseline adjustment</th> }
             @if (columns().productionVariables) {
               @for (predictor of predictorColumns(); track predictor.id) {
-                <th scope="col">{{ predictor.name }}@if (predictor.unit) { <small> ({{ predictor.unit }})</small> }</th>
+                <th class="v1-analysis-results-table__group--predictors" scope="col">{{ predictor.name }}@if (predictor.unit) { <small> ({{ predictor.unit }})</small> }</th>
               }
             }
-            @if (columns().SEnPI) { <th scope="col">SEnPI</th> }
-            @if (hasBanking() && columns().bankedSavings) { <th scope="col">Banked savings</th> }
-            @if (hasBanking() && columns().savingsUnbanked) { <th scope="col">Unbanked savings</th> }
-            @if (columns().savings) { <th scope="col">Savings</th> }
-            @if (columns().totalSavingsPercentImprovement) { <th scope="col">Total savings % improvement</th> }
-            @if (columns().newSavings) { <th scope="col">New savings</th> }
-            @if (columns().annualSavingsPercentImprovement) { <th scope="col">Annual savings % improvement</th> }
-            @if (columns().cummulativeSavings) { <th scope="col">Cumulative savings</th> }
+            @if (columns().SEnPI) { <th class="v1-analysis-results-table__group--improvement" scope="col">SEnPI</th> }
+            @if (hasBanking() && columns().bankedSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Banked savings</th> }
+            @if (hasBanking() && columns().savingsUnbanked) { <th class="v1-analysis-results-table__group--improvement" scope="col">Unbanked savings</th> }
+            @if (columns().savings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Savings</th> }
+            @if (columns().totalSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Total savings % improvement</th> }
+            @if (columns().newSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">New savings</th> }
+            @if (columns().annualSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Annual savings % improvement</th> }
+            @if (columns().cummulativeSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Cumulative savings</th> }
           </tr>
         </thead>
         <tbody>
@@ -91,31 +92,6 @@
         </tbody>
         </table>
       </div>
-
-      <section class="v1-analysis-results__breakdown" aria-labelledby="group-breakdown-heading">
-        <h4 id="group-breakdown-heading">Latest group savings breakdown</h4>
-        @if (groupBreakdown().length) {
-          <div class="v1-table-scroll">
-            <table class="v1-analysis-results-table v1-analysis-results-table--breakdown">
-              <thead>
-                <tr><th scope="col">Group</th><th scope="col">Year</th><th scope="col">Actual</th><th scope="col">Savings</th></tr>
-              </thead>
-              <tbody>
-                @for (group of groupBreakdown(); track group.id) {
-                  <tr>
-                    <th scope="row">{{ group.name }}</th>
-                    <td>{{ group.year || '—' }}</td>
-                    <td>{{ group.actual | analysisResultNumber }}</td>
-                    <td>{{ group.savings | analysisResultNumber }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        } @else {
-          <p>No included group results are available.</p>
-        }
-      </section>
     </section>
 
     <section class="v1-analysis-results-page__charts" aria-label="Facility annual analysis charts">
@@ -131,6 +107,8 @@
           [yAxisTitle]="useChartYAxisTitle()"
           [allowNegativeValues]="true"
           [showSeriesControls]="false"
+          [showValueLabels]="true"
+          [compactValueLabels]="true"
           period="yearly"
           ariaLabel="Facility annual actual and calculated use chart"
           downloadFileName="facility-annual-use"
@@ -147,6 +125,7 @@
           yAxisTitle="Percent Improvement"
           [allowNegativeValues]="true"
           [showSeriesControls]="false"
+          [showValueLabels]="true"
           period="yearly"
           ariaLabel="Facility annual and total improvement chart"
           downloadFileName="facility-annual-improvement"
