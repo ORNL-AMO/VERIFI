@@ -12,8 +12,9 @@ import { FacilityAnalysisResultsDisplayService } from '../../../results/presenta
 import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
 import { AnalysisResultColumnChooserComponent } from '../../../results/presentation/column-chooser/analysis-result-column-chooser.component';
 import { AnalysisResultNumberPipe } from '../../../results/presentation/number/analysis-result-number.pipe';
-import { monthlyResultMarkers, AnalysisResultMarker } from '../../../banking/facility-analysis-banking';
-import { AnalysisResultMarkerLegendComponent, AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { monthlyResultMarkers, orderedUniqueResultMarkers } from '../../../results/presentation/result-markers/analysis-result-markers';
 
 type AnalysisResultColumnSection = 'period' | 'use' | 'predictors' | 'improvement';
 
@@ -42,7 +43,7 @@ export class FacilityAnalysisGroupMonthlyTableComponent {
     ) as Readonly<Record<string, number>>,
     isFiscalYearEnd: rows[index + 1]?.fiscalYear !== row.fiscalYear
   })));
-  readonly legendMarkers = computed(() => uniqueMarkers(this.rowViews().flatMap(view => view.markers)));
+  readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly currentPage = signal(1);
   readonly pageSizeControl = new FormControl(DEFAULT_TIME_PERIOD_PAGE_SIZE, { nonNullable: true });
   readonly pageSize = toSignal(this.pageSizeControl.valueChanges, { initialValue: this.pageSizeControl.value });
@@ -119,9 +120,4 @@ export class FacilityAnalysisGroupMonthlyTableComponent {
     this.hoveredColumnId.set(columnId);
     this.hoveredSection.set(section);
   }
-}
-
-function uniqueMarkers(markers: readonly AnalysisResultMarker[]): readonly AnalysisResultMarker[] {
-  const present = new Set(markers);
-  return (['banked-source', 'banked-savings', 'transition', 'model'] as const).filter(marker => present.has(marker));
 }

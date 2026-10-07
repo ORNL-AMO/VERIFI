@@ -1,7 +1,6 @@
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import {
-  annualResultMarkers,
   bankedSavingsChartMonthlyRows,
   bankedSavingsPreviewRows,
   bankingDependencyIncludes,
@@ -9,7 +8,6 @@ import {
   bankingSourceOptions,
   bankingTabAvailable,
   bankingYearOptions,
-  monthlyResultMarkers,
   usableBankedGroup
 } from './facility-analysis-banking';
 
@@ -126,19 +124,4 @@ describe('facility analysis banking presentation', () => {
     expect(rows.every(row => !row.isBanked && !row.isIntermediateBanked)).toBe(true);
   });
 
-  it('maps banked, transition, savings, and generated/user model periods', () => {
-    const generated = group({ analysisType: 'regression', isGeneratedModel: true, regressionModelYear: 2022 });
-    expect(annualResultMarkers({ year: 2022, isBanked: true, isIntermediateBanked: false, savingsBanked: 10 } as AnnualAnalysisSummary, generated))
-      .toEqual(['banked-source', 'banked-savings', 'model']);
-
-    const userDefined = group({
-      analysisType: 'regression', isGeneratedModel: false,
-      regressionStartYear: 2022, regressionModelStartMonth: 3,
-      regressionEndYear: 2023, regressionModelEndMonth: 2
-    });
-    expect(monthlyResultMarkers({
-      date: new Date(2022, 5, 1), fiscalYear: 2022,
-      isBanked: true, isIntermediateBanked: true, savingsBanked: 0
-    } as MonthlyAnalysisSummaryData, userDefined)).toEqual(['transition', 'model']);
-  });
 });

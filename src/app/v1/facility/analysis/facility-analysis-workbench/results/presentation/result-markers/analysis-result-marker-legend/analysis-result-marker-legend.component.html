@@ -1,0 +1,12 @@
+@if (markerViews().length) {
+  <aside class="v1-result-marker-legend" aria-label="Result marker legend">
+    @for (marker of markerViews(); track marker.id) {
+      <span class="v1-result-marker-legend__item">
+        <span class="v1-result-marker-legend__icon" aria-hidden="true">
+          <app-ui-icon [name]="marker.icon" [size]="16" [strokeWidth]="2"></app-ui-icon>
+        </span>
+        <span>{{ marker.label }}</span>
+      </span>
+    }
+  </aside>
+}

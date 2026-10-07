@@ -13,8 +13,9 @@ import {
 import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
 import { AnalysisResultColumnChooserComponent } from '../../../results/presentation/column-chooser/analysis-result-column-chooser.component';
 import { AnalysisResultNumberPipe } from '../../../results/presentation/number/analysis-result-number.pipe';
-import { annualResultMarkers, AnalysisResultMarker } from '../../../banking/facility-analysis-banking';
-import { AnalysisResultMarkerLegendComponent, AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { annualResultMarkers, orderedUniqueResultMarkers } from '../../../results/presentation/result-markers/analysis-result-markers';
 
 @Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
 export class FacilityAnalysisGroupAnnualComponent {
@@ -33,7 +34,7 @@ export class FacilityAnalysisGroupAnnualComponent {
       (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
     ) as Readonly<Record<string, number>>
   })));
-  readonly legendMarkers = computed(() => uniqueMarkers(this.rowViews().flatMap(view => view.markers)));
+  readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly predictorScopeId = computed(() => this.groupContext.group()?.idbGroupId ?? '');
   readonly availablePredictors = computed(() => this.groupContext.group()?.predictorVariables ?? []);
   readonly predictorColumns = computed(() => {
@@ -85,9 +86,4 @@ export class FacilityAnalysisGroupAnnualComponent {
   readonly useChartYAxisTitle = computed(() => this.groupContext.autosave.draft()?.analysisCategory === 'water'
     ? `Consumption${this.unit() ? ` (${this.unit()})` : ''}`
     : `Energy Use${this.unit() ? ` (${this.unit()})` : ''}`);
-}
-
-function uniqueMarkers(markers: readonly AnalysisResultMarker[]): readonly AnalysisResultMarker[] {
-  const present = new Set(markers);
-  return (['banked-source', 'banked-savings', 'transition', 'model'] as const).filter(marker => present.has(marker));
 }

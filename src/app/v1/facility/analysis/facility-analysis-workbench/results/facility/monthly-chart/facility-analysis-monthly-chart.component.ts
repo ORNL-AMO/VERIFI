@@ -9,6 +9,7 @@ import {
   monthlyUseChartRows
 } from '../../presentation/facility-analysis-result.view';
 import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
+import { monthlyResultMarkers, orderedUniqueResultMarkers } from '../../presentation/result-markers/analysis-result-markers';
 
 @Component({
   selector: 'app-facility-analysis-monthly-chart',
@@ -29,7 +30,19 @@ export class FacilityAnalysisMonthlyChartComponent {
   readonly unit = computed(() => this.context.analysis()?.analysisCategory === 'water'
     ? this.context.analysis()?.waterUnit
     : this.context.analysis()?.energyUnit);
-  readonly useChartRows = computed(() => monthlyUseChartRows(this.rows()));
+  readonly chartRows = computed(() => {
+    const state = this.results.state();
+    if (state.state !== 'ready') return [];
+    return this.rows().map(row => {
+      const target = new Date(row.date).getTime();
+      const markers = orderedUniqueResultMarkers((state.groups ?? []).flatMap(result => {
+        const groupRow = result.monthlyAnalysisSummaryData.find(item => new Date(item.date).getTime() === target);
+        return groupRow ? monthlyResultMarkers(groupRow) : [];
+      }));
+      return { ...row, isIntermediateBanked: markers.includes('transition') };
+    });
+  });
+  readonly useChartRows = computed(() => monthlyUseChartRows(this.chartRows()));
   readonly useChartMetrics = computed(() => monthlyUseChartMetrics(this.category(), this.unit()));
   readonly savingsChart = computed(() => monthlySavingsChartView(this.rows(), false));
 }

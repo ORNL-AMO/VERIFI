@@ -20,13 +20,14 @@ import {
 import { AnalysisResultNumberPipe } from '../../results/presentation/number/analysis-result-number.pipe';
 import {
   bankedSavingsChartMonthlyRows,
-  bankedSavingsPreviewRows,
-  AnalysisResultMarker
+  bankedSavingsPreviewRows
 } from '../../banking/facility-analysis-banking';
+import { AnalysisResultMarkersComponent } from '../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import {
-  AnalysisResultMarkerLegendComponent,
-  AnalysisResultMarkersComponent
-} from '../../results/presentation/result-markers/analysis-result-markers.component';
+  AnalysisResultMarker,
+  orderedUniqueResultMarkers
+} from '../../results/presentation/result-markers/analysis-result-markers';
 import { RegressionModelReviewSlideoutComponent } from '../regression/model-review-slideout/regression-model-review-slideout.component';
 import { RegressionModelValidationState } from '../regression/regression-model-validation.service';
 import { modeledQuantityLabel } from '../regression/regression-labels';
@@ -86,7 +87,7 @@ export class FacilityAnalysisBankingComponent {
       markers: [view.transition ? 'transition' : 'banked-source', ...(view.modelPeriod ? ['model' as const] : [])] as readonly AnalysisResultMarker[]
     }));
   });
-  readonly legendMarkers = computed(() => uniqueMarkers(this.annualViews().flatMap(view => view.markers)));
+  readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.annualViews().flatMap(view => view.markers)));
   readonly category = computed(() => this.source()?.analysisCategory);
   readonly unit = computed(() => this.category() === 'water' ? this.source()?.waterUnit : this.source()?.energyUnit);
   readonly annualUseRows = computed(() => annualUseChartRows(this.annualViews().map(view => ({
@@ -153,10 +154,4 @@ export class FacilityAnalysisBankingComponent {
     this.reviewTrigger = undefined;
     if (trigger) queueMicrotask(() => trigger.focus());
   }
-}
-
-function uniqueMarkers(markers: readonly AnalysisResultMarker[]): readonly AnalysisResultMarker[] {
-  const order: readonly AnalysisResultMarker[] = ['banked-source', 'banked-savings', 'transition', 'model'];
-  const present = new Set(markers);
-  return order.filter(marker => present.has(marker));
 }

@@ -3,9 +3,11 @@ import { Component, computed, inject, input } from '@angular/core';
 import { AnalysisGroup } from '@data/models/analysis';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisBankingResultsService } from '../../banking/facility-analysis-banking-results.service';
-import { bankedSavingsPreviewRows, AnalysisResultMarker } from '../../../banking/facility-analysis-banking';
+import { bankedSavingsPreviewRows } from '../../../banking/facility-analysis-banking';
 import { AnalysisResultNumberPipe } from '../../../results/presentation/number/analysis-result-number.pipe';
-import { AnalysisResultMarkerLegendComponent, AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { AnalysisResultMarker } from '../../../results/presentation/result-markers/analysis-result-markers';
 
 @Component({
   selector: 'app-banked-group-savings',
