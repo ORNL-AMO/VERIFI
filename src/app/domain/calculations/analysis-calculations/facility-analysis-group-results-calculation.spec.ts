@@ -100,6 +100,63 @@ describe('calculateFacilityAnalysisGroupResults', () => {
       .map(row => row.fiscalYear))]).toEqual([2020, 2021]);
     expect(result.monthlyAnalysisSummaryData.slice(-12).some(row => row.savingsBanked > 0)).toBe(true);
   });
+
+  it('applies banking boundaries by fiscal year for a non-calendar facility', () => {
+    const currentGroup = groupFixture('absoluteEnergyConsumption');
+    currentGroup.applyBanking = true;
+    currentGroup.bankedAnalysisYear = 2021;
+    currentGroup.newBaselineYear = 2023;
+    const baseRequest = requestFixture(currentGroup);
+    const sourceGroup = groupFixture('absoluteEnergyConsumption');
+    const source = {
+      ...baseRequest.analysisItem,
+      guid: 'source-analysis',
+      name: 'Source analysis',
+      baselineYear: 2020,
+      groups: [sourceGroup]
+    } as IdbAnalysisItem;
+    const currentAnalysis = {
+      ...baseRequest.analysisItem,
+      baselineYear: 2023,
+      hasBanking: true,
+      bankedAnalysisItemId: source.guid,
+      groups: [currentGroup]
+    } as IdbAnalysisItem;
+    const fiscalMeter = {
+      ...meterFixture(currentGroup.idbGroupId),
+      monthlyData: [
+        ...fiscalYearData(2020, 100),
+        ...fiscalYearData(2021, 80),
+        ...fiscalYearData(2022, 70),
+        ...fiscalYearData(2023, 60)
+      ]
+    } as CalanderizedMeter;
+    const request: FacilityAnalysisGroupResultsWorkerRequest = {
+      ...baseRequest,
+      analysisItem: currentAnalysis,
+      accountAnalysisItems: [currentAnalysis, source],
+      facility: {
+        ...baseRequest.facility,
+        fiscalYear: 'nonCalendarYear',
+        fiscalYearMonth: 6,
+        fiscalYearCalendarEnd: true
+      },
+      calanderizedMeters: [fiscalMeter],
+      reportYear: 2023
+    };
+
+    const result = calculateFacilityAnalysisGroupResults(request);
+
+    expect([...new Set(result.monthlyAnalysisSummaryData
+      .filter(row => row.isBanked && !row.isIntermediateBanked)
+      .map(row => row.fiscalYear))]).toEqual([2020, 2021]);
+    expect([...new Set(result.monthlyAnalysisSummaryData
+      .filter(row => row.isIntermediateBanked)
+      .map(row => row.fiscalYear))]).toEqual([2022]);
+    expect(result.annualAnalysisSummaryData).toEqual([
+      expect.objectContaining({ year: 2023, savingsBanked: 144, savingsUnbanked: 0 })
+    ]);
+  });
 });
 
 function requestFixture(group: AnalysisGroup, includePredictor = false): FacilityAnalysisGroupResultsWorkerRequest {
@@ -168,6 +225,20 @@ function yearData(year: number, energyUse: number): MonthlyData[] {
     date: new Date(year, month, 1), year, monthNumValue: month, fiscalYear: year,
     energyUse, energyConsumption: energyUse
   } as MonthlyData));
+}
+
+function fiscalYearData(fiscalYear: number, energyUse: number): MonthlyData[] {
+  return Array.from({ length: 12 }, (_, offset) => {
+    const date = new Date(fiscalYear - 1, 6 + offset, 1);
+    return {
+      date,
+      year: date.getFullYear(),
+      monthNumValue: date.getMonth(),
+      fiscalYear,
+      energyUse,
+      energyConsumption: energyUse
+    } as MonthlyData;
+  });
 }
 
 function predictorDataFixture(): IdbPredictorData[] {
