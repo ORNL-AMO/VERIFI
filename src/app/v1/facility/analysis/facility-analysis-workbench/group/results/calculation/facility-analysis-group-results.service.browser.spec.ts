@@ -39,6 +39,73 @@ describe('FacilityAnalysisGroupResultsService browser Worker lifecycle', () => {
     expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
   });
 
+  it('posts the selected-group request and supersedes stale calculation inputs', async () => {
+    const harness = configure({ otherGroupBlocked: true });
+    const service = TestBed.inject(FacilityAnalysisGroupResultsService);
+    await settleSignals();
+    const first = FakeWorker.instances[0];
+
+    expect(first.payload).toMatchObject({
+      analysisItem: { guid: 'analysis-a', baselineYear: 2020 },
+      groupGuid: 'group-a',
+      facility: { guid: 'facility-a' },
+      accountAnalysisItems: [{ guid: 'analysis-a', groups: [{ idbGroupId: 'group-a' }] }]
+    });
+
+    harness.analysis.set({ ...harness.analysis(), baselineYear: 2021 });
+    await settleSignals();
+
+    expect(first.terminate).toHaveBeenCalledOnce();
+    expect(FakeWorker.instances).toHaveLength(2);
+    const second = FakeWorker.instances[1];
+    expect(second.payload).toMatchObject({ analysisItem: { baselineYear: 2021 } });
+
+    first.emitMessage(completeResponse());
+    expect(service.state().state).toBe('loading');
+    second.emitMessage(completeResponse());
+    expect(service.state()).toMatchObject({ state: 'ready', groupGuid: 'group-a' });
+    expect(second.terminate).toHaveBeenCalledOnce();
+  });
+
+  it('publishes typed Worker failures and terminates the Worker', async () => {
+    configure({ otherGroupBlocked: true });
+    const service = TestBed.inject(FacilityAnalysisGroupResultsService);
+    await settleSignals();
+    const worker = FakeWorker.instances[0];
+
+    worker.emitMessage({ ok: false, message: 'calculation failed' });
+
+    expect(service.state()).toMatchObject({ state: 'error', message: 'calculation failed' });
+    expect(worker.terminate).toHaveBeenCalledOnce();
+  });
+
+  it('rejects a stale selected-group response and terminates the Worker', async () => {
+    configure({ otherGroupBlocked: true });
+    const service = TestBed.inject(FacilityAnalysisGroupResultsService);
+    await settleSignals();
+    const worker = FakeWorker.instances[0];
+
+    worker.emitMessage(completeResponse('group-b'));
+
+    expect(service.state()).toMatchObject({
+      state: 'error',
+      message: 'Analysis group calculation returned a stale result.'
+    });
+    expect(worker.terminate).toHaveBeenCalledOnce();
+  });
+
+  it('maps Worker transport errors and terminates the Worker', async () => {
+    configure({ otherGroupBlocked: true });
+    const service = TestBed.inject(FacilityAnalysisGroupResultsService);
+    await settleSignals();
+    const worker = FakeWorker.instances[0];
+
+    worker.emitError(new ErrorEvent('error', { message: 'transport failed' }));
+
+    expect(service.state()).toMatchObject({ state: 'error', message: 'Analysis group calculation failed.' });
+    expect(worker.terminate).toHaveBeenCalledOnce();
+  });
+
   it('reuses the facility result when every group is complete', async () => {
     configure({ otherGroupBlocked: false, facilityReady: true });
     const service = TestBed.inject(FacilityAnalysisGroupResultsService);
@@ -148,11 +215,11 @@ function finding(kind: 'facility-analysis' | 'analysis-group', guid: string): an
   return { severity: 'error', entity: { kind, guid } };
 }
 
-function completeResponse(): unknown {
+function completeResponse(groupGuid = 'group-a'): unknown {
   return {
     ok: true,
     value: {
-      itemId: 'analysis-a', groupGuid: 'group-a', group: analysisFixture().groups[0],
+      itemId: 'analysis-a', groupGuid, group: analysisFixture().groups.find(group => group.idbGroupId === groupGuid),
       annualAnalysisSummaryData: [], monthlyAnalysisSummaryData: [], reportYear: 2025
     }
   };
@@ -168,14 +235,19 @@ class FakeWorker {
   static instances: FakeWorker[] = [];
   readonly listeners = new Map<string, Array<(event: MessageEvent | ErrorEvent) => void>>();
   readonly terminate = vi.fn();
+  payload: unknown;
 
   constructor() { FakeWorker.instances.push(this); }
   addEventListener(type: string, listener: (event: MessageEvent | ErrorEvent) => void): void {
     this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
   }
-  postMessage(): void {}
+  postMessage(payload: unknown): void { this.payload = payload; }
   emitMessage(data: unknown): void {
     if (this.terminate.mock.calls.length > 0) return;
     for (const listener of this.listeners.get('message') ?? []) listener({ data } as MessageEvent);
+  }
+  emitError(error: ErrorEvent): void {
+    if (this.terminate.mock.calls.length > 0) return;
+    for (const listener of this.listeners.get('error') ?? []) listener(error);
   }
 }

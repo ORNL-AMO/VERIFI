@@ -1,4 +1,5 @@
 @let state = results.state();
+@let columnSettings = columns();
 <section class="v1-analysis-results-page" aria-label="Facility annual results">
   @if (context.hasBlockingErrors() || state.state !== 'ready' || !rows().length) {
   <div class="v1-analysis-results-page__intro v1-analysis-results-page__intro--standalone">
@@ -42,24 +43,24 @@
           </tr>
           <tr>
             <th scope="col">Year</th>
-            @if (columns().actualEnergy) { <th class="v1-analysis-results-table__group--use" scope="col">Actual</th> }
-            @if (columns().adjusted) { <th class="v1-analysis-results-table__group--use" scope="col">Adjusted</th> }
-            @if (columns().baselineAdjustmentForNormalization) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for normalization</th> }
-            @if (columns().baselineAdjustmentForOther) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for other</th> }
-            @if (columns().baselineAdjustment) { <th class="v1-analysis-results-table__group--use" scope="col">Total baseline adjustment</th> }
-            @if (columns().productionVariables) {
+            @if (columnSettings.actualEnergy) { <th class="v1-analysis-results-table__group--use" scope="col">Actual</th> }
+            @if (columnSettings.adjusted) { <th class="v1-analysis-results-table__group--use" scope="col">Adjusted</th> }
+            @if (columnSettings.baselineAdjustmentForNormalization) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for normalization</th> }
+            @if (columnSettings.baselineAdjustmentForOther) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for other</th> }
+            @if (columnSettings.baselineAdjustment) { <th class="v1-analysis-results-table__group--use" scope="col">Total baseline adjustment</th> }
+            @if (columnSettings.productionVariables) {
               @for (predictor of predictorColumns(); track predictor.id) {
                 <th class="v1-analysis-results-table__group--predictors" scope="col">{{ predictor.name }}@if (predictor.unit) { <small> ({{ predictor.unit }})</small> }</th>
               }
             }
-            @if (columns().SEnPI) { <th class="v1-analysis-results-table__group--improvement" scope="col">SEnPI</th> }
-            @if (hasBanking() && columns().bankedSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Banked savings</th> }
-            @if (hasBanking() && columns().savingsUnbanked) { <th class="v1-analysis-results-table__group--improvement" scope="col">Unbanked savings</th> }
-            @if (columns().savings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Savings</th> }
-            @if (columns().totalSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Total savings % improvement</th> }
-            @if (columns().newSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">New savings</th> }
-            @if (columns().annualSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Annual savings % improvement</th> }
-            @if (columns().cummulativeSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Cumulative savings</th> }
+            @if (columnSettings.SEnPI) { <th class="v1-analysis-results-table__group--improvement" scope="col">SEnPI</th> }
+            @if (hasBanking() && columnSettings.bankedSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Banked savings</th> }
+            @if (hasBanking() && columnSettings.savingsUnbanked) { <th class="v1-analysis-results-table__group--improvement" scope="col">Unbanked savings</th> }
+            @if (columnSettings.savings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Savings</th> }
+            @if (columnSettings.totalSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Total savings % improvement</th> }
+            @if (columnSettings.newSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">New savings</th> }
+            @if (columnSettings.annualSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Annual savings % improvement</th> }
+            @if (columnSettings.cummulativeSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Cumulative savings</th> }
           </tr>
         </thead>
         <tbody>
@@ -69,24 +70,24 @@
                 {{ view.row.year }}
                 @if (view.row.isBanked) { <span class="v1-chip">Banked</span> }
               </th>
-              @if (columns().actualEnergy) { <td>{{ view.row.energyUse | analysisResultNumber }}</td> }
-              @if (columns().adjusted) { <td>{{ view.row.adjusted | analysisResultNumber }}</td> }
-              @if (columns().baselineAdjustmentForNormalization) { <td>{{ view.row.baselineAdjustmentForNormalization | analysisResultNumber }}</td> }
-              @if (columns().baselineAdjustmentForOther) { <td>{{ view.row.baselineAdjustmentForOtherV2 | analysisResultNumber }}</td> }
-              @if (columns().baselineAdjustment) { <td>{{ view.row.baselineAdjustment | analysisResultNumber }}</td> }
-              @if (columns().productionVariables) {
+              @if (columnSettings.actualEnergy) { <td>{{ view.row.energyUse | analysisResultNumber }}</td> }
+              @if (columnSettings.adjusted) { <td>{{ view.row.adjusted | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustmentForNormalization) { <td>{{ view.row.baselineAdjustmentForNormalization | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustmentForOther) { <td>{{ view.row.baselineAdjustmentForOtherV2 | analysisResultNumber }}</td> }
+              @if (columnSettings.baselineAdjustment) { <td>{{ view.row.baselineAdjustment | analysisResultNumber }}</td> }
+              @if (columnSettings.productionVariables) {
                 @for (predictor of predictorColumns(); track predictor.id) {
-                  <td>{{ $any(view.predictors)[predictor.id] | analysisResultNumber }}</td>
+                  <td>{{ view.predictors[predictor.id] | analysisResultNumber }}</td>
                 }
               }
-              @if (columns().SEnPI) { <td>{{ view.row.SEnPI | analysisResultNumber }}</td> }
-              @if (hasBanking() && columns().bankedSavings) { <td>{{ view.row.savingsBanked | analysisResultNumber }}</td> }
-              @if (hasBanking() && columns().savingsUnbanked) { <td>{{ view.row.savingsUnbanked | analysisResultNumber }}</td> }
-              @if (columns().savings) { <td>{{ view.row.savings | analysisResultNumber }}</td> }
-              @if (columns().totalSavingsPercentImprovement) { <td>{{ view.row.totalSavingsPercentImprovement | number:'1.0-2' }}%</td> }
-              @if (columns().newSavings) { <td>{{ view.row.newSavings | analysisResultNumber }}</td> }
-              @if (columns().annualSavingsPercentImprovement) { <td>{{ view.row.annualSavingsPercentImprovement | number:'1.0-2' }}%</td> }
-              @if (columns().cummulativeSavings) { <td>{{ view.row.cummulativeSavings | analysisResultNumber }}</td> }
+              @if (columnSettings.SEnPI) { <td>{{ view.row.SEnPI | analysisResultNumber }}</td> }
+              @if (hasBanking() && columnSettings.bankedSavings) { <td>{{ view.row.savingsBanked | analysisResultNumber }}</td> }
+              @if (hasBanking() && columnSettings.savingsUnbanked) { <td>{{ view.row.savingsUnbanked | analysisResultNumber }}</td> }
+              @if (columnSettings.savings) { <td>{{ view.row.savings | analysisResultNumber }}</td> }
+              @if (columnSettings.totalSavingsPercentImprovement) { <td>{{ view.row.totalSavingsPercentImprovement | number:'1.0-2' }}%</td> }
+              @if (columnSettings.newSavings) { <td>{{ view.row.newSavings | analysisResultNumber }}</td> }
+              @if (columnSettings.annualSavingsPercentImprovement) { <td>{{ view.row.annualSavingsPercentImprovement | number:'1.0-2' }}%</td> }
+              @if (columnSettings.cummulativeSavings) { <td>{{ view.row.cummulativeSavings | analysisResultNumber }}</td> }
             </tr>
           }
         </tbody>

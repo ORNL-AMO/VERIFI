@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { CopyTableService } from '@shared/helper-services/copy-table.service';
 import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@shared/table-pagination';
@@ -16,7 +18,7 @@ type AnalysisResultColumnSection = 'period' | 'use' | 'predictors' | 'improvemen
 @Component({
   selector: 'app-facility-analysis-group-monthly-table',
   standalone: true,
-  imports: [CommonModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe],
+  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe],
   templateUrl: './facility-analysis-group-monthly-table.component.html',
   styleUrls: ['./facility-analysis-group-monthly-table.component.css']
 })
@@ -32,11 +34,14 @@ export class FacilityAnalysisGroupMonthlyTableComponent {
   });
   readonly rowViews = computed(() => this.rows().map((row, index, rows) => ({
     row,
-    predictors: Object.fromEntries((row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])),
+    predictors: Object.fromEntries(
+      (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
+    ) as Readonly<Record<string, number>>,
     isFiscalYearEnd: rows[index + 1]?.fiscalYear !== row.fiscalYear
   })));
   readonly currentPage = signal(1);
-  readonly pageSize = signal(DEFAULT_TIME_PERIOD_PAGE_SIZE);
+  readonly pageSizeControl = new FormControl(DEFAULT_TIME_PERIOD_PAGE_SIZE, { nonNullable: true });
+  readonly pageSize = toSignal(this.pageSizeControl.valueChanges, { initialValue: this.pageSizeControl.value });
   readonly pageSizeOptions = [...TIME_PERIOD_PAGE_SIZE_OPTIONS];
   readonly copyingTable = signal(false);
   readonly hoveredColumnId = signal<string | undefined>(undefined);
@@ -50,47 +55,52 @@ export class FacilityAnalysisGroupMonthlyTableComponent {
     const maxPage = this.maxPage();
     if (this.currentPage() > maxPage) this.currentPage.set(maxPage);
   });
+  private readonly resetCurrentPage = effect(() => {
+    this.pageSize();
+    this.currentPage.set(1);
+  });
   readonly hasMissingValues = computed(() => this.rows().some(row => row.missingValueWarning));
   readonly hasBanking = computed(() => this.groupContext.autosave.draft()?.hasBanking === true);
   readonly group = this.groupContext.group;
   readonly predictorScopeId = computed(() => this.group()?.idbGroupId ?? '');
   readonly availablePredictors = computed(() => this.group()?.predictorVariables ?? []);
   readonly predictorColumns = computed(() => {
-    if (!this.columns().productionVariables) return [];
-    const scopeId = this.predictorScopeId();
     const columns = this.columns();
+    if (!columns.productionVariables) return [];
+    const scopeId = this.predictorScopeId();
     if (columns.predictorGroupId !== scopeId) return this.availablePredictors().filter(variable => variable.productionInAnalysis);
     const visible = new Set(columns.predictors.filter(item => item.display).map(item => item.predictor.id));
     return this.availablePredictors().filter(variable => visible.has(variable.id));
   });
-  readonly useColumnCount = computed(() => [
-    this.columns().actualEnergy,
-    this.columns().modeledEnergy,
-    this.columns().adjusted,
-    this.columns().baselineAdjustmentForNormalization,
-    this.columns().baselineAdjustmentForOther,
-    this.columns().baselineAdjustment
-  ].filter(Boolean).length);
+  readonly useColumnCount = computed(() => {
+    const columns = this.columns();
+    return [
+      columns.actualEnergy,
+      columns.modeledEnergy,
+      columns.adjusted,
+      columns.baselineAdjustmentForNormalization,
+      columns.baselineAdjustmentForOther,
+      columns.baselineAdjustment
+    ].filter(Boolean).length;
+  });
   readonly predictorColumnCount = computed(() => this.columns().productionVariables ? this.predictorColumns().length : 0);
-  readonly improvementColumnCount = computed(() => [
-    this.columns().SEnPI,
-    this.hasBanking() && this.columns().bankedSavings,
-    this.hasBanking() && this.columns().savingsUnbanked,
-    this.columns().savings,
-    this.columns().rollingSavings,
-    this.columns().rolling12MonthImprovement
-  ].filter(Boolean).length);
+  readonly improvementColumnCount = computed(() => {
+    const columns = this.columns();
+    return [
+      columns.SEnPI,
+      this.hasBanking() && columns.bankedSavings,
+      this.hasBanking() && columns.savingsUnbanked,
+      columns.savings,
+      columns.rollingSavings,
+      columns.rolling12MonthImprovement
+    ].filter(Boolean).length;
+  });
   readonly unit = computed(() => {
     const analysis = this.groupContext.autosave.draft();
     return analysis?.analysisCategory === 'water' ? analysis.waterUnit : analysis?.energyUnit;
   });
 
   @ViewChild('monthlyResultsTable', { static: false }) monthlyResultsTable?: ElementRef<HTMLTableElement>;
-
-  setPageSize(value: string): void {
-    this.pageSize.set(Number(value));
-    this.currentPage.set(1);
-  }
 
   copyTable(): void {
     if (!this.monthlyResultsTable) return;

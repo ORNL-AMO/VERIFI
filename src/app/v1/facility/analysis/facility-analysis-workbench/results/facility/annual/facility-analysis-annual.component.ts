@@ -33,7 +33,9 @@ export class FacilityAnalysisAnnualComponent {
   readonly hasBanking = computed(() => this.context.analysis()?.hasBanking === true);
   readonly rowViews = computed(() => this.rows().map(row => ({
     row,
-    predictors: Object.fromEntries((row.predictorUsage ?? []).map(item => [item.predictorId, item.usage]))
+    predictors: Object.fromEntries(
+      (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
+    ) as Readonly<Record<string, number>>
   })));
   readonly predictorScopeId = computed(() => `facility:${this.context.analysisGuid()}`);
   readonly availablePredictors = computed<AnalysisGroupPredictorVariable[]>(() => this.context.workspace.facilityPredictors().map(predictor => ({
@@ -45,28 +47,35 @@ export class FacilityAnalysisAnnualComponent {
     regressionCoefficient: predictor.regressionCoefficient
   })));
   readonly predictorColumns = computed(() => {
-    if (!this.columns().productionVariables || this.columns().predictorGroupId !== this.predictorScopeId()) return [];
-    const visible = new Set(this.columns().predictors.filter(item => item.display).map(item => item.predictor.id));
+    const columns = this.columns();
+    if (!columns.productionVariables || columns.predictorGroupId !== this.predictorScopeId()) return [];
+    const visible = new Set(columns.predictors.filter(item => item.display).map(item => item.predictor.id));
     return this.availablePredictors().filter(variable => visible.has(variable.id));
   });
-  readonly useColumnCount = computed(() => [
-    this.columns().actualEnergy,
-    this.columns().adjusted,
-    this.columns().baselineAdjustmentForNormalization,
-    this.columns().baselineAdjustmentForOther,
-    this.columns().baselineAdjustment
-  ].filter(Boolean).length);
+  readonly useColumnCount = computed(() => {
+    const columns = this.columns();
+    return [
+      columns.actualEnergy,
+      columns.adjusted,
+      columns.baselineAdjustmentForNormalization,
+      columns.baselineAdjustmentForOther,
+      columns.baselineAdjustment
+    ].filter(Boolean).length;
+  });
   readonly predictorColumnCount = computed(() => this.columns().productionVariables ? this.predictorColumns().length : 0);
-  readonly improvementColumnCount = computed(() => [
-    this.columns().SEnPI,
-    this.hasBanking() && this.columns().bankedSavings,
-    this.hasBanking() && this.columns().savingsUnbanked,
-    this.columns().savings,
-    this.columns().totalSavingsPercentImprovement,
-    this.columns().newSavings,
-    this.columns().annualSavingsPercentImprovement,
-    this.columns().cummulativeSavings
-  ].filter(Boolean).length);
+  readonly improvementColumnCount = computed(() => {
+    const columns = this.columns();
+    return [
+      columns.SEnPI,
+      this.hasBanking() && columns.bankedSavings,
+      this.hasBanking() && columns.savingsUnbanked,
+      columns.savings,
+      columns.totalSavingsPercentImprovement,
+      columns.newSavings,
+      columns.annualSavingsPercentImprovement,
+      columns.cummulativeSavings
+    ].filter(Boolean).length;
+  });
   readonly unit = computed(() => this.context.analysis()?.analysisCategory === 'water' ? this.context.analysis()?.waterUnit : this.context.analysis()?.energyUnit);
   readonly useChartMetrics = computed(() => annualUseChartMetrics(
     this.context.analysis()?.analysisCategory,
