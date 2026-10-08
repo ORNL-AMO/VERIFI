@@ -14,8 +14,6 @@ export type LoadFactorCalculationMethod = 'voltageCurrent' | 'measuredPower';
 export class LoadFactorModalComponent {
   @Input()
   year: number;
-  @Input()
-  ratedPowerUnit: string | null = null;
 
   @Output()
   saveCalculatedLoadFactor = new EventEmitter<number>();
@@ -28,7 +26,9 @@ export class LoadFactorModalComponent {
   voltage: number | null = null;
   current: number | null = null;
   numberOfPhases: LoadFactorPhaseCount = 3;
-  measuredPowerKilowatts: number | null = null;
+  measuredPower: number | null = null;
+  ratedPowerUnit: string = 'hp';
+  measuredPowerUnit: string = 'kW';
   readonly phaseOptions: Array<LoadFactorPhaseCount> = [1, 2, 3];
   readonly powerUnitOptions: Array<UnitOption> = PowerUnitOptions;
 
@@ -46,10 +46,14 @@ export class LoadFactorModalComponent {
 
   get actualPowerKilowatts(): number | null {
     if (this.calculationMethod === 'measuredPower') {
-      if (!Number.isFinite(this.measuredPowerKilowatts) || this.measuredPowerKilowatts < 0) {
+      if (!Number.isFinite(this.measuredPower) || this.measuredPower < 0) {
         return null;
       }
-      return this.measuredPowerKilowatts;
+      const conversion = new ConvertValue(this.measuredPower, this.measuredPowerUnit, 'kW');
+      if (conversion.hasError || !Number.isFinite(conversion.convertedValue)) {
+        return null;
+      }
+      return conversion.convertedValue;
     }
 
     if (!Number.isFinite(this.voltage) || this.voltage < 0
@@ -111,7 +115,7 @@ export class LoadFactorModalComponent {
     this.voltage = null;
     this.current = null;
     this.numberOfPhases = 3;
-    this.measuredPowerKilowatts = null;
+    this.measuredPower = null;
   }
 
   closeCalculateLoadFactorModal() {

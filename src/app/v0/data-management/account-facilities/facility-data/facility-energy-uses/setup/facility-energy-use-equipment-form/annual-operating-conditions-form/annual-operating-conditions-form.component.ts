@@ -12,7 +12,6 @@ export class AnnualOperatingConditionsFormComponent {
   annualOperatingConditionsDataForm = input.required<FormGroup>();
   inSetup = input(false);
   hasElectricityUtility = input.required<boolean>();
-  ratedPowerUnit = input<string | null>(null);
 
   @Output()
   emitRemoveOperatingConditionsData: EventEmitter<void> = new EventEmitter<void>();

@@ -159,7 +159,6 @@
 
 @if (showCalculateLoadFactorModal) {
 <app-load-factor-modal [year]="_annualOperatingConditionsDataForm.controls.year.value"
-    [ratedPowerUnit]="ratedPowerUnit()"
     (saveCalculatedLoadFactor)="handleCalculatedLoadFactor($event)"
     (closeModal)="closeCalculateLoadFactorModal()"></app-load-factor-modal>
 }

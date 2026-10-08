@@ -63,8 +63,7 @@
         track $index) {
         <app-annual-operating-conditions-form [annualOperatingConditionsDataForm]="annualOperatingConditionsDataForm"
             (emitRemoveOperatingConditionsData)="removeOperatingConditionsData(annualOperatingConditionsDataForm)"
-            [hasElectricityUtility]="_hasElectricityUtility"
-            [ratedPowerUnit]="_utilityDataForms[0].utilityDataForm.controls.units.value">
+            [hasElectricityUtility]="_hasElectricityUtility">
         </app-annual-operating-conditions-form>
         }
         @if(_yearOptions.length > 0) { <div class="w-100 text-end">
@@ -95,8 +94,7 @@
 track $index) {
 <app-annual-operating-conditions-form [annualOperatingConditionsDataForm]="annualOperatingConditionsDataForm"
     (emitRemoveOperatingConditionsData)="removeOperatingConditionsData(annualOperatingConditionsDataForm)"
-    [inSetup]="true" [hasElectricityUtility]="_hasElectricityUtility"
-    [ratedPowerUnit]="_utilityDataForms[0].utilityDataForm.controls.units.value">
+    [inSetup]="true" [hasElectricityUtility]="_hasElectricityUtility">
 </app-annual-operating-conditions-form>
 }
 <div class="d-flex justify-content-end">
