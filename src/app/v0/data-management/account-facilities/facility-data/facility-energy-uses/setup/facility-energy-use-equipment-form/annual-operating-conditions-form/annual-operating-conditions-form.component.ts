@@ -8,14 +8,18 @@ import { FormGroup } from '@angular/forms';
   styleUrl: './annual-operating-conditions-form.component.css',
 })
 export class AnnualOperatingConditionsFormComponent {
+
   annualOperatingConditionsDataForm = input.required<FormGroup>();
-  @Output()
-  emitRemoveOperatingConditionsData: EventEmitter<void> = new EventEmitter<void>();
   inSetup = input(false);
   hasElectricityUtility = input.required<boolean>();
+  ratedPowerUnit = input<string | null>(null);
+
+  @Output()
+  emitRemoveOperatingConditionsData: EventEmitter<void> = new EventEmitter<void>();
 
   showRemoveOperatingConditionsModal: boolean = false;
   showCalculateHoursOfOperationModal: boolean = false;
+  showCalculateLoadFactorModal: boolean = false;
 
   openRemoveOperatingConditionsModal() {
     this.showRemoveOperatingConditionsModal = true;
@@ -44,5 +48,17 @@ export class AnnualOperatingConditionsFormComponent {
     annualOperatingConditionsDataForm.controls.hoursPerDay.setValue(hoursPerDay);
     annualOperatingConditionsDataForm.controls.daysPerWeek.setValue(daysPerWeek);
     annualOperatingConditionsDataForm.controls.weeksPerYear.setValue(weeksPerYear);
+  }
+
+  openCalculateLoadFactorModal() {
+    this.showCalculateLoadFactorModal = true;
+  }
+
+  closeCalculateLoadFactorModal() {
+    this.showCalculateLoadFactorModal = false;
+  }
+
+  handleCalculatedLoadFactor(loadFactor: number) {
+    this.annualOperatingConditionsDataForm().controls.loadFactor.setValue(loadFactor);
   }
 }

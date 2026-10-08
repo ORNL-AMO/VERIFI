@@ -27,6 +27,12 @@
         </div>
         <div class="col">
             <div class="input-group">
+                <span class="input-group-text">
+                    <button type="button" class="btn p-0 border-0 bg-transparent" aria-label="Calculate load factor"
+                        (click)="openCalculateLoadFactorModal()">
+                        <i class="fa fa-calculator text-primary icon-style"></i>
+                    </button>
+                </span>
                 <input class="form-control" type="number" formControlName="loadFactor" min="0" max="100"
                     id="{{'loadFactor_'+selectedYear}}">
                 <span class="input-group-text">%</span>
@@ -122,7 +128,9 @@
 }
 
 
-<div [ngClass]="{'windowOverlay': showRemoveOperatingConditionsModal || showCalculateHoursOfOperationModal }"></div>
+<div
+    [ngClass]="{'windowOverlay': showRemoveOperatingConditionsModal || showCalculateHoursOfOperationModal || showCalculateLoadFactorModal }">
+</div>
 <div class="popup" [class.open]="showRemoveOperatingConditionsModal">
     <div class="popup-header">Remove Year of Operating Conditions Data
         <button class="item-right" (click)="closeRemoveOperatingConditionsModal()">x</button>
@@ -147,4 +155,11 @@
     [weeksPerYear]="_annualOperatingConditionsDataForm.controls.weeksPerYear.value"
     (saveCalculatedHoursPerYear)="handleCalculatedValues($event)"
     (closeModal)="closeCalculateHoursOfOperationModal()"></app-operating-hours-modal>
+}
+
+@if (showCalculateLoadFactorModal) {
+<app-load-factor-modal [year]="_annualOperatingConditionsDataForm.controls.year.value"
+    [ratedPowerUnit]="ratedPowerUnit()"
+    (saveCalculatedLoadFactor)="handleCalculatedLoadFactor($event)"
+    (closeModal)="closeCalculateLoadFactorModal()"></app-load-factor-modal>
 }

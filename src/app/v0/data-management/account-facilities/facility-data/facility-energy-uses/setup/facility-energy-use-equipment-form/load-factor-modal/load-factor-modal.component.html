@@ -1,0 +1,118 @@
+<div class="popup" [class.open]="showCalculateLoadFactorModal">
+    <div class="popup-header">
+        Load Factor Calculator - {{ year }}
+        <button class="item-right" type="button" (click)="closeCalculateLoadFactorModal()">x</button>
+    </div>
+
+    <div class="popup-body">
+        <div class="mb-4">
+            <div class="btn-group calculation-method-toggle">
+                <input class="btn-check" type="radio" name="loadFactorCalculationMethod"
+                    id="voltageCurrentMethod_{{year}}" value="voltageCurrent" [ngModel]="calculationMethod"
+                    (ngModelChange)="setCalculationMethod($event)">
+                <label class="btn btn-outline-primary" for="voltageCurrentMethod_{{year}}">
+                    Voltage &amp; Current
+                </label>
+
+                <input class="btn-check" type="radio" name="loadFactorCalculationMethod"
+                    id="measuredPowerMethod_{{year}}" value="measuredPower" [ngModel]="calculationMethod"
+                    (ngModelChange)="setCalculationMethod($event)">
+                <label class="btn btn-outline-primary" for="measuredPowerMethod_{{year}}">
+                    Measured Power
+                </label>
+            </div>
+        </div>
+
+        <div class="fw-bold text-size">Inputs</div>
+        <hr class="mt-0">
+
+        <div class="row mb-2 mt-4">
+            <label class="col-5 col-form-label" for="ratedPower_{{year}}">Rated Power</label>
+            <div class="col-7">
+                <div class="input-group">
+                    <input class="form-control" type="number" id="ratedPower_{{year}}" min="0" [(ngModel)]="ratedPower">
+                    <select class="input-group-text unit-control" id="ratedPowerUnit_{{year}}"
+                        [(ngModel)]="ratedPowerUnit">
+                        @for (option of powerUnitOptions; track option.value) {
+                        <option [ngValue]="option.value">
+                            <span [innerHTML]="option.value | settingsLabel"></span>
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        @if (calculationMethod === 'voltageCurrent') {
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="voltage_{{year}}">Voltage</label>
+            <div class="col-7">
+                <div class="input-group">
+                    <input class="form-control" type="number" id="voltage_{{year}}" min="0" [(ngModel)]="voltage">
+                    <span class="input-group-text unit-control">V</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="current_{{year}}">Current</label>
+            <div class="col-7">
+                <div class="input-group">
+                    <input class="form-control" type="number" id="current_{{year}}" min="0" [(ngModel)]="current">
+                    <span class="input-group-text unit-control">A</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="numberOfPhases_{{year}}">Number of Phases</label>
+            <div class="col-7">
+                <select class="form-select" id="numberOfPhases_{{year}}" [(ngModel)]="numberOfPhases">
+                    @for (phase of phaseOptions; track phase) {
+                    <option [ngValue]="phase">{{phase}}</option>
+                    }
+                </select>
+            </div>
+        </div>
+        } @else {
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="measuredPower_{{year}}">Measured Power</label>
+            <div class="col-7">
+                <div class="input-group">
+                    <input class="form-control" type="number" id="measuredPower_{{year}}" min="0"
+                        [(ngModel)]="measuredPowerKilowatts">
+                    <span class="input-group-text unit-control">kW</span>
+                </div>
+            </div>
+        </div>
+        }
+
+        <div class="alert alert-secondary text-center mt-3 mb-2">
+            @if (calculationMethod === 'voltageCurrent') {
+            <div class="mb-2">
+                Calculated Power: <strong>{{displayedActualPowerKilowatts | number:'1.2-2'}} kW</strong>
+            </div>
+            } 
+            <div>
+                Rated Power: <strong>{{displayedRatedPowerKilowatts | number:'1.2-2'}} kW</strong>
+            </div>
+        </div>
+
+        <div class="alert mb-0 text-center" [ngClass]="showLoadFactorWarning ? 'alert-warning' : 'alert-success'">
+            <div class="text-size fst-italic mb-2 fw-bold">
+                Load Factor: <strong class="text-size">{{displayedLoadFactorPercent | number:'1.1-1'}}%</strong>
+            </div>
+            @if (loadFactorPercent != null && loadFactorPercent < 40) { 
+                <div class="text-danger">The load factor is below 40%.</div>
+            } @else if (loadFactorPercent != null && loadFactorPercent > 100) {
+                <div class="text-danger">The load factor is above 100%. Apply will use 100.0%.</div>
+            }
+        </div>
+        <hr>
+    </div>
+
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary small me-2" type="button" (click)="closeCalculateLoadFactorModal()">Cancel</button>
+        <button class="btn btn-primary small" type="button" [disabled]="isDisabled" (click)="save()">Apply</button>
+    </div>
+</div>
