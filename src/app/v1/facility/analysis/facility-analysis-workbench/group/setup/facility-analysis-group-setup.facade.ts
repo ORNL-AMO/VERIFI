@@ -5,6 +5,9 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { isSkippedAnalysisType } from '../../facility-analysis-workbench.models';
 import { invalidateRegressionModel } from '../regression/regression-draft';
+import { FacilityAnalysisPeriodService } from '../../analysis-setup/facility-analysis-period.service';
+import { evaluateBankedGroupConfiguration } from '@shared/shared-analysis/banking-configuration';
+import { bankingSourceHasBlockingErrors } from '../../banking/facility-analysis-banking';
 
 /** Owns group-setup derived state and draft mutations; the component owns view interaction. */
 @Injectable()
@@ -13,6 +16,7 @@ export class FacilityAnalysisGroupSetupFacade {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workbench = this.groupContext.workbench;
   readonly autosave = this.groupContext.autosave;
+  private readonly period = inject(FacilityAnalysisPeriodService);
   readonly group = this.groupContext.group;
   readonly analysis = this.autosave.draft;
   readonly dataAdjustmentDraft = signal<AdjustmentDraft>({ amount: '' });
@@ -46,6 +50,34 @@ export class FacilityAnalysisGroupSetupFacade {
     if (!baseline) return [];
     return Array.from({ length: Math.max(new Date().getFullYear() - baseline + 1, 1) }, (_, index) => baseline + index);
   });
+  readonly latestCompleteYears = computed(() => this.period.bankingLatestCompleteYears(this.groupContext.groupGuid()));
+  readonly bankingConfiguration = computed(() => evaluateBankedGroupConfiguration(
+    this.analysis(), this.group(), this.workbench.analyses(), this.latestCompleteYears()
+  ));
+  readonly bankingSource = computed(() => this.bankingConfiguration().source);
+  readonly bankedGroup = computed(() => this.bankingConfiguration().sourceGroup);
+  readonly bankingYears = computed(() => this.bankingConfiguration());
+  readonly bankingUnavailableReason = computed(() => {
+    const configuration = this.bankingConfiguration();
+    if (configuration.issue || !configuration.source) return 'Select a valid banking source in Analysis Setup.';
+    if (bankingSourceHasBlockingErrors(this.analysis(), configuration.source, this.workbench.status.items())) {
+      return 'Resolve the selected banking source errors before applying banking.';
+    }
+    if (!configuration.sourceGroup) return 'The banking source does not contain a usable matching meter group.';
+    if (configuration.groupIssue === 'data-unavailable') {
+      return 'This group or its banking source does not have a complete year of required meter and predictor data.';
+    }
+    return undefined;
+  });
+  readonly bankingModelYearWarning = computed(() => {
+    const group = this.group();
+    const sourceGroup = this.bankedGroup();
+    return group?.applyBanking && sourceGroup?.analysisType === 'regression'
+      && Number.isFinite(sourceGroup.regressionModelYear) && Number.isFinite(group.bankedAnalysisYear)
+      && sourceGroup.regressionModelYear > group.bankedAnalysisYear
+      ? `The source model year (${sourceGroup.regressionModelYear}) is after the applied banking year (${group.bankedAnalysisYear}). Review the source model before relying on these results.`
+      : undefined;
+  });
   readonly availableDataAdjustmentYears = computed(() => {
     const used = new Set(this.group()?.dataAdjustments.map(item => item.year) ?? []);
     return this.adjustmentYears().filter(year => !used.has(year));
@@ -64,8 +96,13 @@ export class FacilityAnalysisGroupSetupFacade {
   readonly bankingYearError = computed(() => {
     const group = this.group();
     if (!group?.applyBanking) return undefined;
-    if (!group.bankedAnalysisYear || !group.newBaselineYear) return 'Select both the applied banking year and the new baseline year.';
-    return group.newBaselineYear <= group.bankedAnalysisYear ? 'The new baseline year must be after the applied banking year.' : undefined;
+    switch (this.bankingConfiguration().groupIssue) {
+      case 'years-missing': return 'Select both the applied banking year and the new baseline year.';
+      case 'applied-year-out-of-range': return 'Select an applied banking year supported by the source and complete group data.';
+      case 'baseline-year-out-of-range': return 'Select a new baseline year supported by the current analysis and complete group data.';
+      case 'year-order': return 'The new baseline year must be after the applied banking year.';
+      default: return undefined;
+    }
   });
 
   changeAnalysisType(type: AnalysisType): void {
@@ -142,6 +179,7 @@ export class FacilityAnalysisGroupSetupFacade {
   }
 
   setApplyBanking(checked: boolean): void {
+    if (checked && this.bankingUnavailableReason()) return;
     this.updateGroup(group => {
       group.applyBanking = checked;
       if (!checked) {
@@ -153,6 +191,10 @@ export class FacilityAnalysisGroupSetupFacade {
 
   setBankingYear(field: 'bankedAnalysisYear' | 'newBaselineYear', year: number | undefined): void {
     this.updateGroup(group => { group[field] = year; }, true);
+  }
+
+  clearModels(): void {
+    this.updateGroup(group => { invalidateRegressionModel(group); }, true);
   }
 
   private adjustmentDraft(kind: AdjustmentKind): WritableSignal<AdjustmentDraft> {
@@ -173,7 +215,11 @@ export class FacilityAnalysisGroupSetupFacade {
       immediate,
       valid: draft => {
         const group = draft.groups.find(item => item.idbGroupId === groupGuid);
-        return !!group && groupSetupDraftValid(group, draft.hasBanking);
+        const evaluation = evaluateBankedGroupConfiguration(
+          draft, group, this.workbench.analyses(), this.latestCompleteYears()
+        );
+        return !!group && groupSetupDraftValid(group, draft.hasBanking, evaluation.valid)
+          && (!evaluation.source || !bankingSourceHasBlockingErrors(draft, evaluation.source, this.workbench.status.items()));
       }
     });
   }
@@ -191,7 +237,11 @@ function validAdjustmentDraft(draft: AdjustmentDraft): boolean {
   return !!draft.year && draft.amount.trim().length > 0 && Number.isFinite(amount) && amount > 0;
 }
 
-export function groupSetupDraftValid(group: AnalysisGroup, analysisHasBanking: boolean): boolean {
+export function groupSetupDraftValid(
+  group: AnalysisGroup,
+  analysisHasBanking: boolean,
+  bankingConfigurationValid = true
+): boolean {
   if (isSkippedAnalysisType(group.analysisType)) return true;
   if ((group.analysisType === 'energyIntensity' || group.analysisType === 'modifiedEnergyIntensity')
     && !group.predictorVariables.some(variable => variable.productionInAnalysis)) return false;
@@ -204,6 +254,7 @@ export function groupSetupDraftValid(group: AnalysisGroup, analysisHasBanking: b
   if (analysisHasBanking && group.applyBanking) {
     if (!Number.isFinite(group.bankedAnalysisYear) || !Number.isFinite(group.newBaselineYear)) return false;
     if (group.bankedAnalysisYear >= group.newBaselineYear) return false;
+    if (!bankingConfigurationValid) return false;
   }
   return [...(group.dataAdjustments ?? []), ...(group.baselineAdjustmentsV2 ?? [])]
     .every(adjustment => Number.isFinite(adjustment.year) && Number.isFinite(adjustment.amount) && adjustment.amount >= 0);

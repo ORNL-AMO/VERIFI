@@ -8,11 +8,12 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AdjustmentKind, FacilityAnalysisGroupSetupFacade } from './facility-analysis-group-setup.facade';
 import { FacilityAnalysisGroupSetupController } from './facility-analysis-group-setup.controller';
+import { BankedGroupSavingsComponent } from './banked-group-savings/banked-group-savings.component';
 
 @Component({
   selector: 'app-facility-analysis-group-setup',
   standalone: true,
-  imports: [RouterLink, IconComponent, ConfirmationDialogComponent, ReactiveFormsModule],
+  imports: [RouterLink, IconComponent, ConfirmationDialogComponent, ReactiveFormsModule, BankedGroupSavingsComponent],
   providers: [FacilityAnalysisGroupSetupFacade, FacilityAnalysisGroupSetupController],
   templateUrl: './facility-analysis-group-setup.component.html',
   styleUrls: ['./facility-analysis-group-setup.component.css']
@@ -47,9 +48,16 @@ export class FacilityAnalysisGroupSetupComponent implements OnDestroy {
   readonly canAddDataAdjustment = this.setup.canAddDataAdjustment;
   readonly canAddBaselineAdjustment = this.setup.canAddBaselineAdjustment;
   readonly bankingYearError = this.setup.bankingYearError;
+  readonly bankingYears = this.setup.bankingYears;
+  readonly bankingSource = this.setup.bankingSource;
+  readonly bankedGroup = this.setup.bankedGroup;
+  readonly bankingUnavailableReason = this.setup.bankingUnavailableReason;
+  readonly bankingModelYearWarning = this.setup.bankingModelYearWarning;
   constructor() { effect(() => this.controller.pendingChange() ? this.openConfirmation() : this.closeConfirmation()); }
 
   confirmPendingChange(): void { this.controller.confirmPendingChange(); }
+
+  requestClearModels(): void { this.controller.requestClearModels(); }
 
   cancelModelInputChange(): void {
     this.closeConfirmation();

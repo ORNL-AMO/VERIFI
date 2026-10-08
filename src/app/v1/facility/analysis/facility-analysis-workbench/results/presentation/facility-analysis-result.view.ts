@@ -83,7 +83,7 @@ export function annualUseChartRows(rows: readonly AnnualAnalysisSummary[]): read
     periodKey: String(row.year),
     periodLabel: String(row.year),
     sortValue: row.year,
-    values: { actual: row.energyUse, calculated: row.adjusted }
+    values: { actual: row.energyUse, calculated: row.isIntermediateBanked ? null : row.adjusted }
   }));
 }
 
@@ -93,7 +93,7 @@ export function annualImprovementChartRows(rows: readonly AnnualAnalysisSummary[
     periodLabel: String(row.year),
     sortValue: row.year,
     values: {
-      annualImprovement: row.annualSavingsPercentImprovement,
+      annualImprovement: row.isIntermediateBanked ? null : row.annualSavingsPercentImprovement,
       totalImprovement: row.totalSavingsPercentImprovement
     }
   }));
@@ -158,7 +158,7 @@ export function monthlyUseChartRows(rows: readonly MonthlyAnalysisSummaryData[])
       periodKey: `${date.getFullYear()}-${date.getMonth()}`,
       periodLabel: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       sortValue: date.getTime(),
-      values: { actual: row.energyUse, calculated: row.adjusted }
+      values: { actual: row.energyUse, calculated: row.isIntermediateBanked ? null : row.adjusted }
     };
   });
 }
@@ -178,28 +178,22 @@ export function monthlySavingsChartView(
       { id: 'losses', label: 'Losses', unit: '%', color: 'var(--v1-danger)' },
       { id: 'savings', label: 'Savings', unit: '%', color: 'var(--v1-success)' }
     ];
-  const latestBanked = rows
-    .filter(row => row.isBanked)
-    .reduce<MonthlyAnalysisSummaryData | undefined>((latest, row) => {
-      return !latest || new Date(row.date).getTime() > new Date(latest.date).getTime() ? row : latest;
-    }, undefined);
-
+  const transitionCarry = carriedTransitionImprovement(rows);
   return {
     metrics,
     rows: rows.map(row => {
       const date = new Date(row.date);
       const rollingImprovement = row.rolling12MonthImprovement;
-      const values: Record<string, number> = {
+      const values: Record<string, number | null> = {
         savings: (!includeBanking || !row.isBanked) && rollingImprovement >= 0 ? rollingImprovement : 0,
-        losses: rollingImprovement < 0 ? rollingImprovement : 0
+        losses: (!includeBanking || !row.isBanked) && rollingImprovement < 0 ? rollingImprovement : 0
       };
       if (includeBanking) {
-        values['bankedSavings'] = row.isBanked && !row.isIntermediateBanked && rollingImprovement >= 0
-          ? rollingImprovement
-          : row.isIntermediateBanked && (latestBanked?.percentSavingsComparedToBaseline ?? -1) >= 0
-            ? latestBanked?.percentSavingsComparedToBaseline ?? 0
-            : 0;
-        values['bankedLosses'] = rollingImprovement < 0 ? rollingImprovement : 0;
+        const bankedImprovement = row.isIntermediateBanked
+          ? transitionCarry.get(row) ?? row.percentSavingsComparedToBaseline
+          : rollingImprovement;
+        values['bankedSavings'] = row.isBanked && bankedImprovement >= 0 ? bankedImprovement : 0;
+        values['bankedLosses'] = row.isBanked && bankedImprovement < 0 ? bankedImprovement : 0;
       }
       return {
         periodKey: `${date.getFullYear()}-${date.getMonth()}`,
@@ -209,4 +203,21 @@ export function monthlySavingsChartView(
       };
     })
   };
+}
+
+function carriedTransitionImprovement(
+  rows: readonly MonthlyAnalysisSummaryData[]
+): ReadonlyMap<MonthlyAnalysisSummaryData, number> {
+  const carry = new Map<MonthlyAnalysisSummaryData, number>();
+  let appliedImprovement: number | undefined;
+  [...rows]
+    .sort((first, second) => new Date(first.date).getTime() - new Date(second.date).getTime())
+    .forEach(row => {
+      if (row.isBanked && !row.isIntermediateBanked && Number.isFinite(row.percentSavingsComparedToBaseline)) {
+        appliedImprovement = row.percentSavingsComparedToBaseline;
+      } else if (row.isIntermediateBanked && appliedImprovement !== undefined) {
+        carry.set(row, appliedImprovement);
+      }
+    });
+  return carry;
 }

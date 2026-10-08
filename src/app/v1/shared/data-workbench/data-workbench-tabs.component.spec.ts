@@ -48,4 +48,32 @@ describe('DataWorkbenchTabsComponent', () => {
     expect(indicator.textContent).toContain('!');
     expect(indicator.textContent).toContain('2 issues');
   });
+
+  it('renders unavailable tabs as disabled and does not emit their identifier', () => {
+    TestBed.configureTestingModule({ imports: [DataWorkbenchTabsComponent] });
+    const fixture = TestBed.createComponent(DataWorkbenchTabsComponent);
+    fixture.componentRef.setInput('tabs', [{
+      id: 'banking', label: 'Banked Savings', icon: 'bank', disabled: true,
+      disabledReason: 'Complete valid banking options in Setup to view Banked Savings.'
+    }]);
+    fixture.componentRef.setInput('activeTab', 'setup');
+    fixture.componentRef.setInput('ariaLabel', 'Analysis sections');
+    const selected = vi.fn();
+    fixture.componentInstance.tabSelected.subscribe(selected);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('aria-disabled')).toBe('true');
+    expect(button.title).toContain('Complete valid banking options');
+    expect(button.tabIndex).toBe(0);
+    const descriptionId = button.getAttribute('aria-describedby');
+    expect(descriptionId).toBeTruthy();
+    expect(fixture.nativeElement.querySelector(`#${descriptionId}`)?.textContent)
+      .toContain('Complete valid banking options');
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    button.click();
+    expect(selected).not.toHaveBeenCalled();
+  });
 });

@@ -84,7 +84,7 @@ export type StatusDestination =
     readonly analysisGuid: string;
     readonly scope: 'analysis' | 'group' | 'facility';
     readonly groupGuid?: string;
-    readonly tab: 'setup' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
+    readonly tab: 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
   }
   | { readonly kind: 'unavailable' };
 

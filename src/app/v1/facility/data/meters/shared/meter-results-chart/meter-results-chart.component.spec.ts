@@ -124,6 +124,33 @@ describe('MeterResultsChartComponent', () => {
     expect(lines.every((series: { smooth?: boolean }) => series.smooth === false)).toBe(true);
   });
 
+  it('renders unavailable values as chart gaps and omits comparison bands across them', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('chartRows', [
+      { periodKey: '1', periodLabel: '2023', sortValue: 1, values: { utility: 10, cost: 20 } },
+      { periodKey: '2', periodLabel: '2024', sortValue: 2, values: { utility: 12, cost: null } },
+      { periodKey: '3', periodLabel: '2025', sortValue: 3, values: { utility: 14, cost: 28 } }
+    ]);
+    fixture.componentRef.setInput('showAllMetrics', true);
+    fixture.componentRef.setInput('comparisonBand', {
+      referenceMetricId: 'utility', comparisonMetricId: 'cost',
+      comparisonAboveColor: 'green', referenceAboveColor: 'red'
+    });
+    fixture.detectChanges();
+
+    const option = fixture.componentInstance.chartOption() as Record<string, any>;
+    expect(option.series[0].data).toEqual([]);
+    expect(option.series[1].data).toEqual([]);
+    expect(option.series.find((series: any) => series.name === 'Total Cost')).toMatchObject({
+      data: [20, null, 28],
+      connectNulls: false
+    });
+    expect(fixture.componentInstance.accessibleRows()[1].cells[1].valueLabel).toBe('Unavailable');
+    expect(option.tooltip.formatter([
+      { axisValueLabel: '2024', marker: '', seriesName: 'Total Cost', value: null }
+    ])).toContain('Total Cost: —');
+  });
+
   it.each([
     ['monthly', 'all values are zero', [0, 0, 0]],
     ['monthly', 'values net to zero', [20, -20, 0]],

@@ -82,6 +82,7 @@ import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/fa
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
 import { FacilityAnalysisGroupSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/setup/facility-analysis-group-setup.component';
+import { FacilityAnalysisBankingComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/banking/facility-analysis-banking.component';
 import { FacilityAnalysisRegressionComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/regression/facility-analysis-regression.component';
 import { FacilityAnalysisGroupAnnualComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/annual/facility-analysis-group-annual.component';
 import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-table/facility-analysis-group-monthly-table.component';
@@ -361,6 +362,7 @@ export const V1Routes: Routes = [
                     children: [
                       { path: '', pathMatch: 'full', redirectTo: 'setup' },
                       { path: 'setup', component: FacilityAnalysisGroupSetupComponent, data: { analysisScope: 'group', analysisTab: 'setup' } },
+                      { path: 'banking', component: FacilityAnalysisBankingComponent, data: { analysisScope: 'group', analysisTab: 'banking' } },
                       { path: 'regression', component: FacilityAnalysisRegressionComponent, data: { analysisScope: 'group', analysisTab: 'regression' } },
                       { path: 'annual', component: FacilityAnalysisGroupAnnualComponent, data: { analysisScope: 'group', analysisTab: 'annual' } },
                       { path: 'monthly-table', component: FacilityAnalysisGroupMonthlyTableComponent, data: { analysisScope: 'group', analysisTab: 'monthly-table' } },

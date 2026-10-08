@@ -5,7 +5,7 @@ import { StatusItem } from '@app/v1/status/status.models';
 import { ANALYSIS_FACILITY_TABS, activeAnalysisWorkbenchStageId, buildAnalysisWorkbenchStageAttention, buildAnalysisWorkbenchStageNavigation, buildAnalysisWorkbenchStages, buildAnalysisWorkbenchTabAttention, findingsForAnalysisStage, stageHasBlockingErrors, tabsForAnalysisGroup } from './facility-analysis-workbench.models';
 
 describe('facility analysis workbench models', () => {
-  const regression = { idbGroupId: 'group-b', analysisType: 'regression' } as AnalysisGroup;
+  const regression = { idbGroupId: 'group-b', analysisType: 'regression', applyBanking: false } as AnalysisGroup;
   const skipped = { idbGroupId: 'group-a', analysisType: 'skip' } as AnalysisGroup;
   const analysis = { guid: 'analysis-a', groups: [skipped, regression] } as IdbAnalysisItem;
   const meterGroups = [
@@ -25,6 +25,14 @@ describe('facility analysis workbench models', () => {
     expect(tabsForAnalysisGroup(regression).map(tab => tab.id)).toEqual([
       'setup', 'regression', 'annual', 'monthly-table', 'monthly-chart'
     ]);
+    const bankedRegression = { ...regression, applyBanking: true };
+    expect(tabsForAnalysisGroup(bankedRegression, true, true).map(tab => tab.id)).toEqual([
+      'setup', 'banking', 'regression', 'annual', 'monthly-table', 'monthly-chart'
+    ]);
+    expect(tabsForAnalysisGroup(bankedRegression, false, true).some(tab => tab.id === 'banking')).toBe(false);
+    const unavailableBankingTab = tabsForAnalysisGroup(bankedRegression, true).find(tab => tab.id === 'banking');
+    expect(unavailableBankingTab).toMatchObject({ label: 'Banked Savings', disabled: true });
+    expect(tabsForAnalysisGroup(bankedRegression, true, true).find(tab => tab.id === 'banking')?.disabled).toBe(false);
     expect(tabsForAnalysisGroup(skipped).map(tab => tab.id)).toEqual(['setup']);
     expect(ANALYSIS_FACILITY_TABS.map(tab => tab.id)).toEqual([
       'annual', 'monthly-table', 'monthly-chart', 'group-contributions'

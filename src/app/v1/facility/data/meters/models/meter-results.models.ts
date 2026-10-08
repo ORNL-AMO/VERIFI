@@ -74,7 +74,7 @@ export interface MeterResultsChartRow {
   readonly periodKey: string;
   readonly periodLabel: string;
   readonly sortValue: number;
-  readonly values: Readonly<Record<string, number>>;
+  readonly values: Readonly<Record<string, number | null>>;
 }
 
 export function buildMeterDataColumns(

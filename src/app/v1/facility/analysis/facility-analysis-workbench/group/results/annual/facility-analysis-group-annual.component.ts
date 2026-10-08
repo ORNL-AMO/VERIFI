@@ -13,8 +13,11 @@ import {
 import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
 import { AnalysisResultColumnChooserComponent } from '../../../results/presentation/column-chooser/analysis-result-column-chooser.component';
 import { AnalysisResultNumberPipe } from '../../../results/presentation/number/analysis-result-number.pipe';
+import { AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { annualResultMarkers, orderedUniqueResultMarkers } from '../../../results/presentation/result-markers/analysis-result-markers';
 
-@Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
+@Component({ selector: 'app-facility-analysis-group-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent], templateUrl: './facility-analysis-group-annual.component.html', styleUrls: ['./facility-analysis-group-annual.component.css'] })
 export class FacilityAnalysisGroupAnnualComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisGroupResultsService);
@@ -26,10 +29,12 @@ export class FacilityAnalysisGroupAnnualComponent {
   });
   readonly rowViews = computed(() => this.rows().map(row => ({
     row,
+    markers: annualResultMarkers(row, this.groupContext.group(), this.groupContext.workbench.facility()),
     predictors: Object.fromEntries(
       (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
     ) as Readonly<Record<string, number>>
   })));
+  readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly predictorScopeId = computed(() => this.groupContext.group()?.idbGroupId ?? '');
   readonly availablePredictors = computed(() => this.groupContext.group()?.predictorVariables ?? []);
   readonly predictorColumns = computed(() => {

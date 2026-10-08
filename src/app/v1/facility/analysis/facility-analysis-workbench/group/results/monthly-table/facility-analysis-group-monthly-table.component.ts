@@ -12,13 +12,16 @@ import { FacilityAnalysisResultsDisplayService } from '../../../results/presenta
 import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
 import { AnalysisResultColumnChooserComponent } from '../../../results/presentation/column-chooser/analysis-result-column-chooser.component';
 import { AnalysisResultNumberPipe } from '../../../results/presentation/number/analysis-result-number.pipe';
+import { AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { monthlyResultMarkers, orderedUniqueResultMarkers } from '../../../results/presentation/result-markers/analysis-result-markers';
 
 type AnalysisResultColumnSection = 'period' | 'use' | 'predictors' | 'improvement';
 
 @Component({
   selector: 'app-facility-analysis-group-monthly-table',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe],
+  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent],
   templateUrl: './facility-analysis-group-monthly-table.component.html',
   styleUrls: ['./facility-analysis-group-monthly-table.component.css']
 })
@@ -34,11 +37,13 @@ export class FacilityAnalysisGroupMonthlyTableComponent {
   });
   readonly rowViews = computed(() => this.rows().map((row, index, rows) => ({
     row,
+    markers: monthlyResultMarkers(row, this.groupContext.group()),
     predictors: Object.fromEntries(
       (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
     ) as Readonly<Record<string, number>>,
     isFiscalYearEnd: rows[index + 1]?.fiscalYear !== row.fiscalYear
   })));
+  readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly currentPage = signal(1);
   readonly pageSizeControl = new FormControl(DEFAULT_TIME_PERIOD_PAGE_SIZE, { nonNullable: true });
   readonly pageSize = toSignal(this.pageSizeControl.valueChanges, { initialValue: this.pageSizeControl.value });

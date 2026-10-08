@@ -42,7 +42,7 @@ h2, h3, p { margin: 0; }
 .v1-analysis-group-setup__adjustment-list { display: grid; gap: var(--v1-space-1); }
 .v1-analysis-group-setup__adjustment { display: grid; grid-template-columns: 4rem minmax(9rem, 1fr) auto; gap: var(--v1-space-2); align-items: center; }
 .v1-analysis-group-setup__amount-control { display: flex; min-width: 0; }
-.v1-analysis-group-setup__amount-control .form-control { min-width: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.v1-analysis-group-setup__amount-control .v1-input { min-width: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .v1-analysis-group-setup__amount-control span { display: inline-flex; align-items: center; padding: .45rem .65rem; border: 1px solid var(--v1-border); border-left: 0; border-radius: 0 var(--v1-radius-sm) var(--v1-radius-sm) 0; background: var(--v1-content-block); color: var(--v1-muted); font-size: .8rem; font-weight: 800; white-space: nowrap; }
 .v1-analysis-group-setup__adjustment-editor { display: grid; grid-template-columns: minmax(7rem, .7fr) minmax(10rem, 1fr) auto; grid-template-rows: auto auto; gap: .3rem var(--v1-space-2); align-items: end; padding-top: var(--v1-space-2); border-top: 1px solid var(--v1-divider); }
 .v1-analysis-group-setup__adjustment-editor label { font-size: .8rem; font-weight: 800; }
@@ -54,9 +54,21 @@ h2, h3, p { margin: 0; }
 .v1-analysis-group-setup__add-adjustment { justify-self: start; margin-top: var(--v1-space-1); }
 .v1-analysis-group-setup__months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--v1-space-2); }
 .v1-analysis-group-setup__months label { display: grid; gap: .25rem; }
-.v1-analysis-group-setup__banking-years { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-3); }
+.v1-analysis-group-setup__banking { display: grid; gap: var(--v1-space-3); padding-top: var(--v1-space-4); border-top: 1px solid var(--v1-divider); }
+.v1-analysis-group-setup__banking-layout { display: grid; gap: var(--v1-space-4); align-items: start; min-width: 0; }
+.v1-analysis-group-setup__banking-controls { display: grid; gap: var(--v1-space-3); min-width: 0; }
+.v1-analysis-group-setup__banking-layout > app-banked-group-savings { min-width: 0; }
+.v1-analysis-group-setup__banking-heading { display: grid; gap: .25rem; justify-items: start; }
+.v1-analysis-group-setup__banking-heading > p:not(.v1-eyebrow) { color: var(--v1-muted); font-size: .84rem; }
+.v1-analysis-group-setup__banking-heading .v1-analysis-group-setup__check { margin-top: .35rem; }
+.v1-analysis-group-setup__model-lock { display: grid; gap: .4rem; justify-items: start; color: var(--v1-muted); font-size: .82rem; line-height: 1.35; }
+.v1-analysis-group-setup__banking-years { display: grid; grid-template-columns: repeat(2, minmax(12rem, 20rem)); gap: var(--v1-space-3); justify-content: start; }
 .v1-analysis-group-setup__banking-years label { display: grid; gap: .3rem; }
 .v1-field-error { color: var(--v1-danger); font-weight: 800; }
+@media (min-width: 981px) {
+  .v1-analysis-group-setup__banking-layout { grid-template-columns: minmax(18rem, .7fr) minmax(0, 1.6fr); }
+  .v1-analysis-group-setup__banking-years { grid-template-columns: minmax(12rem, 20rem); }
+}
 @media (max-width: 980px) {
   .v1-analysis-group-setup__configuration { grid-template-columns: 1fr; }
   .v1-analysis-group-setup__configuration > .v1-analysis-group-setup__meters { grid-column: 1; }

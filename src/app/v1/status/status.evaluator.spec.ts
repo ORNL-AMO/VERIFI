@@ -198,7 +198,96 @@ describe('v1 workspace status evaluator', () => {
     expect(entityCodes(result, facilityReport.guid)).toContain('report.configuration.invalid');
     expect(entityCodes(result, accountReport.guid)).toContain('report.configuration.invalid');
   });
+
+  it('rejects circular banking sources and unusable matching source groups', () => {
+    const currentGroup = analysisGroup({ applyBanking: true, bankedAnalysisYear: 2025, newBaselineYear: 2026 });
+    const sourceGroup = analysisGroup({ analysisType: 'skip' });
+    const current = facilityAnalysis('current', [currentGroup], {
+      hasBanking: true, bankedAnalysisItemId: 'source'
+    });
+    const source = facilityAnalysis('source', [sourceGroup], {
+      hasBanking: true, bankedAnalysisItemId: 'current'
+    });
+
+    const result = evaluate(snapshot({ facilityAnalyses: [current, source] }));
+    const analysisFinding = result.findings.find(item => item.entity.guid === current.guid
+      && item.code === 'analysis.configuration.invalid');
+    const groupFinding = result.findings.find(item => item.entity.guid === `${current.guid}:group-a`
+      && item.code === 'analysis-group.setup.invalid');
+
+    expect(analysisFinding?.evidence.reasons).toEqual(expect.arrayContaining(['bankingError']));
+    expect(groupFinding?.evidence.reasons).toContain('bankingSourceGroupUnavailable');
+  });
+
+  it('propagates an invalid banking dependency without duplicating the consumer finding', () => {
+    const current = facilityAnalysis('current', [analysisGroup()], {
+      hasBanking: true, bankedAnalysisItemId: 'source'
+    });
+    const source = facilityAnalysis('source', [analysisGroup()], { name: ' ' });
+
+    const result = evaluate(snapshot({ facilityAnalyses: [current, source] }));
+    const findings = result.findings.filter(item => item.entity.guid === current.guid
+      && item.code === 'analysis.configuration.invalid');
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].evidence.reasons).toEqual(expect.arrayContaining(['bankingError', 'bankingSourceInvalid']));
+  });
+
+  it('rejects an applied banking year beyond complete source predictor inputs', () => {
+    const currentGroup = analysisGroup({ applyBanking: true, bankedAnalysisYear: 2023, newBaselineYear: 2024 });
+    const sourceGroup = analysisGroup({
+      analysisType: 'regression', isGeneratedModel: true, regressionModelYear: 2020, regressionConstant: 1,
+      selectedModelId: 'model-a', models: [{
+        modelId: 'model-a', isValid: true,
+        predictorVariables: [{ id: 'predictor-a', name: 'Production' }]
+      }],
+      predictorVariables: [{
+        id: 'predictor-a', name: 'Production', production: true, productionInAnalysis: true,
+        regressionCoefficient: 1
+      }]
+    });
+    const current = facilityAnalysis('current', [currentGroup], {
+      baselineYear: 2023, hasBanking: true, bankedAnalysisItemId: 'source'
+    });
+    const source = facilityAnalysis('source', [sourceGroup], { baselineYear: 2020 });
+    const value = snapshot({
+      facilityAnalyses: [current, source],
+      predictorData: [2020, 2021].flatMap(year => Array.from({ length: 12 }, (_, month) => predictorData({
+        guid: `predictor-a-${year}-${month}`,
+        year,
+        month: month + 1
+      })))
+    });
+    const calendarized = [calendarizedMeter(value.meters[0], [2020, 2021, 2022, 2023, 2024, 2025]
+      .flatMap(year => Array.from({ length: 12 }, (_, monthNumValue) => monthlyData({ year, monthNumValue }))))];
+
+    const result = evaluate(value, calendarized);
+    const groupFinding = result.findings.find(item => item.entity.guid === 'current:group-a'
+      && item.code === 'analysis-group.setup.invalid');
+
+    expect(groupFinding?.evidence.reasons).toContain('bankingAppliedYearOutOfRange');
+  });
 });
+
+function facilityAnalysis(
+  guid: string,
+  groups: IdbAnalysisItem['groups'],
+  overrides: Partial<IdbAnalysisItem> = {}
+): IdbAnalysisItem {
+  return {
+    guid, accountId: 'account-a', facilityId: 'facility-a', name: guid,
+    analysisCategory: 'energy', energyIsSource: false, energyUnit: 'MMBtu', waterUnit: 'gal',
+    baselineYear: 2026, hasBanking: false, groups, ...overrides
+  } as IdbAnalysisItem;
+}
+
+function analysisGroup(overrides: Record<string, unknown> = {}): IdbAnalysisItem['groups'][number] {
+  return {
+    idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: [],
+    specifiedMonthlyPercentBaseload: false, monthlyPercentBaseload: [], dataAdjustments: [], baselineAdjustmentsV2: [],
+    isGeneratedModel: false, maxModelVariables: 4, applyBanking: false, ...overrides
+  } as IdbAnalysisItem['groups'][number];
+}
 
 function snapshot(overrides: Partial<AccountWorkspaceSnapshot> = {}): AccountWorkspaceSnapshot {
   const meterValue = meter({ guid: 'meter-a', groupId: 'group-a', meterReadingDataApplication: 'fullMonth' });

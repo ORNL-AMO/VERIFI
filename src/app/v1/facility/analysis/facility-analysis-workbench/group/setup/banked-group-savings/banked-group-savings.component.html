@@ -1,0 +1,26 @@
+@let state = results.state();
+<section class="v1-banked-preview" aria-labelledby="banked-group-savings-heading">
+  <h3 id="banked-group-savings-heading">Banked Group Savings</h3>
+  @if (state.state === 'waiting' && state.reason === 'configuration') {
+    <p class="v1-banked-preview__state" role="status">Select valid banking years to preview source savings.</p>
+  } @else if (state.state === 'waiting' && state.reason === 'autosave') {
+    <p class="v1-banked-preview__state" role="status"><app-ui-icon name="loading" spin></app-ui-icon> Saving banking configuration…</p>
+  } @else if (state.state === 'waiting' && state.reason === 'blocked') {
+    <p class="v1-banked-preview__state v1-banked-preview__state--error" role="alert"><app-ui-icon name="warning"></app-ui-icon> Resolve validation errors in the selected source analysis before calculating banked savings.</p>
+  } @else if (state.state === 'waiting') {
+    <p class="v1-banked-preview__state" role="status"><app-ui-icon name="loading" spin></app-ui-icon> Waiting for validated source inputs…</p>
+  } @else if (state.state === 'loading') {
+    <p class="v1-banked-preview__state" role="status"><app-ui-icon name="loading" spin></app-ui-icon> Calculating banked savings…</p>
+  } @else if (state.state === 'error') {
+    <p class="v1-banked-preview__state v1-banked-preview__state--error" role="alert"><app-ui-icon name="warning"></app-ui-icon> {{ state.message }}</p>
+  } @else if (state.state === 'ready' && !rows().length) {
+    <p class="v1-banked-preview__state" role="status">No complete source years are available before the new baseline.</p>
+  } @else if (state.state === 'ready') {
+    <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Banked group savings preview">
+      <table><thead><tr><th scope="col">Year</th><th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Total savings improvement</th><th scope="col">Annual savings improvement</th><th scope="col">Cumulative savings</th></tr></thead>
+        <tbody>@for (view of views(); track view.summary.year) { <tr><th scope="row"><span class="v1-banked-preview__year"><span>{{ view.summary.year }}</span><app-analysis-result-markers [markers]="view.markers"></app-analysis-result-markers></span></th><td>{{ view.summary.energyUse | analysisResultNumber }}</td><td>{{ view.transition ? '—' : (view.summary.adjusted | analysisResultNumber) }}</td><td>{{ view.totalSavingsPercentImprovement == null ? '—' : (view.totalSavingsPercentImprovement | number:'1.0-2') + '%' }}</td><td>{{ view.transition ? '—' : (view.summary.annualSavingsPercentImprovement | number:'1.0-2') + '%' }}</td><td>{{ view.summary.cummulativeSavings == null ? '—' : (view.summary.cummulativeSavings | analysisResultNumber) }}</td></tr> }</tbody>
+      </table>
+    </div>
+    <app-analysis-result-marker-legend [markers]="legendMarkers()"></app-analysis-result-marker-legend>
+  }
+</section>

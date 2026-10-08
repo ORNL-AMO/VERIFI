@@ -56,6 +56,31 @@ describe('FacilityAnalysisMonthlyTableComponent', () => {
     expect(component.currentPage()).toBe(1);
     expect(component.displayedRows()).toHaveLength(24);
   });
+
+  it('aggregates banking markers from group results and suppresses facility transition-derived values', () => {
+    const context = TestBed.inject(FacilityAnalysisWorkbenchContext) as any;
+    context.analysis.set({ analysisCategory: 'energy', energyUnit: 'MMBtu', hasBanking: true });
+    const date = new Date(2024, 0, 1);
+    (TestBed.inject(FacilityAnalysisResultsService) as any).state.set({
+      state: 'ready',
+      monthly: [{
+        date, fiscalYear: 2024, energyUse: 10, adjusted: 98765, predictorUsage: [],
+        rollingSavings: 3, rolling12MonthImprovement: 3, missingValueWarning: false
+      }],
+      groups: [{
+        monthlyAnalysisSummaryData: [{
+          date, fiscalYear: 2024, isBanked: true, isIntermediateBanked: true, savingsBanked: 4
+        }]
+      }]
+    });
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ');
+    expect(text).toContain('Banked savings added');
+    expect(text).toContain('Transition period');
+    expect(text).toContain('—');
+    expect(text).not.toContain('98,765');
+  });
 });
 
 function selectPageSize(host: HTMLElement, value: number): void {

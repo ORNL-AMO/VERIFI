@@ -59,6 +59,7 @@ import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/fa
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
+import { FacilityAnalysisBankingComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/banking/facility-analysis-banking.component';
 import { FacilityAnalysisResultsShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/shell/facility-analysis-results-shell.component';
 import { FacilityAnalysisGroupMonthlyTableComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-table/facility-analysis-group-monthly-table.component';
 import { FacilityAnalysisGroupMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/results/monthly-chart/facility-analysis-group-monthly-chart.component';
@@ -114,6 +115,10 @@ describe('V1Routes facility data meters routes', () => {
     expect(workbench?.children?.find(route => route.path === 'group/:groupGuid')?.providers).toBeUndefined();
 
     const groupChildren = workbench?.children?.find(route => route.path === 'group/:groupGuid')?.children ?? [];
+    expect(groupChildren.find(route => route.path === 'banking')).toMatchObject({
+      component: FacilityAnalysisBankingComponent,
+      data: { analysisScope: 'group', analysisTab: 'banking' }
+    });
     expect(groupChildren.find(route => route.path === 'monthly-table')).toMatchObject({
       component: FacilityAnalysisGroupMonthlyTableComponent,
       data: { analysisScope: 'group', analysisTab: 'monthly-table' }

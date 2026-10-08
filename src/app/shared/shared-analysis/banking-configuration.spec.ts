@@ -1,55 +1,122 @@
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { getBankedAnalysisGroup, isBankedGroupConfigurationComplete } from './banking-configuration';
+import {
+  bankingGroupDependencyChain,
+  evaluateBankedGroupConfiguration,
+  evaluateBankingSource,
+  getBankedAnalysisGroup,
+  isBankedGroupConfigurationComplete
+} from './banking-configuration';
 
 describe('banking configuration', () => {
-  const group = (overrides: Partial<AnalysisGroup> = {}): AnalysisGroup => ({
-    idbGroupId: 'group-1',
-    analysisType: 'absoluteEnergyConsumption',
-    applyBanking: true,
-    bankedAnalysisYear: 2019,
-    newBaselineYear: 2020,
-    ...overrides
+  const group = (overrides: Partial<AnalysisGroup> = {}) => ({
+    idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: [],
+    applyBanking: false, models: [], ...overrides
   } as AnalysisGroup);
-
-  const analysis = (overrides: Partial<IdbAnalysisItem> = {}): IdbAnalysisItem => ({
-    guid: 'analysis-1',
-    hasBanking: true,
-    bankedAnalysisItemId: 'banked-analysis-1',
-    groups: [group()],
-    ...overrides
+  const analysis = (guid: string, overrides: Partial<IdbAnalysisItem> = {}) => ({
+    guid, facilityId: 'facility-a', accountId: 'account-a', name: guid,
+    analysisCategory: 'energy', energyIsSource: false, energyUnit: 'MMBtu', waterUnit: 'gal',
+    baselineYear: 2022, hasBanking: false, groups: [group()], ...overrides
   } as IdbAnalysisItem);
 
-  const bankedAnalysis = (overrides: Partial<IdbAnalysisItem> = {}): IdbAnalysisItem => ({
-    guid: 'banked-analysis-1',
-    groups: [group({ bankedAnalysisYear: undefined, newBaselineYear: undefined })],
-    ...overrides
-  } as IdbAnalysisItem);
+  it.each([
+    ['missing source', 'missing', undefined],
+    ['incompatible source', 'incompatible', analysis('source', { energyIsSource: true })],
+    ['missing transitive dependency', 'dependency-missing', analysis('source', {
+      hasBanking: true, bankedAnalysisItemId: 'deleted'
+    })]
+  ])('rejects a %s', (_label, issue, source) => {
+    const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source' });
+    const analyses = source ? [current, source] : [current];
 
-  it('accepts a fully configured group with a matching banked group', () => {
-    const selectedGroup = group();
-    const selectedAnalysis = analysis({ groups: [selectedGroup] });
-    const selectedBankedAnalysis = bankedAnalysis();
+    expect(evaluateBankingSource(current, analyses).issue).toBe(issue);
+  });
 
-    expect(isBankedGroupConfigurationComplete(selectedAnalysis, selectedGroup, selectedBankedAnalysis)).toBe(true);
-    expect(getBankedAnalysisGroup(selectedAnalysis, selectedGroup, selectedBankedAnalysis)?.idbGroupId).toBe('group-1');
+  it('rejects direct and transitive cycles', () => {
+    const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source' });
+    const source = analysis('source', { hasBanking: true, bankedAnalysisItemId: 'dependency' });
+    const dependency = analysis('dependency', { hasBanking: true, bankedAnalysisItemId: 'current' });
+
+    expect(evaluateBankingSource(current, [current, source, dependency]).issue).toBe('cycle');
+  });
+
+  it('includes transitive dependencies only while the matching source group applies banking', () => {
+    const dependency = analysis('dependency');
+    const source = analysis('source', {
+      hasBanking: true, bankedAnalysisItemId: dependency.guid,
+      groups: [group({ applyBanking: true })]
+    });
+
+    expect(bankingGroupDependencyChain(source, 'group-a', [source, dependency]).map(item => item.guid))
+      .toEqual(['source', 'dependency']);
+    source.groups[0].applyBanking = false;
+    expect(bankingGroupDependencyChain(source, 'group-a', [source, dependency]).map(item => item.guid))
+      .toEqual(['source']);
+  });
+
+  it('bounds both years and rejects stale persisted selections', () => {
+    const configuredGroup = group({ applyBanking: true, bankedAnalysisYear: 2021, newBaselineYear: 2026 });
+    const current = analysis('current', {
+      baselineYear: 2023, hasBanking: true, bankedAnalysisItemId: 'source', groups: [configuredGroup]
+    });
+    const source = analysis('source', { baselineYear: 2020, groups: [group()] });
+
+    const stale = evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2025 }
+    );
+    expect(stale.appliedYears).toEqual([2021, 2022, 2023, 2024, 2025]);
+    expect(stale.newBaselineYears).toEqual([2023, 2024, 2025]);
+    expect(stale.groupIssue).toBe('baseline-year-out-of-range');
+
+    configuredGroup.newBaselineYear = 2024;
+    expect(evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2025 }
+    ).valid).toBe(true);
+    configuredGroup.bankedAnalysisYear = 2020;
+    expect(evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2025 }
+    ).groupIssue)
+      .toBe('applied-year-out-of-range');
+  });
+
+  it('bounds applied years by source inputs and new baselines by consumer inputs', () => {
+    const configuredGroup = group({ applyBanking: true, bankedAnalysisYear: 2023, newBaselineYear: 2024 });
+    const current = analysis('current', {
+      baselineYear: 2023, hasBanking: true, bankedAnalysisItemId: 'source', groups: [configuredGroup]
+    });
+    const source = analysis('source', { baselineYear: 2020, groups: [group()] });
+
+    const evaluation = evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2021 }
+    );
+
+    expect(evaluation.appliedYears).toEqual([2021]);
+    expect(evaluation.newBaselineYears).toEqual([2023, 2024, 2025]);
+    expect(evaluation.groupIssue).toBe('applied-year-out-of-range');
+  });
+
+  it('keeps the calculation-readiness contract for a complete matching group', () => {
+    const configuredGroup = group({ applyBanking: true, bankedAnalysisYear: 2021, newBaselineYear: 2022 });
+    const current = analysis('current', {
+      hasBanking: true, bankedAnalysisItemId: 'source', groups: [configuredGroup]
+    });
+    const source = analysis('source', { groups: [group()] });
+
+    expect(getBankedAnalysisGroup(current, configuredGroup, source)).toBe(source.groups[0]);
+    expect(isBankedGroupConfigurationComplete(current, configuredGroup, source)).toBe(true);
   });
 
   it.each([
-    ['missing applied banking year', group({ bankedAnalysisYear: undefined }), bankedAnalysis()],
-    ['missing new baseline year', group({ newBaselineYear: undefined }), bankedAnalysis()],
-    ['invalid year order', group({ bankedAnalysisYear: 2020, newBaselineYear: 2020 }), bankedAnalysis()],
-    ['missing banked group', group(), bankedAnalysis({ groups: [] })],
-    ['missing banked analysis', group(), undefined],
-    ['skipped banked group', group(), bankedAnalysis({ groups: [group({ analysisType: 'skip' })] })],
-    ['banked group configured to skip analysis', group(), bankedAnalysis({ groups: [group({ analysisType: 'skipAnalysis' })] })],
-  ])('rejects %s', (_label, selectedGroup, selectedBankedAnalysis) => {
-    const selectedAnalysis = analysis({ groups: [selectedGroup] });
+    ['banking is not applied', group()],
+    ['applied year is missing', group({ applyBanking: true, newBaselineYear: 2022 })],
+    ['new baseline is missing', group({ applyBanking: true, bankedAnalysisYear: 2021 })],
+    ['year order is invalid', group({ applyBanking: true, bankedAnalysisYear: 2022, newBaselineYear: 2022 })]
+  ])('keeps calculation readiness false when %s', (_label, configuredGroup) => {
+    const current = analysis('current', {
+      hasBanking: true, bankedAnalysisItemId: 'source', groups: [configuredGroup]
+    });
+    const source = analysis('source', { groups: [group()] });
 
-    expect(isBankedGroupConfigurationComplete(
-      selectedAnalysis,
-      selectedGroup,
-      selectedBankedAnalysis
-    )).toBe(false);
+    expect(isBankedGroupConfigurationComplete(current, configuredGroup, source)).toBe(false);
   });
 });

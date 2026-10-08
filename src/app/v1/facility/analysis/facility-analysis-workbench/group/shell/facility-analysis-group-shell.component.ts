@@ -7,11 +7,14 @@ import { FacilityAnalysisWorkbenchContext } from '../../facility-analysis-workbe
 import { AnalysisWorkbenchTabId, isSkippedAnalysisType } from '../../facility-analysis-workbench.models';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { FacilityAnalysisGroupResultsService } from '../results/calculation/facility-analysis-group-results.service';
+import { FacilityAnalysisBankingResultsService } from '../banking/facility-analysis-banking-results.service';
+import { bankingTabAvailable } from '../../banking/facility-analysis-banking';
+import { FacilityAnalysisPeriodService } from '../../analysis-setup/facility-analysis-period.service';
 
 @Component({
   selector: 'app-facility-analysis-group-shell',
   standalone: true,
-  providers: [FacilityAnalysisGroupContext, FacilityAnalysisGroupResultsService],
+  providers: [FacilityAnalysisGroupContext, FacilityAnalysisGroupResultsService, FacilityAnalysisBankingResultsService],
   imports: [RouterOutlet, IconComponent],
   templateUrl: './facility-analysis-group-shell.component.html',
   styleUrls: ['./facility-analysis-group-shell.component.css']
@@ -25,13 +28,21 @@ export class FacilityAnalysisGroupShellComponent {
   readonly groupGuid = this.groupContext.groupGuid;
   readonly group = this.groupContext.group;
   readonly meterGroup = this.groupContext.meterGroup;
+  private readonly period = inject(FacilityAnalysisPeriodService);
   private readonly canonicalRouteEffect = effect(() => {
     const facility = this.context.facility();
-    const analysis = this.context.analysis();
+    const analysis = this.groupContext.autosave.draft() || this.context.analysis();
     const group = this.group();
     if (!facility || !analysis || !group) return;
     const tab = this.activeTabState();
     if ((tab === 'regression' && group.analysisType !== 'regression')
+      || (tab === 'banking' && !bankingTabAvailable(
+        analysis,
+        group,
+        this.context.analyses(),
+        this.context.status.items(),
+        this.period.bankingLatestCompleteYears(group.idbGroupId)
+      ))
       || ((tab === 'annual' || tab === 'monthly-table' || tab === 'monthly-chart') && isSkippedAnalysisType(group.analysisType))) {
       void this.router.navigate([
         '/v1', 'workspace', 'facility', facility.guid, 'analysis', 'workbench', analysis.guid,
@@ -58,6 +69,7 @@ export class FacilityAnalysisGroupShellComponent {
 
 function isAnalysisWorkbenchTab(value: unknown): value is AnalysisWorkbenchTabId {
   return value === 'setup'
+    || value === 'banking'
     || value === 'regression'
     || value === 'annual'
     || value === 'monthly-table'

@@ -13,13 +13,20 @@ import { AnalysisResultNumberPipe } from '../../presentation/number/analysis-res
 import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
 import { FacilityAnalysisResultsDisplayService } from '../../presentation/facility-analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
+import { AnalysisResultMarkersComponent } from '../../presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '../../presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import {
+  AnalysisResultMarker,
+  monthlyResultMarkers,
+  orderedUniqueResultMarkers
+} from '../../presentation/result-markers/analysis-result-markers';
 
 type AnalysisResultColumnSection = 'period' | 'use' | 'predictors' | 'improvement';
 
 @Component({
   selector: 'app-facility-analysis-monthly-table',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe],
+  imports: [CommonModule, ReactiveFormsModule, NgbPaginationModule, IconComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent],
   templateUrl: './facility-analysis-monthly-table.component.html',
   styleUrls: ['./facility-analysis-monthly-table.component.css']
 })
@@ -37,11 +44,13 @@ export class FacilityAnalysisMonthlyTableComponent {
   readonly hasBanking = computed(() => this.context.analysis()?.hasBanking === true);
   readonly rowViews = computed(() => this.rows().map((row, index, rows) => ({
     row,
+    markers: this.facilityMonthlyMarkers(row.date),
     predictors: Object.fromEntries(
       (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
     ) as Readonly<Record<string, number>>,
     isFiscalYearEnd: rows[index + 1]?.fiscalYear !== row.fiscalYear
   })));
+  readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.rowViews().flatMap(view => view.markers)));
   readonly currentPage = signal(1);
   readonly pageSizeControl = new FormControl(DEFAULT_TIME_PERIOD_PAGE_SIZE, { nonNullable: true });
   readonly pageSize = toSignal(this.pageSizeControl.valueChanges, { initialValue: this.pageSizeControl.value });
@@ -102,6 +111,16 @@ export class FacilityAnalysisMonthlyTableComponent {
   readonly unit = computed(() => this.context.analysis()?.analysisCategory === 'water'
     ? this.context.analysis()?.waterUnit
     : this.context.analysis()?.energyUnit);
+
+  private facilityMonthlyMarkers(date: Date): readonly AnalysisResultMarker[] {
+    const state = this.results.state();
+    if (state.state !== 'ready') return [];
+    const target = new Date(date).getTime();
+    return orderedUniqueResultMarkers((state.groups ?? []).flatMap(result => {
+      const row = result.monthlyAnalysisSummaryData.find(item => new Date(item.date).getTime() === target);
+      return row ? monthlyResultMarkers(row) : [];
+    }));
+  }
 
   @ViewChild('monthlyResultsTable', { static: false }) monthlyResultsTable?: ElementRef<HTMLTableElement>;
 
