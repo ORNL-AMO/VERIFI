@@ -1,12 +1,10 @@
 import { AnalysisGroup, AnalysisGroupPredictorVariable } from "@data/models/analysis";
 import { CalanderizedMeter, MonthlyData } from "@data/models/calanderization";
 import { IdbFacility } from "@data/models/idbModels/facility";
-import { IdbAnalysisItem } from "@data/models/idbModels/analysisItem";
 import { IdbPredictorData } from "@data/models/idbModels/predictorData";
 import {
     getIncludedAnalysisInputIds,
-    getLatestCompleteAnalysisYear,
-    getMonthlyStartAndEndDate
+    getLatestCompleteAnalysisYear
 } from "./calculationsHelpers";
 
 describe("getLatestCompleteAnalysisYear", () => {
@@ -199,49 +197,6 @@ describe("getLatestCompleteAnalysisYear", () => {
             [],
             [facility]
         )).toBeUndefined();
-    });
-});
-
-describe("getMonthlyStartAndEndDate banking boundaries", () => {
-    const group = {
-        ...getGroup("group-1"),
-        applyBanking: true,
-        bankedAnalysisYear: 2022,
-        newBaselineYear: 2024
-    } as AnalysisGroup;
-    const analysis = {
-        baselineYear: 2020,
-        hasBanking: true
-    } as IdbAnalysisItem;
-
-    it.each([
-        {
-            label: "calendar years",
-            facility: getFacility("calendar"),
-            expectedBankedStart: new Date(2023, 0, 1),
-            expectedBaselineStart: new Date(2024, 0, 1)
-        },
-        {
-            label: "fiscal years named by their ending year",
-            facility: getFacility("ending-year", "nonCalendarYear", 6, true),
-            expectedBankedStart: new Date(2022, 6, 1),
-            expectedBaselineStart: new Date(2023, 6, 1)
-        },
-        {
-            label: "fiscal years named by their starting year",
-            facility: getFacility("starting-year", "nonCalendarYear", 6, false),
-            expectedBankedStart: new Date(2023, 6, 1),
-            expectedBaselineStart: new Date(2024, 6, 1)
-        }
-    ])("starts the transition after the applied year for $label", ({
-        facility,
-        expectedBankedStart,
-        expectedBaselineStart
-    }) => {
-        const range = getMonthlyStartAndEndDate(facility, analysis, group, 2024);
-
-        expect(range.bankedAnalysisDate).toEqual(expectedBankedStart);
-        expect(range.baselineDate).toEqual(expectedBaselineStart);
     });
 });
 

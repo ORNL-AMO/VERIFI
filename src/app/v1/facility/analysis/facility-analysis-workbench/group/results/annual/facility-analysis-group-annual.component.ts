@@ -29,7 +29,7 @@ export class FacilityAnalysisGroupAnnualComponent {
   });
   readonly rowViews = computed(() => this.rows().map(row => ({
     row,
-    markers: annualResultMarkers(row, this.groupContext.group()),
+    markers: annualResultMarkers(row, this.groupContext.group(), this.groupContext.workbench.facility()),
     predictors: Object.fromEntries(
       (row.predictorUsage ?? []).map(item => [item.predictorId, item.usage])
     ) as Readonly<Record<string, number>>

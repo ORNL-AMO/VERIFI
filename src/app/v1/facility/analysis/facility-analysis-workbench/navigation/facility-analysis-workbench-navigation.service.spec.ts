@@ -43,7 +43,10 @@ describe('FacilityAnalysisWorkbenchNavigationService', () => {
             navigate: vi.fn()
           }
         },
-        { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } },
+        {
+          provide: FacilityAnalysisPeriodService,
+          useValue: { bankingLatestCompleteYears: () => ({ consumer: 2025, source: 2025 }) }
+        },
         {
           provide: FacilityAnalysisWorkbenchContext,
           useValue: {
@@ -174,7 +177,10 @@ function configureReadyNavigation(
           status: { state: signal('ready') }
         }
       },
-      { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } },
+      {
+        provide: FacilityAnalysisPeriodService,
+        useValue: { bankingLatestCompleteYears: () => ({ consumer: 2025, source: 2025 }) }
+      },
       {
         provide: FacilityAnalysisAutosaveService,
         useValue: { state: signal('saved'), draft: signal(analysis), isBlocked: signal(false) }

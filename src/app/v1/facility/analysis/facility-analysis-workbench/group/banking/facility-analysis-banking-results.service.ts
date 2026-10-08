@@ -54,7 +54,7 @@ export class FacilityAnalysisBankingResultsService {
     this.autosave.draft(),
     this.groupContext.group(),
     this.context.analyses(),
-    this.period.groupLatestCompleteYear(this.groupContext.groupGuid())
+    this.period.bankingLatestCompleteYears(this.groupContext.groupGuid())
   ));
   readonly sourceAnalysis = computed(() => this.configuration().source);
   readonly sourceGroup = computed(() => this.configuration().sourceGroup);

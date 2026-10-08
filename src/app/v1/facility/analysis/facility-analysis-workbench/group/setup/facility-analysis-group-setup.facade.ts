@@ -50,9 +50,9 @@ export class FacilityAnalysisGroupSetupFacade {
     if (!baseline) return [];
     return Array.from({ length: Math.max(new Date().getFullYear() - baseline + 1, 1) }, (_, index) => baseline + index);
   });
-  readonly latestCompleteGroupYear = computed(() => this.period.groupLatestCompleteYear(this.groupContext.groupGuid()));
+  readonly latestCompleteYears = computed(() => this.period.bankingLatestCompleteYears(this.groupContext.groupGuid()));
   readonly bankingConfiguration = computed(() => evaluateBankedGroupConfiguration(
-    this.analysis(), this.group(), this.workbench.analyses(), this.latestCompleteGroupYear()
+    this.analysis(), this.group(), this.workbench.analyses(), this.latestCompleteYears()
   ));
   readonly bankingSource = computed(() => this.bankingConfiguration().source);
   readonly bankedGroup = computed(() => this.bankingConfiguration().sourceGroup);
@@ -64,7 +64,9 @@ export class FacilityAnalysisGroupSetupFacade {
       return 'Resolve the selected banking source errors before applying banking.';
     }
     if (!configuration.sourceGroup) return 'The banking source does not contain a usable matching meter group.';
-    if (configuration.groupIssue === 'data-unavailable') return 'This group does not have a complete year of meter and predictor data.';
+    if (configuration.groupIssue === 'data-unavailable') {
+      return 'This group or its banking source does not have a complete year of required meter and predictor data.';
+    }
     return undefined;
   });
   readonly bankingModelYearWarning = computed(() => {
@@ -214,7 +216,7 @@ export class FacilityAnalysisGroupSetupFacade {
       valid: draft => {
         const group = draft.groups.find(item => item.idbGroupId === groupGuid);
         const evaluation = evaluateBankedGroupConfiguration(
-          draft, group, this.workbench.analyses(), this.latestCompleteGroupYear()
+          draft, group, this.workbench.analyses(), this.latestCompleteYears()
         );
         return !!group && groupSetupDraftValid(group, draft.hasBanking, evaluation.valid)
           && (!evaluation.source || !bankingSourceHasBlockingErrors(draft, evaluation.source, this.workbench.status.items()));

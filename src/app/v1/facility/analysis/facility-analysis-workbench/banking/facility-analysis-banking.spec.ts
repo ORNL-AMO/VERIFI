@@ -40,11 +40,11 @@ describe('facility analysis banking presentation', () => {
   });
 
   it('derives bounded banking years from real data availability', () => {
-    expect(bankingYearOptions(2019, 2022, 2024)).toEqual({
-      appliedYears: [2020, 2021, 2022, 2023, 2024],
+    expect(bankingYearOptions(2019, 2022, { source: 2023, consumer: 2024 })).toEqual({
+      appliedYears: [2020, 2021, 2022, 2023],
       newBaselineYears: [2022, 2023, 2024]
     });
-    expect(bankingYearOptions(2025, 2024, 2024).appliedYears).toEqual([]);
+    expect(bankingYearOptions(2025, 2024, { source: 2024, consumer: 2024 }).appliedYears).toEqual([]);
   });
 
   it('exposes a usable matching source group before banking is applied', () => {
@@ -67,30 +67,32 @@ describe('facility analysis banking presentation', () => {
     const current = analysis('current', { hasBanking: true, bankedAnalysisItemId: 'source', groups: [currentGroup] });
     const source = analysis('source', { groups: [group()] });
 
-    expect(bankingTabAvailable(current, currentGroup, [current, source], [], 2024)).toBe(true);
+    const bounds = { consumer: 2024, source: 2024 };
+    expect(bankingTabAvailable(current, currentGroup, [current, source], [], bounds)).toBe(true);
     expect(bankingTabAvailable(current, currentGroup, [current, source], [{
       severity: 'error', entity: { guid: `${current.guid}:${currentGroup.idbGroupId}` },
       evidence: { reasons: ['missingRegressionModelSelection'] }
-    }] as any, 2024)).toBe(true);
+    }] as any, bounds)).toBe(true);
     expect(bankingTabAvailable(current, currentGroup, [current, source], [{
       severity: 'error', entity: { guid: source.guid }
-    }] as any, 2024)).toBe(false);
+    }] as any, bounds)).toBe(false);
     expect(bankingTabAvailable(current, currentGroup, [current, source], [{
       severity: 'error', entity: { guid: current.guid }, evidence: { reasons: ['bankingError'] }
-    }] as any, 2024)).toBe(false);
+    }] as any, bounds)).toBe(false);
     expect(bankingTabAvailable(current, currentGroup, [current, analysis('source', {
       groups: [group({ analysisType: 'skip' })]
-    })], [], 2024)).toBe(false);
-    expect(bankingTabAvailable(current, { ...currentGroup, bankedAnalysisYear: 2025 }, [current, source], [], 2024)).toBe(false);
+    })], [], bounds)).toBe(false);
+    expect(bankingTabAvailable(
+      current, { ...currentGroup, bankedAnalysisYear: 2025 }, [current, source], [], bounds
+    )).toBe(false);
   });
 
   it('projects the preview through the year before the new baseline and carries applied-year improvement', () => {
-    const sourceGroup = group({ analysisType: 'regression', isGeneratedModel: true, regressionModelYear: 2020 });
     const rows = [2019, 2020, 2021, 2022].map(year => ({
       year, totalSavingsPercentImprovement: year - 2018
     } as AnnualAnalysisSummary));
 
-    const preview = bankedSavingsPreviewRows(rows, 2020, 2023, sourceGroup);
+    const preview = bankedSavingsPreviewRows(rows, 2020, 2023);
 
     expect(bankingPreviewReportYear(group({ bankedAnalysisYear: 2020, newBaselineYear: 2023 }))).toBe(2022);
     expect(preview.map(row => ({ year: row.summary.year, transition: row.transition, total: row.totalSavingsPercentImprovement })))
@@ -100,8 +102,28 @@ describe('facility analysis banking presentation', () => {
         { year: 2021, transition: true, total: 2 },
         { year: 2022, transition: true, total: 2 }
       ]);
-    expect(preview[1].modelPeriod).toBe(true);
-    expect(bankedSavingsPreviewRows(rows, 2022, 2023, sourceGroup).some(row => row.transition)).toBe(false);
+    expect(bankedSavingsPreviewRows(rows, 2022, 2023).some(row => row.transition)).toBe(false);
+  });
+
+  it('preserves transition periods already present in the banking source', () => {
+    const annual = [
+      { year: 2021, isIntermediateBanked: false, totalSavingsPercentImprovement: 8 },
+      { year: 2022, isIntermediateBanked: true, totalSavingsPercentImprovement: 8 }
+    ] as AnnualAnalysisSummary[];
+    const monthly = [
+      {
+        date: new Date(2021, 11, 1), fiscalYear: 2021, isIntermediateBanked: false,
+        percentSavingsComparedToBaseline: 8
+      },
+      {
+        date: new Date(2022, 0, 1), fiscalYear: 2022, isIntermediateBanked: true,
+        percentSavingsComparedToBaseline: 8
+      }
+    ] as MonthlyAnalysisSummaryData[];
+
+    expect(bankedSavingsPreviewRows(annual, 2024, 2025).map(row => row.transition)).toEqual([false, true]);
+    expect(bankedSavingsChartMonthlyRows(monthly, 2024, 2025).map(row => row.isIntermediateBanked))
+      .toEqual([false, true]);
   });
 
   it('projects monthly chart rows through transition without mutating source results', () => {

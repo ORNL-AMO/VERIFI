@@ -21,6 +21,9 @@ describe('FacilityAnalysisGroupAnnualComponent', () => {
           provide: FacilityAnalysisGroupContext,
           useValue: {
             group,
+            workbench: {
+              facility: signal({ fiscalYear: 'calendarYear', fiscalYearMonth: 0, fiscalYearCalendarEnd: true })
+            },
             autosave: { draft: signal({ analysisCategory: 'energy', energyUnit: 'MMBtu', hasBanking: true }) }
           }
         },

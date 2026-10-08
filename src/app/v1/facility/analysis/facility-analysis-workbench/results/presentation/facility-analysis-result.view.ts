@@ -178,6 +178,7 @@ export function monthlySavingsChartView(
       { id: 'losses', label: 'Losses', unit: '%', color: 'var(--v1-danger)' },
       { id: 'savings', label: 'Savings', unit: '%', color: 'var(--v1-success)' }
     ];
+  const transitionCarry = carriedTransitionImprovement(rows);
   return {
     metrics,
     rows: rows.map(row => {
@@ -189,7 +190,7 @@ export function monthlySavingsChartView(
       };
       if (includeBanking) {
         const bankedImprovement = row.isIntermediateBanked
-          ? row.percentSavingsComparedToBaseline
+          ? transitionCarry.get(row) ?? row.percentSavingsComparedToBaseline
           : rollingImprovement;
         values['bankedSavings'] = row.isBanked && bankedImprovement >= 0 ? bankedImprovement : 0;
         values['bankedLosses'] = row.isBanked && bankedImprovement < 0 ? bankedImprovement : 0;
@@ -202,4 +203,21 @@ export function monthlySavingsChartView(
       };
     })
   };
+}
+
+function carriedTransitionImprovement(
+  rows: readonly MonthlyAnalysisSummaryData[]
+): ReadonlyMap<MonthlyAnalysisSummaryData, number> {
+  const carry = new Map<MonthlyAnalysisSummaryData, number>();
+  let appliedImprovement: number | undefined;
+  [...rows]
+    .sort((first, second) => new Date(first.date).getTime() - new Date(second.date).getTime())
+    .forEach(row => {
+      if (row.isBanked && !row.isIntermediateBanked && Number.isFinite(row.percentSavingsComparedToBaseline)) {
+        appliedImprovement = row.percentSavingsComparedToBaseline;
+      } else if (row.isIntermediateBanked && appliedImprovement !== undefined) {
+        carry.set(row, appliedImprovement);
+      }
+    });
+  return carry;
 }

@@ -27,7 +27,12 @@ import {
 } from '@domain/calculations/status-check-calculations/validation/groupAnalysisValidation';
 import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity } from '@shared/sharedHelperFunctions';
-import { evaluateBankedGroupConfiguration, evaluateBankingSource } from '@shared/shared-analysis/banking-configuration';
+import {
+  bankingGroupDependencyChain,
+  BankingLatestCompleteYears,
+  evaluateBankedGroupConfiguration,
+  evaluateBankingSource
+} from '@shared/shared-analysis/banking-configuration';
 import { StatusEntityRef, StatusEvaluation, StatusFinding, makeFinding } from './status.models';
 import { DEFAULT_DATA_STALENESS_MONTHS, DataStalenessMonths } from './status.settings';
 
@@ -242,13 +247,17 @@ function evaluateAnalyses(snapshot: AccountWorkspaceSnapshot, calendarizedMeters
     let groupWarning = false;
     for (const group of analysis.groups) {
       const latestCompleteYear = latestCompleteGroupYear(analysis, group, snapshot, calendarizedMeters);
+      const bankingLatestCompleteYears = {
+        consumer: latestCompleteYear,
+        source: latestCompleteBankingSourceYear(analysis, group, snapshot, calendarizedMeters)
+      } satisfies BankingLatestCompleteYears;
       const errors = completeGroupErrors(
         group,
         analysis,
         getGroupErrors(group, analysis, [...calendarizedMeters], [...snapshot.predictorData]),
         snapshot,
         calendarizedMeters,
-        latestCompleteYear
+        bankingLatestCompleteYears
       );
       groupErrors.push(errors);
       if (group.analysisType === 'skip' || group.analysisType === 'skipAnalysis') continue;
@@ -257,7 +266,7 @@ function evaluateAnalyses(snapshot: AccountWorkspaceSnapshot, calendarizedMeters
         analysis,
         group,
         snapshot.facilityAnalyses,
-        latestCompleteYear
+        bankingLatestCompleteYears
       );
       if (bankingSourceGroupInvalid) {
         errors.hasSetupErrors = true;
@@ -421,7 +430,7 @@ function completeGroupErrors(
   calculated: GroupAnalysisErrors,
   snapshot: AccountWorkspaceSnapshot,
   calendarizedMeters: readonly CalanderizedMeter[],
-  latestCompleteYear: number | undefined
+  latestCompleteYears: BankingLatestCompleteYears
 ): GroupAnalysisErrors {
   if (group.analysisType === 'skip' || group.analysisType === 'skipAnalysis') return calculated;
   const errors = { ...calculated };
@@ -472,7 +481,7 @@ function completeGroupErrors(
       analysis,
       group,
       snapshot.facilityAnalyses,
-      latestCompleteYear
+      latestCompleteYears
     );
     errors.missingBankingBaselineYear = !validNumber(group.newBaselineYear);
     errors.missingBankingAppliedYear = !validNumber(group.bankedAnalysisYear);
@@ -666,7 +675,7 @@ function bankingSourceGroupIssue(
   analysis: IdbAnalysisItem,
   group: AnalysisGroup,
   analyses: readonly IdbAnalysisItem[],
-  latestCompleteYear: number | undefined
+  latestCompleteYears: BankingLatestCompleteYears
 ): string | undefined {
   if (!analysis.hasBanking || !group.applyBanking) return undefined;
   const selectedSource = analyses.find(item => item.guid === analysis.bankedAnalysisItemId);
@@ -674,7 +683,7 @@ function bankingSourceGroupIssue(
   if (!matchingSourceGroup || matchingSourceGroup.analysisType === 'skip' || matchingSourceGroup.analysisType === 'skipAnalysis') {
     return 'bankingSourceGroupUnavailable';
   }
-  switch (evaluateBankedGroupConfiguration(analysis, group, analyses, latestCompleteYear).groupIssue) {
+  switch (evaluateBankedGroupConfiguration(analysis, group, analyses, latestCompleteYears).groupIssue) {
     case 'data-unavailable': return 'bankingGroupDataUnavailable';
     case 'applied-year-out-of-range': return 'bankingAppliedYearOutOfRange';
     case 'baseline-year-out-of-range': return 'bankingBaselineYearOutOfRange';
@@ -689,12 +698,37 @@ function latestCompleteGroupYear(
   snapshot: AccountWorkspaceSnapshot,
   calendarizedMeters: readonly CalanderizedMeter[]
 ): number | undefined {
+  return latestCompleteGroupsYear(analysis, [group], snapshot, calendarizedMeters);
+}
+
+function latestCompleteBankingSourceYear(
+  analysis: IdbAnalysisItem,
+  group: AnalysisGroup,
+  snapshot: AccountWorkspaceSnapshot,
+  calendarizedMeters: readonly CalanderizedMeter[]
+): number | undefined {
+  const source = evaluateBankingSource(analysis, snapshot.facilityAnalyses).source;
+  if (!source) return undefined;
+  const chain = bankingGroupDependencyChain(source, group.idbGroupId, snapshot.facilityAnalyses);
+  const groups = chain.map(item => item.groups.find(candidate => candidate.idbGroupId === group.idbGroupId));
+  if (!groups.every((candidate): candidate is AnalysisGroup => !!candidate
+    && candidate.analysisType !== 'skip' && candidate.analysisType !== 'skipAnalysis')) return undefined;
+  return latestCompleteGroupsYear(source, groups, snapshot, calendarizedMeters);
+}
+
+function latestCompleteGroupsYear(
+  analysis: IdbAnalysisItem,
+  groups: readonly AnalysisGroup[],
+  snapshot: AccountWorkspaceSnapshot,
+  calendarizedMeters: readonly CalanderizedMeter[]
+): number | undefined {
   const facility = snapshot.facilities.find(item => item.guid === analysis.facilityId);
   if (!facility) return undefined;
+  const groupIds = new Set(groups.map(item => item.idbGroupId));
   const groupCalendarized = calendarizedMeters.filter(item => item.meter.facilityId === analysis.facilityId
-    && item.meter.groupId === group.idbGroupId && !item.meter.noLongerInUse);
+    && groupIds.has(item.meter.groupId) && !item.meter.noLongerInUse);
   return getLatestCompleteAnalysisYear(
-    [group],
+    [...groups],
     [...groupCalendarized],
     snapshot.predictorData.filter(item => item.facilityId === analysis.facilityId),
     [facility]

@@ -232,6 +232,41 @@ describe('v1 workspace status evaluator', () => {
     expect(findings).toHaveLength(1);
     expect(findings[0].evidence.reasons).toEqual(expect.arrayContaining(['bankingError', 'bankingSourceInvalid']));
   });
+
+  it('rejects an applied banking year beyond complete source predictor inputs', () => {
+    const currentGroup = analysisGroup({ applyBanking: true, bankedAnalysisYear: 2023, newBaselineYear: 2024 });
+    const sourceGroup = analysisGroup({
+      analysisType: 'regression', isGeneratedModel: true, regressionModelYear: 2020, regressionConstant: 1,
+      selectedModelId: 'model-a', models: [{
+        modelId: 'model-a', isValid: true,
+        predictorVariables: [{ id: 'predictor-a', name: 'Production' }]
+      }],
+      predictorVariables: [{
+        id: 'predictor-a', name: 'Production', production: true, productionInAnalysis: true,
+        regressionCoefficient: 1
+      }]
+    });
+    const current = facilityAnalysis('current', [currentGroup], {
+      baselineYear: 2023, hasBanking: true, bankedAnalysisItemId: 'source'
+    });
+    const source = facilityAnalysis('source', [sourceGroup], { baselineYear: 2020 });
+    const value = snapshot({
+      facilityAnalyses: [current, source],
+      predictorData: [2020, 2021].flatMap(year => Array.from({ length: 12 }, (_, month) => predictorData({
+        guid: `predictor-a-${year}-${month}`,
+        year,
+        month: month + 1
+      })))
+    });
+    const calendarized = [calendarizedMeter(value.meters[0], [2020, 2021, 2022, 2023, 2024, 2025]
+      .flatMap(year => Array.from({ length: 12 }, (_, monthNumValue) => monthlyData({ year, monthNumValue }))))];
+
+    const result = evaluate(value, calendarized);
+    const groupFinding = result.findings.find(item => item.entity.guid === 'current:group-a'
+      && item.code === 'analysis-group.setup.invalid');
+
+    expect(groupFinding?.evidence.reasons).toContain('bankingAppliedYearOutOfRange');
+  });
 });
 
 function facilityAnalysis(

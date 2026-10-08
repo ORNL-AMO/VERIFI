@@ -145,6 +145,23 @@ describe('facility analysis result views', () => {
     ]);
   });
 
+  it('carries the last applied improvement when raw transition months have not projected it yet', () => {
+    const rows = [
+      {
+        date: new Date(2023, 11, 1), rolling12MonthImprovement: 20, isBanked: true,
+        isIntermediateBanked: false, percentSavingsComparedToBaseline: 20
+      },
+      {
+        date: new Date(2024, 0, 1), rolling12MonthImprovement: 0, isBanked: true,
+        isIntermediateBanked: true, percentSavingsComparedToBaseline: 0
+      }
+    ] as any;
+
+    expect(monthlySavingsChartView(rows, true).rows[1].values).toEqual({
+      savings: 0, losses: 0, bankedSavings: 20, bankedLosses: 0
+    });
+  });
+
   it.each([
     {
       label: 'energy regression output',

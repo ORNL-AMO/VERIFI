@@ -1,6 +1,6 @@
 <span class="v1-result-markers">
   @for (marker of markerViews(); track marker.id) {
-    <span class="v1-result-marker" [attr.aria-label]="marker.label" [title]="marker.label">
+    <span class="v1-result-marker" role="img" [attr.aria-label]="marker.label" [title]="marker.label">
       <app-ui-icon [name]="marker.icon" [size]="16" [strokeWidth]="2"></app-ui-icon>
     </span>
   }

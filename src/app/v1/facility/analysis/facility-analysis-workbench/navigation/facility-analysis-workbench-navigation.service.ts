@@ -75,7 +75,7 @@ export class FacilityAnalysisWorkbenchNavigationService {
       group,
       this.context.analyses(),
       this.context.status.items(),
-      this.period.groupLatestCompleteYear(stage.groupGuid)
+      this.period.bankingLatestCompleteYears(stage.groupGuid)
     ));
   });
   readonly contextTabAttention = computed(() => {

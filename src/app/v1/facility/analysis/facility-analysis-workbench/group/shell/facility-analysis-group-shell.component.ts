@@ -41,7 +41,7 @@ export class FacilityAnalysisGroupShellComponent {
         group,
         this.context.analyses(),
         this.context.status.items(),
-        this.period.groupLatestCompleteYear(group.idbGroupId)
+        this.period.bankingLatestCompleteYears(group.idbGroupId)
       ))
       || ((tab === 'annual' || tab === 'monthly-table' || tab === 'monthly-chart') && isSkippedAnalysisType(group.analysisType))) {
       void this.router.navigate([

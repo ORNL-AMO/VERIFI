@@ -52,7 +52,10 @@ describe('FacilityAnalysisGroupShellComponent', () => {
           }
         },
         { provide: FacilityAnalysisWorkbenchContext, useValue: context },
-        { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } }
+        {
+          provide: FacilityAnalysisPeriodService,
+          useValue: { bankingLatestCompleteYears: () => ({ consumer: 2025, source: 2025 }) }
+        }
       ]
     });
 

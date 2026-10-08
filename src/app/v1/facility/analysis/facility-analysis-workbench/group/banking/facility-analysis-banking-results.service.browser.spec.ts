@@ -193,7 +193,10 @@ function configure(options: {
   };
   TestBed.configureTestingModule({ providers: [
     FacilityAnalysisBankingResultsService,
-    { provide: FacilityAnalysisPeriodService, useValue: { groupLatestCompleteYear: () => 2025 } },
+    {
+      provide: FacilityAnalysisPeriodService,
+      useValue: { bankingLatestCompleteYears: () => ({ consumer: 2025, source: 2025 }) }
+    },
     {
       provide: FacilityAnalysisGroupContext,
       useValue: {

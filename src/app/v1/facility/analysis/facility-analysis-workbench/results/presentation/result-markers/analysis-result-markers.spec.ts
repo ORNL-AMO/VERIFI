@@ -32,6 +32,26 @@ describe('analysis result markers', () => {
     } as MonthlyAnalysisSummaryData, userDefined)).toEqual(['transition', 'model']);
   });
 
+  it('maps user-defined annual model markers using fiscal periods', () => {
+    const userDefined = {
+      analysisType: 'regression', isGeneratedModel: false,
+      regressionStartYear: 2024, regressionModelStartMonth: 0,
+      regressionEndYear: 2024, regressionModelEndMonth: 5
+    } as AnalysisGroup;
+    const facility = {
+      fiscalYear: 'nonCalendarYear' as const,
+      fiscalYearMonth: 6,
+      fiscalYearCalendarEnd: false
+    };
+
+    expect(annualResultMarkers({
+      year: 2023, isBanked: false, isIntermediateBanked: false, savingsBanked: 0
+    } as AnnualAnalysisSummary, userDefined, facility)).toEqual(['model']);
+    expect(annualResultMarkers({
+      year: 2024, isBanked: false, isIntermediateBanked: false, savingsBanked: 0
+    } as AnnualAnalysisSummary, userDefined, facility)).toEqual([]);
+  });
+
   it('deduplicates markers in the shared legend order', () => {
     expect(orderedUniqueResultMarkers(['model', 'transition', 'banked-source', 'model']))
       .toEqual(['banked-source', 'transition', 'model']);

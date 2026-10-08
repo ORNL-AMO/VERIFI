@@ -3,6 +3,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { StatusItem } from '@app/v1/status/status.models';
 import {
   bankingDependencyIncludes,
+  BankingLatestCompleteYears,
   bankingYearOptions,
   evaluateBankedGroupConfiguration,
   evaluateBankingSource,
@@ -29,7 +30,6 @@ export interface BankedSavingsPreviewRow {
   readonly summary: AnnualAnalysisSummary;
   readonly totalSavingsPercentImprovement: number | undefined;
   readonly transition: boolean;
-  readonly modelPeriod: boolean;
 }
 
 export function bankingSourceOptions(
@@ -106,10 +106,10 @@ export function bankingTabAvailable(
   group: AnalysisGroup | undefined,
   analyses: readonly IdbAnalysisItem[],
   findings: readonly StatusItem[],
-  latestCompleteYear: number | undefined
+  latestCompleteYears: BankingLatestCompleteYears
 ): boolean {
   const source = selectedBankingSource(analysis, analyses);
-  if (!evaluateBankedGroupConfiguration(analysis, group, analyses, latestCompleteYear).valid || !source) return false;
+  if (!evaluateBankedGroupConfiguration(analysis, group, analyses, latestCompleteYears).valid || !source) return false;
   return !bankingSourceHasBlockingErrors(analysis, source, findings);
 }
 
@@ -135,20 +135,19 @@ export function bankingPreviewReportYear(group: AnalysisGroup | undefined): numb
 export function bankedSavingsPreviewRows(
   rows: readonly AnnualAnalysisSummary[],
   appliedYear: number,
-  newBaselineYear: number,
-  sourceGroup: AnalysisGroup
+  newBaselineYear: number
 ): readonly BankedSavingsPreviewRow[] {
   const applied = rows.find(row => row.year === appliedYear);
-  return rows.filter(row => row.year < newBaselineYear).map(row => ({
-    summary: row,
-    transition: row.year > appliedYear,
-    modelPeriod: sourceGroup.analysisType === 'regression' && (sourceGroup.isGeneratedModel
-      ? row.year === sourceGroup.regressionModelYear
-      : row.year >= sourceGroup.regressionStartYear && row.year <= sourceGroup.regressionEndYear),
-    totalSavingsPercentImprovement: row.year > appliedYear
-      ? applied?.totalSavingsPercentImprovement
-      : row.totalSavingsPercentImprovement
-  }));
+  return rows.filter(row => row.year < newBaselineYear).map(row => {
+    const consumerTransition = row.year > appliedYear;
+    return {
+      summary: row,
+      transition: !!row.isIntermediateBanked || consumerTransition,
+      totalSavingsPercentImprovement: consumerTransition
+        ? applied?.totalSavingsPercentImprovement
+        : row.totalSavingsPercentImprovement
+    };
+  });
 }
 
 export function bankedSavingsChartMonthlyRows(
@@ -164,12 +163,12 @@ export function bankedSavingsChartMonthlyRows(
   return rows
     .filter(row => row.fiscalYear < newBaselineYear)
     .map(row => {
-      const transition = row.fiscalYear > appliedYear;
+      const consumerTransition = row.fiscalYear > appliedYear;
       return {
         ...row,
         isBanked: true,
-        isIntermediateBanked: transition,
-        percentSavingsComparedToBaseline: transition && appliedPeriod
+        isIntermediateBanked: !!row.isIntermediateBanked || consumerTransition,
+        percentSavingsComparedToBaseline: consumerTransition && appliedPeriod
           ? appliedPeriod.percentSavingsComparedToBaseline
           : row.percentSavingsComparedToBaseline
       };

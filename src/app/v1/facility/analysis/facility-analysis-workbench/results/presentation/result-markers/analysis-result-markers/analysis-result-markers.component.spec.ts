@@ -11,5 +11,6 @@ describe('AnalysisResultMarkersComponent', () => {
     const markers = fixture.nativeElement.querySelectorAll('.v1-result-marker') as NodeListOf<HTMLElement>;
     expect(Array.from(markers).map(marker => marker.getAttribute('aria-label')))
       .toEqual(['Banked source period', 'Transition period']);
+    expect(Array.from(markers).map(marker => marker.getAttribute('role'))).toEqual(['img', 'img']);
   });
 });

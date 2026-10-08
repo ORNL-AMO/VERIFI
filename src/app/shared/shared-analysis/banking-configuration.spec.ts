@@ -1,6 +1,7 @@
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import {
+  bankingGroupDependencyChain,
   evaluateBankedGroupConfiguration,
   evaluateBankingSource,
   getBankedAnalysisGroup,
@@ -39,6 +40,20 @@ describe('banking configuration', () => {
     expect(evaluateBankingSource(current, [current, source, dependency]).issue).toBe('cycle');
   });
 
+  it('includes transitive dependencies only while the matching source group applies banking', () => {
+    const dependency = analysis('dependency');
+    const source = analysis('source', {
+      hasBanking: true, bankedAnalysisItemId: dependency.guid,
+      groups: [group({ applyBanking: true })]
+    });
+
+    expect(bankingGroupDependencyChain(source, 'group-a', [source, dependency]).map(item => item.guid))
+      .toEqual(['source', 'dependency']);
+    source.groups[0].applyBanking = false;
+    expect(bankingGroupDependencyChain(source, 'group-a', [source, dependency]).map(item => item.guid))
+      .toEqual(['source']);
+  });
+
   it('bounds both years and rejects stale persisted selections', () => {
     const configuredGroup = group({ applyBanking: true, bankedAnalysisYear: 2021, newBaselineYear: 2026 });
     const current = analysis('current', {
@@ -46,16 +61,38 @@ describe('banking configuration', () => {
     });
     const source = analysis('source', { baselineYear: 2020, groups: [group()] });
 
-    const stale = evaluateBankedGroupConfiguration(current, configuredGroup, [current, source], 2025);
+    const stale = evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2025 }
+    );
     expect(stale.appliedYears).toEqual([2021, 2022, 2023, 2024, 2025]);
     expect(stale.newBaselineYears).toEqual([2023, 2024, 2025]);
     expect(stale.groupIssue).toBe('baseline-year-out-of-range');
 
     configuredGroup.newBaselineYear = 2024;
-    expect(evaluateBankedGroupConfiguration(current, configuredGroup, [current, source], 2025).valid).toBe(true);
+    expect(evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2025 }
+    ).valid).toBe(true);
     configuredGroup.bankedAnalysisYear = 2020;
-    expect(evaluateBankedGroupConfiguration(current, configuredGroup, [current, source], 2025).groupIssue)
+    expect(evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2025 }
+    ).groupIssue)
       .toBe('applied-year-out-of-range');
+  });
+
+  it('bounds applied years by source inputs and new baselines by consumer inputs', () => {
+    const configuredGroup = group({ applyBanking: true, bankedAnalysisYear: 2023, newBaselineYear: 2024 });
+    const current = analysis('current', {
+      baselineYear: 2023, hasBanking: true, bankedAnalysisItemId: 'source', groups: [configuredGroup]
+    });
+    const source = analysis('source', { baselineYear: 2020, groups: [group()] });
+
+    const evaluation = evaluateBankedGroupConfiguration(
+      current, configuredGroup, [current, source], { consumer: 2025, source: 2021 }
+    );
+
+    expect(evaluation.appliedYears).toEqual([2021]);
+    expect(evaluation.newBaselineYears).toEqual([2023, 2024, 2025]);
+    expect(evaluation.groupIssue).toBe('applied-year-out-of-range');
   });
 
   it('keeps the calculation-readiness contract for a complete matching group', () => {

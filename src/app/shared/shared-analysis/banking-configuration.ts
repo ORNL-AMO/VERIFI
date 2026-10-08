@@ -29,6 +29,11 @@ export interface BankedGroupConfigurationEvaluation extends BankingSourceEvaluat
   readonly valid: boolean;
 }
 
+export interface BankingLatestCompleteYears {
+  readonly consumer: number | undefined;
+  readonly source: number | undefined;
+}
+
 export function evaluateBankingSource(
   analysis: IdbAnalysisItem | undefined,
   analyses: readonly IdbAnalysisItem[]
@@ -48,7 +53,7 @@ export function evaluateBankedGroupConfiguration(
   analysis: IdbAnalysisItem | undefined,
   group: AnalysisGroup | undefined,
   analyses: readonly IdbAnalysisItem[],
-  latestCompleteYear: number | undefined
+  latestCompleteYears: BankingLatestCompleteYears
 ): BankedGroupConfigurationEvaluation {
   const sourceEvaluation = evaluateBankingSource(analysis, analyses);
   const source = sourceEvaluation.source;
@@ -58,14 +63,14 @@ export function evaluateBankedGroupConfiguration(
   const { appliedYears, newBaselineYears } = bankingYearOptions(
     source?.baselineYear,
     analysis?.baselineYear,
-    latestCompleteYear
+    latestCompleteYears
   );
   const groupIssue = bankedGroupIssue(
     analysis,
     group,
     sourceEvaluation.issue,
     sourceGroup,
-    latestCompleteYear,
+    latestCompleteYears,
     appliedYears,
     newBaselineYears
   );
@@ -103,17 +108,37 @@ export function bankingDependencyIncludes(
   return false;
 }
 
+export function bankingGroupDependencyChain(
+  source: IdbAnalysisItem,
+  groupGuid: string,
+  analyses: readonly IdbAnalysisItem[]
+): readonly IdbAnalysisItem[] {
+  const byGuid = new Map(analyses.map(analysis => [analysis.guid, analysis]));
+  const chain: IdbAnalysisItem[] = [];
+  const visited = new Set<string>();
+  let cursor: IdbAnalysisItem | undefined = source;
+  while (cursor && !visited.has(cursor.guid)) {
+    chain.push(cursor);
+    visited.add(cursor.guid);
+    const group = cursor.groups.find(item => item.idbGroupId === groupGuid);
+    cursor = cursor.hasBanking && cursor.bankedAnalysisItemId && group?.applyBanking
+      ? byGuid.get(cursor.bankedAnalysisItemId)
+      : undefined;
+  }
+  return chain;
+}
+
 export function bankingYearOptions(
   sourceBaselineYear: number | undefined,
   analysisBaselineYear: number | undefined,
-  latestCompleteYear: number | undefined
+  latestCompleteYears: BankingLatestCompleteYears
 ): { readonly appliedYears: readonly number[]; readonly newBaselineYears: readonly number[] } {
   return {
     appliedYears: yearRange(
       Number.isFinite(sourceBaselineYear) ? sourceBaselineYear! + 1 : undefined,
-      latestCompleteYear
+      latestCompleteYears.source
     ),
-    newBaselineYears: yearRange(analysisBaselineYear, latestCompleteYear)
+    newBaselineYears: yearRange(analysisBaselineYear, latestCompleteYears.consumer)
   };
 }
 
@@ -152,14 +177,16 @@ function bankedGroupIssue(
   group: AnalysisGroup | undefined,
   sourceIssue: BankingSourceIssue | undefined,
   sourceGroup: AnalysisGroup | undefined,
-  latestCompleteYear: number | undefined,
+  latestCompleteYears: BankingLatestCompleteYears,
   appliedYears: readonly number[],
   newBaselineYears: readonly number[]
 ): BankedGroupIssue | undefined {
   if (!analysis?.hasBanking || !group?.applyBanking) return 'source';
   if (sourceIssue) return 'source';
   if (!sourceGroup || isSkippedGroup(sourceGroup)) return 'group-unavailable';
-  if (!Number.isFinite(latestCompleteYear)) return 'data-unavailable';
+  if (!Number.isFinite(latestCompleteYears.consumer) || !Number.isFinite(latestCompleteYears.source)) {
+    return 'data-unavailable';
+  }
   if (!Number.isFinite(group.bankedAnalysisYear) || !Number.isFinite(group.newBaselineYear)) return 'years-missing';
   if (!appliedYears.includes(group.bankedAnalysisYear)) return 'applied-year-out-of-range';
   if (!newBaselineYears.includes(group.newBaselineYear)) return 'baseline-year-out-of-range';

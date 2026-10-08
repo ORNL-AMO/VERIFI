@@ -208,7 +208,7 @@
               @if (bankingModelYearWarning()) { <p class="v1-analysis-group-setup__notice" role="status"><app-ui-icon name="info"></app-ui-icon><span>{{ bankingModelYearWarning() }}</span></p> }
             }
           </div>
-          @if (currentGroup.applyBanking && !bankingUnavailableReason()) { <app-banked-group-savings [group]="currentGroup"></app-banked-group-savings> }
+          @if (currentGroup.applyBanking && !bankingUnavailableReason()) { <app-banked-group-savings [group]="currentGroup" [facility]="workbench.facility()"></app-banked-group-savings> }
         </div>
       </section>
     }

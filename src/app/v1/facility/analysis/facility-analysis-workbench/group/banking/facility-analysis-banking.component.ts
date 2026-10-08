@@ -26,6 +26,7 @@ import { AnalysisResultMarkersComponent } from '../../results/presentation/resul
 import { AnalysisResultMarkerLegendComponent } from '../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import {
   AnalysisResultMarker,
+  isAnnualModelPeriod,
   orderedUniqueResultMarkers
 } from '../../results/presentation/result-markers/analysis-result-markers';
 import { RegressionModelReviewSlideoutComponent } from '../regression/model-review-slideout/regression-model-review-slideout.component';
@@ -80,11 +81,13 @@ export class FacilityAnalysisBankingComponent {
     return bankedSavingsPreviewRows(
       state.annual,
       group.bankedAnalysisYear,
-      group.newBaselineYear,
-      sourceGroup
+      group.newBaselineYear
     ).map(view => ({
       ...view,
-      markers: [view.transition ? 'transition' : 'banked-source', ...(view.modelPeriod ? ['model' as const] : [])] as readonly AnalysisResultMarker[]
+      markers: [
+        view.transition ? 'transition' : 'banked-source',
+        ...(isAnnualModelPeriod(sourceGroup, view.summary.year, this.facility()) ? ['model' as const] : [])
+      ] as readonly AnalysisResultMarker[]
     }));
   });
   readonly legendMarkers = computed(() => orderedUniqueResultMarkers(this.annualViews().flatMap(view => view.markers)));
