@@ -1,0 +1,28 @@
+@let groupRows = groups();
+@let isCompact = compact();
+<section
+  class="v1-analysis-model-roster"
+  [class.v1-analysis-model-roster--compact]="isCompact"
+  [attr.aria-labelledby]="headingId()">
+  <div class="v1-analysis-model-roster__heading">
+    <h2 [id]="headingId()">{{ isCompact ? 'Groups and models' : 'Analysis groups and models' }}</h2>
+  </div>
+  @if (groupRows.length) {
+    <div class="v1-analysis-model-roster__list">
+      @for (group of groupRows; track group.id) {
+        <article [class.v1-analysis-model-roster__group--excluded]="group.excluded">
+          <div class="v1-analysis-model-roster__identity">
+            <h3>{{ group.name }}</h3>
+            <span class="v1-chip">{{ group.methodLabel }}</span>
+          </div>
+          <p class="v1-analysis-model-roster__model">{{ group.modelLabel }}</p>
+          <p class="v1-analysis-model-roster__equation" [class.v1-analysis-model-roster__equation--unavailable]="group.unavailable">
+            {{ group.equationLabel }}
+          </p>
+        </article>
+      }
+    </div>
+  } @else {
+    <p class="v1-analysis-model-roster__empty">No analysis groups are configured.</p>
+  }
+</section>

@@ -1,25 +1,30 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { FacilityAnalysisPeriodService } from '../analysis-setup/facility-analysis-period.service';
+import { IdbFacility } from '@data/models/idbModels/facility';
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from '../results/calculation/facility-analysis-results.service';
+import {
+  FacilityAnalysisOutcomeState,
+  facilityAnalysisOutcomeDisplay,
+  facilityAnalysisOutcomeSummary
+} from '../../facility-analysis-outcome-summary';
+import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
 
 @Component({
   selector: 'app-facility-analysis-workbench-header',
   standalone: true,
   imports: [
-    DecimalPipe,
     RouterLink,
     IconComponent,
     DataWorkbenchFactsToggleComponent,
-    DataWorkbenchResourceSwitcherComponent
+    DataWorkbenchResourceSwitcherComponent,
+    FacilityAnalysisGroupModelRosterComponent
   ],
   templateUrl: './facility-analysis-workbench-header.component.html',
   styleUrls: ['./facility-analysis-workbench-header.component.css']
@@ -29,7 +34,6 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
-  readonly period = inject(FacilityAnalysisPeriodService);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly workflow = inject(FacilityAnalysisWorkbenchNavigationService);
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
@@ -37,10 +41,15 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
     label: analysis.name || 'Untitled analysis',
     icon: 'analysis' as const
   })));
-  readonly resultFacts = computed(() => facilityAnalysisResultFacts(
+  readonly resultOutcome = computed(() => facilityAnalysisResultOutcome(
     this.results.state(),
     this.autosave.state(),
-    this.context.hasBlockingErrors()
+    this.context.hasBlockingErrors(),
+    this.context.facility()
+  ));
+  readonly resultDisplay = computed(() => facilityAnalysisOutcomeDisplay(
+    this.resultOutcome(),
+    (this.autosave.draft() || this.context.analysis())?.analysisCategory ?? 'energy'
   ));
   readonly dependencyMessage = computed(() => {
     const analysis = this.context.analysis();
@@ -59,41 +68,29 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   }
 }
 
-export interface FacilityAnalysisResultFacts {
-  readonly totalSavingsPercentImprovement?: number;
-  readonly unavailableMessage?: string;
-}
-
-export function facilityAnalysisResultFacts(
+export function facilityAnalysisResultOutcome(
   state: FacilityAnalysisResultState,
   autosaveState: AnalysisAutosaveState = 'saved',
-  hasBlockingErrors = false
-): FacilityAnalysisResultFacts {
+  hasBlockingErrors = false,
+  facility: Pick<IdbFacility, 'fiscalYear'> | undefined = undefined
+): FacilityAnalysisOutcomeState {
   if (state.state !== 'ready') {
     if (hasBlockingErrors || (state.state === 'waiting' && state.reason === 'blocked')) {
-      return { unavailableMessage: 'Setup incomplete' };
+      return { state: 'blocked', message: 'Setup incomplete' };
     }
-    if (state.state === 'loading') return { unavailableMessage: 'Calculating…' };
-    if (state.state === 'error') return { unavailableMessage: 'Calculation failed' };
+    if (state.state === 'loading') return { state: 'loading', message: 'Calculating…' };
+    if (state.state === 'error') return { state: 'error', message: 'Calculation failed' };
     if (state.state === 'waiting' && state.reason === 'autosave') {
-      if (autosaveState === 'invalid') return { unavailableMessage: 'Setup incomplete' };
-      if (autosaveState === 'error') return { unavailableMessage: 'Save failed' };
-      return { unavailableMessage: 'Waiting for save…' };
+      if (autosaveState === 'invalid') return { state: 'blocked', message: 'Setup incomplete' };
+      if (autosaveState === 'error') return { state: 'error', message: 'Save failed' };
+      return { state: 'loading', message: 'Waiting for save…' };
     }
-    if (state.state === 'waiting') return { unavailableMessage: 'Preparing data…' };
-    return { unavailableMessage: 'Unavailable' };
+    if (state.state === 'waiting') return { state: 'loading', message: 'Preparing data…' };
+    return { state: 'error', message: 'Unavailable' };
   }
-  const reportYear = state.reportYear ?? state.annual.reduce<number | undefined>(
-    (latest, summary) => latest === undefined || summary.year > latest ? summary.year : latest,
-    undefined
-  );
-  const latestSummary = state.annual.find(summary => summary.year === reportYear);
-  const totalSavingsPercentImprovement = latestSummary?.totalSavingsPercentImprovement;
   return {
-    totalSavingsPercentImprovement: Number.isFinite(totalSavingsPercentImprovement)
-      ? totalSavingsPercentImprovement
-      : undefined,
-    unavailableMessage: Number.isFinite(totalSavingsPercentImprovement) ? undefined : 'Unavailable'
+    state: 'ready',
+    summary: facilityAnalysisOutcomeSummary(state.annual, state.monthly, state.reportYear, facility)
   };
 }
 

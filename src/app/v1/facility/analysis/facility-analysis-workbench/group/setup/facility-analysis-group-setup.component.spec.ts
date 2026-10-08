@@ -10,6 +10,7 @@ import { invalidateRegressionModel } from '../regression/regression-draft';
 import { FacilityAnalysisGroupSetupComponent } from './facility-analysis-group-setup.component';
 import { FacilityAnalysisGroupSetupController } from './facility-analysis-group-setup.controller';
 import { FacilityAnalysisGroupSetupFacade, groupSetupDraftValid } from './facility-analysis-group-setup.facade';
+import { RegressionModelValidationService } from '../regression/regression-model-validation.service';
 
 describe('facility analysis group setup behavior', () => {
   it('clears model-derived fields without changing the selected analysis method', () => {
@@ -91,6 +92,54 @@ describe('facility analysis group setup behavior', () => {
     expect(controller.pendingChange()).toBeUndefined();
   });
 
+  it('shows the absolute-consumption equation where production-variable controls would appear', () => {
+    const fixture = renderMethodSetup('absoluteEnergyConsumption');
+
+    const panels = fixture.nativeElement.querySelectorAll('.v1-analysis-group-setup__configuration > .v1-analysis-group-setup__panel') as NodeListOf<HTMLElement>;
+    expect(panels).toHaveLength(3);
+    expect(panels[1].querySelector('h2')?.textContent).toContain('Modeled energy equation');
+    expect(panels[1].textContent).toContain('Modeled energy = baseline-period actual consumption');
+    expect(panels[1].textContent).not.toContain('Production variables');
+  });
+
+  it('shows the classic-intensity equation beneath the production-variable selection', () => {
+    const fixture = renderMethodSetup('energyIntensity');
+
+    const productionPanel = fixture.nativeElement.querySelector('[aria-labelledby="production-variables-heading"]') as HTMLElement;
+    const productionCheckbox = productionPanel.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    const equation = productionPanel.querySelector('.v1-analysis-group-setup__equation') as HTMLElement;
+    expect(productionCheckbox.checked).toBe(true);
+    expect(equation.textContent).toContain('Modeled energy equation');
+    expect(equation.textContent).toContain('Modeled energy = baseline intensity × Production');
+    expect(productionCheckbox.compareDocumentPosition(equation) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('shows the selected regression equation in the middle setup panel', () => {
+    const fixture = renderMethodSetup('regression', true);
+
+    const equationPanel = fixture.nativeElement.querySelector('[aria-labelledby="regression-equation-heading"]') as HTMLElement;
+    const inspectButton = equationPanel.querySelector('button') as HTMLButtonElement;
+    expect(equationPanel.textContent).toContain('Modeled energy equation');
+    expect(equationPanel.textContent).toContain('Modeled energy = 10 + 2 × Production');
+    expect(equationPanel.textContent).not.toContain('No model selected');
+    expect(inspectButton.getAttribute('aria-label')).toBe('Inspect selected regression model');
+    expect(inspectButton.querySelector('app-ui-icon')).not.toBeNull();
+
+    inspectButton.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-regression-model-review-slideout')).not.toBeNull();
+    expect(fixture.debugElement.injector.get(RegressionModelValidationService).inspectGenerated).toHaveBeenCalledOnce();
+  });
+
+  it('shows an explicit empty state when generated regression has no selected model', () => {
+    const fixture = renderMethodSetup('regression', false);
+
+    const equation = fixture.nativeElement.querySelector('.v1-analysis-group-setup__equation-text') as HTMLElement;
+    expect(equation.textContent).toContain('No model selected.');
+    expect(equation.classList).toContain('v1-analysis-group-setup__equation-text--unavailable');
+    expect(fixture.nativeElement.querySelector('.v1-analysis-group-setup__inspect-model')).toBeNull();
+  });
+
   it('renders locked banking controls with an option to clear models, warnings, and the savings preview', () => {
     const group = {
       idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: [],
@@ -157,7 +206,8 @@ describe('facility analysis group setup behavior', () => {
       set: {
         providers: [
           { provide: FacilityAnalysisGroupSetupFacade, useValue: facade },
-          { provide: FacilityAnalysisGroupSetupController, useValue: controller }
+          { provide: FacilityAnalysisGroupSetupController, useValue: controller },
+          { provide: RegressionModelValidationService, useValue: regressionValidationStub() }
         ]
       }
     });
@@ -199,3 +249,110 @@ describe('facility analysis group setup behavior', () => {
     expect(text).toContain('Transition period');
   });
 });
+
+function renderMethodSetup(method: 'absoluteEnergyConsumption' | 'energyIntensity' | 'regression', selectRegressionModel = false) {
+  const predictor = {
+    id: 'production-a',
+    name: 'Production',
+    unit: 'units',
+    production: true,
+    productionInAnalysis: true
+  };
+  const regressionModel = {
+    modelId: 'model-a',
+    modelYear: 2024,
+    coef: [10, 2],
+    predictorVariables: [predictor]
+  };
+  const group = {
+    idbGroupId: 'group-a',
+    analysisType: method,
+    predictorVariables: [predictor],
+    isGeneratedModel: method === 'regression',
+    selectedModelId: method === 'regression' && selectRegressionModel ? regressionModel.modelId : undefined,
+    models: method === 'regression' ? [regressionModel] : undefined,
+    specifiedMonthlyPercentBaseload: false,
+    monthlyPercentBaseload: [],
+    dataAdjustments: [],
+    baselineAdjustmentsV2: [],
+    applyBanking: false
+  } as unknown as AnalysisGroup;
+  const analysis = {
+    guid: 'analysis-a',
+    name: 'Current',
+    analysisCategory: 'energy',
+    energyUnit: 'MMBtu',
+    waterUnit: 'gal',
+    baselineYear: 2022,
+    hasBanking: false,
+    groups: [group]
+  } as IdbAnalysisItem;
+  const facade = {
+    navigation: { facilityDataRoute: () => ['/v1', 'facility-data'] },
+    workbench: { facility: signal({ guid: 'facility-a' }) },
+    group: signal(group),
+    analysis: signal(analysis),
+    dataAdjustmentDraft: signal({ amount: '' }),
+    baselineAdjustmentDraft: signal({ amount: '' }),
+    dataAdjustmentEditorOpen: signal(false),
+    baselineAdjustmentEditorOpen: signal(false),
+    hasModels: signal(false),
+    missingMeters: signal(false),
+    meterStatusItems: signal([]),
+    productionVariables: signal([predictor]),
+    selectedProductionCount: signal(1),
+    isSkipped: signal(false),
+    adjustmentYears: signal([]),
+    availableDataAdjustmentYears: signal([]),
+    availableBaselineAdjustmentYears: signal([]),
+    adjustmentUnit: signal('MMBtu/yr'),
+    canAddDataAdjustment: signal(false),
+    canAddBaselineAdjustment: signal(false),
+    bankingYearError: signal(undefined),
+    bankingYears: signal({ appliedYears: [], newBaselineYears: [] }),
+    bankingSource: signal(undefined),
+    bankedGroup: signal(undefined),
+    bankingUnavailableReason: signal(undefined),
+    bankingModelYearWarning: signal(undefined),
+    removeAdjustment: vi.fn()
+  };
+  const controller = {
+    pendingChange: signal(undefined),
+    cancelPendingChange: vi.fn(),
+    confirmPendingChange: vi.fn(),
+    requestClearModels: vi.fn(),
+    analysisType: new FormControl(method, { nonNullable: true }),
+    predictorControl: () => new FormControl(true, { nonNullable: true }),
+    openAdjustmentEditor: vi.fn(),
+    cancelAdjustmentEditor: vi.fn(),
+    addAdjustment: vi.fn()
+  };
+  TestBed.configureTestingModule({
+    imports: [FacilityAnalysisGroupSetupComponent],
+    providers: [
+      provideRouter([]),
+      { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
+    ]
+  });
+  TestBed.overrideComponent(FacilityAnalysisGroupSetupComponent, {
+    set: {
+      providers: [
+        { provide: FacilityAnalysisGroupSetupFacade, useValue: facade },
+        { provide: FacilityAnalysisGroupSetupController, useValue: controller },
+        { provide: RegressionModelValidationService, useValue: regressionValidationStub() }
+      ]
+    }
+  });
+  const fixture = TestBed.createComponent(FacilityAnalysisGroupSetupComponent);
+  fixture.detectChanges();
+  return fixture;
+}
+
+function regressionValidationStub() {
+  return {
+    state: signal({ state: 'idle' as const }),
+    inspectGenerated: vi.fn(),
+    clear: vi.fn(),
+    retry: vi.fn()
+  };
+}

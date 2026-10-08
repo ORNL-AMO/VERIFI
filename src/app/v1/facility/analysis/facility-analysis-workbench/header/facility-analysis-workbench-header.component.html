@@ -1,7 +1,7 @@
 @if (context.facility(); as facility) {
   @if (context.analysis(); as analysis) {
     @let displayedAnalysis = autosave.draft() || analysis;
-    @let facts = resultFacts();
+    @let outcomes = resultDisplay();
     <header class="v1-data-workbench-header v1-analysis-workbench__header">
       <nav class="v1-data-workbench-breadcrumb" aria-label="Facility analysis breadcrumb">
         <ol>
@@ -60,22 +60,29 @@
       }
 
       <div id="v1-analysis-workbench-facts" [hidden]="!factsToggle.expanded()">
-        <dl class="v1-data-workbench-facts">
-          <div><dt>Baseline</dt><dd>{{ displayedAnalysis.baselineYear || 'Not selected' }}</dd></div>
-          <div><dt>Latest complete year</dt><dd>{{ period.latestCompleteYear() ?? 'Unavailable' }}</dd></div>
-          <div><dt>Basis</dt><dd>{{ displayedAnalysis.analysisCategory === 'energy' ? (displayedAnalysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }}</dd></div>
-          <div><dt>Units</dt><dd>{{ displayedAnalysis.analysisCategory === 'water' ? displayedAnalysis.waterUnit : displayedAnalysis.energyUnit }}</dd></div>
-          <div>
-            <dt>Total savings % improvement</dt>
-            <dd>
-              @if (facts.totalSavingsPercentImprovement !== undefined) {
-                {{ facts.totalSavingsPercentImprovement | number:'1.0-2' }}%
-              } @else {
-                {{ facts.unavailableMessage }}
-              }
-            </dd>
-          </div>
-        </dl>
+        <div class="v1-analysis-workbench__facts-layout">
+          <dl class="v1-analysis-workbench__summary-facts" aria-label="Analysis context and latest results" aria-live="polite">
+            <div>
+              <dt>Baseline</dt>
+              <dd>{{ displayedAnalysis.baselineYear || 'Not selected' }}</dd>
+            </div>
+            <div>
+              <dt>Basis and units</dt>
+              <dd>{{ displayedAnalysis.analysisCategory === 'energy' ? (displayedAnalysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }} · {{ displayedAnalysis.analysisCategory === 'water' ? displayedAnalysis.waterUnit : displayedAnalysis.energyUnit }}</dd>
+            </div>
+            <div [class.v1-analysis-workbench__outcome--unavailable]="outcomes.annual.unavailable">
+              <dt>{{ outcomes.annual.label }}</dt>
+              <dd>{{ outcomes.annual.valueLabel }}</dd>
+              <span>{{ outcomes.annual.metaLabel }}</span>
+            </div>
+            <div [class.v1-analysis-workbench__outcome--unavailable]="outcomes.monthly.unavailable">
+              <dt>{{ outcomes.monthly.label }}</dt>
+              <dd>{{ outcomes.monthly.valueLabel }}</dd>
+              <span>{{ outcomes.monthly.metaLabel }}</span>
+            </div>
+          </dl>
+          <app-facility-analysis-group-model-roster [analysis]="displayedAnalysis" [meterGroups]="context.meterGroups()"></app-facility-analysis-group-model-roster>
+        </div>
       </div>
 
       @if (dependencyMessage(); as message) {

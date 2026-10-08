@@ -32,7 +32,7 @@ import {
 import { RegressionModelReviewSlideoutComponent } from '../regression/model-review-slideout/regression-model-review-slideout.component';
 import { RegressionModelValidationState } from '../regression/regression-model-validation.service';
 import { modeledQuantityLabel } from '../regression/regression-labels';
-import { formatRegressionNumber } from '../regression/regression-number-format';
+import { formatRegressionNumber } from '@app/v1/facility/analysis/regression-number-format';
 
 @Component({
   selector: 'app-facility-analysis-banking',

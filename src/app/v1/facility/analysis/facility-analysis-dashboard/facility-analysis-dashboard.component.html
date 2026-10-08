@@ -1,6 +1,6 @@
 @let facility = workspace.facility();
 @let account = workspace.account();
-@let cards = workspace.cards();
+@let dashboardCards = cards();
 @let visibleCards = filteredCards();
 
 @if (!facility) {
@@ -8,7 +8,18 @@
 } @else {
   <header class="v1-section-header v1-analysis-dashboard__header">
     <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / {{ facility.name || 'Facility' }}</p><h1 id="v1-facility-analysis-title"><app-ui-icon name="analysis"></app-ui-icon> Facility analysis</h1></div>
-    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
+    <div class="v1-analysis-dashboard__header-actions">
+      <button
+        type="button"
+        class="v1-btn v1-btn--quiet v1-btn--sm"
+        aria-controls="v1-analysis-card-grid"
+        [attr.aria-expanded]="showGroupDetails()"
+        (click)="toggleGroupDetails()">
+        <span aria-hidden="true">{{ showGroupDetails() ? '−' : '+' }}</span>
+        {{ showGroupDetails() ? 'Hide group details' : 'Show group details' }}
+      </button>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
+    </div>
   </header>
 
   @if (workspace.workspaceState() === 'loading' || workspace.workspaceState() === 'switching') {
@@ -23,7 +34,7 @@
   @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ actionError() }}</div> }
   @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
 
-  <div class="v1-data-dashboard-workspace"><div class="v1-data-browse" aria-label="Facility analyses">
+  <div class="v1-data-dashboard-workspace"><div id="v1-analysis-card-grid" class="v1-data-browse" aria-label="Facility analyses">
     <form class="v1-data-browse-toolbar" aria-label="Analysis filters" [formGroup]="filtersForm">
       <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" formControlName="search"></div>
       <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label>
@@ -31,24 +42,31 @@
       <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
     </form>
 
-    @if (cards.length === 0) {
+    @if (dashboardCards.length === 0) {
       <app-data-empty-state icon="analysis" context="facility" title="No analyses" description="Create an energy or water analysis to get started."></app-data-empty-state>
     } @else if (visibleCards.length === 0) {
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
     } @else {
       @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
-      <div class="v1-data-browse-grid" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsCard.set($event)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
+      <div class="v1-data-browse-grid v1-analysis-dashboard__card-grid" role="list" aria-label="Facility analyses">
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
       </div>
     }
   </div></div>
 
   @if (detailsCard(); as card) {
-    <app-workspace-slideout [title]="card.analysis.name" description="Analysis setup, validation, and downstream usage" size="large" (closed)="detailsCard.set(undefined)">
+    <app-workspace-slideout [title]="card.analysis.name" description="Analysis setup, results, models, and downstream usage" size="large" (closed)="detailsGuid.set(undefined)">
       <div class="v1-analysis-details">
-        <dl><div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div><div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div><div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Modified</dt><dd>{{ card.modifiedDateLabel }}</dd></div></dl>
-        <h3>Groups</h3>
-        @if (card.groupSummaries.length) { <ul>@for (group of card.groupSummaries; track group.id) { <li><strong>{{ group.name }}</strong><span>{{ group.analysisTypeLabel }} · {{ group.predictorCount }} predictors · {{ group.generatedModelCount }} models</span></li> }</ul> } @else { <p>No groups are included.</p> }
+        <dl>
+          <div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div>
+          <div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div>
+          <div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div>
+          <div><dt>Basis and units</dt><dd>{{ card.category === 'water' ? 'Water' : (card.analysis.energyIsSource ? 'Source energy' : 'Site energy') }} · {{ card.category === 'water' ? card.analysis.waterUnit : card.analysis.energyUnit }}</dd></div>
+          <div><dt>{{ card.outcomeDisplay.annual.label }}</dt><dd>{{ card.outcomeDisplay.annual.valueLabel }}</dd></div>
+          <div><dt>{{ card.outcomeDisplay.monthly.label }}</dt><dd>{{ card.outcomeDisplay.monthly.valueLabel }}</dd></div>
+          <div><dt>Modified</dt><dd>{{ card.modifiedDateLabel }}</dd></div>
+        </dl>
+        <app-facility-analysis-group-model-roster [analysis]="card.analysis" [meterGroups]="workspace.meterGroups()"></app-facility-analysis-group-model-roster>
         <h3>Used by</h3>
         @if (card.dependencyCount || card.bankingSource) { <ul>@for (item of card.linkedAccountAnalyses; track item.guid) { <li>Account analysis: {{ item.name }}</li> } @for (item of card.linkedReports; track item.guid) { <li>Facility report: {{ item.name }}</li> } @for (item of card.bankingConsumers; track item.guid) { <li>Banking analysis: {{ item.name }}</li> } @if (card.bankingSource) { <li>Uses banked source: {{ card.bankingSource.name }}</li> }</ul> } @else { <p>No downstream links.</p> }
         @if (card.findings.length) { <h3>Validation</h3><ul>@for (finding of card.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
@@ -60,7 +78,7 @@
 
   @if (comparisonCards().length === 2) {
     <app-workspace-slideout title="Compare analyses" description="Setup and readiness comparison" size="large" (closed)="clearComparison()">
-      <div class="v1-analysis-comparison">@for (card of comparisonCards(); track card.analysis.guid) { <article><h3>{{ card.analysis.name }}</h3><dl><div><dt>Category</dt><dd>{{ card.category }}</dd></div><div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div><div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Groups</dt><dd>{{ card.groupCount }}</dd></div><div><dt>Regression groups</dt><dd>{{ card.regressionCount }}</dd></div><div><dt>Downstream links</dt><dd>{{ card.dependencyCount }}</dd></div></dl></article> }</div>
+      <div class="v1-analysis-comparison">@for (card of comparisonCards(); track card.analysis.guid) { <article><h3>{{ card.analysis.name }}</h3><dl><div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div><div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div><div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Basis and units</dt><dd>{{ card.category === 'water' ? 'Water' : (card.analysis.energyIsSource ? 'Source energy' : 'Site energy') }} · {{ card.category === 'water' ? card.analysis.waterUnit : card.analysis.energyUnit }}</dd></div><div><dt>{{ card.outcomeDisplay.annual.label }}</dt><dd>{{ card.outcomeDisplay.annual.valueLabel }}</dd></div><div><dt>{{ card.outcomeDisplay.monthly.label }}</dt><dd>{{ card.outcomeDisplay.monthly.valueLabel }}</dd></div><div><dt>Downstream use</dt><dd>{{ downstreamUse(card) }}</dd></div></dl></article> }</div>
     </app-workspace-slideout>
   }
 }

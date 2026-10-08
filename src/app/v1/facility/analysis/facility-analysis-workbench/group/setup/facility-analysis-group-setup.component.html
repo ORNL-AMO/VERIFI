@@ -39,6 +39,39 @@
           @if (!productionVariables().length) { <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a [routerLink]="navigation.facilityDataRoute(facility.guid, 'predictors')">Open Predictors</a></p> }
           @for (predictor of productionVariables(); track predictor.id) { <label class="v1-analysis-group-setup__check"><input type="checkbox" [formControl]="controller.predictorControl(predictor.id)" /><span>{{ predictor.name }} <small>{{ predictor.unit }}</small></span></label> }
           @if (productionVariables().length && selectedProductionCount() === 0) { <p class="v1-field-error" role="alert">Select at least one production variable.</p> }
+          @if (currentGroup.analysisType === 'energyIntensity' && modeledEquation(); as equation) {
+            <div class="v1-analysis-group-setup__equation" aria-labelledby="classic-intensity-equation-heading">
+              <h3 id="classic-intensity-equation-heading" class="v1-analysis-group-setup__subsection-title">Modeled {{ currentAnalysis.analysisCategory === 'water' ? 'water' : 'energy' }} equation</h3>
+              <p class="v1-analysis-group-setup__equation-text">{{ equation }}</p>
+            </div>
+          }
+        </section>
+      }
+
+      @if (currentGroup.analysisType === 'absoluteEnergyConsumption' && modeledEquation(); as equation) {
+        <section class="v1-analysis-group-setup__panel" aria-labelledby="absolute-consumption-equation-heading">
+          <h2 id="absolute-consumption-equation-heading" class="v1-analysis-group-setup__section-title">Modeled {{ currentAnalysis.analysisCategory === 'water' ? 'water' : 'energy' }} equation</h2>
+          <p class="v1-analysis-group-setup__equation-text">{{ equation }}</p>
+        </section>
+      }
+
+      @if (currentGroup.analysisType === 'regression' && regressionEquation(); as equation) {
+        <section class="v1-analysis-group-setup__panel" aria-labelledby="regression-equation-heading">
+          <h2 id="regression-equation-heading" class="v1-analysis-group-setup__section-title">Modeled {{ currentAnalysis.analysisCategory === 'water' ? 'water' : 'energy' }} equation</h2>
+          <div class="v1-analysis-group-setup__equation-row">
+            <p class="v1-analysis-group-setup__equation-text" [class.v1-analysis-group-setup__equation-text--unavailable]="equation.unavailable">{{ equation.text }}</p>
+            @if (selectedRegressionModel(); as model) {
+              <button
+                #inspectModelButton
+                type="button"
+                class="v1-btn v1-btn--secondary v1-btn--sm v1-analysis-group-setup__inspect-model"
+                aria-label="Inspect selected regression model"
+                title="Inspect selected regression model"
+                (click)="inspectRegressionModel(model, inspectModelButton)">
+                <app-ui-icon name="monocle"></app-ui-icon>
+              </button>
+            }
+          </div>
         </section>
       }
 
@@ -213,6 +246,17 @@
       </section>
     }
   </section>
+
+  @if (inspectedRegressionModel(); as model) {
+    <app-regression-model-review-slideout
+      [model]="model"
+      [group]="currentGroup"
+      [analysis]="currentAnalysis"
+      [validationState]="regressionValidation.state()"
+      (closed)="closeRegressionModelInspection()"
+      (retryRequested)="regressionValidation.retry()">
+    </app-regression-model-review-slideout>
+  }
 
 }
 

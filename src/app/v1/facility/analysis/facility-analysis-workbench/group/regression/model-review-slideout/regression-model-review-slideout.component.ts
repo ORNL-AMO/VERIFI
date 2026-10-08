@@ -5,7 +5,7 @@ import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/wo
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { RegressionModelValidationComponent } from '../model-validation/regression-model-validation.component';
 import { RegressionModelValidationState, groupWithGeneratedModel } from '../regression-model-validation.service';
-import { formatRegressionNumber } from '../regression-number-format';
+import { formatRegressionNumber } from '@app/v1/facility/analysis/regression-number-format';
 import { modeledQuantityLabel } from '../regression-labels';
 
 @Component({

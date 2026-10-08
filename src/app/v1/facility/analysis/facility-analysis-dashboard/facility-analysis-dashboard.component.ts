@@ -7,7 +7,7 @@ import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/wo
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AnalysisBrowseCardComponent } from './analysis-browse-card/analysis-browse-card.component';
 import { FacilityAnalysisWorkspaceService } from './facility-analysis-workspace.service';
-import { FacilityAnalysisCard } from './facility-analysis.models';
+import { FacilityAnalysisCard, FacilityAnalysisDashboardCard } from './facility-analysis.models';
 import { AnalysisDraftSlideoutComponent } from './analysis-draft-slideout/analysis-draft-slideout.component';
 import { FacilityAnalysisActionsService } from './facility-analysis-actions.service';
 import { AnalysisCategory } from '@data/models/analysis';
@@ -15,6 +15,9 @@ import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-di
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
+import { facilityAnalysisOutcomeDisplay } from '../facility-analysis-outcome-summary';
+import { FacilityAnalysisGroupModelRosterComponent } from '../group-model-roster/facility-analysis-group-model-roster.component';
 
 type AnalysisCategoryFilter = 'all' | 'energy' | 'water';
 type AnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
@@ -23,7 +26,8 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 @Component({
   selector: 'app-facility-analysis-dashboard',
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule],
+  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisGroupModelRosterComponent],
+  providers: [FacilityAnalysisDashboardResultsService],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']
 })
@@ -37,6 +41,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private confirmationKind: 'active' | 'delete' | undefined;
   readonly workspace = inject(FacilityAnalysisWorkspaceService);
+  readonly results = inject(FacilityAnalysisDashboardResultsService);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
@@ -45,7 +50,14 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     sort: new FormControl<AnalysisSort>('attention', { nonNullable: true })
   });
   readonly filters = toSignal(this.filtersForm.valueChanges, { initialValue: this.filtersForm.getRawValue() });
-  readonly detailsCard = signal<FacilityAnalysisCard | undefined>(undefined);
+  readonly cards = computed<readonly FacilityAnalysisDashboardCard[]>(() => this.workspace.cards().map(card => {
+    const outcome = this.results.states()[card.analysis.guid]
+      ?? { state: 'loading' as const, message: 'Preparing data…' };
+    return { ...card, outcome, outcomeDisplay: facilityAnalysisOutcomeDisplay(outcome, card.category) };
+  }));
+  readonly detailsGuid = signal<string | undefined>(undefined);
+  readonly detailsCard = computed(() => this.cards().find(card => card.analysis.guid === this.detailsGuid()));
+  readonly showGroupDetails = signal(false);
   readonly createOpen = signal(false);
   readonly saving = signal(false);
   readonly actionError = signal<string | undefined>(undefined);
@@ -63,18 +75,18 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     const facility = this.workspace.facility();
     if (!candidate || !facility) return undefined;
     const guid = candidate.category === 'water' ? facility.selectedWaterAnalysisId : facility.selectedEnergyAnalysisId;
-    return this.workspace.cards().find(card => card.analysis.guid === guid);
+    return this.cards().find(card => card.analysis.guid === guid);
   });
   readonly comparisonGuids = signal<readonly string[]>([]);
   readonly comparisonCards = computed(() => this.comparisonGuids()
-    .map(guid => this.workspace.cards().find(card => card.analysis.guid === guid))
-    .filter((card): card is FacilityAnalysisCard => !!card));
+    .map(guid => this.cards().find(card => card.analysis.guid === guid))
+    .filter((card): card is FacilityAnalysisDashboardCard => !!card));
   readonly filteredCards = computed(() => {
     const filters = this.filters();
     const search = filters.search.trim().toLocaleLowerCase();
     const category = filters.category;
     const status = filters.status;
-    return this.workspace.cards()
+    return this.cards()
       .filter(card => !search || card.searchText.includes(search))
       .filter(card => category === 'all' || card.category === category)
       .filter(card => status === 'all' || (status === 'active' ? card.isActiveForReporting : card.status === status))
@@ -132,7 +144,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
     await this.runAction(async () => {
       await this.actions.deleteAnalysis(candidate.analysis.guid);
       this.dismissDeleteConfirmation();
-      this.detailsCard.set(undefined);
+      this.detailsGuid.set(undefined);
       this.comparisonGuids.update(guids => guids.filter(guid => guid !== candidate.analysis.guid));
     });
   }
@@ -148,6 +160,11 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
 
   isCompared(guid: string): boolean { return this.comparisonGuids().includes(guid); }
   clearComparison(): void { this.comparisonGuids.set([]); }
+  toggleGroupDetails(): void { this.showGroupDetails.update(visible => !visible); }
+  downstreamUse(card: FacilityAnalysisCard): string {
+    if (card.dependencyCount === 0) return 'No downstream use';
+    return `${card.dependencyCount} downstream ${card.dependencyCount === 1 ? 'link' : 'links'}`;
+  }
 
   cancelActiveConfirmation(): void {
     if (!this.saving()) this.dismissActiveConfirmation();

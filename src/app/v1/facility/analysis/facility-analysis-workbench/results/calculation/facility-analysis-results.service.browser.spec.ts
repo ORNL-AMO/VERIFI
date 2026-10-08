@@ -60,6 +60,7 @@ describe('FacilityAnalysisResultsService browser Worker lifecycle', () => {
     await settleSignals();
     expect(service.state().state).toBe('loading');
     const first = FakeWorker.instances[0];
+    expect(first.payload).toMatchObject({ calculateAllMonthlyData: true, includeGroupSummaries: true });
 
     analysis.set({ ...analysis(), name: 'Renamed analysis', modifiedDate: new Date() });
     await settleSignals();

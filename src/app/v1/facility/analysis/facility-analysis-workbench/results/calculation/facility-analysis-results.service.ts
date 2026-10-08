@@ -122,7 +122,7 @@ export class FacilityAnalysisResultsService {
       accountPredictorEntries: predictorInputs.entries,
       accountPredictors: predictorInputs.predictors,
       accountAnalysisItems: dependencies,
-      calculateAllMonthlyData: false,
+      calculateAllMonthlyData: true,
       includeGroupSummaries: true
     };
     const fingerprint = facilityAnalysisResultsFingerprint(request);

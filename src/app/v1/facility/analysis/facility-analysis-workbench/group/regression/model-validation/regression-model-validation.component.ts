@@ -4,7 +4,7 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/echarts-chart.directive';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { RegressionModelValidationState } from '../regression-model-validation.service';
-import { formatRegressionNumber } from '../regression-number-format';
+import { formatRegressionNumber } from '@app/v1/facility/analysis/regression-number-format';
 
 @Component({
   selector: 'app-regression-model-validation',
