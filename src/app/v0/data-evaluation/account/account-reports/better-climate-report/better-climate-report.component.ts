@@ -1,5 +1,5 @@
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '@v0/data-evaluation/account/account-reports/account-reports.service';
 import { Router } from '@angular/router';
@@ -17,6 +17,11 @@ import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { DataEvaluationService } from '@v0/data-evaluation/data-evaluation.service';
 import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
+import { AbsoluteEmissionsChartComponent } from '@v0/data-evaluation/account/account-reports/better-climate-report/absolute-emissions-chart/absolute-emissions-chart.component';
+import { EmissionsReductionsChartComponent } from '@v0/data-evaluation/account/account-reports/better-climate-report/emissions-reductions-chart/emissions-reductions-chart.component';
+import { TopPerformersChartComponent } from '@v0/data-evaluation/account/account-reports/better-climate-report/top-performers-chart/top-performers-chart.component';
+import { BetterClimateChartDataOption, BetterClimateChartImageProviders, BetterClimateReportAdapter } from '@v0/data-evaluation/account/account-reports/better-climate-report/better-climate-report.adapter';
+import { ExportReportPdfService } from '@v0/shared/pdf-report/services/export-report-pdf.service';
 @Component({
   selector: 'app-better-climate-report',
   templateUrl: './better-climate-report.component.html',
@@ -25,6 +30,10 @@ import { IdbCustomGWP } from '@data/models/idbModels/customGWP';
 })
 export class BetterClimateReportComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+
+  @ViewChild(AbsoluteEmissionsChartComponent) absoluteEmissionsChart?: AbsoluteEmissionsChartComponent;
+  @ViewChild(EmissionsReductionsChartComponent) emissionsReductionsChart?: EmissionsReductionsChartComponent;
+  @ViewChildren(TopPerformersChartComponent) topPerformersCharts!: QueryList<TopPerformersChartComponent>;
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -39,13 +48,16 @@ export class BetterClimateReportComponent {
   generateExcelSub: Subscription;
   showTitleForStationary: boolean;
   showTitleForTotal: boolean;
+  isExportingPdf: boolean = false;
   constructor(
     private accountReportsService: AccountReportsService,
     private router: Router,
     private eGridService: EGridService,
     private betterClimateExcelWriterService: BetterClimateExcelWriterService,
     private loadingService: LoadingService,
-    private dataEvaluationService: DataEvaluationService
+    private dataEvaluationService: DataEvaluationService,
+    private betterClimateReportAdapter: BetterClimateReportAdapter,
+    private exportReportPdfService: ExportReportPdfService
   ) { }
 
   ngOnInit(): void {
@@ -160,5 +172,40 @@ export class BetterClimateReportComponent {
     //export to excell method sets loading status to false upon completion or error.
     this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReportUnfiltered);
     this.accountReportsService.generateExcel.next(false);
+  }
+
+  async onExportPdf(): Promise<void> {
+    const selectedReport = this.accountWorkspaceStore.selectedAccountReport();
+    if (!selectedReport || this.isExportingPdf || !this.betterClimateReport || !this.betterClimateReportUnfiltered) {
+      return;
+    }
+
+    this.isExportingPdf = true;
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const document = this.betterClimateReportAdapter.buildDocument({
+        account: this.account,
+        report: selectedReport,
+        reportSettings: this.betterClimateReportSetup,
+        filteredReport: this.betterClimateReport,
+        unfilteredReport: this.betterClimateReportUnfiltered,
+        chartImageProviders: this.getChartImageProviders()
+      });
+      await this.exportReportPdfService.export(document, `${selectedReport.name} - Emissions Report.pdf`);
+    } finally {
+      this.isExportingPdf = false;
+    }
+  }
+
+  getChartImageProviders(): BetterClimateChartImageProviders {
+    const facilityPerformance: Partial<Record<BetterClimateChartDataOption, () => Promise<string>>> = {};
+    this.topPerformersCharts?.forEach(chart => {
+      facilityPerformance[chart.chartDataOption] = () => chart.getChartAsBase64Image();
+    });
+    return {
+      absoluteEmissions: () => this.absoluteEmissionsChart?.getChartAsBase64Image() ?? Promise.resolve(''),
+      emissionsReductions: () => this.emissionsReductionsChart?.getChartAsBase64Image() ?? Promise.resolve(''),
+      facilityPerformance
+    };
   }
 }

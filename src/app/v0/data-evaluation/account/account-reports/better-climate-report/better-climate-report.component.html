@@ -201,5 +201,6 @@
 }
 
 @if (calculating == false) {
-<app-print-report-button></app-print-report-button>
+<app-print-report-button [isNewReport]="true" [isLoading]="isExportingPdf"
+  (exportPdf)="onExportPdf()"></app-print-report-button>
 }

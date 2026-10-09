@@ -100,5 +100,25 @@ export class EmissionsReductionsChartComponent {
     };
     this.plotlyService.newPlot(this.emissionsReductionChart.nativeElement, traceData, layout, config);
   }
+
+  async getChartAsBase64Image(): Promise<string> {
+    try {
+      if (!this.emissionsReductionChart?.nativeElement) {
+        return '';
+      }
+      const rawPlotly: any = await this.plotlyService.getPlotly();
+      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
+        return '';
+      }
+      return await rawPlotly.toImage(this.emissionsReductionChart.nativeElement, {
+        format: 'jpeg',
+        height: 700,
+        width: 1400,
+        imageDataOnly: false
+      });
+    } catch {
+      return '';
+    }
+  }
 }
 
