@@ -7,8 +7,14 @@ describe('buildFacilityAnalysisComparisonView', () => {
     const first = card('analysis-a', 'Analysis A', {
       groups: [group('group-a', ['Production', 'Hours']), group('group-b', [], 'skip')]
     });
+    const generatedPredictors = ['Hours', 'Production'].map(name => ({ id: name.toLowerCase(), name }));
     const second = card('analysis-b', 'Analysis B', {
-      groups: [group('group-a', ['Hours', 'Production'], 'regression', 3), group('group-c', [])]
+      groups: [{
+        ...group('group-a', [], 'regression', 3),
+        isGeneratedModel: true,
+        selectedModelId: 'generated-model',
+        models: [{ modelId: 'generated-model', modelYear: 2022, predictorVariables: generatedPredictors, coef: [10, 3, 3] }]
+      }, group('group-c', [])]
     });
 
     const view = buildFacilityAnalysisComparisonView(first, second, facility(), [
@@ -20,6 +26,11 @@ describe('buildFacilityAnalysisComparisonView', () => {
     expect(view.groups.map(item => item.name)).toEqual(['Main process', 'Support', 'Water loop']);
     expect(view.groups[0].fields.find(field => field.id === 'predictors')?.different).toBe(false);
     expect(view.groups[0].fields.find(field => field.id === 'equation')?.different).toBe(true);
+    expect(view.groups[0].fields.find(field => field.id === 'model')).toMatchObject({
+      firstValue: 'User-defined model · Model year 2022',
+      secondValue: 'Generated model · Model year 2022',
+      different: true
+    });
     expect(view.groups[1].fields.find(field => field.id === 'inclusion')).toMatchObject({
       firstValue: 'Excluded', secondValue: 'Not configured', different: true
     });
@@ -63,6 +74,12 @@ describe('buildFacilityAnalysisComparisonView', () => {
     const banking = view.groups[0].fields.find(field => field.id === 'banking');
 
     expect(banking).toMatchObject({ firstValue: 'Banked source · Applied 2022 · New baseline 2023', secondValue: 'Not applied', different: true });
+    expect(view.analysisFields.find(field => field.id === 'banking-enabled')).toMatchObject({
+      firstValue: 'Enabled', secondValue: 'Disabled', different: true
+    });
+    expect(view.analysisFields.find(field => field.id === 'banking-source')).toMatchObject({
+      firstValue: 'Banked source', secondValue: 'Not applicable', different: true
+    });
     expect(view.groups[0].fields.map(field => field.id)).not.toContain('adjustments');
   });
 });

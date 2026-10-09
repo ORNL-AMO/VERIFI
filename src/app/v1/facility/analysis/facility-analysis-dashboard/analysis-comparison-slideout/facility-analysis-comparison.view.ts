@@ -111,7 +111,8 @@ function buildAnalysisFields(
     comparisonField('category', 'Category', categoryLabel(first), categoryLabel(second)),
     comparisonField('unit', 'Unit', comparisonUnit(first) || 'Not set', comparisonUnit(second) || 'Not set'),
     comparisonField('basis', 'Basis', basisLabel(first), basisLabel(second)),
-    comparisonField('banking', 'Banking source', bankingSourceLabel(first.analysis, analyses), bankingSourceLabel(second.analysis, analyses))
+    comparisonField('banking-enabled', 'Banking enabled', bankingEnabledLabel(first.analysis), bankingEnabledLabel(second.analysis)),
+    comparisonField('banking-source', 'Banking source', bankingSourceLabel(first.analysis, analyses), bankingSourceLabel(second.analysis, analyses))
   ];
 }
 
@@ -143,7 +144,7 @@ function buildGroupComparisons(
       comparisonField('inclusion', 'Participation', participationLabel(firstGroup), participationLabel(secondGroup)),
       comparisonField('method', 'Analysis method', firstModel?.methodLabel ?? 'Not configured', secondModel?.methodLabel ?? 'Not configured'),
       comparisonField('predictors', 'Selected predictors', predictorLabel(firstGroup), predictorLabel(secondGroup)),
-      comparisonField('model', 'Model context', firstModel?.modelLabel ?? 'Not configured', secondModel?.modelLabel ?? 'Not configured'),
+      comparisonField('model', 'Model context', modelContextLabel(firstGroup, firstModel?.modelLabel), modelContextLabel(secondGroup, secondModel?.modelLabel)),
       comparisonField('equation', 'Modeled equation', firstModel?.equationLabel ?? 'Not configured', secondModel?.equationLabel ?? 'Not configured'),
       comparisonField('baseload', 'Legacy baseload', baseloadLabel(firstGroup), baseloadLabel(secondGroup)),
       comparisonField('banking', 'Banking setup', groupBankingLabel(first, firstGroup, analyses), groupBankingLabel(second, secondGroup, analyses))
@@ -291,9 +292,19 @@ function groupBankingLabel(
 }
 
 function bankingSourceLabel(analysis: IdbAnalysisItem, analyses: readonly IdbAnalysisItem[]): string {
-  if (!analysis.hasBanking) return 'Disabled';
+  if (!analysis.hasBanking) return 'Not applicable';
   const source = analyses.find(item => item.guid === analysis.bankedAnalysisItemId)?.name;
-  return source ? `Enabled · ${source}` : 'Enabled · Source not set';
+  return source || 'Source not set';
+}
+
+function bankingEnabledLabel(analysis: IdbAnalysisItem): string {
+  return analysis.hasBanking ? 'Enabled' : 'Disabled';
+}
+
+function modelContextLabel(group: AnalysisGroup | undefined, modelLabel: string | undefined): string {
+  if (!group || !modelLabel) return 'Not configured';
+  if (group.analysisType === 'regression' && group.isGeneratedModel) return `Generated model · ${modelLabel}`;
+  return modelLabel;
 }
 
 function categoryLabel(card: FacilityAnalysisDashboardCard): string {

@@ -49,7 +49,7 @@
     } @else {
       @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
       <div class="v1-data-browse-grid v1-analysis-dashboard__card-grid" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
       </div>
     }
   </div></div>
@@ -77,9 +77,13 @@
   @if (createOpen()) { <app-analysis-draft-slideout [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"></app-analysis-draft-slideout> }
 
   @if (comparisonCards().length === 2) {
-    <app-workspace-slideout title="Compare analyses" description="Setup and readiness comparison" size="large" (closed)="clearComparison()">
-      <div class="v1-analysis-comparison">@for (card of comparisonCards(); track card.analysis.guid) { <article><h3>{{ card.analysis.name }}</h3><dl><div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div><div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div><div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div><div><dt>Basis and units</dt><dd>{{ card.category === 'water' ? 'Water' : (card.analysis.energyIsSource ? 'Source energy' : 'Site energy') }} · {{ card.category === 'water' ? card.analysis.waterUnit : card.analysis.energyUnit }}</dd></div><div><dt>{{ card.outcomeDisplay.annual.label }}</dt><dd>{{ card.outcomeDisplay.annual.valueLabel }}</dd></div><div><dt>{{ card.outcomeDisplay.monthly.label }}</dt><dd>{{ card.outcomeDisplay.monthly.valueLabel }}</dd></div><div><dt>Downstream use</dt><dd>{{ downstreamUse(card) }}</dd></div></dl></article> }</div>
-    </app-workspace-slideout>
+    <app-analysis-comparison-slideout
+      [cards]="comparisonCards()"
+      [facility]="facility"
+      [meterGroups]="workspace.meterGroups()"
+      [analyses]="workspace.analyses()"
+      (closed)="clearComparison()">
+    </app-analysis-comparison-slideout>
   }
 }
 

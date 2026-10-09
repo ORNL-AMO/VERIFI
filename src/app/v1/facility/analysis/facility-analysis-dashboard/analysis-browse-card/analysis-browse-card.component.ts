@@ -20,6 +20,7 @@ export class AnalysisBrowseCardComponent {
   readonly meterGroups = input<readonly IdbUtilityMeterGroup[]>([]);
   readonly showGroupDetails = input(false);
   readonly selectedForComparison = input(false);
+  readonly comparisonDisabledReason = input<string | undefined>(undefined);
   readonly canAct = input(true);
   readonly opened = output<FacilityAnalysisDashboardCard>();
   readonly detailsRequested = output<FacilityAnalysisDashboardCard>();
@@ -31,6 +32,7 @@ export class AnalysisBrowseCardComponent {
   readonly view = computed(() => buildFacilityAnalysisResourceView(this.card()));
   readonly actions = computed<readonly ResourceBrowseCardAction[]>(() => {
     const card = this.card();
+    const comparisonDisabledReason = this.comparisonDisabledReason();
     return [
       {
         id: 'active',
@@ -41,8 +43,11 @@ export class AnalysisBrowseCardComponent {
       { id: 'details', label: 'View analysis details', icon: 'monocle' },
       {
         id: 'compare',
-        label: this.selectedForComparison() ? 'Remove from comparison' : 'Add to comparison',
-        icon: 'transfer'
+        label: this.selectedForComparison()
+          ? 'Remove from comparison'
+          : comparisonDisabledReason || 'Add to comparison',
+        icon: 'transfer',
+        disabled: !!comparisonDisabledReason && !this.selectedForComparison()
       },
       { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct() },
       { id: 'delete', label: 'Delete analysis', icon: 'delete', tone: 'danger', disabled: !this.canAct() }

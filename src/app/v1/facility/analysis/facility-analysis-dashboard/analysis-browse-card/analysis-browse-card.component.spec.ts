@@ -41,6 +41,21 @@ describe('AnalysisBrowseCardComponent', () => {
     fixture.detectChanges();
     expect(card.querySelector('app-facility-analysis-group-model-roster')).toBeNull();
   });
+
+  it('disables incompatible comparison actions with an accessible explanation', async () => {
+    await TestBed.configureTestingModule({ imports: [AnalysisBrowseCardComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(AnalysisBrowseCardComponent);
+    fixture.componentRef.setInput('card', cardFixture());
+    fixture.componentRef.setInput('comparisonDisabledReason', 'Compare with another water analysis');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')).toMatchObject({
+      label: 'Compare with another water analysis',
+      disabled: true
+    });
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[aria-label="Compare with another water analysis"]');
+    expect(button?.disabled).toBe(true);
+  });
 });
 
 function cardFixture() {

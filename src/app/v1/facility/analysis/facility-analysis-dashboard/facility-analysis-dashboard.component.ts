@@ -18,6 +18,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
 import { facilityAnalysisOutcomeDisplay } from '../facility-analysis-outcome-summary';
 import { FacilityAnalysisGroupModelRosterComponent } from '../group-model-roster/facility-analysis-group-model-roster.component';
+import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout/analysis-comparison-slideout.component';
 
 type AnalysisCategoryFilter = 'all' | 'energy' | 'water';
 type AnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
@@ -26,7 +27,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 @Component({
   selector: 'app-facility-analysis-dashboard',
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisGroupModelRosterComponent],
+  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisGroupModelRosterComponent, AnalysisComparisonSlideoutComponent],
   providers: [FacilityAnalysisDashboardResultsService],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']
@@ -81,6 +82,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   readonly comparisonCards = computed(() => this.comparisonGuids()
     .map(guid => this.cards().find(card => card.analysis.guid === guid))
     .filter((card): card is FacilityAnalysisDashboardCard => !!card));
+  readonly comparisonCategory = computed(() => this.comparisonCards()[0]?.category);
   readonly filteredCards = computed(() => {
     const filters = this.filters();
     const search = filters.search.trim().toLocaleLowerCase();
@@ -155,17 +157,19 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
       this.comparisonGuids.set(current.filter(guid => guid !== card.analysis.guid));
       return;
     }
+    const category = this.comparisonCategory();
+    if (category && card.category !== category) return;
     this.comparisonGuids.set([...current, card.analysis.guid].slice(-2));
   }
 
   isCompared(guid: string): boolean { return this.comparisonGuids().includes(guid); }
+  comparisonDisabledReason(card: FacilityAnalysisCard): string | undefined {
+    const category = this.comparisonCategory();
+    if (!category || category === card.category || this.isCompared(card.analysis.guid)) return undefined;
+    return `Compare with another ${category} analysis`;
+  }
   clearComparison(): void { this.comparisonGuids.set([]); }
   toggleGroupDetails(): void { this.showGroupDetails.update(visible => !visible); }
-  downstreamUse(card: FacilityAnalysisCard): string {
-    if (card.dependencyCount === 0) return 'No downstream use';
-    return `${card.dependencyCount} downstream ${card.dependencyCount === 1 ? 'link' : 'links'}`;
-  }
-
   cancelActiveConfirmation(): void {
     if (!this.saving()) this.dismissActiveConfirmation();
   }

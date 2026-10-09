@@ -10,14 +10,12 @@
 .v1-data-browse-grid.v1-analysis-dashboard__card-grid { grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr)); }
 .v1-analysis-dashboard__compare-tray { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); padding: .75rem 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface-raised); }
 .v1-analysis-details { display: grid; gap: var(--v1-space-4); }
-.v1-analysis-details dl, .v1-analysis-comparison dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-3); margin: 0; }
-.v1-analysis-details dl div, .v1-analysis-comparison dl div { padding: .75rem; border: 1px solid var(--v1-border); }
-.v1-analysis-details dt, .v1-analysis-comparison dt { color: var(--v1-muted); font-size: .78rem; font-weight: 700; }
-.v1-analysis-details dd, .v1-analysis-comparison dd { margin: .25rem 0 0; font-weight: 800; }
+.v1-analysis-details dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-3); margin: 0; }
+.v1-analysis-details dl div { padding: .75rem; border: 1px solid var(--v1-border); }
+.v1-analysis-details dt { color: var(--v1-muted); font-size: .78rem; font-weight: 700; }
+.v1-analysis-details dd { margin: .25rem 0 0; font-weight: 800; }
 .v1-analysis-details ul { display: grid; gap: .5rem; margin: 0; padding-left: 1.25rem; }
 .v1-analysis-details li span { display: block; color: var(--v1-muted); font-size: .82rem; }
-.v1-analysis-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-4); }
-.v1-analysis-comparison article { min-width: 0; }
 .v1-analysis-active-confirmation { display: grid; gap: var(--v1-space-4); }
 .v1-analysis-active-confirmation footer { display: flex; justify-content: flex-end; gap: var(--v1-space-2); }
-@media (max-width: 760px) { .v1-analysis-dashboard__header, .v1-analysis-comparison { display: grid; grid-template-columns: 1fr; } .v1-analysis-dashboard__header-actions { justify-content: flex-start; } .v1-analysis-details dl, .v1-analysis-comparison dl { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .v1-analysis-dashboard__header { display: grid; grid-template-columns: 1fr; } .v1-analysis-dashboard__header-actions { justify-content: flex-start; } .v1-analysis-details dl { grid-template-columns: 1fr; } }
