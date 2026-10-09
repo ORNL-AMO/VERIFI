@@ -1,0 +1,136 @@
+@if (comparison(); as comparison) {
+  <app-workspace-slideout
+    title="Compare analyses"
+    description="Group setup and facility annual results"
+    size="large"
+    (closed)="closed.emit()">
+    <div class="v1-analysis-comparison">
+      <section aria-labelledby="comparison-analysis-setup-heading">
+        <h3 id="comparison-analysis-setup-heading">Analysis setup</h3>
+        <div class="v1-analysis-comparison__table-scroll" tabindex="0" role="region" aria-label="Analysis setup comparison">
+          <table class="v1-analysis-comparison__setup-table">
+            <thead><tr><th scope="col">Setting</th><th scope="col">{{ comparison.first.analysis.name }}</th><th scope="col">{{ comparison.second.analysis.name }}</th></tr></thead>
+            <tbody>
+              @for (field of comparison.analysisFields; track field.id) {
+                <tr [class.v1-analysis-comparison__different]="field.different">
+                  <th scope="row">{{ field.label }} @if (field.different) { <span class="v1-analysis-comparison__difference-label">Different</span> }</th>
+                  <td>{{ field.firstValue }}</td>
+                  <td>{{ field.secondValue }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="comparison-group-setup-heading">
+        <h3 id="comparison-group-setup-heading">Group modeling setup</h3>
+        @if (comparison.groups.length) {
+          <div class="v1-analysis-comparison__groups">
+            @for (group of comparison.groups; track group.id) {
+              <article>
+                <h4>{{ group.name }} @if (group.different) { <span class="v1-analysis-comparison__difference-label">Different</span> }</h4>
+                <div class="v1-analysis-comparison__table-scroll" tabindex="0" role="region" [attr.aria-label]="group.name + ' setup comparison'">
+                  <table class="v1-analysis-comparison__setup-table">
+                    <thead><tr><th scope="col">Setting</th><th scope="col">{{ comparison.first.analysis.name }}</th><th scope="col">{{ comparison.second.analysis.name }}</th></tr></thead>
+                    <tbody>
+                      @for (field of group.fields; track field.id) {
+                        <tr [class.v1-analysis-comparison__different]="field.different">
+                          <th scope="row">{{ field.label }} @if (field.different) { <span class="v1-analysis-comparison__difference-label">Different</span> }</th>
+                          <td>{{ field.firstValue }}</td>
+                          <td>{{ field.secondValue }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="v1-analysis-comparison__empty">Neither analysis has configured groups.</p>
+        }
+      </section>
+
+      <section aria-labelledby="comparison-annual-results-heading">
+        <h3 id="comparison-annual-results-heading">Facility annual results</h3>
+        <div class="v1-analysis-comparison__result-states" aria-label="Annual result availability">
+          @if (comparison.firstResultMessage) { <p><strong>{{ comparison.first.analysis.name }}:</strong> {{ comparison.firstResultMessage }}</p> }
+          @if (comparison.secondResultMessage) { <p><strong>{{ comparison.second.analysis.name }}:</strong> {{ comparison.secondResultMessage }}</p> }
+        </div>
+        @if (comparison.annualRows.length) {
+          <div class="v1-analysis-comparison__table-scroll" tabindex="0" role="region" aria-label="Facility annual analysis comparison">
+            <table class="v1-analysis-comparison__annual-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" scope="col">Year</th>
+                  <th colspan="5" scope="colgroup">{{ comparison.first.analysis.name }} ({{ comparison.firstUnit }})</th>
+                  <th colspan="5" scope="colgroup">{{ comparison.second.analysis.name }} ({{ comparison.secondUnit }})</th>
+                </tr>
+                <tr>
+                  <th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th>
+                  <th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of comparison.annualRows; track row.year) {
+                  <tr [class.v1-analysis-comparison__incomplete]="row.first?.incomplete || row.second?.incomplete">
+                    <th scope="row">{{ row.yearLabel }}</th>
+                    <td><span>{{ row.first?.actual | analysisResultNumber }}</span><app-analysis-result-markers [markers]="row.first?.markers || []"></app-analysis-result-markers>@if (row.first?.incomplete) { <span class="v1-analysis-comparison__incomplete-label">Incomplete data</span> }</td>
+                    <td>{{ row.first?.adjusted | analysisResultNumber }}</td>
+                    <td>{{ row.first?.savings | analysisResultNumber }}</td>
+                    <td>@if (row.first?.annualImprovement !== null && row.first?.annualImprovement !== undefined) { {{ row.first?.annualImprovement | number:'1.0-2' }}% } @else { — }</td>
+                    <td>@if (row.first?.totalImprovement !== null && row.first?.totalImprovement !== undefined) { {{ row.first?.totalImprovement | number:'1.0-2' }}% } @else { — }</td>
+                    <td><span>{{ row.second?.actual | analysisResultNumber }}</span><app-analysis-result-markers [markers]="row.second?.markers || []"></app-analysis-result-markers>@if (row.second?.incomplete) { <span class="v1-analysis-comparison__incomplete-label">Incomplete data</span> }</td>
+                    <td>{{ row.second?.adjusted | analysisResultNumber }}</td>
+                    <td>{{ row.second?.savings | analysisResultNumber }}</td>
+                    <td>@if (row.second?.annualImprovement !== null && row.second?.annualImprovement !== undefined) { {{ row.second?.annualImprovement | number:'1.0-2' }}% } @else { — }</td>
+                    <td>@if (row.second?.totalImprovement !== null && row.second?.totalImprovement !== undefined) { {{ row.second?.totalImprovement | number:'1.0-2' }}% } @else { — }</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <app-analysis-result-marker-legend [markers]="comparison.annualMarkers"></app-analysis-result-marker-legend>
+
+          <div class="v1-analysis-comparison__charts">
+            @if (comparison.useChartCompatible) {
+              <app-meter-results-chart
+                [chartRows]="comparison.useChartRows"
+                [metrics]="comparison.useChartMetrics"
+                [showAllMetrics]="true"
+                [showSeriesControls]="false"
+                [allowNegativeValues]="true"
+                [showValueLabels]="false"
+                [sharedYAxis]="true"
+                [yAxisTitle]="comparison.firstUnit"
+                period="yearly"
+                ariaLabel="Actual and adjusted annual results for both analyses"
+                downloadFileName="facility-analysis-use-comparison"
+                [embedded]="true">
+              </app-meter-results-chart>
+            } @else {
+              <div class="v1-alert v1-alert--warning" role="status">{{ comparison.useChartUnavailableMessage }}</div>
+            }
+            <app-meter-results-chart
+              [chartRows]="comparison.improvementChartRows"
+              [metrics]="comparison.improvementChartMetrics"
+              [showAllMetrics]="true"
+              [showSeriesControls]="false"
+              [allowNegativeValues]="true"
+              [showValueLabels]="false"
+              [sharedYAxis]="true"
+              yAxisTitle="Percent improvement"
+              period="yearly"
+              ariaLabel="Annual and total improvement for both analyses"
+              downloadFileName="facility-analysis-improvement-comparison"
+              [embedded]="true">
+            </app-meter-results-chart>
+          </div>
+        } @else {
+          <p class="v1-analysis-comparison__empty">No complete annual results are available for comparison.</p>
+        }
+      </section>
+    </div>
+  </app-workspace-slideout>
+}
