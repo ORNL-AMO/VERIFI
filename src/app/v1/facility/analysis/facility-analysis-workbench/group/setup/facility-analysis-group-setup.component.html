@@ -39,7 +39,7 @@
           @if (!productionVariables().length) { <p class="v1-analysis-group-setup__notice v1-analysis-group-setup__notice--error" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>No production predictors are available.</span><a [routerLink]="navigation.facilityDataRoute(facility.guid, 'predictors')">Open Predictors</a></p> }
           @for (predictor of productionVariables(); track predictor.id) { <label class="v1-analysis-group-setup__check"><input type="checkbox" [formControl]="controller.predictorControl(predictor.id)" /><span>{{ predictor.name }} <small>{{ predictor.unit }}</small></span></label> }
           @if (productionVariables().length && selectedProductionCount() === 0) { <p class="v1-field-error" role="alert">Select at least one production variable.</p> }
-          @if (currentGroup.analysisType === 'energyIntensity' && modeledEquation(); as equation) {
+          @if (modeledEquation(); as equation) {
             <div class="v1-analysis-group-setup__equation" aria-labelledby="classic-intensity-equation-heading">
               <h3 id="classic-intensity-equation-heading" class="v1-analysis-group-setup__subsection-title">Modeled {{ currentAnalysis.analysisCategory === 'water' ? 'water' : 'energy' }} equation</h3>
               <p class="v1-analysis-group-setup__equation-text">{{ equation }}</p>

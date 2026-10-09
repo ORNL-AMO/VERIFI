@@ -2,12 +2,12 @@ import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { calculateFacilityAnalysisResults } from '@domain/calculations/analysis-calculations/facility-analysis-results-calculation';
+import { calculateFacilityAnalysisOutcomeResults } from '@domain/calculations/analysis-calculations/facility-analysis-results-calculation';
 import {
   FacilityAnalysisResultsWorkerRequest,
   FacilityAnalysisResultsWorkerResponse
 } from '@platform/web-workers/facility-analysis-results-worker.contract';
-import { runWorker } from '@platform/web-workers/run-worker';
+import { CALCULATION_WORKER_TIMEOUT_MS, runWorker } from '@platform/web-workers/run-worker';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { IDLE_WORKSPACE_CALENDARIZATION } from '@app/v1/shared/calendarization/workspace-calendarization.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -23,7 +23,8 @@ import {
   scan,
   startWith,
   switchMap,
-  tap
+  tap,
+  timeout
 } from 'rxjs';
 import {
   FacilityAnalysisOutcomeState,
@@ -193,14 +194,15 @@ export class FacilityAnalysisDashboardResultsService {
   private calculate(input: DashboardResultRequest): Observable<DashboardResultUpdate> {
     const response$ = defer(() => typeof Worker !== 'undefined'
       ? runWorker<FacilityAnalysisResultsWorkerResponse>(
-          new Worker(new URL('../../../../platform/web-workers/facility-analysis-results.worker', import.meta.url)),
+          new Worker(new URL('../../../../platform/web-workers/facility-analysis-dashboard-results.worker', import.meta.url)),
           input.request
         )
       : of<FacilityAnalysisResultsWorkerResponse>({
           ok: true,
-          value: calculateFacilityAnalysisResults(input.request)
+          value: calculateFacilityAnalysisOutcomeResults(input.request)
         }));
     return response$.pipe(
+      timeout(CALCULATION_WORKER_TIMEOUT_MS),
       map(response => ({
         analysisGuid: input.analysisGuid,
         state: dashboardOutcomeState(response, input)

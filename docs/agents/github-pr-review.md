@@ -19,6 +19,8 @@ Lead with actionable findings. Prioritize:
 - user-visible regressions in loading, empty, validation, error, disabled, success, keyboard, responsive, print, and accessibility states;
 - test quality and whether validation matches the actual risk.
 
+For new Worker-backed queues or dashboard fan-out, inspect lifecycle and workload as separate contracts: timeout and teardown, stale-work cancellation, queue progress after one job fails or stalls, concurrency, total requested history, and structured-clone response size. A concurrency limit does not by itself bound total work or prevent queue starvation.
+
 Style and maintainability comments are useful when they prevent recurring drift. Mark them as non-blocking when they do not affect behavior.
 
 ## V1 Angular review checklist
@@ -35,6 +37,7 @@ For production `src/app/v1/` changes, check that the PR:
 - uses `@let` for repeated object signal reads in a single template view when it improves clarity;
 - avoids repeated ordinary method calls, allocations, sorting, filtering, or business logic inside template bindings;
 - includes meaningful behavior tests instead of creation-only tests.
+- renders every supported value of a closed analysis-method or state union, including retained legacy-compatible variants, when a template condition changes.
 
 Repeated direct signal reads such as `appearance.settings().palette` across several bindings are usually a non-blocking maintainability comment: suggest a local alias like `@let settings = appearance.settings();`. Escalate only when the repeated expression is expensive, unstable, or hides important state.
 

@@ -114,6 +114,14 @@ describe('facility analysis group setup behavior', () => {
     expect(productionCheckbox.compareDocumentPosition(equation) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('shows the modified-intensity equation beneath the production-variable selection', () => {
+    const fixture = renderMethodSetup('modifiedEnergyIntensity');
+
+    const productionPanel = fixture.nativeElement.querySelector('[aria-labelledby="production-variables-heading"]') as HTMLElement;
+    expect(productionPanel.querySelector('.v1-analysis-group-setup__equation')?.textContent)
+      .toContain('Modeled energy = baseline intensity × Production × (1 − baseload share) + baseline-period actual × baseload share');
+  });
+
   it('shows the selected regression equation in the middle setup panel', () => {
     const fixture = renderMethodSetup('regression', true);
 
@@ -250,7 +258,7 @@ describe('facility analysis group setup behavior', () => {
   });
 });
 
-function renderMethodSetup(method: 'absoluteEnergyConsumption' | 'energyIntensity' | 'regression', selectRegressionModel = false) {
+function renderMethodSetup(method: 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression', selectRegressionModel = false) {
   const predictor = {
     id: 'production-a',
     name: 'Production',
@@ -272,6 +280,7 @@ function renderMethodSetup(method: 'absoluteEnergyConsumption' | 'energyIntensit
     selectedModelId: method === 'regression' && selectRegressionModel ? regressionModel.modelId : undefined,
     models: method === 'regression' ? [regressionModel] : undefined,
     specifiedMonthlyPercentBaseload: false,
+    averagePercentBaseload: 20,
     monthlyPercentBaseload: [],
     dataAdjustments: [],
     baselineAdjustmentsV2: [],
@@ -322,6 +331,9 @@ function renderMethodSetup(method: 'absoluteEnergyConsumption' | 'energyIntensit
     confirmPendingChange: vi.fn(),
     requestClearModels: vi.fn(),
     analysisType: new FormControl(method, { nonNullable: true }),
+    baseloadMode: new FormControl<'average' | 'monthly'>('average', { nonNullable: true }),
+    averageBaseload: new FormControl<number | null>(20),
+    monthlyBaseloadControl: () => new FormControl(20, { nonNullable: true }),
     predictorControl: () => new FormControl(true, { nonNullable: true }),
     openAdjustmentEditor: vi.fn(),
     cancelAdjustmentEditor: vi.fn(),

@@ -7,9 +7,9 @@ description: Change VERIFI calculations, conversions, validation/status checks, 
 
 1. Read [Calculations, Workers, and reports](../../../ARCHITECTURE.md#calculations-workers-and-reports) plus the [Implementer](../../../docs/agents/personas.md#implementer) and [Reviewer](../../../docs/agents/personas.md#reviewer) modes.
 2. Locate the pure calculation under `src/app/domain/calculations/` or `src/app/shared/shared-analysis/calculations/`. Trace every caller, relevant model, Worker, dashboard, report component, and file writer before editing.
-3. State the formula, units, aggregation level, date boundaries, missing-data behavior, and rounding policy. Preserve full precision until the existing presentation boundary unless the domain rule says otherwise.
+3. State the formula, units, aggregation level, date boundaries, missing-data behavior, and rounding policy. Trace completeness and warning flags back to the rows that generate them; fiscal-year summaries must derive flags from the same fiscal-year row set as their values rather than calendar-year dates. Preserve full precision until the existing presentation boundary unless the domain rule says otherwise.
 4. Keep calculation code deterministic. Avoid DOM, Angular service, IndexedDB, or Electron dependencies in code shared with Workers.
-5. When a Worker is involved, update its request payload, response, error result, caller, and structured-clone assumptions together. Check all synchronous and Worker-backed paths using the shared calculation.
+5. When a Worker is involved, update its request payload, response, error result, caller, and structured-clone assumptions together. Check all synchronous and Worker-backed paths using the shared calculation. For queued or fan-out work, verify timeout and teardown behavior, concurrency and queue progress, total calculation scope, and response payload size; limiting concurrency alone does not bound total work.
 6. Keep on-screen, printed, and exported values aligned. Inspect Excel, PDF, and PowerPoint writers when a shared report value changes.
 7. Add table-driven tests with normal, boundary, zero, missing, invalid, and representative unit-conversion cases. Include a regression case for the issue being solved.
 

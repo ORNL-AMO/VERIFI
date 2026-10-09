@@ -4,6 +4,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { CALCULATION_WORKER_TIMEOUT_MS } from '@platform/web-workers/run-worker';
 import { of } from 'rxjs';
 import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
 
@@ -117,6 +118,33 @@ describe('FacilityAnalysisDashboardResultsService browser Worker lifecycle', () 
     expect(service.states()['analysis-a']).toMatchObject({
       state: 'ready', summary: { annual: { value: 6.25 } }
     });
+  });
+
+  it('times out stalled workers and continues the queued dashboard calculations', async () => {
+    vi.useFakeTimers();
+    try {
+      const analyses = signal([
+        analysisFixture('analysis-a'),
+        analysisFixture('analysis-b'),
+        analysisFixture('analysis-c')
+      ]);
+      configure(analyses, signal([]));
+      const service = TestBed.inject(FacilityAnalysisDashboardResultsService);
+      await settleSignals();
+
+      expect(FakeWorker.instances).toHaveLength(2);
+      await vi.advanceTimersByTimeAsync(CALCULATION_WORKER_TIMEOUT_MS);
+      await settleSignals();
+
+      expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+      expect(FakeWorker.instances[1].terminate).toHaveBeenCalledOnce();
+      expect(FakeWorker.instances).toHaveLength(3);
+      expect(service.states()['analysis-a']).toEqual({ state: 'error', message: 'Calculation failed' });
+      expect(service.states()['analysis-b']).toEqual({ state: 'error', message: 'Calculation failed' });
+      expect(service.states()['analysis-c']).toEqual({ state: 'loading', message: 'Calculating…' });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
