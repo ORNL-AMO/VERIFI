@@ -11,7 +11,7 @@ import {
 } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import {
-  ResourceBrowseCardCapabilities,
+  READ_ONLY_RESOURCE_BROWSE_CARD_CAPABILITIES,
   ResourceBrowseCardView
 } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -38,7 +38,7 @@ export class AccountPortfolioAnalysesTabComponent {
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
 
-  readonly cardCapabilities: ResourceBrowseCardCapabilities = { canOpen: true, canAct: false };
+  readonly cardCapabilities = READ_ONLY_RESOURCE_BROWSE_CARD_CAPABILITIES;
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
     category: new FormControl<PortfolioAnalysisCategoryFilter>('all', { nonNullable: true }),

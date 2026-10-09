@@ -88,6 +88,53 @@ describe('buildFacilityAnalysisComparisonView', () => {
     });
     expect(view.groups[0].fields.map(field => field.id)).not.toContain('adjustments');
   });
+
+  it('distinguishes predictor and banking records that share display names', () => {
+    const firstSource = analysis('source-a', 'Banked source');
+    const secondSource = analysis('source-b', 'Banked source');
+    const first = card('analysis-a', 'Analysis A', {
+      hasBanking: true,
+      bankedAnalysisItemId: firstSource.guid,
+      groups: [{
+        ...group('group-a', ['Production']),
+        predictorVariables: [{ id: 'predictor-a', name: 'Production', productionInAnalysis: true }],
+        applyBanking: true,
+        bankedAnalysisYear: 2022,
+        newBaselineYear: 2023
+      }]
+    });
+    const second = card('analysis-b', 'Analysis B', {
+      hasBanking: true,
+      bankedAnalysisItemId: secondSource.guid,
+      groups: [{
+        ...group('group-a', ['Production']),
+        predictorVariables: [{ id: 'predictor-b', name: 'Production', productionInAnalysis: true }],
+        applyBanking: true,
+        bankedAnalysisYear: 2022,
+        newBaselineYear: 2023
+      }]
+    });
+
+    const view = buildFacilityAnalysisComparisonView(
+      first,
+      second,
+      facility(),
+      [{ guid: 'group-a', name: 'Main' }] as any,
+      [firstSource, secondSource, first.analysis, second.analysis]
+    );
+
+    expect(view.groups[0].fields.find(field => field.id === 'predictors')).toMatchObject({
+      firstValue: 'Production', secondValue: 'Production', different: true
+    });
+    expect(view.analysisFields.find(field => field.id === 'banking-source')).toMatchObject({
+      firstValue: 'Banked source', secondValue: 'Banked source', different: true
+    });
+    expect(view.groups[0].fields.find(field => field.id === 'banking')).toMatchObject({
+      firstValue: 'Banked source · Applied 2022 · New baseline 2023',
+      secondValue: 'Banked source · Applied 2022 · New baseline 2023',
+      different: true
+    });
+  });
 });
 
 function card(

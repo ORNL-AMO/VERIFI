@@ -131,7 +131,14 @@ function buildAnalysisFields(
   return [
     ...fields,
     comparisonField('banking-enabled', 'Banking enabled', bankingEnabledLabel(first.analysis), bankingEnabledLabel(second.analysis)),
-    comparisonField('banking-source', 'Banking source', bankingSourceLabel(first.analysis, analyses), bankingSourceLabel(second.analysis, analyses))
+    comparisonField(
+      'banking-source',
+      'Banking source',
+      bankingSourceLabel(first.analysis, analyses),
+      bankingSourceLabel(second.analysis, analyses),
+      bankingSourceKey(first.analysis),
+      bankingSourceKey(second.analysis)
+    )
   ];
 }
 
@@ -162,13 +169,27 @@ function buildGroupComparisons(
     const fields: FacilityAnalysisComparisonField[] = [
       comparisonField('inclusion', 'Participation', participationLabel(firstGroup), participationLabel(secondGroup)),
       comparisonField('method', 'Analysis method', firstModel?.methodLabel ?? 'Not configured', secondModel?.methodLabel ?? 'Not configured'),
-      comparisonField('predictors', 'Selected predictors', predictorLabel(firstGroup), predictorLabel(secondGroup)),
+      comparisonField(
+        'predictors',
+        'Selected predictors',
+        predictorLabel(firstGroup),
+        predictorLabel(secondGroup),
+        predictorKey(firstGroup),
+        predictorKey(secondGroup)
+      ),
       comparisonField('model', 'Model context', modelContextLabel(firstGroup, firstModel?.modelLabel), modelContextLabel(secondGroup, secondModel?.modelLabel)),
       comparisonField('equation', 'Modeled equation', firstModel?.equationLabel ?? 'Not configured', secondModel?.equationLabel ?? 'Not configured'),
       comparisonField('baseload', 'Legacy baseload', baseloadLabel(firstGroup), baseloadLabel(secondGroup))
     ];
     if (first.hasBanking || second.hasBanking) {
-      fields.push(comparisonField('banking', 'Banking setup', groupBankingLabel(first, firstGroup, analyses), groupBankingLabel(second, secondGroup, analyses)));
+      fields.push(comparisonField(
+        'banking',
+        'Banking setup',
+        groupBankingLabel(first, firstGroup, analyses),
+        groupBankingLabel(second, secondGroup, analyses),
+        groupBankingKey(first, firstGroup),
+        groupBankingKey(second, secondGroup)
+      ));
     }
     return {
       id,
@@ -283,13 +304,21 @@ function improvementChartMetrics(
   ];
 }
 
-function comparisonField(id: string, label: string, firstValue: string, secondValue: string): FacilityAnalysisComparisonField {
+function comparisonField(
+  id: string,
+  label: string,
+  firstValue: string,
+  secondValue: string,
+  firstComparisonValue = firstValue,
+  secondComparisonValue = secondValue
+): FacilityAnalysisComparisonField {
   return {
     id,
     label,
     firstValue,
     secondValue,
     different: normalize(firstValue) !== normalize(secondValue)
+      || normalize(firstComparisonValue) !== normalize(secondComparisonValue)
   };
 }
 
@@ -302,15 +331,28 @@ function participationLabel(group: AnalysisGroup | undefined): string {
 
 function predictorLabel(group: AnalysisGroup | undefined): string {
   if (!group) return 'Not configured';
-  const model = group.isGeneratedModel
-    ? group.models?.find(item => item.modelId === group.selectedModelId)
-    : undefined;
-  const predictors = (model?.predictorVariables ?? group.predictorVariables ?? [])
-    .filter(variable => model ? true : variable.productionInAnalysis)
+  const predictors = selectedPredictors(group)
     .map(variable => variable.name)
     .filter(Boolean)
     .sort((left, right) => left.localeCompare(right));
   return predictors.length ? predictors.join(', ') : 'None';
+}
+
+function predictorKey(group: AnalysisGroup | undefined): string {
+  if (!group) return 'not-configured';
+  const predictorIds = selectedPredictors(group)
+    .map(variable => variable.id)
+    .filter(Boolean)
+    .sort((left, right) => left.localeCompare(right));
+  return predictorIds.length ? predictorIds.join('|') : 'none';
+}
+
+function selectedPredictors(group: AnalysisGroup): readonly { id: string; name: string }[] {
+  const model = group.isGeneratedModel
+    ? group.models?.find(item => item.modelId === group.selectedModelId)
+    : undefined;
+  return (model?.predictorVariables ?? group.predictorVariables ?? [])
+    .filter(variable => model ? true : variable.productionInAnalysis);
 }
 
 function baseloadLabel(group: AnalysisGroup | undefined): string {
@@ -335,10 +377,25 @@ function groupBankingLabel(
   return `${source} · Applied ${applied} · New baseline ${baseline}`;
 }
 
+function groupBankingKey(analysis: IdbAnalysisItem, group: AnalysisGroup | undefined): string {
+  if (!group) return 'not-configured';
+  if (!analysis.hasBanking || !group.applyBanking) return 'not-applied';
+  return [
+    analysis.bankedAnalysisItemId || 'source-not-set',
+    yearValue(group.bankedAnalysisYear),
+    yearValue(group.newBaselineYear)
+  ].join('|');
+}
+
 function bankingSourceLabel(analysis: IdbAnalysisItem, analyses: readonly IdbAnalysisItem[]): string {
   if (!analysis.hasBanking) return 'Not applicable';
   const source = analyses.find(item => item.guid === analysis.bankedAnalysisItemId)?.name;
   return source || 'Source not set';
+}
+
+function bankingSourceKey(analysis: IdbAnalysisItem): string {
+  if (!analysis.hasBanking) return 'not-applicable';
+  return analysis.bankedAnalysisItemId || 'source-not-set';
 }
 
 function bankingEnabledLabel(analysis: IdbAnalysisItem): string {

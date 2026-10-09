@@ -11,7 +11,7 @@
             <li>Account</li>
           }
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">{{ facility.name || 'Facility' }}</a></li>
+          <li><a [routerLink]="navigation.facilityRoute(facility.guid)">{{ facility.name || 'Facility' }}</a></li>
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
           <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Analyses</a></li>
         </ol>

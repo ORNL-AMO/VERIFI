@@ -56,11 +56,11 @@
       description="Analyses will appear here after you create them for a facility.">
     </app-data-empty-state>
   } @else if (visibleCards.length === 0) {
-    <article class="v1-empty-state" role="status">
-      <app-ui-icon name="clearFilter"></app-ui-icon>
-      <h2>No analyses match these filters</h2>
-      <p>Adjust the search or filters to return to the full analysis list.</p>
-    </article>
+    <app-data-empty-state
+      icon="clearFilter"
+      title="No analyses match these filters"
+      description="Adjust the search or filters to return to the full analysis list.">
+    </app-data-empty-state>
   } @else {
     <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-analyses__cards" role="list" aria-label="Account facility analyses">
       @for (entry of visibleCards; track entry.card.analysis.guid) {

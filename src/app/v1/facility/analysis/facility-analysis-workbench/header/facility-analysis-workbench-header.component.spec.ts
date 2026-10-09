@@ -102,6 +102,7 @@ describe('facility analysis workbench header', () => {
           provide: WorkspaceNavigationService,
           useValue: {
             accountPortfolioRoute: (accountGuid: string, tab: string) => ['/account', accountGuid, 'data', 'portfolio', tab],
+            facilityRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'overview'],
             facilityAnalysisRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'analyses'],
             facilityAnalysisWorkbenchRoute: (facilityGuid: string, analysisGuid: string) => [
               '/facility', facilityGuid, 'analysis', analysisGuid
@@ -125,7 +126,7 @@ describe('facility analysis workbench header', () => {
     expect(breadcrumbs.map(link => link.textContent?.trim())).toEqual(['Account A', 'Facility A', 'Analyses']);
     expect(breadcrumbs.map(link => link.getAttribute('href'))).toEqual([
       '/account/account-a/data/portfolio/analyses',
-      '/facility/facility-a/analyses',
+      '/facility/facility-a/overview',
       '/facility/facility-a/analyses'
     ]);
     expect(host.textContent).toContain('Latest full year · FY 2025');

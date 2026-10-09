@@ -46,11 +46,11 @@
       description="Meters will appear here after you add or upload them for a facility.">
     </app-data-empty-state>
   } @else if (visibleCards.length === 0) {
-    <article class="v1-empty-state" role="status">
-      <app-ui-icon name="clearFilter"></app-ui-icon>
-      <h2>No meters match these filters</h2>
-      <p>Adjust the search or filter controls to return to the full meter list.</p>
-    </article>
+    <app-data-empty-state
+      icon="clearFilter"
+      title="No meters match these filters"
+      description="Adjust the search or filter controls to return to the full meter list.">
+    </app-data-empty-state>
   } @else {
     <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-meters__cards" role="list" aria-label="Account meters">
       @for (item of visibleCards; track item.card.meter.guid) {

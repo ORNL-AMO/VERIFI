@@ -44,11 +44,11 @@
   }
 
   @if (summaries.length === 0) {
-    <article class="v1-empty-state" role="status">
-      <app-ui-icon name="clearFilter"></app-ui-icon>
-      <h2>No facilities match these filters</h2>
-      <p>Adjust the search or filter controls to return to the full portfolio.</p>
-    </article>
+    <app-data-empty-state
+      icon="clearFilter"
+      title="No facilities match these filters"
+      description="Adjust the search or filter controls to return to the full portfolio.">
+    </app-data-empty-state>
   } @else {
     <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-tab__cards" role="list" aria-label="Facilities">
       @for (summary of summaries; track summary.facility.guid) {

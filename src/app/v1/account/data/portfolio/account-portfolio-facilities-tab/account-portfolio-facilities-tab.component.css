@@ -24,35 +24,11 @@
   color: var(--v1-danger);
 }
 
-.v1-empty-state,
 .v1-facility-card {
   background: var(--v1-surface);
   border: 1px solid var(--v1-border);
   border-radius: var(--v1-radius);
   box-shadow: 0 1rem 2rem var(--v1-shadow-soft);
-}
-
-.v1-empty-state {
-  align-items: start;
-  display: grid;
-  gap: .6rem;
-  justify-items: start;
-  padding: 1.25rem;
-}
-
-.v1-empty-state > .v1-icon {
-  color: var(--v1-account);
-  font-size: 1.5rem;
-}
-
-.v1-empty-state h2,
-.v1-empty-state p {
-  margin: 0;
-}
-
-.v1-empty-state p {
-  color: var(--v1-muted);
-  max-width: 42rem;
 }
 
 .v1-facility-card {
