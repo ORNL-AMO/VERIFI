@@ -1,6 +1,6 @@
 @if (comparison(); as comparison) {
   <app-workspace-slideout
-    title="Compare analyses"
+    [title]="comparison.first.analysis.name + ' vs ' + comparison.second.analysis.name"
     description="Group setup and facility annual results"
     size="large"
     (closed)="closed.emit()">

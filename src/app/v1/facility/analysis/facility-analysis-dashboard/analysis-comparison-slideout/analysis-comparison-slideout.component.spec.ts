@@ -24,6 +24,7 @@ describe('AnalysisComparisonSlideoutComponent', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent.replace(/\s+/g, ' ');
+    expect(fixture.nativeElement.querySelector('#v1-workspace-slideout-title')?.textContent).toBe('Analysis A vs Analysis B');
     expect(text).toContain('Analysis setup');
     expect(text).toContain('Group modeling setup');
     expect(text).toContain('Facility annual results');
