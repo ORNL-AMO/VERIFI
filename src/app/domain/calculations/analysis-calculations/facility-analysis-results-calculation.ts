@@ -41,9 +41,10 @@ export function calculateFacilityAnalysisOutcomeResults(
 export function projectFacilityAnalysisOutcomeResults(
   value: FacilityAnalysisResultsValue
 ): FacilityAnalysisResultsValue {
-  const annual = value.reportYear === undefined
-    ? undefined
-    : value.annualAnalysisSummaries.find(row => row.year === value.reportYear);
+  const annual = value.annualAnalysisSummaries.filter(row =>
+    Number.isFinite(row.year)
+    && (value.reportYear === undefined || row.year <= value.reportYear)
+  );
   let monthly: FacilityAnalysisResultsValue['monthlyAnalysisSummaryData'][number] | undefined;
   let latestMonthlyTime = Number.NEGATIVE_INFINITY;
   value.monthlyAnalysisSummaryData.forEach(row => {
@@ -55,7 +56,7 @@ export function projectFacilityAnalysisOutcomeResults(
   });
   return {
     ...value,
-    annualAnalysisSummaries: annual ? [annual] : [],
+    annualAnalysisSummaries: annual,
     monthlyAnalysisSummaryData: monthly ? [monthly] : [],
     groupSummaries: []
   };
