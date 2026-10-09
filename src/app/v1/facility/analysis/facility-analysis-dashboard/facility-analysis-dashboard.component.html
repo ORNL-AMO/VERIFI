@@ -35,12 +35,17 @@
   @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ actionError() }}</div> }
   @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
 
-  <div class="v1-data-dashboard-workspace"><div id="v1-analysis-card-grid" class="v1-data-browse" aria-label="Facility analyses">
+  <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div id="v1-analysis-card-grid" class="v1-data-browse" aria-label="Facility analyses">
     @if (activeCards.length) {
       <section class="v1-analysis-dashboard__active-cards" aria-label="Active analyses for reporting">
         @for (card of activeCards; track card.analysis.guid) {
-          <article class="v1-analysis-dashboard__active-card">
-            <app-ui-icon class="v1-analysis-dashboard__active-icon" name="target"></app-ui-icon>
+          <article
+            class="v1-analysis-dashboard__active-card"
+            [class.v1-analysis-dashboard__active-card--water]="card.category === 'water'">
+            <div class="v1-analysis-dashboard__active-icons" aria-hidden="true">
+              <app-ui-icon name="target"></app-ui-icon>
+              <app-ui-icon [name]="card.category === 'water' ? 'droplet' : 'energy'"></app-ui-icon>
+            </div>
             <div class="v1-analysis-dashboard__active-identity">
               <span>Active for Reporting</span>
               <strong>{{ card.analysis.name }}</strong>
