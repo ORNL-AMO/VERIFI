@@ -1,6 +1,14 @@
 :host { display: contents; }
 .v1-analysis-workbench__header.v1-data-workbench-header { box-shadow: none; }
 #v1-analysis-workbench-facts[hidden] { display: none; }
+.v1-analysis-workbench__facts-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-2); align-items: stretch; }
+.v1-analysis-workbench__summary-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-2); min-width: 0; margin: 0; }
+.v1-analysis-workbench__summary-facts > div { display: grid; align-content: center; gap: .12rem; min-width: 0; min-height: 4.25rem; padding: var(--v1-space-3); border: 1px solid var(--v1-border); background: var(--v1-content-block); }
+.v1-analysis-workbench__summary-facts dt { color: var(--v1-muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.v1-analysis-workbench__summary-facts dd { margin: 0; font-size: 1rem; font-weight: 950; overflow-wrap: anywhere; }
+.v1-analysis-workbench__summary-facts span { color: var(--v1-muted); font-size: .74rem; font-weight: 800; }
+.v1-analysis-workbench__summary-facts .v1-analysis-workbench__outcome--unavailable dd { font-size: .9rem; }
+.v1-analysis-workbench__outcome--unavailable dd { color: var(--v1-muted); font-size: 1rem; }
 .v1-analysis-workbench__save-state { display: inline-flex; gap: .35rem; align-items: center; justify-content: flex-end; min-width: 13.5rem; min-height: var(--v1-control-height-sm); color: var(--v1-muted); font-size: .8rem; font-weight: 800; white-space: nowrap; }
 .v1-analysis-workbench__save-state--saved { color: var(--v1-success); }
 .v1-analysis-workbench__save-state--error { color: var(--v1-danger); }
@@ -12,3 +20,5 @@
 .v1-analysis-workbench__status-notes button:hover, .v1-analysis-workbench__status-notes button:focus-visible { color: var(--v1-text); }
 @media (max-width: 640px) { .v1-analysis-workbench__status-notes li { grid-template-columns: 1rem minmax(0, 1fr); } .v1-analysis-workbench__status-notes button { grid-column: 2; justify-self: start; } }
 @media (max-width: 760px) { .v1-analysis-workbench__save-state { flex-basis: 100%; justify-content: flex-start; min-width: 0; white-space: normal; } }
+@media (max-width: 900px) { .v1-analysis-workbench__facts-layout { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .v1-analysis-workbench__summary-facts { grid-template-columns: 1fr; } }

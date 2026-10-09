@@ -69,24 +69,16 @@ export class AnnualAnalysisSummaryDataClass {
         this.setAnnualSavingsPercentImprovement();
         this.setCummulativeSavings(previousYearsSummaryData);
         this.setNewSavings();
-        this.setMissingPredictorValue(monthlyAnalysisSummaryData);
-        this.setMissingPredictors(monthlyAnalysisSummaryData);
+        this.setMissingPredictorValue();
+        this.setMissingPredictors();
     }
 
-    setMissingPredictorValue(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
-        this.missingPredictorValue = monthlyAnalysisSummaryData.some(data =>
-            data.date.getFullYear() === this.year && data.missingValueWarning
-        );
+    setMissingPredictorValue() {
+        this.missingPredictorValue = this.yearAnalysisSummaryData.some(data => data.missingValueWarning);
     }
 
-    setMissingPredictors(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
-        const allMissing: string[] = [];
-        monthlyAnalysisSummaryData.forEach(data => {
-            if (data.date.getFullYear() === this.year && data.missingPredictors) {
-                allMissing.push(...data.missingPredictors);
-            }
-        });
-        this.missingPredictors = _.uniq(allMissing);
+    setMissingPredictors() {
+        this.missingPredictors = _.uniq(this.yearAnalysisSummaryData.flatMap(data => data.missingPredictors ?? []));
     }
 
     setYearAnalysisSummaryData(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {

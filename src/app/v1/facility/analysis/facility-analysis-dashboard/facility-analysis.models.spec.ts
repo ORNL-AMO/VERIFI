@@ -27,17 +27,16 @@ describe('buildFacilityAnalysisCards', () => {
     expect(card).toMatchObject({
       status: 'warning',
       isActiveForReporting: true,
-      groupCount: 1,
-      regressionCount: 1,
-      generatedModelCount: 2,
       dependencyCount: 3
     });
-    expect(card.groupSummaries[0]).toMatchObject({ name: 'Main plant', predictorCount: 1, hasSelectedModel: true });
     expect(card.linkedAccountAnalyses.map(item => item.guid)).toEqual(['account-analysis-a']);
     expect(card.linkedReports.map(item => item.guid)).toEqual(['report-a']);
     expect(card.bankingSource?.guid).toBe('banking-source');
     expect(card.bankingConsumers.map(item => item.guid)).toEqual(['banking-consumer']);
     expect(card.searchText).toContain('main plant');
+    expect(card.searchText).toContain('regression');
+    expect(card.searchText).toContain('model year 2022');
+    expect(card.searchText).not.toContain('generated model');
     expect(card.searchText).toContain('active reporting');
     expect(card.searchText).toContain('reference baseline');
     expect(card.searchText).toContain('banked model');
@@ -80,8 +79,8 @@ function makeAnalysis(guid: string, name: string, category: 'energy' | 'water' =
       idbGroupId: 'group-a',
       analysisType: 'regression',
       predictorVariables: [{ id: 'predictor-a', name: 'Production', production: true, productionInAnalysis: true, regressionCoefficient: 1 }],
-      models: [{ modelId: 'model-a' }, { modelId: 'model-b' }],
-      selectedModelId: 'model-a'
+      models: [{ modelId: 'model-a', modelYear: 2022, coef: [4, 2], predictorVariables: [{ id: 'predictor-a', name: 'Production' }] }, { modelId: 'model-b' }],
+      selectedModelId: 'model-a', isGeneratedModel: true, regressionModelYear: 2022
     } as any]
   };
 }

@@ -95,6 +95,8 @@
       </section>
     }
 
+    <ng-content select="[resource-card-after-facts]"></ng-content>
+
     @if (view.notes?.length) {
       <ul class="v1-resource-browse-card__notes">
         @for (note of view.notes; track note.id) {

@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RegressionModelValidationComponent } from '../model-validation/regression-model-validation.component';
 import { RegressionModelValidationState, modelPeriodMonthCount, userDefinedValidationMessage } from '../regression-model-validation.service';
-import { formatRegressionNumber } from '../regression-number-format';
+import { formatRegressionNumber } from '@app/v1/facility/analysis/regression-number-format';
 import { FacilityAnalysisRegressionFacade } from '../facility-analysis-regression.facade';
 import { FacilityAnalysisRegressionController } from '../facility-analysis-regression.controller';
 import { modeledQuantityLabel } from '../regression-labels';

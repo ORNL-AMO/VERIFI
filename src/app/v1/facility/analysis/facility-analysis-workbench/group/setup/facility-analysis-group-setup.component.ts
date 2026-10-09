@@ -1,20 +1,23 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, effect, inject } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AnalysisType } from '@data/models/analysis';
+import { AnalysisType, JStatRegressionModel } from '@data/models/analysis';
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AdjustmentKind, FacilityAnalysisGroupSetupFacade } from './facility-analysis-group-setup.facade';
 import { FacilityAnalysisGroupSetupController } from './facility-analysis-group-setup.controller';
 import { BankedGroupSavingsComponent } from './banked-group-savings/banked-group-savings.component';
+import { buildFacilityAnalysisGroupModelView } from '../../../group-model-roster/facility-analysis-group-model.view';
+import { RegressionModelReviewSlideoutComponent } from '../regression/model-review-slideout/regression-model-review-slideout.component';
+import { RegressionModelValidationService } from '../regression/regression-model-validation.service';
 
 @Component({
   selector: 'app-facility-analysis-group-setup',
   standalone: true,
-  imports: [RouterLink, IconComponent, ConfirmationDialogComponent, ReactiveFormsModule, BankedGroupSavingsComponent],
-  providers: [FacilityAnalysisGroupSetupFacade, FacilityAnalysisGroupSetupController],
+  imports: [RouterLink, IconComponent, ConfirmationDialogComponent, ReactiveFormsModule, BankedGroupSavingsComponent, RegressionModelReviewSlideoutComponent],
+  providers: [FacilityAnalysisGroupSetupFacade, FacilityAnalysisGroupSetupController, RegressionModelValidationService],
   templateUrl: './facility-analysis-group-setup.component.html',
   styleUrls: ['./facility-analysis-group-setup.component.css']
 })
@@ -25,7 +28,9 @@ export class FacilityAnalysisGroupSetupComponent implements OnDestroy {
   readonly controller = inject(FacilityAnalysisGroupSetupController);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  readonly regressionValidation = inject(RegressionModelValidationService);
   private confirmationOpen = false;
+  private regressionInspectionTrigger: HTMLElement | undefined;
 
   readonly navigation = this.setup.navigation;
   readonly workbench = this.setup.workbench;
@@ -53,9 +58,58 @@ export class FacilityAnalysisGroupSetupComponent implements OnDestroy {
   readonly bankedGroup = this.setup.bankedGroup;
   readonly bankingUnavailableReason = this.setup.bankingUnavailableReason;
   readonly bankingModelYearWarning = this.setup.bankingModelYearWarning;
+  readonly selectedRegressionModel = computed(() => {
+    const group = this.group();
+    if (group?.analysisType !== 'regression' || !group.isGeneratedModel) return undefined;
+    return group.models?.find(model => model.modelId === group.selectedModelId);
+  });
+  readonly inspectedRegressionModel = signal<JStatRegressionModel | undefined>(undefined);
+  readonly modeledEquation = computed(() => {
+    const analysis = this.analysis();
+    const group = this.group();
+    if (!analysis || !group) return undefined;
+    return buildFacilityAnalysisGroupModelView(
+      group,
+      '',
+      analysis.analysisCategory,
+      analysis.baselineYear
+    ).equationLabel;
+  });
+  readonly regressionEquation = computed(() => {
+    const analysis = this.analysis();
+    const group = this.group();
+    if (!analysis || group?.analysisType !== 'regression') return undefined;
+    const selectedModel = this.selectedRegressionModel();
+    if (group.isGeneratedModel && !selectedModel) {
+      return { text: 'No model selected.', unavailable: true };
+    }
+    const view = buildFacilityAnalysisGroupModelView(
+      group,
+      '',
+      analysis.analysisCategory,
+      analysis.baselineYear
+    );
+    return { text: view.equationLabel, unavailable: view.unavailable };
+  });
   constructor() { effect(() => this.controller.pendingChange() ? this.openConfirmation() : this.closeConfirmation()); }
 
   confirmPendingChange(): void { this.controller.confirmPendingChange(); }
+
+  inspectRegressionModel(model: JStatRegressionModel, trigger: HTMLElement): void {
+    const group = this.group();
+    if (!group) return;
+    this.regressionInspectionTrigger = trigger;
+    this.inspectedRegressionModel.set(model);
+    this.regressionValidation.inspectGenerated(group, model);
+  }
+
+  closeRegressionModelInspection(): void {
+    this.inspectedRegressionModel.set(undefined);
+    this.regressionValidation.clear();
+    const trigger = this.regressionInspectionTrigger;
+    this.regressionInspectionTrigger = undefined;
+    if (trigger) queueMicrotask(() => trigger.focus());
+  }
 
   requestClearModels(): void { this.controller.requestClearModels(); }
 
@@ -70,6 +124,8 @@ export class FacilityAnalysisGroupSetupComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.closeConfirmation();
+    this.inspectedRegressionModel.set(undefined);
+    this.regressionValidation.clear();
   }
 
   private openConfirmation(): void {

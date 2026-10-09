@@ -27,3 +27,36 @@ export function calculateFacilityAnalysisResults(
     reportYear: calculation.reportYear
   };
 }
+
+/** Dashboard projection that preserves the shared calculation while bounding its returned result payload. */
+export function calculateFacilityAnalysisOutcomeResults(
+  request: FacilityAnalysisResultsWorkerRequest
+): FacilityAnalysisResultsValue {
+  return projectFacilityAnalysisOutcomeResults(calculateFacilityAnalysisResults({
+    ...request,
+    includeGroupSummaries: false
+  }));
+}
+
+export function projectFacilityAnalysisOutcomeResults(
+  value: FacilityAnalysisResultsValue
+): FacilityAnalysisResultsValue {
+  const annual = value.reportYear === undefined
+    ? undefined
+    : value.annualAnalysisSummaries.find(row => row.year === value.reportYear);
+  let monthly: FacilityAnalysisResultsValue['monthlyAnalysisSummaryData'][number] | undefined;
+  let latestMonthlyTime = Number.NEGATIVE_INFINITY;
+  value.monthlyAnalysisSummaryData.forEach(row => {
+    const time = new Date(row.date).getTime();
+    if (Number.isFinite(time) && time > latestMonthlyTime) {
+      latestMonthlyTime = time;
+      monthly = row;
+    }
+  });
+  return {
+    ...value,
+    annualAnalysisSummaries: annual ? [annual] : [],
+    monthlyAnalysisSummaryData: monthly ? [monthly] : [],
+    groupSummaries: []
+  };
+}

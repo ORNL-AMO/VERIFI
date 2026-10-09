@@ -12,6 +12,7 @@ import { AnalysisDraftSlideoutComponent } from './analysis-draft-slideout/analys
 import { FacilityAnalysisDashboardComponent } from './facility-analysis-dashboard.component';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
 
 describe('FacilityAnalysisDashboardComponent', () => {
   let fixture: ComponentFixture<FacilityAnalysisDashboardComponent>;
@@ -40,6 +41,19 @@ describe('FacilityAnalysisDashboardComponent', () => {
       setActiveAnalysis: vi.fn(async () => undefined),
       deleteAnalysis: vi.fn(async () => undefined)
     };
+    TestBed.overrideComponent(FacilityAnalysisDashboardComponent, {
+      set: {
+        providers: [{
+          provide: FacilityAnalysisDashboardResultsService,
+          useValue: {
+            states: signal({
+              'energy-a': readyOutcome(2025, 8.75, new Date(2026, 7, 1), 7.9),
+              'water-b': { state: 'blocked', message: 'Setup incomplete' }
+            })
+          }
+        }]
+      }
+    });
     await TestBed.configureTestingModule({
       imports: [FacilityAnalysisDashboardComponent],
       providers: [
@@ -47,7 +61,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
         { provide: FacilityAnalysisWorkspaceService, useValue: {
           account: signal({ guid: 'account-a', name: 'Account A' }),
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
-          cards,
+          cards, meterGroups: signal([]),
           canWrite: signal(true), hasPending: signal(false), workspaceState: signal('ready'),
           workspaceError: signal(undefined), statusState: signal('ready')
         } },
@@ -83,6 +97,35 @@ describe('FacilityAnalysisDashboardComponent', () => {
     component.filtersForm.controls.category.setValue('all');
     component.filtersForm.controls.status.setValue('warning');
     expect(component.filteredCards().map(card => card.analysis.guid)).toEqual(['water-b']);
+  });
+
+  it('shows outcome snapshots on cards and mirrors model context in Details', () => {
+    expect(fixture.nativeElement.textContent).toContain('Latest full year · 2025');
+    expect(fixture.nativeElement.textContent).toContain('8.75%');
+    expect(fixture.nativeElement.textContent).toContain('Setup incomplete');
+
+    browseCard(0).detailsRequested.emit(component.cards()[0]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Analysis groups and models');
+    expect(fixture.nativeElement.textContent).toContain('No analysis groups are configured.');
+    expect(fixture.nativeElement.textContent).toContain('Latest month · Aug 2026');
+  });
+
+  it('toggles group details across dashboard cards without hiding facts', () => {
+    const toggle = (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('button[aria-controls="v1-analysis-card-grid"]');
+    if (!toggle) throw new Error('Group-details toggle not found');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.textContent).toContain('Show group details');
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(component.showGroupDetails()).toBe(true);
+    expect(toggle.textContent).toContain('Hide group details');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.textContent).toContain('Latest full year · 2025');
   });
 
   it('opens canonical workbench routes and limits comparison to two analyses', () => {
@@ -123,7 +166,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
   });
 
   it('copies an analysis from its rendered card and opens the copied workbench', async () => {
-    browseCard(0).copyRequested.emit(cards()[0]);
+    browseCard(0).copyRequested.emit(component.cards()[0]);
     await fixture.whenStable();
 
     expect(actions.copyAnalysis).toHaveBeenCalledWith('energy-a');
@@ -134,7 +177,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     actions.setActiveAnalysis
       .mockRejectedValueOnce(new Error('Active selection failed.'))
       .mockResolvedValueOnce(undefined);
-    browseCard(0).activeRequested.emit(cards()[0]);
+    browseCard(0).activeRequested.emit(component.cards()[0]);
     fixture.detectChanges();
 
     expect(modalPortal.show.mock.calls[0][0]).toBeInstanceOf(TemplatePortal);
@@ -142,7 +185,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(component.activeCandidate()).toBe(cards()[0]);
+    expect(component.activeCandidate()?.analysis.guid).toBe(cards()[0].analysis.guid);
     expect(component.actionError()).toBe('Active selection failed.');
 
     await component.confirmActive();
@@ -163,7 +206,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     cards.set([blocked]);
     fixture.detectChanges();
 
-    browseCard(0).deleteRequested.emit(blocked);
+    browseCard(0).deleteRequested.emit(component.cards()[0]);
     fixture.detectChanges();
 
     void component.confirmDelete();
@@ -174,7 +217,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     actions.deleteAnalysis
       .mockRejectedValueOnce(new Error('Analysis deletion failed.'))
       .mockResolvedValueOnce(undefined);
-    browseCard(0).deleteRequested.emit(cards()[0]);
+    browseCard(0).deleteRequested.emit(component.cards()[0]);
     fixture.detectChanges();
 
     expect(modalPortal.show.mock.calls[0][0]).toBeInstanceOf(TemplatePortal);
@@ -182,7 +225,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(component.deleteCandidate()).toBe(cards()[0]);
+    expect(component.deleteCandidate()?.analysis.guid).toBe(cards()[0].analysis.guid);
     expect(component.actionError()).toBe('Analysis deletion failed.');
 
     await component.confirmDelete();
@@ -222,9 +265,19 @@ function makeCard(
     category,
     status,
     statusLabel: status === 'ready' ? 'Ready' : 'Warning',
-    findings: [], groupSummaries: [], groupCount: 0, regressionCount: 0, generatedModelCount: 0,
+    findings: [],
     isActiveForReporting: false, linkedAccountAnalyses: [], linkedReports: [], bankingConsumers: [], dependencyCount: 0,
     modifiedDateLabel: 'Jan 2, 2025', modifiedSortValue: 2, searchText: `${name} ${category}`.toLocaleLowerCase(),
     attentionRank: status === 'warning' ? 1 : 3
+  };
+}
+
+function readyOutcome(year: number, annual: number, month: Date, monthly: number) {
+  return {
+    state: 'ready' as const,
+    summary: {
+      annual: { periodLabel: String(year), value: annual },
+      monthly: { periodLabel: month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), value: monthly }
+    }
   };
 }

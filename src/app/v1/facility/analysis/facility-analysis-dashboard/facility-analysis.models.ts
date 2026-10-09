@@ -1,22 +1,14 @@
-import { AnalysisCategory, AnalysisType } from '@data/models/analysis';
+import { AnalysisCategory } from '@data/models/analysis';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
+import { FacilityAnalysisOutcomeDisplay, FacilityAnalysisOutcomeState } from '../facility-analysis-outcome-summary';
+import { buildFacilityAnalysisGroupModelViews } from '../group-model-roster/facility-analysis-group-model.view';
 
 export type FacilityAnalysisCardStatus = 'evaluating' | 'ready' | 'warning' | 'error';
-
-export interface FacilityAnalysisGroupSummary {
-  readonly id: string;
-  readonly name: string;
-  readonly analysisType: AnalysisType;
-  readonly analysisTypeLabel: string;
-  readonly predictorCount: number;
-  readonly generatedModelCount: number;
-  readonly hasSelectedModel: boolean;
-}
 
 export interface FacilityAnalysisCard {
   readonly analysis: IdbAnalysisItem;
@@ -24,10 +16,6 @@ export interface FacilityAnalysisCard {
   readonly status: FacilityAnalysisCardStatus;
   readonly statusLabel: string;
   readonly findings: readonly StatusItem[];
-  readonly groupSummaries: readonly FacilityAnalysisGroupSummary[];
-  readonly groupCount: number;
-  readonly regressionCount: number;
-  readonly generatedModelCount: number;
   readonly isActiveForReporting: boolean;
   readonly linkedAccountAnalyses: readonly IdbAccountAnalysisItem[];
   readonly linkedReports: readonly IdbFacilityReport[];
@@ -38,6 +26,11 @@ export interface FacilityAnalysisCard {
   readonly modifiedSortValue: number;
   readonly searchText: string;
   readonly attentionRank: number;
+}
+
+export interface FacilityAnalysisDashboardCard extends FacilityAnalysisCard {
+  readonly outcome: FacilityAnalysisOutcomeState;
+  readonly outcomeDisplay: FacilityAnalysisOutcomeDisplay;
 }
 
 export interface BuildFacilityAnalysisCardsInput {
@@ -51,22 +44,13 @@ export interface BuildFacilityAnalysisCardsInput {
 }
 
 export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInput): FacilityAnalysisCard[] {
-  const groupNames = new Map(input.meterGroups.map(group => [group.guid, group.name || 'Untitled group']));
   return input.analyses.map(analysis => {
     const findings = input.statusItems.filter(item =>
       (item.entity.kind === 'facility-analysis' && item.entity.guid === analysis.guid)
       || (item.entity.kind === 'analysis-group' && item.entity.guid.startsWith(`${analysis.guid}:`))
     );
     const status = resolveStatus(input.statusState, findings);
-    const groupSummaries = (analysis.groups ?? []).map(group => ({
-      id: group.idbGroupId,
-      name: groupNames.get(group.idbGroupId) ?? group.idbGroupId,
-      analysisType: group.analysisType,
-      analysisTypeLabel: analysisTypeLabel(group.analysisType),
-      predictorCount: group.predictorVariables?.filter(variable => variable.productionInAnalysis).length ?? 0,
-      generatedModelCount: group.models?.length ?? 0,
-      hasSelectedModel: !!group.selectedModelId
-    }));
+    const groupModels = buildFacilityAnalysisGroupModelViews(analysis, input.meterGroups);
     const linkedAccountAnalyses = input.accountAnalyses.filter(item =>
       item.facilityAnalysisItems?.some(link =>
         link.facilityId === analysis.facilityId && link.analysisItemId === analysis.guid
@@ -92,7 +76,7 @@ export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInpu
       analysis.baselineYear,
       analysis.energyIsSource ? 'source energy' : 'site energy',
       isActiveForReporting ? 'active reporting' : '',
-      ...groupSummaries.map(group => group.name),
+      ...groupModels.flatMap(group => [group.name, group.methodLabel, group.modelLabel, group.equationLabel]),
       ...linkedAccountAnalyses.map(item => item.name),
       ...linkedReports.map(item => item.name),
       bankingSource?.name ?? '',
@@ -104,10 +88,6 @@ export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInpu
       status,
       statusLabel,
       findings,
-      groupSummaries,
-      groupCount: groupSummaries.length,
-      regressionCount: groupSummaries.filter(group => group.analysisType === 'regression').length,
-      generatedModelCount: groupSummaries.reduce((sum, group) => sum + group.generatedModelCount, 0),
       isActiveForReporting,
       linkedAccountAnalyses,
       linkedReports,
@@ -120,17 +100,6 @@ export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInpu
       attentionRank: status === 'error' ? 0 : status === 'warning' ? 1 : status === 'evaluating' ? 2 : 3
     };
   }).sort((first, second) => first.analysis.name.localeCompare(second.analysis.name));
-}
-
-export function analysisTypeLabel(type: AnalysisType): string {
-  switch (type) {
-    case 'absoluteEnergyConsumption': return 'Absolute';
-    case 'energyIntensity': return 'Classic intensity';
-    case 'modifiedEnergyIntensity': return 'Modified intensity';
-    case 'regression': return 'Regression';
-    case 'skip':
-    case 'skipAnalysis': return 'Excluded';
-  }
 }
 
 function resolveStatus(state: StatusEvaluationState, findings: readonly StatusItem[]): FacilityAnalysisCardStatus {

@@ -1,44 +1,60 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
 import { ResourceBrowseCardAction } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
-import { FacilityAnalysisCard } from '../facility-analysis.models';
+import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
+import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
+import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 import { buildFacilityAnalysisResourceView } from './facility-analysis-card.view';
 
 @Component({
   selector: 'app-analysis-browse-card',
   host: { class: 'v1-resource-browse-card-host' },
   standalone: true,
-  imports: [ResourceBrowseCardComponent],
+  imports: [ResourceBrowseCardComponent, FacilityAnalysisGroupModelRosterComponent],
   templateUrl: './analysis-browse-card.component.html',
-  styleUrls: ['./analysis-browse-card.component.css']
+  styleUrls: ['./analysis-browse-card.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnalysisBrowseCardComponent {
-  @Input({ required: true }) card!: FacilityAnalysisCard;
-  @Input() selectedForComparison = false;
-  @Input() canAct = true;
-  @Output() opened = new EventEmitter<FacilityAnalysisCard>();
-  @Output() detailsRequested = new EventEmitter<FacilityAnalysisCard>();
-  @Output() comparisonToggled = new EventEmitter<FacilityAnalysisCard>();
-  @Output() copyRequested = new EventEmitter<FacilityAnalysisCard>();
-  @Output() activeRequested = new EventEmitter<FacilityAnalysisCard>();
-  @Output() deleteRequested = new EventEmitter<FacilityAnalysisCard>();
+  readonly card = input.required<FacilityAnalysisDashboardCard>();
+  readonly meterGroups = input<readonly IdbUtilityMeterGroup[]>([]);
+  readonly showGroupDetails = input(false);
+  readonly selectedForComparison = input(false);
+  readonly canAct = input(true);
+  readonly opened = output<FacilityAnalysisDashboardCard>();
+  readonly detailsRequested = output<FacilityAnalysisDashboardCard>();
+  readonly comparisonToggled = output<FacilityAnalysisDashboardCard>();
+  readonly copyRequested = output<FacilityAnalysisDashboardCard>();
+  readonly activeRequested = output<FacilityAnalysisDashboardCard>();
+  readonly deleteRequested = output<FacilityAnalysisDashboardCard>();
 
-  get view() { return buildFacilityAnalysisResourceView(this.card); }
-  get actions(): readonly ResourceBrowseCardAction[] {
+  readonly view = computed(() => buildFacilityAnalysisResourceView(this.card()));
+  readonly actions = computed<readonly ResourceBrowseCardAction[]>(() => {
+    const card = this.card();
     return [
-      { id: 'active', label: this.card.isActiveForReporting ? 'Active for reporting' : 'Set active for reporting', icon: 'target', disabled: !this.canAct || this.card.isActiveForReporting },
+      {
+        id: 'active',
+        label: card.isActiveForReporting ? 'Active for reporting' : 'Set active for reporting',
+        icon: 'target',
+        disabled: !this.canAct() || card.isActiveForReporting
+      },
       { id: 'details', label: 'View analysis details', icon: 'monocle' },
-      { id: 'compare', label: this.selectedForComparison ? 'Remove from comparison' : 'Add to comparison', icon: 'transfer' },
-      { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct },
-      { id: 'delete', label: 'Delete analysis', icon: 'delete', tone: 'danger', disabled: !this.canAct }
+      {
+        id: 'compare',
+        label: this.selectedForComparison() ? 'Remove from comparison' : 'Add to comparison',
+        icon: 'transfer'
+      },
+      { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct() },
+      { id: 'delete', label: 'Delete analysis', icon: 'delete', tone: 'danger', disabled: !this.canAct() }
     ];
-  }
+  });
 
   selectAction(id: string): void {
-    if (id === 'details') this.detailsRequested.emit(this.card);
-    if (id === 'compare') this.comparisonToggled.emit(this.card);
-    if (id === 'copy') this.copyRequested.emit(this.card);
-    if (id === 'active') this.activeRequested.emit(this.card);
-    if (id === 'delete') this.deleteRequested.emit(this.card);
+    const card = this.card();
+    if (id === 'details') this.detailsRequested.emit(card);
+    if (id === 'compare') this.comparisonToggled.emit(card);
+    if (id === 'copy') this.copyRequested.emit(card);
+    if (id === 'active') this.activeRequested.emit(card);
+    if (id === 'delete') this.deleteRequested.emit(card);
   }
 }

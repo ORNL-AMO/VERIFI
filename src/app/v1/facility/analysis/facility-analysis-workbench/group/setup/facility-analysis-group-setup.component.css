@@ -15,6 +15,12 @@ h2, h3, p { margin: 0; }
 .v1-analysis-group-setup__panel fieldset > label { display: inline-flex; gap: .4rem; align-items: center; width: fit-content; font-weight: 400; line-height: 1.25; }
 .v1-analysis-group-setup__panel fieldset > label input[type="radio"] { flex: 0 0 auto; margin: 0; }
 .v1-analysis-group-setup__legacy, .v1-analysis-group-setup__check { display: flex; gap: var(--v1-space-2); align-items: center; }
+.v1-analysis-group-setup__equation { display: grid; gap: var(--v1-space-2); margin-top: var(--v1-space-2); padding-top: var(--v1-space-3); border-top: 1px solid var(--v1-divider); }
+.v1-analysis-group-setup__equation-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--v1-space-2); align-items: start; }
+.v1-analysis-group-setup__equation-text { padding: .75rem .9rem; border-left: .25rem solid var(--v1-content-control); background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); color: var(--v1-text); font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: clamp(.95rem, 1.2vw, 1.1rem); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+.v1-analysis-group-setup__equation-text--unavailable { color: var(--v1-muted); font-family: inherit; font-size: .86rem; font-weight: 750; }
+.v1-analysis-group-setup__inspect-model { width: var(--v1-control-height-sm); padding: 0; }
+.v1-analysis-group-setup__inspect-model .v1-icon { width: 1rem; height: 1rem; }
 .v1-analysis-group-setup__notice { display: grid; grid-template-columns: 1rem minmax(0, 1fr) auto; gap: var(--v1-space-1) var(--v1-space-2); align-items: start; color: var(--v1-muted); font-size: .86rem; line-height: 1.35; }
 .v1-analysis-group-setup__notice .v1-icon { width: 1rem; height: 1rem; margin-top: .08rem; }
 .v1-analysis-group-setup__notice a { font-weight: 800; }

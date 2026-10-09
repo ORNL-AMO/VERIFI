@@ -1,0 +1,23 @@
+:host { display: block; min-width: 0; }
+.v1-analysis-model-roster { display: grid; grid-template-rows: auto 1fr; gap: var(--v1-space-2); min-width: 0; height: 100%; padding: var(--v1-space-3); border: 1px solid var(--v1-border); background: var(--v1-content-block); }
+.v1-analysis-model-roster__heading { display: flex; flex-wrap: wrap; gap: var(--v1-space-2); align-items: baseline; justify-content: space-between; }
+.v1-analysis-model-roster__heading h2 { margin: 0; font-size: .95rem; font-weight: 950; }
+.v1-analysis-model-roster__list { display: grid; align-content: stretch; min-width: 0; }
+.v1-analysis-model-roster article { display: grid; grid-template-columns: minmax(8rem, .65fr) minmax(0, 1.35fr); align-content: center; column-gap: var(--v1-space-3); row-gap: .2rem; min-width: 0; padding: var(--v1-space-2) var(--v1-space-3); border-top: 1px solid var(--v1-border); }
+.v1-analysis-model-roster__group--excluded { opacity: .78; }
+.v1-analysis-model-roster__identity { display: flex; grid-row: 1 / span 2; flex-wrap: wrap; gap: var(--v1-space-2); align-items: center; align-self: center; justify-content: space-between; min-width: 0; }
+.v1-analysis-model-roster h3 { margin: 0; min-width: 0; font-size: .9rem; font-weight: 950; overflow-wrap: anywhere; }
+.v1-analysis-model-roster__model, .v1-analysis-model-roster__equation, .v1-analysis-model-roster__empty { margin: 0; }
+.v1-analysis-model-roster__model { color: var(--v1-muted); font-size: .72rem; font-weight: 800; }
+.v1-analysis-model-roster__equation { color: var(--v1-text); font-family: var(--v1-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace); font-size: .73rem; font-weight: 750; line-height: 1.35; overflow-wrap: anywhere; }
+.v1-analysis-model-roster__equation--unavailable, .v1-analysis-model-roster__empty { color: var(--v1-muted); font-family: inherit; font-style: italic; }
+.v1-analysis-model-roster--compact { gap: var(--v1-space-1); height: auto; padding: var(--v1-space-2) 0 0; border: 0; border-top: 1px solid var(--v1-border); background: transparent; }
+.v1-analysis-model-roster--compact .v1-analysis-model-roster__heading h2 { color: var(--v1-muted); font-size: .68rem; font-weight: 850; text-transform: uppercase; }
+.v1-analysis-model-roster--compact article { grid-template-columns: minmax(5.75rem, .7fr) minmax(0, 1.3fr); column-gap: var(--v1-space-2); padding: var(--v1-space-2) 0; }
+.v1-analysis-model-roster--compact h3 { font-size: .76rem; }
+.v1-analysis-model-roster--compact .v1-chip { padding: .1rem .3rem; font-size: .58rem; line-height: 1; }
+.v1-analysis-model-roster--compact .v1-analysis-model-roster__model { font-size: .64rem; }
+.v1-analysis-model-roster--compact .v1-analysis-model-roster__equation { font-size: .65rem; line-height: 1.25; }
+@media (max-width: 680px) { .v1-analysis-model-roster article { grid-template-columns: 1fr; } .v1-analysis-model-roster__identity { grid-row: auto; } }
+@media (max-width: 680px) { .v1-analysis-model-roster--compact article { grid-template-columns: minmax(5.75rem, .7fr) minmax(0, 1.3fr); } .v1-analysis-model-roster--compact .v1-analysis-model-roster__identity { grid-row: 1 / span 2; } }
+@media (max-width: 420px) { .v1-analysis-model-roster--compact article { grid-template-columns: 1fr; } .v1-analysis-model-roster--compact .v1-analysis-model-roster__identity { grid-row: auto; } }
