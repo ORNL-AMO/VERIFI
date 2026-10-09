@@ -2,6 +2,7 @@
 @let account = workspace.account();
 @let dashboardCards = cards();
 @let visibleCards = filteredCards();
+@let activeCards = activeReportingCards();
 
 @if (!facility) {
   <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No facility selected</h1><p>Select a facility before managing analyses.</p></article>
@@ -35,6 +36,33 @@
   @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
 
   <div class="v1-data-dashboard-workspace"><div id="v1-analysis-card-grid" class="v1-data-browse" aria-label="Facility analyses">
+    @if (activeCards.length) {
+      <section class="v1-analysis-dashboard__active-cards" aria-label="Active analyses for reporting">
+        @for (card of activeCards; track card.analysis.guid) {
+          <article class="v1-analysis-dashboard__active-card">
+            <app-ui-icon class="v1-analysis-dashboard__active-icon" name="target"></app-ui-icon>
+            <div class="v1-analysis-dashboard__active-identity">
+              <span>Active for Reporting</span>
+              <strong>{{ card.analysis.name }}</strong>
+              <small>{{ card.category === 'water' ? 'Water analysis' : 'Energy analysis' }}</small>
+            </div>
+            <div class="v1-analysis-dashboard__active-result">
+              @if (card.findings.length) {
+                <app-ui-icon name="warning"></app-ui-icon>
+                <strong>{{ card.findings.length }}</strong>
+                <span>{{ card.findings.length === 1 ? 'validation issue' : 'validation issues' }}</span>
+              } @else if (card.outcome.state === 'ready') {
+                <strong>{{ card.outcomeDisplay.monthly.valueLabel }} savings</strong>
+                <span>{{ card.outcomeDisplay.monthly.label }}</span>
+              } @else {
+                <strong>{{ card.outcome.message }}</strong>
+                <span>Latest month savings</span>
+              }
+            </div>
+          </article>
+        }
+      </section>
+    }
     <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four" aria-label="Analysis filters" [formGroup]="filtersForm">
       <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" formControlName="search"></div>
       <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label>

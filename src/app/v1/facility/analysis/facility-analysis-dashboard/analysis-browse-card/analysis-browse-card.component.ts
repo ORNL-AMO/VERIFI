@@ -35,12 +35,12 @@ export class AnalysisBrowseCardComponent {
     const card = this.card();
     const comparisonDisabledReason = this.comparisonDisabledReason();
     return [
-      {
+      ...(!card.isActiveForReporting ? [{
         id: 'active',
-        label: card.isActiveForReporting ? 'Active for reporting' : 'Set active for reporting',
-        icon: 'target',
-        disabled: !this.canAct() || card.isActiveForReporting
-      },
+        label: 'Set active for reporting',
+        icon: 'target' as const,
+        disabled: !this.canAct()
+      }] : []),
       { id: 'details', label: 'View analysis details', icon: 'monocle' },
       {
         id: 'compare',

@@ -20,7 +20,12 @@ export function buildFacilityAnalysisResourceView(
     chips: [
       { id: 'category', label: categoryLabel, icon: card.category === 'water' ? 'droplet' : 'energy', tone: 'neutral' },
       { id: 'status', label: card.statusLabel, icon: card.status === 'evaluating' ? 'loading' : card.status === 'ready' ? 'success' : card.status === 'error' ? 'danger' : 'warning', tone, loading: card.status === 'evaluating' },
-      ...(card.isActiveForReporting ? [{ id: 'active', label: 'Active for reporting', icon: 'target' as const, tone: 'info' as const }] : [])
+      ...(card.isActiveForReporting ? [{
+        id: 'active',
+        label: 'Active for Reporting',
+        icon: 'target' as const,
+        accentColor: 'var(--v1-primary)'
+      }] : [])
     ],
     factSections: [
       {

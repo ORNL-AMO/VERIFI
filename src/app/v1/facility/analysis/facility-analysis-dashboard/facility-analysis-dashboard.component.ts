@@ -58,6 +58,7 @@ export class FacilityAnalysisDashboardComponent implements OnDestroy {
   }));
   readonly detailsGuid = signal<string | undefined>(undefined);
   readonly detailsCard = computed(() => this.cards().find(card => card.analysis.guid === this.detailsGuid()));
+  readonly activeReportingCards = computed(() => this.cards().filter(card => card.isActiveForReporting));
   readonly showGroupDetails = signal(false);
   readonly createOpen = signal(false);
   readonly saving = signal(false);
