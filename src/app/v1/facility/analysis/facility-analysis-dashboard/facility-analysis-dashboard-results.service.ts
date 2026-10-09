@@ -27,9 +27,9 @@ import {
   timeout
 } from 'rxjs';
 import {
-  FacilityAnalysisOutcomeState,
   facilityAnalysisOutcomeSummary
 } from '../facility-analysis-outcome-summary';
+import { FacilityAnalysisDashboardResultState } from './facility-analysis.models';
 import {
   analysisDependencyClosure,
   facilityAnalysisResultsFingerprint,
@@ -44,18 +44,18 @@ interface DashboardResultRequest {
 
 interface DashboardResultInput {
   readonly key: string;
-  readonly states: Readonly<Record<string, FacilityAnalysisOutcomeState>>;
+  readonly states: Readonly<Record<string, FacilityAnalysisDashboardResultState>>;
   readonly requests: readonly DashboardResultRequest[];
 }
 
 interface DashboardResultUpdate {
   readonly analysisGuid: string;
-  readonly state: FacilityAnalysisOutcomeState;
+  readonly state: FacilityAnalysisDashboardResultState;
 }
 
 interface CachedDashboardResult {
   readonly fingerprint: string;
-  readonly state: FacilityAnalysisOutcomeState & { readonly state: 'ready' };
+  readonly state: Extract<FacilityAnalysisDashboardResultState, { readonly state: 'ready' }>;
 }
 
 @Injectable()
@@ -80,7 +80,7 @@ export class FacilityAnalysisDashboardResultsService {
     })
   );
 
-  readonly states: Signal<Readonly<Record<string, FacilityAnalysisOutcomeState>>> = toSignal(
+  readonly states: Signal<Readonly<Record<string, FacilityAnalysisDashboardResultState>>> = toSignal(
     this.stateStream,
     { initialValue: {} }
   );
@@ -89,7 +89,7 @@ export class FacilityAnalysisDashboardResultsService {
     const analyses = [...this.workspace.selectedFacilityAnalyses()]
       .sort((first, second) => first.guid.localeCompare(second.guid));
     const facility = this.workspace.selectedFacility();
-    const stateEntries: Array<readonly [string, FacilityAnalysisOutcomeState]> = [];
+    const stateEntries: Array<readonly [string, FacilityAnalysisDashboardResultState]> = [];
     const requests: DashboardResultRequest[] = [];
     const keyParts: string[] = [];
     const scopeKey = analyses.map(analysis => analysis.guid).join(',');
@@ -230,12 +230,14 @@ export class FacilityAnalysisDashboardResultsService {
 function dashboardOutcomeState(
   response: FacilityAnalysisResultsWorkerResponse,
   input: DashboardResultRequest
-): FacilityAnalysisOutcomeState {
+): FacilityAnalysisDashboardResultState {
   if (response.ok === false || response.value.itemId !== input.analysisGuid) {
     return { state: 'error', message: 'Calculation failed' };
   }
   return {
     state: 'ready',
+    annualAnalysisSummaries: response.value.annualAnalysisSummaries,
+    reportYear: response.value.reportYear,
     summary: facilityAnalysisOutcomeSummary(
       response.value.annualAnalysisSummaries,
       response.value.monthlyAnalysisSummaryData,
@@ -246,7 +248,7 @@ function dashboardOutcomeState(
 }
 
 function dashboardInput(
-  entries: Array<readonly [string, FacilityAnalysisOutcomeState]>,
+  entries: Array<readonly [string, FacilityAnalysisDashboardResultState]>,
   requests: readonly DashboardResultRequest[],
   key: string
 ): DashboardResultInput {

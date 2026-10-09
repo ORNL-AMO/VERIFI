@@ -47,7 +47,12 @@ describe('FacilityAnalysisDashboardResultsService browser Worker lifecycle', () 
     await settleSignals();
     expect(FakeWorker.instances).toHaveLength(3);
     expect(service.states()['analysis-a']).toMatchObject({
-      state: 'ready', summary: { annual: { value: 6.25 }, monthly: { value: 4.5 } }
+      state: 'ready',
+      annualAnalysisSummaries: [
+        { year: 2024, totalSavingsPercentImprovement: 3.25 },
+        { year: 2025, totalSavingsPercentImprovement: 6.25 }
+      ],
+      summary: { annual: { value: 6.25 }, monthly: { value: 4.5 } }
     });
 
     FakeWorker.instances[1].emitMessage({ ok: false, message: 'failed' });
@@ -186,9 +191,12 @@ function analysisFixture(guid: string, bankedAnalysisItemId?: string): IdbAnalys
 function completeResponse(itemId: string, reportYear: number, annualImprovement: number): unknown {
   return {
     ok: true,
-    value: {
+      value: {
       itemId, reportYear,
-      annualAnalysisSummaries: [{ year: reportYear, totalSavingsPercentImprovement: annualImprovement }],
+      annualAnalysisSummaries: [
+        { year: reportYear - 1, totalSavingsPercentImprovement: 3.25 },
+        { year: reportYear, totalSavingsPercentImprovement: annualImprovement }
+      ],
       monthlyAnalysisSummaryData: [{
         date: new Date(reportYear + 1, 0, 1), rolling12MonthImprovement: 4.5,
         missingValueWarning: false

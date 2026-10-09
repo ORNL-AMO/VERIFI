@@ -15,7 +15,8 @@ export type AnalysisResultStatusState =
   selector: 'app-analysis-result-status',
   standalone: true,
   imports: [IconComponent],
-  templateUrl: './analysis-result-status.component.html'
+  templateUrl: './analysis-result-status.component.html',
+  styleUrls: ['./analysis-result-status.component.css']
 })
 export class AnalysisResultStatusComponent {
   @Input({ required: true }) state!: AnalysisResultStatusState;

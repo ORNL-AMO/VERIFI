@@ -1,0 +1,75 @@
+@let allCards = analysisCards();
+@let visibleCards = filteredAnalysisCards();
+
+<section class="v1-account-portfolio-analyses" aria-label="Portfolio analyses">
+  <form
+    class="v1-data-browse-toolbar v1-data-browse-toolbar--four"
+    aria-label="Analysis filters"
+    [formGroup]="filtersForm">
+    <div class="v1-data-browse-search">
+      <span class="input-group-text">
+        <app-ui-icon name="search"></app-ui-icon>
+      </span>
+      <input
+        type="search"
+        aria-label="Find analysis, facility, group, status, or dependency"
+        placeholder="Find analysis, facility, group, status, or dependency"
+        formControlName="search">
+    </div>
+
+    <label>
+      <span>Category</span>
+      <select class="v1-select" formControlName="category">
+        <option value="all">All</option>
+        <option value="energy">Energy</option>
+        <option value="water">Water</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Status</span>
+      <select class="v1-select" formControlName="status">
+        <option value="all">All</option>
+        <option value="ready">Ready</option>
+        <option value="warning">Needs review</option>
+        <option value="error">Invalid</option>
+        <option value="active">Active for reporting</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Sort</span>
+      <select class="v1-select" formControlName="sort">
+        <option value="attention">Attention first</option>
+        <option value="modified">Recently modified</option>
+        <option value="name">Analysis name</option>
+        <option value="facility">Facility name</option>
+        <option value="baseline">Baseline year</option>
+      </select>
+    </label>
+  </form>
+
+  @if (allCards.length === 0) {
+    <app-data-empty-state
+      icon="analysis"
+      title="No analyses"
+      description="Analyses will appear here after you create them for a facility.">
+    </app-data-empty-state>
+  } @else if (visibleCards.length === 0) {
+    <app-data-empty-state
+      icon="clearFilter"
+      title="No analyses match these filters"
+      description="Adjust the search or filters to return to the full analysis list.">
+    </app-data-empty-state>
+  } @else {
+    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-analyses__cards" role="list" aria-label="Account facility analyses">
+      @for (entry of visibleCards; track entry.card.analysis.guid) {
+        <app-resource-browse-card
+          [view]="entry.view"
+          [capabilities]="cardCapabilities"
+          (opened)="open(entry)">
+        </app-resource-browse-card>
+      }
+    </div>
+  }
+</section>

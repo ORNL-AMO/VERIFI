@@ -39,7 +39,7 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Readings"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Predictors"].v1-facility-card__fact')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Energy Uses"].v1-facility-card__fact')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Analyses"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Analyses"].v1-facility-card__fact')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Reports"]')).toBeNull();
   });
 
@@ -64,7 +64,7 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(cardTitles(fixture)).toEqual(['Alpha Plant', 'Beta Works']);
   });
 
-  it('navigates linked facts to facility data and owns facility deletion', async () => {
+  it('navigates linked facts to facility data and analyses and owns facility deletion', async () => {
     const fixture = setup();
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
     const workspaceService = TestBed.inject(AccountWorkspaceService) as unknown as { selectFacility: ReturnType<typeof vi.fn> };
@@ -73,10 +73,12 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
 
     fixture.detectChanges();
     (fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Energy Uses"]') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('[aria-label="Open Alpha Plant Analyses"]') as HTMLButtonElement).click();
     (fixture.nativeElement.querySelector('[aria-label="Delete facility"]') as HTMLButtonElement).click();
 
     expect(workspaceService.selectFacility).toHaveBeenCalledWith('facility-a');
-    expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses']);
+    expect(router.navigate).toHaveBeenNthCalledWith(1, ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'energy-uses']);
+    expect(router.navigate).toHaveBeenNthCalledWith(2, ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard']);
     expect(fixture.componentInstance.facilityToDelete()?.guid).toBe('facility-b');
     expect(modalPortal.show).toHaveBeenCalled();
     expect(portfolioFacilities.deleteFacility).not.toHaveBeenCalled();
@@ -118,7 +120,8 @@ function setup(): ComponentFixture<AccountPortfolioFacilitiesTabComponent> {
         useValue: {
           openFacility: vi.fn(async () => undefined),
           facilitySettingsRoute: (facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', facilityGuid, 'settings', detail],
-          facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail]
+          facilityDataRoute: (facilityGuid: string, detail = 'meters') => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
+          facilityAnalysisRoute: (facilityGuid: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard']
         }
       },
       { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },

@@ -4,7 +4,7 @@ Use this guide when reviewing VERIFI pull requests in GitHub. It extends the [Re
 
 ## Start
 
-Read the pull request diff, changed files, tests provided by the author, and the matching row in the [task context index](context-index.md). Load only the linked architecture sections, skills, and local source needed to understand the changed contract.
+Use `review-code-changes`. Read the pull request diff, changed files, tests provided by the author, and the matching row in the [task context index](context-index.md). Load only the linked architecture sections, subsystem skills, and local source needed to understand the changed contract. Trace affected entry points, owners, consumers, and compatibility paths before treating a changed line as locally correct.
 
 For v1 UI migration work, include the [Angular template guidance](angular-template-guidance.md), [Unified UI/UX migration guide](../unified-ux-migration.md), and [P1 selected prototype baseline](p1-selected-prototype-baseline.md) when they are relevant to the changed files.
 
@@ -16,12 +16,14 @@ Lead with actionable findings. Prioritize:
 - calculation, report, import/export, and Web Worker contract changes;
 - Electron preload, IPC, filesystem, dialog, updater, and context-isolation boundaries;
 - v0/v1 separation, shared-layer imports, route stability, and workspace state correctness;
+- Angular component, service, and route-context ownership, including lifecycle cleanup and reactive state flow;
 - user-visible regressions in loading, empty, validation, error, disabled, success, keyboard, responsive, print, and accessibility states;
+- reuse of existing components, presentation builders, semantic classes, and style layers where the changed behavior has the same contract;
 - test quality and whether validation matches the actual risk.
 
 For new Worker-backed queues or dashboard fan-out, inspect lifecycle and workload as separate contracts: timeout and teardown, stale-work cancellation, queue progress after one job fails or stalls, concurrency, total requested history, and structured-clone response size. A concurrency limit does not by itself bound total work or prevent queue starvation.
 
-Style and maintainability comments are useful when they prevent recurring drift. Mark them as non-blocking when they do not affect behavior.
+Perform a reuse pass across changed TypeScript, templates, and CSS plus the nearest shared and neighboring implementations. Repeated semantic markup, data shaping, interaction behavior, or complete style blocks can justify consolidation. Matching individual declarations usually do not. Prefer an existing shared component or semantic class over a new abstraction, and mark cleanup comments as non-blocking when they do not affect behavior.
 
 ## V1 Angular review checklist
 
@@ -31,13 +33,18 @@ For production `src/app/v1/` changes, check that the PR:
 - avoids `@v0/*` imports from production v1 code;
 - organizes code by feature folder rather than broad `pages` or `components` buckets;
 - avoids routine `V1` or `v1-` prefixes except at real version boundaries;
-- keeps orchestration in components and reusable behavior in services, helpers, pipes, or shared components;
+- keeps route and interaction orchestration in the owning component or context while placing reusable behavior in services, deterministic builders, helpers, pipes, or shared components;
 - reads workspace and lifecycle state from existing signals instead of maintaining duplicate component copies;
 - uses `computed()` for reusable or non-trivial derived state;
 - uses `@let` for repeated object signal reads in a single template view when it improves clarity;
 - avoids repeated ordinary method calls, allocations, sorting, filtering, or business logic inside template bindings;
-- includes meaningful behavior tests instead of creation-only tests.
-- renders every supported value of a closed analysis-method or state union, including retained legacy-compatible variants, when a template condition changes.
+- uses typed reactive forms for editable state, search, filtering, paging, and preferences;
+- passes typed values and semantic intents across component boundaries instead of raw DOM events;
+- preserves cleanup for subscriptions, Workers, timers, listeners, portals, and other lifecycle-owned resources;
+- reuses established shared components, presentation patterns, and semantic style classes when behavior and ownership match;
+- includes meaningful behavior tests instead of creation-only tests;
+- renders every supported value of a closed analysis-method or state union, including retained legacy-compatible variants, when a template condition changes;
+- covers labels, roles, announcements, focus behavior, keyboard operation, responsive layout, and theme states relevant to the change.
 
 Repeated direct signal reads such as `appearance.settings().palette` across several bindings are usually a non-blocking maintainability comment: suggest a local alias like `@let settings = appearance.settings();`. Escalate only when the repeated expression is expensive, unstable, or hides important state.
 

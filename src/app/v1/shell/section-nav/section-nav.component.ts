@@ -73,8 +73,23 @@ type ImportNavigationFile = {
 };
 
 type AnalysisNavigation = {
+  readonly guid: string;
   readonly name: string;
   readonly steps: readonly AnalysisWorkbenchStageNavigation[];
+};
+
+type AnalysisNavItem = {
+  readonly guid: string;
+  readonly label: string;
+  readonly icon: 'energy' | 'droplet';
+  readonly route: readonly string[];
+  readonly expanded: boolean;
+};
+
+type AnalysisNavGroup = {
+  readonly id: 'active' | 'energy' | 'water';
+  readonly label: string;
+  readonly items: readonly AnalysisNavItem[];
 };
 
 const ACCOUNT_DATA_ITEMS: ReadonlyArray<DataNavItem> = [
@@ -187,6 +202,7 @@ export class SectionNavComponent {
       || (item.entity.kind === 'analysis-group' && item.entity.guid.startsWith(`${analysisGuid}:`))
     );
     return {
+      guid: analysis.guid,
       name: analysis.name || 'Untitled analysis',
       steps: buildAnalysisWorkbenchStageNavigation(
         stages,
@@ -197,6 +213,47 @@ export class SectionNavComponent {
         this.status.state() === 'ready'
       )
     };
+  });
+  readonly facilityAnalysisGroups = computed<ReadonlyArray<AnalysisNavGroup>>(() => {
+    const facility = this.navigation.facility();
+    if (!facility) return [];
+
+    const activeAnalysisGuid = this.navigation.activeAnalysisGuid();
+    const analyses = this.workspace.selectedFacilityAnalyses().map(analysis => ({
+      guid: analysis.guid,
+      label: analysis.name || 'Untitled analysis',
+      category: analysis.analysisCategory,
+      icon: analysis.analysisCategory === 'water' ? 'droplet' as const : 'energy' as const,
+      route: this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, analysis.guid),
+      expanded: analysis.guid === activeAnalysisGuid
+    }));
+    const active = [
+      analyses.find(analysis =>
+        analysis.category === 'energy' && analysis.guid === facility.selectedEnergyAnalysisId),
+      analyses.find(analysis =>
+        analysis.category === 'water' && analysis.guid === facility.selectedWaterAnalysisId)
+    ].filter((analysis): analysis is NonNullable<typeof analysis> => !!analysis);
+    const activeGuids = new Set(active.map(analysis => analysis.guid));
+    const sortByName = (first: typeof analyses[number], second: typeof analyses[number]): number =>
+      first.label.localeCompare(second.label) || first.guid.localeCompare(second.guid);
+    const groups: AnalysisNavGroup[] = [
+      { id: 'active', label: 'Active for Reporting', items: active },
+      {
+        id: 'energy',
+        label: 'Energy',
+        items: analyses
+          .filter(analysis => analysis.category === 'energy' && !activeGuids.has(analysis.guid))
+          .sort(sortByName)
+      },
+      {
+        id: 'water',
+        label: 'Water',
+        items: analyses
+          .filter(analysis => analysis.category === 'water' && !activeGuids.has(analysis.guid))
+          .sort(sortByName)
+      }
+    ];
+    return groups.filter(group => group.items.length > 0);
   });
   readonly facilityMeterItems = computed<ReadonlyArray<MeterNavItem>>(() => {
     const statusReady = this.status.state() === 'ready';

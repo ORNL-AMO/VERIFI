@@ -1,14 +1,27 @@
-import { AnalysisCategory } from '@data/models/analysis';
+import { AnalysisCategory, AnnualAnalysisSummary } from '@data/models/analysis';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
-import { FacilityAnalysisOutcomeDisplay, FacilityAnalysisOutcomeState } from '../facility-analysis-outcome-summary';
+import {
+  FacilityAnalysisOutcomeDisplay,
+  FacilityAnalysisOutcomeState,
+  FacilityAnalysisOutcomeSummary
+} from '../facility-analysis-outcome-summary';
 import { buildFacilityAnalysisGroupModelViews } from '../group-model-roster/facility-analysis-group-model.view';
 
 export type FacilityAnalysisCardStatus = 'evaluating' | 'ready' | 'warning' | 'error';
+
+export type FacilityAnalysisDashboardResultState =
+  | Exclude<FacilityAnalysisOutcomeState, { readonly state: 'ready' }>
+  | {
+      readonly state: 'ready';
+      readonly summary: FacilityAnalysisOutcomeSummary;
+      readonly annualAnalysisSummaries: readonly AnnualAnalysisSummary[];
+      readonly reportYear?: number;
+    };
 
 export interface FacilityAnalysisCard {
   readonly analysis: IdbAnalysisItem;
@@ -29,7 +42,7 @@ export interface FacilityAnalysisCard {
 }
 
 export interface FacilityAnalysisDashboardCard extends FacilityAnalysisCard {
-  readonly outcome: FacilityAnalysisOutcomeState;
+  readonly outcome: FacilityAnalysisDashboardResultState;
   readonly outcomeDisplay: FacilityAnalysisOutcomeDisplay;
 }
 

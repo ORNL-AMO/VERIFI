@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from '@angular/core';
+import { Component, computed, EventEmitter, Input, Output, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { FacilityAnalysisDashboardComponent } from './facility-analysis-dashboar
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
+import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout/analysis-comparison-slideout.component';
 
 describe('FacilityAnalysisDashboardComponent', () => {
   let fixture: ComponentFixture<FacilityAnalysisDashboardComponent>;
@@ -54,6 +55,10 @@ describe('FacilityAnalysisDashboardComponent', () => {
         }]
       }
     });
+    TestBed.overrideComponent(FacilityAnalysisDashboardComponent, {
+      remove: { imports: [AnalysisComparisonSlideoutComponent] },
+      add: { imports: [AnalysisComparisonSlideoutStubComponent] }
+    });
     await TestBed.configureTestingModule({
       imports: [FacilityAnalysisDashboardComponent],
       providers: [
@@ -61,7 +66,7 @@ describe('FacilityAnalysisDashboardComponent', () => {
         { provide: FacilityAnalysisWorkspaceService, useValue: {
           account: signal({ guid: 'account-a', name: 'Account A' }),
           facility: signal({ guid: 'facility-a', name: 'Facility A' }),
-          cards, meterGroups: signal([]),
+          cards, analyses: computed(() => cards().map(card => card.analysis)), meterGroups: signal([]),
           canWrite: signal(true), hasPending: signal(false), workspaceState: signal('ready'),
           workspaceError: signal(undefined), statusState: signal('ready')
         } },
@@ -128,16 +133,29 @@ describe('FacilityAnalysisDashboardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Latest full year · 2025');
   });
 
-  it('opens canonical workbench routes and limits comparison to two analyses', () => {
+  it('opens canonical workbench routes and compares only two analyses from the same category', () => {
     const third = makeCard('energy-c', 'Energy C', 'ready');
     cards.set([...cards(), third]);
     component.open(cards()[0]);
     component.toggleComparison(cards()[0]);
+    fixture.detectChanges();
+    expect(browseCardByGuid('energy-a').actions().find(action => action.id === 'compare')?.icon).toBe('apple');
+    expect(browseCardByGuid('energy-c').actions().find(action => action.id === 'compare')?.icon).toBe('orange');
     component.toggleComparison(cards()[1]);
+    expect(component.comparisonGuids()).toEqual(['energy-a']);
+    expect(component.comparisonDisabledReason(cards()[1])).toBe('Compare with another energy analysis');
+
     component.toggleComparison(third);
+    fixture.detectChanges();
 
     expect(router.navigate).toHaveBeenCalledWith(['/analysis', 'facility-a', 'energy-a']);
-    expect(component.comparisonGuids()).toEqual(['water-b', 'energy-c']);
+    expect(component.comparisonGuids()).toEqual(['energy-a', 'energy-c']);
+    const comparison = fixture.debugElement.query(By.directive(AnalysisComparisonSlideoutStubComponent));
+    expect(comparison).not.toBeNull();
+
+    comparison.componentInstance.closed.emit();
+    expect(component.comparisonGuids()).toEqual([]);
+    expect(component.comparisonDisabledReason(cards()[1])).toBeUndefined();
   });
 
   it('keeps creation open with a visible command error, then closes and navigates after retry', async () => {
@@ -241,6 +259,14 @@ describe('FacilityAnalysisDashboardComponent', () => {
     return fixture.debugElement.queryAll(By.directive(AnalysisBrowseCardComponent))[index].componentInstance;
   }
 
+  function browseCardByGuid(guid: string): AnalysisBrowseCardComponent {
+    const card = fixture.debugElement.queryAll(By.directive(AnalysisBrowseCardComponent))
+      .map(item => item.componentInstance as AnalysisBrowseCardComponent)
+      .find(item => item.card().analysis.guid === guid);
+    if (!card) throw new Error(`Analysis card not found: ${guid}`);
+    return card;
+  }
+
   function buttonByText(label: string): HTMLButtonElement {
     const button = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button'))
       .find(item => item.textContent?.replace(/\s+/g, ' ').trim() === label);
@@ -249,6 +275,15 @@ describe('FacilityAnalysisDashboardComponent', () => {
   }
 
 });
+
+@Component({ selector: 'app-analysis-comparison-slideout', template: '', standalone: true })
+class AnalysisComparisonSlideoutStubComponent {
+  @Input() cards: unknown;
+  @Input() facility: unknown;
+  @Input() meterGroups: unknown;
+  @Input() analyses: unknown;
+  @Output() closed = new EventEmitter<void>();
+}
 
 function makeCard(
   guid: string,
@@ -275,6 +310,19 @@ function makeCard(
 function readyOutcome(year: number, annual: number, month: Date, monthly: number) {
   return {
     state: 'ready' as const,
+    reportYear: year,
+    annualAnalysisSummaries: [{
+      year,
+      energyUse: 100,
+      adjusted: 90,
+      savings: 10,
+      annualSavingsPercentImprovement: annual,
+      totalSavingsPercentImprovement: annual,
+      isBanked: false,
+      isIntermediateBanked: false,
+      savingsBanked: 0,
+      missingPredictorValue: false
+    }],
     summary: {
       annual: { periodLabel: String(year), value: annual },
       monthly: { periodLabel: month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), value: monthly }
