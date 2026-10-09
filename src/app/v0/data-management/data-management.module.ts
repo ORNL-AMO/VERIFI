@@ -104,6 +104,7 @@ import { ConfirmEnergyUsesUploadComponent } from '@v0/data-management/data-manag
 import { FacilityEnergyUsesSankeyComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-footprint/facility-energy-uses-sankey/facility-energy-uses-sankey.component';
 import { FacilityEnergyUsesGroupSankeyComponent } from '@v0/data-management/account-facilities/facility-data/facility-energy-uses/results/facility-energy-uses-group-footprint/facility-energy-uses-group-sankey/facility-energy-uses-group-sankey.component';
 import { OperatingHoursModalModule } from '@v0/shared/operating-hours-modal/operating-hours.module';
+import { LoadFactorModalComponent } from './account-facilities/facility-data/facility-energy-uses/setup/facility-energy-use-equipment-form/load-factor-modal/load-factor-modal.component';
 
 
 @NgModule({
@@ -197,7 +198,8 @@ import { OperatingHoursModalModule } from '@v0/shared/operating-hours-modal/oper
     MapMeterGroupsToEquipmentComponent,
     ConfirmEnergyUsesUploadComponent,
     FacilityEnergyUsesSankeyComponent,
-    FacilityEnergyUsesGroupSankeyComponent
+    FacilityEnergyUsesGroupSankeyComponent,
+    LoadFactorModalComponent
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,19 @@
+.calculation-method-toggle {
+    display: flex;
+    width: 100%;
+}
+
+.calculation-method-toggle .btn {
+    flex: 1 1 0;
+}
+
+.unit-control {
+    flex: 0 0 8rem;
+    width: 8rem;
+    justify-content: center;
+    text-align: center;
+}
+
+.text-size {
+    font-size: 1.25rem;
+}
