@@ -43,12 +43,24 @@ export interface FacilityAnalysisComparisonAnnualRow {
   readonly second?: FacilityAnalysisComparisonAnnualCell;
 }
 
+export interface FacilityAnalysisComparisonAnnualTable {
+  readonly id: 'first' | 'second';
+  readonly analysisName: string;
+  readonly unit: string;
+  readonly rows: readonly {
+    readonly year: number;
+    readonly yearLabel: string;
+    readonly result?: FacilityAnalysisComparisonAnnualCell;
+  }[];
+}
+
 export interface FacilityAnalysisComparisonView {
   readonly first: FacilityAnalysisDashboardCard;
   readonly second: FacilityAnalysisDashboardCard;
   readonly analysisFields: readonly FacilityAnalysisComparisonField[];
   readonly groups: readonly FacilityAnalysisComparisonGroup[];
   readonly annualRows: readonly FacilityAnalysisComparisonAnnualRow[];
+  readonly annualTables: readonly FacilityAnalysisComparisonAnnualTable[];
   readonly annualMarkers: readonly AnalysisResultMarker[];
   readonly firstUnit: string;
   readonly secondUnit: string;
@@ -72,6 +84,8 @@ export function buildFacilityAnalysisComparisonView(
   const firstAnnual = readyAnnualRows(first);
   const secondAnnual = readyAnnualRows(second);
   const annualRows = buildAnnualRows(firstAnnual, secondAnnual, facility);
+  const firstUnit = comparisonUnit(first) || 'Not set';
+  const secondUnit = comparisonUnit(second) || 'Not set';
   const useChartCompatible = first.category === second.category
     && comparisonUnit(first) === comparisonUnit(second)
     && (first.category === 'water' || first.analysis.energyIsSource === second.analysis.energyIsSource);
@@ -81,12 +95,13 @@ export function buildFacilityAnalysisComparisonView(
     analysisFields: buildAnalysisFields(first, second, analyses),
     groups: buildGroupComparisons(first.analysis, second.analysis, meterGroups, analyses),
     annualRows,
+    annualTables: buildAnnualTables(annualRows, first.analysis.name, second.analysis.name, firstUnit, secondUnit),
     annualMarkers: orderedUniqueResultMarkers(annualRows.flatMap(row => [
       ...(row.first?.markers ?? []),
       ...(row.second?.markers ?? [])
     ])),
-    firstUnit: comparisonUnit(first) || 'Not set',
-    secondUnit: comparisonUnit(second) || 'Not set',
+    firstUnit,
+    secondUnit,
     useChartCompatible,
     useChartUnavailableMessage: useChartCompatible
       ? undefined
@@ -105,12 +120,16 @@ function buildAnalysisFields(
   second: FacilityAnalysisDashboardCard,
   analyses: readonly IdbAnalysisItem[]
 ): readonly FacilityAnalysisComparisonField[] {
-  return [
+  const fields = [
     comparisonField('status', 'Status', first.statusLabel, second.statusLabel),
     comparisonField('baseline', 'Baseline year', yearValue(first.analysis.baselineYear), yearValue(second.analysis.baselineYear)),
     comparisonField('category', 'Category', categoryLabel(first), categoryLabel(second)),
     comparisonField('unit', 'Unit', comparisonUnit(first) || 'Not set', comparisonUnit(second) || 'Not set'),
-    comparisonField('basis', 'Basis', basisLabel(first), basisLabel(second)),
+    comparisonField('basis', 'Basis', basisLabel(first), basisLabel(second))
+  ];
+  if (!first.analysis.hasBanking && !second.analysis.hasBanking) return fields;
+  return [
+    ...fields,
     comparisonField('banking-enabled', 'Banking enabled', bankingEnabledLabel(first.analysis), bankingEnabledLabel(second.analysis)),
     comparisonField('banking-source', 'Banking source', bankingSourceLabel(first.analysis, analyses), bankingSourceLabel(second.analysis, analyses))
   ];
@@ -140,15 +159,17 @@ function buildGroupComparisons(
     const secondGroup = secondGroups.get(id);
     const firstModel = firstModels.get(id);
     const secondModel = secondModels.get(id);
-    const fields = [
+    const fields: FacilityAnalysisComparisonField[] = [
       comparisonField('inclusion', 'Participation', participationLabel(firstGroup), participationLabel(secondGroup)),
       comparisonField('method', 'Analysis method', firstModel?.methodLabel ?? 'Not configured', secondModel?.methodLabel ?? 'Not configured'),
       comparisonField('predictors', 'Selected predictors', predictorLabel(firstGroup), predictorLabel(secondGroup)),
       comparisonField('model', 'Model context', modelContextLabel(firstGroup, firstModel?.modelLabel), modelContextLabel(secondGroup, secondModel?.modelLabel)),
       comparisonField('equation', 'Modeled equation', firstModel?.equationLabel ?? 'Not configured', secondModel?.equationLabel ?? 'Not configured'),
-      comparisonField('baseload', 'Legacy baseload', baseloadLabel(firstGroup), baseloadLabel(secondGroup)),
-      comparisonField('banking', 'Banking setup', groupBankingLabel(first, firstGroup, analyses), groupBankingLabel(second, secondGroup, analyses))
+      comparisonField('baseload', 'Legacy baseload', baseloadLabel(firstGroup), baseloadLabel(secondGroup))
     ];
+    if (first.hasBanking || second.hasBanking) {
+      fields.push(comparisonField('banking', 'Banking setup', groupBankingLabel(first, firstGroup, analyses), groupBankingLabel(second, secondGroup, analyses)));
+    }
     return {
       id,
       name: names.get(id) || firstModel?.name || secondModel?.name || `Meter group ${index + 1}`,
@@ -156,6 +177,29 @@ function buildGroupComparisons(
       different: fields.some(field => field.different)
     };
   });
+}
+
+function buildAnnualTables(
+  rows: readonly FacilityAnalysisComparisonAnnualRow[],
+  firstName: string,
+  secondName: string,
+  firstUnit: string,
+  secondUnit: string
+): readonly FacilityAnalysisComparisonAnnualTable[] {
+  return [
+    {
+      id: 'first',
+      analysisName: firstName,
+      unit: firstUnit,
+      rows: rows.map(row => ({ year: row.year, yearLabel: row.yearLabel, result: row.first }))
+    },
+    {
+      id: 'second',
+      analysisName: secondName,
+      unit: secondUnit,
+      rows: rows.map(row => ({ year: row.year, yearLabel: row.yearLabel, result: row.second }))
+    }
+  ];
 }
 
 function buildAnnualRows(

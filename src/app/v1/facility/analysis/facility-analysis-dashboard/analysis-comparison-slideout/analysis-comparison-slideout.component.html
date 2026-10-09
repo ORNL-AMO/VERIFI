@@ -29,7 +29,7 @@
           <div class="v1-analysis-comparison__groups">
             @for (group of comparison.groups; track group.id) {
               <article>
-                <h4>{{ group.name }} @if (group.different) { <span class="v1-analysis-comparison__difference-label">Different</span> }</h4>
+                <div class="v1-analysis-comparison__group-heading" role="heading" aria-level="4">{{ group.name }} @if (group.different) { <span class="v1-analysis-comparison__difference-label">Different</span> }</div>
                 <div class="v1-analysis-comparison__table-scroll" tabindex="0" role="region" [attr.aria-label]="group.name + ' setup comparison'">
                   <table class="v1-analysis-comparison__setup-table">
                     <thead><tr><th scope="col">Setting</th><th scope="col">{{ comparison.first.analysis.name }}</th><th scope="col">{{ comparison.second.analysis.name }}</th></tr></thead>
@@ -59,37 +59,29 @@
           @if (comparison.secondResultMessage) { <p><strong>{{ comparison.second.analysis.name }}:</strong> {{ comparison.secondResultMessage }}</p> }
         </div>
         @if (comparison.annualRows.length) {
-          <div class="v1-analysis-comparison__table-scroll" tabindex="0" role="region" aria-label="Facility annual analysis comparison">
-            <table class="v1-analysis-comparison__annual-table">
-              <thead>
-                <tr>
-                  <th rowspan="2" scope="col">Year</th>
-                  <th colspan="5" scope="colgroup">{{ comparison.first.analysis.name }} ({{ comparison.firstUnit }})</th>
-                  <th colspan="5" scope="colgroup">{{ comparison.second.analysis.name }} ({{ comparison.secondUnit }})</th>
-                </tr>
-                <tr>
-                  <th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th>
-                  <th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (row of comparison.annualRows; track row.year) {
-                  <tr [class.v1-analysis-comparison__incomplete]="row.first?.incomplete || row.second?.incomplete">
-                    <th scope="row">{{ row.yearLabel }}</th>
-                    <td><span>{{ row.first?.actual | analysisResultNumber }}</span><app-analysis-result-markers [markers]="row.first?.markers || []"></app-analysis-result-markers>@if (row.first?.incomplete) { <span class="v1-analysis-comparison__incomplete-label">Incomplete data</span> }</td>
-                    <td>{{ row.first?.adjusted | analysisResultNumber }}</td>
-                    <td>{{ row.first?.savings | analysisResultNumber }}</td>
-                    <td>@if (row.first?.annualImprovement !== null && row.first?.annualImprovement !== undefined) { {{ row.first?.annualImprovement | number:'1.0-2' }}% } @else { — }</td>
-                    <td>@if (row.first?.totalImprovement !== null && row.first?.totalImprovement !== undefined) { {{ row.first?.totalImprovement | number:'1.0-2' }}% } @else { — }</td>
-                    <td><span>{{ row.second?.actual | analysisResultNumber }}</span><app-analysis-result-markers [markers]="row.second?.markers || []"></app-analysis-result-markers>@if (row.second?.incomplete) { <span class="v1-analysis-comparison__incomplete-label">Incomplete data</span> }</td>
-                    <td>{{ row.second?.adjusted | analysisResultNumber }}</td>
-                    <td>{{ row.second?.savings | analysisResultNumber }}</td>
-                    <td>@if (row.second?.annualImprovement !== null && row.second?.annualImprovement !== undefined) { {{ row.second?.annualImprovement | number:'1.0-2' }}% } @else { — }</td>
-                    <td>@if (row.second?.totalImprovement !== null && row.second?.totalImprovement !== undefined) { {{ row.second?.totalImprovement | number:'1.0-2' }}% } @else { — }</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+          <div class="v1-analysis-comparison__annual-tables">
+            @for (table of comparison.annualTables; track table.id) {
+              <article class="v1-analysis-comparison__annual-result">
+                <div class="v1-analysis-comparison__result-heading" role="heading" aria-level="4">{{ table.analysisName }} ({{ table.unit }})</div>
+                <div class="v1-analysis-comparison__table-scroll" tabindex="0" role="region" [attr.aria-label]="table.analysisName + ' annual results'">
+                  <table class="v1-analysis-comparison__annual-table">
+                    <thead><tr><th scope="col">Year</th><th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th></tr></thead>
+                    <tbody>
+                      @for (row of table.rows; track row.year) {
+                        <tr [class.v1-analysis-comparison__incomplete]="row.result?.incomplete">
+                          <th scope="row">{{ row.yearLabel }}</th>
+                          <td><span>{{ row.result?.actual | analysisResultNumber }}</span><app-analysis-result-markers [markers]="row.result?.markers || []"></app-analysis-result-markers>@if (row.result?.incomplete) { <span class="v1-analysis-comparison__incomplete-label">Incomplete data</span> }</td>
+                          <td>{{ row.result?.adjusted | analysisResultNumber }}</td>
+                          <td>{{ row.result?.savings | analysisResultNumber }}</td>
+                          <td>@if (row.result?.annualImprovement !== null && row.result?.annualImprovement !== undefined) { {{ row.result?.annualImprovement | number:'1.0-2' }}% } @else { — }</td>
+                          <td>@if (row.result?.totalImprovement !== null && row.result?.totalImprovement !== undefined) { {{ row.result?.totalImprovement | number:'1.0-2' }}% } @else { — }</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            }
           </div>
           <app-analysis-result-marker-legend [markers]="comparison.annualMarkers"></app-analysis-result-marker-legend>
 

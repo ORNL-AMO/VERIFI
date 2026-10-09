@@ -29,8 +29,12 @@ describe('AnalysisComparisonSlideoutComponent', () => {
     expect(text).toContain('Facility annual results');
     expect(text).toContain('Different');
     expect(text).toContain('2024');
+    expect(text).not.toContain('Banking');
     expect(fixture.debugElement.queryAll(By.directive(MeterResultsChartStubComponent))).toHaveLength(2);
-    expect(fixture.nativeElement.querySelector('[aria-label="Facility annual analysis comparison"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.v1-analysis-comparison__annual-result')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('[aria-label="Analysis A annual results"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Analysis B annual results"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('h4')).toBeNull();
   });
 
   it('keeps the improvement chart and explains why use cannot be charted across unlike units and bases', () => {

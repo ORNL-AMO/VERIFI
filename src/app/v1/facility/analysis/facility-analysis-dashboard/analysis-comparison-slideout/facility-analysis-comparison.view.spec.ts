@@ -34,6 +34,9 @@ describe('buildFacilityAnalysisComparisonView', () => {
     expect(view.groups[1].fields.find(field => field.id === 'inclusion')).toMatchObject({
       firstValue: 'Excluded', secondValue: 'Not configured', different: true
     });
+    expect(view.analysisFields.map(field => field.id)).not.toContain('banking-enabled');
+    expect(view.analysisFields.map(field => field.id)).not.toContain('banking-source');
+    expect(view.groups.flatMap(item => item.fields).map(field => field.id)).not.toContain('banking');
   });
 
   it('aligns non-overlapping annual years and preserves transition and missing-data behavior', () => {
@@ -47,6 +50,9 @@ describe('buildFacilityAnalysisComparisonView', () => {
     expect(view.annualRows[0].first?.markers).toContain('transition');
     expect(view.annualRows[1].second?.incomplete).toBe(true);
     expect(view.useChartRows[0].values['firstAdjusted']).toBeNull();
+    expect(view.annualTables.map(table => table.analysisName)).toEqual(['Analysis A', 'Analysis B']);
+    expect(view.annualTables[0].rows[1].result).toBeUndefined();
+    expect(view.annualTables[1].rows[0].result).toBeUndefined();
   });
 
   it('keeps percentage charts but suppresses the shared use chart for different units or bases', () => {
