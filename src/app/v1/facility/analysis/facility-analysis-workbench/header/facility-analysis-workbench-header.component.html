@@ -5,9 +5,13 @@
     <header class="v1-data-workbench-header v1-analysis-workbench__header">
       <nav class="v1-data-workbench-breadcrumb" aria-label="Facility analysis breadcrumb">
         <ol>
-          <li>{{ context.account()?.name || 'Account' }}</li>
+          @if (context.account(); as account) {
+            <li><a [routerLink]="navigation.accountPortfolioRoute(account.guid, 'analyses')">{{ account.name || 'Account' }}</a></li>
+          } @else {
+            <li>Account</li>
+          }
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li>{{ facility.name || 'Facility' }}</li>
+          <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">{{ facility.name || 'Facility' }}</a></li>
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
           <li><a [routerLink]="navigation.facilityAnalysisRoute(facility.guid)">Analyses</a></li>
         </ol>

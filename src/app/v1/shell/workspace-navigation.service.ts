@@ -22,6 +22,7 @@ export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
 export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
 export type FacilityAnalysisGroupRouteTab = 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
 export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
+export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 export type FacilityAnalysisStageScope = 'analysis' | 'group' | 'facility' | 'used-by';
@@ -330,6 +331,10 @@ export class WorkspaceNavigationService {
 
   accountDataRoute(accountGuid: string, detail = 'portfolio'): Array<string> {
     return ['/v1', 'workspace', 'account', accountGuid, 'data', detail];
+  }
+
+  accountPortfolioRoute(accountGuid: string, tab: AccountPortfolioTab = 'facilities'): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'data', 'portfolio', tab];
   }
 
   accountImportsRoute(accountGuid: string): Array<string> {

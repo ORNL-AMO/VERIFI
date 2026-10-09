@@ -106,6 +106,9 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'portfolio'
     ]);
+    expect(service.accountPortfolioRoute('account-a', 'analyses')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'analyses'
+    ]);
     expect(service.accountImportsRoute('account-a')).toEqual([
       '/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'
     ]);

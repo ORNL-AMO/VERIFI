@@ -1,5 +1,5 @@
 import { facilityAnalysisOutcomeDisplay } from '../../facility-analysis-outcome-summary';
-import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
+import { FacilityAnalysisCard, FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 import { buildFacilityAnalysisResourceView } from './facility-analysis-card.view';
 
 describe('buildFacilityAnalysisResourceView', () => {
@@ -47,5 +47,25 @@ describe('buildFacilityAnalysisResourceView', () => {
     expect(view.factSections?.[1].facts).toContainEqual(expect.objectContaining({
       id: 'basis', valueLabel: 'Water · gal'
     }));
+  });
+
+  it('builds an owning-facility setup card when dashboard outcomes are not requested', () => {
+    const view = buildFacilityAnalysisResourceView({
+      analysis: {
+        guid: 'analysis-a', name: 'Energy performance', baselineYear: 2022,
+        analysisCategory: 'energy', energyIsSource: false, energyUnit: 'MMBtu', groups: []
+      },
+      category: 'energy', status: 'ready', statusLabel: 'Ready', findings: [],
+      isActiveForReporting: true, linkedAccountAnalyses: [], linkedReports: [], bankingConsumers: [],
+      dependencyCount: 0, modifiedDateLabel: 'Oct 9, 2026', modifiedSortValue: 0,
+      searchText: '', attentionRank: 3
+    } as unknown as FacilityAnalysisCard, {
+      facility: { guid: 'facility-a', name: 'Alpha Plant' } as any
+    });
+
+    expect(view.owner).toEqual({ label: 'Alpha Plant', icon: 'facility' });
+    expect(view.factSections?.map(section => section.id)).toEqual(['setup']);
+    expect(view.factSections?.[0].facts).toContainEqual({ id: 'groups', label: 'Groups', valueLabel: '0' });
+    expect(view.chips).toContainEqual(expect.objectContaining({ id: 'active', label: 'Active for Reporting' }));
   });
 });
