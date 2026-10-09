@@ -48,13 +48,21 @@
             </div>
             <div class="v1-analysis-dashboard__active-identity">
               <span>Active for Reporting</span>
-              <strong>{{ card.analysis.name }}</strong>
+              <a
+                class="v1-analysis-dashboard__active-link"
+                [routerLink]="navigation.facilityAnalysisWorkbenchRoute(facility.guid, card.analysis.guid)"
+                [attr.aria-label]="'Open ' + card.analysis.name + ' analysis'">
+                <strong>{{ card.analysis.name }}</strong>
+                <app-ui-icon name="chevronRight"></app-ui-icon>
+              </a>
               <small>{{ card.category === 'water' ? 'Water analysis' : 'Energy analysis' }}</small>
             </div>
             <div class="v1-analysis-dashboard__active-result">
               @if (card.findings.length) {
-                <app-ui-icon name="warning"></app-ui-icon>
-                <strong>{{ card.findings.length }}</strong>
+                <div class="v1-analysis-dashboard__active-result-value">
+                  <app-ui-icon name="warning"></app-ui-icon>
+                  <strong>{{ card.findings.length }}</strong>
+                </div>
                 <span>{{ card.findings.length === 1 ? 'validation issue' : 'validation issues' }}</span>
               } @else if (card.outcome.state === 'ready') {
                 <strong>{{ card.outcomeDisplay.monthly.valueLabel }} savings</strong>

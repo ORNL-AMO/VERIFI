@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
@@ -27,7 +27,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 @Component({
   selector: 'app-facility-analysis-dashboard',
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisGroupModelRosterComponent, AnalysisComparisonSlideoutComponent],
+  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, RouterLink, FacilityAnalysisGroupModelRosterComponent, AnalysisComparisonSlideoutComponent],
   providers: [FacilityAnalysisDashboardResultsService],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']
