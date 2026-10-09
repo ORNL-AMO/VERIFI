@@ -361,74 +361,97 @@
             <app-ui-icon name="analysis"></app-ui-icon>
             Dashboard
           </a>
-          @if (contextMode === 'facility' && activeAnalysisNavigation(); as workflow) {
-            <section class="v1-nav__analysis-workflow" [attr.aria-label]="workflow.name">
-              <h2 [title]="workflow.name">
-                <app-ui-icon name="analysis"></app-ui-icon>
-                <span>{{ workflow.name }}</span>
-              </h2>
-              <nav class="v1-workflow-stepper" [attr.aria-label]="'Analysis progress for ' + workflow.name">
-                <ol>
-                  @for (step of workflow.steps; track step.id) {
-                    <li [class.is-current]="step.current" [class.is-complete]="step.completed" [class.is-blocked]="!step.canOpen">
-                      @if (step.canOpen) {
-                        <a [routerLink]="step.route" [attr.aria-current]="step.current ? 'step' : null">
-                          <span
-                            class="v1-workflow-stepper__marker"
-                            [class.is-complete]="step.completed"
-                            [class.has-blocking-errors]="step.hasBlockingErrors">
-                            @if (step.kind === 'analysis' || step.kind === 'group') {
-                              @if (step.completed) {
-                                <app-ui-icon name="checkmarkBadge"></app-ui-icon>
-                                <span class="visually-hidden">Complete</span>
-                              } @else if (step.hasBlockingErrors) {
-                                <app-ui-icon name="badgeAlert"></app-ui-icon>
-                                <span class="visually-hidden">Has blocking errors</span>
+          @if (contextMode === 'facility' && selectedFacility) {
+            @let workflow = activeAnalysisNavigation();
+            @for (group of facilityAnalysisGroups(); track group.id) {
+              <section
+                class="v1-nav__analysis-section"
+                [attr.aria-labelledby]="'v1-analysis-' + group.id + '-title'">
+                <span
+                  class="v1-nav__sublabel"
+                  [id]="'v1-analysis-' + group.id + '-title'">
+                  {{ group.label }}
+                </span>
+                @for (analysis of group.items; track analysis.guid) {
+                  <div class="v1-nav__analysis-entry">
+                    <a
+                      class="v1-nav__analysis-link"
+                      [class.active]="analysis.expanded"
+                      [routerLink]="analysis.route"
+                      [attr.aria-expanded]="analysis.expanded"
+                      [attr.title]="analysis.label">
+                      <app-ui-icon [name]="analysis.icon"></app-ui-icon>
+                      <span class="v1-nav__item-label">{{ analysis.label }}</span>
+                    </a>
+                    @if (analysis.expanded && workflow && workflow.guid === analysis.guid) {
+                      <nav
+                        class="v1-nav__analysis-workflow v1-workflow-stepper"
+                        [attr.aria-label]="'Analysis progress for ' + workflow.name">
+                        <ol>
+                          @for (step of workflow.steps; track step.id) {
+                            <li [class.is-current]="step.current" [class.is-complete]="step.completed" [class.is-blocked]="!step.canOpen">
+                              @if (step.canOpen) {
+                                <a [routerLink]="step.route" [attr.aria-current]="step.current ? 'step' : null">
+                                  <span
+                                    class="v1-workflow-stepper__marker"
+                                    [class.is-complete]="step.completed"
+                                    [class.has-blocking-errors]="step.hasBlockingErrors">
+                                    @if (step.kind === 'analysis' || step.kind === 'group') {
+                                      @if (step.completed) {
+                                        <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                                        <span class="visually-hidden">Complete</span>
+                                      } @else if (step.hasBlockingErrors) {
+                                        <app-ui-icon name="badgeAlert"></app-ui-icon>
+                                        <span class="visually-hidden">Has blocking errors</span>
+                                      } @else {
+                                        <span class="visually-hidden">Not complete</span>
+                                      }
+                                    } @else if (step.kind === 'facility') {
+                                      <app-ui-icon name="chartAnalysis"></app-ui-icon>
+                                      <span class="visually-hidden">Results</span>
+                                    } @else {
+                                      <app-ui-icon name="link"></app-ui-icon>
+                                      <span class="visually-hidden">Dependencies</span>
+                                    }
+                                  </span>
+                                  <span class="v1-workflow-stepper__label">{{ step.label }}</span>
+                                </a>
                               } @else {
-                                <span class="visually-hidden">Not complete</span>
+                                <span class="v1-workflow-stepper__blocked" aria-disabled="true">
+                                  <span
+                                    class="v1-workflow-stepper__marker"
+                                    [class.is-complete]="step.completed"
+                                    [class.has-blocking-errors]="step.hasBlockingErrors">
+                                    @if (step.kind === 'analysis' || step.kind === 'group') {
+                                      @if (step.completed) {
+                                        <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                                        <span class="visually-hidden">Complete</span>
+                                      } @else if (step.hasBlockingErrors) {
+                                        <app-ui-icon name="badgeAlert"></app-ui-icon>
+                                        <span class="visually-hidden">Has blocking errors</span>
+                                      } @else {
+                                        <span class="visually-hidden">Not complete</span>
+                                      }
+                                    } @else if (step.kind === 'facility') {
+                                      <app-ui-icon name="chartAnalysis"></app-ui-icon>
+                                      <span class="visually-hidden">Results</span>
+                                    } @else {
+                                      <app-ui-icon name="link"></app-ui-icon>
+                                      <span class="visually-hidden">Dependencies</span>
+                                    }
+                                  </span>
+                                  <span class="v1-workflow-stepper__label">{{ step.label }}</span>
+                                </span>
                               }
-                            } @else if (step.kind === 'facility') {
-                              <app-ui-icon name="chartAnalysis"></app-ui-icon>
-                              <span class="visually-hidden">Results</span>
-                            } @else {
-                              <app-ui-icon name="link"></app-ui-icon>
-                              <span class="visually-hidden">Dependencies</span>
-                            }
-                          </span>
-                          <span class="v1-workflow-stepper__label">{{ step.label }}</span>
-                        </a>
-                      } @else {
-                        <span class="v1-workflow-stepper__blocked" aria-disabled="true">
-                          <span
-                            class="v1-workflow-stepper__marker"
-                            [class.is-complete]="step.completed"
-                            [class.has-blocking-errors]="step.hasBlockingErrors">
-                            @if (step.kind === 'analysis' || step.kind === 'group') {
-                              @if (step.completed) {
-                                <app-ui-icon name="checkmarkBadge"></app-ui-icon>
-                                <span class="visually-hidden">Complete</span>
-                              } @else if (step.hasBlockingErrors) {
-                                <app-ui-icon name="badgeAlert"></app-ui-icon>
-                                <span class="visually-hidden">Has blocking errors</span>
-                              } @else {
-                                <span class="visually-hidden">Not complete</span>
-                              }
-                            } @else if (step.kind === 'facility') {
-                              <app-ui-icon name="chartAnalysis"></app-ui-icon>
-                              <span class="visually-hidden">Results</span>
-                            } @else {
-                              <app-ui-icon name="link"></app-ui-icon>
-                              <span class="visually-hidden">Dependencies</span>
-                            }
-                          </span>
-                          <span class="v1-workflow-stepper__label">{{ step.label }}</span>
-                        </span>
-                      }
-                    </li>
-                  }
-                </ol>
-              </nav>
-            </section>
+                            </li>
+                          }
+                        </ol>
+                      </nav>
+                    }
+                  </div>
+                }
+              </section>
+            }
           }
         </section>
       }
