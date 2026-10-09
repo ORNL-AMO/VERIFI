@@ -35,7 +35,7 @@
   @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
 
   <div class="v1-data-dashboard-workspace"><div id="v1-analysis-card-grid" class="v1-data-browse" aria-label="Facility analyses">
-    <form class="v1-data-browse-toolbar" aria-label="Analysis filters" [formGroup]="filtersForm">
+    <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four" aria-label="Analysis filters" [formGroup]="filtersForm">
       <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find analysis, group, status, or dependency" placeholder="Find analysis, group, status, or dependency" formControlName="search"></div>
       <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label>
       <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="ready">Ready</option><option value="warning">Warning</option><option value="error">Error</option><option value="active">Active</option></select></label>
