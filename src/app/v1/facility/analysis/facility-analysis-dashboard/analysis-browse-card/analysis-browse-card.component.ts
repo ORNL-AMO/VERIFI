@@ -20,6 +20,7 @@ export class AnalysisBrowseCardComponent {
   readonly meterGroups = input<readonly IdbUtilityMeterGroup[]>([]);
   readonly showGroupDetails = input(false);
   readonly selectedForComparison = input(false);
+  readonly comparisonHasSelection = input(false);
   readonly comparisonDisabledReason = input<string | undefined>(undefined);
   readonly canAct = input(true);
   readonly opened = output<FacilityAnalysisDashboardCard>();
@@ -46,7 +47,7 @@ export class AnalysisBrowseCardComponent {
         label: this.selectedForComparison()
           ? 'Remove from comparison'
           : comparisonDisabledReason || 'Add to comparison',
-        icon: 'transfer',
+        icon: this.comparisonHasSelection() && !this.selectedForComparison() ? 'orange' : 'apple',
         disabled: !!comparisonDisabledReason && !this.selectedForComparison()
       },
       { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct() },

@@ -56,6 +56,23 @@ describe('AnalysisBrowseCardComponent', () => {
     const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[aria-label="Compare with another water analysis"]');
     expect(button?.disabled).toBe(true);
   });
+
+  it('uses an apple for the first selection and an orange for the second selection', async () => {
+    await TestBed.configureTestingModule({ imports: [AnalysisBrowseCardComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(AnalysisBrowseCardComponent);
+    fixture.componentRef.setInput('card', cardFixture());
+
+    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')?.icon).toBe('apple');
+
+    fixture.componentRef.setInput('comparisonHasSelection', true);
+    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')?.icon).toBe('orange');
+
+    fixture.componentRef.setInput('selectedForComparison', true);
+    expect(fixture.componentInstance.actions().find(action => action.id === 'compare')).toMatchObject({
+      label: 'Remove from comparison',
+      icon: 'apple'
+    });
+  });
 });
 
 function cardFixture() {

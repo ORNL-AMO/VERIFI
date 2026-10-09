@@ -6,6 +6,7 @@ import ArrowDownWideNarrowIcon from '@hugeicons/core-free-icons/ArrowDownWideNar
 import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon';
 import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon';
 import ArrowUpWideNarrowIcon from '@hugeicons/core-free-icons/ArrowUpWideNarrowIcon';
+import Apple01Icon from '@hugeicons/core-free-icons/Apple01Icon';
 import AsteriskIcon from '@hugeicons/core-free-icons/AsteriskIcon';
 import Attachment01Icon from '@hugeicons/core-free-icons/Attachment01Icon';
 import BarChartIcon from '@hugeicons/core-free-icons/BarChartIcon';
@@ -67,6 +68,7 @@ import LockIcon from '@hugeicons/core-free-icons/LockIcon';
 import LockKeyholeIcon from '@hugeicons/core-free-icons/LockKeyholeIcon';
 import MicroscopeIcon from '@hugeicons/core-free-icons/MicroscopeIcon';
 import Monocle01Icon from '@hugeicons/core-free-icons/Monocle01Icon';
+import OrangeIcon from '@hugeicons/core-free-icons/OrangeIcon';
 import PackageIcon from '@hugeicons/core-free-icons/PackageIcon';
 import PencilEdit02Icon from '@hugeicons/core-free-icons/PencilEdit02Icon';
 import PaintRollerIcon from '@hugeicons/core-free-icons/PaintRollerIcon';
@@ -102,6 +104,7 @@ export const ICON_REGISTRY = {
   accountIssue: Alert02Icon,
   add: Add01Icon,
   analysis: MicroscopeIcon,
+  apple: Apple01Icon,
   arrowLeft: ArrowLeft01Icon,
   arrowRight: ArrowRight01Icon,
   attachment: Attachment01Icon,
@@ -161,6 +164,7 @@ export const ICON_REGISTRY = {
   meterGroup: CombineIcon,
   meterGroupItem: GroupIcon,
   monocle: Monocle01Icon,
+  orange: OrangeIcon,
   overview: PieChartIcon,
   package: PackageIcon,
   paintRoller: PaintRollerIcon,

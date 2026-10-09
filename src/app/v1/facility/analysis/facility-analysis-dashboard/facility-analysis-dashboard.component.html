@@ -49,7 +49,7 @@
     } @else {
       @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
       <div class="v1-data-browse-grid v1-analysis-dashboard__card-grid" role="list" aria-label="Facility analyses">
-        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
+        @for (card of visibleCards; track card.analysis.guid) { <app-analysis-browse-card [card]="card" [meterGroups]="workspace.meterGroups()" [showGroupDetails]="showGroupDetails()" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonHasSelection]="comparisonGuids().length === 1" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-analysis-browse-card> }
       </div>
     }
   </div></div>

@@ -8,7 +8,7 @@
 .v1-analysis-dashboard__header h1 { display: inline-flex; align-items: center; gap: var(--v1-space-2); }
 .v1-analysis-dashboard__header-actions { display: flex; flex-wrap: wrap; gap: var(--v1-space-2); align-items: center; justify-content: flex-end; }
 .v1-data-browse-grid.v1-analysis-dashboard__card-grid { grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr)); }
-.v1-analysis-dashboard__compare-tray { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); padding: .75rem 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface-raised); }
+.v1-analysis-dashboard__compare-tray { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); padding: .75rem 1rem; border: 1px solid var(--v1-border); background: var(--v1-panel); color: var(--v1-text); }
 .v1-analysis-details { display: grid; gap: var(--v1-space-4); }
 .v1-analysis-details dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-3); margin: 0; }
 .v1-analysis-details dl div { padding: .75rem; border: 1px solid var(--v1-border); }

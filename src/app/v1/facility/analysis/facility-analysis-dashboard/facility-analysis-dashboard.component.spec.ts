@@ -138,6 +138,9 @@ describe('FacilityAnalysisDashboardComponent', () => {
     cards.set([...cards(), third]);
     component.open(cards()[0]);
     component.toggleComparison(cards()[0]);
+    fixture.detectChanges();
+    expect(browseCardByGuid('energy-a').actions().find(action => action.id === 'compare')?.icon).toBe('apple');
+    expect(browseCardByGuid('energy-c').actions().find(action => action.id === 'compare')?.icon).toBe('orange');
     component.toggleComparison(cards()[1]);
     expect(component.comparisonGuids()).toEqual(['energy-a']);
     expect(component.comparisonDisabledReason(cards()[1])).toBe('Compare with another energy analysis');
@@ -254,6 +257,14 @@ describe('FacilityAnalysisDashboardComponent', () => {
 
   function browseCard(index: number): AnalysisBrowseCardComponent {
     return fixture.debugElement.queryAll(By.directive(AnalysisBrowseCardComponent))[index].componentInstance;
+  }
+
+  function browseCardByGuid(guid: string): AnalysisBrowseCardComponent {
+    const card = fixture.debugElement.queryAll(By.directive(AnalysisBrowseCardComponent))
+      .map(item => item.componentInstance as AnalysisBrowseCardComponent)
+      .find(item => item.card().analysis.guid === guid);
+    if (!card) throw new Error(`Analysis card not found: ${guid}`);
+    return card;
   }
 
   function buttonByText(label: string): HTMLButtonElement {

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import Apple01Icon from '@hugeicons/core-free-icons/Apple01Icon';
 import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
 import MicroscopeIcon from '@hugeicons/core-free-icons/MicroscopeIcon';
+import OrangeIcon from '@hugeicons/core-free-icons/OrangeIcon';
 import SaveIcon from '@hugeicons/core-free-icons/SaveIcon';
 import Upload03Icon from '@hugeicons/core-free-icons/Upload03Icon';
 import { IconComponent } from './icon.component';
@@ -75,5 +77,10 @@ describe('IconComponent', () => {
 
   it('maps the analysis icon to MicroscopeIcon', () => {
     expect(ICON_REGISTRY.analysis).toBe(MicroscopeIcon);
+  });
+
+  it('maps the comparison fruit icons to their Hugeicons', () => {
+    expect(ICON_REGISTRY.apple).toBe(Apple01Icon);
+    expect(ICON_REGISTRY.orange).toBe(OrangeIcon);
   });
 });
