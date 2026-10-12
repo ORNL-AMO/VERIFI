@@ -14,7 +14,7 @@ import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transact
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { accountReportReferencesAnalysis, IdbAccountReport } from '@data/models/idbModels/accountReport';
 
 export interface DeleteFacilityAnalysisCommand {
   readonly accountGuid: string;
@@ -370,15 +370,6 @@ export class AnalysisCommandHandler {
       );
     }
   }
-}
-
-export function accountReportReferencesAnalysis(report: IdbAccountReport, analysisGuid: string): boolean {
-  return [
-    report.betterPlantsReportSetup?.analysisItemId,
-    report.performanceReportSetup?.analysisItemId,
-    report.analysisReportSetup?.analysisItemId,
-    report.accountSavingsReportSetup?.analysisItemId
-  ].includes(analysisGuid);
 }
 
 export function buildFacilityAnalysesWithPredictors(

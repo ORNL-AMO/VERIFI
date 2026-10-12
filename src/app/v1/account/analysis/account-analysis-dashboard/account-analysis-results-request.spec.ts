@@ -45,4 +45,19 @@ describe('account analysis results request', () => {
     changed.accountAnalysisItem.baselineYear = 2023;
     expect(accountAnalysisResultsFingerprint(changed)).not.toBe(accountAnalysisResultsFingerprint(request));
   });
+
+  it('changes when a calculation predictor identity changes', () => {
+    const request = buildAccountAnalysisResultsRequest(analysis, snapshot);
+    request.allAccountAnalysisItems[0].groups = [{
+      idbGroupId: 'group-a',
+      predictorVariables: [{
+        id: 'predictor-a', name: 'Weather', production: false,
+        productionInAnalysis: false, regressionCoefficient: 2, unit: 'F'
+      }]
+    } as any];
+    const changed = structuredClone(request);
+    changed.allAccountAnalysisItems[0].groups[0].predictorVariables[0].id = 'predictor-b';
+
+    expect(accountAnalysisResultsFingerprint(changed)).not.toBe(accountAnalysisResultsFingerprint(request));
+  });
 });

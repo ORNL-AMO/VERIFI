@@ -52,7 +52,7 @@ export function accountAnalysisResultsFingerprint(request: AccountAnalysisResult
 }
 
 const DISPLAY_ONLY_KEYS = new Set([
-  'id', 'name', 'createdDate', 'modifiedDate', 'checked', 'isAnalysisVisited'
+  'name', 'createdDate', 'modifiedDate', 'checked', 'isAnalysisVisited'
 ]);
 
 function stableCalculationValue(value: unknown): unknown {
@@ -63,7 +63,8 @@ function stableCalculationValue(value: unknown): unknown {
   }
   if (value && typeof value === 'object') {
     return Object.fromEntries(Object.entries(value as Record<string, unknown>)
-      .filter(([key]) => !DISPLAY_ONLY_KEYS.has(key))
+      .filter(([key, nested]) => !DISPLAY_ONLY_KEYS.has(key)
+        && !(key === 'id' && (nested === undefined || typeof nested === 'number')))
       .sort(([first], [second]) => first.localeCompare(second))
       .map(([key, nested]) => [key, stableCalculationValue(nested)]));
   }

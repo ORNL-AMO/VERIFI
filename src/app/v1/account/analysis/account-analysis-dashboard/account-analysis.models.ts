@@ -1,11 +1,10 @@
 import { AnalysisCategory, AnnualAnalysisSummary } from '@data/models/analysis';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { IdbAccountReport } from '@data/models/idbModels/accountReport';
+import { accountReportReferencesAnalysis, IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
-import { accountReportReferencesAnalysis } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import {
   FacilityAnalysisOutcomeDisplay,
   FacilityAnalysisOutcomeState,

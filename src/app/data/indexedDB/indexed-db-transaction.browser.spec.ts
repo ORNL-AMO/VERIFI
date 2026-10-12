@@ -300,6 +300,7 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
     await transactionService.runTransaction(['accountReports'], 'readwrite', transaction => transaction.put('accountReports', {
       ...accountAFixture.accountReport,
+      reportType: 'analysis',
       analysisReportSetup: { ...accountAFixture.accountReport.analysisReportSetup, analysisItemId: analysisGuid }
     }));
 

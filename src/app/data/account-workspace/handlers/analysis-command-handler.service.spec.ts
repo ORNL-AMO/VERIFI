@@ -117,15 +117,18 @@ describe('AnalysisCommandHandler', () => {
   });
 
   it('blocks account-analysis deletion for each supported linked report setup', async () => {
-    const setupNames = [
-      'betterPlantsReportSetup', 'performanceReportSetup', 'analysisReportSetup', 'accountSavingsReportSetup'
+    const reportSetups = [
+      ['betterPlants', 'betterPlantsReportSetup'],
+      ['performance', 'performanceReportSetup'],
+      ['analysis', 'analysisReportSetup'],
+      ['accountSavings', 'accountSavingsReportSetup']
     ];
-    for (const setupName of setupNames) {
+    for (const [reportType, setupName] of reportSetups) {
       const { handler, transactions } = createHandler();
       const context = {
         getAllByIndex: vi.fn()
           .mockResolvedValueOnce([{ id: 8, guid: 'aa-1', accountId: ACCOUNT }])
-          .mockResolvedValueOnce([{ [setupName]: { analysisItemId: 'aa-1' } }])
+          .mockResolvedValueOnce([{ reportType, [setupName]: { analysisItemId: 'aa-1' } }])
       };
       transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
       await expect(handler.deleteAccountAnalysisAtomic({ accountGuid: ACCOUNT, analysisGuid: 'aa-1' }))

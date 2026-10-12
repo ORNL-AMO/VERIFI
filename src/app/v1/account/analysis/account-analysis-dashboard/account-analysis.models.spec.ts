@@ -49,10 +49,15 @@ describe('account analysis dashboard models', () => {
   });
 
   it('discovers links from all four account report analysis fields', () => {
-    const reports = ['betterPlantsReportSetup', 'performanceReportSetup', 'analysisReportSetup', 'accountSavingsReportSetup']
-      .map((field, index) => ({
+    const reports = [
+      ['betterPlants', 'betterPlantsReportSetup'],
+      ['performance', 'performanceReportSetup'],
+      ['analysis', 'analysisReportSetup'],
+      ['accountSavings', 'accountSavingsReportSetup']
+    ].map(([reportType, field], index) => ({
         guid: `report-${index}`,
         name: `Report ${index}`,
+        reportType,
         [field]: { analysisItemId: analysis.guid }
       })) as unknown as IdbAccountReport[];
     const [card] = buildAccountAnalysisCards({
@@ -67,6 +72,22 @@ describe('account analysis dashboard models', () => {
     expect(card.linkedReports).toHaveLength(4);
     expect(card.selectionCounts).toEqual({ included: 1, skipped: 1, missing: 1, invalid: 1 });
     expect(card.isActiveForReporting).toBe(true);
+  });
+
+  it('ignores an analysis reference retained in an inactive report setup', () => {
+    const [card] = buildAccountAnalysisCards({
+      account,
+      analyses: [analysis],
+      facilities,
+      facilityAnalyses,
+      reports: [{
+        guid: 'report-a', name: 'Overview', reportType: 'dataOverview',
+        betterPlantsReportSetup: { analysisItemId: analysis.guid }
+      } as IdbAccountReport],
+      statusItems: [],
+      statusState: 'ready'
+    });
+    expect(card.linkedReports).toEqual([]);
   });
 
   it('filters searchable facility facts and applies stable attention ordering', () => {
