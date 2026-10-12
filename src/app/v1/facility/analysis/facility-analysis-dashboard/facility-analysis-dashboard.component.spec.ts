@@ -84,6 +84,8 @@ describe('FacilityAnalysisDashboardComponent', () => {
 
   it('renders analysis cards and distinguishes filtered empty results', () => {
     expect(fixture.nativeElement.querySelector('app-ui-icon[name="analysis"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-eyebrow')?.textContent.trim()).toBe('Account A / Facility Analysis');
+    expect(fixture.nativeElement.querySelector('h1')?.textContent.trim()).toBe('Facility A Analysis');
     expect(getComputedStyle(fixture.nativeElement).paddingTop).not.toBe('0px');
     expect(fixture.nativeElement.textContent).toContain('Energy A');
     expect(fixture.nativeElement.textContent).toContain('Water B');

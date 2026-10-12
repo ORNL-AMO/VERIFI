@@ -75,6 +75,8 @@ describe('AccountAnalysisDashboardComponent', () => {
 
   it('renders active summaries, result facts, and blocked states', () => {
     const text = fixture.nativeElement.textContent;
+    expect(fixture.nativeElement.querySelector('.v1-eyebrow')?.textContent.trim()).toBe('Account Analysis');
+    expect(fixture.nativeElement.querySelector('h1')?.textContent.trim()).toBe('Portfolio A Analysis');
     expect(text).toContain('Portfolio A');
     expect(text).toContain('Active for Reporting');
     expect(text).toContain('12.5%');
