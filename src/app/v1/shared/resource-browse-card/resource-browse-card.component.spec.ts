@@ -83,7 +83,7 @@ describe('ResourceBrowseCardComponent', () => {
     fixture.componentRef.setInput('actions', [
       { id: 'delete', label: 'Delete resource', icon: 'delete', tone: 'danger' }
     ]);
-    fixture.componentRef.setInput('capabilities', { canOpen: true, canAct: false });
+    fixture.componentRef.setInput('readOnly', true);
     const opened = vi.fn();
     fixture.componentInstance.opened.subscribe(opened);
     fixture.detectChanges();

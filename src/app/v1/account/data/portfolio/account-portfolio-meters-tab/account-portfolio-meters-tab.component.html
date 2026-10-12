@@ -56,7 +56,7 @@
       @for (item of visibleCards; track item.card.meter.guid) {
         <app-resource-browse-card
           [view]="item.view"
-          [capabilities]="cardCapabilities"
+          readOnly
           (opened)="openMeter(item)">
         </app-resource-browse-card>
       }
