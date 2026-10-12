@@ -107,4 +107,25 @@ describe('account analysis dashboard models', () => {
       search: 'alpha energy', category: 'all', status: 'all', sort: 'attention'
     }).map(card => card.analysis.guid)).toEqual(['warning', 'account-analysis-a']);
   });
+
+  it('sorts finite baseline years first and leaves unset baselines at the end', () => {
+    const cards = buildAccountAnalysisCards({
+      account,
+      analyses: [
+        { ...analysis, guid: 'unset-z', name: 'Zulu', baselineYear: undefined },
+        { ...analysis, guid: 'newer', name: 'Newer', baselineYear: 2023 },
+        { ...analysis, guid: 'older', name: 'Older', baselineYear: 2021 },
+        { ...analysis, guid: 'unset-a', name: 'Alpha', baselineYear: undefined }
+      ] as IdbAccountAnalysisItem[],
+      facilities,
+      facilityAnalyses,
+      reports: [],
+      statusItems: [],
+      statusState: 'ready'
+    });
+
+    expect(filterAndSortAccountAnalysisCards(cards, {
+      search: '', category: 'all', status: 'all', sort: 'baseline'
+    }).map(card => card.analysis.guid)).toEqual(['older', 'newer', 'unset-a', 'unset-z']);
+  });
 });

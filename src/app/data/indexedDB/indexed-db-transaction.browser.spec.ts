@@ -301,7 +301,7 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     await transactionService.runTransaction(['accountReports'], 'readwrite', transaction => transaction.put('accountReports', {
       ...accountAFixture.accountReport,
       reportType: 'analysis',
-      analysisReportSetup: { ...accountAFixture.accountReport.analysisReportSetup, analysisItemId: analysisGuid }
+      analysisReportSetup: { analysisItemId: analysisGuid }
     }));
 
     await expect(handler.deleteAccountAnalysisAtomic({ accountGuid, analysisGuid }))

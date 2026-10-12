@@ -9,23 +9,45 @@ export function buildAccountAnalysisResultsRequest(
   snapshot: AccountWorkspaceSnapshot,
   reportYear?: number
 ): AccountAnalysisResultsWorkerRequest {
-  const selected = (analysis.facilityAnalysisItems ?? [])
-    .filter(link => !!link.analysisItemId && link.analysisItemId !== 'skip')
-    .map(link => snapshot.facilityAnalyses.find(item => item.guid === link.analysisItemId))
-    .filter((item): item is IdbAnalysisItem => !!item);
+  const selected = (analysis.facilityAnalysisItems ?? []).flatMap(link => {
+    if (!link.analysisItemId || link.analysisItemId === 'skip') return [];
+    const item = snapshot.facilityAnalyses.find(candidate =>
+      candidate.guid === link.analysisItemId && candidate.facilityId === link.facilityId
+    );
+    return item ? [item] : [];
+  });
   const dependencyByGuid = new Map<string, IdbAnalysisItem>();
   selected.forEach(item => analysisDependencyClosure(item, snapshot.facilityAnalyses)
     .forEach(dependency => dependencyByGuid.set(dependency.guid, dependency)));
+  const facilityGuids = new Set(selected.map(item => item.facilityId));
+  const groupGuids = new Set([...dependencyByGuid.values()]
+    .flatMap(item => item.groups ?? [])
+    .map(group => group.idbGroupId));
+  const predictorGuids = new Set([...dependencyByGuid.values()]
+    .flatMap(item => item.groups ?? [])
+    .flatMap(group => [
+      ...(group.predictorVariables ?? []),
+      ...(group.models?.find(model => model.modelId === group.selectedModelId)?.predictorVariables ?? [])
+    ])
+    .map(predictor => predictor.id));
+  const meters = snapshot.meters.filter(meter =>
+    facilityGuids.has(meter.facilityId) && groupGuids.has(meter.groupId)
+  );
+  const meterGuids = new Set(meters.map(meter => meter.guid));
   return {
     accountAnalysisItem: structuredClone(analysis),
     account: structuredClone(snapshot.account),
-    accountFacilities: structuredClone(snapshot.facilities),
-    accountPredictorEntries: structuredClone(snapshot.predictorData),
+    accountFacilities: structuredClone(snapshot.facilities.filter(facility => facilityGuids.has(facility.guid))),
+    accountPredictorEntries: structuredClone(snapshot.predictorData.filter(entry =>
+      facilityGuids.has(entry.facilityId) && predictorGuids.has(entry.predictorId)
+    )),
     allAccountAnalysisItems: structuredClone([...dependencyByGuid.values()]),
     calculateAllMonthlyData: true,
-    meters: structuredClone(snapshot.meters),
-    meterData: structuredClone(snapshot.meterData),
-    accountPredictors: structuredClone(snapshot.predictors),
+    meters: structuredClone(meters),
+    meterData: structuredClone(snapshot.meterData.filter(entry => meterGuids.has(entry.meterId))),
+    accountPredictors: structuredClone(snapshot.predictors.filter(predictor =>
+      facilityGuids.has(predictor.facilityId) && predictorGuids.has(predictor.guid)
+    )),
     reportYear
   };
 }

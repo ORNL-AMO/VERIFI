@@ -190,7 +190,7 @@ export function filterAndSortAccountAnalysisCards<T extends AccountAnalysisCard>
     if (filters.sort === 'modified') return second.modifiedSortValue - first.modifiedSortValue;
     if (filters.sort === 'name') return first.analysis.name.localeCompare(second.analysis.name);
     if (filters.sort === 'baseline') {
-      return first.analysis.baselineYear - second.analysis.baselineYear
+      return (first.analysis.baselineYear ?? Infinity) - (second.analysis.baselineYear ?? Infinity)
         || first.analysis.name.localeCompare(second.analysis.name);
     }
     return first.attentionRank - second.attentionRank
