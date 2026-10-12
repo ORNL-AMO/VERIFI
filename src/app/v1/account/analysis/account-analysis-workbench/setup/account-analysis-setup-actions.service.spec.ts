@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
@@ -56,6 +57,109 @@ describe('buildBulkFacilityAnalysis', () => {
 
 describe('AccountAnalysisSetupActionsService', () => {
   afterEach(() => TestBed.resetTestingModule());
+
+  it('clears selected and skipped facility links while preserving the remaining analysis fields', async () => {
+    const originalModifiedDate = new Date('2026-01-02T00:00:00.000Z');
+    const draftValue = {
+      id: 42,
+      guid: 'account-analysis-a',
+      accountId: 'account-a',
+      name: 'Portfolio plan',
+      analysisCategory: 'energy',
+      energyIsSource: true,
+      energyUnit: 'MMBtu',
+      waterUnit: 'gal',
+      baselineYear: 2022,
+      hasBanking: true,
+      checked: true,
+      isAnalysisVisited: true,
+      facilityItemsInitialized: true,
+      createdDate: new Date('2025-01-01T00:00:00.000Z'),
+      modifiedDate: originalModifiedDate,
+      facilityAnalysisItems: [
+        { facilityId: 'facility-a', analysisItemId: 'analysis-a' },
+        { facilityId: 'facility-b', analysisItemId: 'skip' }
+      ]
+    } as IdbAccountAnalysisItem;
+    const draft = signal(draftValue);
+    const updateAccountAnalysis = vi.fn().mockImplementation(async analysis => analysis);
+    const execute = vi.fn(async (_request, persist: () => Promise<unknown>) => ({ value: await persist(), change: {} }));
+    TestBed.configureTestingModule({ providers: [
+      AccountAnalysisSetupActionsService,
+      {
+        provide: AccountAnalysisWorkbenchContext,
+        useValue: {
+          account: signal({ guid: 'account-a' } as IdbAccount),
+          facilities: signal([]),
+          workspace: { canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), predictors: signal([]) }
+        }
+      },
+      { provide: AccountAnalysisAutosaveService, useValue: { draft, flush: vi.fn().mockResolvedValue(true) } },
+      { provide: WorkspaceCommandBoundary, useValue: { execute } },
+      { provide: AnalysisCommandHandler, useValue: { updateAccountAnalysis } },
+      { provide: WorkspaceNavigationService, useValue: {} },
+      { provide: Router, useValue: {} }
+    ] });
+    const service = TestBed.inject(AccountAnalysisSetupActionsService);
+
+    expect(await service.clearSelections()).toBe(true);
+    expect(updateAccountAnalysis).toHaveBeenCalledOnce();
+    const [updated, accountGuid] = updateAccountAnalysis.mock.calls[0] as [IdbAccountAnalysisItem, string];
+    expect(accountGuid).toBe('account-a');
+    expect(updated.modifiedDate).toBeInstanceOf(Date);
+    expect(updated).toEqual({
+      ...structuredClone(draftValue),
+      isAnalysisVisited: false,
+      facilityItemsInitialized: false,
+      modifiedDate: updated.modifiedDate,
+      facilityAnalysisItems: [
+        { facilityId: 'facility-a', analysisItemId: undefined },
+        { facilityId: 'facility-b', analysisItemId: undefined }
+      ]
+    });
+    expect(draft()).toBe(draftValue);
+    expect(draft().facilityAnalysisItems.map(item => item.analysisItemId)).toEqual(['analysis-a', 'skip']);
+    expect(service.busy()).toBe(false);
+    expect(service.error()).toBeUndefined();
+  });
+
+  it('returns false and exposes a persistence failure when selections cannot be cleared', async () => {
+    const draft = signal({
+      guid: 'account-analysis-a', accountId: 'account-a', name: 'Portfolio plan', analysisCategory: 'energy',
+      energyIsSource: true, baselineYear: 2022,
+      facilityAnalysisItems: [{ facilityId: 'facility-a', analysisItemId: 'analysis-a' }]
+    } as IdbAccountAnalysisItem);
+    const updateAccountAnalysis = vi.fn().mockRejectedValue(new Error('IndexedDB write failed'));
+    const execute = vi.fn(async (_request, persist: () => Promise<unknown>) => {
+      try {
+        return { value: await persist(), change: {} };
+      } catch (error) {
+        throw new WorkspaceWriteError('persistence-failed', 'The account analysis update could not be persisted.', error);
+      }
+    });
+    TestBed.configureTestingModule({ providers: [
+      AccountAnalysisSetupActionsService,
+      {
+        provide: AccountAnalysisWorkbenchContext,
+        useValue: {
+          account: signal({ guid: 'account-a' } as IdbAccount),
+          facilities: signal([]),
+          workspace: { canWrite: signal(true), hasPending: signal(false), meterGroups: signal([]), predictors: signal([]) }
+        }
+      },
+      { provide: AccountAnalysisAutosaveService, useValue: { draft, flush: vi.fn().mockResolvedValue(true) } },
+      { provide: WorkspaceCommandBoundary, useValue: { execute } },
+      { provide: AnalysisCommandHandler, useValue: { updateAccountAnalysis } },
+      { provide: WorkspaceNavigationService, useValue: {} },
+      { provide: Router, useValue: {} }
+    ] });
+    const service = TestBed.inject(AccountAnalysisSetupActionsService);
+
+    expect(await service.clearSelections()).toBe(false);
+    expect(updateAccountAnalysis).toHaveBeenCalledOnce();
+    expect(service.error()).toBe('The account analysis update could not be persisted.');
+    expect(service.busy()).toBe(false);
+  });
 
   it('commits the generated analyses through the bulk command and navigates to facility selection', async () => {
     const account = signal({ guid: 'account-a' } as IdbAccount);
