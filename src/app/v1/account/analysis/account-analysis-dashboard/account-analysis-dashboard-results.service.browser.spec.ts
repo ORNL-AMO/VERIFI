@@ -71,6 +71,17 @@ describe('AccountAnalysisDashboardResultsService browser Worker lifecycle', () =
     expect(service.states()['analysis-warning']).toEqual({ state: 'loading', message: 'Calculating…' });
   });
 
+  it('blocks analyses with missing current-facility selections before starting a Worker', async () => {
+    const analyses = signal([{ ...accountAnalysisFixture('analysis-missing'), facilityAnalysisItems: [] }]);
+    configure(analyses, signal([]));
+
+    const service = TestBed.inject(AccountAnalysisDashboardResultsService);
+    await settleSignals();
+
+    expect(service.states()['analysis-missing']).toEqual({ state: 'blocked', message: 'Setup incomplete' });
+    expect(FakeWorker.instances).toHaveLength(0);
+  });
+
   it('cancels stale work, starts a replacement, and rejects stale messages when inputs change', async () => {
     const analyses = signal([accountAnalysisFixture('analysis-a')]);
     configure(analyses, signal([]));
@@ -151,7 +162,10 @@ describe('AccountAnalysisDashboardResultsService browser Worker lifecycle', () =
 
   it('uses the deterministic synchronous fallback when Workers are unavailable', async () => {
     globalThis.Worker = undefined as unknown as typeof Worker;
-    const analyses = signal([{ ...accountAnalysisFixture('analysis-a'), facilityAnalysisItems: [] }]);
+    const analyses = signal([{
+      ...accountAnalysisFixture('analysis-a'),
+      facilityAnalysisItems: [{ facilityId: 'facility-a', analysisItemId: 'skip' }]
+    }]);
     configure(analyses, signal([]));
 
     const service = TestBed.inject(AccountAnalysisDashboardResultsService);

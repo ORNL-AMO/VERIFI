@@ -233,6 +233,8 @@ The Regression tab presents generated and user-defined models as separate workfl
 
 The production v1 account-analysis dashboard mirrors the facility dashboard's inventory workflow while preserving the account-specific contract: each account analysis selects one facility analysis or an explicit skip for every facility, and existing account calculations roll those selections into account annual and monthly results. The dashboard owns create, copy, active-for-reporting, guarded delete, details, filtering, result summaries, and same-category comparison. A stable account-analysis workbench route initially renders a placeholder for the next implementation phase.
 
+The approved dashboard implementation scope adds a typed v1-only account-analysis Worker contract and dedicated entry point. It runs at most two unblocked requests, isolates card failures, cancels stale work, and shares one deterministic calculation function with its synchronous fallback. This does not change account formulas, legacy Worker messages, v0 behavior, IndexedDB or backup shapes, report output, or Electron boundaries.
+
 Shared account/facility presentation lives under the v1 shared analysis-results boundary only when the semantic contract is identical: generic result charts, number formatting, markers, outcome facts, active summaries, and comparison layout qualify. Feature-specific tables and projections remain explicit when columns, formulas, or completeness rules differ. See [V1 Account Analysis Architecture](v1-account-analysis-architecture.md).
 
 - Do not add v0/v1 conditionals to legacy components.

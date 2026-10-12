@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -56,6 +56,7 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private confirmationKind: 'active' | 'delete' | undefined;
+  private dashboardAccountGuid: string | undefined;
   readonly workspace = inject(AccountAnalysisWorkspaceService);
   readonly results = inject(AccountAnalysisDashboardResultsService);
   readonly navigation = inject(WorkspaceNavigationService);
@@ -108,6 +109,20 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
     .map(guid => this.cards().find(card => card.analysis.guid === guid))
     .filter((card): card is AccountAnalysisDashboardCard => !!card));
   readonly comparisonCategory = computed(() => this.comparisonCards()[0]?.category);
+
+  constructor() {
+    effect(() => {
+      const requestedAccountGuid = this.navigation.routeState().accountGuid;
+      const loadedAccountGuid = this.workspace.account()?.guid;
+      const accountGuid = this.workspace.workspaceState() === 'ready'
+        && loadedAccountGuid === requestedAccountGuid
+          ? loadedAccountGuid
+          : undefined;
+      if (accountGuid === this.dashboardAccountGuid) return;
+      this.dashboardAccountGuid = accountGuid;
+      this.resetTransientState();
+    });
+  }
 
   open(card: AccountAnalysisCard): void { this.openAnalysisGuid(card.analysis.guid); }
   openCreate(): void { if (this.canAct()) { this.actionError.set(undefined); this.createOpen.set(true); } }
@@ -203,6 +218,20 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
     if (this.confirmationKind !== kind) return;
     this.confirmationKind = undefined;
     this.modalPortal.hide();
+  }
+
+  private resetTransientState(): void {
+    this.detailsGuid.set(undefined);
+    this.createOpen.set(false);
+    this.actionError.set(undefined);
+    this.activeCandidate.set(undefined);
+    this.deleteCandidate.set(undefined);
+    this.comparisonGuids.set([]);
+    this.filtersForm.reset({ search: '', category: 'all', status: 'all', sort: 'attention' });
+    if (this.confirmationKind) {
+      this.confirmationKind = undefined;
+      this.modalPortal.hide();
+    }
   }
 
   private async runAction(action: () => Promise<void>): Promise<void> {

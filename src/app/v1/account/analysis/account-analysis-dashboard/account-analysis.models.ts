@@ -86,11 +86,11 @@ export function buildAccountAnalysisCards(input: BuildAccountAnalysisCardsInput)
     const findings = input.statusItems.filter(item =>
       item.entity.kind === 'account-analysis' && item.entity.guid === analysis.guid
     );
-    const status = resolveStatus(input.statusState, findings);
     const facilitySelections = buildAccountAnalysisFacilitySelections(
       analysis, input.facilities, input.facilityAnalyses
     );
     const selectionCounts = countSelections(facilitySelections);
+    const status = resolveStatus(input.statusState, findings, selectionCounts);
     const linkedReports = input.reports.filter(report => accountReportReferencesAnalysis(report, analysis.guid));
     const isActiveForReporting = analysis.analysisCategory === 'water'
       ? input.account?.selectedWaterAnalysisId === analysis.guid
@@ -224,9 +224,13 @@ function countSelections(selections: readonly AccountAnalysisFacilitySelectionVi
   }), { included: 0, skipped: 0, missing: 0, invalid: 0 });
 }
 
-function resolveStatus(state: StatusEvaluationState, findings: readonly StatusItem[]): AccountAnalysisCardStatus {
+function resolveStatus(
+  state: StatusEvaluationState,
+  findings: readonly StatusItem[],
+  selections: AccountAnalysisSelectionCounts
+): AccountAnalysisCardStatus {
   if (state !== 'ready') return state === 'error' ? 'error' : 'evaluating';
-  if (findings.some(item => item.severity === 'error')) return 'error';
+  if (findings.some(item => item.severity === 'error') || selections.missing > 0 || selections.invalid > 0) return 'error';
   if (findings.some(item => item.severity === 'warning')) return 'warning';
   return 'ready';
 }

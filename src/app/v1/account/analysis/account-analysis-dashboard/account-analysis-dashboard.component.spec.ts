@@ -13,6 +13,12 @@ import { AccountAnalysisCard } from './account-analysis.models';
 describe('AccountAnalysisDashboardComponent', () => {
   let fixture: ComponentFixture<AccountAnalysisDashboardComponent>;
   let navigate: ReturnType<typeof vi.fn>;
+  let account: ReturnType<typeof signal<any>>;
+  let workspaceState: ReturnType<typeof signal<string>>;
+  let routeState: ReturnType<typeof signal<any>>;
+  let resultStates: ReturnType<typeof signal<Record<string, any>>>;
+  let modalShow: ReturnType<typeof vi.fn>;
+  let modalHide: ReturnType<typeof vi.fn>;
   const cards = signal<readonly AccountAnalysisCard[]>([
     card('energy-a', 'Portfolio energy', 'energy', true),
     card('water-a', 'Portfolio water', 'water', false),
@@ -20,18 +26,22 @@ describe('AccountAnalysisDashboardComponent', () => {
   ]);
 
   beforeEach(async () => {
+    account = signal({ guid: 'account-a', name: 'Portfolio A', selectedEnergyAnalysisId: 'energy-a' });
+    workspaceState = signal('ready');
+    routeState = signal({ accountGuid: 'account-a' });
+    resultStates = signal({
+      'energy-a': readyOutcome(12.5),
+      'water-a': { state: 'blocked', message: 'Setup incomplete' },
+      'energy-b': readyOutcome(9.5)
+    });
+    modalShow = vi.fn();
+    modalHide = vi.fn();
     await TestBed.configureTestingModule({ imports: [AccountAnalysisDashboardComponent] })
       .overrideComponent(AccountAnalysisDashboardComponent, {
         set: {
           providers: [{
             provide: AccountAnalysisDashboardResultsService,
-            useValue: {
-              states: signal({
-                'energy-a': readyOutcome(12.5),
-                'water-a': { state: 'blocked', message: 'Setup incomplete' },
-                'energy-b': readyOutcome(9.5)
-              })
-            }
+            useValue: { states: resultStates }
           }]
         }
       })
@@ -41,11 +51,11 @@ describe('AccountAnalysisDashboardComponent', () => {
           {
             provide: AccountAnalysisWorkspaceService,
             useValue: {
-              account: signal({ guid: 'account-a', name: 'Portfolio A', selectedEnergyAnalysisId: 'energy-a' }),
+              account,
               cards,
               canWrite: signal(true),
               hasPending: signal(false),
-              workspaceState: signal('ready'),
+              workspaceState,
               workspaceError: signal(undefined),
               statusState: signal('ready')
             }
@@ -61,11 +71,12 @@ describe('AccountAnalysisDashboardComponent', () => {
           {
             provide: WorkspaceNavigationService,
             useValue: {
+              routeState,
               accountAnalysisWorkbenchRoute: (_account: string, analysis: string) => ['/analysis', analysis],
               accountAnalysisRoute: () => ['/analysis']
             }
           },
-          { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } }
+          { provide: ModalPortalService, useValue: { show: modalShow, hide: modalHide } }
         ]
       }).compileComponents();
     navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
@@ -105,6 +116,71 @@ describe('AccountAnalysisDashboardComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Facility analysis selections');
   });
+
+  it('hides retained account content and clears transient state while switching accounts', () => {
+    fixture.componentInstance.detailsGuid.set('energy-a');
+    fixture.componentInstance.createOpen.set(true);
+    fixture.componentInstance.toggleComparison(cards()[0]);
+    fixture.componentInstance.filtersForm.controls.category.setValue('water');
+    fixture.componentInstance.requestActive(cards()[0]);
+    expect(modalShow).toHaveBeenCalledOnce();
+
+    workspaceState.set('switching');
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-data-dashboard-workspace')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Loading account analyses');
+    expect(fixture.nativeElement.textContent).not.toContain('Portfolio energy');
+    expect(fixture.componentInstance.detailsGuid()).toBeUndefined();
+    expect(fixture.componentInstance.createOpen()).toBe(false);
+    expect(fixture.componentInstance.comparisonGuids()).toEqual([]);
+    expect(fixture.componentInstance.activeCandidate()).toBeUndefined();
+    expect(fixture.componentInstance.filtersForm.getRawValue()).toEqual({
+      search: '', category: 'all', status: 'all', sort: 'attention'
+    });
+    expect(modalHide).toHaveBeenCalledOnce();
+
+    routeState.set({ accountGuid: 'account-b' });
+    account.set({ guid: 'account-b', name: 'Portfolio B' });
+    workspaceState.set('ready');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1')?.textContent.trim()).toBe('Portfolio B Analysis');
+  });
+
+  it('does not render incomplete annual comparison values as valid results', () => {
+    resultStates.set({
+      ...resultStates(),
+      'energy-a': readyOutcome(12.5, [{
+        year: 2025,
+        energyUse: 987654,
+        adjusted: 876543,
+        savings: 111111,
+        annualSavingsPercentImprovement: 12,
+        totalSavingsPercentImprovement: 14,
+        missingPredictorValue: true
+      }]),
+      'energy-b': readyOutcome(9.5, [{
+        year: 2025,
+        energyUse: 123,
+        adjusted: 120,
+        savings: 3,
+        annualSavingsPercentImprovement: 2,
+        totalSavingsPercentImprovement: 3,
+        missingPredictorValue: false
+      }])
+    });
+    fixture.componentInstance.toggleComparison(cards()[0]);
+    fixture.componentInstance.toggleComparison(cards()[2]);
+    fixture.detectChanges();
+
+    const firstResultRow = fixture.nativeElement.querySelector(
+      '.v1-account-analysis-comparison__tables article:first-child tbody tr'
+    );
+    expect(firstResultRow.textContent).toContain('Incomplete data');
+    expect(firstResultRow.textContent).not.toContain('987654');
+  });
 });
 
 function card(guid: string, name: string, category: 'energy' | 'water', active: boolean): AccountAnalysisCard {
@@ -130,10 +206,10 @@ function card(guid: string, name: string, category: 'energy' | 'water', active: 
   };
 }
 
-function readyOutcome(value: number): any {
+function readyOutcome(value: number, annualAnalysisSummaries: readonly any[] = []): any {
   return {
     state: 'ready',
-    annualAnalysisSummaries: [],
+    annualAnalysisSummaries,
     summary: {
       annual: { periodLabel: 'FY 2025', value },
       monthly: { periodLabel: 'Jan 2026', value }

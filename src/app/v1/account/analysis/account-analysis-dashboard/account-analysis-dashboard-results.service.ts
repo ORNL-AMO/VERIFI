@@ -24,7 +24,10 @@ import {
   timeout
 } from 'rxjs';
 import { analysisOutcomeSummary } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
-import { AccountAnalysisDashboardResultState } from './account-analysis.models';
+import {
+  AccountAnalysisDashboardResultState,
+  buildAccountAnalysisFacilitySelections
+} from './account-analysis.models';
 import {
   accountAnalysisResultsFingerprint,
   buildAccountAnalysisResultsRequest
@@ -143,7 +146,15 @@ export class AccountAnalysisDashboardResultsService {
 
   private hasBlockingErrors(analysisGuid: string): boolean {
     const analysis = this.workspace.accountAnalyses().find(item => item.guid === analysisGuid);
-    const selectedGuids = new Set((analysis?.facilityAnalysisItems ?? [])
+    const snapshot = this.workspace.snapshot();
+    if (!analysis || !snapshot) return true;
+    const hasBlockingSelection = buildAccountAnalysisFacilitySelections(
+      analysis,
+      snapshot.facilities,
+      snapshot.facilityAnalyses
+    ).some(selection => selection.state === 'missing' || selection.state === 'invalid');
+    if (hasBlockingSelection) return true;
+    const selectedGuids = new Set((analysis.facilityAnalysisItems ?? [])
       .map(item => item.analysisItemId)
       .filter((guid): guid is string => !!guid && guid !== 'skip'));
     return this.status.items().some(item => item.severity === 'error' && (

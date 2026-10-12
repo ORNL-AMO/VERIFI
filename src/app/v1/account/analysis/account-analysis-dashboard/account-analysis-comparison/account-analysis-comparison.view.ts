@@ -23,6 +23,10 @@ export interface AccountAnalysisAnnualRow {
   readonly yearLabel: string;
   readonly first?: AnnualAnalysisSummary;
   readonly second?: AnnualAnalysisSummary;
+  readonly firstAvailable: boolean;
+  readonly secondAvailable: boolean;
+  readonly firstStatusLabel: string;
+  readonly secondStatusLabel: string;
 }
 
 export interface AccountAnalysisComparisonView {
@@ -111,12 +115,20 @@ export function alignAnnualRows(
   return [...new Set([...firstByYear.keys(), ...secondByYear.keys()])]
     .filter(Number.isFinite)
     .sort((first, second) => first - second)
-    .map(year => ({
-      year,
-      yearLabel: fiscalYear === 'calendarYear' ? String(year) : `FY ${year}`,
-      first: firstByYear.get(year),
-      second: secondByYear.get(year)
-    }));
+    .map(year => {
+      const first = firstByYear.get(year);
+      const second = secondByYear.get(year);
+      return {
+        year,
+        yearLabel: fiscalYear === 'calendarYear' ? String(year) : `FY ${year}`,
+        first,
+        second,
+        firstAvailable: annualRowAvailable(first),
+        secondAvailable: annualRowAvailable(second),
+        firstStatusLabel: annualRowStatus(first),
+        secondStatusLabel: annualRowStatus(second)
+      };
+    });
 }
 
 function readyRows(card: AccountAnalysisDashboardCard): readonly AnnualAnalysisSummary[] {
@@ -180,6 +192,15 @@ function value(row: AnnualAnalysisSummary | undefined, key: keyof AnnualAnalysis
   if (!row || row.missingPredictorValue) return null;
   const candidate = row[key];
   return typeof candidate === 'number' && Number.isFinite(candidate) ? candidate : null;
+}
+
+function annualRowAvailable(row: AnnualAnalysisSummary | undefined): boolean {
+  return !!row && row.missingPredictorValue !== true;
+}
+
+function annualRowStatus(row: AnnualAnalysisSummary | undefined): string {
+  if (!row) return 'No result';
+  return row.missingPredictorValue ? 'Incomplete data' : 'Complete';
 }
 
 function resultMessage(card: AccountAnalysisDashboardCard): string | undefined {

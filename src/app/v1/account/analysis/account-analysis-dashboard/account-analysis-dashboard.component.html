@@ -1,9 +1,15 @@
 @let account = workspace.account();
+@let workspaceState = workspace.workspaceState();
+@let requestedAccountGuid = navigation.routeState().accountGuid;
 @let dashboardCards = cards();
 @let visibleCards = filteredCards();
 @let activeCards = activeReportingCards();
 
-@if (!account) {
+@if (workspaceState === 'error' || (workspace.workspaceError() && requestedAccountGuid && account?.guid !== requestedAccountGuid)) {
+  <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ workspace.workspaceError()?.message || 'The account-analysis workspace could not be loaded.' }}</div>
+} @else if (workspaceState === 'loading' || workspaceState === 'switching' || (requestedAccountGuid && account?.guid !== requestedAccountGuid)) {
+  <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Loading account analyses…</div>
+} @else if (!account) {
   <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No account selected</h1><p>Select an account before managing analyses.</p></article>
 } @else {
   <header class="v1-section-header v1-analysis-dashboard__header">
@@ -11,11 +17,7 @@
     <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
   </header>
 
-  @if (workspace.workspaceState() === 'loading' || workspace.workspaceState() === 'switching') {
-    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Loading account analyses…</div>
-  } @else if (workspace.workspaceState() === 'error') {
-    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ workspace.workspaceError()?.message || 'The account-analysis workspace could not be loaded.' }}</div>
-  } @else if (workspace.statusState() === 'error') {
+  @if (workspace.statusState() === 'error') {
     <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>Analysis validation could not be completed. Records remain available.</div>
   } @else if (workspace.statusState() === 'evaluating') {
     <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Checking analysis readiness…</div>

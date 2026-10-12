@@ -91,10 +91,19 @@ describe('account analysis dashboard models', () => {
   });
 
   it('filters searchable facility facts and applies stable attention ordering', () => {
-    const warning = { ...analysis, guid: 'warning', name: 'Zulu' } as IdbAccountAnalysisItem;
+    const completeAnalysis = {
+      ...analysis,
+      facilityAnalysisItems: [
+        { facilityId: 'facility-a', analysisItemId: 'analysis-a' },
+        { facilityId: 'facility-b', analysisItemId: 'skip' },
+        { facilityId: 'facility-c', analysisItemId: 'skip' },
+        { facilityId: 'facility-d', analysisItemId: 'skip' }
+      ]
+    } as IdbAccountAnalysisItem;
+    const warning = { ...completeAnalysis, guid: 'warning', name: 'Zulu' } as IdbAccountAnalysisItem;
     const cards = buildAccountAnalysisCards({
       account,
-      analyses: [analysis, warning],
+      analyses: [completeAnalysis, warning],
       facilities,
       facilityAnalyses,
       reports: [],
@@ -106,6 +115,25 @@ describe('account analysis dashboard models', () => {
     expect(filterAndSortAccountAnalysisCards(cards, {
       search: 'alpha energy', category: 'all', status: 'all', sort: 'attention'
     }).map(card => card.analysis.guid)).toEqual(['warning', 'account-analysis-a']);
+  });
+
+  it('marks an analysis as an error when a current facility has no selection entry', () => {
+    const [card] = buildAccountAnalysisCards({
+      account,
+      analyses: [{
+        ...analysis,
+        facilityAnalysisItems: [{ facilityId: 'facility-a', analysisItemId: 'analysis-a' }]
+      } as IdbAccountAnalysisItem],
+      facilities,
+      facilityAnalyses,
+      reports: [],
+      statusItems: [],
+      statusState: 'ready'
+    });
+
+    expect(card.selectionCounts).toEqual({ included: 1, skipped: 0, missing: 3, invalid: 0 });
+    expect(card.status).toBe('error');
+    expect(card.statusLabel).toBe('Error');
   });
 
   it('sorts finite baseline years first and leaves unset baselines at the end', () => {

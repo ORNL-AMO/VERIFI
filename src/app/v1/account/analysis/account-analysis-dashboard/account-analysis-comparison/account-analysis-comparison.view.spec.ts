@@ -43,6 +43,25 @@ describe('account analysis comparison view', () => {
     expect(view.firstResultMessage).toBe('Calculating…');
     expect(view.secondResultMessage).toBe('Calculation failed');
   });
+
+  it('projects incomplete annual rows as unavailable to tables and charts', () => {
+    const incomplete = annual(2025, { missingPredictorValue: true });
+    const [row] = alignAnnualRows([incomplete], [], 'calendarYear');
+    const view = buildAccountAnalysisComparisonView(
+      card('first', 'MMBtu', 'Source energy', [incomplete]),
+      card('second', 'MMBtu', 'Source energy', []),
+      'calendarYear'
+    );
+
+    expect(row).toMatchObject({
+      firstAvailable: false,
+      firstStatusLabel: 'Incomplete data',
+      secondAvailable: false,
+      secondStatusLabel: 'No result'
+    });
+    expect(view.useChartRows[0].values).toMatchObject({ firstActual: null, firstAdjusted: null });
+    expect(view.improvementChartRows[0].values).toMatchObject({ firstAnnual: null, firstTotal: null });
+  });
 });
 
 function selection(
@@ -81,7 +100,7 @@ function card(
   };
 }
 
-function annual(year: number): AnnualAnalysisSummary {
+function annual(year: number, overrides: Partial<AnnualAnalysisSummary> = {}): AnnualAnalysisSummary {
   return {
     year,
     energyUse: year * 10,
@@ -89,6 +108,7 @@ function annual(year: number): AnnualAnalysisSummary {
     savings: year,
     annualSavingsPercentImprovement: 1.5,
     totalSavingsPercentImprovement: 4.25,
-    missingPredictorValue: false
+    missingPredictorValue: false,
+    ...overrides
   } as AnnualAnalysisSummary;
 }
