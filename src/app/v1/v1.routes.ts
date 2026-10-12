@@ -77,7 +77,15 @@ import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wi
 import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
 import { AccountAnalysisDashboardComponent } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard.component';
-import { AccountAnalysisWorkbenchPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-workbench-placeholder/account-analysis-workbench-placeholder.component';
+import { AccountAnalysisWorkbenchComponent } from '@app/v1/account/analysis/account-analysis-workbench/account-analysis-workbench.component';
+import { AccountAnalysisSetupComponent } from '@app/v1/account/analysis/account-analysis-workbench/setup/account-analysis-setup.component';
+import { AccountAnalysisSelectFacilityItemsComponent } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-select-facility-items.component';
+import { AccountAnalysisResultsShellComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/shell/account-analysis-results-shell.component';
+import { AccountAnalysisAnnualComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/annual/account-analysis-annual.component';
+import { AccountAnalysisMonthlyTableComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-table/account-analysis-monthly-table.component';
+import { AccountAnalysisMonthlyChartComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-chart/account-analysis-monthly-chart.component';
+import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-details/account-analysis-facility-details.component';
+import { AccountAnalysisUsedByComponent } from '@app/v1/account/analysis/account-analysis-workbench/used-by/account-analysis-used-by.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
@@ -186,7 +194,30 @@ export const V1Routes: Routes = [
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
               { path: 'dashboard', component: AccountAnalysisDashboardComponent },
-              { path: 'workbench/:analysisGuid', component: AccountAnalysisWorkbenchPlaceholderComponent },
+              {
+                path: 'workbench/:analysisGuid',
+                component: AccountAnalysisWorkbenchComponent,
+                children: [
+                  { path: '', pathMatch: 'full', redirectTo: 'setup' },
+                  { path: 'setup', component: AccountAnalysisSetupComponent, data: { accountAnalysisStage: 'setup' } },
+                  { path: 'select-items', component: AccountAnalysisSelectFacilityItemsComponent, data: { accountAnalysisStage: 'select-items' } },
+                  {
+                    path: 'results',
+                    component: AccountAnalysisResultsShellComponent,
+                    data: { accountAnalysisStage: 'results' },
+                    children: [
+                      { path: '', pathMatch: 'full', redirectTo: 'annual' },
+                      { path: 'annual', component: AccountAnalysisAnnualComponent, data: { accountAnalysisResultTab: 'annual' } },
+                      { path: 'monthly-table', component: AccountAnalysisMonthlyTableComponent, data: { accountAnalysisResultTab: 'monthly-table' } },
+                      { path: 'monthly-chart', component: AccountAnalysisMonthlyChartComponent, data: { accountAnalysisResultTab: 'monthly-chart' } },
+                      { path: 'facility-details', component: AccountAnalysisFacilityDetailsComponent, data: { accountAnalysisResultTab: 'facility-details' } },
+                      { path: '**', redirectTo: 'annual' }
+                    ]
+                  },
+                  { path: 'used-by', component: AccountAnalysisUsedByComponent, data: { accountAnalysisStage: 'used-by' } },
+                  { path: '**', redirectTo: 'setup' }
+                ]
+              },
               { path: '**', redirectTo: 'dashboard' }
             ]
           },

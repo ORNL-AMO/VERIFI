@@ -361,9 +361,10 @@
             <app-ui-icon name="analysis"></app-ui-icon>
             Dashboard
           </a>
-          @if (contextMode === 'facility' && selectedFacility) {
-            @let workflow = activeAnalysisNavigation();
-            @for (group of facilityAnalysisGroups(); track group.id) {
+          @if ((contextMode === 'facility' && selectedFacility) || contextMode === 'account') {
+            @let workflow = contextMode === 'facility' ? activeAnalysisNavigation() : activeAccountAnalysisNavigation();
+            @let analysisGroups = contextMode === 'facility' ? facilityAnalysisGroups() : accountAnalysisGroups();
+            @for (group of analysisGroups; track group.id) {
               <section
                 class="v1-nav__analysis-section"
                 [attr.aria-labelledby]="'v1-analysis-' + group.id + '-title'">
@@ -396,25 +397,33 @@
                                     class="v1-workflow-stepper__marker"
                                     [class.is-complete]="step.completed"
                                     [class.has-blocking-errors]="step.hasBlockingErrors">
-                                    @if (step.kind === 'analysis' || step.kind === 'group') {
-                                      @if (step.completed) {
-                                        <app-ui-icon name="checkmarkBadge"></app-ui-icon>
-                                        <span class="visually-hidden">Complete</span>
-                                      } @else if (step.hasBlockingErrors) {
-                                        <app-ui-icon name="badgeAlert"></app-ui-icon>
-                                        <span class="visually-hidden">Has blocking errors</span>
-                                      } @else {
-                                        <span class="visually-hidden">Not complete</span>
-                                      }
+                                    @if (step.completed) {
+                                      <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                                      <span class="visually-hidden">Complete</span>
+                                    } @else if (step.hasBlockingErrors) {
+                                      <app-ui-icon name="badgeAlert"></app-ui-icon>
+                                      <span class="visually-hidden">Has blocking errors</span>
+                                    } @else if (step.kind === 'analysis' || step.kind === 'group') {
+                                      <span class="visually-hidden">Not complete</span>
                                     } @else if (step.kind === 'facility') {
                                       <app-ui-icon name="chartAnalysis"></app-ui-icon>
                                       <span class="visually-hidden">Results</span>
-                                    } @else {
+                                    } @else if (step.kind === 'used-by') {
                                       <app-ui-icon name="link"></app-ui-icon>
                                       <span class="visually-hidden">Dependencies</span>
+                                    } @else {
+                                      <app-ui-icon [name]="step.icon || 'analysis'"></app-ui-icon>
                                     }
                                   </span>
                                   <span class="v1-workflow-stepper__label">{{ step.label }}</span>
+                                  @if (step.attention && !step.hasBlockingErrors) {
+                                    <span
+                                      class="v1-nav__attention v1-nav__attention--{{ step.attention.state }}"
+                                      [attr.title]="step.attention.total + ' active status checks in ' + step.label">
+                                      <span aria-hidden="true">{{ step.attention.total }}</span>
+                                      <span class="visually-hidden">{{ step.attention.total }} issues: {{ step.attention.errorCount }} errors, {{ step.attention.warningCount }} warnings</span>
+                                    </span>
+                                  }
                                 </a>
                               } @else {
                                 <span class="v1-workflow-stepper__blocked" aria-disabled="true">
@@ -422,25 +431,33 @@
                                     class="v1-workflow-stepper__marker"
                                     [class.is-complete]="step.completed"
                                     [class.has-blocking-errors]="step.hasBlockingErrors">
-                                    @if (step.kind === 'analysis' || step.kind === 'group') {
-                                      @if (step.completed) {
-                                        <app-ui-icon name="checkmarkBadge"></app-ui-icon>
-                                        <span class="visually-hidden">Complete</span>
-                                      } @else if (step.hasBlockingErrors) {
-                                        <app-ui-icon name="badgeAlert"></app-ui-icon>
-                                        <span class="visually-hidden">Has blocking errors</span>
-                                      } @else {
-                                        <span class="visually-hidden">Not complete</span>
-                                      }
+                                    @if (step.completed) {
+                                      <app-ui-icon name="checkmarkBadge"></app-ui-icon>
+                                      <span class="visually-hidden">Complete</span>
+                                    } @else if (step.hasBlockingErrors) {
+                                      <app-ui-icon name="badgeAlert"></app-ui-icon>
+                                      <span class="visually-hidden">Has blocking errors</span>
+                                    } @else if (step.kind === 'analysis' || step.kind === 'group') {
+                                      <span class="visually-hidden">Not complete</span>
                                     } @else if (step.kind === 'facility') {
                                       <app-ui-icon name="chartAnalysis"></app-ui-icon>
                                       <span class="visually-hidden">Results</span>
-                                    } @else {
+                                    } @else if (step.kind === 'used-by') {
                                       <app-ui-icon name="link"></app-ui-icon>
                                       <span class="visually-hidden">Dependencies</span>
+                                    } @else {
+                                      <app-ui-icon [name]="step.icon || 'analysis'"></app-ui-icon>
                                     }
                                   </span>
                                   <span class="v1-workflow-stepper__label">{{ step.label }}</span>
+                                  @if (step.attention && !step.hasBlockingErrors) {
+                                    <span
+                                      class="v1-nav__attention v1-nav__attention--{{ step.attention.state }}"
+                                      [attr.title]="step.attention.total + ' active status checks in ' + step.label">
+                                      <span aria-hidden="true">{{ step.attention.total }}</span>
+                                      <span class="visually-hidden">{{ step.attention.total }} issues: {{ step.attention.errorCount }} errors, {{ step.attention.warningCount }} warnings</span>
+                                    </span>
+                                  }
                                 </span>
                               }
                             </li>

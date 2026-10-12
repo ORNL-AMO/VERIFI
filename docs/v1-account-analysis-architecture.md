@@ -43,11 +43,13 @@ Page-specific tables remain explicit when their columns, row semantics, formulas
 
 Account comparison accepts two analyses of the same category. It compares analysis setup and each facility selection by GUID, aligns annual rows by fiscal year, renders one accessible table per analysis, and reuses the common charts. Actual-versus-adjusted series require compatible units and energy basis; percentage-improvement series remain comparable independently.
 
-## Workbench extension point
+## Workbench scaffold and extension points
 
-The placeholder workbench resolves the route analysis GUID, shows the selected record identity, and provides navigation back to the dashboard. The next workbench task should replace that component in place rather than changing the route.
+The selected-analysis route now owns a production v1 workbench scaffold. Its route-scoped context resolves the selected account analysis and its facilities, facility analyses, reports, and status findings. Primary navigation follows Setup, Select Facility Items, Results, and Used By; Results owns Annual, Monthly Table, Monthly Chart, and Facility Details child routes. The footer advances through primary stages, while the account Analysis sidebar mirrors the same workflow and keeps result tabs contextual to the workbench.
 
-Future setup and results pages should reuse the typed calculation entry point and shared analysis presentation where the semantics match. The workbench should own its editing, autosave, navigation, and full result lifecycle; the dashboard coordinator must remain an inventory-scoped projection rather than becoming shared mutable workbench state.
+Setup is always available. Select Facility Items requires valid setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. The seven destination components currently establish final route and layout boundaries with explicit deferred-content states. They intentionally do not edit records, run workbench calculations, or reproduce partial v0 forms, tables, or charts.
+
+Follow-on parity work should fill these components in place. Setup and facility selection should add route-scoped editing and autosave; results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench must own its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
 
 ## Testing map
 

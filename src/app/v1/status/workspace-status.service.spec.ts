@@ -148,7 +148,7 @@ describe('WorkspaceStatusService', () => {
     ]);
   });
 
-  it('navigates account-analysis findings to the placeholder workbench', () => {
+  it('navigates account-analysis findings to the workbench root', () => {
     const service = setup(signal(workspaceSnapshot()), signal(1), new BehaviorSubject(result('ready')));
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
     const entity = {
@@ -161,7 +161,7 @@ describe('WorkspaceStatusService', () => {
       'account-analysis.configuration.invalid', 'error', 'configuration', entity, { reasons: ['missingSelection'] }
     )));
     expect(router.navigate).toHaveBeenCalledWith([
-      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'account-analysis-a'
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'account-analysis-a', 'setup'
     ]);
   });
 });

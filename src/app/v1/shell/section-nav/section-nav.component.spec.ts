@@ -26,7 +26,7 @@ describe('SectionNavComponent', () => {
     selectedEnergyAnalysisId?: string;
     selectedWaterAnalysisId?: string;
   } | undefined>>;
-  let account: ReturnType<typeof signal<{ guid: string; name: string; isSingleFacilityCompany?: boolean; displayEmissions?: boolean }>>;
+  let account: ReturnType<typeof signal<{ guid: string; name: string; isSingleFacilityCompany?: boolean; displayEmissions?: boolean; selectedEnergyAnalysisId?: string; selectedWaterAnalysisId?: string }>>;
   let isSingleSiteWorkspace: ReturnType<typeof signal<boolean>>;
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
   let singleSiteWorkspaceState: ReturnType<typeof signal<string>>;
@@ -40,11 +40,13 @@ describe('SectionNavComponent', () => {
   let activeAnalysisGuid: ReturnType<typeof signal<string | undefined>>;
   let activeAnalysisGroupGuid: ReturnType<typeof signal<string | undefined>>;
   let activeAnalysisStageScope: ReturnType<typeof signal<'analysis' | 'group' | 'facility' | 'used-by' | undefined>>;
+  let activeAccountAnalysisStageScope: ReturnType<typeof signal<'setup' | 'select-items' | 'results' | 'used-by' | undefined>>;
   let facilityMeters: ReturnType<typeof signal<Array<{ guid: string; name: string; source: MeterSource }>>>;
   let facilityMeterGroups: ReturnType<typeof signal<Array<{ guid: string; name: string }>>>;
   let facilityPredictors: ReturnType<typeof signal<Array<any>>>;
   let facilityPredictorData: ReturnType<typeof signal<Array<any>>>;
   let selectedFacilityAnalyses: ReturnType<typeof signal<Array<any>>>;
+  let accountAnalyses: ReturnType<typeof signal<Array<any>>>;
   let setFacility: ReturnType<typeof vi.fn>;
   let statusState: ReturnType<typeof signal<'ready' | 'evaluating'>>;
   let statusItems: ReturnType<typeof signal<StatusItem[]>>;
@@ -73,11 +75,13 @@ describe('SectionNavComponent', () => {
     activeAnalysisGuid = signal<string | undefined>(undefined);
     activeAnalysisGroupGuid = signal<string | undefined>(undefined);
     activeAnalysisStageScope = signal<'analysis' | 'group' | 'facility' | 'used-by' | undefined>(undefined);
+    activeAccountAnalysisStageScope = signal<'setup' | 'select-items' | 'results' | 'used-by' | undefined>(undefined);
     facilityMeters = signal([]);
     facilityMeterGroups = signal([]);
     facilityPredictors = signal([]);
     facilityPredictorData = signal([]);
     selectedFacilityAnalyses = signal([]);
+    accountAnalyses = signal([]);
     setFacility = vi.fn();
     statusState = signal<'ready' | 'evaluating'>('ready');
     statusItems = signal([]);
@@ -106,6 +110,7 @@ describe('SectionNavComponent', () => {
             activeAnalysisGuid,
             activeAnalysisGroupGuid,
             activeAnalysisStageScope,
+            activeAccountAnalysisStageScope,
             accountRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'home', 'overview'],
             facilityRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'home', 'overview'],
             accountDataRoute: (_accountGuid: string, detail = 'portfolio') => ['/v1', 'workspace', 'account', 'account-a', 'data', detail],
@@ -116,6 +121,8 @@ describe('SectionNavComponent', () => {
             facilityPredictorRoute: (_facilityGuid: string, predictorGuid: string, tab = 'settings') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', predictorGuid, tab],
             facilityWeatherPredictorRoute: (_facilityGuid: string, groupKey: string, tab = 'setup') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', groupKey, tab],
             accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],
+            accountAnalysisWorkbenchRoute: (_accountGuid: string, analysisGuid: string, tab = 'setup') =>
+              ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', analysisGuid, tab],
             facilityAnalysisRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'],
             facilityAnalysisWorkbenchRoute: (_facilityGuid: string, analysisGuid: string, tab = 'setup') =>
               ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', analysisGuid, tab],
@@ -133,7 +140,10 @@ describe('SectionNavComponent', () => {
             facilityMeterGroups,
             facilityPredictors,
             facilityPredictorData,
-            selectedFacilityAnalyses
+            selectedFacilityAnalyses,
+            accountAnalyses,
+            facilities,
+            facilityAnalyses: signal([])
           }
         },
         {
@@ -268,6 +278,44 @@ describe('SectionNavComponent', () => {
     expect(sections[1].querySelector<HTMLAnchorElement>('.v1-nav__analysis-link')?.getAttribute('href'))
       .toContain('/analysis/workbench/energy-a/setup');
     expect(fixture.nativeElement.querySelector('.v1-nav__analysis-workflow')).toBeNull();
+  });
+
+  it('lists account analyses and expands the selected four-stage workflow', () => {
+    activeSection.set('analysis');
+    activeDetail.set('workbench');
+    contextMode.set('account');
+    activeAnalysisGuid.set('account-analysis-a');
+    activeAccountAnalysisStageScope.set('results');
+    account.set({
+      guid: 'account-a',
+      name: 'Account A',
+      selectedEnergyAnalysisId: 'account-analysis-a'
+    });
+    accountAnalyses.set([
+      {
+        ...analysisNav('account-analysis-a', 'Portfolio Energy', 'energy'),
+        accountId: 'account-a',
+        baselineYear: 2020,
+        facilityAnalysisItems: []
+      },
+      {
+        ...analysisNav('account-analysis-b', 'Portfolio Water', 'water'),
+        accountId: 'account-a',
+        baselineYear: 2021,
+        facilityAnalysisItems: []
+      }
+    ]);
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const workflow: HTMLElement = fixture.nativeElement.querySelector('.v1-nav__analysis-workflow');
+
+    expect([...workflow.querySelectorAll('.v1-workflow-stepper__label')].map(item => item.textContent?.trim()))
+      .toEqual(['Setup', 'Select Facility Items', 'Results', 'Used By']);
+    expect(workflow.querySelector('[aria-current="step"]')?.textContent).toContain('Results');
+    expect(fixture.nativeElement.textContent).toContain('Active for Reporting');
+    expect(fixture.nativeElement.textContent).toContain('Portfolio Water');
+    expect(workflow.querySelectorAll('a')).toHaveLength(4);
   });
 
   it('ignores stale active selections and omits empty analysis groups', () => {

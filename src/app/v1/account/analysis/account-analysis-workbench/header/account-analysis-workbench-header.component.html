@@ -1,0 +1,75 @@
+@if (context.account(); as account) {
+  @if (context.analysis(); as analysis) {
+    @let status = statusPresentation();
+    <header class="v1-data-workbench-header v1-account-analysis-workbench__header">
+      <nav class="v1-data-workbench-breadcrumb" aria-label="Account analysis breadcrumb">
+        <ol>
+          <li><a [routerLink]="navigation.accountPortfolioRoute(account.guid, 'analyses')">{{ account.name || 'Account' }}</a></li>
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          <li><a [routerLink]="navigation.accountAnalysisRoute(account.guid)">Analyses</a></li>
+        </ol>
+      </nav>
+
+      <div class="v1-data-workbench-title-row">
+        <div class="v1-data-workbench-title">
+          <h1 id="v1-account-analysis-workbench-title">
+            <app-ui-icon name="analysis"></app-ui-icon>
+            <app-data-workbench-resource-switcher
+              [resources]="analysisResources()"
+              [selectedId]="analysis.guid"
+              [currentLabel]="analysis.name || 'Untitled analysis'"
+              ariaLabel="Switch account analysis"
+              (resourceSelected)="switchAnalysis($event)">
+            </app-data-workbench-resource-switcher>
+          </h1>
+        </div>
+        <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
+          @if (context.isActiveForReporting()) {
+            <span class="v1-chip v1-chip--info"><app-ui-icon name="star"></app-ui-icon> Active for reporting</span>
+          }
+          <span class="v1-chip">{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span>
+          <span class="v1-chip v1-chip--{{ status.tone }}">
+            <app-ui-icon [name]="status.icon" [spin]="context.status.state() === 'evaluating'"></app-ui-icon>
+            {{ status.label }}
+          </span>
+          <app-data-workbench-facts-toggle #factsToggle controls="v1-account-analysis-workbench-facts"></app-data-workbench-facts-toggle>
+        </div>
+      </div>
+
+      <div id="v1-account-analysis-workbench-facts" [hidden]="!factsToggle.expanded()">
+        <dl class="v1-account-analysis-workbench__summary-facts" aria-label="Account analysis context">
+          <div>
+            <dt>Baseline</dt>
+            <dd>{{ analysis.baselineYear || 'Not selected' }}</dd>
+          </div>
+          <div>
+            <dt>Basis and units</dt>
+            <dd>{{ analysis.analysisCategory === 'energy' ? (analysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }}</dd>
+            <span>{{ analysis.analysisCategory === 'water' ? analysis.waterUnit : analysis.energyUnit }}</span>
+          </div>
+          <div>
+            <dt>Facility selections</dt>
+            <dd>{{ context.includedCount() }} included</dd>
+            <span>{{ selectionSummary() }}</span>
+          </div>
+          <div>
+            <dt>Linked reports</dt>
+            <dd>{{ context.linkedReports().length }}</dd>
+            <span>{{ context.linkedReports().length === 1 ? 'Saved report' : 'Saved reports' }}</span>
+          </div>
+        </dl>
+      </div>
+
+      @if (workflow.currentStageFindings().length) {
+        <ul class="v1-data-workbench-status-notes v1-account-analysis-workbench__status-notes" aria-label="Account analysis status items">
+          @for (finding of workflow.currentStageFindings(); track finding.id) {
+            <li [class.v1-account-analysis-workbench__status-note--error]="finding.severity === 'error'">
+              <app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon>
+              <span><strong>{{ finding.title }}</strong> {{ finding.description }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </header>
+  }
+}

@@ -22,6 +22,9 @@ export type FacilityWeatherPredictorRouteTab = 'setup' | 'readings' | 'quality';
 export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
 export type FacilityAnalysisGroupRouteTab = 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
 export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
+export type AccountAnalysisRouteTab = 'setup' | 'select-items' | 'used-by';
+export type AccountAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details';
+export type AccountAnalysisStageScope = 'setup' | 'select-items' | 'results' | 'used-by';
 export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
@@ -70,6 +73,8 @@ export interface RouteState {
   readonly analysisGuid?: string;
   readonly analysisGroupGuid?: string;
   readonly analysisStageScope?: FacilityAnalysisStageScope;
+  readonly accountAnalysisStageScope?: AccountAnalysisStageScope;
+  readonly accountAnalysisResultTab?: AccountAnalysisResultRouteTab;
   readonly importFileId?: string;
   readonly importStep?: string;
   readonly section: SectionId;
@@ -157,6 +162,8 @@ export class WorkspaceNavigationService {
   readonly activeAnalysisGuid = computed(() => this.routeState().analysisGuid);
   readonly activeAnalysisGroupGuid = computed(() => this.routeState().analysisGroupGuid);
   readonly activeAnalysisStageScope = computed(() => this.routeState().analysisStageScope);
+  readonly activeAccountAnalysisStageScope = computed(() => this.routeState().accountAnalysisStageScope);
+  readonly activeAccountAnalysisResultTab = computed(() => this.routeState().accountAnalysisResultTab);
   readonly activeImportFileId = computed(() => this.routeState().importFileId);
   readonly activeImportStep = computed(() => this.routeState().importStep);
   readonly account = computed(() => this.resolveAccount());
@@ -345,8 +352,20 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
   }
 
-  accountAnalysisWorkbenchRoute(accountGuid: string, analysisGuid: string): Array<string> {
-    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'workbench', analysisGuid];
+  accountAnalysisWorkbenchRoute(
+    accountGuid: string,
+    analysisGuid: string,
+    tab: AccountAnalysisRouteTab = 'setup'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'workbench', analysisGuid, tab];
+  }
+
+  accountAnalysisResultsRoute(
+    accountGuid: string,
+    analysisGuid: string,
+    tab: AccountAnalysisResultRouteTab = 'annual'
+  ): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'workbench', analysisGuid, 'results', tab];
   }
 
   facilityRoute(facilityGuid: string): Array<string> {
@@ -658,6 +677,20 @@ export function parseWorkspaceRoute(url: string): RouteState {
   const isAccountAnalysisWorkbenchRoute = section === 'analysis'
     && routeParts[4] === 'workbench'
     && !!routeParts[5];
+  const accountAnalysisStageSegment = isAccountAnalysisWorkbenchRoute ? routeParts[6] : undefined;
+  const accountAnalysisStageScope: AccountAnalysisStageScope | undefined = accountAnalysisStageSegment === 'select-items'
+    ? 'select-items'
+    : accountAnalysisStageSegment === 'results'
+      ? 'results'
+      : accountAnalysisStageSegment === 'used-by'
+        ? 'used-by'
+        : isAccountAnalysisWorkbenchRoute
+          ? 'setup'
+          : undefined;
+  const accountAnalysisResultTab = accountAnalysisStageScope === 'results'
+    && ['annual', 'monthly-table', 'monthly-chart', 'facility-details'].includes(routeParts[7])
+      ? routeParts[7] as AccountAnalysisResultRouteTab
+      : undefined;
   return {
     view: 'workspace',
     contextMode: 'account',
@@ -667,6 +700,8 @@ export function parseWorkspaceRoute(url: string): RouteState {
     analysisGuid: isAccountAnalysisWorkbenchRoute
       ? safeDecodeRoutePart(routeParts[5])
       : undefined,
+    accountAnalysisStageScope,
+    accountAnalysisResultTab,
     importFileId: isImportFileRoute && routeParts[5]
       ? safeDecodeRoutePart(routeParts[5])
       : undefined,

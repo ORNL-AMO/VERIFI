@@ -1,0 +1,30 @@
+@let account = context.account();
+@let analysis = context.analysis();
+
+@if (!account) {
+  <article class="v1-empty-state" role="status">
+    <app-ui-icon name="accountIssue"></app-ui-icon>
+    <h1>No account selected</h1>
+    <p>Select an account before opening an analysis.</p>
+  </article>
+} @else if (!analysis) {
+  <article class="v1-empty-state" role="alert">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <h1>Analysis not found</h1>
+    <p>This account analysis is no longer available in {{ account.name }}.</p>
+    <a class="v1-btn v1-btn--secondary" [routerLink]="navigation.accountAnalysisRoute(account.guid)">
+      <app-ui-icon name="arrowLeft"></app-ui-icon> Back to analyses
+    </a>
+  </article>
+} @else {
+  <div class="v1-data-workbench-sticky v1-account-analysis-workbench__sticky">
+    <app-account-analysis-workbench-header></app-account-analysis-workbench-header>
+    <app-account-analysis-workbench-stage-navigation></app-account-analysis-workbench-stage-navigation>
+  </div>
+
+  <main class="v1-account-analysis-workbench__content" aria-labelledby="v1-account-analysis-workbench-title">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-account-analysis-workbench-footer></app-account-analysis-workbench-footer>
+}

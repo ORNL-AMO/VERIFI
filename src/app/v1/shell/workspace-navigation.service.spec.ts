@@ -116,7 +116,10 @@ describe('WorkspaceNavigationService', () => {
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
     ]);
     expect(service.accountAnalysisWorkbenchRoute('account-a', 'analysis-a')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a'
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'setup'
+    ]);
+    expect(service.accountAnalysisResultsRoute('account-a', 'analysis-a', 'monthly-chart')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'results', 'monthly-chart'
     ]);
     expect(service.facilityRoute('facility-a')).toEqual([
       '/v1',
@@ -234,13 +237,18 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
-  it('parses account analysis workbench identity into route state', () => {
-    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/analysis/workbench/analysis%20a')).toMatchObject({
+  it('parses account analysis workbench identity, stage, and Results tab into route state', () => {
+    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/analysis/workbench/analysis%20a/results/monthly-chart')).toMatchObject({
       contextMode: 'account',
       accountGuid: 'account-a',
       section: 'analysis',
       detail: 'workbench',
-      analysisGuid: 'analysis a'
+      analysisGuid: 'analysis a',
+      accountAnalysisStageScope: 'results',
+      accountAnalysisResultTab: 'monthly-chart'
+    });
+    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/analysis/workbench/analysis-a')).toMatchObject({
+      accountAnalysisStageScope: 'setup'
     });
   });
 
