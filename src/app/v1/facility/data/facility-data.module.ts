@@ -39,7 +39,7 @@ import { ConfirmDeleteMeterModalComponent } from './meters/meters-dashboard/mete
 import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
 import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.component';
-import { MeterResultsChartComponent } from './meters/shared/meter-results-chart/meter-results-chart.component';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { FacilityPredictorsComponent } from './predictors/facility-predictors.component';
 import { PredictorWorkbenchComponent } from './predictors/predictor-workbench/predictor-workbench.component';
 import { PredictorWorkbenchQualityReportComponent } from './predictors/predictor-workbench/quality-report/predictor-workbench-quality-report.component';

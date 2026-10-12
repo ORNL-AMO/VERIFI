@@ -9,9 +9,20 @@ Use this guide when a user or maintainer explicitly asks an agent to open a VERI
 3. Check for an existing pull request for the head branch before creating another one.
 4. Preserve unrelated worktree changes. Stop before committing or pushing if the requested PR cannot be isolated safely.
 
+## Complete the local review checkpoint
+
+Before pushing the branch or creating or updating the pull request:
+
+1. Use the [`review-code-changes`](../../.agents/skills/review-code-changes/SKILL.md) workflow to review the exact `origin/<base>...HEAD` comparison that GitHub will display.
+2. Present the user with prioritized, actionable findings and validation gaps. Say explicitly when no actionable findings remain.
+3. Stop and wait for the user to evaluate the findings. Do not change the reviewed implementation, push the branch, or create or update the pull request until the user authorizes the next step.
+4. Apply only the fixes the user requests, rerun the affected checks, and review the updated comparison before returning to this checkpoint. Continue only after the user explicitly approves opening or updating the pull request.
+
+GitHub-hosted review, including Copilot review, follows pull-request creation and complements rather than replaces this local checkpoint.
+
 ## Prepare the branch
 
-- Review the complete comparison and resolve actionable findings in scope.
+- After the user approves the local review checkpoint, resolve the agreed findings in scope and confirm the comparison still contains only intended work.
 - Run the risk-based validation selected by the matching task context and skills. An explicit pre-PR request requires `npm run test:all:ci` plus the production builds selected by the affected runtime boundaries.
 - Record every command and its result. Disclose failed, aborted, skipped, or unavailable checks exactly; never describe them as passing.
 - Ensure intended files are committed with focused messages and the head branch is pushed to its configured remote. Do not force-push unless the user explicitly authorizes it.

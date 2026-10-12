@@ -147,6 +147,23 @@ describe('WorkspaceStatusService', () => {
       '/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', 'analysis-a', 'setup'
     ]);
   });
+
+  it('navigates account-analysis findings to the placeholder workbench', () => {
+    const service = setup(signal(workspaceSnapshot()), signal(1), new BehaviorSubject(result('ready')));
+    const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
+    const entity = {
+      kind: 'account-analysis' as const,
+      guid: 'account-analysis-a',
+      name: 'Portfolio energy',
+      accountGuid: 'account-a'
+    };
+    service.navigateTo(presentFinding(makeFinding(
+      'account-analysis.configuration.invalid', 'error', 'configuration', entity, { reasons: ['missingSelection'] }
+    )));
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'account-analysis-a'
+    ]);
+  });
 });
 
 function setup(

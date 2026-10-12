@@ -4,7 +4,7 @@ import { EChartsChartDirective, V1EChartsOption } from '@app/v1/shared/charts/ec
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
-import { AnalysisResultNumberPipe } from '../../presentation/number/analysis-result-number.pipe';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
 import {
   FacilityGroupContributionsView,

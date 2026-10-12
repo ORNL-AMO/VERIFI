@@ -28,7 +28,7 @@ import {
 } from 'rxjs';
 import {
   facilityAnalysisOutcomeSummary
-} from '../facility-analysis-outcome-summary';
+} from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { FacilityAnalysisDashboardResultState } from './facility-analysis.models';
 import {
   analysisDependencyClosure,

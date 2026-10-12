@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
 import {
@@ -10,17 +10,17 @@ import {
   annualUseChartRows
 } from '../../presentation/facility-analysis-result.view';
 import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
-import { AnalysisResultNumberPipe } from '../../presentation/number/analysis-result-number.pipe';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
 import { FacilityAnalysisResultsDisplayService } from '../../presentation/facility-analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
-import { AnalysisResultMarkersComponent } from '../../presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
-import { AnalysisResultMarkerLegendComponent } from '../../presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import {
   AnalysisResultMarker,
   annualResultMarkers,
   orderedUniqueResultMarkers
-} from '../../presentation/result-markers/analysis-result-markers';
+} from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
 @Component({ selector: 'app-facility-analysis-annual', standalone: true, imports: [CommonModule, MeterResultsChartComponent, AnalysisResultStatusComponent, AnalysisResultColumnChooserComponent, AnalysisResultNumberPipe, AnalysisResultMarkersComponent, AnalysisResultMarkerLegendComponent], templateUrl: './facility-analysis-annual.component.html', styleUrls: ['./facility-analysis-annual.component.css'] })
 export class FacilityAnalysisAnnualComponent {

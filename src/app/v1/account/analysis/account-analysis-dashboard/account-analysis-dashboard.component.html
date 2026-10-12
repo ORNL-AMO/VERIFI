@@ -1,0 +1,114 @@
+@let account = workspace.account();
+@let workspaceState = workspace.workspaceState();
+@let requestedAccountGuid = navigation.routeState().accountGuid;
+@let dashboardCards = cards();
+@let visibleCards = filteredCards();
+@let activeCards = activeReportingCards();
+
+@if (workspaceState === 'error' || (workspace.workspaceError() && requestedAccountGuid && account?.guid !== requestedAccountGuid)) {
+  <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ workspace.workspaceError()?.message || 'The account-analysis workspace could not be loaded.' }}</div>
+} @else if (workspaceState === 'loading' || workspaceState === 'switching' || (requestedAccountGuid && account?.guid !== requestedAccountGuid)) {
+  <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Loading account analyses…</div>
+} @else if (!account) {
+  <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No account selected</h1><p>Select an account before managing analyses.</p></article>
+} @else {
+  <header class="v1-section-header v1-analysis-dashboard__header">
+    <div><p class="v1-eyebrow">Account Analysis</p><h1 id="v1-account-analysis-title"><app-ui-icon name="analysis"></app-ui-icon> {{ account.name || 'Account' }} Analysis</h1></div>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
+  </header>
+
+  @if (workspace.statusState() === 'error') {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>Analysis validation could not be completed. Records remain available.</div>
+  } @else if (workspace.statusState() === 'evaluating') {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon>Checking analysis readiness…</div>
+  }
+  @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ actionError() }}</div> }
+  @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
+
+  <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div class="v1-data-browse" aria-label="Account analyses">
+    @if (activeCards.length) {
+      <section class="v1-analysis-dashboard__active-cards" aria-label="Active account analyses for reporting">
+        @for (card of activeCards; track card.analysis.guid) {
+          <app-active-summary-card
+            [analysisName]="card.analysis.name"
+            [category]="card.category"
+            [route]="navigation.accountAnalysisWorkbenchRoute(account.guid, card.analysis.guid)"
+            [validationIssueCount]="card.findings.length"
+            [resultState]="card.outcome.state"
+            [resultMessage]="card.outcome.state === 'ready' ? '' : card.outcome.message"
+            [resultValueLabel]="card.outcomeDisplay.monthly.valueLabel"
+            [resultPeriodLabel]="card.outcomeDisplay.monthly.label">
+          </app-active-summary-card>
+        }
+      </section>
+    }
+    <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four" aria-label="Account analysis filters" [formGroup]="filtersForm">
+      <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find analysis, facility, status, or report" placeholder="Find analysis, facility, status, or report" formControlName="search"></div>
+      <label><span>Category</span><select class="v1-select" formControlName="category"><option value="all">All</option><option value="energy">Energy</option><option value="water">Water</option></select></label>
+      <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="ready">Ready</option><option value="warning">Warning</option><option value="error">Error</option><option value="active">Active</option></select></label>
+      <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option><option value="baseline">Baseline year</option></select></label>
+    </form>
+
+    @if (dashboardCards.length === 0) {
+      <app-data-empty-state icon="analysis" context="account" title="No account analyses" description="Create an energy or water account analysis to roll up facility results."></app-data-empty-state>
+    } @else if (visibleCards.length === 0) {
+      <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
+    } @else {
+      @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
+      <div class="v1-data-browse-grid v1-data-browse-grid--analysis" role="list" aria-label="Account analyses">
+        @for (card of visibleCards; track card.analysis.guid) {
+          <app-account-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonHasSelection]="comparisonGuids().length === 1" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-account-analysis-browse-card>
+        }
+      </div>
+    }
+  </div></div>
+
+  @if (detailsCard(); as card) {
+    <app-workspace-slideout [title]="card.analysis.name" description="Account setup, facility selections, results, validation, and report usage" size="large" (closed)="detailsGuid.set(undefined)">
+      <div class="v1-analysis-details v1-account-analysis-details">
+        <dl>
+          <div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div>
+          <div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div>
+          <div><dt>Baseline</dt><dd>{{ card.analysis.baselineYear || 'Not set' }}</dd></div>
+          <div><dt>Basis and units</dt><dd>{{ card.basisLabel }} · {{ card.unitLabel }}</dd></div>
+          <div><dt>{{ card.outcomeDisplay.annual.label }}</dt><dd>{{ card.outcomeDisplay.annual.valueLabel }}</dd></div>
+          <div><dt>{{ card.outcomeDisplay.monthly.label }}</dt><dd>{{ card.outcomeDisplay.monthly.valueLabel }}</dd></div>
+          <div><dt>Modified</dt><dd>{{ card.modifiedDateLabel }}</dd></div>
+        </dl>
+        <h3>Facility selections</h3>
+        <div class="v1-table-shell"><table><thead><tr><th scope="col">Facility</th><th scope="col">Selected analysis</th><th scope="col">State</th></tr></thead><tbody>@for (selection of card.facilitySelections; track selection.facilityGuid) { <tr><th scope="row">{{ selection.facilityName }}</th><td>{{ selection.analysisName }}</td><td>{{ selection.detail }}</td></tr> }</tbody></table></div>
+        <h3>Linked reports</h3>
+        @if (card.linkedReports.length) { <ul>@for (report of card.linkedReports; track report.guid) { <li>{{ report.name }}</li> }</ul> } @else { <p>No linked account reports.</p> }
+        @if (card.findings.length) { <h3>Validation</h3><ul>@for (finding of card.findings; track finding.id) { <li>{{ finding.description }}</li> }</ul> }
+      </div>
+    </app-workspace-slideout>
+  }
+
+  @if (createOpen()) { <app-account-analysis-draft-slideout [energyAvailable]="energyAvailable()" [waterAvailable]="waterAvailable()" [saving]="saving()" [error]="actionError()" (submitted)="create($event)" (cancelled)="closeCreate()"></app-account-analysis-draft-slideout> }
+
+  @if (comparisonCards().length === 2) {
+    <app-account-analysis-comparison [cards]="comparisonCards()" [fiscalYear]="account.fiscalYear" (closed)="clearComparison()"></app-account-analysis-comparison>
+  }
+}
+
+<ng-template #activeConfirmation>
+  @if (activeCandidate(); as candidate) {
+    <app-confirmation-dialog title="Set active for reporting?" titleId="set-active-account-analysis-title" cancelAriaLabel="Cancel active account analysis change" confirmLabel="Set active" confirmClass="v1-btn--action" confirmIcon="target" [busy]="saving()" [disabled]="saving() || !activeEligibility()?.allowed" (confirmed)="confirmActive()" (cancelled)="cancelActiveConfirmation()">
+      <p>Use <strong>{{ candidate.analysis.name }}</strong> as the active {{ candidate.category }} account analysis.</p>
+      @if (activeReplacement(); as current) { <p>This replaces <strong>{{ current.analysis.name }}</strong>.</p> }
+      @if (activeEligibility(); as eligibility) { @if (!eligibility.allowed) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ eligibility.reason }}</div> } }
+      @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() }}</span></div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+
+<ng-template #deleteConfirmation>
+  @if (deleteCandidate(); as candidate) {
+    <app-confirmation-dialog title="Delete account analysis?" titleId="delete-account-analysis-title" cancelAriaLabel="Cancel account analysis deletion" confirmLabel="Delete analysis" confirmClass="v1-btn--danger" confirmIcon="delete" [busy]="saving()" [disabled]="saving() || candidate.linkedReports.length > 0" (confirmed)="confirmDelete()" (cancelled)="cancelDeleteConfirmation()">
+      <p><strong>{{ candidate.analysis.name }}</strong> will be permanently deleted.</p>
+      @if (candidate.isActiveForReporting) { <p>Its active-for-reporting selection will be cleared.</p> }
+      @if (candidate.linkedReports.length) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>Remove this analysis from {{ candidate.linkedReports.length }} linked account report(s) before deleting it.</div> }
+      @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actionError() }}</span></div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>

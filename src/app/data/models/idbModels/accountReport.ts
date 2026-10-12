@@ -27,6 +27,22 @@ export interface IdbAccountReport extends IdbEntry {
     accountSavingsReportSetup: AccountSavingsReportSetup
 }
 
+export function accountReportReferencesAnalysis(report: IdbAccountReport, analysisGuid: string): boolean {
+    if (report.reportType === 'betterPlants') {
+        return report.betterPlantsReportSetup?.analysisItemId === analysisGuid;
+    }
+    if (report.reportType === 'performance') {
+        return report.performanceReportSetup?.analysisItemId === analysisGuid;
+    }
+    if (report.reportType === 'analysis') {
+        return report.analysisReportSetup?.analysisItemId === analysisGuid;
+    }
+    if (report.reportType === 'accountSavings') {
+        return report.accountSavingsReportSetup?.analysisItemId === analysisGuid;
+    }
+    return false;
+}
+
 export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<IdbFacility>, groups: Array<IdbUtilityMeterGroup>): IdbAccountReport {
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {

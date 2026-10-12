@@ -170,6 +170,12 @@ export class WorkspaceStatusService {
           ? ['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'analysis', 'workbench', item.destination.analysisGuid, 'group', item.destination.groupGuid, item.destination.tab]
           : ['/v1', 'workspace', 'facility', item.destination.facilityGuid, 'analysis', 'workbench', item.destination.analysisGuid, item.destination.tab]);
         break;
+      case 'account-analysis':
+        void this.router.navigate([
+          '/v1', 'workspace', 'account', item.destination.accountGuid,
+          'analysis', 'workbench', item.destination.analysisGuid
+        ]);
+        break;
     }
   }
 

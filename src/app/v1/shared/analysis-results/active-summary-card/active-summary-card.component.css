@@ -1,0 +1,15 @@
+:host { display: contents; }
+.v1-active-summary { --v1-analysis-active-accent: var(--v1-primary); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--v1-space-3); align-items: center; flex: 1 1 24rem; max-width: 36rem; min-width: 0; padding: .75rem 1rem; border: 1px solid color-mix(in srgb, var(--v1-analysis-active-accent) 42%, var(--v1-border)); border-left: 4px solid var(--v1-analysis-active-accent); border-radius: var(--v1-radius); background: color-mix(in srgb, var(--v1-analysis-active-accent) 7%, var(--v1-surface)); color: var(--v1-text); }
+.v1-active-summary--water { --v1-analysis-active-accent: var(--v1-info); }
+.v1-active-summary__icons { display: grid; align-self: start; justify-items: center; gap: var(--v1-space-1); margin-top: .15rem; color: var(--v1-analysis-active-accent); }
+.v1-active-summary__identity, .v1-active-summary__result { display: grid; min-width: 0; }
+.v1-active-summary__identity > span { color: var(--v1-analysis-active-accent); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.v1-active-summary__link { display: inline-flex; gap: var(--v1-space-1); align-items: center; min-width: 0; width: fit-content; max-width: 100%; color: var(--v1-text); text-decoration: none; }
+.v1-active-summary__link strong { overflow: hidden; font-size: .95rem; text-overflow: ellipsis; white-space: nowrap; }
+.v1-active-summary__link > .v1-icon { flex: 0 0 auto; color: var(--v1-analysis-active-accent); font-size: .75rem; }
+.v1-active-summary__link:hover strong, .v1-active-summary__link:focus-visible strong { text-decoration: underline; }
+.v1-active-summary__identity small, .v1-active-summary__result span { color: var(--v1-muted); font-size: .72rem; font-weight: 750; }
+.v1-active-summary__result { justify-items: end; text-align: right; }
+.v1-active-summary__result-value { display: inline-flex; gap: var(--v1-space-1); align-items: center; }
+.v1-active-summary__result-value > .v1-icon { color: var(--v1-warning); }
+@media (max-width: 760px) { .v1-active-summary { grid-template-columns: auto minmax(0, 1fr); max-width: none; } .v1-active-summary__result { grid-column: 2; justify-items: start; text-align: left; } }

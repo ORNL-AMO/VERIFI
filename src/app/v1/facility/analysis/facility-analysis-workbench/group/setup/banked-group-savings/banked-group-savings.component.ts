@@ -5,10 +5,10 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisBankingResultsService } from '../../banking/facility-analysis-banking-results.service';
 import { bankedSavingsPreviewRows } from '../../../banking/facility-analysis-banking';
-import { AnalysisResultNumberPipe } from '../../../results/presentation/number/analysis-result-number.pipe';
-import { AnalysisResultMarkersComponent } from '../../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
-import { AnalysisResultMarkerLegendComponent } from '../../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
-import { AnalysisResultMarker, isAnnualModelPeriod } from '../../../results/presentation/result-markers/analysis-result-markers';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
+import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { AnalysisResultMarker, isAnnualModelPeriod } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
 @Component({
   selector: 'app-banked-group-savings',

@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
 import {
@@ -9,7 +9,7 @@ import {
   monthlyUseChartRows
 } from '../../presentation/facility-analysis-result.view';
 import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
-import { monthlyResultMarkers, orderedUniqueResultMarkers } from '../../presentation/result-markers/analysis-result-markers';
+import { monthlyResultMarkers, orderedUniqueResultMarkers } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
 @Component({
   selector: 'app-facility-analysis-monthly-chart',

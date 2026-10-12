@@ -1,7 +1,18 @@
 /** Selected-meter table and chart contracts plus deterministic result transformations. */
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
+import {
+  MeterResultsChartMetric,
+  MeterResultsChartRow,
+  MeterResultsPeriod
+} from '@app/v1/shared/charts/metric-results-chart.models';
 
-export type MeterResultsPeriod = 'monthly' | 'yearly';
+export {
+  MeterResultsChartComparisonBand,
+  MeterResultsChartMetric,
+  MeterResultsChartRow,
+  MeterResultsPeriod
+} from '@app/v1/shared/charts/metric-results-chart.models';
+
 export type MeterResultMetricId =
   | 'energyConsumption'
   | 'energyUse'
@@ -53,28 +64,6 @@ export interface MeterYearlyDataRow {
   readonly mobileTotalEmissions: number;
   readonly fugitiveEmissions: number;
   readonly processEmissions: number;
-}
-
-export interface MeterResultsChartMetric {
-  readonly id: string;
-  readonly label: string;
-  readonly unit?: string;
-  readonly currency?: boolean;
-  readonly color?: string;
-}
-
-export interface MeterResultsChartComparisonBand {
-  readonly referenceMetricId: string;
-  readonly comparisonMetricId: string;
-  readonly comparisonAboveColor: string;
-  readonly referenceAboveColor: string;
-}
-
-export interface MeterResultsChartRow {
-  readonly periodKey: string;
-  readonly periodLabel: string;
-  readonly sortValue: number;
-  readonly values: Readonly<Record<string, number | null>>;
 }
 
 export function buildMeterDataColumns(

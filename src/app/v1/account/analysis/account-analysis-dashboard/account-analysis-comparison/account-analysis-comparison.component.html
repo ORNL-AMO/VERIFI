@@ -1,0 +1,57 @@
+@if (comparison(); as comparison) {
+  <app-workspace-slideout [title]="comparison.first.analysis.name + ' vs ' + comparison.second.analysis.name" description="Account setup, facility selections, and annual results" size="large" (closed)="closed.emit()">
+    <div class="v1-account-analysis-comparison">
+      <section aria-labelledby="account-comparison-setup-heading">
+        <h3 id="account-comparison-setup-heading">Analysis setup</h3>
+        <div class="v1-account-analysis-comparison__scroll" tabindex="0" role="region" aria-label="Account analysis setup comparison">
+          <table><thead><tr><th scope="col">Setting</th><th scope="col">{{ comparison.first.analysis.name }}</th><th scope="col">{{ comparison.second.analysis.name }}</th></tr></thead><tbody>
+            @for (field of comparison.fields; track field.id) { <tr [class.v1-account-analysis-comparison__different]="field.different"><th scope="row">{{ field.label }} @if (field.different) { <span>Different</span> }</th><td>{{ field.firstValue }}</td><td>{{ field.secondValue }}</td></tr> }
+          </tbody></table>
+        </div>
+      </section>
+
+      <section aria-labelledby="account-comparison-facilities-heading">
+        <h3 id="account-comparison-facilities-heading">Facility analysis selections</h3>
+        <div class="v1-account-analysis-comparison__scroll" tabindex="0" role="region" aria-label="Facility selection comparison">
+          <table><thead><tr><th scope="col">Facility</th><th scope="col">{{ comparison.first.analysis.name }}</th><th scope="col">{{ comparison.second.analysis.name }}</th></tr></thead><tbody>
+            @for (selection of comparison.selections; track selection.facilityGuid) { <tr [class.v1-account-analysis-comparison__different]="selection.different"><th scope="row">{{ selection.facilityName }} @if (selection.different) { <span>Different</span> }</th><td>{{ selection.firstValue }}</td><td>{{ selection.secondValue }}</td></tr> }
+          </tbody></table>
+        </div>
+      </section>
+
+      <section aria-labelledby="account-comparison-results-heading">
+        <h3 id="account-comparison-results-heading">Account annual results</h3>
+        <div class="v1-account-analysis-comparison__states" aria-label="Annual result availability">
+          @if (comparison.firstResultMessage) { <p><strong>{{ comparison.first.analysis.name }}:</strong> {{ comparison.firstResultMessage }}</p> }
+          @if (comparison.secondResultMessage) { <p><strong>{{ comparison.second.analysis.name }}:</strong> {{ comparison.secondResultMessage }}</p> }
+        </div>
+        @if (comparison.annualRows.length) {
+          <div class="v1-account-analysis-comparison__tables">
+            <article>
+              <h4>{{ comparison.first.analysis.name }} ({{ comparison.first.unitLabel }})</h4>
+              <div class="v1-account-analysis-comparison__scroll" tabindex="0" role="region" [attr.aria-label]="comparison.first.analysis.name + ' annual results'">
+                <table><thead><tr><th scope="col">Year</th><th scope="col">Status</th><th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th></tr></thead><tbody>
+                  @for (row of comparison.annualRows; track row.year) { <tr><th scope="row">{{ row.yearLabel }}</th><td>{{ row.firstStatusLabel }}</td><td>@if (row.firstAvailable) { {{ row.first?.energyUse | analysisResultNumber }} } @else { — }</td><td>@if (row.firstAvailable) { {{ row.first?.adjusted | analysisResultNumber }} } @else { — }</td><td>@if (row.firstAvailable) { {{ row.first?.savings | analysisResultNumber }} } @else { — }</td><td>@if (row.firstAvailable) { {{ row.first?.annualSavingsPercentImprovement | analysisResultNumber }}% } @else { — }</td><td>@if (row.firstAvailable) { {{ row.first?.totalSavingsPercentImprovement | analysisResultNumber }}% } @else { — }</td></tr> }
+                </tbody></table>
+              </div>
+            </article>
+            <article>
+              <h4>{{ comparison.second.analysis.name }} ({{ comparison.second.unitLabel }})</h4>
+              <div class="v1-account-analysis-comparison__scroll" tabindex="0" role="region" [attr.aria-label]="comparison.second.analysis.name + ' annual results'">
+                <table><thead><tr><th scope="col">Year</th><th scope="col">Status</th><th scope="col">Actual</th><th scope="col">Adjusted</th><th scope="col">Savings</th><th scope="col">Annual improvement</th><th scope="col">Total improvement</th></tr></thead><tbody>
+                  @for (row of comparison.annualRows; track row.year) { <tr><th scope="row">{{ row.yearLabel }}</th><td>{{ row.secondStatusLabel }}</td><td>@if (row.secondAvailable) { {{ row.second?.energyUse | analysisResultNumber }} } @else { — }</td><td>@if (row.secondAvailable) { {{ row.second?.adjusted | analysisResultNumber }} } @else { — }</td><td>@if (row.secondAvailable) { {{ row.second?.savings | analysisResultNumber }} } @else { — }</td><td>@if (row.secondAvailable) { {{ row.second?.annualSavingsPercentImprovement | analysisResultNumber }}% } @else { — }</td><td>@if (row.secondAvailable) { {{ row.second?.totalSavingsPercentImprovement | analysisResultNumber }}% } @else { — }</td></tr> }
+                </tbody></table>
+              </div>
+            </article>
+          </div>
+          <div class="v1-account-analysis-comparison__charts">
+            @if (comparison.useChartCompatible) {
+              <app-meter-results-chart [chartRows]="comparison.useChartRows" [metrics]="comparison.useChartMetrics" [showAllMetrics]="true" [showSeriesControls]="false" [allowNegativeValues]="true" [sharedYAxis]="true" [yAxisTitle]="comparison.first.unitLabel" period="yearly" ariaLabel="Actual and adjusted annual account results for both analyses" downloadFileName="account-analysis-use-comparison" [embedded]="true"></app-meter-results-chart>
+            } @else { <div class="v1-alert v1-alert--warning" role="status">{{ comparison.useChartUnavailableMessage }}</div> }
+            <app-meter-results-chart [chartRows]="comparison.improvementChartRows" [metrics]="comparison.improvementChartMetrics" [showAllMetrics]="true" [showSeriesControls]="false" [allowNegativeValues]="true" [sharedYAxis]="true" yAxisTitle="Percent improvement" period="yearly" ariaLabel="Annual and total percentage improvement for both account analyses" downloadFileName="account-analysis-improvement-comparison" [embedded]="true"></app-meter-results-chart>
+          </div>
+        } @else if (comparison.bothResultsReady) { <p class="v1-account-analysis-comparison__empty">No complete annual results are available for comparison.</p> }
+      </section>
+    </div>
+  </app-workspace-slideout>
+}

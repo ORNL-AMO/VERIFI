@@ -1,0 +1,3 @@
+.v1-account-analysis-details .v1-table-shell { overflow-x: auto; }
+.v1-account-analysis-details table { width: 100%; border-collapse: collapse; }
+.v1-account-analysis-details th, .v1-account-analysis-details td { padding: .7rem; border: 1px solid var(--v1-border); text-align: left; }

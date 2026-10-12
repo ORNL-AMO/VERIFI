@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
-import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/facility/data/meters/models';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
+import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/shared/charts/metric-results-chart.models';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout.component';

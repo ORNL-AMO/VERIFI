@@ -65,8 +65,8 @@ const RULES: Record<StatusRuleCode, StatusRulePresentation> = {
   },
   'analysis-group.model.invalid': { title: 'Review regression model', description: () => 'The selected regression model does not pass its validity checks.', todo: true, destination: facilityAnalysis },
   'analysis-group.inputs.invalid': { title: 'Review analysis inputs', description: () => 'One or more included meters or predictors has setup or data errors.', todo: true, destination: facilityAnalysis },
-  'account-analysis.configuration.invalid': { title: 'Complete account analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
-  'account-analysis.children.warning': { title: 'Review facility analyses', description: () => 'One or more included facility analyses has warnings.', todo: true, destination: unavailable },
+  'account-analysis.configuration.invalid': { title: 'Complete account analysis setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: accountAnalysis },
+  'account-analysis.children.warning': { title: 'Review facility analyses', description: () => 'One or more included facility analyses has warnings.', todo: true, destination: accountAnalysis },
   'report.configuration.invalid': { title: 'Complete report setup', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
   'report.dates.invalid': { title: 'Correct report dates', description: finding => `Review: ${evidenceList(finding, 'reasons')}.`, todo: true, destination: unavailable },
   'report.analysis.invalid': { title: 'Select a valid analysis', description: () => 'This report requires an existing analysis without setup errors.', todo: true, destination: unavailable },
@@ -103,6 +103,14 @@ function meterTab(tab: 'settings' | 'readings' | 'quality'): (finding: StatusFin
 
 function predictorTab(tab: 'settings' | 'readings' | 'quality'): (finding: StatusFinding) => StatusDestination {
   return finding => ({ kind: 'predictor-tab', facilityGuid: finding.entity.facilityGuid!, predictorGuid: finding.entity.guid, tab });
+}
+
+function accountAnalysis(finding: StatusFinding): StatusDestination {
+  return {
+    kind: 'account-analysis',
+    accountGuid: finding.entity.accountGuid,
+    analysisGuid: finding.entity.guid
+  };
 }
 
 function facilityAnalysis(finding: StatusFinding): StatusDestination {

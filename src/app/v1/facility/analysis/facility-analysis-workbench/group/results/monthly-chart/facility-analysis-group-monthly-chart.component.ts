@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { FacilityAnalysisGroupContext } from '../../facility-analysis-group-context.service';
 import { FacilityAnalysisGroupResultsService } from '../calculation/facility-analysis-group-results.service';
 import {

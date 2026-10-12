@@ -46,6 +46,8 @@ export function facilityAnalysisOutcomeDisplay(
   };
 }
 
+export const analysisOutcomeDisplay = facilityAnalysisOutcomeDisplay;
+
 export function facilityAnalysisOutcomeSummary(
   annualRows: readonly AnnualAnalysisSummary[],
   monthlyRows: readonly MonthlyAnalysisSummaryData[],
@@ -77,6 +79,8 @@ export function facilityAnalysisOutcomeSummary(
       : { periodLabel: 'Latest month', unavailableMessage: 'No complete month' }
   };
 }
+
+export const analysisOutcomeSummary = facilityAnalysisOutcomeSummary;
 
 function improvementFact(
   periodLabel: string,
