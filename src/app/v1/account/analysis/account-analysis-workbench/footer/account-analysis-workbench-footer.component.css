@@ -1,0 +1,7 @@
+:host { display: contents; }
+@media (max-width: 560px) {
+  .v1-wizard-actions { display: grid; }
+  .v1-wizard-actions > .v1-btn, .v1-wizard-actions__next, .v1-wizard-actions__next > .v1-btn { width: 100%; }
+  .v1-wizard-actions__next { justify-items: stretch; }
+  .v1-wizard-actions__requirement { max-width: none; text-align: left; }
+}

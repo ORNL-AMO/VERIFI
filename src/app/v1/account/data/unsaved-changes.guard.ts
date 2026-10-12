@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanDeactivateFn, RouterStateSnapshot } from '@angular/router';
+import { CanActivateFn, CanDeactivateFn, RouterStateSnapshot } from '@angular/router';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 export interface HasUnsavedChanges {
@@ -14,3 +14,6 @@ export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges | null> = (c
   if (component.canNavigateWithoutDiscard?.(nextState)) return true;
   return !component.hasUnsavedChanges() || inject(UnsavedChangesService).confirmDiscard(true);
 };
+
+export const flushPendingChangesGuard: CanActivateFn = () =>
+  inject(UnsavedChangesService).flushPendingChanges();

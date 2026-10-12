@@ -89,6 +89,61 @@ describe('AnalysisCommandHandler', () => {
     expect(result.id).toBe(2);
   });
 
+  it('creates and links exactly one generated facility analysis per current facility atomically', async () => {
+    const { handler, transactions } = createHandler();
+    const accountAnalysis = {
+      id: 8, guid: 'aa-1', accountId: ACCOUNT, analysisCategory: 'energy',
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: undefined }]
+    } as IdbAccountAnalysisItem;
+    const generated = {
+      guid: 'a-new', accountId: ACCOUNT, facilityId: FACILITY, analysisCategory: 'energy'
+    } as IdbAnalysisItem;
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([accountAnalysis])
+        .mockResolvedValueOnce([{ id: 4, guid: FACILITY, accountId: ACCOUNT }])
+        .mockResolvedValueOnce([]),
+      add: vi.fn().mockResolvedValue(21),
+      put: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.createBulkFacilityAnalysesForAccount({
+      accountGuid: ACCOUNT, accountAnalysisGuid: 'aa-1', analyses: [generated]
+    });
+
+    expect(context.add).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ guid: 'a-new' }));
+    expect(result.analyses[0].id).toBe(21);
+    expect(context.put).toHaveBeenCalledWith('accountAnalysisItems', expect.objectContaining({
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'a-new' }]
+    }));
+  });
+
+  it('rejects bulk creation when selections exist or the generated facility set is incomplete', async () => {
+    const { handler, transactions } = createHandler();
+    const selected = {
+      id: 8, guid: 'aa-1', accountId: ACCOUNT, analysisCategory: 'energy',
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'existing' }]
+    };
+    const operationWith = (accountAnalysis: unknown, facilities: unknown[] = []) => {
+      const context = {
+        getAllByIndex: vi.fn().mockResolvedValueOnce([accountAnalysis]).mockResolvedValueOnce(facilities)
+      };
+      transactions.runTransaction.mockImplementationOnce(async (_stores, _mode, operation) => operation(context));
+    };
+    operationWith(selected);
+    await expect(handler.createBulkFacilityAnalysesForAccount({
+      accountGuid: ACCOUNT, accountAnalysisGuid: 'aa-1', analyses: []
+    })).rejects.toThrow('Clear the current facility selections');
+
+    operationWith({ ...selected, facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: undefined }] }, [
+      { id: 4, guid: FACILITY, accountId: ACCOUNT }
+    ]);
+    await expect(handler.createBulkFacilityAnalysesForAccount({
+      accountGuid: ACCOUNT, accountAnalysisGuid: 'aa-1', analyses: []
+    })).rejects.toThrow('exactly one analysis');
+  });
+
   it('deleteAccountAnalysis rejects cross-account analysis', async () => {
     const { handler, accountAnalysisDb } = createHandler();
     await expect(

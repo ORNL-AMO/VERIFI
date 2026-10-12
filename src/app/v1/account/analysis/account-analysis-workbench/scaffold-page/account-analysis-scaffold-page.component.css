@@ -1,0 +1,6 @@
+:host { display: block; }
+.v1-account-analysis-section { display: grid; gap: var(--v1-space-4); min-height: 18rem; padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0 0 var(--v1-radius) var(--v1-radius); background: var(--v1-surface); }
+.v1-account-analysis-section header { display: flex; align-items: center; min-width: 0; }
+.v1-account-analysis-section h2 { display: flex; gap: .55rem; align-items: center; margin: 0; font-size: 1.05rem; }
+.v1-account-analysis-section h2 .v1-icon { color: var(--v1-content-control); }
+.v1-account-analysis-section .v1-empty-state { align-self: center; }

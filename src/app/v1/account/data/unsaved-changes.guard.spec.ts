@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { unsavedChangesGuard } from './unsaved-changes.guard';
+import { flushPendingChangesGuard, unsavedChangesGuard } from './unsaved-changes.guard';
 
 describe('unsavedChangesGuard', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
@@ -63,5 +63,22 @@ describe('unsavedChangesGuard', () => {
 
     expect(result).toBe(false);
     expect(unsaved.confirmDiscard).not.toHaveBeenCalled();
+  });
+});
+
+describe('flushPendingChangesGuard', () => {
+  beforeEach(() => TestBed.configureTestingModule({}));
+  afterEach(() => vi.restoreAllMocks());
+
+  it('uses registered editors to flush pending changes before activation', async () => {
+    const unsaved = TestBed.inject(UnsavedChangesService);
+    vi.spyOn(unsaved, 'flushPendingChanges').mockResolvedValue(false);
+
+    const result = TestBed.runInInjectionContext(() =>
+      flushPendingChangesGuard(null as any, null as any)
+    );
+
+    await expect(result).resolves.toBe(false);
+    expect(unsaved.flushPendingChanges).toHaveBeenCalledOnce();
   });
 });

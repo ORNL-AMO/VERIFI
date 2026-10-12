@@ -173,7 +173,7 @@ export class WorkspaceStatusService {
       case 'account-analysis':
         void this.router.navigate([
           '/v1', 'workspace', 'account', item.destination.accountGuid,
-          'analysis', 'workbench', item.destination.analysisGuid
+          'analysis', 'workbench', item.destination.analysisGuid, 'setup'
         ]);
         break;
     }

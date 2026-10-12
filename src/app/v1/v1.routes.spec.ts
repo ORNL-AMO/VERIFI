@@ -5,7 +5,7 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
 import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
-import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
 import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
@@ -55,7 +55,15 @@ import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wi
 import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
 import { AccountAnalysisDashboardComponent } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard.component';
-import { AccountAnalysisWorkbenchPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-workbench-placeholder/account-analysis-workbench-placeholder.component';
+import { AccountAnalysisWorkbenchComponent } from '@app/v1/account/analysis/account-analysis-workbench/account-analysis-workbench.component';
+import { AccountAnalysisSetupComponent } from '@app/v1/account/analysis/account-analysis-workbench/setup/account-analysis-setup.component';
+import { AccountAnalysisSelectFacilityItemsComponent } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-select-facility-items.component';
+import { AccountAnalysisResultsShellComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/shell/account-analysis-results-shell.component';
+import { AccountAnalysisAnnualComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/annual/account-analysis-annual.component';
+import { AccountAnalysisMonthlyTableComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-table/account-analysis-monthly-table.component';
+import { AccountAnalysisMonthlyChartComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-chart/account-analysis-monthly-chart.component';
+import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-details/account-analysis-facility-details.component';
+import { AccountAnalysisUsedByComponent } from '@app/v1/account/analysis/account-analysis-workbench/used-by/account-analysis-used-by.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
@@ -90,14 +98,34 @@ describe('V1Routes facility data meters routes', () => {
     });
   });
 
-  it('routes account and facility analysis dashboards with a stable facility workbench destination', () => {
+  it('routes account and facility analysis dashboards with nested workbench destinations', () => {
     const accountAnalysis = accountWorkspaceRoute().children?.find(route => route.path === 'analysis');
     const facilityAnalysis = facilityWorkspaceRoute().children?.find(route => route.path === 'analysis');
 
     expect(accountAnalysis?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'dashboard' }),
       expect.objectContaining({ path: 'dashboard', component: AccountAnalysisDashboardComponent }),
-      expect.objectContaining({ path: 'workbench/:analysisGuid', component: AccountAnalysisWorkbenchPlaceholderComponent })
+      expect.objectContaining({ path: 'workbench/:analysisGuid', component: AccountAnalysisWorkbenchComponent })
+    ]));
+    const accountWorkbench = accountAnalysis?.children?.find(route => route.path === 'workbench/:analysisGuid');
+    expect(accountWorkbench?.canActivate).toEqual([flushPendingChangesGuard]);
+    expect(accountWorkbench?.canDeactivate).toEqual([unsavedChangesGuard]);
+    expect(accountWorkbench?.children).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: '', redirectTo: 'setup' }),
+      expect.objectContaining({ path: 'setup', component: AccountAnalysisSetupComponent }),
+      expect.objectContaining({ path: 'select-items', component: AccountAnalysisSelectFacilityItemsComponent }),
+      expect.objectContaining({ path: 'results', component: AccountAnalysisResultsShellComponent }),
+      expect.objectContaining({ path: 'used-by', component: AccountAnalysisUsedByComponent }),
+      expect.objectContaining({ path: '**', redirectTo: 'setup' })
+    ]));
+    const accountResults = accountWorkbench?.children?.find(route => route.path === 'results')?.children ?? [];
+    expect(accountResults).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: '', redirectTo: 'annual' }),
+      expect.objectContaining({ path: 'annual', component: AccountAnalysisAnnualComponent }),
+      expect.objectContaining({ path: 'monthly-table', component: AccountAnalysisMonthlyTableComponent }),
+      expect.objectContaining({ path: 'monthly-chart', component: AccountAnalysisMonthlyChartComponent }),
+      expect.objectContaining({ path: 'facility-details', component: AccountAnalysisFacilityDetailsComponent }),
+      expect.objectContaining({ path: '**', redirectTo: 'annual' })
     ]));
     expect(facilityAnalysis?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'dashboard' }),

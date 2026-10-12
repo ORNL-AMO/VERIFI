@@ -38,6 +38,17 @@ export interface DeleteAccountAnalysisResult {
   readonly clearedActiveSelection: boolean;
 }
 
+export interface CreateBulkFacilityAnalysesCommand {
+  readonly accountGuid: string;
+  readonly accountAnalysisGuid: string;
+  readonly analyses: readonly IdbAnalysisItem[];
+}
+
+export interface CreateBulkFacilityAnalysesResult {
+  readonly accountAnalysis: IdbAccountAnalysisItem;
+  readonly analyses: readonly IdbAnalysisItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AnalysisCommandHandler {
   constructor(
@@ -140,6 +151,72 @@ export class AnalysisCommandHandler {
   async updateAccountAnalysis(analysis: IdbAccountAnalysisItem, activeAccountGuid: string): Promise<IdbAccountAnalysisItem> {
     this.assertOwnership(analysis.accountId, activeAccountGuid, 'account analysis');
     return firstValueFrom(this.accountAnalysisDb.updateWithObservable({ ...analysis }));
+  }
+
+  async createBulkFacilityAnalysesForAccount(
+    command: CreateBulkFacilityAnalysesCommand
+  ): Promise<CreateBulkFacilityAnalysesResult> {
+    return this.transactions.runTransaction(
+      ['analysisItems', 'accountAnalysisItems', 'facilities'],
+      'readwrite',
+      async transaction => {
+        const accountAnalyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>(
+          'accountAnalysisItems', 'accountId', command.accountGuid
+        );
+        const accountAnalysis = accountAnalyses.find(item => item.guid === command.accountAnalysisGuid);
+        if (!accountAnalysis || accountAnalysis.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The account analysis is missing or does not belong to the selected account.');
+        }
+        this.assertOwnership(accountAnalysis.accountId, command.accountGuid, 'account analysis');
+        if ((accountAnalysis.facilityAnalysisItems ?? []).some(item => item.analysisItemId !== undefined)) {
+          throw new WorkspaceWriteError('validation-failed', 'Clear the current facility selections before creating analyses in bulk.');
+        }
+
+        const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', command.accountGuid);
+        const facilityGuids = new Set(facilities.map(facility => facility.guid));
+        const analysisFacilityGuids = new Set(command.analyses.map(analysis => analysis.facilityId));
+        const analysisGuids = new Set(command.analyses.map(analysis => analysis.guid));
+        if (command.analyses.length !== facilities.length
+          || analysisFacilityGuids.size !== facilities.length
+          || analysisGuids.size !== command.analyses.length
+          || [...facilityGuids].some(guid => !analysisFacilityGuids.has(guid))) {
+          throw new WorkspaceWriteError('validation-failed', 'Bulk creation must provide exactly one analysis for every current facility.');
+        }
+
+        const existingAnalyses = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', command.accountGuid);
+        const existingGuids = new Set(existingAnalyses.map(analysis => analysis.guid));
+        for (const analysis of command.analyses) {
+          this.assertOwnership(analysis.accountId, command.accountGuid, 'facility analysis');
+          if (!facilityGuids.has(analysis.facilityId)
+            || analysis.analysisCategory !== accountAnalysis.analysisCategory
+            || existingGuids.has(analysis.guid)) {
+            throw new WorkspaceWriteError('validation-failed', 'A generated facility analysis does not match the current account analysis.');
+          }
+        }
+
+        const persistedAnalyses: IdbAnalysisItem[] = [];
+        for (const analysis of command.analyses) {
+          const persisted = structuredClone(analysis);
+          delete persisted.id;
+          const key = await transaction.add('analysisItems', persisted);
+          persisted.id = Number(key);
+          persistedAnalyses.push(persisted);
+        }
+
+        const analysisByFacility = new Map(persistedAnalyses.map(analysis => [analysis.facilityId, analysis]));
+        const updatedAccountAnalysis: IdbAccountAnalysisItem = {
+          ...accountAnalysis,
+          isAnalysisVisited: false,
+          modifiedDate: new Date(),
+          facilityAnalysisItems: facilities.map(facility => ({
+            facilityId: facility.guid,
+            analysisItemId: analysisByFacility.get(facility.guid)!.guid
+          }))
+        };
+        await transaction.put('accountAnalysisItems', updatedAccountAnalysis);
+        return { accountAnalysis: updatedAccountAnalysis, analyses: persistedAnalyses };
+      }
+    );
   }
 
   async deleteAccountAnalysis(analysis: IdbAccountAnalysisItem, activeAccountGuid: string): Promise<number> {
