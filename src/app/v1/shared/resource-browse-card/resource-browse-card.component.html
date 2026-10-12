@@ -16,7 +16,7 @@
       type="button"
       class="v1-resource-browse-card__title"
       [attr.aria-label]="view.openLabel"
-      [disabled]="!capabilities.canOpen"
+      [disabled]="!canOpen"
       (click)="opened.emit()">
       <app-ui-icon [name]="view.icon" [style.color]="view.iconColor || null"></app-ui-icon>
       <span class="v1-resource-browse-card__title-text">{{ view.title }}</span>
@@ -111,7 +111,7 @@
     }
   </div>
 
-  @if (view.footerTag || (capabilities.canAct && actions.length > 0)) {
+  @if (view.footerTag || (!readOnly && actions.length > 0)) {
     <footer class="v1-resource-browse-card__footer">
       @if (view.footerTag; as footerTag) {
         <span class="v1-resource-browse-card__footer-tag">
@@ -121,19 +121,25 @@
           {{ footerTag.label }}
         </span>
       }
-      @if (capabilities.canAct && actions.length > 0) {
+      @if (!readOnly && actions.length > 0) {
         <div class="v1-resource-browse-card__actions" aria-label="Resource actions">
           @for (action of actions; track action.id) {
+            @let disabledDescriptionId = idPrefix + '-disabled-' + action.id;
             <button
               type="button"
               class="v1-icon-btn"
               [class.v1-icon-btn--danger]="action.tone === 'danger'"
-              [title]="action.label"
+              [title]="action.disabledReason || action.label"
               [attr.aria-label]="action.label"
-              [disabled]="action.disabled || action.loading"
+              [attr.aria-disabled]="action.disabled && action.disabledReason ? 'true' : null"
+              [attr.aria-describedby]="action.disabled && action.disabledReason ? disabledDescriptionId : null"
+              [disabled]="(action.disabled && !action.disabledReason) || action.loading"
               (click)="selectAction(action)">
               <app-ui-icon [name]="action.loading ? 'loading' : action.icon" [spin]="action.loading === true"></app-ui-icon>
             </button>
+            @if (action.disabled && action.disabledReason) {
+              <span class="visually-hidden" [id]="disabledDescriptionId">{{ action.disabledReason }}</span>
+            }
           }
         </div>
       }

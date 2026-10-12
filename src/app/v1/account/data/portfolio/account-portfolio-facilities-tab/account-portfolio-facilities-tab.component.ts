@@ -20,12 +20,13 @@ type FacilityStatusFilter = 'all' | 'attention' | 'noMeters' | 'noReadings' | 'n
 type FacilitySort = 'attention' | 'facilityName' | 'modified';
 type FacilityTone = 'success' | 'warning' | 'danger';
 type FacilityDataDetail = 'meters' | 'predictors' | 'energy-uses';
+type FacilityContentDestination = FacilityDataDetail | 'analyses';
 
 interface FacilityFact {
   readonly label: string;
   readonly value: string;
   readonly icon: IconName;
-  readonly detail?: FacilityDataDetail;
+  readonly destination?: FacilityContentDestination;
 }
 
 interface FacilitySummary {
@@ -127,9 +128,12 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
     void this.router.navigate(this.navigation.facilitySettingsRoute(facility.guid));
   }
 
-  openFacilityData(facility: IdbFacility, detail: FacilityDataDetail): void {
+  openFacilityContent(facility: IdbFacility, destination: FacilityContentDestination): void {
     this.workspaceService.selectFacility(facility.guid);
-    void this.router.navigate(this.navigation.facilityDataRoute(facility.guid, detail));
+    const route = destination === 'analyses'
+      ? this.navigation.facilityAnalysisRoute(facility.guid)
+      : this.navigation.facilityDataRoute(facility.guid, destination);
+    void this.router.navigate(route);
   }
 
   ngOnDestroy(): void {
@@ -204,10 +208,10 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
       noReadings,
       noAnalyses,
       facts: [
-        { label: 'Meters', value: String(meters.length), icon: 'meter', detail: 'meters' },
-        { label: 'Predictors', value: String(predictors.length), icon: 'chartLine', detail: 'predictors' },
-        { label: 'Energy Uses', value: String(equipment.length), icon: 'tools', detail: 'energy-uses' },
-        { label: 'Analyses', value: String(analyses.length), icon: 'analysis' },
+        { label: 'Meters', value: String(meters.length), icon: 'meter', destination: 'meters' },
+        { label: 'Predictors', value: String(predictors.length), icon: 'chartLine', destination: 'predictors' },
+        { label: 'Energy Uses', value: String(equipment.length), icon: 'tools', destination: 'energy-uses' },
+        { label: 'Analyses', value: String(analyses.length), icon: 'analysis', destination: 'analyses' },
         { label: 'Reports', value: String(reports.length), icon: 'reports' }
       ]
     };

@@ -1,0 +1,40 @@
+:host { display: contents; }
+
+.v1-analysis-comparison,
+.v1-analysis-comparison > section,
+.v1-analysis-comparison__groups,
+.v1-analysis-comparison__groups article,
+.v1-analysis-comparison__annual-tables,
+.v1-analysis-comparison__annual-result { display: grid; gap: var(--v1-space-3); min-width: 0; }
+.v1-analysis-comparison { gap: var(--v1-space-5); }
+.v1-analysis-comparison h3, .v1-analysis-comparison p { margin: 0; }
+.v1-analysis-comparison h3 { font-size: 1rem; font-weight: 950; }
+.v1-analysis-comparison__group-heading, .v1-analysis-comparison__result-heading { display: flex; flex-wrap: wrap; gap: var(--v1-space-2); align-items: center; font-size: .92rem; font-weight: 900; }
+.v1-analysis-comparison__groups { grid-template-columns: minmax(0, 1fr); }
+.v1-analysis-comparison__groups article { align-content: start; padding: var(--v1-space-3); border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.v1-analysis-comparison__table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.v1-analysis-comparison__table-scroll:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 2px; }
+.v1-analysis-comparison table { width: 100%; border-collapse: collapse; color: var(--v1-text); font-size: .82rem; }
+.v1-analysis-comparison th, .v1-analysis-comparison td { padding: .55rem .65rem; border-bottom: 1px solid var(--v1-divider); text-align: left; vertical-align: top; }
+.v1-analysis-comparison thead th { background: var(--v1-content-block); color: var(--v1-muted); font-size: .72rem; font-weight: 900; text-transform: uppercase; }
+.v1-analysis-comparison tbody th { width: 10rem; color: var(--v1-text); font-weight: 850; }
+.v1-analysis-comparison tbody tr:last-child > * { border-bottom: 0; }
+.v1-analysis-comparison__setup-table { min-width: 38rem; table-layout: fixed; }
+.v1-analysis-comparison__setup-table th:not(:first-child), .v1-analysis-comparison__setup-table td { width: calc((100% - 10rem) / 2); overflow-wrap: anywhere; }
+.v1-analysis-comparison__different { background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface)); }
+.v1-analysis-comparison__difference-label, .v1-analysis-comparison__incomplete-label { display: inline-flex; margin-left: .3rem; padding: .12rem .35rem; border-radius: var(--v1-radius-pill); font-size: .64rem; font-weight: 900; line-height: 1.1; }
+.v1-analysis-comparison__difference-label { border: 1px solid color-mix(in srgb, var(--v1-warning) 60%, var(--v1-border)); background: color-mix(in srgb, var(--v1-warning) 15%, var(--v1-surface)); color: var(--v1-text); }
+.v1-analysis-comparison__annual-table { min-width: 48rem; font-variant-numeric: tabular-nums; }
+.v1-analysis-comparison__annual-table th, .v1-analysis-comparison__annual-table td { text-align: right; white-space: nowrap; }
+.v1-analysis-comparison__annual-table th:first-child { position: sticky; left: 0; z-index: 1; text-align: left; background: var(--v1-content-block); }
+.v1-analysis-comparison__annual-table td app-analysis-result-markers { margin-left: .25rem; }
+.v1-analysis-comparison__incomplete { background: color-mix(in srgb, var(--v1-warning) 12%, var(--v1-surface)); }
+.v1-analysis-comparison__incomplete-label { display: block; margin: .25rem 0 0; color: var(--v1-muted); }
+.v1-analysis-comparison__result-states { display: grid; gap: var(--v1-space-1); }
+.v1-analysis-comparison__result-states:empty { display: none; }
+.v1-analysis-comparison__result-states p, .v1-analysis-comparison__empty { padding: var(--v1-space-3); border: 1px solid var(--v1-border); background: var(--v1-content-block); color: var(--v1-muted); }
+.v1-analysis-comparison__charts { display: grid; gap: var(--v1-space-3); grid-template-columns: minmax(0, 1fr); }
+
+@media (max-width: 900px) {
+  .v1-analysis-comparison__annual-table { min-width: 44rem; }
+}

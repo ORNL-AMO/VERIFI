@@ -20,7 +20,12 @@ describe('SectionNavComponent', () => {
   let activeSection: ReturnType<typeof signal<string>>;
   let contextMode: ReturnType<typeof signal<string>>;
   let facilities: ReturnType<typeof signal<ReadonlyArray<{ guid: string; name: string }>>>;
-  let selectedFacility: ReturnType<typeof signal<{ guid: string; name: string } | undefined>>;
+  let selectedFacility: ReturnType<typeof signal<{
+    guid: string;
+    name: string;
+    selectedEnergyAnalysisId?: string;
+    selectedWaterAnalysisId?: string;
+  } | undefined>>;
   let account: ReturnType<typeof signal<{ guid: string; name: string; isSingleFacilityCompany?: boolean; displayEmissions?: boolean }>>;
   let isSingleSiteWorkspace: ReturnType<typeof signal<boolean>>;
   let hasSingleSiteRecovery: ReturnType<typeof signal<boolean>>;
@@ -48,7 +53,12 @@ describe('SectionNavComponent', () => {
     activeSection = signal('home');
     contextMode = signal('account');
     facilities = signal([]);
-    selectedFacility = signal<{ guid: string; name: string } | undefined>(undefined);
+    selectedFacility = signal<{
+      guid: string;
+      name: string;
+      selectedEnergyAnalysisId?: string;
+      selectedWaterAnalysisId?: string;
+    } | undefined>(undefined);
     account = signal({ guid: 'account-a', name: 'Account A' });
     isSingleSiteWorkspace = signal(false);
     hasSingleSiteRecovery = signal(false);
@@ -107,6 +117,8 @@ describe('SectionNavComponent', () => {
             facilityWeatherPredictorRoute: (_facilityGuid: string, groupKey: string, tab = 'setup') => ['/v1', 'workspace', 'facility', 'facility-a', 'data', 'predictors', 'weather', groupKey, tab],
             accountAnalysisRoute: () => ['/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'],
             facilityAnalysisRoute: () => ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'dashboard'],
+            facilityAnalysisWorkbenchRoute: (_facilityGuid: string, analysisGuid: string, tab = 'setup') =>
+              ['/v1', 'workspace', 'facility', 'facility-a', 'analysis', 'workbench', analysisGuid, tab],
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
@@ -184,17 +196,28 @@ describe('SectionNavComponent', () => {
     selectedFacilityAnalyses.set([{
       guid: 'analysis-a',
       name: 'FY 2025 Energy Analysis',
+      analysisCategory: 'energy',
       groups: [
         { idbGroupId: 'group-b', analysisType: 'regression' },
         { idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption' }
       ]
+    }, {
+      guid: 'analysis-b',
+      name: 'Other Energy Analysis',
+      analysisCategory: 'energy',
+      groups: []
     }]);
 
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
     const workflow: HTMLElement = fixture.nativeElement.querySelector('.v1-nav__analysis-workflow');
+    const analysisLink: HTMLAnchorElement = fixture.nativeElement.querySelector('.v1-nav__analysis-link');
 
-    expect(workflow.querySelector('h2')?.textContent).toContain('FY 2025 Energy Analysis');
+    expect(analysisLink.textContent).toContain('FY 2025 Energy Analysis');
+    expect(analysisLink.classList.contains('active')).toBe(true);
+    expect(analysisLink.getAttribute('aria-expanded')).toBe('true');
+    expect(analysisLink.hasAttribute('aria-current')).toBe(false);
+    expect(fixture.nativeElement.querySelectorAll('.v1-nav__analysis-link[aria-expanded="false"]')).toHaveLength(1);
     expect([...workflow.querySelectorAll('.v1-workflow-stepper__label')].map(item => item.textContent?.trim()))
       .toEqual(['Analysis Setup', 'Natural Gas', 'Electricity', 'Facility Results', 'Used By']);
     expect(workflow.querySelector('[aria-current="step"]')?.textContent).toContain('Natural Gas');
@@ -205,6 +228,67 @@ describe('SectionNavComponent', () => {
     const icons = fixture.debugElement.queryAll(By.css('.v1-nav__analysis-workflow .v1-workflow-stepper__marker app-ui-icon'))
       .map(element => element.componentInstance.name);
     expect(icons).toEqual(['checkmarkBadge', 'checkmarkBadge', 'checkmarkBadge', 'chartAnalysis', 'link']);
+  });
+
+  it('lists active analyses first and groups remaining analyses by category', () => {
+    activeSection.set('analysis');
+    activeDetail.set('dashboard');
+    contextMode.set('facility');
+    selectedFacility.set({
+      guid: 'facility-a',
+      name: 'Facility A',
+      selectedEnergyAnalysisId: 'energy-active',
+      selectedWaterAnalysisId: 'water-active'
+    });
+    selectedFacilityAnalyses.set([
+      analysisNav('water-z', 'Zulu Water', 'water'),
+      analysisNav('energy-z', 'Zulu Energy', 'energy'),
+      analysisNav('water-active', 'Official Water', 'water'),
+      analysisNav('energy-active', 'Official Energy', 'energy'),
+      analysisNav('energy-a', 'Alpha Energy', 'energy'),
+      analysisNav('water-a', 'Alpha Water', 'water')
+    ]);
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const sections = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-nav__analysis-section'));
+    const namesFor = (section: HTMLElement): string[] =>
+      Array.from<HTMLElement>(section.querySelectorAll('.v1-nav__analysis-link .v1-nav__item-label'))
+        .map(item => item.textContent?.trim() || '');
+
+    expect(sections.map(section => section.querySelector('.v1-nav__sublabel')?.textContent?.trim()))
+      .toEqual(['Active for Reporting', 'Energy', 'Water']);
+    expect(namesFor(sections[0])).toEqual(['Official Energy', 'Official Water']);
+    expect(namesFor(sections[1])).toEqual(['Alpha Energy', 'Zulu Energy']);
+    expect(namesFor(sections[2])).toEqual(['Alpha Water', 'Zulu Water']);
+    expect(fixture.debugElement.queryAll(By.css('.v1-nav__analysis-link app-ui-icon'))
+      .map(element => element.componentInstance.name))
+      .toEqual(['energy', 'droplet', 'energy', 'energy', 'droplet', 'droplet']);
+    expect(sections[0].querySelectorAll('.v1-nav__analysis-link')).toHaveLength(2);
+    expect(sections[1].querySelector<HTMLAnchorElement>('.v1-nav__analysis-link')?.getAttribute('href'))
+      .toContain('/analysis/workbench/energy-a/setup');
+    expect(fixture.nativeElement.querySelector('.v1-nav__analysis-workflow')).toBeNull();
+  });
+
+  it('ignores stale active selections and omits empty analysis groups', () => {
+    activeSection.set('analysis');
+    contextMode.set('facility');
+    selectedFacility.set({
+      guid: 'facility-a',
+      name: 'Facility A',
+      selectedEnergyAnalysisId: 'missing-analysis'
+    });
+    selectedFacilityAnalyses.set([analysisNav('energy-a', 'Energy Analysis', 'energy')]);
+
+    const fixture = TestBed.createComponent(SectionNavComponent);
+    fixture.detectChanges();
+    const sections = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-nav__analysis-section'));
+
+    expect(sections).toHaveLength(1);
+    expect(sections[0].querySelector('.v1-nav__sublabel')?.textContent).toContain('Energy');
+    expect(sections[0].textContent).toContain('Energy Analysis');
+    expect(fixture.nativeElement.textContent).not.toContain('Active for Reporting');
+    expect(fixture.nativeElement.textContent).not.toContain('Water');
   });
 
   it('shows an accessible empty marker for an incomplete analysis stage', () => {
@@ -219,6 +303,7 @@ describe('SectionNavComponent', () => {
     selectedFacilityAnalyses.set([{
       guid: 'analysis-a',
       name: 'FY 2025 Energy Analysis',
+      analysisCategory: 'energy',
       groups: [{ idbGroupId: 'group-b', analysisType: 'regression' }]
     }]);
     statusItems.set(presentFindings([makeFinding(
@@ -804,5 +889,14 @@ describe('SectionNavComponent', () => {
 
   function meterNav(guid: string, name: string, source: MeterSource = 'Electricity'): { guid: string; name: string; source: MeterSource } {
     return { guid, name, source };
+  }
+
+  function analysisNav(guid: string, name: string, analysisCategory: 'energy' | 'water'): {
+    guid: string;
+    name: string;
+    analysisCategory: 'energy' | 'water';
+    groups: [];
+  } {
+    return { guid, name, analysisCategory, groups: [] };
   }
 });

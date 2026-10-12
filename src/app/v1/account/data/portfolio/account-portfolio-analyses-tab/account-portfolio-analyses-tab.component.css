@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.v1-account-portfolio-analyses {
+  display: grid;
+  gap: .85rem;
+  min-width: 0;
+}

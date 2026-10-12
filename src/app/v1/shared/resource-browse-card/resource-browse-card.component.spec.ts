@@ -53,6 +53,30 @@ describe('ResourceBrowseCardComponent', () => {
     expect(selected).not.toHaveBeenCalledWith('disabled');
   });
 
+  it('keeps actions with disabled reasons focusable and exposes the explanation', () => {
+    fixture.componentRef.setInput('view', { title: 'Resource A', openLabel: 'Open Resource A', icon: 'chartLine' });
+    fixture.componentRef.setInput('actions', [{
+      id: 'compare', label: 'Add to comparison', icon: 'apple', disabled: true,
+      disabledReason: 'Compare with another energy analysis.'
+    }]);
+    const selected = vi.fn();
+    fixture.componentInstance.actionSelected.subscribe(selected);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('[aria-label="Add to comparison"]') as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('aria-disabled')).toBe('true');
+    expect(button.tabIndex).toBe(0);
+    const descriptionId = button.getAttribute('aria-describedby');
+    expect(descriptionId).toBeTruthy();
+    expect(fixture.nativeElement.querySelector(`#${descriptionId}`)?.textContent)
+      .toContain('Compare with another energy analysis.');
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    button.click();
+    expect(selected).not.toHaveBeenCalled();
+  });
+
   it('shows loading and unavailable fact presentation', () => {
     fixture.componentRef.setInput('view', {
       title: 'Resource A',
@@ -83,7 +107,7 @@ describe('ResourceBrowseCardComponent', () => {
     fixture.componentRef.setInput('actions', [
       { id: 'delete', label: 'Delete resource', icon: 'delete', tone: 'danger' }
     ]);
-    fixture.componentRef.setInput('capabilities', { canOpen: true, canAct: false });
+    fixture.componentRef.setInput('readOnly', true);
     const opened = vi.fn();
     fixture.componentInstance.opened.subscribe(opened);
     fixture.detectChanges();

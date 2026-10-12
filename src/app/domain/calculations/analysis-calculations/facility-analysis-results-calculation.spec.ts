@@ -10,7 +10,7 @@ import {
 } from './facility-analysis-results-calculation';
 
 describe('projectFacilityAnalysisOutcomeResults', () => {
-  it('matches the full calculation for the two dashboard outcome periods without returning history', () => {
+  it('matches the full calculation annual history and newest dashboard month without group results', () => {
     const request = requestFixture();
 
     const full = calculateFacilityAnalysisResults(request);
@@ -18,14 +18,12 @@ describe('projectFacilityAnalysisOutcomeResults', () => {
 
     expect(full.annualAnalysisSummaries).toHaveLength(2);
     expect(full.monthlyAnalysisSummaryData).toHaveLength(33);
-    expect(outcome.annualAnalysisSummaries).toEqual([
-      full.annualAnalysisSummaries.find(row => row.year === full.reportYear)
-    ]);
+    expect(outcome.annualAnalysisSummaries).toEqual(full.annualAnalysisSummaries);
     expect(outcome.monthlyAnalysisSummaryData).toEqual([full.monthlyAnalysisSummaryData.at(-1)]);
     expect(outcome.groupSummaries).toEqual([]);
   });
 
-  it('returns only the report-year and newest valid monthly rows without group payloads', () => {
+  it('returns annual rows through the report year and the newest valid monthly row without group payloads', () => {
     const value = {
       itemId: 'analysis-a',
       reportYear: 2025,
@@ -43,12 +41,12 @@ describe('projectFacilityAnalysisOutcomeResults', () => {
 
     const outcome = projectFacilityAnalysisOutcomeResults(value);
 
-    expect(outcome.annualAnalysisSummaries).toEqual([value.annualAnalysisSummaries[1]]);
+    expect(outcome.annualAnalysisSummaries).toEqual(value.annualAnalysisSummaries);
     expect(outcome.monthlyAnalysisSummaryData).toEqual([value.monthlyAnalysisSummaryData[2]]);
     expect(outcome.groupSummaries).toEqual([]);
   });
 
-  it('returns empty outcome rows when the requested periods are unavailable', () => {
+  it('retains earlier annual rows when the requested report year is unavailable', () => {
     const outcome = projectFacilityAnalysisOutcomeResults({
       itemId: 'analysis-a',
       reportYear: 2025,
@@ -57,8 +55,20 @@ describe('projectFacilityAnalysisOutcomeResults', () => {
       groupSummaries: []
     } as unknown as FacilityAnalysisResultsValue);
 
-    expect(outcome.annualAnalysisSummaries).toEqual([]);
+    expect(outcome.annualAnalysisSummaries).toEqual([{ year: 2024 }]);
     expect(outcome.monthlyAnalysisSummaryData).toEqual([]);
+  });
+
+  it('omits annual rows after the report year and rows without a finite year', () => {
+    const outcome = projectFacilityAnalysisOutcomeResults({
+      itemId: 'analysis-a',
+      reportYear: 2025,
+      annualAnalysisSummaries: [{ year: 2024 }, { year: Number.NaN }, { year: 2026 }],
+      monthlyAnalysisSummaryData: [],
+      groupSummaries: []
+    } as unknown as FacilityAnalysisResultsValue);
+
+    expect(outcome.annualAnalysisSummaries).toEqual([{ year: 2024 }]);
   });
 });
 

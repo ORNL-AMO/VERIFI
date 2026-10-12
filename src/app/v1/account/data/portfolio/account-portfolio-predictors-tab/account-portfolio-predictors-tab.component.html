@@ -12,7 +12,7 @@
       @for (entry of cards; track entry.item.kind === 'standard' ? entry.item.card.predictor.guid : entry.item.group.routeKey) {
         <app-resource-browse-card
           [view]="entry.view"
-          [capabilities]="cardCapabilities"
+          readOnly
           (opened)="open(entry)">
         </app-resource-browse-card>
       }

@@ -6,10 +6,7 @@ import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildMeterCards, MeterCardView } from '@app/v1/facility/data/meters/models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import {
-  ResourceBrowseCardCapabilities,
-  ResourceBrowseCardView
-} from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
+import { ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
 import { buildMeterResourceView } from '@app/v1/facility/data/meters/meters-dashboard/meter-browse-card/meter-browse-card.view';
 
 type PortfolioMeterStatusFilter = 'all' | 'attention' | 'noReadings' | 'missingGroup' | 'valid';
@@ -38,8 +35,6 @@ export class AccountPortfolioMetersTabComponent {
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
-  readonly cardCapabilities: ResourceBrowseCardCapabilities = { canOpen: true, canAct: false };
-
   readonly search = signal('');
   readonly statusFilter = signal<PortfolioMeterStatusFilter>('all');
   readonly sortBy = signal<PortfolioMeterSort>('attention');

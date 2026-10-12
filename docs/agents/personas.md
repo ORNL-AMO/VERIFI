@@ -39,11 +39,14 @@ Deliver the cause, impact, supporting evidence, and a scoped fix strategy. Do no
 Use this mode for code review, risk assessment, or final verification.
 
 - Review the diff and the surrounding contract, not just changed lines.
+- Trace the changed entry points, state ownership, data flow, consumers, and compatibility paths against the relevant architecture documentation.
 - Prioritize correctness, data preservation, security boundaries, and regressions.
+- For Angular changes, review component, service, and route-context responsibilities; reactive state and forms; template behavior; accessibility; and shared-layer boundaries.
+- Compare changed TypeScript, templates, and styles with neighboring and shared implementations. Call out repeated semantic patterns, including CSS, when consolidation would prevent drift; do not demand abstractions for coincidental duplication.
 - Check test quality and the selected validation tier.
 - Verify documentation and compatibility claims against source.
 - Distinguish actionable findings from optional improvements.
-- For GitHub pull request reviews, use the [GitHub PR review guide](github-pr-review.md) for comment scope, severity, and v1 Angular checklist expectations.
+- Use `review-code-changes` for the review workflow. For GitHub pull request reviews, also use the [GitHub PR review guide](github-pr-review.md) for comment scope, severity, and v1 Angular checklist expectations.
 
 Deliver prioritized findings with precise evidence. State explicitly when there are no actionable findings and identify any validation that could not be performed.
 

@@ -5,10 +5,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { PredictorBrowseItem, buildPredictorCards, buildWeatherStationGroups } from '@app/v1/facility/data/predictors/models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import {
-  ResourceBrowseCardCapabilities,
-  ResourceBrowseCardView
-} from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
+import { ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
 import {
   buildPredictorResourceView,
   buildWeatherStationResourceView
@@ -31,8 +28,6 @@ export class AccountPortfolioPredictorsTabComponent {
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
-  readonly cardCapabilities: ResourceBrowseCardCapabilities = { canOpen: true, canAct: false };
-
   readonly predictorCards = computed<PortfolioPredictorCard[]>(() => {
     const predictors = this.workspace.predictors();
     const predictorData = this.workspace.predictorData();

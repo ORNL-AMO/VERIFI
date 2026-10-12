@@ -101,6 +101,8 @@ describe('facility analysis workbench header', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
+            accountPortfolioRoute: (accountGuid: string, tab: string) => ['/account', accountGuid, 'data', 'portfolio', tab],
+            facilityRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'overview'],
             facilityAnalysisRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'analyses'],
             facilityAnalysisWorkbenchRoute: (facilityGuid: string, analysisGuid: string) => [
               '/facility', facilityGuid, 'analysis', analysisGuid
@@ -119,7 +121,14 @@ describe('facility analysis workbench header', () => {
     const fixture = TestBed.createComponent(FacilityAnalysisWorkbenchHeaderComponent);
     fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;
+    const breadcrumbs = Array.from<HTMLAnchorElement>(host.querySelectorAll('.v1-data-workbench-breadcrumb a'));
 
+    expect(breadcrumbs.map(link => link.textContent?.trim())).toEqual(['Account A', 'Facility A', 'Analyses']);
+    expect(breadcrumbs.map(link => link.getAttribute('href'))).toEqual([
+      '/account/account-a/data/portfolio/analyses',
+      '/facility/facility-a/overview',
+      '/facility/facility-a/analyses'
+    ]);
     expect(host.textContent).toContain('Latest full year · FY 2025');
     expect(host.textContent).toContain('8.75%');
     expect(host.textContent).toContain('Latest month · Sep 2026');
