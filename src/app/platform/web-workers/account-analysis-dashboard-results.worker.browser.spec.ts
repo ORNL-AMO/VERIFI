@@ -27,14 +27,22 @@ describe('account analysis dashboard results Worker', () => {
       accountPredictors: [],
       reportYear: 2022
     };
-    const worker = new Worker(
-      new URL('./account-analysis-dashboard-results.worker', import.meta.url),
-      { type: 'module' }
-    );
+    const workerUrl = new URL('./account-analysis-dashboard-results.worker', import.meta.url);
+    const workerResponse = await fetch(workerUrl);
+    expect(workerResponse.ok, `${workerResponse.status} ${workerUrl}`).toBe(true);
+    const worker = new Worker(workerUrl, { type: 'module' });
 
-    const response = await firstValueFrom(
-      runWorker<AccountAnalysisResultsWorkerResponse>(worker, request)
-    );
+    let response: AccountAnalysisResultsWorkerResponse;
+    try {
+      response = await firstValueFrom(
+        runWorker<AccountAnalysisResultsWorkerResponse>(worker, request)
+      );
+    } catch (error) {
+      if (error instanceof ErrorEvent) {
+        throw new Error(`${error.message} (${error.filename}:${error.lineno}:${error.colno})`);
+      }
+      throw error;
+    }
 
     expect(response).toEqual({
       ok: true,
