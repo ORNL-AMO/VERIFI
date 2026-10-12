@@ -27,6 +27,13 @@ export function buildFacilityAnalysisResourceView(
     owner: options.facility ? { label: options.facility.name, icon: 'facility' } : undefined,
     chips: [
       { id: 'category', label: categoryLabel, icon: card.category === 'water' ? 'droplet' : 'energy', tone: 'neutral' },
+      ...(card.status === 'evaluating' ? [{
+        id: 'status',
+        label: 'Evaluating',
+        icon: 'loading' as const,
+        tone: 'info' as const,
+        loading: true
+      }] : []),
       ...(card.status === 'warning' || card.status === 'error' ? [{
         id: 'status',
         label: card.status === 'error' ? 'Invalid' : 'Needs review',

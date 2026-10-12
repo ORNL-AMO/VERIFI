@@ -72,6 +72,7 @@ export interface FacilityAnalysisComparisonView {
   readonly improvementChartMetrics: readonly MeterResultsChartMetric[];
   readonly firstResultMessage?: string;
   readonly secondResultMessage?: string;
+  readonly bothResultsReady: boolean;
 }
 
 export function buildFacilityAnalysisComparisonView(
@@ -111,7 +112,8 @@ export function buildFacilityAnalysisComparisonView(
     improvementChartRows: buildChartRows(annualRows, 'improvement'),
     improvementChartMetrics: improvementChartMetrics(first, second),
     firstResultMessage: resultMessage(first),
-    secondResultMessage: resultMessage(second)
+    secondResultMessage: resultMessage(second),
+    bothResultsReady: first.outcome.state === 'ready' && second.outcome.state === 'ready'
   };
 }
 

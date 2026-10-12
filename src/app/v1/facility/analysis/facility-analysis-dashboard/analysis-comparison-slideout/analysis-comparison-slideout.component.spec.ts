@@ -56,6 +56,36 @@ describe('AnalysisComparisonSlideoutComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Analysis setup');
     expect(fixture.nativeElement.textContent).toContain('Analysis A');
     expect(fixture.nativeElement.textContent).toContain('Analysis B');
+    expect(fixture.nativeElement.textContent).not.toContain('No complete annual results are available for comparison.');
+  });
+
+  it('shows the empty annual-results message only after both outcomes are ready', () => {
+    const first = {
+      ...card('analysis-a', 'Analysis A', 'MMBtu', false),
+      outcome: { state: 'loading' as const, message: 'Calculating analysis results' }
+    };
+    const second = {
+      ...card('analysis-b', 'Analysis B', 'MMBtu', false),
+      outcome: { state: 'loading' as const, message: 'Calculating analysis results' }
+    };
+    setInputs(first, second);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Calculating analysis results');
+    expect(fixture.nativeElement.textContent).not.toContain('No complete annual results are available for comparison.');
+
+    const readyFirst = {
+      ...card('analysis-a', 'Analysis A', 'MMBtu', false),
+      outcome: { ...card('analysis-a', 'Analysis A', 'MMBtu', false).outcome, annualAnalysisSummaries: [] }
+    };
+    const readySecond = {
+      ...card('analysis-b', 'Analysis B', 'MMBtu', false),
+      outcome: { ...card('analysis-b', 'Analysis B', 'MMBtu', false).outcome, annualAnalysisSummaries: [] }
+    };
+    fixture.componentRef.setInput('cards', [readyFirst, readySecond]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No complete annual results are available for comparison.');
   });
 
   function setInputs(first: FacilityAnalysisDashboardCard, second: FacilityAnalysisDashboardCard): void {

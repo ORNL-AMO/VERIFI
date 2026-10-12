@@ -67,6 +67,23 @@ describe('buildFacilityAnalysisComparisonView', () => {
     expect(view.improvementChartMetrics).toHaveLength(4);
   });
 
+  it('exposes whether both result outcomes are ready before presenting an empty comparison', () => {
+    const first = card('analysis-a', 'Analysis A', {}, []);
+    const second = {
+      ...card('analysis-b', 'Analysis B', {}, []),
+      outcome: { state: 'loading' as const, message: 'Calculating analysis results' }
+    };
+
+    const pendingView = buildFacilityAnalysisComparisonView(first, second, facility(), [], [first.analysis, second.analysis]);
+    expect(pendingView.annualRows).toEqual([]);
+    expect(pendingView.bothResultsReady).toBe(false);
+
+    const readySecond = card('analysis-b', 'Analysis B', {}, []);
+    const readyView = buildFacilityAnalysisComparisonView(first, readySecond, facility(), [], [first.analysis, readySecond.analysis]);
+    expect(readyView.annualRows).toEqual([]);
+    expect(readyView.bothResultsReady).toBe(true);
+  });
+
   it('compares group banking source and years without including adjustment details', () => {
     const source = analysis('source', 'Banked source');
     const first = card('analysis-a', 'Analysis A', {

@@ -119,7 +119,7 @@
               [embedded]="true">
             </app-meter-results-chart>
           </div>
-        } @else {
+        } @else if (comparison.bothResultsReady) {
           <p class="v1-analysis-comparison__empty">No complete annual results are available for comparison.</p>
         }
       </section>

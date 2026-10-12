@@ -49,6 +49,26 @@ describe('buildFacilityAnalysisResourceView', () => {
     }));
   });
 
+  it('announces evaluation in progress without adding an ordinary ready chip', () => {
+    const outcome = { state: 'loading' as const, message: 'Calculating analysis results' };
+    const view = buildFacilityAnalysisResourceView({
+      analysis: {
+        guid: 'analysis-a', name: 'Energy performance', baselineYear: 2022,
+        analysisCategory: 'energy', energyIsSource: false, energyUnit: 'MMBtu', groups: []
+      },
+      category: 'energy', status: 'evaluating', statusLabel: 'Evaluating', findings: [],
+      isActiveForReporting: false, linkedAccountAnalyses: [], linkedReports: [], bankingConsumers: [],
+      dependencyCount: 0, modifiedDateLabel: 'Oct 9, 2026', modifiedSortValue: 0,
+      searchText: '', attentionRank: 3, outcome,
+      outcomeDisplay: facilityAnalysisOutcomeDisplay(outcome, 'energy')
+    } as unknown as FacilityAnalysisDashboardCard);
+
+    expect(view.chips).toContainEqual(expect.objectContaining({
+      id: 'status', label: 'Evaluating', icon: 'loading', tone: 'info', loading: true
+    }));
+    expect(view.chips).not.toContainEqual(expect.objectContaining({ label: 'Ready' }));
+  });
+
   it('builds an owning-facility setup card when dashboard outcomes are not requested', () => {
     const view = buildFacilityAnalysisResourceView({
       analysis: {

@@ -129,6 +129,7 @@
 .v1-resource-browse-card__footer { display: flex; flex-wrap: wrap; gap: var(--v1-space-2); align-items: center; justify-content: space-between; margin-top: auto; padding-top: var(--v1-space-2); border-top: 1px solid var(--v1-border); }
 .v1-resource-browse-card__footer-tag { display: inline-flex; gap: var(--v1-space-1); align-items: center; max-width: min(100%, 13rem); min-width: 0; padding: .28rem .5rem; border-radius: var(--v1-radius-sm); background: color-mix(in srgb, var(--v1-facility) 9%, var(--v1-panel)); color: var(--v1-facility); font-size: .86rem; font-weight: 800; overflow-wrap: anywhere; }
 .v1-resource-browse-card__actions { display: inline-flex; gap: var(--v1-space-1); align-items: center; margin-left: auto; }
+.v1-resource-browse-card__actions .v1-icon-btn[aria-disabled="true"] { cursor: not-allowed; opacity: var(--v1-disabled-opacity); }
 
 @media (max-width: 680px) {
   .v1-resource-browse-card__facts { grid-template-columns: 1fr; }

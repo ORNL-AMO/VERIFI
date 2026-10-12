@@ -44,11 +44,10 @@ export class AnalysisBrowseCardComponent {
       { id: 'details', label: 'View analysis details', icon: 'monocle' },
       {
         id: 'compare',
-        label: this.selectedForComparison()
-          ? 'Remove from comparison'
-          : comparisonDisabledReason || 'Add to comparison',
+        label: this.selectedForComparison() ? 'Remove from comparison' : 'Add to comparison',
         icon: this.comparisonHasSelection() && !this.selectedForComparison() ? 'orange' : 'apple',
-        disabled: !!comparisonDisabledReason && !this.selectedForComparison()
+        disabled: !!comparisonDisabledReason && !this.selectedForComparison(),
+        disabledReason: this.selectedForComparison() ? undefined : comparisonDisabledReason
       },
       { id: 'copy', label: 'Copy analysis', icon: 'copy', disabled: !this.canAct() },
       { id: 'delete', label: 'Delete analysis', icon: 'delete', tone: 'danger', disabled: !this.canAct() }

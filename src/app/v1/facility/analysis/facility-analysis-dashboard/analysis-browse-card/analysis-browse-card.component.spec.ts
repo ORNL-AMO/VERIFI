@@ -50,11 +50,17 @@ describe('AnalysisBrowseCardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.actions().find(action => action.id === 'compare')).toMatchObject({
-      label: 'Compare with another water analysis',
-      disabled: true
+      label: 'Add to comparison',
+      disabled: true,
+      disabledReason: 'Compare with another water analysis'
     });
-    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[aria-label="Compare with another water analysis"]');
-    expect(button?.disabled).toBe(true);
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[aria-label="Add to comparison"]');
+    expect(button?.disabled).toBe(false);
+    expect(button?.getAttribute('aria-disabled')).toBe('true');
+    const descriptionId = button?.getAttribute('aria-describedby');
+    expect(descriptionId).toBeTruthy();
+    expect((fixture.nativeElement as HTMLElement).querySelector(`#${descriptionId}`)?.textContent)
+      .toContain('Compare with another water analysis');
   });
 
   it('uses an apple for the first selection and an orange for the second selection', async () => {

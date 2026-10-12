@@ -54,6 +54,7 @@ export interface ResourceBrowseCardAction {
   readonly icon: IconName;
   readonly tone?: 'default' | 'danger';
   readonly disabled?: boolean;
+  readonly disabledReason?: string;
   readonly loading?: boolean;
 }
 
