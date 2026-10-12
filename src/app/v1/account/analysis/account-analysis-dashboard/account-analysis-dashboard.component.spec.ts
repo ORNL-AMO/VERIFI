@@ -15,7 +15,8 @@ describe('AccountAnalysisDashboardComponent', () => {
   let navigate: ReturnType<typeof vi.fn>;
   const cards = signal<readonly AccountAnalysisCard[]>([
     card('energy-a', 'Portfolio energy', 'energy', true),
-    card('water-a', 'Portfolio water', 'water', false)
+    card('water-a', 'Portfolio water', 'water', false),
+    card('energy-b', 'Portfolio energy alternate', 'energy', false)
   ]);
 
   beforeEach(async () => {
@@ -27,7 +28,8 @@ describe('AccountAnalysisDashboardComponent', () => {
             useValue: {
               states: signal({
                 'energy-a': readyOutcome(12.5),
-                'water-a': { state: 'blocked', message: 'Setup incomplete' }
+                'water-a': { state: 'blocked', message: 'Setup incomplete' },
+                'energy-b': readyOutcome(9.5)
               })
             }
           }]
@@ -88,6 +90,18 @@ describe('AccountAnalysisDashboardComponent', () => {
 
     fixture.componentInstance.open(cards()[1]);
     expect(navigate).toHaveBeenCalledWith(['/analysis', 'water-a']);
+  });
+
+  it('selects exactly two analyses from the same category for comparison', () => {
+    fixture.componentInstance.toggleComparison(cards()[0]);
+    fixture.componentInstance.toggleComparison(cards()[1]);
+    expect(fixture.componentInstance.comparisonGuids()).toEqual(['energy-a']);
+    expect(fixture.componentInstance.comparisonDisabledReason(cards()[1])).toContain('energy');
+
+    fixture.componentInstance.toggleComparison(cards()[2]);
+    expect(fixture.componentInstance.comparisonGuids()).toEqual(['energy-a', 'energy-b']);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Facility analysis selections');
   });
 });
 

@@ -3,7 +3,7 @@ import {
   MeterResultsChartComparisonBand,
   MeterResultsChartMetric,
   MeterResultsChartRow
-} from '@app/v1/facility/data/meters/models';
+} from '@app/v1/shared/charts/metric-results-chart.models';
 import { isSkippedAnalysisType } from '../../facility-analysis-workbench.models';
 
 export const MONTHLY_USE_COMPARISON_BAND: MeterResultsChartComparisonBand = {

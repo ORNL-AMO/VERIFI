@@ -22,6 +22,7 @@ import {
 } from './account-analysis.models';
 import { AccountAnalysisBrowseCardComponent } from './account-analysis-browse-card/account-analysis-browse-card.component';
 import { AccountAnalysisDraftSlideoutComponent } from './account-analysis-draft-slideout/account-analysis-draft-slideout.component';
+import { AccountAnalysisComparisonComponent } from './account-analysis-comparison/account-analysis-comparison.component';
 
 type AnalysisCategoryFilter = 'all' | AnalysisCategory;
 type AnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
@@ -38,6 +39,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
     ActiveSummaryCardComponent,
     AccountAnalysisBrowseCardComponent,
     AccountAnalysisDraftSlideoutComponent,
+    AccountAnalysisComparisonComponent,
     ReactiveFormsModule
   ],
   providers: [AccountAnalysisDashboardResultsService],
@@ -100,6 +102,11 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
       ? account.selectedWaterAnalysisId : account.selectedEnergyAnalysisId;
     return this.cards().find(card => card.analysis.guid === guid);
   });
+  readonly comparisonGuids = signal<readonly string[]>([]);
+  readonly comparisonCards = computed(() => this.comparisonGuids()
+    .map(guid => this.cards().find(card => card.analysis.guid === guid))
+    .filter((card): card is AccountAnalysisDashboardCard => !!card));
+  readonly comparisonCategory = computed(() => this.comparisonCards()[0]?.category);
 
   open(card: AccountAnalysisCard): void { this.openAnalysisGuid(card.analysis.guid); }
   openCreate(): void { if (this.canAct()) { this.actionError.set(undefined); this.createOpen.set(true); } }
@@ -149,8 +156,28 @@ export class AccountAnalysisDashboardComponent implements OnDestroy {
       await this.actions.deleteAnalysis(candidate.analysis.guid);
       this.dismissDeleteConfirmation();
       this.detailsGuid.set(undefined);
+      this.comparisonGuids.update(guids => guids.filter(guid => guid !== candidate.analysis.guid));
     });
   }
+
+  toggleComparison(card: AccountAnalysisCard): void {
+    const current = this.comparisonGuids();
+    if (current.includes(card.analysis.guid)) {
+      this.comparisonGuids.set(current.filter(guid => guid !== card.analysis.guid));
+      return;
+    }
+    const category = this.comparisonCategory();
+    if (category && category !== card.category) return;
+    this.comparisonGuids.set([...current, card.analysis.guid].slice(-2));
+  }
+
+  isCompared(guid: string): boolean { return this.comparisonGuids().includes(guid); }
+  comparisonDisabledReason(card: AccountAnalysisCard): string | undefined {
+    const category = this.comparisonCategory();
+    if (!category || category === card.category || this.isCompared(card.analysis.guid)) return undefined;
+    return `Compare with another ${category} analysis`;
+  }
+  clearComparison(): void { this.comparisonGuids.set([]); }
 
   cancelActiveConfirmation(): void { if (!this.saving()) this.dismissActiveConfirmation(); }
   cancelDeleteConfirmation(): void { if (!this.saving()) this.dismissDeleteConfirmation(); }

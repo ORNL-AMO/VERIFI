@@ -1,0 +1,15 @@
+.v1-account-analysis-comparison { display: grid; gap: var(--v1-space-5); }
+.v1-account-analysis-comparison section { display: grid; gap: var(--v1-space-3); }
+.v1-account-analysis-comparison h3, .v1-account-analysis-comparison h4, .v1-account-analysis-comparison p { margin: 0; }
+.v1-account-analysis-comparison__scroll { overflow-x: auto; }
+.v1-account-analysis-comparison table { width: 100%; min-width: 42rem; border-collapse: collapse; }
+.v1-account-analysis-comparison th, .v1-account-analysis-comparison td { padding: .7rem; border: 1px solid var(--v1-border); text-align: left; vertical-align: top; }
+.v1-account-analysis-comparison thead th { background: var(--v1-panel); }
+.v1-account-analysis-comparison__different > th { border-left: 4px solid var(--v1-warning); }
+.v1-account-analysis-comparison__different > th span { display: block; color: var(--v1-warning-text); font-size: .7rem; text-transform: uppercase; }
+.v1-account-analysis-comparison__states { display: grid; gap: var(--v1-space-2); }
+.v1-account-analysis-comparison__tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-4); }
+.v1-account-analysis-comparison__tables article, .v1-account-analysis-comparison__charts { display: grid; gap: var(--v1-space-3); min-width: 0; }
+.v1-account-analysis-comparison__charts { grid-template-columns: 1fr; }
+.v1-account-analysis-comparison__empty { color: var(--v1-muted); }
+@media (max-width: 900px) { .v1-account-analysis-comparison__tables { grid-template-columns: 1fr; } }

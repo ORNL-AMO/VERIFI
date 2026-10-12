@@ -1,5 +1,11 @@
 import { AccountAnalysisResultsValue } from '@platform/web-workers/account-analysis-results-worker.contract';
-import { projectAccountAnalysisDashboardResults } from './account-analysis-results-calculation';
+import {
+  calculateAccountAnalysisDashboardResults,
+  calculateAccountAnalysisResults,
+  projectAccountAnalysisDashboardResults
+} from './account-analysis-results-calculation';
+import { getNewIdbAccount } from '@data/models/idbModels/account';
+import { getNewIdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 
 describe('account analysis dashboard result projection', () => {
   it('keeps annual history through the report year and only the newest valid month', () => {
@@ -30,5 +36,24 @@ describe('account analysis dashboard result projection', () => {
     } as unknown as AccountAnalysisResultsValue;
     expect(projectAccountAnalysisDashboardResults(value).annualAnalysisSummaries[0].totalSavingsPercentImprovement)
       .toBe(precise);
+  });
+
+  it('uses the same deterministic calculation for full and dashboard execution', () => {
+    const account = getNewIdbAccount();
+    account.guid = 'account-a';
+    account.sustainabilityQuestions.energyReductionBaselineYear = 2022;
+    const analysis = getNewIdbAccountAnalysisItem('energy', account, []);
+    analysis.guid = 'analysis-a';
+    const request = {
+      accountAnalysisItem: analysis,
+      account,
+      accountFacilities: [],
+      accountPredictorEntries: [],
+      allAccountAnalysisItems: [],
+      calculateAllMonthlyData: false,
+      meters: [], meterData: [], accountPredictors: [], reportYear: 2022
+    };
+    expect(calculateAccountAnalysisDashboardResults(request))
+      .toEqual(projectAccountAnalysisDashboardResults(calculateAccountAnalysisResults(request)));
   });
 });

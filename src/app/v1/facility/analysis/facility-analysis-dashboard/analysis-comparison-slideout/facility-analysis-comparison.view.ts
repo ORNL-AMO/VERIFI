@@ -2,7 +2,7 @@ import { AnalysisGroup, AnnualAnalysisSummary } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/facility/data/meters/models';
+import { MeterResultsChartMetric, MeterResultsChartRow } from '@app/v1/shared/charts/metric-results-chart.models';
 import {
   AnalysisResultMarker,
   annualResultMarkers,

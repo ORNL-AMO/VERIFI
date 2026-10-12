@@ -58,4 +58,3 @@ Future setup and results pages should reuse the typed calculation entry point an
 | Atomic deletion and rollback | Chromium IndexedDB tests |
 | Routes and status destinations | Fast route and service tests |
 | Responsive layout, charts, focus, themes, and Electron window constraints | Focused manual review |
-
