@@ -27,6 +27,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 
 @Component({
   selector: 'app-facility-analysis-dashboard',
+  host: { class: 'v1-analysis-dashboard-host' },
   standalone: true,
   imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisGroupModelRosterComponent, AnalysisComparisonSlideoutComponent, ActiveSummaryCardComponent],
   providers: [FacilityAnalysisDashboardResultsService],

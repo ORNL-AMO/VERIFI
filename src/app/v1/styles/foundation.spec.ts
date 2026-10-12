@@ -43,6 +43,14 @@ describe('v1 foundation styles', () => {
     );
   });
 
+  it('provides shared analysis dashboard and details presentation', () => {
+    expect(ruleFor('.v1-root .v1-analysis-dashboard-host')).toContain('display: grid');
+    expect(ruleFor('.v1-root .v1-analysis-dashboard__header')).toContain('justify-content: space-between');
+    expect(ruleFor('.v1-root .v1-analysis-dashboard__compare-tray')).toContain('background: var(--v1-panel)');
+    expect(ruleFor('.v1-root .v1-analysis-details dl'))
+      .toContain('grid-template-columns: repeat(2, minmax(0, 1fr))');
+  });
+
   it('fills the shared v1 background with bottom-anchored skyline artwork', () => {
     const rule = ruleFor('.v1-background-skyline-rocket,\n.v1-background-skyline-rocket-night,\n.v1-background-skyline-green,\n.v1-background-skyline-neon,\n.v1-background-skyline-aurora,\n.v1-background-skyline-blueprint,\n.v1-background-skyline-steel');
 

@@ -6,7 +6,7 @@
 @if (!account) {
   <article class="v1-empty-state" role="status"><app-ui-icon name="accountIssue"></app-ui-icon><h1>No account selected</h1><p>Select an account before managing analyses.</p></article>
 } @else {
-  <header class="v1-section-header v1-account-analysis-dashboard__header">
+  <header class="v1-section-header v1-analysis-dashboard__header">
     <div><p class="v1-eyebrow">Account Analysis</p><h1 id="v1-account-analysis-title"><app-ui-icon name="analysis"></app-ui-icon> {{ account.name || 'Account' }} Analysis</h1></div>
     <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct() || (!energyAvailable() && !waterAvailable())" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add analysis</button>
   </header>
@@ -23,9 +23,9 @@
   @if (actionError() && !createOpen() && !activeCandidate() && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon>{{ actionError() }}</div> }
   @if (!workspace.canWrite()) { <div class="v1-alert v1-alert--warning" role="status"><app-ui-icon name="lock"></app-ui-icon>Analysis actions are unavailable while the workspace is loading or switching.</div> }
 
-  <div class="v1-data-dashboard-workspace v1-account-analysis-dashboard__workspace"><div class="v1-data-browse" aria-label="Account analyses">
+  <div class="v1-data-dashboard-workspace v1-analysis-dashboard__workspace"><div class="v1-data-browse" aria-label="Account analyses">
     @if (activeCards.length) {
-      <section class="v1-account-analysis-dashboard__active-cards" aria-label="Active account analyses for reporting">
+      <section class="v1-analysis-dashboard__active-cards" aria-label="Active account analyses for reporting">
         @for (card of activeCards; track card.analysis.guid) {
           <app-active-summary-card
             [analysisName]="card.analysis.name"
@@ -52,7 +52,7 @@
     } @else if (visibleCards.length === 0) {
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
     } @else {
-      @if (comparisonGuids().length > 0) { <div class="v1-account-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
+      @if (comparisonGuids().length > 0) { <div class="v1-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
       <div class="v1-data-browse-grid v1-data-browse-grid--analysis" role="list" aria-label="Account analyses">
         @for (card of visibleCards; track card.analysis.guid) {
           <app-account-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonHasSelection]="comparisonGuids().length === 1" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-account-analysis-browse-card>
@@ -63,7 +63,7 @@
 
   @if (detailsCard(); as card) {
     <app-workspace-slideout [title]="card.analysis.name" description="Account setup, facility selections, results, validation, and report usage" size="large" (closed)="detailsGuid.set(undefined)">
-      <div class="v1-account-analysis-details">
+      <div class="v1-analysis-details v1-account-analysis-details">
         <dl>
           <div><dt>Category</dt><dd>{{ card.category === 'water' ? 'Water' : 'Energy' }}</dd></div>
           <div><dt>Status</dt><dd>{{ card.statusLabel }}</dd></div>

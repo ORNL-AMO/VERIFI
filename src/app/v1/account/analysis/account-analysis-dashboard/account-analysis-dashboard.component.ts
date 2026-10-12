@@ -30,6 +30,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
+  host: { class: 'v1-analysis-dashboard-host' },
   standalone: true,
   imports: [
     IconComponent,
