@@ -1,4 +1,4 @@
-import { AnalysisCategory } from '@data/models/analysis';
+import { AnalysisCategory, AnnualAnalysisSummary } from '@data/models/analysis';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
@@ -6,6 +6,11 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { StatusEvaluationState, StatusItem } from '@app/v1/status/status.models';
 import { accountReportReferencesAnalysis } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import {
+  FacilityAnalysisOutcomeDisplay,
+  FacilityAnalysisOutcomeState,
+  FacilityAnalysisOutcomeSummary
+} from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 
 export type AccountAnalysisCardStatus = 'evaluating' | 'ready' | 'warning' | 'error';
 export type AccountAnalysisSelectionState = 'included' | 'skipped' | 'missing' | 'invalid';
@@ -44,6 +49,20 @@ export interface AccountAnalysisCard {
   readonly modifiedSortValue: number;
   readonly searchText: string;
   readonly attentionRank: number;
+}
+
+export type AccountAnalysisDashboardResultState =
+  | Exclude<FacilityAnalysisOutcomeState, { readonly state: 'ready' }>
+  | {
+      readonly state: 'ready';
+      readonly summary: FacilityAnalysisOutcomeSummary;
+      readonly annualAnalysisSummaries: readonly AnnualAnalysisSummary[];
+      readonly reportYear?: number;
+    };
+
+export interface AccountAnalysisDashboardCard extends AccountAnalysisCard {
+  readonly outcome: AccountAnalysisDashboardResultState;
+  readonly outcomeDisplay: FacilityAnalysisOutcomeDisplay;
 }
 
 export interface BuildAccountAnalysisCardsInput {
