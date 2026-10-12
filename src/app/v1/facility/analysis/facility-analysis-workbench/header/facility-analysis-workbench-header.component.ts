@@ -13,7 +13,7 @@ import {
   FacilityAnalysisOutcomeState,
   facilityAnalysisOutcomeDisplay,
   facilityAnalysisOutcomeSummary
-} from '../../facility-analysis-outcome-summary';
+} from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
 
 @Component({

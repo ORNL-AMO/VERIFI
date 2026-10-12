@@ -1,4 +1,4 @@
-import { facilityAnalysisOutcomeDisplay } from '../../facility-analysis-outcome-summary';
+import { facilityAnalysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { FacilityAnalysisCard, FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 import { buildFacilityAnalysisResourceView } from './facility-analysis-card.view';
 

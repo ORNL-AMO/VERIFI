@@ -39,40 +39,16 @@
     @if (activeCards.length) {
       <section class="v1-analysis-dashboard__active-cards" aria-label="Active analyses for reporting">
         @for (card of activeCards; track card.analysis.guid) {
-          <article
-            class="v1-analysis-dashboard__active-card"
-            [class.v1-analysis-dashboard__active-card--water]="card.category === 'water'">
-            <div class="v1-analysis-dashboard__active-icons" aria-hidden="true">
-              <app-ui-icon name="target"></app-ui-icon>
-              <app-ui-icon [name]="card.category === 'water' ? 'droplet' : 'energy'"></app-ui-icon>
-            </div>
-            <div class="v1-analysis-dashboard__active-identity">
-              <span>Active for Reporting</span>
-              <a
-                class="v1-analysis-dashboard__active-link"
-                [routerLink]="navigation.facilityAnalysisWorkbenchRoute(facility.guid, card.analysis.guid)"
-                [attr.aria-label]="'Open ' + card.analysis.name + ' analysis'">
-                <strong>{{ card.analysis.name }}</strong>
-                <app-ui-icon name="chevronRight"></app-ui-icon>
-              </a>
-              <small>{{ card.category === 'water' ? 'Water analysis' : 'Energy analysis' }}</small>
-            </div>
-            <div class="v1-analysis-dashboard__active-result">
-              @if (card.findings.length) {
-                <div class="v1-analysis-dashboard__active-result-value">
-                  <app-ui-icon name="warning"></app-ui-icon>
-                  <strong>{{ card.findings.length }}</strong>
-                </div>
-                <span>{{ card.findings.length === 1 ? 'validation issue' : 'validation issues' }}</span>
-              } @else if (card.outcome.state === 'ready') {
-                <strong>{{ card.outcomeDisplay.monthly.valueLabel }} savings</strong>
-                <span>{{ card.outcomeDisplay.monthly.label }}</span>
-              } @else {
-                <strong>{{ card.outcome.message }}</strong>
-                <span>Latest month savings</span>
-              }
-            </div>
-          </article>
+          <app-active-summary-card
+            [analysisName]="card.analysis.name"
+            [category]="card.category"
+            [route]="navigation.facilityAnalysisWorkbenchRoute(facility.guid, card.analysis.guid)"
+            [validationIssueCount]="card.findings.length"
+            [resultState]="card.outcome.state"
+            [resultMessage]="card.outcome.state === 'ready' ? '' : card.outcome.message"
+            [resultValueLabel]="card.outcomeDisplay.monthly.valueLabel"
+            [resultPeriodLabel]="card.outcomeDisplay.monthly.label">
+          </app-active-summary-card>
         }
       </section>
     }

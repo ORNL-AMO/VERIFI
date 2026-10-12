@@ -9,17 +9,17 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
 import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
-import { AnalysisResultNumberPipe } from '../../presentation/number/analysis-result-number.pipe';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
 import { FacilityAnalysisResultsDisplayService } from '../../presentation/facility-analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
-import { AnalysisResultMarkersComponent } from '../../presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
-import { AnalysisResultMarkerLegendComponent } from '../../presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import {
   AnalysisResultMarker,
   monthlyResultMarkers,
   orderedUniqueResultMarkers
-} from '../../presentation/result-markers/analysis-result-markers';
+} from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
 type AnalysisResultColumnSection = 'period' | 'use' | 'predictors' | 'improvement';
 

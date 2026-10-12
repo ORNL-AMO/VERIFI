@@ -12,7 +12,7 @@ import {
   MeterResultsChartMetric,
   MeterResultsChartRow,
   MeterResultsPeriod
-} from '@app/v1/facility/data/meters/models';
+} from '../metric-results-chart.models';
 
 type MeterChartState = 'idle' | 'loading' | 'ready' | 'error';
 type MeterChartSeriesDisplay = 'off' | 'bar' | 'line';

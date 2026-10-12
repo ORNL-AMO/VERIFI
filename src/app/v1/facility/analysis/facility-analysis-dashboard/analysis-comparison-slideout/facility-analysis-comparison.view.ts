@@ -7,7 +7,7 @@ import {
   AnalysisResultMarker,
   annualResultMarkers,
   orderedUniqueResultMarkers
-} from '../../facility-analysis-workbench/results/presentation/result-markers/analysis-result-markers';
+} from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 import { buildFacilityAnalysisGroupModelViews } from '../../group-model-roster/facility-analysis-group-model.view';
 import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 

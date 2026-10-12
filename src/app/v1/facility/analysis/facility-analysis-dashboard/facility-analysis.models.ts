@@ -9,7 +9,7 @@ import {
   FacilityAnalysisOutcomeDisplay,
   FacilityAnalysisOutcomeState,
   FacilityAnalysisOutcomeSummary
-} from '../facility-analysis-outcome-summary';
+} from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { buildFacilityAnalysisGroupModelViews } from '../group-model-roster/facility-analysis-group-model.view';
 
 export type FacilityAnalysisCardStatus = 'evaluating' | 'ready' | 'warning' | 'error';

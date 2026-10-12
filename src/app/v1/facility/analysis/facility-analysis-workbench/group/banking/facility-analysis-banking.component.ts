@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { JStatRegressionModel } from '@data/models/analysis';
-import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
@@ -17,18 +17,18 @@ import {
   monthlyUseChartMetrics,
   monthlyUseChartRows
 } from '../../results/presentation/facility-analysis-result.view';
-import { AnalysisResultNumberPipe } from '../../results/presentation/number/analysis-result-number.pipe';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import {
   bankedSavingsChartMonthlyRows,
   bankedSavingsPreviewRows
 } from '../../banking/facility-analysis-banking';
-import { AnalysisResultMarkersComponent } from '../../results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
-import { AnalysisResultMarkerLegendComponent } from '../../results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
 import {
   AnalysisResultMarker,
   isAnnualModelPeriod,
   orderedUniqueResultMarkers
-} from '../../results/presentation/result-markers/analysis-result-markers';
+} from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 import { RegressionModelReviewSlideoutComponent } from '../regression/model-review-slideout/regression-model-review-slideout.component';
 import { RegressionModelValidationState } from '../regression/regression-model-validation.service';
 import { modeledQuantityLabel } from '../regression/regression-labels';

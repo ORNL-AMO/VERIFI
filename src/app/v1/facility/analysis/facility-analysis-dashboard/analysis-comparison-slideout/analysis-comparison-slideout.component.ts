@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { MeterResultsChartComponent } from '@app/v1/facility/data/meters/shared/meter-results-chart/meter-results-chart.component';
+import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { AnalysisResultMarkerLegendComponent } from '../../facility-analysis-workbench/results/presentation/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
-import { AnalysisResultMarkersComponent } from '../../facility-analysis-workbench/results/presentation/result-markers/analysis-result-markers/analysis-result-markers.component';
-import { AnalysisResultNumberPipe } from '../../facility-analysis-workbench/results/presentation/number/analysis-result-number.pipe';
+import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
+import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
+import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { FacilityAnalysisDashboardCard } from '../facility-analysis.models';
 import { buildFacilityAnalysisComparisonView } from './facility-analysis-comparison.view';
 

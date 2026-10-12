@@ -1,4 +1,4 @@
-import { facilityAnalysisOutcomeDisplay, facilityAnalysisOutcomeSummary } from './facility-analysis-outcome-summary';
+import { facilityAnalysisOutcomeDisplay, facilityAnalysisOutcomeSummary } from './analysis-outcome-summary';
 
 describe('facilityAnalysisOutcomeSummary', () => {
   it('uses the report year and the newest available monthly row', () => {
