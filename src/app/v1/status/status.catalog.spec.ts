@@ -72,6 +72,20 @@ describe('v1 status presentation catalog', () => {
       .toEqual({ kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'setup' });
   });
 
+  it('routes account-analysis findings to the account workbench', () => {
+    const entity = {
+      kind: 'account-analysis' as const,
+      guid: 'account-analysis-a',
+      name: 'Portfolio energy',
+      accountGuid: 'account-a'
+    };
+    expect(presentFindings([makeFinding(
+      'account-analysis.configuration.invalid', 'error', 'configuration', entity, { reasons: ['missingSelection'] }
+    )])[0].destination).toEqual({
+      kind: 'account-analysis', accountGuid: 'account-a', analysisGuid: 'account-analysis-a'
+    });
+  });
+
   it('sorts Todos by severity, record name, and rule code', () => {
     const otherEntity = { ...meterEntity, guid: 'meter-b', name: 'Alpha meter' };
     const findings = [

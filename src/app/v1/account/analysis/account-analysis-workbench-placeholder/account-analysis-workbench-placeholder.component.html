@@ -1,0 +1,16 @@
+@let account = workspace.account();
+@let selected = analysis();
+<section class="v1-account-analysis-workbench-placeholder" aria-labelledby="v1-account-analysis-workbench-title">
+  <header class="v1-section-header">
+    <div>
+      <p class="v1-eyebrow">{{ account?.name || 'Account' }} / Account analysis</p>
+      <h1 id="v1-account-analysis-workbench-title"><app-ui-icon [name]="selected?.analysisCategory === 'water' ? 'droplet' : 'energy'"></app-ui-icon>{{ selected?.name || 'Analysis not found' }}</h1>
+    </div>
+    @if (account) { <a class="v1-btn v1-btn--quiet" [routerLink]="navigation.accountAnalysisRoute(account.guid)">Back to analyses</a> }
+  </header>
+  @if (selected) {
+    <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="info"></app-ui-icon><span>The account-analysis workbench will be implemented in the next phase. This route preserves the selected analysis identity.</span></div>
+  } @else {
+    <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>The requested account analysis could not be found.</span></div>
+  }
+</section>

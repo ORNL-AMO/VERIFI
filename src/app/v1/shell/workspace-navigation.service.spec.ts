@@ -6,7 +6,7 @@ import { vi } from 'vitest';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { WorkspaceNavigationService } from './workspace-navigation.service';
+import { parseWorkspaceRoute, WorkspaceNavigationService } from './workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
@@ -114,6 +114,9 @@ describe('WorkspaceNavigationService', () => {
     ]);
     expect(service.accountAnalysisRoute('account-a')).toEqual([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'dashboard'
+    ]);
+    expect(service.accountAnalysisWorkbenchRoute('account-a', 'analysis-a')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a'
     ]);
     expect(service.facilityRoute('facility-a')).toEqual([
       '/v1',
@@ -229,6 +232,16 @@ describe('WorkspaceNavigationService', () => {
       'settings',
       'goals'
     ]);
+  });
+
+  it('parses account analysis workbench identity into route state', () => {
+    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/analysis/workbench/analysis%20a')).toMatchObject({
+      contextMode: 'account',
+      accountGuid: 'account-a',
+      section: 'analysis',
+      detail: 'workbench',
+      analysisGuid: 'analysis a'
+    });
   });
 
   it('exposes the active uploaded file and workflow step from the route', () => {

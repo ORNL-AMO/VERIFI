@@ -76,7 +76,8 @@ import { ImportPredictorReadingsStepComponent } from '@app/v1/account/imports/im
 import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictors/import-predictors-step.component';
 import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
-import { AccountAnalysisPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-placeholder/account-analysis-placeholder.component';
+import { AccountAnalysisDashboardComponent } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard.component';
+import { AccountAnalysisWorkbenchPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-workbench-placeholder/account-analysis-workbench-placeholder.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
@@ -184,7 +185,8 @@ export const V1Routes: Routes = [
             path: 'analysis',
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-              { path: 'dashboard', component: AccountAnalysisPlaceholderComponent },
+              { path: 'dashboard', component: AccountAnalysisDashboardComponent },
+              { path: 'workbench/:analysisGuid', component: AccountAnalysisWorkbenchPlaceholderComponent },
               { path: '**', redirectTo: 'dashboard' }
             ]
           },

@@ -177,10 +177,10 @@ export function buildAccountAnalysisFacilitySelections(
   });
 }
 
-export function filterAndSortAccountAnalysisCards(
-  cards: readonly AccountAnalysisCard[],
+export function filterAndSortAccountAnalysisCards<T extends AccountAnalysisCard>(
+  cards: readonly T[],
   filters: AccountAnalysisCardFilters
-): AccountAnalysisCard[] {
+): T[] {
   const search = filters.search.trim().toLocaleLowerCase();
   return cards.filter(card =>
     (!search || card.searchText.includes(search))

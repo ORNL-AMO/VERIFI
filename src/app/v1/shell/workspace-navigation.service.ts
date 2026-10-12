@@ -345,6 +345,10 @@ export class WorkspaceNavigationService {
     return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'dashboard'];
   }
 
+  accountAnalysisWorkbenchRoute(accountGuid: string, analysisGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'analysis', 'workbench', analysisGuid];
+  }
+
   facilityRoute(facilityGuid: string): Array<string> {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
   }
@@ -651,12 +655,18 @@ export function parseWorkspaceRoute(url: string): RouteState {
   }
   const section = normalizeSection(routeParts[3]);
   const isImportFileRoute = section === 'imports' && routeParts[4] === 'file';
+  const isAccountAnalysisWorkbenchRoute = section === 'analysis'
+    && routeParts[4] === 'workbench'
+    && !!routeParts[5];
   return {
     view: 'workspace',
     contextMode: 'account',
     accountGuid: routeParts[2],
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],
+    analysisGuid: isAccountAnalysisWorkbenchRoute
+      ? safeDecodeRoutePart(routeParts[5])
+      : undefined,
     importFileId: isImportFileRoute && routeParts[5]
       ? safeDecodeRoutePart(routeParts[5])
       : undefined,

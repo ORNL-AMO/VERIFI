@@ -86,6 +86,7 @@ export type StatusDestination =
     readonly groupGuid?: string;
     readonly tab: 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
   }
+  | { readonly kind: 'account-analysis'; readonly accountGuid: string; readonly analysisGuid: string }
   | { readonly kind: 'unavailable' };
 
 export interface StatusItem extends StatusFinding {

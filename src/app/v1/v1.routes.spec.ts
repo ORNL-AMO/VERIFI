@@ -54,7 +54,8 @@ import { ImportPredictorReadingsStepComponent } from '@app/v1/account/imports/im
 import { ImportPredictorsStepComponent } from '@app/v1/account/imports/import-wizard/steps/predictors/import-predictors-step.component';
 import { ImportReviewStepComponent } from '@app/v1/account/imports/import-wizard/steps/review/import-review-step.component';
 import { ImportWorksheetStepComponent } from '@app/v1/account/imports/import-wizard/steps/worksheet/import-worksheet-step.component';
-import { AccountAnalysisPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-placeholder/account-analysis-placeholder.component';
+import { AccountAnalysisDashboardComponent } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-dashboard.component';
+import { AccountAnalysisWorkbenchPlaceholderComponent } from '@app/v1/account/analysis/account-analysis-workbench-placeholder/account-analysis-workbench-placeholder.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
@@ -95,7 +96,8 @@ describe('V1Routes facility data meters routes', () => {
 
     expect(accountAnalysis?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'dashboard' }),
-      expect.objectContaining({ path: 'dashboard', component: AccountAnalysisPlaceholderComponent })
+      expect.objectContaining({ path: 'dashboard', component: AccountAnalysisDashboardComponent }),
+      expect.objectContaining({ path: 'workbench/:analysisGuid', component: AccountAnalysisWorkbenchPlaceholderComponent })
     ]));
     expect(facilityAnalysis?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'dashboard' }),
