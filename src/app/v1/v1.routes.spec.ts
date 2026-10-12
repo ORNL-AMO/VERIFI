@@ -5,7 +5,7 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
 import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
-import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
 import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
@@ -108,6 +108,7 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'workbench/:analysisGuid', component: AccountAnalysisWorkbenchComponent })
     ]));
     const accountWorkbench = accountAnalysis?.children?.find(route => route.path === 'workbench/:analysisGuid');
+    expect(accountWorkbench?.canActivate).toEqual([flushPendingChangesGuard]);
     expect(accountWorkbench?.canDeactivate).toEqual([unsavedChangesGuard]);
     expect(accountWorkbench?.children).toEqual(expect.arrayContaining([
       expect.objectContaining({ path: '', redirectTo: 'setup' }),

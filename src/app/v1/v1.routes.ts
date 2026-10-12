@@ -3,7 +3,7 @@ import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from
 import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
 import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
-import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
+import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
 import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
@@ -197,6 +197,7 @@ export const V1Routes: Routes = [
               {
                 path: 'workbench/:analysisGuid',
                 component: AccountAnalysisWorkbenchComponent,
+                canActivate: [flushPendingChangesGuard],
                 canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },

@@ -55,7 +55,8 @@ export class AccountAnalysisAutosaveService {
     const unregister = this.unsavedChanges.register(
       () => this.isDirty(),
       () => this.discard(),
-      () => this.isBlocked()
+      () => this.isBlocked(),
+      () => this.flush()
     );
     const beforeUnload = (event: BeforeUnloadEvent) => {
       if (!this.isDirty() && !this.isBlocked()) return;

@@ -37,4 +37,37 @@ describe('UnsavedChangesService', () => {
     expect(service.confirmDiscard()).toBe(false);
     expect(confirm).not.toHaveBeenCalled();
   });
+
+  it('flushes a registered dirty editor before navigation', async () => {
+    const flush = vi.fn().mockResolvedValue(true);
+    service.register(() => true, vi.fn(), () => false, flush);
+
+    await expect(service.flushPendingChanges()).resolves.toBe(true);
+    expect(flush).toHaveBeenCalledOnce();
+  });
+
+  it('flushes a registered editor while navigation is blocked by an active save', async () => {
+    const flush = vi.fn().mockResolvedValue(false);
+    service.register(() => false, vi.fn(), () => true, flush);
+
+    await expect(service.flushPendingChanges()).resolves.toBe(false);
+    expect(flush).toHaveBeenCalledOnce();
+  });
+
+  it('stops navigation when a registered editor cannot flush', async () => {
+    const firstFlush = vi.fn().mockResolvedValue(false);
+    const secondFlush = vi.fn().mockResolvedValue(true);
+    service.register(() => true, vi.fn(), () => false, firstFlush);
+    service.register(() => true, vi.fn(), () => false, secondFlush);
+
+    await expect(service.flushPendingChanges()).resolves.toBe(false);
+    expect(firstFlush).toHaveBeenCalledOnce();
+    expect(secondFlush).not.toHaveBeenCalled();
+  });
+
+  it('ignores dirty editors that do not support flushing', async () => {
+    service.register(() => true, vi.fn());
+
+    await expect(service.flushPendingChanges()).resolves.toBe(true);
+  });
 });
