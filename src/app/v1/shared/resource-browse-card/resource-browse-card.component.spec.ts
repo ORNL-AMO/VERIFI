@@ -1,13 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { vi } from 'vitest';
 import { ResourceBrowseCardComponent } from './resource-browse-card.component';
 
 describe('ResourceBrowseCardComponent', () => {
   let fixture: ComponentFixture<ResourceBrowseCardComponent>;
+  const componentCss = readFileSync(join(__dirname, 'resource-browse-card.component.css'), 'utf8');
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [ResourceBrowseCardComponent] }).compileComponents();
     fixture = TestBed.createComponent(ResourceBrowseCardComponent);
+  });
+
+  it('fills its grid row and keeps the footer at the bottom', () => {
+    expect(componentCss).toMatch(/:host\s*{[^}]*height:\s*100%/s);
+    expect(componentCss).toMatch(/\.v1-resource-browse-card\s*{[^}]*flex-direction:\s*column[^}]*height:\s*100%/s);
+    expect(componentCss).toMatch(/\.v1-resource-browse-card__footer\s*{[^}]*margin-top:\s*auto/s);
   });
 
   it('renders prepared optional sections with accessible title and action labels', () => {

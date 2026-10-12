@@ -53,7 +53,7 @@
       <article class="v1-empty-state" role="status"><app-ui-icon name="clearFilter"></app-ui-icon><h2>No analyses match these filters</h2><p>Adjust the search or filters to return to the full analysis list.</p></article>
     } @else {
       @if (comparisonGuids().length > 0) { <div class="v1-account-analysis-dashboard__compare-tray" role="status"><span>{{ comparisonGuids().length }} of 2 analyses selected for comparison.</span><button type="button" class="v1-btn v1-btn--secondary" (click)="clearComparison()">Clear</button></div> }
-      <div class="v1-data-browse-grid v1-account-analysis-dashboard__card-grid" role="list" aria-label="Account analyses">
+      <div class="v1-data-browse-grid v1-data-browse-grid--analysis" role="list" aria-label="Account analyses">
         @for (card of visibleCards; track card.analysis.guid) {
           <app-account-analysis-browse-card [card]="card" [canAct]="canAct()" [selectedForComparison]="isCompared(card.analysis.guid)" [comparisonHasSelection]="comparisonGuids().length === 1" [comparisonDisabledReason]="comparisonDisabledReason(card)" (opened)="open($event)" (detailsRequested)="detailsGuid.set($event.analysis.guid)" (comparisonToggled)="toggleComparison($event)" (copyRequested)="copy($event)" (activeRequested)="requestActive($event)" (deleteRequested)="requestDelete($event)"></app-account-analysis-browse-card>
         }
