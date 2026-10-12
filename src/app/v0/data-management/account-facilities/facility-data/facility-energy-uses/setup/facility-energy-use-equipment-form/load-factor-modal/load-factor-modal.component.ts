@@ -26,6 +26,7 @@ export class LoadFactorModalComponent {
   voltage: number | null = null;
   current: number | null = null;
   numberOfPhases: LoadFactorPhaseCount = 3;
+  powerFactor: number | null = 1;
   measuredPower: number | null = null;
   ratedPowerUnit: string = 'hp';
   measuredPowerUnit: string = 'kW';
@@ -58,11 +59,12 @@ export class LoadFactorModalComponent {
 
     if (!Number.isFinite(this.voltage) || this.voltage < 0
       || !Number.isFinite(this.current) || this.current < 0
-      || !Number.isInteger(this.numberOfPhases) || this.numberOfPhases < 1 || this.numberOfPhases > 3) {
+      || !Number.isInteger(this.numberOfPhases) || this.numberOfPhases < 1 || this.numberOfPhases > 3
+      || !Number.isFinite(this.powerFactor) || this.powerFactor < 0 || this.powerFactor > 1) {
       return null;
     }
 
-    return this.voltage * this.current * Math.sqrt(this.numberOfPhases) / 1000;
+    return this.voltage * this.current * Math.sqrt(this.numberOfPhases) * this.powerFactor / 1000;
   }
 
   get loadFactorPercent(): number | null {
@@ -115,6 +117,7 @@ export class LoadFactorModalComponent {
     this.voltage = null;
     this.current = null;
     this.numberOfPhases = 3;
+    this.powerFactor = 1;
     this.measuredPower = null;
   }
 

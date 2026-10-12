@@ -74,6 +74,14 @@
                 </select>
             </div>
         </div>
+
+        <div class="row mb-2">
+            <label class="col-5 col-form-label" for="powerFactor_{{year}}">Power Factor</label>
+            <div class="col-7">
+                <input class="form-control" type="number" id="powerFactor_{{year}}"
+                    [(ngModel)]="powerFactor">
+            </div>
+        </div>
         } @else {
         <div class="row mb-2">
             <label class="col-5 col-form-label" for="measuredPower_{{year}}">Measured Power</label>
