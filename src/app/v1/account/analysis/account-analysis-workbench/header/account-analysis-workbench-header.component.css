@@ -8,5 +8,10 @@
 .v1-account-analysis-workbench__summary-facts span { color: var(--v1-muted); font-size: .74rem; font-weight: 800; }
 .v1-account-analysis-workbench__status-notes strong { color: var(--v1-text); }
 .v1-account-analysis-workbench__status-note--error > .v1-icon { color: var(--v1-danger); }
+.v1-account-analysis-workbench__save-state { display: inline-flex; gap: .35rem; align-items: center; justify-content: flex-end; min-width: 13.5rem; min-height: var(--v1-control-height-sm); color: var(--v1-muted); font-size: .8rem; font-weight: 800; white-space: nowrap; }
+.v1-account-analysis-workbench__save-state--saved { color: var(--v1-success); }
+.v1-account-analysis-workbench__save-state--error { color: var(--v1-danger); }
+.v1-account-analysis-workbench__save-error { margin: 0; }
+@media (max-width: 760px) { .v1-account-analysis-workbench__save-state { flex-basis: 100%; justify-content: flex-start; min-width: 0; white-space: normal; } }
 @media (max-width: 900px) { .v1-account-analysis-workbench__summary-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .v1-account-analysis-workbench__summary-facts { grid-template-columns: 1fr; } }

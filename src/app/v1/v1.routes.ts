@@ -197,6 +197,7 @@ export const V1Routes: Routes = [
               {
                 path: 'workbench/:analysisGuid',
                 component: AccountAnalysisWorkbenchComponent,
+                canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },
                   { path: 'setup', component: AccountAnalysisSetupComponent, data: { accountAnalysisStage: 'setup' } },

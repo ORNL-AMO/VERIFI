@@ -1,11 +1,13 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
 import { AccountAnalysisWorkbenchNavigationService } from '../navigation/account-analysis-workbench-navigation.service';
 import { AccountAnalysisWorkbenchHeaderComponent } from './account-analysis-workbench-header.component';
+import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
 
 describe('AccountAnalysisWorkbenchHeaderComponent', () => {
   it('renders selected analysis identity, setup facts, status, and the shared facts toggle', () => {
@@ -31,6 +33,13 @@ describe('AccountAnalysisWorkbenchHeaderComponent', () => {
         {
           provide: AccountAnalysisWorkbenchNavigationService,
           useValue: { currentStageFindings: signal([]) }
+        },
+        {
+          provide: AccountAnalysisAutosaveService,
+          useValue: {
+            draft: signal(analysis), state: signal('saved'), error: signal(undefined),
+            flush: vi.fn().mockResolvedValue(true), retry: vi.fn(), discard: vi.fn()
+          }
         },
         {
           provide: WorkspaceNavigationService,

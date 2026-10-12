@@ -43,13 +43,15 @@ Page-specific tables remain explicit when their columns, row semantics, formulas
 
 Account comparison accepts two analyses of the same category. It compares analysis setup and each facility selection by GUID, aligns annual rows by fiscal year, renders one accessible table per analysis, and reuses the common charts. Actual-versus-adjusted series require compatible units and energy basis; percentage-improvement series remain comparable independently.
 
-## Workbench scaffold and extension points
+## Workbench workflow and extension points
 
-The selected-analysis route now owns a production v1 workbench scaffold. Its route-scoped context resolves the selected account analysis and its facilities, facility analyses, reports, and status findings. Primary navigation follows Setup, Select Facility Items, Results, and Used By; Results owns Annual, Monthly Table, Monthly Chart, and Facility Details child routes. The footer advances through primary stages, while the account Analysis sidebar mirrors the same workflow and keeps result tabs contextual to the workbench.
+The selected-analysis route owns the production v1 workbench. Its route-scoped context resolves the selected account analysis and its facilities, facility analyses, reports, and status findings. Primary navigation follows Setup, Select Facility Items, Results, and Used By; Results owns Annual, Monthly Table, Monthly Chart, and Facility Details child routes. The footer advances through primary stages, while the account Analysis sidebar mirrors the same workflow and keeps result tabs contextual to the workbench.
 
-Setup is always available. Select Facility Items requires valid setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. The seven destination components currently establish final route and layout boundaries with explicit deferred-content states. They intentionally do not edit records, run workbench calculations, or reproduce partial v0 forms, tables, or charts.
+Setup now has v0 workflow parity through a typed reactive editor. Route-scoped autosave maintains separate committed and editable records, persists changes through the account workspace command boundary, protects navigation while work is pending or invalid, and publishes one account-analysis patch per save. Complete baseline years are projected from the canonical calendarization for the draft unit and energy basis. Once a facility is selected or skipped, calculation-bearing fields lock until an explicit portal-hosted confirmation clears those selections; referenced facility analyses and reports remain intact.
 
-Follow-on parity work should fill these components in place. Setup and facility selection should add route-scoped editing and autosave; results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench must own its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
+Setup also owns the bulk facility-analysis workflow. It builds one new Absolute Consumption or Classic Intensity analysis per current facility and commits the generated analyses and account links in one IndexedDB transaction. Ownership and category relationships are validated before writes; a failure rolls back the complete operation. The operation preserves existing analyses, uses the later facility-goal baseline for new facilities where v0 does, and introduces no schema or record-shape changes.
+
+Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. Select Facility Items, the four Results destinations, and Used By remain explicit content scaffolds for follow-on parity work. Results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench owns its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
 
 ## Testing map
 
@@ -57,6 +59,8 @@ Follow-on parity work should fill these components in place. Setup and facility 
 | --- | --- |
 | Card, facility-selection, linked-report, and comparison projections | Fast pure tests |
 | Dashboard forms and interactions | Focused Angular TestBed tests |
+| Setup drafts, autosave recovery, locking, and period availability | Fast service and focused Angular TestBed tests |
+| Bulk facility-analysis creation and rollback | Fast handler tests plus Chromium IndexedDB tests |
 | Calculation formula parity and result projection | Deterministic calculation tests |
 | Worker messaging, cancellation, timeout, and supersession | Chromium browser tests |
 | Atomic deletion and rollback | Chromium IndexedDB tests |

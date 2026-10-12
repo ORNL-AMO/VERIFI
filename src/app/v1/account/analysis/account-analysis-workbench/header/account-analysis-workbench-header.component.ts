@@ -6,6 +6,7 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
 import { AccountAnalysisWorkbenchNavigationService } from '../navigation/account-analysis-workbench-navigation.service';
+import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
 
 @Component({
   selector: 'app-account-analysis-workbench-header',
@@ -19,6 +20,7 @@ export class AccountAnalysisWorkbenchHeaderComponent {
   readonly context = inject(AccountAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
   readonly workflow = inject(AccountAnalysisWorkbenchNavigationService);
+  readonly autosave = inject(AccountAnalysisAutosaveService);
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
     label: analysis.name || 'Untitled analysis',
@@ -38,8 +40,9 @@ export class AccountAnalysisWorkbenchHeaderComponent {
     return `${this.context.includedCount()} included · ${this.context.skippedCount()} skipped · ${total} total`;
   });
 
-  switchAnalysis(analysisGuid: string): void {
+  async switchAnalysis(analysisGuid: string): Promise<void> {
+    if (!await this.autosave.flush()) return;
     const account = this.context.account();
-    if (account) void this.router.navigate(this.navigation.accountAnalysisWorkbenchRoute(account.guid, analysisGuid));
+    if (account) await this.router.navigate(this.navigation.accountAnalysisWorkbenchRoute(account.guid, analysisGuid));
   }
 }

@@ -1,6 +1,178 @@
-<app-account-analysis-scaffold-page
-  headingId="v1-account-analysis-setup-heading"
-  title="Setup"
-  icon="settings"
-  description="Account-analysis settings, baseline controls, and their validation will be migrated from the current VERIFI workflow in the next parity pass.">
-</app-account-analysis-scaffold-page>
+@let analysis = draft();
+@let account = context.account();
+@if (analysis && account) {
+  <form class="v1-account-analysis-setup" aria-label="Account analysis setup" [formGroup]="form">
+    <div class="v1-account-analysis-setup__grid">
+      <section class="v1-account-analysis-setup__panel" aria-label="Analysis details">
+        <label for="account-analysis-name">Name</label>
+        <input
+          id="account-analysis-name"
+          class="v1-input"
+          formControlName="name"
+          required
+          [attr.aria-invalid]="form.controls.name.invalid" />
+        @if (form.controls.name.invalid) {
+          <p class="v1-field-error" role="alert">Enter an analysis name.</p>
+        }
+
+        @if (analysis.analysisCategory === 'energy') {
+          <fieldset [attr.aria-describedby]="hasSelections() ? 'account-analysis-selection-lock' : null">
+            <legend>Analysis boundary</legend>
+            <label><input type="radio" formControlName="energyIsSource" [value]="true" /> Source energy</label>
+            <label><input type="radio" formControlName="energyIsSource" [value]="false" /> Site energy</label>
+          </fieldset>
+          <label for="account-analysis-energy-unit">Display unit</label>
+          <select
+            id="account-analysis-energy-unit"
+            class="v1-select"
+            formControlName="energyUnit"
+            [attr.aria-describedby]="hasSelections() ? 'account-analysis-selection-lock' : null">
+            @for (option of energyUnits; track option.value) {
+              <option [value]="option.value" [innerHTML]="option.display"></option>
+            }
+          </select>
+        } @else {
+          <label for="account-analysis-water-unit">Display unit</label>
+          <select
+            id="account-analysis-water-unit"
+            class="v1-select"
+            formControlName="waterUnit"
+            [attr.aria-describedby]="hasSelections() ? 'account-analysis-selection-lock' : null">
+            @for (option of waterUnits; track option.value) {
+              <option [value]="option.value" [innerHTML]="option.display"></option>
+            }
+          </select>
+        }
+      </section>
+
+      <section class="v1-account-analysis-setup__panel" aria-label="Analysis period">
+        <label for="account-analysis-baseline-year">Baseline year</label>
+        <select
+          id="account-analysis-baseline-year"
+          class="v1-select"
+          formControlName="baselineYear"
+          [attr.aria-describedby]="hasSelections() ? 'account-analysis-selection-lock' : null">
+          <option [ngValue]="null" disabled>Select a complete year</option>
+          @if (period.currentBaselineUnavailable()) {
+            <option [ngValue]="analysis.baselineYear">{{ analysis.baselineYear }} (current; complete data unavailable)</option>
+          }
+          @for (year of period.baselineYears(); track year) {
+            <option [ngValue]="year">{{ year }}</option>
+          }
+        </select>
+
+        @if (period.state() === 'idle' || period.state() === 'evaluating') {
+          <p class="v1-account-analysis-setup__notice" role="status">
+            <app-ui-icon name="loading" spin></app-ui-icon><span>Checking complete baseline years…</span>
+          </p>
+        } @else if (period.state() === 'error') {
+          <p class="v1-account-analysis-setup__notice v1-account-analysis-setup__notice--error" role="alert">
+            <app-ui-icon name="warning"></app-ui-icon><span>{{ period.error() || 'Baseline years are unavailable for the current workspace.' }}</span>
+          </p>
+        } @else if (!period.baselineYears().length) {
+          <p class="v1-account-analysis-setup__notice v1-account-analysis-setup__notice--error" role="alert">
+            <app-ui-icon name="warning"></app-ui-icon><span>No complete baseline years are available for this analysis category. Review account meter data before continuing.</span>
+          </p>
+        } @else if (period.currentBaselineUnavailable()) {
+          <p class="v1-account-analysis-setup__notice" role="status">
+            <app-ui-icon name="info"></app-ui-icon><span>The saved baseline is retained, but the current data no longer contains all twelve months for that year.</span>
+          </p>
+        }
+
+        @if (baselineGoalWarning()) {
+          <p class="v1-account-analysis-setup__notice" role="status">
+            <app-ui-icon name="info"></app-ui-icon><span>{{ baselineGoalWarning() }}</span>
+          </p>
+        }
+
+        <dl class="v1-account-analysis-setup__context">
+          <div><dt>Latest complete year</dt><dd>{{ period.latestCompleteYear() || 'Unavailable' }}</dd></div>
+          <div><dt>Fiscal calendar</dt><dd>{{ account.fiscalYear === 'nonCalendarYear' ? 'Non-calendar year' : 'Calendar year' }}</dd></div>
+        </dl>
+        <div class="v1-account-analysis-setup__links">
+          <a class="v1-inline-link" [routerLink]="navigation.accountSettingsRoute(account.guid, 'financial')">Review fiscal settings</a>
+          <a class="v1-inline-link" [routerLink]="navigation.accountSettingsRoute(account.guid, 'goals')">Review account goals</a>
+        </div>
+        <p class="v1-account-analysis-setup__guidance">Results include every complete year. Choose a report year later when creating a report.</p>
+      </section>
+    </div>
+
+    @if (hasSelections()) {
+      <section class="v1-account-analysis-setup__workflow" aria-labelledby="account-analysis-selection-lock-heading">
+        <div>
+          <p class="v1-eyebrow">Selections protected</p>
+          <h2 id="account-analysis-selection-lock-heading">Calculation settings are locked</h2>
+          <p id="account-analysis-selection-lock">
+            {{ selectedFacilityCount() }} {{ selectedFacilityCount() === 1 ? 'facility has' : 'facilities have' }} an analysis selection or explicit skip. Clear those selections before changing the boundary, display unit, or baseline.
+          </p>
+          @if (context.linkedReports().length) {
+            <p><app-ui-icon name="link"></app-ui-icon> Changes can affect {{ context.linkedReports().length }} linked {{ context.linkedReports().length === 1 ? 'report' : 'reports' }}.</p>
+          }
+        </div>
+        <button type="button" class="v1-btn v1-btn--secondary" [disabled]="actions.busy()" (click)="requestClearSelections()">
+          <app-ui-icon name="lockKeyhole"></app-ui-icon> Clear selections to edit
+        </button>
+      </section>
+    } @else {
+      <section class="v1-account-analysis-setup__workflow" aria-labelledby="account-analysis-bulk-heading">
+        <div>
+          <p class="v1-eyebrow">Optional shortcut</p>
+          <h2 id="account-analysis-bulk-heading">Create facility analyses</h2>
+          <p>Create and select a new matching analysis for every current facility using these account-analysis settings.</p>
+        </div>
+        <button
+          type="button"
+          class="v1-btn v1-btn--action"
+          [disabled]="actions.busy() || autosave.state() === 'invalid' || autosave.state() === 'error' || !period.baselineYears().length"
+          (click)="requestBulkCreate()">
+          <app-ui-icon name="add"></app-ui-icon> Create facility analyses
+        </button>
+      </section>
+    }
+  </form>
+}
+
+<ng-template #clearSelectionsModal>
+  <app-confirmation-dialog
+    title="Clear facility selections?"
+    titleId="clear-account-analysis-selections-title"
+    cancelAriaLabel="Cancel clearing facility selections"
+    confirmLabel="Clear selections"
+    confirmIcon="delete"
+    [busy]="actions.busy()"
+    [disabled]="actions.busy()"
+    (confirmed)="confirmClearSelections()"
+    (cancelled)="closeModal()">
+    <p>This removes every facility analysis selection and explicit skip from this account analysis. The facility analyses and linked reports are retained.</p>
+    <p>You will need to select or skip every facility again before Results are available.</p>
+    @if (actions.error()) {
+      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actions.error() }}</span></div>
+    }
+  </app-confirmation-dialog>
+</ng-template>
+
+<ng-template #bulkCreateModal>
+  <app-confirmation-dialog
+    title="Create facility analyses?"
+    titleId="bulk-create-facility-analyses-title"
+    cancelAriaLabel="Cancel creating facility analyses"
+    confirmLabel="Create analyses"
+    confirmClass="v1-btn--action"
+    confirmIcon="add"
+    size="wide"
+    bodySpacing="spacious"
+    [busy]="actions.busy()"
+    [disabled]="actions.busy()"
+    (confirmed)="confirmBulkCreate()"
+    (cancelled)="closeModal()">
+    <p>A new {{ draft()?.analysisCategory }} analysis will be created and selected for every current facility. Existing facility analyses are retained.</p>
+    <fieldset class="v1-account-analysis-setup__bulk-options">
+      <legend>Analysis type for every generated group</legend>
+      <label><input type="radio" [formControl]="bulkAnalysisType" value="absoluteEnergyConsumption" /> Absolute consumption</label>
+      <label><input type="radio" [formControl]="bulkAnalysisType" value="energyIntensity" /> Classic intensity</label>
+    </fieldset>
+    @if (actions.error()) {
+      <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>{{ actions.error() }}</span></div>
+    }
+  </app-confirmation-dialog>
+</ng-template>

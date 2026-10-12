@@ -12,14 +12,17 @@ import {
   activeAccountAnalysisResultTabId,
   activeAccountAnalysisWorkbenchStageId,
   buildAccountAnalysisWorkbenchStageNavigation,
+  accountAnalysisWorkbenchReadiness,
   findingsForAccountAnalysisStage
 } from '../account-analysis-workbench.models';
+import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
 
 @Injectable()
 export class AccountAnalysisWorkbenchNavigationService {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly context = inject(AccountAnalysisWorkbenchContext);
+  private readonly autosave = inject(AccountAnalysisAutosaveService);
   private readonly workspaceNavigation = inject(WorkspaceNavigationService);
   private readonly activeStageState = signal<AccountAnalysisWorkbenchStageId>(
     activeAccountAnalysisWorkbenchStageId(this.router.url)
@@ -30,10 +33,17 @@ export class AccountAnalysisWorkbenchNavigationService {
 
   readonly activeStageId = this.activeStageState.asReadonly();
   readonly activeResultTabId = this.activeResultTabState.asReadonly();
+  readonly readiness = computed(() => accountAnalysisWorkbenchReadiness(
+    this.autosave.draft() || this.context.analysis(),
+    this.context.findings(),
+    this.context.status.state() === 'ready',
+    this.context.selections().length === this.context.facilities().length
+      && this.context.selections().every(item => item.state === 'included' || item.state === 'skipped')
+  ));
   readonly stages = computed(() => buildAccountAnalysisWorkbenchStageNavigation(
     this.context.stages(),
     this.activeStageId(),
-    this.context.readiness(),
+    this.readiness(),
     this.context.findings()
   ));
   readonly stageIndex = computed(() => this.stages().findIndex(stage => stage.id === this.activeStageId()));
@@ -51,8 +61,9 @@ export class AccountAnalysisWorkbenchNavigationService {
   readonly requirement = computed(() => accountAnalysisNavigationRequirement(
     this.activeStageId(),
     this.context.status.state(),
-    this.context.readiness().setupComplete,
-    this.context.readiness().selectionsComplete
+    this.readiness().setupComplete,
+    this.readiness().selectionsComplete,
+    this.autosave.state()
   ));
   readonly disabled = computed(() => !!this.requirement());
 
@@ -60,7 +71,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     const current = this.currentStage();
     const statusState = this.context.status.state();
     if (!current || current.available || statusState === 'idle' || statusState === 'evaluating') return;
-    const fallback = this.context.readiness().setupComplete
+    const fallback = this.readiness().setupComplete
       ? this.stages().find(stage => stage.id === 'select-items')
       : this.stages().find(stage => stage.id === 'setup');
     if (fallback) void this.router.navigate(fallback.route, { replaceUrl: true });
@@ -74,7 +85,8 @@ export class AccountAnalysisWorkbenchNavigationService {
     ).subscribe(event => this.syncFromUrl(event.urlAfterRedirects));
   }
 
-  back(): void {
+  async back(): Promise<void> {
+    if (!await this.autosave.flush()) return;
     const previous = this.previousStage();
     if (previous) {
       void this.router.navigate(previous.route);
@@ -84,13 +96,15 @@ export class AccountAnalysisWorkbenchNavigationService {
     if (account) void this.router.navigate(this.workspaceNavigation.accountAnalysisRoute(account.guid));
   }
 
-  continue(): void {
+  async continue(): Promise<void> {
     if (this.disabled()) return;
+    if (!await this.autosave.flush()) return;
     const next = this.nextStage();
     if (next?.available) void this.router.navigate(next.route);
   }
 
-  finish(): void {
+  async finish(): Promise<void> {
+    if (!await this.autosave.flush()) return;
     const account = this.context.account();
     if (account) void this.router.navigate(this.workspaceNavigation.accountAnalysisRoute(account.guid));
   }
@@ -118,8 +132,12 @@ export function accountAnalysisNavigationRequirement(
   stageId: AccountAnalysisWorkbenchStageId,
   statusState: StatusEvaluationState,
   setupComplete: boolean,
-  selectionsComplete: boolean
+  selectionsComplete: boolean,
+  autosaveState: import('../editing/account-analysis-autosave.service').AccountAnalysisAutosaveState = 'saved'
 ): string | undefined {
+  if (autosaveState === 'saving') return 'Saving changes before navigation is available.';
+  if (autosaveState === 'invalid') return 'Fix the validation errors before continuing.';
+  if (autosaveState === 'error') return 'Retry or discard the unsaved changes before continuing.';
   if ((stageId === 'setup' || stageId === 'select-items') && (statusState === 'idle' || statusState === 'evaluating')) {
     return 'Checking analysis status before navigation is available.';
   }

@@ -10,6 +10,7 @@ import {
   AccountAnalysisWorkbenchNavigationService,
   accountAnalysisNavigationRequirement
 } from './account-analysis-workbench-navigation.service';
+import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
 
 describe('accountAnalysisNavigationRequirement', () => {
   it('blocks stage advancement until status and prerequisites are ready', () => {
@@ -21,6 +22,10 @@ describe('accountAnalysisNavigationRequirement', () => {
       .toBe('Select a valid facility analysis or skip every facility before viewing Results.');
     expect(accountAnalysisNavigationRequirement('setup', 'error', false, false))
       .toBe('Analysis status is unavailable. Retry the workspace status check before continuing.');
+    expect(accountAnalysisNavigationRequirement('setup', 'ready', true, false, 'saving'))
+      .toBe('Saving changes before navigation is available.');
+    expect(accountAnalysisNavigationRequirement('setup', 'ready', true, false, 'invalid'))
+      .toBe('Fix the validation errors before continuing.');
   });
 
   it('allows navigation from complete stages and all informational/result stages', () => {
@@ -30,7 +35,7 @@ describe('accountAnalysisNavigationRequirement', () => {
     expect(accountAnalysisNavigationRequirement('used-by', 'ready', false, false)).toBeUndefined();
   });
 
-  it('moves the footer by primary stage and switches Results tabs independently', () => {
+  it('flushes drafts, moves the footer by primary stage, and switches Results tabs independently', async () => {
     const navigate = vi.fn();
     const router = {
       url: '/v1/workspace/account/account-a/analysis/workbench/analysis-a/results/monthly-chart',
@@ -45,11 +50,20 @@ describe('accountAnalysisNavigationRequirement', () => {
           provide: AccountAnalysisWorkbenchContext,
           useValue: {
             stages: signal(buildAccountAnalysisWorkbenchStages('account-a', 'analysis-a')),
-            readiness: signal({ statusReady: true, setupComplete: true, selectionsComplete: true }),
             findings: signal([]),
             status: { state: signal('ready') },
             account: signal({ guid: 'account-a' }),
-            analysis: signal({ guid: 'analysis-a' })
+            analysis: signal({ guid: 'analysis-a', name: 'Analysis', baselineYear: 2020 }),
+            facilities: signal([{ guid: 'facility-a' }]),
+            selections: signal([{ state: 'included' }])
+          }
+        },
+        {
+          provide: AccountAnalysisAutosaveService,
+          useValue: {
+            draft: signal({ guid: 'analysis-a', name: 'Analysis', baselineYear: 2020 }),
+            state: signal('saved'),
+            flush: vi.fn().mockResolvedValue(true)
           }
         },
         {
@@ -65,11 +79,11 @@ describe('accountAnalysisNavigationRequirement', () => {
 
     expect(service.activeStageId()).toBe('results');
     expect(service.activeResultTabId()).toBe('monthly-chart');
-    service.back();
+    await service.back();
     expect(navigate).toHaveBeenCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'select-items'
     ]);
-    service.continue();
+    await service.continue();
     expect(navigate).toHaveBeenCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'used-by'
     ]);

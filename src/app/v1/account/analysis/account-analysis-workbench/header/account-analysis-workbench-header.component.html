@@ -1,5 +1,6 @@
 @if (context.account(); as account) {
   @if (context.analysis(); as analysis) {
+    @let displayedAnalysis = autosave.draft() || analysis;
     @let status = statusPresentation();
     <header class="v1-data-workbench-header v1-account-analysis-workbench__header">
       <nav class="v1-data-workbench-breadcrumb" aria-label="Account analysis breadcrumb">
@@ -16,18 +17,32 @@
             <app-ui-icon name="analysis"></app-ui-icon>
             <app-data-workbench-resource-switcher
               [resources]="analysisResources()"
-              [selectedId]="analysis.guid"
-              [currentLabel]="analysis.name || 'Untitled analysis'"
+              [selectedId]="displayedAnalysis.guid"
+              [currentLabel]="displayedAnalysis.name || 'Untitled analysis'"
               ariaLabel="Switch account analysis"
               (resourceSelected)="switchAnalysis($event)">
             </app-data-workbench-resource-switcher>
           </h1>
         </div>
         <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
+          <span
+            class="v1-account-analysis-workbench__save-state"
+            [class.v1-account-analysis-workbench__save-state--saved]="autosave.state() === 'saved'"
+            [class.v1-account-analysis-workbench__save-state--error]="autosave.state() === 'error' || autosave.state() === 'invalid'"
+            aria-live="polite">
+            @switch (autosave.state()) {
+              @case ('idle') { Changes save automatically. }
+              @case ('dirty') { <app-ui-icon name="clock"></app-ui-icon> Changes save automatically. }
+              @case ('saving') { <app-ui-icon name="loading" spin></app-ui-icon> Saving… }
+              @case ('saved') { <app-ui-icon name="check"></app-ui-icon> Saved. }
+              @case ('invalid') { <app-ui-icon name="warning"></app-ui-icon> Fix validation errors. }
+              @case ('error') { <app-ui-icon name="warning"></app-ui-icon> Save failed. }
+            }
+          </span>
           @if (context.isActiveForReporting()) {
             <span class="v1-chip v1-chip--info"><app-ui-icon name="star"></app-ui-icon> Active for reporting</span>
           }
-          <span class="v1-chip">{{ analysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span>
+          <span class="v1-chip">{{ displayedAnalysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</span>
           <span class="v1-chip v1-chip--{{ status.tone }}">
             <app-ui-icon [name]="status.icon" [spin]="context.status.state() === 'evaluating'"></app-ui-icon>
             {{ status.label }}
@@ -36,16 +51,25 @@
         </div>
       </div>
 
+      @if (autosave.error()) {
+        <div class="v1-alert v1-alert--danger v1-account-analysis-workbench__save-error" role="alert">
+          <app-ui-icon name="warning"></app-ui-icon>
+          <span>{{ autosave.error() }}</span>
+          <button type="button" class="v1-btn v1-btn--secondary" (click)="autosave.retry()">Retry</button>
+          <button type="button" class="v1-btn v1-btn--ghost" (click)="autosave.discard()">Discard changes</button>
+        </div>
+      }
+
       <div id="v1-account-analysis-workbench-facts" [hidden]="!factsToggle.expanded()">
         <dl class="v1-account-analysis-workbench__summary-facts" aria-label="Account analysis context">
           <div>
             <dt>Baseline</dt>
-            <dd>{{ analysis.baselineYear || 'Not selected' }}</dd>
+            <dd>{{ displayedAnalysis.baselineYear || 'Not selected' }}</dd>
           </div>
           <div>
             <dt>Basis and units</dt>
-            <dd>{{ analysis.analysisCategory === 'energy' ? (analysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }}</dd>
-            <span>{{ analysis.analysisCategory === 'water' ? analysis.waterUnit : analysis.energyUnit }}</span>
+            <dd>{{ displayedAnalysis.analysisCategory === 'energy' ? (displayedAnalysis.energyIsSource ? 'Source energy' : 'Site energy') : 'Water' }}</dd>
+            <span>{{ displayedAnalysis.analysisCategory === 'water' ? displayedAnalysis.waterUnit : displayedAnalysis.energyUnit }}</span>
           </div>
           <div>
             <dt>Facility selections</dt>

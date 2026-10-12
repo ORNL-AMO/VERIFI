@@ -5,6 +5,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { AccountAnalysisWorkbenchContext } from './account-analysis-workbench-context.service';
 import { AccountAnalysisWorkbenchComponent } from './account-analysis-workbench.component';
 import { AccountAnalysisWorkbenchNavigationService } from './navigation/account-analysis-workbench-navigation.service';
+import { AccountAnalysisAutosaveService } from './editing/account-analysis-autosave.service';
 
 describe('AccountAnalysisWorkbenchComponent', () => {
   it('shows a recovery destination when the route analysis no longer exists', () => {
@@ -16,7 +17,11 @@ describe('AccountAnalysisWorkbenchComponent', () => {
       set: {
         providers: [
           { provide: AccountAnalysisWorkbenchContext, useValue: context },
-          { provide: AccountAnalysisWorkbenchNavigationService, useValue: {} }
+          { provide: AccountAnalysisWorkbenchNavigationService, useValue: {} },
+          {
+            provide: AccountAnalysisAutosaveService,
+            useValue: { isDirty: signal(false), isBlocked: signal(false) }
+          }
         ]
       }
     });

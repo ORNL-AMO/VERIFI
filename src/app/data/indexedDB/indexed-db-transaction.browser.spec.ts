@@ -294,6 +294,82 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     expect(await harness.getAll('accounts')).toContainEqual(accountBFixture.account);
   });
 
+  it('atomically creates facility analyses and links them to an account analysis', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const analysisGuid = accountAFixture.accountAnalysis.guid as string;
+    await transactionService.runTransaction(['accountAnalysisItems'], 'readwrite', transaction => transaction.put(
+      'accountAnalysisItems',
+      {
+        ...accountAFixture.accountAnalysis,
+        analysisCategory: 'energy',
+        facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: undefined }]
+      }
+    ));
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+    const generated = {
+      guid: 'bulk-analysis-a', accountId: accountGuid, facilityId: facilityGuid,
+      analysisCategory: 'energy', name: 'Bulk analysis', groups: []
+    } as any;
+
+    const result = await handler.createBulkFacilityAnalysesForAccount({
+      accountGuid, accountAnalysisGuid: analysisGuid, analyses: [generated]
+    });
+
+    expect(result.analyses[0].id).toEqual(expect.any(Number));
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).toContainEqual(expect.objectContaining({ guid: 'bulk-analysis-a' }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: analysisGuid,
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: 'bulk-analysis-a' }]
+    }));
+  });
+
+  it('rolls back every bulk-created analysis when a later generated record fails', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const secondFacilityGuid = 'facility-a-second';
+    const analysisGuid = accountAFixture.accountAnalysis.guid as string;
+    await transactionService.runTransaction(['facilities', 'accountAnalysisItems'], 'readwrite', async transaction => {
+      await transaction.add('facilities', {
+        ...accountAFixture.facility,
+        id: 901,
+        guid: secondFacilityGuid
+      });
+      await transaction.put('accountAnalysisItems', {
+        ...accountAFixture.accountAnalysis,
+        analysisCategory: 'energy',
+        facilityAnalysisItems: [
+          { facilityId: facilityGuid, analysisItemId: undefined },
+          { facilityId: secondFacilityGuid, analysisItemId: undefined }
+        ]
+      });
+    });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+    const valid = {
+      guid: 'bulk-analysis-first', accountId: accountGuid, facilityId: facilityGuid,
+      analysisCategory: 'energy', name: 'First', groups: []
+    } as any;
+    const invalid = {
+      guid: 'bulk-analysis-second', accountId: accountGuid, facilityId: secondFacilityGuid,
+      analysisCategory: 'energy', name: 'Second', groups: [], invalidCloneValue: () => undefined
+    } as any;
+
+    await expect(handler.createBulkFacilityAnalysesForAccount({
+      accountGuid, accountAnalysisGuid: analysisGuid, analyses: [valid, invalid]
+    })).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).not.toContainEqual(expect.objectContaining({ guid: 'bulk-analysis-first' }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: analysisGuid,
+      facilityAnalysisItems: [
+        { facilityId: facilityGuid, analysisItemId: undefined },
+        { facilityId: secondFacilityGuid, analysisItemId: undefined }
+      ]
+    }));
+  });
+
   it('rejects linked and cross-account account-analysis deletion without changing records', async () => {
     const accountGuid = accountAFixture.account.guid as string;
     const analysisGuid = accountAFixture.accountAnalysis.guid as string;
