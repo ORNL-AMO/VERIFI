@@ -97,6 +97,42 @@ describe('AnalysisCommandHandler', () => {
     expect(accountAnalysisDb.deleteWithObservable).not.toHaveBeenCalled();
   });
 
+  it('deletes an account analysis and clears the matching active selection atomically', async () => {
+    const { handler, transactions } = createHandler();
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([{ id: 8, guid: 'aa-1', accountId: ACCOUNT }])
+        .mockResolvedValueOnce([]),
+      getAll: vi.fn().mockResolvedValue([{ id: 1, guid: ACCOUNT, selectedEnergyAnalysisId: 'aa-1' }]),
+      put: vi.fn().mockResolvedValue(undefined),
+      deleteByKey: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.deleteAccountAnalysisAtomic({ accountGuid: ACCOUNT, analysisGuid: 'aa-1' });
+
+    expect(result.clearedActiveSelection).toBe(true);
+    expect(context.put).toHaveBeenCalledWith('accounts', expect.objectContaining({ selectedEnergyAnalysisId: undefined }));
+    expect(context.deleteByKey).toHaveBeenCalledWith('accountAnalysisItems', 8);
+  });
+
+  it('blocks account-analysis deletion for each supported linked report setup', async () => {
+    const setupNames = [
+      'betterPlantsReportSetup', 'performanceReportSetup', 'analysisReportSetup', 'accountSavingsReportSetup'
+    ];
+    for (const setupName of setupNames) {
+      const { handler, transactions } = createHandler();
+      const context = {
+        getAllByIndex: vi.fn()
+          .mockResolvedValueOnce([{ id: 8, guid: 'aa-1', accountId: ACCOUNT }])
+          .mockResolvedValueOnce([{ [setupName]: { analysisItemId: 'aa-1' } }])
+      };
+      transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+      await expect(handler.deleteAccountAnalysisAtomic({ accountGuid: ACCOUNT, analysisGuid: 'aa-1' }))
+        .rejects.toThrow('linked account report');
+    }
+  });
+
   // ---------------------------------------------------------------------------
   // Predictor-analysis compound operations
   // ---------------------------------------------------------------------------

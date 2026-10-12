@@ -13,6 +13,8 @@ import { AccountWorkspaceStore } from '../account-workspace.store';
 import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
+import { IdbAccount } from '@data/models/idbModels/account';
+import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 
 export interface DeleteFacilityAnalysisCommand {
   readonly accountGuid: string;
@@ -23,6 +25,16 @@ export interface DeleteFacilityAnalysisCommand {
 export interface DeleteFacilityAnalysisResult {
   readonly deletedAnalysis: IdbAnalysisItem;
   readonly clearedAccountAnalysisCount: number;
+  readonly clearedActiveSelection: boolean;
+}
+
+export interface DeleteAccountAnalysisCommand {
+  readonly accountGuid: string;
+  readonly analysisGuid: string;
+}
+
+export interface DeleteAccountAnalysisResult {
+  readonly deletedAnalysis: IdbAccountAnalysisItem;
   readonly clearedActiveSelection: boolean;
 }
 
@@ -134,6 +146,52 @@ export class AnalysisCommandHandler {
     this.assertOwnership(analysis.accountId, activeAccountGuid, 'account analysis');
     await firstValueFrom(this.accountAnalysisDb.deleteWithObservable(analysis.id));
     return analysis.id;
+  }
+
+  async deleteAccountAnalysisAtomic(command: DeleteAccountAnalysisCommand): Promise<DeleteAccountAnalysisResult> {
+    return this.transactions.runTransaction(
+      ['accountAnalysisItems', 'accountReports', 'accounts'],
+      'readwrite',
+      async transaction => {
+        const analyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>(
+          'accountAnalysisItems', 'accountId', command.accountGuid
+        );
+        const analysis = analyses.find(item => item.guid === command.analysisGuid);
+        if (!analysis || analysis.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The account analysis is missing or does not belong to the selected account.');
+        }
+        this.assertOwnership(analysis.accountId, command.accountGuid, 'account analysis');
+
+        const reports = await transaction.getAllByIndex<IdbAccountReport>('accountReports', 'accountId', command.accountGuid);
+        const linkedReports = reports.filter(report => accountReportReferencesAnalysis(report, analysis.guid));
+        if (linkedReports.length) {
+          throw new WorkspaceWriteError(
+            'validation-failed',
+            `Remove this analysis from ${linkedReports.length} linked account report(s) before deleting it.`
+          );
+        }
+
+        const accounts = await transaction.getAll<IdbAccount>('accounts');
+        const account = accounts.find(item => item.guid === command.accountGuid);
+        if (!account || account.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected account could not be found.');
+        }
+        const clearedActiveSelection = account.selectedEnergyAnalysisId === analysis.guid
+          || account.selectedWaterAnalysisId === analysis.guid;
+        if (clearedActiveSelection) {
+          await transaction.put('accounts', {
+            ...account,
+            selectedEnergyAnalysisId: account.selectedEnergyAnalysisId === analysis.guid
+              ? undefined : account.selectedEnergyAnalysisId,
+            selectedWaterAnalysisId: account.selectedWaterAnalysisId === analysis.guid
+              ? undefined : account.selectedWaterAnalysisId,
+            modifiedDate: new Date()
+          });
+        }
+        await transaction.deleteByKey('accountAnalysisItems', analysis.id);
+        return { deletedAnalysis: analysis, clearedActiveSelection };
+      }
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -312,6 +370,15 @@ export class AnalysisCommandHandler {
       );
     }
   }
+}
+
+export function accountReportReferencesAnalysis(report: IdbAccountReport, analysisGuid: string): boolean {
+  return [
+    report.betterPlantsReportSetup?.analysisItemId,
+    report.performanceReportSetup?.analysisItemId,
+    report.analysisReportSetup?.analysisItemId,
+    report.accountSavingsReportSetup?.analysisItemId
+  ].includes(analysisGuid);
 }
 
 export function buildFacilityAnalysesWithPredictors(

@@ -273,6 +273,47 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     expect(await harness.getAll('analysisItems')).toContainEqual(accountAFixture.facilityAnalysis);
   });
 
+  it('atomically deletes an account analysis and clears only its account active selection', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const analysisGuid = accountAFixture.accountAnalysis.guid as string;
+    await transactionService.runTransaction(['accounts'], 'readwrite', transaction => transaction.put('accounts', {
+      ...accountAFixture.account,
+      selectedEnergyAnalysisId: analysisGuid
+    }));
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    const result = await handler.deleteAccountAnalysisAtomic({ accountGuid, analysisGuid });
+
+    expect(result.clearedActiveSelection).toBe(true);
+    await harness.reopen();
+    expect(await harness.getAll('accountAnalysisItems')).not.toContainEqual(expect.objectContaining({ guid: analysisGuid }));
+    expect(await harness.getAll('accounts')).toContainEqual(expect.objectContaining({
+      guid: accountGuid,
+      selectedEnergyAnalysisId: undefined
+    }));
+    expect(await harness.getAll('accounts')).toContainEqual(accountBFixture.account);
+  });
+
+  it('rejects linked and cross-account account-analysis deletion without changing records', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const analysisGuid = accountAFixture.accountAnalysis.guid as string;
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+    await transactionService.runTransaction(['accountReports'], 'readwrite', transaction => transaction.put('accountReports', {
+      ...accountAFixture.accountReport,
+      analysisReportSetup: { ...accountAFixture.accountReport.analysisReportSetup, analysisItemId: analysisGuid }
+    }));
+
+    await expect(handler.deleteAccountAnalysisAtomic({ accountGuid, analysisGuid }))
+      .rejects.toThrow('linked account report');
+    await expect(handler.deleteAccountAnalysisAtomic({
+      accountGuid: accountBFixture.account.guid as string,
+      analysisGuid
+    })).rejects.toThrow('missing or does not belong');
+
+    await harness.reopen();
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(accountAFixture.accountAnalysis);
+  });
+
   it('rolls back meter-group creation when a related analysis write fails', async () => {
     const invalidAnalysis = {
       ...accountAFixture.facilityAnalysis,
