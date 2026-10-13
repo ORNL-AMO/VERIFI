@@ -1,5 +1,5 @@
 :host { display: flex; flex: 1 1 auto; min-height: 0; }
-.v1-account-selection { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; width: 100%; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+section.v1-account-selection { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; width: 100%; border: 1px solid var(--v1-border); border-radius: 0 0 var(--v1-radius) var(--v1-radius) !important; background: var(--v1-surface); overflow: hidden; }
 .v1-account-selection__workspace { display: grid; flex: 1 1 auto; grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr); min-height: 0; }
 .v1-account-selection__rail { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border-right: 1px solid var(--v1-border); background: var(--v1-surface-muted); }
 .v1-account-selection__rail > header { padding: 1rem; border-bottom: 1px solid var(--v1-border); }

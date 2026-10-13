@@ -1,6 +1,6 @@
 :host { display: block; }
 h2, p { margin-block: 0; }
-.v1-account-analysis-setup { display: grid; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0; background: var(--v1-surface); }
+form.v1-account-analysis-setup { display: grid; border: 1px solid var(--v1-border); border-top: 0; border-radius: 0 0 var(--v1-radius) var(--v1-radius) !important; background: var(--v1-surface); overflow: hidden; }
 .v1-account-analysis-setup__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .v1-account-analysis-setup__panel { display: grid; align-content: start; gap: var(--v1-space-2); min-width: 0; padding-block: 1rem; }
 .v1-account-analysis-setup__panel:first-child { padding-right: 1.25rem; padding-left: 1rem; }
