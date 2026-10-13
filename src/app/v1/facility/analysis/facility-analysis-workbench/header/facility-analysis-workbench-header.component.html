@@ -103,19 +103,7 @@
         </ul>
       }
 
-      @if (workflow.currentStageFindings().length) {
-        <ul class="v1-data-workbench-status-notes v1-analysis-workbench__status-notes" aria-label="Analysis status items">
-          @for (finding of workflow.currentStageFindings(); track finding.id) {
-            <li [class.v1-analysis-workbench__status-note--error]="finding.severity === 'error'">
-              <app-ui-icon [name]="finding.severity === 'error' ? 'warning' : 'info'"></app-ui-icon>
-              <span><strong>{{ finding.title }}</strong> {{ finding.description }}</span>
-              @if (finding.destination.kind !== 'unavailable') {
-                <button type="button" (click)="context.status.navigateTo(finding)">Review</button>
-              }
-            </li>
-          }
-        </ul>
-      }
+      <app-analysis-status-notes [findings]="context.findings()" (reviewed)="context.status.navigateTo($event)"></app-analysis-status-notes>
     </header>
   }
 }

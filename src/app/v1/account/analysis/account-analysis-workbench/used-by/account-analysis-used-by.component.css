@@ -1,1 +1,13 @@
 :host { display: block; }
+.account-analysis-used-by { display: grid; gap: var(--v1-space-4); padding: var(--v1-space-4); border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); }
+h2, h3, p { margin: 0; }
+.account-analysis-used-by__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); }
+.account-analysis-used-by__heading > div { display: grid; gap: var(--v1-space-2); }
+.account-analysis-used-by__reports { display: grid; margin: var(--v1-space-3) 0 0; padding: 0; list-style: none; }
+.account-analysis-used-by__reports li { display: flex; align-items: center; justify-content: space-between; gap: var(--v1-space-3); padding-block: var(--v1-space-3); border-bottom: 1px solid var(--v1-divider); }
+.account-analysis-used-by__reports li:last-child { border-bottom: 0; padding-bottom: 0; }
+.account-analysis-used-by__reports li > span:first-child { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.account-analysis-used-by__reports small { color: var(--v1-muted); }
+@media (max-width: 760px) {
+  .account-analysis-used-by__heading, .account-analysis-used-by__reports li { flex-direction: column; align-items: flex-start; }
+}

@@ -52,6 +52,8 @@ The workbench owns the services that must survive child-tab navigation:
 
 The workbench route component is the provider and guard boundary. Its header, workflow navigation, and footer are focused child components that inject the route-scoped services directly. The header and both workflow/contextual tab rows share one sticky stack; group and facility result shells retain only route context, canonical fallback behavior, empty states, and their child outlets.
 
+The header's shared `AnalysisStatusNotesComponent` displays all selected-analysis and selected-analysis-group findings on every stage and result tab, including Used By. Status details remain visible when facts are collapsed; Review delegates a typed finding to workspace status navigation. Stage and tab attention badges remain contextual and keep their existing readiness behavior.
+
 Each group route creates `FacilityAnalysisGroupContext`. It resolves the group, group meters, meter-group metadata, and group findings. Setup and Regression then create page-specific facades:
 
 - `FacilityAnalysisGroupSetupController` owns the typed setup forms, dynamic predictor controls, adjustment-editor state, and pending confirmations. `FacilityAnalysisGroupSetupFacade` owns setup projections and typed analysis-draft mutations.

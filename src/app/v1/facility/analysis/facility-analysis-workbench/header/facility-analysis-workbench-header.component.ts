@@ -7,7 +7,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { AnalysisAutosaveState, FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
-import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
+import { AnalysisStatusNotesComponent } from '@app/v1/shared/analysis-results/status-notes/analysis-status-notes.component';
 import { FacilityAnalysisResultState, FacilityAnalysisResultsService } from '../results/calculation/facility-analysis-results.service';
 import {
   FacilityAnalysisOutcomeState,
@@ -25,7 +25,8 @@ import { AccountAnalysisReturnService } from '../navigation/account-analysis-ret
     IconComponent,
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,
-    FacilityAnalysisGroupModelRosterComponent
+    FacilityAnalysisGroupModelRosterComponent,
+    AnalysisStatusNotesComponent
   ],
   templateUrl: './facility-analysis-workbench-header.component.html',
   styleUrls: ['./facility-analysis-workbench-header.component.css']
@@ -36,7 +37,6 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly results = inject(FacilityAnalysisResultsService);
-  readonly workflow = inject(FacilityAnalysisWorkbenchNavigationService);
   readonly accountAnalysisReturn = inject(AccountAnalysisReturnService);
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,

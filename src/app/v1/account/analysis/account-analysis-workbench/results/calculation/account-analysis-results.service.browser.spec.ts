@@ -39,6 +39,39 @@ describe('AccountAnalysisResultsService browser Worker lifecycle', () => {
     expect(service.state()).toMatchObject({ state: 'error', message: 'Account analysis calculation returned a stale result.' });
   });
 
+  it('shares one calculation across header and result consumers, clears old analysis results, and tears down pending work', async () => {
+    const draft = signal(analysisFixture());
+    const autosaveState = signal('saved');
+    configure(draft, autosaveState, signal('ready'), signal(true));
+    const headerResults = TestBed.inject(AccountAnalysisResultsService);
+    await settleSignals();
+    const resultPageResults = TestBed.inject(AccountAnalysisResultsService);
+    expect(resultPageResults).toBe(headerResults);
+    expect(FakeWorker.instances).toHaveLength(1);
+    FakeWorker.instances[0].emitMessage(completeResponse('analysis-a'));
+    expect(headerResults.state()).toMatchObject({ state: 'ready', analysisGuid: 'analysis-a' });
+
+    draft.set({ ...draft(), name: 'Renamed for header' });
+    await settleSignals();
+    expect(FakeWorker.instances).toHaveLength(1);
+    expect(resultPageResults.state().state).toBe('ready');
+
+    autosaveState.set('dirty');
+    await settleSignals();
+    expect(headerResults.state()).toMatchObject({ state: 'waiting', reason: 'autosave' });
+    autosaveState.set('saved');
+    await settleSignals();
+    expect(resultPageResults.state().state).toBe('ready');
+    expect(FakeWorker.instances).toHaveLength(1);
+
+    draft.set({ ...draft(), guid: 'analysis-b' });
+    await settleSignals();
+    expect(headerResults.state()).toMatchObject({ state: 'loading', analysisGuid: 'analysis-b' });
+    const pending = FakeWorker.instances[1];
+    TestBed.resetTestingModule();
+    expect(pending.terminate).toHaveBeenCalledOnce();
+  });
+
   it('waits for saved, validated, valid selections before starting work', async () => {
     const autosaveState = signal('dirty');
     const statusState = signal('evaluating');
