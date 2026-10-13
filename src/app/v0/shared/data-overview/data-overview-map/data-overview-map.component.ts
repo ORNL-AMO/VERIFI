@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-data-overview-map',
@@ -203,18 +204,6 @@ export class DataOverviewMapComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.utilityUsageMap?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.utilityUsageMap.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.utilityUsageMap?.nativeElement); 
   }
 }

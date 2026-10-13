@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-meter-cost-timeseries-graph',
@@ -126,19 +127,7 @@ export class MeterCostTimeseriesGraphComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.meterCostTimeSeriesGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.meterCostTimeSeriesGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.meterCostTimeSeriesGraph?.nativeElement);
   }
 }
 

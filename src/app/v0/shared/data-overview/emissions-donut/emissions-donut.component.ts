@@ -7,6 +7,7 @@ import { FacilityOverviewMeter } from '@domain/calculations/dashboard-calculatio
 import { EmissionsResults, EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/models/eGridEmissions';
 import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountOverviewService } from '@v0/data-evaluation/account/account-overview/account-overview.service';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-emissions-donut',
@@ -197,18 +198,6 @@ export class EmissionsDonutComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.emissionsDonut?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.emissionsDonut.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.emissionsDonut?.nativeElement);
   }
 }

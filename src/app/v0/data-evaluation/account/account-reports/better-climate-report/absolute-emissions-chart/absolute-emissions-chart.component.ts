@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
 import { getEmissionsTypeColor } from '@data/models/eGridEmissions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-absolute-emissions-chart',
@@ -140,22 +141,6 @@ export class AbsoluteEmissionsChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.absoluteEmissionsStackedBarChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      return await rawPlotly.toImage(this.absoluteEmissionsStackedBarChart.nativeElement, {
-        format: 'jpeg',
-        height: 700,
-        width: 1400,
-        imageDataOnly: false
-      });
-    } catch {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.absoluteEmissionsStackedBarChart?.nativeElement);
   }
 }

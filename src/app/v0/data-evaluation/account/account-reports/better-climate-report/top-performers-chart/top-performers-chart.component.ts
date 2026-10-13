@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
 import { BetterClimateReportSetup } from '@data/models/overview-report';
 import type { BetterClimateChartDataOption } from '@v0/data-evaluation/account/account-reports/better-climate-report/better-climate-report.adapter';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-top-performers-chart',
@@ -157,22 +158,6 @@ export class TopPerformersChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.performanceChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      return await rawPlotly.toImage(this.performanceChart.nativeElement, {
-        format: 'jpeg',
-        height: 700,
-        width: 1400,
-        imageDataOnly: false
-      });
-    } catch {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.performanceChart?.nativeElement);
   }
 }

@@ -7,6 +7,7 @@ import { UtilityColors } from '@shared/utilityColors';
 import * as _ from 'lodash';
 import { AnalysisGroup } from '@data/models/analysis';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-performance-chart',
@@ -235,18 +236,6 @@ export class PerformanceChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.performanceChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.performanceChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.performanceChart?.nativeElement);
   }
 }

@@ -7,6 +7,7 @@ import { FacilityOverviewService } from '@v0/data-evaluation/facility/facility-o
 import { AnnualSourceData, AnnualSourceDataItem } from '@domain/calculations/dashboard-calculations/facilityOverviewClass';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from '@data/models/eGridEmissions';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-emissions-usage-chart',
@@ -162,18 +163,6 @@ export class EmissionsUsageChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.utilityBarChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.utilityBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.utilityBarChart?.nativeElement);
   }
 }
