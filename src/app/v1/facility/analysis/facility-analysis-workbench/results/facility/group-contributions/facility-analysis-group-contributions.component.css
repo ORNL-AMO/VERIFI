@@ -4,7 +4,6 @@
 
 .v1-analysis-contributions__intro,
 .v1-analysis-contributions__table,
-.v1-analysis-contributions__chart,
 .v1-analysis-contributions__empty {
   border: 1px solid var(--v1-border);
   border-top: 0;
@@ -21,47 +20,6 @@
   min-width: 0;
   overflow: hidden;
   border-radius: 0 0 var(--v1-radius) var(--v1-radius);
-}
-
-.v1-analysis-contributions__chart {
-  display: grid;
-  gap: var(--v1-space-2);
-  padding: var(--v1-space-4);
-}
-
-.v1-analysis-contributions__chart-actions {
-  display: flex;
-  gap: var(--v1-space-3);
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.v1-analysis-contributions__chart-actions h2 {
-  margin: 0 auto 0 0;
-  color: var(--v1-text);
-  font-size: 1rem;
-  font-weight: 900;
-}
-
-.v1-analysis-contributions__chart-actions .v1-icon-btn:hover,
-.v1-analysis-contributions__chart-actions .v1-icon-btn:focus-visible {
-  border-color: var(--v1-content-control);
-  color: var(--v1-content-control);
-}
-
-.v1-analysis-contributions__chart-scroll {
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-.v1-analysis-contributions__chart-scroll:focus-visible {
-  outline: 2px solid var(--v1-focus);
-  outline-offset: 2px;
-}
-
-.v1-analysis-contributions__heatmap {
-  width: 100%;
-  background: var(--v1-surface);
 }
 
 .v1-table-scroll {

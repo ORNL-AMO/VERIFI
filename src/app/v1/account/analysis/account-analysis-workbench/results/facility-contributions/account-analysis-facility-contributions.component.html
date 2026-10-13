@@ -1,0 +1,67 @@
+@let state = results.state();
+@let contributions = view();
+<section class="v1-account-facility-contributions" aria-label="Account facility contributions">
+  @if (blocking() || state.state !== 'ready' || !rows().length) {
+    <div class="v1-account-facility-contributions__intro">
+      <app-analysis-result-status scope="account" period="annual" [state]="state" [blocking]="blocking()" [rowCount]="rows().length"></app-analysis-result-status>
+    </div>
+  }
+
+  @if (!blocking() && state.state === 'ready' && rows().length) {
+    @if (hasContributionData()) {
+      <app-contribution-heatmap
+        [view]="heatmapView()"
+        scopeLabel="Facility"
+        [compact]="true"
+        downloadFileName="account-facility-contributions">
+      </app-contribution-heatmap>
+
+      <section class="v1-account-facility-contributions__table" aria-label="Facility contribution table">
+        <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Facility contributions by fiscal year">
+          <table class="v1-account-facility-contributions-table">
+            <thead>
+              <tr>
+                <th scope="col">Facility / Fiscal Year</th>
+                <th scope="col">Savings@if (unit()) { <small> ({{ unit() }})</small> }</th>
+                <th scope="col">% Savings</th>
+                <th scope="col">% Contribution</th>
+                <th scope="col"><span class="visually-hidden">Facility analysis</span></th>
+              </tr>
+            </thead>
+            @for (year of contributions.years; track year.year) {
+              <tbody>
+                <tr class="v1-account-facility-contributions-table__year">
+                  <th scope="rowgroup">Fiscal Year {{ year.year }} Total</th>
+                  <td [class.is-negative]="year.totalSavings < 0">{{ year.totalSavings | analysisResultNumber }}</td>
+                  <td [class.is-negative]="year.totalSavingsPercent < 0">{{ year.totalSavingsPercent | number:'1.0-3' }}%</td>
+                  <td [class.is-negative]="year.totalContributionPercent < 0">{{ year.totalContributionPercent | number:'1.0-3' }}%</td>
+                  <td></td>
+                </tr>
+                @for (facility of year.facilities; track facility.facilityGuid) {
+                  <tr>
+                    <th scope="row">{{ facility.facilityName }}</th>
+                    <td [class.is-negative]="facility.savings < 0">{{ facility.savings | analysisResultNumber }}</td>
+                    <td [class.is-negative]="facility.savingsPercent < 0">{{ facility.savingsPercent | number:'1.0-3' }}%</td>
+                    <td [class.is-negative]="facility.contributionPercent < 0">{{ facility.contributionPercent | number:'1.0-3' }}%</td>
+                    <td>
+                      @let drillIn = drillInLinks()[facility.facilityGuid];
+                      <a class="v1-text-link" [routerLink]="drillIn?.route" [queryParams]="drillIn?.queryParams">View group contributions<span class="visually-hidden"> for {{ facility.facilityName }}</span></a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            }
+          </table>
+        </div>
+      </section>
+    } @else {
+      <section class="v1-account-facility-contributions__empty">
+        <article class="v1-empty-state" role="status">
+          <app-ui-icon name="facility"></app-ui-icon>
+          <h2>No facility contribution results</h2>
+          <p>Post-baseline results from at least one selected facility analysis are needed for this comparison.</p>
+        </article>
+      </section>
+    }
+  }
+</section>

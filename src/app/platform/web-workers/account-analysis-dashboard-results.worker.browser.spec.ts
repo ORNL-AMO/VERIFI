@@ -48,5 +48,6 @@ describe('account analysis dashboard results Worker', () => {
       ok: true,
       value: calculateAccountAnalysisDashboardResults(request)
     });
+    expect(response.ok && response.value.facilitySummaries).toBeUndefined();
   });
 });

@@ -8,6 +8,7 @@ export interface AccountAnalysisReturnOrigin {
   readonly accountGuid: string;
   readonly accountAnalysisGuid: string;
   readonly facilityGuid: string;
+  readonly resultTab?: 'facility-details' | 'facility-contributions';
 }
 
 @Injectable()
@@ -34,6 +35,15 @@ export class AccountAnalysisReturnService {
   async returnToAccountAnalysis(): Promise<boolean> {
     const origin = this.origin();
     if (!origin) return false;
+    if (origin.resultTab) {
+      return this.router.navigate(
+        this.navigation.accountAnalysisResultsRoute(
+          origin.accountGuid,
+          origin.accountAnalysisGuid,
+          origin.resultTab
+        )
+      );
+    }
     return this.router.navigate(
       this.navigation.accountAnalysisWorkbenchRoute(
         origin.accountGuid,
@@ -49,7 +59,13 @@ export function readAccountAnalysisReturnOrigin(params: Pick<URLSearchParams, 'g
   const accountGuid = params.get(ACCOUNT_ANALYSIS_ORIGIN_QUERY.accountGuid)?.trim();
   const accountAnalysisGuid = params.get(ACCOUNT_ANALYSIS_ORIGIN_QUERY.analysisGuid)?.trim();
   const facilityGuid = params.get(ACCOUNT_ANALYSIS_ORIGIN_QUERY.facilityGuid)?.trim();
+  const resultTab = params.get(ACCOUNT_ANALYSIS_ORIGIN_QUERY.resultTab)?.trim();
   return accountGuid && accountAnalysisGuid && facilityGuid
-    ? { accountGuid, accountAnalysisGuid, facilityGuid }
+    ? {
+      accountGuid,
+      accountAnalysisGuid,
+      facilityGuid,
+      ...(resultTab === 'facility-details' || resultTab === 'facility-contributions' ? { resultTab } : {})
+    }
     : undefined;
 }

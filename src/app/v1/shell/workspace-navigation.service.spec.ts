@@ -121,6 +121,9 @@ describe('WorkspaceNavigationService', () => {
     expect(service.accountAnalysisResultsRoute('account-a', 'analysis-a', 'monthly-chart')).toEqual([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'results', 'monthly-chart'
     ]);
+    expect(service.accountAnalysisResultsRoute('account-a', 'analysis-a', 'facility-contributions')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'results', 'facility-contributions'
+    ]);
     expect(service.facilityRoute('facility-a')).toEqual([
       '/v1',
       'workspace',

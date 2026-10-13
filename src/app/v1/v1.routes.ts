@@ -85,6 +85,7 @@ import { AccountAnalysisAnnualComponent } from '@app/v1/account/analysis/account
 import { AccountAnalysisMonthlyTableComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-table/account-analysis-monthly-table.component';
 import { AccountAnalysisMonthlyChartComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/monthly-chart/account-analysis-monthly-chart.component';
 import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-details/account-analysis-facility-details.component';
+import { AccountAnalysisFacilityContributionsComponent } from '@app/v1/account/analysis/account-analysis-workbench/results/facility-contributions/account-analysis-facility-contributions.component';
 import { AccountAnalysisUsedByComponent } from '@app/v1/account/analysis/account-analysis-workbench/used-by/account-analysis-used-by.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
@@ -214,6 +215,7 @@ export const V1Routes: Routes = [
                       { path: 'monthly-table', component: AccountAnalysisMonthlyTableComponent, data: { accountAnalysisResultTab: 'monthly-table' } },
                       { path: 'monthly-chart', component: AccountAnalysisMonthlyChartComponent, data: { accountAnalysisResultTab: 'monthly-chart' } },
                       { path: 'facility-details', component: AccountAnalysisFacilityDetailsComponent, data: { accountAnalysisResultTab: 'facility-details' } },
+                      { path: 'facility-contributions', component: AccountAnalysisFacilityContributionsComponent, data: { accountAnalysisResultTab: 'facility-contributions' } },
                       { path: '**', redirectTo: 'annual' }
                     ]
                   },

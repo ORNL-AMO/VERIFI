@@ -177,6 +177,8 @@ In v1, content-navigation controls use the themed content-control color (`--v1-c
 
 The repository does not define a separate design system. Do not introduce one implicitly as part of a feature issue.
 
+Shared v1 analysis presentation lives under `src/app/v1/shared/analysis-results`. Its contribution heatmap owns the common fiscal-year chart, formatting, themed labels, horizontal overflow, and PNG download for account facility contributions and facility group contributions. Features supply precomputed percentages and retain ownership of calculations, tables, navigation, and vertical scrolling. See [V1 Account Analysis Architecture](docs/v1-account-analysis-architecture.md#shared-analysis-presentation).
+
 ## Tests, builds, and delivery
 
 Test targets are configured in `angular.json` and exposed through `package.json`:

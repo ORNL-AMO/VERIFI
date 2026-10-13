@@ -93,6 +93,7 @@ describe('account analysis workbench models', () => {
     expect(activeAccountAnalysisWorkbenchStageId('/v1/workspace/account/a/analysis/workbench/x/results/monthly-chart')).toBe('results');
     expect(activeAccountAnalysisWorkbenchStageId('/v1/workspace/account/a/analysis/workbench/x/used-by')).toBe('used-by');
     expect(activeAccountAnalysisResultTabId('/v1/workspace/account/a/analysis/workbench/x/results/facility-details')).toBe('facility-details');
+    expect(activeAccountAnalysisResultTabId('/v1/workspace/account/a/analysis/workbench/x/results/facility-contributions')).toBe('facility-contributions');
     expect(activeAccountAnalysisResultTabId('/v1/workspace/account/a/analysis/workbench/x/setup')).toBe('annual');
   });
 });

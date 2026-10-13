@@ -1,1 +1,9 @@
-:host, .v1-account-analysis-results-shell { display: block; }
+:host,
+.v1-account-analysis-results-shell {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.v1-account-analysis-results-shell { flex-direction: column; }

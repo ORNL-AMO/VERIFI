@@ -1,6 +1,66 @@
-<app-account-analysis-scaffold-page
-  headingId="v1-account-analysis-facility-details-heading"
-  title="Facility Details"
-  icon="facility"
-  description="Facility-level account result summaries and their navigation back to selected facility analyses will be migrated in the next results parity pass.">
-</app-account-analysis-scaffold-page>
+@let state = results.state();
+<section class="v1-account-facility-details" aria-label="Account facility details">
+  @if (blocking() || state.state !== 'ready') {
+    <div class="v1-account-facility-details__intro">
+      <app-analysis-result-status scope="account" period="monthly" [state]="state" [blocking]="blocking()" [rowCount]="facilities().length"></app-analysis-result-status>
+    </div>
+  } @else if (!facilities().length) {
+    <article class="v1-empty-state" role="status">
+      <h2>No facility results</h2>
+      <p>Select at least one facility analysis to compare monthly facility results.</p>
+    </article>
+  } @else {
+    <div class="v1-account-facility-details__content" tabindex="0" role="region" aria-label="Scrollable facility details">
+      <div class="v1-account-facility-details__grid">
+        @for (facility of facilities(); track facility.facilityGuid) {
+          <article class="v1-account-facility-details__facility">
+            <header class="v1-account-facility-details__header">
+              <h2>
+                <a [routerLink]="facility.drillInRoute" [queryParams]="facility.drillInQueryParams">
+                  <app-ui-icon name="facility"></app-ui-icon>
+                  <span>{{ facility.facilityName }}</span>
+                  <app-ui-icon name="chevronRight" aria-hidden="true"></app-ui-icon>
+                </a>
+              </h2>
+              <dl class="v1-account-facility-details__facts" [attr.aria-label]="facility.facilityName + ' latest results'">
+                <div>
+                  <dt>@if (facility.latestFiscalYear !== undefined) { FY {{ facility.latestFiscalYear }} total savings } @else { Total savings }</dt>
+                  <dd [class.is-negative]="(facility.latestFiscalYearSavings ?? 0) < 0">
+                    @if (facility.latestFiscalYearSavings !== undefined) { {{ facility.latestFiscalYearSavings | analysisResultNumber }} @if (unit()) { <small>{{ unit() }}</small> } } @else { — }
+                  </dd>
+                </div>
+                <div>
+                  <dt>% contribution to account</dt>
+                  <dd [class.is-negative]="(facility.latestFiscalYearContributionPercent ?? 0) < 0">
+                    @if (facility.latestFiscalYearContributionPercent !== undefined) { {{ facility.latestFiscalYearContributionPercent | number:'1.0-2' }}% } @else { — }
+                  </dd>
+                </div>
+                <div>
+                  <dt>Rolling 12-month improvement</dt>
+                  <dd [class.is-negative]="(facility.latestRollingImprovement ?? 0) < 0">
+                    @if (facility.latestRollingImprovement !== undefined) { {{ facility.latestRollingImprovement | number:'1.0-2' }}% } @else { — }
+                  </dd>
+                </div>
+              </dl>
+            </header>
+            <app-meter-results-chart
+              [chartRows]="facility.chartRows"
+              [metrics]="chartMetrics()"
+              [showAllMetrics]="true"
+              allMetricsDisplay="line"
+              [sharedYAxis]="true"
+              [yAxisTitle]="unit()"
+              [allowNegativeValues]="true"
+              [showSeriesControls]="false"
+              period="monthly"
+              [ariaLabel]="facility.facilityName + ' monthly actual and calculated use chart'"
+              [downloadFileName]="facility.facilityName + '-monthly-use'"
+              [embedded]="true"
+              [compact]="true">
+            </app-meter-results-chart>
+          </article>
+        }
+      </div>
+    </div>
+  }
+</section>

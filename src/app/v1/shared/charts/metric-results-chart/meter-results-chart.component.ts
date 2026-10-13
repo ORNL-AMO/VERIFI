@@ -72,6 +72,8 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() downloadFileName = 'meter-results-chart';
   @Input() joinsFollowingSection = false;
   @Input() embedded = false;
+  /** Use for dense, multi-chart result views where each chart shares the available workspace height. */
+  @Input() compact = false;
 
   @ViewChild(EChartsChartDirective) chartDirective?: EChartsChartDirective;
 

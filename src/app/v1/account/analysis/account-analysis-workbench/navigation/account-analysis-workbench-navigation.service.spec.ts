@@ -103,8 +103,8 @@ describe('accountAnalysisNavigationRequirement', () => {
     expect(navigate).toHaveBeenCalledWith([
       '/v1', 'workspace', 'account', 'account-a', 'analysis', 'workbench', 'analysis-a', 'used-by'
     ]);
-    service.openResultTab('facility-details');
-    expect(navigate).toHaveBeenCalledWith(['/results', 'facility-details']);
+    service.openResultTab('facility-contributions');
+    expect(navigate).toHaveBeenCalledWith(['/results', 'facility-contributions']);
   });
 
   it('steps the Select footer through facilities before navigating to Results', async () => {

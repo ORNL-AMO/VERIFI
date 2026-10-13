@@ -3,6 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from '@data/models/analysis';
 import { calculateAccountAnalysisResults } from '@domain/calculations/analysis-calculations/account-analysis-results-calculation';
 import {
+  AccountAnalysisFacilitySummary,
   AccountAnalysisResultsValue,
   AccountAnalysisResultsWorkerRequest,
   AccountAnalysisResultsWorkerResponse
@@ -24,6 +25,7 @@ export type AccountAnalysisResultState =
     readonly state: 'ready'; readonly analysisGuid: string; readonly fingerprint: string;
     readonly annual: readonly AnnualAnalysisSummary[];
     readonly monthly: readonly MonthlyAnalysisSummaryData[];
+    readonly facilitySummaries: readonly AccountAnalysisFacilitySummary[];
     readonly reportYear?: number;
   }
   | { readonly state: 'error'; readonly analysisGuid: string; readonly fingerprint: string; readonly message: string };
@@ -113,6 +115,7 @@ function normalizeAccountAnalysisValue(value: AccountAnalysisResultsValue, analy
     state: 'ready', analysisGuid, fingerprint,
     annual: value.annualAnalysisSummaries,
     monthly: value.monthlyAnalysisSummaryData,
+    facilitySummaries: value.facilitySummaries ?? [],
     reportYear: value.reportYear
   };
 }

@@ -24,6 +24,10 @@
   border-radius: 0;
 }
 
+.v1-meter-results-chart--compact {
+  gap: var(--v1-space-2);
+}
+
 .v1-meter-results-chart__controls {
   display: flex;
   flex-wrap: wrap;
@@ -71,6 +75,21 @@
   width: 100%;
   min-height: 24rem;
   background: var(--v1-surface);
+}
+
+/* Keep the chart data table available to screen readers without contributing to the chart's layout or scroll height. */
+.v1-meter-results-chart__accessible-data {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  contain: strict;
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (max-width: 680px) {

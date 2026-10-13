@@ -1,0 +1,51 @@
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.v1-account-facility-contributions {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  contain: paint;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.v1-account-facility-contributions__intro,
+.v1-account-facility-contributions__table,
+.v1-account-facility-contributions__empty {
+  border: 1px solid var(--v1-border);
+  border-top: 0;
+  background: var(--v1-surface);
+}
+
+.v1-account-facility-contributions__intro,
+.v1-account-facility-contributions__empty {
+  padding: var(--v1-space-4);
+  border-radius: 0 0 var(--v1-radius) var(--v1-radius);
+}
+
+.v1-account-facility-contributions__table { display: block; flex: 0 0 auto; min-width: 0; overflow: hidden; border-radius: 0 0 var(--v1-radius) var(--v1-radius); }
+.v1-account-facility-contributions__table .v1-table-scroll { min-width: 0; max-width: 100%; overflow-x: auto; overflow-y: hidden; contain: paint; background: var(--v1-surface); }
+
+.v1-account-facility-contributions-table { width: 100%; min-width: 52rem; border-collapse: collapse; color: var(--v1-text); font-size: .88rem; }
+.v1-account-facility-contributions-table th,
+.v1-account-facility-contributions-table td { padding: .6rem .7rem; border-bottom: 1px solid var(--v1-divider); text-align: right; vertical-align: middle; }
+.v1-account-facility-contributions-table thead th { background: color-mix(in srgb, var(--v1-action) 9%, var(--v1-panel)); color: var(--v1-muted); font-size: .76rem; font-weight: 900; line-height: 1.25; text-transform: uppercase; white-space: normal; }
+.v1-account-facility-contributions-table th:first-child,
+.v1-account-facility-contributions-table td:first-child { text-align: left; }
+.v1-account-facility-contributions-table tbody th { font-weight: 800; }
+.v1-account-facility-contributions-table tbody tr:not(.v1-account-facility-contributions-table__year) th { padding-left: calc(.7rem + var(--v1-space-4)); font-weight: 600; }
+.v1-account-facility-contributions-table tbody tr:not(.v1-account-facility-contributions-table__year):hover { background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); }
+.v1-account-facility-contributions-table__year > * { border-top: 1px solid color-mix(in srgb, var(--v1-action) 45%, var(--v1-border)); border-bottom-color: color-mix(in srgb, var(--v1-action) 45%, var(--v1-border)); background: color-mix(in srgb, var(--v1-action) 14%, var(--v1-surface)); color: var(--v1-text); font-weight: 900; }
+.v1-account-facility-contributions-table__year th { font-size: .74rem; letter-spacing: .02em; text-transform: uppercase; }
+.v1-account-facility-contributions-table tbody:first-of-type .v1-account-facility-contributions-table__year > * { border-top: 0; }
+.v1-account-facility-contributions-table tbody:last-of-type tr:last-child > * { border-bottom: 0; }
+.v1-account-facility-contributions-table td { font-variant-numeric: tabular-nums; }
+.v1-account-facility-contributions-table .is-negative { color: var(--v1-danger); }

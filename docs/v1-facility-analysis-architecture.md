@@ -167,7 +167,7 @@ Both ordinary scopes offer Annual, Monthly Table, and Monthly Chart. Annual disp
 
 Future results pages should be added below the existing group or facility result shells. They should consume the coordinator’s current result or add a clearly named projection to it. Add a new Worker only when the calculation has a genuinely different input and lifecycle boundary—not merely because a new tab needs another presentation.
 
-Generic metric charts and their contracts, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout are shared v1 analysis presentation. Account and facility features own the view builders that adapt their calculation results and setup fields to those components. Keep tables feature-owned when their columns, row semantics, formulas, or completeness rules differ; promote them only when both workflows use the same contract without feature switches.
+Generic metric charts and their contracts, contribution heatmaps, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout are shared v1 analysis presentation. The shared contribution heatmap owns chart configuration, percentage formatting, themes, horizontal overflow, and PNG download for both group and account facility contributions. Account and facility features own the view builders that adapt their calculation results and setup fields to those components. Keep tables feature-owned when their columns, row semantics, formulas, or completeness rules differ; promote them only when both workflows use the same contract without feature switches.
 
 ## Confirmation and navigation rules
 

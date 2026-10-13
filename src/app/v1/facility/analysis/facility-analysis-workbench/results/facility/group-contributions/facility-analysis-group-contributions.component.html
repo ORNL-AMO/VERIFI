@@ -15,30 +15,11 @@
 
   @if (!context.hasBlockingErrors() && state.state === 'ready' && rows().length) {
     @if (hasContributionData()) {
-      <section class="v1-analysis-contributions__chart" aria-label="Group contribution chart">
-        <div class="v1-analysis-contributions__chart-actions">
-          <h2>Group Contributions by Fiscal Year</h2>
-          <button
-            type="button"
-            class="v1-icon-btn"
-            title="Download PNG"
-            aria-label="Download group contribution heatmap as PNG"
-            (click)="downloadHeatmap()">
-            <app-ui-icon name="download"></app-ui-icon>
-          </button>
-        </div>
-        <div class="v1-analysis-contributions__chart-scroll" tabindex="0" role="region" aria-label="Scrollable group contribution heatmap">
-          <div
-            #contributionHeatmap
-            class="v1-analysis-contributions__heatmap"
-            [style.height.px]="heatmapHeight()"
-            [style.min-width.px]="heatmapWidth()"
-            [appV1ECharts]="heatmapOption()"
-            role="img"
-            aria-label="Group percent contribution heatmap by fiscal year. Green indicates savings and red indicates losses.">
-          </div>
-        </div>
-      </section>
+      <app-contribution-heatmap
+        [view]="heatmapView()"
+        scopeLabel="Group"
+        downloadFileName="facility-group-contributions">
+      </app-contribution-heatmap>
 
       <section class="v1-analysis-contributions__table" aria-label="Group contribution table">
         <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Group contributions by fiscal year">
