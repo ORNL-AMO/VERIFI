@@ -3,10 +3,11 @@
 
 <section class="v1-account-portfolio" aria-labelledby="v1-account-portfolio-title">
   @if (currentAccount) {
+    <div #portfolioSticky class="v1-data-workbench-sticky v1-account-portfolio__sticky">
     <header class="v1-section-header v1-account-portfolio__header">
       <div>
         <p class="v1-eyebrow">Account Data</p>
-        <h1 id="v1-account-portfolio-title">Portfolio</h1>
+        <h1 id="v1-account-portfolio-title"><app-ui-icon name="portfolio"></app-ui-icon> Portfolio</h1>
       </div>
       <div class="v1-account-portfolio__header-actions">
         <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
@@ -30,6 +31,7 @@
         </a>
       }
     </nav>
+    </div>
 
     @if (!canWrite()) {
       <div class="v1-alert v1-alert--warning" role="status">
@@ -38,7 +40,7 @@
       </div>
     }
 
-    @if (totals().facilities === 0) {
+    @if (totals().facilities === 0 && totals().analyses === 0) {
       <app-data-empty-state
         icon="facility"
         title="No facilities"

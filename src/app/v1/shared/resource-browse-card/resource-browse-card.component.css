@@ -50,6 +50,15 @@
   overflow-wrap: anywhere;
 }
 
+.v1-resource-browse-card__owner--accented {
+  margin: calc(var(--v1-space-4) * -1) calc(var(--v1-space-4) * -1) 0;
+  padding: var(--v1-space-3) var(--v1-space-4);
+  background: color-mix(in srgb, var(--v1-resource-owner-accent) 18%, var(--v1-panel));
+  border-bottom-color: color-mix(in srgb, var(--v1-resource-owner-accent) 35%, var(--v1-border));
+  color: var(--v1-text);
+}
+.v1-resource-browse-card__owner--accented .v1-icon { color: var(--v1-resource-owner-accent); }
+
 .v1-resource-browse-card__title {
   display: inline-flex;
   gap: var(--v1-space-2);

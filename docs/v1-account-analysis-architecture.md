@@ -26,6 +26,8 @@ Creating an analysis uses the existing model factory so every current facility r
 
 The dashboard exposes loading, evaluating, blocked, calculation-error, workspace-error, empty, filtered-empty, disabled, and ready states. Search, filters, sorting, and create controls use typed reactive forms.
 
+The account portfolio Analyses tab reuses the account card projection as a read-only setup/status summary alongside facility summaries, without requesting outcome calculations. Scope chips, icons, and themed owner-header accents distinguish Account analysis from Facility analysis. An All/Account/Facility filter combines with search, category, and status while preserving the query; owner names and existing feature search fields remain searchable. Each card opens its owning workbench, and portfolio totals include both scopes while excluding hidden single-facility account pairs.
+
 ## Calculation orchestration
 
 The dashboard wraps `AnnualAccountAnalysisSummaryClass` in a deterministic typed entry point shared by its Worker and synchronous fallback. The calculation receives an immutable snapshot containing the account analysis, account and facilities, selected facility analyses plus banking dependencies, meters and readings, and predictors and readings.

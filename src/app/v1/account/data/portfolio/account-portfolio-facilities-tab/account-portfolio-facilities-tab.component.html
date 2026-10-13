@@ -1,26 +1,29 @@
 @let summaries = filteredSummaries();
 
 <section class="v1-account-portfolio-tab" aria-label="Portfolio facilities">
-  <form class="v1-data-browse-toolbar v1-account-portfolio-tab__toolbar" aria-label="Facility filters">
-    <div class="v1-data-browse-search v1-account-portfolio-tab__search">
-      <span class="input-group-text">
-        <app-ui-icon name="search"></app-ui-icon>
-      </span>
-      <input
-        id="v1-portfolio-facility-search"
-        type="search"
-        aria-label="Find facility, location, or type"
-        placeholder="Find facility, location, or type"
-        [value]="search()"
-        #facilitySearch
-        (input)="setSearch(facilitySearch.value)">
+  <form class="v1-data-browse-toolbar v1-account-portfolio-tab__toolbar" aria-label="Facility filters" [formGroup]="filtersForm">
+    <div class="v1-portfolio-browse-search">
+      <p class="v1-portfolio-browse-count" role="status">Showing {{ filteredSummaries().length }} of {{ facilitySummaries().length }} facilities</p>
+      <div class="v1-data-browse-search v1-account-portfolio-tab__search">
+        <span class="input-group-text">
+          <app-ui-icon name="search"></app-ui-icon>
+        </span>
+        <input
+          id="v1-portfolio-facility-search"
+          type="search"
+          aria-label="Find facility, location, or type"
+          placeholder="Find facility, location, or type"
+          formControlName="search">
+      </div>
     </div>
 
     <label>
       <span>Status</span>
-      <select #facilityStatus [value]="statusFilter()" (change)="setStatusFilter(facilityStatus.value)">
+      <select class="v1-select" formControlName="status">
         <option value="all">All</option>
-        <option value="attention">Needs setup</option>
+        <option value="attention">Needs attention</option>
+          <option value="error">Errors</option>
+          <option value="warning">Warnings</option>
         <option value="noMeters">No meters</option>
         <option value="noReadings">No readings</option>
         <option value="noAnalyses">No analyses</option>
@@ -29,8 +32,8 @@
 
     <label>
       <span>Sort</span>
-      <select #facilitySort [value]="sortBy()" (change)="setSortBy(facilitySort.value)">
-        <option value="attention">Setup first</option>
+      <select class="v1-select" formControlName="sort">
+        <option value="attention">Attention first</option>
         <option value="facilityName">Facility name</option>
         <option value="modified">Latest activity</option>
       </select>
@@ -54,21 +57,22 @@
       @for (summary of summaries; track summary.facility.guid) {
         <article class="v1-facility-card" [ngClass]="'v1-facility-card--' + summary.statusTone" role="listitem">
           <header class="v1-facility-card__header">
-            <div class="v1-facility-card__identity">
-              <button type="button" class="v1-facility-card__title" (click)="openFacility(summary.facility)">
-                <app-ui-icon name="facility"></app-ui-icon>
-                <span class="v1-facility-card__title-text">{{ summary.facility.name }}</span>
-                <app-ui-icon name="chevronRight" class="v1-facility-card__title-chevron"></app-ui-icon>
-              </button>
-              <span class="v1-facility-card__location">
-                <app-ui-icon name="location"></app-ui-icon>
-                {{ summary.location }}
-              </span>
-            </div>
-            <span class="v1-chip v1-chip--{{ summary.statusTone }} v1-facility-card__status">
-              {{ summary.statusLabel }}
-            </span>
+            <button type="button" class="v1-facility-card__title" (click)="openFacility(summary.facility)">
+              <app-ui-icon name="facility"></app-ui-icon>
+              <span class="v1-facility-card__title-text">{{ summary.facility.name }}</span>
+              <app-ui-icon name="chevronRight" class="v1-facility-card__title-chevron"></app-ui-icon>
+            </button>
           </header>
+
+          <div class="v1-facility-card__context">
+            <span class="v1-facility-card__location"><app-ui-icon name="location"></app-ui-icon>{{ summary.location }}</span>
+            @if (summary.statusLabel) {
+              <span class="v1-chip v1-chip--{{ summary.statusTone }} v1-facility-card__status">
+                <app-ui-icon [name]="summary.errorCount ? 'danger' : 'warning'"></app-ui-icon>
+                {{ summary.statusLabel }}
+              </span>
+            }
+          </div>
 
           <div class="v1-facility-card__facts" aria-label="Facility facts">
             @for (fact of summary.facts; track fact.label) {

@@ -5,6 +5,7 @@ export type ResourceBrowseCardTone = 'success' | 'warning' | 'danger' | 'info' |
 export interface ResourceBrowseCardOwner {
   readonly label: string;
   readonly icon?: IconName;
+  readonly accentColor?: string;
 }
 
 export interface ResourceBrowseCardChip {

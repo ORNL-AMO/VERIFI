@@ -9,19 +9,28 @@ import {
   buildFacilityAnalysisCards,
   FacilityAnalysisCard
 } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis.models';
+import { buildAccountAnalysisCards, AccountAnalysisCard } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis.models';
+import { buildAccountAnalysisResourceView } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis-browse-card/account-analysis-card.view';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 
+type PortfolioAnalysisScopeFilter = 'all' | 'account' | 'facility';
 type PortfolioAnalysisCategoryFilter = 'all' | 'energy' | 'water';
 type PortfolioAnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
 type PortfolioAnalysisSort = 'attention' | 'modified' | 'name' | 'facility' | 'baseline';
 
-interface PortfolioAnalysisCard {
-  readonly card: FacilityAnalysisCard;
-  readonly facility: IdbFacility;
+interface PortfolioAnalysisCardContext {
+  readonly key: string;
+  readonly ownerName: string;
+  readonly searchText: string;
   readonly view: ResourceBrowseCardView;
 }
+
+type PortfolioAnalysisCard = PortfolioAnalysisCardContext & (
+  | { readonly scope: 'account'; readonly card: AccountAnalysisCard }
+  | { readonly scope: 'facility'; readonly card: FacilityAnalysisCard; readonly facility: IdbFacility }
+);
 
 @Component({
   selector: 'app-account-portfolio-analyses-tab',
@@ -37,6 +46,7 @@ export class AccountPortfolioAnalysesTabComponent {
 
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
+    scope: new FormControl<PortfolioAnalysisScopeFilter>('all', { nonNullable: true }),
     category: new FormControl<PortfolioAnalysisCategoryFilter>('all', { nonNullable: true }),
     status: new FormControl<PortfolioAnalysisStatusFilter>('all', { nonNullable: true }),
     sort: new FormControl<PortfolioAnalysisSort>('attention', { nonNullable: true })
@@ -50,7 +60,17 @@ export class AccountPortfolioAnalysesTabComponent {
     const statusItems = this.status.items();
     const statusState = this.status.state();
 
-    return this.workspace.facilities().flatMap(facility => buildFacilityAnalysisCards({
+    const account = this.workspace.account();
+    const accountCards: PortfolioAnalysisCard[] = account && !account.isSingleFacilityCompany ? buildAccountAnalysisCards({
+      account, analyses: accountAnalyses, facilities: this.workspace.facilities(), facilityAnalyses: analyses,
+      reports: this.workspace.accountReports(), statusItems, statusState
+    }).map(card => ({
+      scope: 'account', key: `account:${card.analysis.guid}`, card,
+      ownerName: account.name || 'Account',
+      searchText: `Account analysis ${account.name || ''} ${card.searchText}`.toLocaleLowerCase(),
+      view: portfolioAnalysisView('account', account.name || 'Account', buildAccountAnalysisResourceView(card))
+    })) : [];
+    const facilityCards: PortfolioAnalysisCard[] = this.workspace.facilities().flatMap(facility => buildFacilityAnalysisCards({
       analyses: analyses.filter(analysis => analysis.facilityId === facility.guid),
       accountAnalyses,
       reports: reports.filter(report => report.facilityId === facility.guid),
@@ -59,18 +79,19 @@ export class AccountPortfolioAnalysesTabComponent {
       statusItems,
       statusState
     }).map(card => ({
-      card,
-      facility,
-      view: buildFacilityAnalysisResourceView(card, { facility })
+      scope: 'facility' as const, key: `facility:${card.analysis.guid}`, card, facility,
+      ownerName: facility.name || 'Unnamed facility',
+      searchText: `Facility analysis ${facility.name || ''} ${card.searchText}`.toLocaleLowerCase(),
+      view: portfolioAnalysisView('facility', facility.name || 'Unnamed facility', buildFacilityAnalysisResourceView(card, { facility }))
     })));
+    return [...accountCards, ...facilityCards];
   });
   readonly filteredAnalysisCards = computed<PortfolioAnalysisCard[]>(() => {
     const filters = this.filters();
     const search = filters.search.trim().toLocaleLowerCase();
     return this.analysisCards()
-      .filter(entry => !search
-        || entry.card.searchText.includes(search)
-        || entry.facility.name.toLocaleLowerCase().includes(search))
+      .filter(entry => filters.scope === 'all' || entry.scope === filters.scope)
+      .filter(entry => !search || entry.searchText.includes(search))
       .filter(entry => filters.category === 'all' || entry.card.category === filters.category)
       .filter(entry => filters.status === 'all'
         || (filters.status === 'active' ? entry.card.isActiveForReporting : entry.card.status === filters.status))
@@ -78,6 +99,10 @@ export class AccountPortfolioAnalysesTabComponent {
   });
 
   open(entry: PortfolioAnalysisCard): void {
+    if (entry.scope === 'account') {
+      void this.router.navigate(this.navigation.accountAnalysisWorkbenchRoute(entry.card.analysis.accountId, entry.card.analysis.guid));
+      return;
+    }
     void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(
       entry.facility.guid,
       entry.card.analysis.guid
@@ -93,17 +118,17 @@ export class AccountPortfolioAnalysesTabComponent {
       return second.card.modifiedSortValue - first.card.modifiedSortValue || compareName(first, second);
     }
     if (sort === 'name') {
-      return compareName(first, second) || compareFacility(first, second);
+      return compareName(first, second) || compareOwner(first, second);
     }
     if (sort === 'facility') {
-      return compareFacility(first, second) || compareName(first, second);
+      return compareOwner(first, second) || compareName(first, second);
     }
     if (sort === 'baseline') {
       return (first.card.analysis.baselineYear ?? Infinity) - (second.card.analysis.baselineYear ?? Infinity)
         || compareName(first, second);
     }
     return first.card.attentionRank - second.card.attentionRank
-      || compareFacility(first, second)
+      || compareOwner(first, second)
       || compareName(first, second);
   }
 }
@@ -112,6 +137,22 @@ function compareName(first: PortfolioAnalysisCard, second: PortfolioAnalysisCard
   return first.card.analysis.name.localeCompare(second.card.analysis.name);
 }
 
-function compareFacility(first: PortfolioAnalysisCard, second: PortfolioAnalysisCard): number {
-  return first.facility.name.localeCompare(second.facility.name);
+function compareOwner(first: PortfolioAnalysisCard, second: PortfolioAnalysisCard): number {
+  return first.scope.localeCompare(second.scope) || first.ownerName.localeCompare(second.ownerName);
+}
+
+function portfolioAnalysisView(
+  scope: 'account' | 'facility',
+  ownerName: string,
+  view: ResourceBrowseCardView
+): ResourceBrowseCardView {
+  const scopeLabel = scope === 'account' ? 'Account analysis' : 'Facility analysis';
+  return {
+    ...view,
+    openLabel: `Open ${view.title}, ${scopeLabel.toLocaleLowerCase()} for ${ownerName}`,
+    owner: { label: ownerName, icon: scope === 'account' ? 'account' : 'facility',
+      accentColor: scope === 'account' ? 'var(--v1-account)' : 'var(--v1-facility)' },
+    chips: [{ id: 'scope', label: scopeLabel, icon: scope === 'account' ? 'account' : 'facility',
+      accentColor: scope === 'account' ? 'var(--v1-account)' : 'var(--v1-facility)' }, ...(view.chips ?? [])]
+  };
 }

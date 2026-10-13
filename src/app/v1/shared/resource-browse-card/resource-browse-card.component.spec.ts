@@ -41,6 +41,23 @@ describe('ResourceBrowseCardComponent', () => {
     expect(element.textContent).toContain('Review this resource');
   });
 
+  it('applies an optional owner accent and preserves unaccented cards', () => {
+    fixture.componentRef.setInput('view', {
+      title: 'Resource A', openLabel: 'Open Resource A', icon: 'analysis',
+      owner: { label: 'Account A', icon: 'account', accentColor: 'var(--v1-account)' }
+    });
+    fixture.detectChanges();
+    const owner = fixture.nativeElement.querySelector('.v1-resource-browse-card__owner') as HTMLElement;
+    expect(owner.classList.contains('v1-resource-browse-card__owner--accented')).toBe(true);
+    expect(owner.style.getPropertyValue('--v1-resource-owner-accent')).toBe('var(--v1-account)');
+    fixture.componentRef.setInput('view', {
+      title: 'Resource A', openLabel: 'Open Resource A', icon: 'analysis', owner: { label: 'Facility A', icon: 'facility' }
+    });
+    fixture.detectChanges();
+    expect(owner.classList.contains('v1-resource-browse-card__owner--accented')).toBe(false);
+    expect(owner.style.getPropertyValue('--v1-resource-owner-accent')).toBe('');
+  });
+
   it('emits open and enabled action intents but ignores disabled actions', () => {
     fixture.componentRef.setInput('view', { title: 'Resource A', openLabel: 'Open Resource A', icon: 'chartLine' });
     fixture.componentRef.setInput('actions', [

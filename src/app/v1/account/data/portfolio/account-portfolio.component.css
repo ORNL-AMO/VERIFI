@@ -5,15 +5,31 @@
 
 .v1-account-portfolio {
   display: grid;
-  gap: 1rem;
+  gap: 0;
   padding: clamp(1rem, 3vw, 1.5rem);
 }
 
 .v1-account-portfolio__header {
-  align-items: start;
+  align-items: center;
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
+.v1-account-portfolio__sticky.v1-data-workbench-sticky {
+  background: transparent;
+  box-shadow: none;
+}
+
+.v1-account-portfolio__sticky {
+  display: grid;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+#v1-account-portfolio-title {
+  display: flex;
+  align-items: center;
+  gap: var(--v1-space-2);
+}
 .v1-account-portfolio__header-actions {
   display: flex;
   flex-wrap: wrap;
@@ -101,7 +117,8 @@
     justify-content: flex-start;
   }
 
-  .v1-account-portfolio__selectors {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .v1-account-portfolio__selectors { display: flex; overflow-x: auto; gap: .5rem; }
+  .v1-portfolio-selector { display: flex; align-items: center; flex: 0 0 auto; gap: .5rem; padding: .55rem .7rem; }
+  .v1-portfolio-selector__count strong { font-size: 1rem; }
+  .v1-portfolio-selector__label { font-size: .85rem; }
 }

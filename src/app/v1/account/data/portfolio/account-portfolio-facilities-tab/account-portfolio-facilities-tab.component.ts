@@ -1,5 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -11,12 +13,14 @@ import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { StatusItem, summarizeFindings } from '@app/v1/status/status.models';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { PortfolioFacilityService } from '../portfolio-facility.service';
 
-type FacilityStatusFilter = 'all' | 'attention' | 'noMeters' | 'noReadings' | 'noAnalyses';
+type FacilityStatusFilter = 'all' | 'attention' | 'noMeters' | 'noReadings' | 'noAnalyses' | 'error' | 'warning';
 type FacilitySort = 'attention' | 'facilityName' | 'modified';
 type FacilityTone = 'success' | 'warning' | 'danger';
 type FacilityDataDetail = 'meters' | 'predictors' | 'energy-uses';
@@ -34,7 +38,9 @@ interface FacilitySummary {
   readonly location: string;
   readonly classification: string;
   readonly issueCount: number;
-  readonly statusLabel: string;
+  readonly statusLabel?: string;
+  readonly errorCount: number;
+  readonly warningCount: number;
   readonly statusTone: FacilityTone;
   readonly statusRank: number;
   readonly latestActivityLabel: string;
@@ -52,6 +58,7 @@ interface FacilitySummary {
   standalone: false
 })
 export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
+  private readonly status = inject(WorkspaceStatusService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly router = inject(Router);
@@ -64,9 +71,12 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
 
   readonly canWrite = this.workspace.canWrite;
   readonly hasPending = this.workspace.hasPending;
-  readonly search = signal('');
-  readonly statusFilter = signal<FacilityStatusFilter>('all');
-  readonly sortBy = signal<FacilitySort>('attention');
+  readonly filtersForm = new FormGroup({
+    search: new FormControl('', { nonNullable: true }),
+    status: new FormControl<FacilityStatusFilter>('all', { nonNullable: true }),
+    sort: new FormControl<FacilitySort>('attention', { nonNullable: true })
+  });
+  readonly filters = toSignal(this.filtersForm.valueChanges, { initialValue: this.filtersForm.getRawValue() });
   readonly facilityToDelete = signal<IdbFacility | undefined>(undefined);
 
   actionMessage = '';
@@ -82,6 +92,7 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
     const reportsByFacility = this.groupByFacilityId(this.workspace.facilityReports());
     const equipmentByFacility = this.groupByFacilityId(this.workspace.energyUseEquipment());
 
+    const findings = this.status.state() === 'ready' ? this.status.items() : [];
     return this.workspace.facilities().map(facility => this.buildFacilitySummary(
       facility,
       metersByFacility.get(facility.guid) || [],
@@ -90,13 +101,14 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
       predictorDataByFacility.get(facility.guid) || [],
       analysesByFacility.get(facility.guid) || [],
       reportsByFacility.get(facility.guid) || [],
-      equipmentByFacility.get(facility.guid) || []
+      equipmentByFacility.get(facility.guid) || [],
+      findings.filter(item => item.entity.facilityGuid === facility.guid || (item.entity.kind === 'facility' && item.entity.guid === facility.guid))
     ));
   });
 
   readonly filteredSummaries = computed<FacilitySummary[]>(() => {
-    const search = this.search().trim().toLowerCase();
-    const statusFilter = this.statusFilter();
+    const search = this.filters().search.trim().toLowerCase();
+    const statusFilter = this.filters().status;
     return this.facilitySummaries()
       .filter(summary => this.matchesSearch(summary, search))
       .filter(summary => this.matchesStatusFilter(summary, statusFilter))
@@ -104,18 +116,18 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
   });
 
   setSearch(value: string): void {
-    this.search.set(value);
+    this.filtersForm.controls.search.setValue(value);
   }
 
   setStatusFilter(value: string): void {
     if (this.isStatusFilter(value)) {
-      this.statusFilter.set(value);
+      this.filtersForm.controls.status.setValue(value);
     }
   }
 
   setSortBy(value: string): void {
     if (this.isFacilitySort(value)) {
-      this.sortBy.set(value);
+      this.filtersForm.controls.sort.setValue(value);
     }
   }
 
@@ -186,12 +198,14 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
     predictorData: readonly IdbPredictorData[],
     analyses: readonly IdbAnalysisItem[],
     reports: readonly IdbFacilityReport[],
-    equipment: readonly IdbFacilityEnergyUseEquipment[]
+    equipment: readonly IdbFacilityEnergyUseEquipment[],
+    findings: readonly StatusItem[]
   ): FacilitySummary {
     const noMeters = meters.length === 0;
     const noReadings = meters.length > 0 && meterData.length === 0;
     const noAnalyses = analyses.length === 0;
-    const issueCount = [noMeters, noReadings, noAnalyses].filter(Boolean).length;
+    const status = summarizeFindings(findings);
+    const issueCount = status.errorCount + status.warningCount;
     const latestActivity = this.getLatestActivity([facility], meters, meterData, predictors, predictorData, analyses, reports, equipment);
 
     return {
@@ -199,9 +213,13 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
       location: this.formatLocation(facility),
       classification: facility.classification || 'Unclassified',
       issueCount,
-      statusLabel: this.getStatusLabel(noMeters, noReadings, noAnalyses),
-      statusTone: this.getStatusTone(noMeters, noReadings, noAnalyses),
-      statusRank: this.getStatusRank(noMeters, noReadings, noAnalyses),
+      errorCount: status.errorCount,
+      warningCount: status.warningCount,
+      statusLabel: status.errorCount
+        ? `${status.errorCount} ${status.errorCount === 1 ? 'error' : 'errors'}${status.warningCount ? ` · ${status.warningCount} ${status.warningCount === 1 ? 'warning' : 'warnings'}` : ''}`
+        : status.warningCount ? `${status.warningCount} ${status.warningCount === 1 ? 'warning' : 'warnings'}` : undefined,
+      statusTone: status.errorCount ? 'danger' : status.warningCount ? 'warning' : 'success',
+      statusRank: status.errorCount ? 0 : status.warningCount ? 1 : 2,
       latestActivityLabel: latestActivity ? this.formatDate(latestActivity) : 'No activity',
       latestActivitySortValue: latestActivity ? latestActivity.getTime() : 0,
       noMeters,
@@ -239,6 +257,8 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
     switch (filter) {
       case 'attention':
         return summary.issueCount > 0;
+      case 'error': return summary.errorCount > 0;
+      case 'warning': return summary.warningCount > 0;
       case 'noMeters':
         return summary.noMeters;
       case 'noReadings':
@@ -251,10 +271,10 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
   }
 
   private compareSummaries(first: FacilitySummary, second: FacilitySummary): number {
-    if (this.sortBy() === 'facilityName') {
+    if (this.filters().sort === 'facilityName') {
       return first.facility.name.localeCompare(second.facility.name);
     }
-    if (this.sortBy() === 'modified') {
+    if (this.filters().sort === 'modified') {
       return second.latestActivitySortValue - first.latestActivitySortValue
         || first.facility.name.localeCompare(second.facility.name);
     }
@@ -292,44 +312,8 @@ export class AccountPortfolioFacilitiesTabComponent implements OnDestroy {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  private getStatusLabel(noMeters: boolean, noReadings: boolean, noAnalyses: boolean): string {
-    if (noMeters) {
-      return 'Needs meters';
-    }
-    if (noReadings) {
-      return 'Needs readings';
-    }
-    if (noAnalyses) {
-      return 'Ready for analysis';
-    }
-    return 'Set up';
-  }
-
-  private getStatusTone(noMeters: boolean, noReadings: boolean, noAnalyses: boolean): FacilityTone {
-    if (noMeters) {
-      return 'danger';
-    }
-    if (noReadings || noAnalyses) {
-      return 'warning';
-    }
-    return 'success';
-  }
-
-  private getStatusRank(noMeters: boolean, noReadings: boolean, noAnalyses: boolean): number {
-    if (noMeters) {
-      return 0;
-    }
-    if (noReadings) {
-      return 1;
-    }
-    if (noAnalyses) {
-      return 2;
-    }
-    return 3;
-  }
-
   private isStatusFilter(value: string): value is FacilityStatusFilter {
-    return ['all', 'attention', 'noMeters', 'noReadings', 'noAnalyses'].includes(value);
+    return ['all', 'attention', 'noMeters', 'noReadings', 'noAnalyses', 'error', 'warning'].includes(value);
   }
 
   private isFacilitySort(value: string): value is FacilitySort {

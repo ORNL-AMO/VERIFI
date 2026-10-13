@@ -49,10 +49,30 @@ describe('AccountPortfolioPredictorsTabComponent', () => {
     const fixture = TestBed.createComponent(AccountPortfolioPredictorsTabComponent);
     fixture.detectChanges();
 
-    expect(cardTitles(fixture)).toEqual(['Production', 'Station station-a']);
+    expect(cardTitles(fixture)).toEqual(['Station station-a', 'Production']);
     expect(fixture.nativeElement.textContent).toContain('Alpha Plant');
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
     expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__actions')).toHaveLength(0);
+
+    expect(fixture.nativeElement.querySelectorAll('.v1-select')).toHaveLength(3);
+    const controls = fixture.componentInstance.filtersForm.controls;
+    controls.search.setValue('beta');
+    controls.type.setValue('weather');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Station station-a']);
+    controls.type.setValue('standard');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No predictors match these filters');
+    expect(controls.search.value).toBe('beta');
+    controls.search.setValue('alpha');
+    controls.status.setValue('clear');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Production']);
+    controls.search.setValue('');
+    controls.type.setValue('all');
+    controls.status.setValue('noReadings');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Station station-a']);
 
     (fixture.nativeElement.querySelector('[aria-label="Open Station station-a weather workbench"]') as HTMLButtonElement).click();
     expect(navigate).toHaveBeenCalledWith([
