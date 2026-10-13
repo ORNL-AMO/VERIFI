@@ -10,8 +10,6 @@
 }
 
 .v1-data-browse-toolbar.v1-account-portfolio-analyses__toolbar { grid-template-columns: minmax(14rem, 1fr) repeat(4, minmax(8rem, auto)); }
-.v1-account-portfolio-analyses__search { display: grid; gap: .35rem; min-width: 0; }
-.v1-account-portfolio-analyses__count { margin: 0; color: var(--v1-text); font-size: .85rem; }
 @media (max-width: 76rem) {
   .v1-data-browse-toolbar.v1-account-portfolio-analyses__toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .v1-account-portfolio-analyses__search { grid-column: 1 / -1; }
