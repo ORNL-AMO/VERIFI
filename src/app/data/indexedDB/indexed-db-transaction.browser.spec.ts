@@ -3,6 +3,7 @@ import { PredictorCommandHandler } from '@data/account-workspace/handlers/predic
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { dbConfig } from './_dbConfig';
 import { IndexedDbTransactionService } from './indexed-db-transaction.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
@@ -266,7 +267,7 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
       ...accountAFixture.facility,
       selectedEnergyAnalysisId: analysisGuid
     };
-    const facilityAnalysis = {
+    const facilityAnalysis: IdbAnalysisItem = {
       ...accountAFixture.facilityAnalysis,
       analysisCategory: 'energy',
       energyIsSource: true,
@@ -276,7 +277,7 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
       hasBanking: false,
       groups: [],
       modifiedDate: new Date('2026-10-13T00:00:00Z')
-    };
+    } as IdbAnalysisItem;
     await transactionService.runTransaction(
       ['accounts', 'facilities', 'analysisItems'],
       'readwrite',
