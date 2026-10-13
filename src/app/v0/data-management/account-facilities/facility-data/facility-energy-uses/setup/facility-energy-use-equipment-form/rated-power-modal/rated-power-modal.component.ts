@@ -6,7 +6,7 @@ import { calculateRatedPowerWithUnitConversion, convertHeatCapacityUnits } from 
 import { getEnergyUseUnit } from '@domain/calculations/energy-footprint/energyFootprintCalculations';
 import { FuelTypeOption } from '@shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '@shared/fuel-options/getFuelTypeOptions';
-import { MassUnitOptions, PowerUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
+import { ChilledWaterUnitOptions, MassUnitOptions, PowerUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '@shared/unitOptions';
 
 @Component({
   selector: 'app-rated-power-modal',
@@ -39,6 +39,9 @@ export class RatedPowerModalComponent {
 
   private heatCapacityEnergyUnit: string;
   private heatCapacityPhysicalUnit: string;
+  private referenceHeatCapacity: number;
+  private referenceHeatCapacityEnergyUnit: string;
+  private referenceHeatCapacityPhysicalUnit: string;
 
   ngOnInit() {
     this.powerUnit = PowerUnitOptions.some(option => option.value === this.initialPowerUnit) ? this.initialPowerUnit : 'MMBtuhr';
@@ -52,6 +55,8 @@ export class RatedPowerModalComponent {
   setSourceDefaults() {
     if (this.energySource === 'Natural Gas') {
       this.setNaturalGasDefaults();
+    } else if (this.energySource === 'Other Energy') {
+      this.setOtherEnergyDefaults();
     } else {
       this.setPhase('Gas', false);
     }
@@ -64,15 +69,30 @@ export class RatedPowerModalComponent {
     this.setFuelHeatCapacity();
   }
 
+  setOtherEnergyDefaults() {
+    this.fuelOptions = getFuelTypeOptions('Other Energy', this.phase, [], 4, undefined, undefined);
+    this.fuelOptions = this.fuelOptions.filter(option => option.value !== 'District Hot Water');
+    this.fuel = this.fuelOptions[0]?.value ?? '';
+    this.setOtherEnergyPhysicalUnitOptions();
+    const selectedFuel = this.fuelOptions.find(option => option.value === this.fuel);
+    this.physicalUnit = this.getAvailablePhysicalUnit(selectedFuel?.startingUnit);
+    this.setFuelHeatCapacity();
+  }
 
   loadMeterDefaults(meter: IdbUtilityMeter) {
-    const meterPhase: MeterPhase = meter.phase ?? (this.energySource === 'Natural Gas' ? 'Gas' : this.phase);
-    this.setPhase(meterPhase, false);
-    this.fuel = this.energySource === 'Natural Gas' ? 'Natural Gas' : (meter.fuel ?? '');
+    if (this.energySource === 'Other Energy') {
+      this.fuel = this.fuelOptions.some(option => option.value === meter.fuel) ? meter.fuel : '';
+      this.setOtherEnergyPhysicalUnitOptions();
+    } else {
+      const meterPhase: MeterPhase = meter.phase ?? (this.energySource === 'Natural Gas' ? 'Gas' : this.phase);
+      this.setPhase(meterPhase, false);
+      this.fuel = this.energySource === 'Natural Gas' ? 'Natural Gas' : (meter.fuel ?? '');
+    }
 
-    const meterUsesPhysicalUnit = this.physicalUnitOptions.some(option => option.value === meter.startingUnit);
+    const meterStartingUnit = this.normalizePhysicalUnit(meter.startingUnit);
+    const meterUsesPhysicalUnit = this.physicalUnitOptions.some(option => option.value === meterStartingUnit);
     if (meterUsesPhysicalUnit) {
-      this.physicalUnit = meter.startingUnit;
+      this.physicalUnit = meterStartingUnit;
     } else {
       const selectedFuel = this.fuelOptions.find(option => option.value === this.fuel);
       this.physicalUnit = this.getAvailablePhysicalUnit(selectedFuel?.startingUnit);
@@ -87,19 +107,11 @@ export class RatedPowerModalComponent {
       return;
     }
 
-    const meterHeatCapacity = Number(linkedHeatCapacity);
-    const convertedHeatCapacity = convertHeatCapacityUnits(
-      meterHeatCapacity,
+    this.setHeatCapacityForSelectedPhysicalUnit(
+      Number(linkedHeatCapacity),
       meter.energyUnit,
-      this.normalizePhysicalUnit(meter.startingUnit),
-      meter.energyUnit,
-      this.physicalUnit
+      meterStartingUnit
     );
-    if (Number.isFinite(convertedHeatCapacity)) {
-      this.setHeatCapacity(convertedHeatCapacity, meter.energyUnit, this.physicalUnit);
-    } else {
-      this.setFuelHeatCapacity();
-    }
   }
 
   get energyUnit(): string {
@@ -123,6 +135,21 @@ export class RatedPowerModalComponent {
       : '';
   }
 
+  get heatCapacityLabel(): string {
+    if (this.energySource !== 'Other Energy') {
+      return 'Heat Capacity';
+    }
+
+    const otherEnergyType = this.fuelOptions.find(option => option.value === this.fuel)?.otherEnergyType;
+    if (otherEnergyType === 'Steam') {
+      return 'Specific Enthalpy';
+    }
+    if (otherEnergyType === 'Chilled Water' || otherEnergyType === 'Compressed Air') {
+      return 'Efficiency';
+    }
+    return 'Heat Capacity';
+  }
+
   get ratedCapacityUnitLabel(): string {
     return this.physicalUnit
       ? `${this.getUnitOptionSymbol(this.physicalUnit, this.physicalUnitOptions)}/hr`
@@ -135,6 +162,11 @@ export class RatedPowerModalComponent {
 
   changeFuel(fuel: string) {
     this.fuel = fuel;
+    if (this.energySource === 'Other Energy') {
+      this.setOtherEnergyPhysicalUnitOptions();
+      const selectedFuel = this.fuelOptions.find(option => option.value === fuel);
+      this.physicalUnit = this.getAvailablePhysicalUnit(selectedFuel?.startingUnit);
+    }
     this.setFuelHeatCapacity();
   }
 
@@ -143,33 +175,16 @@ export class RatedPowerModalComponent {
   }
 
   changePhysicalUnit(physicalUnit: string) {
-    const previousHeatCapacityPhysicalUnit = this.heatCapacityPhysicalUnit;
     this.physicalUnit = physicalUnit;
-
-    if (!Number.isFinite(this.heatCapacity)
-      || !this.heatCapacityEnergyUnit
-      || !previousHeatCapacityPhysicalUnit) {
-      this.heatCapacityPhysicalUnit = physicalUnit;
-      return;
-    }
-
-    const convertedHeatCapacity = convertHeatCapacityUnits(
-      this.heatCapacity,
-      this.heatCapacityEnergyUnit,
-      this.normalizePhysicalUnit(previousHeatCapacityPhysicalUnit),
-      this.heatCapacityEnergyUnit,
-      physicalUnit
-    );
-    if (Number.isFinite(convertedHeatCapacity)) {
-      this.setHeatCapacity(convertedHeatCapacity, this.heatCapacityEnergyUnit, physicalUnit);
-    } else {
-      this.setHeatCapacity(undefined, this.heatCapacityEnergyUnit, physicalUnit);
-    }
+    this.setHeatCapacityFromReference();
   }
 
   updateHeatCapacity(value: string) {
     this.heatCapacityDisplay = value;
     this.heatCapacity = value.trim() === '' ? NaN : Number(value);
+    this.referenceHeatCapacity = this.heatCapacity;
+    this.referenceHeatCapacityEnergyUnit = this.heatCapacityEnergyUnit;
+    this.referenceHeatCapacityPhysicalUnit = this.heatCapacityPhysicalUnit;
   }
 
   formatHeatCapacityDisplay() {
@@ -191,7 +206,7 @@ export class RatedPowerModalComponent {
   }
 
   get isDisabled(): boolean {
-    return !this.phase || !this.fuel || !this.powerUnit || !this.physicalUnit
+    return (this.energySource !== 'Other Energy' && !this.phase) || !this.fuel || !this.powerUnit || !this.physicalUnit
       || !Number.isFinite(this.heatCapacity) || this.heatCapacity < 0
       || !Number.isFinite(this.ratedCapacity) || this.ratedCapacity < 0
       || !Number.isFinite(this.calculatedRatedPower);
@@ -220,6 +235,7 @@ export class RatedPowerModalComponent {
   setFuelHeatCapacity() {
     const selectedFuel = this.fuelOptions.find(option => option.value === this.fuel);
     if (!selectedFuel) {
+      this.setHeatCapacityReference(undefined, undefined, undefined);
       this.setHeatCapacity(undefined, undefined, undefined);
       return;
     }
@@ -227,17 +243,29 @@ export class RatedPowerModalComponent {
   }
 
   setHeatCapacityForSelectedPhysicalUnit(value: number, energyUnit: string, physicalUnit: string) {
+    this.setHeatCapacityReference(value, energyUnit, this.normalizePhysicalUnit(physicalUnit));
+    this.setHeatCapacityFromReference();
+  }
+
+  setHeatCapacityFromReference() {
+    if (!Number.isFinite(this.referenceHeatCapacity)
+      || !this.referenceHeatCapacityEnergyUnit
+      || !this.referenceHeatCapacityPhysicalUnit) {
+      this.setHeatCapacity(undefined, this.referenceHeatCapacityEnergyUnit, this.physicalUnit);
+      return;
+    }
+
     const convertedHeatCapacity = convertHeatCapacityUnits(
-      value,
-      energyUnit,
-      this.normalizePhysicalUnit(physicalUnit),
-      energyUnit,
+      this.referenceHeatCapacity,
+      this.referenceHeatCapacityEnergyUnit,
+      this.referenceHeatCapacityPhysicalUnit,
+      this.referenceHeatCapacityEnergyUnit,
       this.physicalUnit
     );
     if (Number.isFinite(convertedHeatCapacity)) {
-      this.setHeatCapacity(convertedHeatCapacity, energyUnit, this.physicalUnit);
+      this.setHeatCapacity(convertedHeatCapacity, this.referenceHeatCapacityEnergyUnit, this.physicalUnit);
     } else {
-      this.setHeatCapacity(value, energyUnit, physicalUnit);
+      this.setHeatCapacity(undefined, this.referenceHeatCapacityEnergyUnit, this.physicalUnit);
     }
   }
 
@@ -248,9 +276,10 @@ export class RatedPowerModalComponent {
     this.heatCapacityDisplay = Number.isFinite(value) ? value.toFixed(6) : '';
   }
 
-  private getAvailablePhysicalUnit(preferredUnit?: string): string {
-    if (this.physicalUnitOptions.some(option => option.value === preferredUnit)) {
-      return preferredUnit;
+  getAvailablePhysicalUnit(preferredUnit?: string): string {
+    const normalizedPreferredUnit = this.normalizePhysicalUnit(preferredUnit);
+    if (this.physicalUnitOptions.some(option => option.value === normalizedPreferredUnit)) {
+      return normalizedPreferredUnit;
     }
     if (this.phase === 'Gas' && preferredUnit === 'ft3'
       && this.physicalUnitOptions.some(option => option.value === 'SCF')) {
@@ -263,11 +292,30 @@ export class RatedPowerModalComponent {
     return this.physicalUnitOptions[0]?.value ?? '';
   }
 
-  private normalizePhysicalUnit(unit: string): string {
+  normalizePhysicalUnit(unit: string): string {
     return unit === 'Therm' ? 'Therms' : unit;
   }
 
-  private getNaturalGasOption(): FuelTypeOption {
+  setOtherEnergyPhysicalUnitOptions() {
+    const selectedFuel = this.fuelOptions.find(option => option.value === this.fuel);
+    if (selectedFuel?.otherEnergyType === 'Steam') {
+      this.physicalUnitOptions = [...MassUnitOptions];
+    } else if (selectedFuel?.otherEnergyType === 'Chilled Water') {
+      this.physicalUnitOptions = [...ChilledWaterUnitOptions];
+    } else if (selectedFuel?.otherEnergyType === 'Compressed Air') {
+      this.physicalUnitOptions = [...VolumeGasOptions];
+    } else {
+      this.physicalUnitOptions = [];
+    }
+  }
+
+  setHeatCapacityReference(value: number, energyUnit: string, physicalUnit: string) {
+    this.referenceHeatCapacity = value;
+    this.referenceHeatCapacityEnergyUnit = energyUnit;
+    this.referenceHeatCapacityPhysicalUnit = physicalUnit;
+  }
+
+  getNaturalGasOption(): FuelTypeOption {
     return {
       value: 'Natural Gas',
       startingUnit: 'SCF',

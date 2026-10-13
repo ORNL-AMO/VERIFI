@@ -67,7 +67,7 @@ export class EquipmentUtilityDataFormComponent {
   }
 
   isRatedCapacityCalculatorSource(source: MeterSource): boolean {
-    return source === 'Natural Gas' || source === 'Other Fuels';
+    return source === 'Natural Gas' || source === 'Other Fuels' || source === 'Other Energy';
   }
 
   isRatedCapacityEquipmentType(equipmentType: EquipmentType): boolean {

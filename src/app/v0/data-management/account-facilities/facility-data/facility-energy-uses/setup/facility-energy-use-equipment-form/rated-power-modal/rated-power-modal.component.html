@@ -3,6 +3,7 @@
         <button class="item-right" (click)="closeRatedPowerModal()">x</button>
     </div>
     <div class="popup-body">
+        @if (energySource !== 'Other Energy') {
         <div class="form-group row mb-2">
             <label class="col-5 col-form-label" for="ratedPowerPhase">Fuel Type</label>
             <div class="col-7">
@@ -14,8 +15,11 @@
                 </select>
             </div>
         </div>
+        }
         <div class="form-group row mb-2">
-            <label class="col-5 col-form-label" for="ratedPowerFuel">Fuel</label>
+            <label class="col-5 col-form-label" for="ratedPowerFuel">
+                {{energySource === 'Other Energy' ? 'Energy Type' : 'Fuel'}}
+            </label>
             <div class="col-7">
                 <select class="form-select" id="ratedPowerFuel" [ngModel]="fuel" (ngModelChange)="changeFuel($event)">
                     <option value="">Select fuel</option>
@@ -48,7 +52,7 @@
             </div>
         </div>
         <div class="form-group row mb-2">
-            <label class="col-5 col-form-label" for="ratedPowerHeatCapacity">Heat Capacity</label>
+            <label class="col-5 col-form-label" for="ratedPowerHeatCapacity">{{heatCapacityLabel}}</label>
             <div class="col-7">
                 <div class="input-group">
                     <input class="form-control" id="ratedPowerHeatCapacity" type="text" inputmode="decimal"
