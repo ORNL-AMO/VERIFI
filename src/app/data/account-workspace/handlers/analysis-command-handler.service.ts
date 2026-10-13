@@ -10,11 +10,19 @@ import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { AccountWorkspaceStore } from '../account-workspace.store';
-import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import {
+  IndexedDbTransactionContext,
+  IndexedDbTransactionService
+} from '@data/indexedDB/indexed-db-transaction.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
 import { IdbAccount } from '@data/models/idbModels/account';
 import { accountReportReferencesAnalysis, IdbAccountReport } from '@data/models/idbModels/accountReport';
+import {
+  buildSingleFacilityAnalysisPair,
+  singleFacilityAnalysisPairCandidates,
+  singleFacilityAnalysisPairIsCurrent
+} from '../single-facility-analysis-pairs';
 
 export interface DeleteFacilityAnalysisCommand {
   readonly accountGuid: string;
@@ -26,6 +34,20 @@ export interface DeleteFacilityAnalysisResult {
   readonly deletedAnalysis: IdbAnalysisItem;
   readonly clearedAccountAnalysisCount: number;
   readonly clearedActiveSelection: boolean;
+  readonly deletedAccountAnalysisCount: number;
+}
+
+export interface SingleFacilityAnalysisPairSyncResult {
+  readonly accountAnalyses: readonly IdbAccountAnalysisItem[];
+  readonly account?: IdbAccount;
+}
+
+export interface FacilityAnalysisPairWriteResult extends SingleFacilityAnalysisPairSyncResult {
+  readonly analysis: IdbAnalysisItem;
+}
+
+export interface SetActiveFacilityAnalysisResult extends SingleFacilityAnalysisPairSyncResult {
+  readonly facility: IdbFacility;
 }
 
 export interface DeleteAccountAnalysisCommand {
@@ -84,6 +106,95 @@ export class AnalysisCommandHandler {
     return firstValueFrom(this.analysisDb.updateWithObservable({ ...analysis }));
   }
 
+  async addFacilityAnalysisWithSingleSitePair(
+    analysis: IdbAnalysisItem,
+    activeAccountGuid: string
+  ): Promise<FacilityAnalysisPairWriteResult> {
+    return this.transactions.runTransaction(
+      ['accounts', 'facilities', 'analysisItems', 'accountAnalysisItems'],
+      'readwrite',
+      async transaction => {
+        this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
+        const persisted = structuredClone(analysis);
+        delete persisted.id;
+        const existing = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', activeAccountGuid);
+        if (existing.some(item => item.guid === persisted.guid)) {
+          throw new WorkspaceWriteError('validation-failed', 'The facility analysis identifier is already in use.');
+        }
+        const key = await transaction.add('analysisItems', persisted);
+        persisted.id = Number(key);
+        const pairs = await this.reconcileSingleFacilityAnalysisPairsInTransaction(transaction, activeAccountGuid);
+        return { analysis: persisted, ...pairs };
+      }
+    );
+  }
+
+  async updateFacilityAnalysisWithSingleSitePair(
+    analysis: IdbAnalysisItem,
+    activeAccountGuid: string
+  ): Promise<FacilityAnalysisPairWriteResult> {
+    return this.transactions.runTransaction(
+      ['accounts', 'facilities', 'analysisItems', 'accountAnalysisItems'],
+      'readwrite',
+      async transaction => {
+        this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
+        const existing = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', activeAccountGuid);
+        const persisted = existing.find(item => item.guid === analysis.guid);
+        if (!persisted || persisted.id === undefined || persisted.facilityId !== analysis.facilityId) {
+          throw new WorkspaceWriteError('validation-failed', 'The facility analysis is missing or does not belong to the selected facility.');
+        }
+        const updated = structuredClone({ ...analysis, id: persisted.id });
+        await transaction.put('analysisItems', updated);
+        const pairs = await this.reconcileSingleFacilityAnalysisPairsInTransaction(transaction, activeAccountGuid);
+        return { analysis: updated, ...pairs };
+      }
+    );
+  }
+
+  async setActiveFacilityAnalysisAtomic(
+    accountGuid: string,
+    facilityGuid: string,
+    analysisGuid: string
+  ): Promise<SetActiveFacilityAnalysisResult> {
+    return this.transactions.runTransaction(
+      ['accounts', 'facilities', 'analysisItems', 'accountAnalysisItems'],
+      'readwrite',
+      async transaction => {
+        const analyses = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid);
+        const analysis = analyses.find(item => item.guid === analysisGuid && item.facilityId === facilityGuid);
+        if (!analysis) {
+          throw new WorkspaceWriteError('validation-failed', 'The analysis is missing or does not belong to the selected facility.');
+        }
+        const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid);
+        const facility = facilities.find(item => item.guid === facilityGuid);
+        if (!facility || facility.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected facility could not be found.');
+        }
+        const updatedFacility: IdbFacility = {
+          ...facility,
+          selectedEnergyAnalysisId: analysis.analysisCategory === 'energy'
+            ? analysis.guid : facility.selectedEnergyAnalysisId,
+          selectedWaterAnalysisId: analysis.analysisCategory === 'water'
+            ? analysis.guid : facility.selectedWaterAnalysisId,
+          modifiedDate: new Date()
+        };
+        await transaction.put('facilities', updatedFacility);
+        const pairs = await this.reconcileSingleFacilityAnalysisPairsInTransaction(transaction, accountGuid);
+        return { facility: updatedFacility, ...pairs };
+      }
+    );
+  }
+
+  async reconcileSingleFacilityAnalysisPairs(
+    accountGuid: string
+  ): Promise<SingleFacilityAnalysisPairSyncResult> {
+    return this.transactions.runTransaction(
+      ['accounts', 'facilities', 'analysisItems', 'accountAnalysisItems'],
+      'readwrite',
+      transaction => this.reconcileSingleFacilityAnalysisPairsInTransaction(transaction, accountGuid)
+    );
+  }
+
   async deleteFacilityAnalysis(analysis: IdbAnalysisItem, activeAccountGuid: string): Promise<number> {
     this.assertOwnership(analysis.accountId, activeAccountGuid, 'facility analysis');
     await firstValueFrom(this.analysisDb.deleteWithObservable(analysis.id));
@@ -92,7 +203,7 @@ export class AnalysisCommandHandler {
 
   async deleteFacilityAnalysisAtomic(command: DeleteFacilityAnalysisCommand): Promise<DeleteFacilityAnalysisResult> {
     return this.transactions.runTransaction(
-      ['analysisItems', 'accountAnalysisItems', 'facilities', 'facilityReports'],
+      ['accounts', 'analysisItems', 'accountAnalysisItems', 'accountReports', 'facilities', 'facilityReports'],
       'readwrite',
       async transaction => {
         const analyses = await transaction.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', command.accountGuid);
@@ -118,9 +229,31 @@ export class AnalysisCommandHandler {
           throw new WorkspaceWriteError('validation-failed', 'The selected facility could not be found.');
         }
         const accountAnalyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>('accountAnalysisItems', 'accountId', command.accountGuid);
+        const accounts = await transaction.getAll<IdbAccount>('accounts');
+        const account = accounts.find(item => item.guid === command.accountGuid);
+        if (!account || account.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected account could not be found.');
+        }
+        const isSingleFacility = account.isSingleFacilityCompany === true && facilities.length === 1;
+        const pairedAccountAnalyses = isSingleFacility
+          ? singleFacilityAnalysisPairCandidates(accountAnalyses, facility.guid, analysis.guid)
+          : [];
+        if (pairedAccountAnalyses.length) {
+          const accountReports = await transaction.getAllByIndex<IdbAccountReport>('accountReports', 'accountId', command.accountGuid);
+          const linkedAccountReports = accountReports.filter(report => pairedAccountAnalyses.some(pair =>
+            accountReportReferencesAnalysis(report, pair.guid)
+          ));
+          if (linkedAccountReports.length) {
+            throw new WorkspaceWriteError(
+              'validation-failed',
+              `Remove the paired account analysis from ${linkedAccountReports.length} linked account report(s) before deleting it.`
+            );
+          }
+        }
         const now = new Date();
         let clearedAccountAnalysisCount = 0;
         for (const item of accountAnalyses) {
+          if (pairedAccountAnalyses.some(pair => pair.guid === item.guid)) continue;
           let changed = false;
           const links = (item.facilityAnalysisItems ?? []).map(link => {
             if (link.facilityId === facility.guid && link.analysisItemId === analysis.guid) {
@@ -135,6 +268,10 @@ export class AnalysisCommandHandler {
           }
         }
 
+        for (const pair of pairedAccountAnalyses) {
+          if (pair.id !== undefined) await transaction.deleteByKey('accountAnalysisItems', pair.id);
+        }
+
         const clearedActiveSelection = facility.selectedEnergyAnalysisId === analysis.guid
           || facility.selectedWaterAnalysisId === analysis.guid;
         if (clearedActiveSelection) {
@@ -145,8 +282,24 @@ export class AnalysisCommandHandler {
             modifiedDate: now
           });
         }
+        const pairedGuids = new Set(pairedAccountAnalyses.map(item => item.guid));
+        if (pairedGuids.has(account.selectedEnergyAnalysisId) || pairedGuids.has(account.selectedWaterAnalysisId)) {
+          await transaction.put('accounts', {
+            ...account,
+            selectedEnergyAnalysisId: pairedGuids.has(account.selectedEnergyAnalysisId)
+              ? undefined : account.selectedEnergyAnalysisId,
+            selectedWaterAnalysisId: pairedGuids.has(account.selectedWaterAnalysisId)
+              ? undefined : account.selectedWaterAnalysisId,
+            modifiedDate: now
+          });
+        }
         await transaction.deleteByKey('analysisItems', analysis.id);
-        return { deletedAnalysis: analysis, clearedAccountAnalysisCount, clearedActiveSelection };
+        return {
+          deletedAnalysis: analysis,
+          clearedAccountAnalysisCount,
+          clearedActiveSelection,
+          deletedAccountAnalysisCount: pairedAccountAnalyses.length
+        };
       }
     );
   }
@@ -518,6 +671,81 @@ export class AnalysisCommandHandler {
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
+
+  private async reconcileSingleFacilityAnalysisPairsInTransaction(
+    transaction: IndexedDbTransactionContext,
+    accountGuid: string
+  ): Promise<SingleFacilityAnalysisPairSyncResult> {
+    const accounts = await transaction.getAll<IdbAccount>('accounts');
+    const account = accounts.find(item => item.guid === accountGuid);
+    if (!account || account.id === undefined) {
+      throw new WorkspaceWriteError('validation-failed', 'The selected account could not be found.');
+    }
+    const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid);
+    if (account.isSingleFacilityCompany !== true || facilities.length !== 1) {
+      return { accountAnalyses: [] };
+    }
+
+    const facility = facilities[0];
+    const facilityAnalyses = (await transaction.getAllByIndex<IdbAnalysisItem>(
+      'analysisItems', 'accountId', accountGuid
+    )).filter(item => item.facilityId === facility.guid);
+    const accountAnalyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>(
+      'accountAnalysisItems', 'accountId', accountGuid
+    );
+    const writtenPairs: IdbAccountAnalysisItem[] = [];
+    const pairByFacilityAnalysis = new Map<string, IdbAccountAnalysisItem>();
+
+    for (const facilityAnalysis of facilityAnalyses) {
+      const candidates = singleFacilityAnalysisPairCandidates(
+        accountAnalyses,
+        facility.guid,
+        facilityAnalysis.guid
+      );
+      const activePairGuid = facilityAnalysis.analysisCategory === 'water'
+        && facility.selectedWaterAnalysisId === facilityAnalysis.guid
+          ? account.selectedWaterAnalysisId
+          : facilityAnalysis.analysisCategory === 'energy'
+            && facility.selectedEnergyAnalysisId === facilityAnalysis.guid
+              ? account.selectedEnergyAnalysisId
+              : undefined;
+      const existing = candidates.find(item => item.guid === activePairGuid) ?? candidates[0];
+      if (existing && singleFacilityAnalysisPairIsCurrent(existing, facility, facilityAnalysis)) {
+        pairByFacilityAnalysis.set(facilityAnalysis.guid, existing);
+        continue;
+      }
+      const pair = buildSingleFacilityAnalysisPair(account, facility, facilityAnalysis, existing);
+      if (existing?.id !== undefined) {
+        await transaction.put('accountAnalysisItems', pair);
+      } else {
+        const key = await transaction.add('accountAnalysisItems', pair);
+        pair.id = Number(key);
+      }
+      writtenPairs.push(pair);
+      pairByFacilityAnalysis.set(facilityAnalysis.guid, pair);
+    }
+
+    const selectedPairGuid = (analysisGuid: string | undefined, category: 'energy' | 'water') => {
+      if (!analysisGuid || facilityAnalyses.find(item => item.guid === analysisGuid)?.analysisCategory !== category) {
+        return undefined;
+      }
+      return pairByFacilityAnalysis.get(analysisGuid)?.guid;
+    };
+    const selectedEnergyAnalysisId = selectedPairGuid(facility.selectedEnergyAnalysisId, 'energy');
+    const selectedWaterAnalysisId = selectedPairGuid(facility.selectedWaterAnalysisId, 'water');
+    const accountChanged = account.selectedEnergyAnalysisId !== selectedEnergyAnalysisId
+      || account.selectedWaterAnalysisId !== selectedWaterAnalysisId;
+    if (!accountChanged) return { accountAnalyses: writtenPairs };
+
+    const updatedAccount: IdbAccount = {
+      ...account,
+      selectedEnergyAnalysisId,
+      selectedWaterAnalysisId,
+      modifiedDate: new Date()
+    };
+    await transaction.put('accounts', updatedAccount);
+    return { accountAnalyses: writtenPairs, account: updatedAccount };
+  }
 
   private assertOwnership(entityAccountGuid: string | undefined, activeAccountGuid: string, label: string): void {
     if (entityAccountGuid && entityAccountGuid !== activeAccountGuid) {

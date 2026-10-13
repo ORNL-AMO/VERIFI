@@ -107,6 +107,18 @@ describe('AccountAnalysisSelectFacilityItemsComponent', () => {
 
     expect(selection.openFacilityAnalysis).toHaveBeenCalledWith(selection.detailCards()[0].analysis);
   });
+
+  it('restores slideout controls when opening the full analysis fails', async () => {
+    const { fixture, selection } = await setup();
+    selection.openFacilityAnalysis.mockRejectedValueOnce(new Error('Save failed'));
+    fixture.detectChanges();
+    fixture.componentInstance.requestView(selection.detailCards()[0].analysis);
+
+    await expect(fixture.componentInstance.openDetails()).rejects.toThrow('Save failed');
+
+    expect(fixture.componentInstance.leaving()).toBe(false);
+    expect(fixture.componentInstance.detailsGuid()).toBe('analysis-a');
+  });
 });
 
 async function setup() {

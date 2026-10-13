@@ -105,11 +105,14 @@ export class AccountAnalysisSelectFacilityItemsComponent {
     const analysis = this.detailsCard()?.analysis;
     if (!analysis || this.leaving()) return;
     this.leaving.set(true);
-    const opened = await this.selection.openFacilityAnalysis(analysis);
-    this.leaving.set(false);
-    if (opened) {
-      this.detailsGuid.set(undefined);
-      this.detailsResults.close();
+    try {
+      const opened = await this.selection.openFacilityAnalysis(analysis);
+      if (opened) {
+        this.detailsGuid.set(undefined);
+        this.detailsResults.close();
+      }
+    } finally {
+      this.leaving.set(false);
     }
   }
 

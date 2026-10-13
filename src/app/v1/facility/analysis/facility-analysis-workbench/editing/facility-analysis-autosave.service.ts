@@ -1,10 +1,10 @@
 import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
-import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
+import { facilityAnalysisPairWritePatch } from '../../single-facility-analysis-pair.service';
 
 export type AnalysisAutosaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'invalid' | 'error';
 export const ANALYSIS_AUTOSAVE_DEBOUNCE_MS = 650;
@@ -147,17 +147,14 @@ export class FacilityAnalysisAutosaveService {
           entityGuid: submitted.guid,
           label: 'Saving facility analysis',
           notification: { suppressSuccessToast: true },
-          publication: {
-            mode: 'patch',
-            buildPatch: value => upsertWorkspaceRecords('facilityAnalyses', [value])
-          }
+          publication: { mode: 'patch', buildPatch: facilityAnalysisPairWritePatch }
         },
-        () => this.analysisHandler.updateFacilityAnalysis(submitted, account.guid)
+        () => this.analysisHandler.updateFacilityAnalysisWithSingleSitePair(submitted, account.guid)
       );
       if (this.activeGuid !== submitted.guid) return;
-      this.committedValue.set(cloneAnalysis(result.value));
+      this.committedValue.set(cloneAnalysis(result.value.analysis));
       if (submittedVersion === this.editVersion) {
-        this.draftValue.set(cloneAnalysis(result.value));
+        this.draftValue.set(cloneAnalysis(result.value.analysis));
         this.stateValue.set('saved');
       } else {
         this.stateValue.set('dirty');

@@ -12,6 +12,10 @@ The approved dashboard implementation plan deliberately adds a typed, v1-only ac
 
 No account-analysis record shape, database schema, backup format, report output, formula, unit conversion, rounding rule, or Electron contract changes as part of the dashboard.
 
+Valid single-facility accounts do not expose the account-analysis dashboard or workbench. Account Analysis routes redirect to the sole facility's Analysis dashboard or the corresponding facility-analysis workbench view. Each facility analysis has a hidden account-analysis pair containing exactly one selection link to that analysis. The pair mirrors category, basis, display units, baseline, banking state, and name so account-level reports and other consumers retain the existing account-analysis contract without creating a second user-facing editing workflow.
+
+Pair creation and synchronization use the existing account-analysis record shape and GUID relationships. Creating, copying, editing, activating, or deleting a facility analysis commits the paired account-analysis change atomically in v1. The selected account energy or water analysis follows the pair for the facility's active analysis. Route-entry reconciliation backfills missing or stale pairs for existing single-facility workspaces; multi-facility accounts keep the explicit account-analysis workflow unchanged. A paired analysis referenced by an account report blocks deletion through the same dependency rule as an ordinary account analysis.
+
 ## Dashboard ownership
 
 The dashboard projects every account analysis into one card containing status, category, baseline, basis and units, facility-selection readiness, linked reports, active-for-reporting state, modified date, and the latest complete annual and monthly outcome facts. It offers create, copy, set active, compare, details, and guarded delete commands through a feature action service.
@@ -78,5 +82,6 @@ The account result pages mirror the v1 facility-result interaction contract whil
 | Calculation formula parity and result projection | Deterministic calculation tests |
 | Worker messaging, cancellation, timeout, and supersession | Chromium browser tests |
 | Atomic deletion and rollback | Chromium IndexedDB tests |
+| Single-facility hidden pairing, active synchronization, and route bypass | Fast pure/guard tests plus Chromium IndexedDB tests |
 | Routes and status destinations | Fast route and service tests |
 | Responsive layout, charts, focus, themes, and Electron window constraints | Focused manual review |

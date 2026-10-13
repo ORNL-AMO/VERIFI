@@ -1,6 +1,8 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
+import { SingleFacilityAnalysisPairService } from '@app/v1/facility/analysis/single-facility-analysis-pair.service';
 
 export const accountHomeCanonicalGuard: CanActivateFn = route => {
   const accountGuid = route.parent?.paramMap.get('accountGuid');
@@ -20,20 +22,26 @@ export const facilityHomeCanonicalGuard: CanActivateFn = route => {
   return inject(Router).createUrlTree(facilityHomeCommands(facilityGuid));
 };
 
-export const singleSiteAccountRedirectGuard: CanActivateFn = (_route, state) => {
+export const singleSiteAccountRedirectGuard: CanActivateFn = async (_route, state) => {
   const store = inject(AccountWorkspaceStore);
+  const router = inject(Router);
   const account = store.account();
   const facilities = store.facilities();
   if (account?.isSingleFacilityCompany !== true || facilities.length !== 1) {
     return true;
   }
 
+  await inject(SingleFacilityAnalysisPairService).ensurePairs();
   if (isAccountDataRoute(state) && !isAccountCustomDataRoute(state)) {
     return true;
   }
 
-  const commands = singleSiteRedirectCommands(state, facilities[0].guid);
-  return inject(Router).createUrlTree(commands);
+  const commands = singleSiteRedirectCommands(
+    state,
+    facilities[0].guid,
+    store.accountAnalyses()
+  );
+  return router.createUrlTree(commands);
 };
 
 export function accountHomeCommands(accountGuid: string): Array<string> {
@@ -44,7 +52,11 @@ export function facilityHomeCommands(facilityGuid: string): Array<string> {
   return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
 }
 
-export function singleSiteRedirectCommands(state: RouterStateSnapshot, facilityGuid: string): Array<string> {
+export function singleSiteRedirectCommands(
+  state: RouterStateSnapshot,
+  facilityGuid: string,
+  accountAnalyses: readonly IdbAccountAnalysisItem[] = []
+): Array<string> {
   const parts = accountRouteParts(state);
   const section = parts[3];
   const detail = parts[4];
@@ -55,7 +67,37 @@ export function singleSiteRedirectCommands(state: RouterStateSnapshot, facilityG
   if (section === 'data' && isCustomDataDetail(detail)) {
     return ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail];
   }
+  if (section === 'analysis') {
+    if (detail !== 'workbench') {
+      return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+    }
+    const pair = accountAnalyses.find(item => item.guid === parts[5]);
+    const facilityAnalysisGuid = pair?.facilityAnalysisItems?.length === 1
+      && pair.facilityAnalysisItems[0].facilityId === facilityGuid
+        ? pair.facilityAnalysisItems[0].analysisItemId
+        : undefined;
+    if (!facilityAnalysisGuid) {
+      return ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard'];
+    }
+    return facilityAnalysisWorkbenchCommands(parts, facilityGuid, facilityAnalysisGuid);
+  }
   return ['/v1', 'workspace', 'facility', facilityGuid, 'home', 'overview'];
+}
+
+function facilityAnalysisWorkbenchCommands(
+  accountRoute: readonly string[],
+  facilityGuid: string,
+  facilityAnalysisGuid: string
+): Array<string> {
+  const base = ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'workbench', facilityAnalysisGuid];
+  const accountStage = accountRoute[6];
+  const accountResult = accountRoute[7];
+  if (accountStage === 'used-by') return [...base, 'used-by'];
+  if (accountStage !== 'results') return [...base, 'setup'];
+  if (accountResult === 'monthly-table' || accountResult === 'monthly-chart') {
+    return [...base, 'facility', accountResult];
+  }
+  return [...base, 'facility', 'annual'];
 }
 
 function isAccountDataRoute(state: RouterStateSnapshot): boolean {
