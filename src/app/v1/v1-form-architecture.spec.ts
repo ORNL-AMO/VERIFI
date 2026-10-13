@@ -14,8 +14,7 @@ const TEMPLATE_DRIVEN_ALLOWLIST = new Set([
   'account/imports/import-wizard/steps/mapping/import-mapping-step.component.html',
   'account/imports/import-wizard/steps/meters/import-meters-step.component.html',
   'account/imports/import-wizard/steps/predictors/import-predictors-step.component.html',
-  'account/imports/import-wizard/steps/worksheet/import-worksheet-step.component.html',
-  'shell/section-nav/facility-picker/facility-picker.component.html'
+  'account/imports/import-wizard/steps/worksheet/import-worksheet-step.component.html'
 ]);
 
 function collectFiles(directory: string, extensions: readonly string[], files: string[] = []): string[] {

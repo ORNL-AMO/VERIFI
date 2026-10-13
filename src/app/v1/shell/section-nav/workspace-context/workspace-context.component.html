@@ -1,0 +1,45 @@
+@let contextMode = navigation.contextMode();
+@let facilities = navigation.facilities();
+@let selectedFacility = navigation.facility();
+@let account = navigation.account();
+
+@if (!isSingleSiteWorkspace()) {
+  <div class="v1-nav__context" role="group" aria-label="Switch workspace context">
+    <button
+      type="button"
+      [attr.aria-pressed]="contextMode === 'account'"
+      [class.active]="contextMode === 'account'"
+      (click)="navigation.setContext('account')">
+      <app-ui-icon name="account"></app-ui-icon>
+      Account
+    </button>
+    <button
+      type="button"
+      [class.active]="contextMode === 'facility'"
+      [disabled]="facilities.length === 0"
+      [attr.aria-pressed]="contextMode === 'facility'"
+      (click)="navigation.setContext('facility')">
+      <app-ui-icon name="facility"></app-ui-icon>
+      Facility
+    </button>
+  </div>
+}
+
+@if (!isSingleSiteWorkspace() && contextMode === 'facility' && facilities.length > 0) {
+  <app-facility-picker
+    [facilities]="facilities"
+    [selectedFacility]="selectedFacility"
+    (facilitySelected)="navigation.setFacility($event)">
+  </app-facility-picker>
+}
+
+@if (hasSingleSiteRecovery() && account) {
+  <section class="v1-nav__recovery v1-alert v1-alert--warning" aria-labelledby="v1-single-site-recovery-title">
+    <app-ui-icon name="warning"></app-ui-icon>
+    <div>
+      <strong id="v1-single-site-recovery-title">{{ recoveryTitle() }}</strong>
+      <p>{{ recoveryMessage() }}</p>
+      <a [routerLink]="navigation.legacyFacilityManagementRoute(account.guid)">Open facility management</a>
+    </div>
+  </section>
+}

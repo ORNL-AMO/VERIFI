@@ -1,0 +1,7 @@
+:host { display: block; min-width: 0; }
+.v1-nav__children[hidden] { display: none; }
+.v1-nav__resource-entry { display: grid; min-width: 0; }
+.v1-nav__weather-outputs { display: grid; gap: .1rem; min-width: 0; margin: .05rem 0 .2rem 1.55rem; padding: 0; list-style: none; }
+.v1-nav__weather-output { display: grid; grid-template-columns: 1rem minmax(0, 1fr); gap: .35rem; align-items: center; min-width: 0; min-height: 1.45rem; color: var(--v1-muted); font-size: .78rem; font-weight: 700; }
+.v1-nav__weather-output .v1-icon { width: 1rem; height: 1rem; }
+.v1-nav__weather-output span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,0 +1,20 @@
+:host { display: block; min-width: 0; }
+.v1-analysis-stages { min-width: 0; }
+ol { display: grid; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+li { min-width: 0; }
+.v1-analysis-stages a, .v1-analysis-stages__disabled { display: flex; gap: .5rem; align-items: center; min-width: 0; min-height: 2.15rem; padding: .32rem .45rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); color: var(--v1-muted); font-size: .82rem; font-weight: 800; line-height: 1.2; text-decoration: none; }
+.v1-analysis-stages a:hover, .v1-analysis-stages a:focus-visible { border-color: color-mix(in srgb, var(--v1-content-control) 28%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 6%, var(--v1-surface)); color: var(--v1-text); }
+.v1-analysis-stages a:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -2px; }
+.v1-analysis-stages .is-current a { border-color: color-mix(in srgb, var(--v1-content-control) 34%, var(--v1-border)); background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface)); color: var(--v1-text); box-shadow: inset 3px 0 0 var(--v1-content-control); }
+.v1-analysis-stages__disabled { color: var(--v1-muted); cursor: not-allowed; }
+.v1-analysis-stages__marker { display: inline-grid; flex: 0 0 1.25rem; width: 1.25rem; height: 1.25rem; place-items: center; }
+.v1-analysis-stages__marker.is-complete { color: var(--v1-success); }
+.v1-analysis-stages__marker.has-blocking-errors { color: var(--v1-danger); }
+.v1-analysis-stages__marker .v1-icon { width: 1.15rem; height: 1.15rem; }
+.v1-analysis-stages__label { min-width: 0; overflow-wrap: anywhere; }
+app-status-attention { margin-left: auto; }
+.v1-analysis-stages--horizontal { box-sizing: border-box; padding: var(--v1-space-2); border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); overflow-x: auto; }
+.v1-analysis-stages--horizontal.v1-analysis-stages--with-context { border-bottom: 0; }
+.v1-analysis-stages--horizontal ol { display: flex; gap: var(--v1-space-2); width: max-content; min-width: 100%; }
+.v1-analysis-stages--horizontal a, .v1-analysis-stages--horizontal .v1-analysis-stages__disabled { gap: .45rem; min-height: var(--v1-control-height); padding: .45rem .75rem; white-space: nowrap; }
+.v1-analysis-stages--horizontal .is-current a { box-shadow: none; }

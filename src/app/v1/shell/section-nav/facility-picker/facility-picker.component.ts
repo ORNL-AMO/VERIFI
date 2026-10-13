@@ -1,4 +1,6 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, computed, signal } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { IdbFacility } from '@data/models/idbModels/facility';
 
 const SEARCH_THRESHOLD = 5;
@@ -10,37 +12,29 @@ const SEARCH_THRESHOLD = 5;
   standalone: false
 })
 export class FacilityPickerComponent {
-  @Input() facilities: ReadonlyArray<IdbFacility> = [];
+  private readonly facilitiesState = signal<readonly IdbFacility[]>([]);
+  @Input() set facilities(value: readonly IdbFacility[]) { this.facilitiesState.set(value); }
+  get facilities(): readonly IdbFacility[] { return this.facilitiesState(); }
   @Input() selectedFacility: IdbFacility | undefined;
   @Output() readonly facilitySelected = new EventEmitter<string>();
 
   @ViewChild('toggleButton') private readonly toggleButton?: ElementRef<HTMLButtonElement>;
 
   open = false;
-  search = '';
-
-  get showSearch(): boolean {
-    return this.facilities.length > SEARCH_THRESHOLD;
-  }
-
-  get filteredFacilities(): ReadonlyArray<IdbFacility> {
-    const query = this.search.trim().toLowerCase();
-    if (!query) {
-      return this.facilities;
-    }
-    return this.facilities.filter(facility =>
-      facility.name.toLowerCase().includes(query) ||
-      this.facilityLocation(facility).toLowerCase().includes(query));
-  }
-
-  facilityLocation(facility: IdbFacility): string {
-    return [facility.city, facility.state].filter(part => !!part).join(', ');
-  }
+  readonly search = new FormControl('', { nonNullable: true });
+  private readonly query = toSignal(this.search.valueChanges, { initialValue: '' });
+  readonly showSearch = computed(() => this.facilitiesState().length > SEARCH_THRESHOLD);
+  readonly filteredFacilities = computed(() => {
+    const query = this.query().trim().toLowerCase();
+    return this.facilitiesState().map(facility => ({
+      ...facility, location: [facility.city, facility.state].filter(Boolean).join(', ')
+    })).filter(facility => !query || facility.name.toLowerCase().includes(query) || facility.location.toLowerCase().includes(query));
+  });
 
   toggle(): void {
     this.open = !this.open;
     if (this.open) {
-      this.search = '';
+      this.search.setValue('');
     }
   }
 

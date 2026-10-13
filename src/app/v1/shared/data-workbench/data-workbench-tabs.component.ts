@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { StatusAttentionComponent } from '@app/v1/shared/status/status-attention/status-attention.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { StatusAttentionSummary } from '@app/v1/status/status.models';
@@ -18,7 +19,7 @@ export interface DataWorkbenchTab {
   templateUrl: './data-workbench-tabs.component.html',
   styleUrls: ['./data-workbench-tabs.component.css'],
   standalone: true,
-  imports: [IconComponent]
+  imports: [IconComponent, StatusAttentionComponent]
 })
 export class DataWorkbenchTabsComponent {
   readonly idPrefix = `v1-data-tabs-${++nextTabsId}`;

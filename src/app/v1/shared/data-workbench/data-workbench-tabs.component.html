@@ -16,18 +16,7 @@
       (click)="selectTab(tab)">
       <app-ui-icon [name]="tab.icon"></app-ui-icon>
       {{ tab.label }}
-      @if (tabAttention && tabAttention.total > 0) {
-        <span
-          class="v1-data-tabs__attention v1-data-tabs__attention--{{ tabAttention.state }}"
-          [class.v1-data-tabs__attention--indicator]="attentionDisplay === 'indicator'"
-          [attr.title]="tabAttention.total + ' active status checks in ' + tab.label">
-          <span aria-hidden="true">{{ attentionDisplay === 'indicator' ? '!' : tabAttention.total }}</span>
-          <span class="visually-hidden">
-            {{ tabAttention.total }} issues: {{ tabAttention.errorCount }} errors,
-            {{ tabAttention.warningCount }} warnings
-          </span>
-        </span>
-      }
+        <app-status-attention [summary]="tabAttention" [contextLabel]="tab.label" [display]="attentionDisplay"></app-status-attention>
     </button>
     @if (tab.disabled && tab.disabledReason) {
       <span class="visually-hidden" [id]="disabledDescriptionId">{{ tab.disabledReason }}</span>

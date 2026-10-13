@@ -1,0 +1,163 @@
+.v1-root .v1-nav .v1-nav__link,
+.v1-root .v1-nav .v1-nav__context button {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  min-height: 2.25rem;
+  border-radius: var(--v1-radius-sm);
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    border-color .18s ease,
+    background-color .18s ease,
+    box-shadow .18s ease,
+    color .18s ease,
+    transform .18s ease;
+}
+
+.v1-root .v1-nav .v1-nav__group {
+  display: grid;
+  gap: .25rem;
+}
+
+.v1-root .v1-nav .v1-nav__item {
+  display: grid;
+  gap: .15rem;
+}
+
+.v1-root .v1-nav .v1-nav__item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .2rem;
+  align-items: stretch;
+}
+
+.v1-root .v1-nav .v1-nav__item-row > a {
+  min-width: 0;
+}
+
+.v1-root .v1-nav .v1-nav__subgroup {
+  display: grid;
+  gap: .25rem;
+  margin-top: .4rem;
+  padding-top: .45rem;
+  border-top: 1px solid var(--v1-divider);
+}
+
+.v1-root .v1-nav .v1-nav__label {
+  color: var(--v1-muted);
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.v1-root .v1-nav .v1-nav__sublabel {
+  color: var(--v1-muted);
+  font-size: .68rem;
+  font-weight: 900;
+}
+
+.v1-root .v1-nav .v1-nav__link {
+  padding: .35rem .55rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--v1-muted);
+}
+
+.v1-root .v1-nav .v1-nav__link.active {
+  border-color: color-mix(in srgb, var(--v1-content-control) 30%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
+  color: var(--v1-text);
+  box-shadow: inset 3px 0 0 var(--v1-content-control);
+}
+
+.v1-root .v1-nav .v1-nav__child-toggle {
+  justify-content: center;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  cursor: pointer;
+}
+
+.v1-root .v1-nav .v1-nav__child-toggle:hover,
+.v1-root .v1-nav .v1-nav__child-toggle:focus-visible {
+  border-color: color-mix(in srgb, var(--v1-content-control) 24%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 7%, var(--v1-surface));
+  color: var(--v1-text);
+}
+
+.v1-root .v1-nav .v1-nav__child-toggle .v1-icon {
+  font-size: .72rem;
+  transition: transform .16s ease;
+}
+
+.v1-root .v1-nav .v1-nav__item--open .v1-nav__child-toggle .v1-icon {
+  transform: rotate(90deg);
+}
+
+.v1-root .v1-nav .v1-nav__children {
+  display: grid;
+  gap: .18rem;
+  min-width: 0;
+  margin: .05rem 0 .45rem .75rem;
+  padding-left: .65rem;
+  border-left: 1px solid var(--v1-divider);
+}
+
+.v1-root .v1-nav .v1-nav__link.v1-nav__child {
+  display: inline-flex;
+  gap: .45rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.15rem;
+  padding: .35rem .55rem;
+  color: var(--v1-muted);
+}
+
+.v1-root .v1-nav .v1-nav__link.v1-nav__child:hover,
+.v1-root .v1-nav .v1-nav__link.v1-nav__child:focus-visible {
+  color: var(--v1-text);
+}
+
+.v1-root .v1-nav .v1-nav__link.v1-nav__child.active {
+  color: var(--v1-text);
+  box-shadow: inset 2px 0 0 var(--v1-content-control);
+}
+
+.v1-root .v1-nav .v1-nav__child .v1-icon {
+  flex: 0 0 auto;
+}
+
+.v1-root .v1-nav .v1-nav__item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.v1-root .v1-nav .v1-nav__link.v1-nav__item--danger {
+  color: var(--v1-danger);
+}
+
+.v1-root .v1-nav .v1-nav__link.v1-nav__item--danger.active {
+  border-color: color-mix(in srgb, var(--v1-content-control) 30%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface));
+  color: var(--v1-danger);
+  box-shadow: inset 3px 0 0 var(--v1-content-control);
+}
+
+.v1-root .v1-nav .v1-nav__link:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+
+.v1-root .v1-nav .v1-nav__link:focus-visible,
+.v1-root .v1-nav .v1-nav__context button:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -2px; }
+.v1-root .v1-nav .v1-nav__link > app-status-attention { margin-left: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .v1-root .v1-nav .v1-nav__link,
+  .v1-root .v1-nav .v1-nav__context button,
+  .v1-root .v1-nav .v1-nav__child-toggle .v1-icon { transition: none; }
+}
