@@ -31,6 +31,11 @@
           </h1>
         </div>
         <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
+          @if (accountAnalysisReturn.origin()) {
+            <button type="button" class="v1-btn v1-btn--secondary" (click)="accountAnalysisReturn.returnToAccountAnalysis()">
+              <app-ui-icon name="arrowLeft"></app-ui-icon> Return to Account Analysis
+            </button>
+          }
           <span
             class="v1-analysis-workbench__save-state"
             [class.v1-analysis-workbench__save-state--saved]="autosave.state() === 'saved'"

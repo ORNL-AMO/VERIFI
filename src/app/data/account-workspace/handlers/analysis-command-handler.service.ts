@@ -49,6 +49,18 @@ export interface CreateBulkFacilityAnalysesResult {
   readonly analyses: readonly IdbAnalysisItem[];
 }
 
+export interface CreateLinkedFacilityAnalysisCommand {
+  readonly accountGuid: string;
+  readonly accountAnalysisGuid: string;
+  readonly facilityGuid: string;
+  readonly analysis: IdbAnalysisItem;
+}
+
+export interface CreateLinkedFacilityAnalysisResult {
+  readonly accountAnalysis: IdbAccountAnalysisItem;
+  readonly analysis: IdbAnalysisItem;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AnalysisCommandHandler {
   constructor(
@@ -215,6 +227,74 @@ export class AnalysisCommandHandler {
         };
         await transaction.put('accountAnalysisItems', updatedAccountAnalysis);
         return { accountAnalysis: updatedAccountAnalysis, analyses: persistedAnalyses };
+      }
+    );
+  }
+
+  async createLinkedFacilityAnalysisForAccount(
+    command: CreateLinkedFacilityAnalysisCommand
+  ): Promise<CreateLinkedFacilityAnalysisResult> {
+    return this.transactions.runTransaction(
+      ['analysisItems', 'accountAnalysisItems', 'facilities'],
+      'readwrite',
+      async transaction => {
+        const accountAnalyses = await transaction.getAllByIndex<IdbAccountAnalysisItem>(
+          'accountAnalysisItems', 'accountId', command.accountGuid
+        );
+        const accountAnalysis = accountAnalyses.find(item => item.guid === command.accountAnalysisGuid);
+        if (!accountAnalysis || accountAnalysis.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The account analysis is missing or does not belong to the selected account.');
+        }
+        this.assertOwnership(accountAnalysis.accountId, command.accountGuid, 'account analysis');
+
+        const facilities = await transaction.getAllByIndex<IdbFacility>('facilities', 'accountId', command.accountGuid);
+        const facility = facilities.find(item => item.guid === command.facilityGuid);
+        if (!facility || facility.id === undefined) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected facility is missing or does not belong to the selected account.');
+        }
+
+        const analysis = { ...command.analysis };
+        delete analysis.id;
+        this.assertOwnership(analysis.accountId, command.accountGuid, 'facility analysis');
+        const facilityBaseline = accountAnalysis.analysisCategory === 'water'
+          ? facility.sustainabilityQuestions.waterReductionBaselineYear
+          : facility.sustainabilityQuestions.energyReductionBaselineYear;
+        const expectedBaseline = facility.isNewFacility
+          && Number.isFinite(facilityBaseline)
+          && facilityBaseline > accountAnalysis.baselineYear
+            ? facilityBaseline
+            : accountAnalysis.baselineYear;
+        if (analysis.facilityId !== facility.guid
+          || analysis.analysisCategory !== accountAnalysis.analysisCategory
+          || (analysis.analysisCategory === 'energy' && analysis.energyIsSource !== accountAnalysis.energyIsSource)
+          || analysis.baselineYear !== expectedBaseline) {
+          throw new WorkspaceWriteError('validation-failed', 'The generated facility analysis does not match the account-analysis selection requirements.');
+        }
+
+        const existingAnalyses = await transaction.getAllByIndex<IdbAnalysisItem>(
+          'analysisItems', 'accountId', command.accountGuid
+        );
+        if (existingAnalyses.some(item => item.guid === analysis.guid)) {
+          throw new WorkspaceWriteError('validation-failed', 'The generated facility analysis identifier is already in use.');
+        }
+
+        const existingLinks = new Map(
+          (accountAnalysis.facilityAnalysisItems ?? []).map(item => [item.facilityId, item.analysisItemId])
+        );
+        const updatedAccountAnalysis: IdbAccountAnalysisItem = {
+          ...accountAnalysis,
+          isAnalysisVisited: false,
+          facilityItemsInitialized: true,
+          modifiedDate: new Date(),
+          facilityAnalysisItems: facilities.map(item => ({
+            facilityId: item.guid,
+            analysisItemId: item.guid === facility.guid ? analysis.guid : existingLinks.get(item.guid)
+          }))
+        };
+        await transaction.put('accountAnalysisItems', updatedAccountAnalysis);
+        const key = await transaction.add('analysisItems', analysis);
+        analysis.id = Number(key);
+        return { accountAnalysis: updatedAccountAnalysis, analysis };
       }
     );
   }

@@ -4,7 +4,7 @@ This document is the implementation reference for the production v1 account-anal
 
 ## Scope and boundaries
 
-The feature lives under `src/app/v1/account/analysis`. The dashboard owns account-analysis inventory, commands, filters, active-for-reporting presentation, concise result calculation, details, and comparison. The route `/v1/workspace/account/:accountGuid/analysis/workbench/:analysisGuid` is the stable selected-analysis destination; until the workbench is implemented it renders one read-only placeholder.
+The feature lives under `src/app/v1/account/analysis`. The dashboard owns account-analysis inventory, commands, filters, active-for-reporting presentation, concise result calculation, details, and comparison. The route `/v1/workspace/account/:accountGuid/analysis/workbench/:analysisGuid` is the stable selected-analysis destination and owns Setup, Select Facility Items, Results, and Used By.
 
 IndexedDB remains the durable source of truth. Account analyses continue to reference facility analyses by facility and analysis GUID. Production v1 reuses the existing account roll-up calculations, persistence command boundary, workspace snapshot, status evaluation, and Worker infrastructure without importing v0 presentation or services.
 
@@ -51,7 +51,13 @@ Setup now has v0 workflow parity through a typed reactive editor. Route-scoped a
 
 Setup also owns the bulk facility-analysis workflow. It builds one new Absolute Consumption or Classic Intensity analysis per current facility and commits the generated analyses and account links in one IndexedDB transaction. Ownership and category relationships are validated before writes; a failure rolls back the complete operation. The operation preserves existing analyses, uses the later facility-goal baseline for new facilities where v0 does, and introduces no schema or record-shape changes.
 
-Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. Select Facility Items, the four Results destinations, and Used By remain explicit content scaffolds for follow-on parity work. Results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench owns its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
+Select Facility Items now has v0 workflow parity through a route-scoped selection controller. It reconciles GUID links to the current facility set, filters candidates by facility, category, energy basis, and baseline, presents v1 status findings and common-input data coverage, and immediately autosaves a selection or explicit skip. The footer walks the current facility order before opening Results. Selected errors remain editable and can be opened in the facility workbench, but they block Results; warnings do not.
+
+View Analysis opens the same facility-analysis details slideout used by the facility dashboard. Its setup, models, downstream usage, and validation render immediately; annual and monthly outcome facts calculate lazily for only the opened analysis and its banking dependencies. The route-scoped coordinator reuses canonical calendarization, the existing facility-analysis outcome Worker contract, deterministic fingerprints, and one compact matching outcome summary per opened analysis; full annual and monthly result tables are not retained. Closing the panel or opening another analysis cancels stale Worker work. The slideout footer opens the full facility-analysis workbench with the validated account-analysis return origin, without an intermediate confirmation modal.
+
+Creating a facility analysis from Select Facility Items stays inside the account workbench until confirmation in a v1 slideout. The standard factory supplies regression groups, the account analysis supplies category and energy basis, and the account baseline is used except for the established later new-facility goal baseline. One native transaction creates the facility analysis, replaces that facility's account-analysis link, and reconciles current facility links. The facility workbench receives a validated transient GUID origin and exposes Return to Account Analysis, restoring the originating facility without accepting an arbitrary return URL.
+
+Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. The four Results destinations and Used By remain explicit content scaffolds for follow-on parity work. Results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench owns its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
 
 ## Testing map
 
@@ -61,6 +67,10 @@ Setup is always available. Select Facility Items requires a valid editable setup
 | Dashboard forms and interactions | Focused Angular TestBed tests |
 | Setup drafts, autosave recovery, locking, and period availability | Fast service and focused Angular TestBed tests |
 | Bulk facility-analysis creation and rollback | Fast handler tests plus Chromium IndexedDB tests |
+| Facility selection, eligibility, progress, and per-facility footer navigation | Fast pure, service, and Angular TestBed tests |
+| Single facility-analysis create/link and rollback | Fast handler tests plus Chromium IndexedDB tests |
+| Facility-workbench return origin validation | Fast route-service tests |
+| On-demand facility detail results, cancellation, and cache reuse | Focused component tests plus Chromium Worker tests |
 | Calculation formula parity and result projection | Deterministic calculation tests |
 | Worker messaging, cancellation, timeout, and supersession | Chromium browser tests |
 | Atomic deletion and rollback | Chromium IndexedDB tests |

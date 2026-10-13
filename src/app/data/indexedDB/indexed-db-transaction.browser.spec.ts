@@ -370,6 +370,80 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     }));
   });
 
+  it('atomically creates and links one facility analysis, replacing only the selected facility link', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const accountAnalysisGuid = accountAFixture.accountAnalysis.guid as string;
+    await transactionService.runTransaction(['facilities', 'accountAnalysisItems'], 'readwrite', async transaction => {
+      await transaction.put('facilities', {
+        ...accountAFixture.facility,
+        sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2021 }
+      });
+      await transaction.put('accountAnalysisItems', {
+        ...accountAFixture.accountAnalysis,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: accountAFixture.facilityAnalysis.guid }]
+      });
+    });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    const result = await handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid,
+      accountAnalysisGuid,
+      facilityGuid,
+      analysis: {
+        guid: 'linked-analysis-a', accountId: accountGuid, facilityId: facilityGuid,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        name: 'Linked analysis', groups: []
+      } as any
+    });
+
+    expect(result.analysis.id).toEqual(expect.any(Number));
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).toContainEqual(expect.objectContaining({ guid: 'linked-analysis-a' }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: accountAnalysisGuid,
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: 'linked-analysis-a' }]
+    }));
+  });
+
+  it('rolls back the account link when the linked analysis cannot be stored', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const accountAnalysisGuid = accountAFixture.accountAnalysis.guid as string;
+    const originalLinks = [{ facilityId: facilityGuid, analysisItemId: accountAFixture.facilityAnalysis.guid }];
+    await transactionService.runTransaction(['facilities', 'accountAnalysisItems'], 'readwrite', async transaction => {
+      await transaction.put('facilities', {
+        ...accountAFixture.facility,
+        sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2021 }
+      });
+      await transaction.put('accountAnalysisItems', {
+        ...accountAFixture.accountAnalysis,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        facilityAnalysisItems: originalLinks
+      });
+    });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    await expect(handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid,
+      accountAnalysisGuid,
+      facilityGuid,
+      analysis: {
+        guid: 'linked-analysis-invalid', accountId: accountGuid, facilityId: facilityGuid,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        name: 'Invalid analysis', groups: [], invalidCloneValue: () => undefined
+      } as any
+    })).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).not.toContainEqual(expect.objectContaining({ guid: 'linked-analysis-invalid' }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: accountAnalysisGuid,
+      facilityAnalysisItems: originalLinks
+    }));
+  });
+
   it('rejects linked and cross-account account-analysis deletion without changing records', async () => {
     const accountGuid = accountAFixture.account.guid as string;
     const analysisGuid = accountAFixture.accountAnalysis.guid as string;

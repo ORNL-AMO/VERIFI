@@ -29,6 +29,7 @@ import ChevronDownIcon from '@hugeicons/core-free-icons/ChevronDownIcon';
 import ChevronLeftIcon from '@hugeicons/core-free-icons/ChevronLeftIcon';
 import ChevronRightIcon from '@hugeicons/core-free-icons/ChevronRightIcon';
 import ChevronUpIcon from '@hugeicons/core-free-icons/ChevronUpIcon';
+import CircleArrowRightDoubleIcon from '@hugeicons/core-free-icons/CircleArrowRightDoubleIcon';
 import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon';
 import CloudRainIcon from '@hugeicons/core-free-icons/CloudRainIcon';
 import CombineIcon from '@hugeicons/core-free-icons/CombineIcon';
@@ -180,6 +181,7 @@ export const ICON_REGISTRY = {
   search: Search01Icon,
   settings: Settings02Icon,
   settingsSliders: SlidersHorizontalIcon,
+  skip: CircleArrowRightDoubleIcon,
   sortAsc: ArrowUpWideNarrowIcon,
   sortDesc: ArrowDownWideNarrowIcon,
   spreadsheetColumns: LayoutTable01Icon,

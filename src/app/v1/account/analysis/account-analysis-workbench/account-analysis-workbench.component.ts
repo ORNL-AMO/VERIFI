@@ -8,6 +8,7 @@ import { AccountAnalysisWorkbenchHeaderComponent } from './header/account-analys
 import { AccountAnalysisWorkbenchStageNavigationComponent } from './stage-navigation/account-analysis-workbench-stage-navigation.component';
 import { AccountAnalysisWorkbenchFooterComponent } from './footer/account-analysis-workbench-footer.component';
 import { AccountAnalysisAutosaveService } from './editing/account-analysis-autosave.service';
+import { AccountAnalysisFacilitySelectionService } from './select-facility-items/account-analysis-facility-selection.service';
 
 @Component({
   selector: 'app-account-analysis-workbench',
@@ -15,6 +16,7 @@ import { AccountAnalysisAutosaveService } from './editing/account-analysis-autos
   providers: [
     AccountAnalysisWorkbenchContext,
     AccountAnalysisAutosaveService,
+    AccountAnalysisFacilitySelectionService,
     AccountAnalysisWorkbenchNavigationService
   ],
   imports: [

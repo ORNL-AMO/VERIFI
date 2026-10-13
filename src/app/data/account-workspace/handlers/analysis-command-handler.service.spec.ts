@@ -144,6 +144,76 @@ describe('AnalysisCommandHandler', () => {
     })).rejects.toThrow('exactly one analysis');
   });
 
+  it('atomically creates one facility analysis and replaces only its account-analysis link', async () => {
+    const { handler, transactions } = createHandler();
+    const accountAnalysis = {
+      id: 8, guid: 'aa-1', accountId: ACCOUNT, analysisCategory: 'energy', energyIsSource: true,
+      baselineYear: 2022, facilityAnalysisItems: [
+        { facilityId: FACILITY, analysisItemId: 'analysis-old' },
+        { facilityId: 'fac-2', analysisItemId: 'analysis-2' },
+        { facilityId: 'deleted', analysisItemId: 'analysis-deleted' }
+      ]
+    } as IdbAccountAnalysisItem;
+    const generated = {
+      guid: 'analysis-new', accountId: ACCOUNT, facilityId: FACILITY,
+      analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022
+    } as IdbAnalysisItem;
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([accountAnalysis])
+        .mockResolvedValueOnce([
+          { id: 4, guid: FACILITY, accountId: ACCOUNT, sustainabilityQuestions: { energyReductionBaselineYear: 2020 } },
+          { id: 5, guid: 'fac-2', accountId: ACCOUNT, sustainabilityQuestions: { energyReductionBaselineYear: 2020 } }
+        ])
+        .mockResolvedValueOnce([]),
+      add: vi.fn().mockResolvedValue(31),
+      put: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid: ACCOUNT, accountAnalysisGuid: 'aa-1', facilityGuid: FACILITY, analysis: generated
+    });
+
+    expect(result.analysis.id).toBe(31);
+    expect(context.add).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ guid: 'analysis-new' }));
+    expect(context.put).toHaveBeenCalledWith('accountAnalysisItems', expect.objectContaining({
+      facilityItemsInitialized: true,
+      facilityAnalysisItems: [
+        { facilityId: FACILITY, analysisItemId: 'analysis-new' },
+        { facilityId: 'fac-2', analysisItemId: 'analysis-2' }
+      ]
+    }));
+  });
+
+  it('rejects a linked facility analysis with a mismatched basis or baseline before writing', async () => {
+    const { handler, transactions } = createHandler();
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([{
+          id: 8, guid: 'aa-1', accountId: ACCOUNT, analysisCategory: 'energy', energyIsSource: true,
+          baselineYear: 2022, facilityAnalysisItems: []
+        }])
+        .mockResolvedValueOnce([{
+          id: 4, guid: FACILITY, accountId: ACCOUNT, isNewFacility: false,
+          sustainabilityQuestions: { energyReductionBaselineYear: 2020 }
+        }]),
+      add: vi.fn(), put: vi.fn()
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    await expect(handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid: ACCOUNT,
+      accountAnalysisGuid: 'aa-1',
+      facilityGuid: FACILITY,
+      analysis: {
+        guid: 'analysis-new', accountId: ACCOUNT, facilityId: FACILITY,
+        analysisCategory: 'energy', energyIsSource: false, baselineYear: 2020
+      } as IdbAnalysisItem
+    })).rejects.toThrow('does not match');
+    expect(context.add).not.toHaveBeenCalled();
+  });
+
   it('deleteAccountAnalysis rejects cross-account analysis', async () => {
     const { handler, accountAnalysisDb } = createHandler();
     await expect(

@@ -16,6 +16,7 @@ import {
   findingsForAccountAnalysisStage
 } from '../account-analysis-workbench.models';
 import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
+import { AccountAnalysisFacilitySelectionService } from '../select-facility-items/account-analysis-facility-selection.service';
 
 @Injectable()
 export class AccountAnalysisWorkbenchNavigationService {
@@ -23,6 +24,7 @@ export class AccountAnalysisWorkbenchNavigationService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly context = inject(AccountAnalysisWorkbenchContext);
   private readonly autosave = inject(AccountAnalysisAutosaveService);
+  private readonly facilitySelection = inject(AccountAnalysisFacilitySelectionService);
   private readonly workspaceNavigation = inject(WorkspaceNavigationService);
   private readonly activeStageState = signal<AccountAnalysisWorkbenchStageId>(
     activeAccountAnalysisWorkbenchStageId(this.router.url)
@@ -37,8 +39,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     this.autosave.draft() || this.context.analysis(),
     this.context.findings(),
     this.context.status.state() === 'ready',
-    this.context.selections().length === this.context.facilities().length
-      && this.context.selections().every(item => item.state === 'included' || item.state === 'skipped')
+    this.facilitySelection.allAssigned()
   ));
   readonly stages = computed(() => buildAccountAnalysisWorkbenchStageNavigation(
     this.context.stages(),
@@ -63,9 +64,18 @@ export class AccountAnalysisWorkbenchNavigationService {
     this.context.status.state(),
     this.readiness().setupComplete,
     this.readiness().selectionsComplete,
-    this.autosave.state()
+    this.autosave.state(),
+    {
+      facilityCount: this.facilitySelection.selectionItems().length,
+      facilityName: this.facilitySelection.activeFacility()?.name,
+      currentAssigned: this.facilitySelection.currentAssigned(),
+      isLast: this.facilitySelection.isLast(),
+      allAssigned: this.facilitySelection.allAssigned(),
+      hasSelectedErrors: this.facilitySelection.hasSelectedErrors()
+    }
   ));
   readonly disabled = computed(() => !!this.requirement());
+  readonly backDisabled = computed(() => ['saving', 'invalid', 'error'].includes(this.autosave.state()));
 
   private readonly redirectLockedStageEffect = effect(() => {
     const current = this.currentStage();
@@ -87,6 +97,7 @@ export class AccountAnalysisWorkbenchNavigationService {
 
   async back(): Promise<void> {
     if (!await this.autosave.flush()) return;
+    if (this.activeStageId() === 'select-items' && this.facilitySelection.focusPrevious()) return;
     const previous = this.previousStage();
     if (previous) {
       void this.router.navigate(previous.route);
@@ -99,6 +110,7 @@ export class AccountAnalysisWorkbenchNavigationService {
   async continue(): Promise<void> {
     if (this.disabled()) return;
     if (!await this.autosave.flush()) return;
+    if (this.activeStageId() === 'select-items' && this.facilitySelection.focusNext()) return;
     const next = this.nextStage();
     if (next?.available) void this.router.navigate(next.route);
   }
@@ -133,7 +145,21 @@ export function accountAnalysisNavigationRequirement(
   statusState: StatusEvaluationState,
   setupComplete: boolean,
   selectionsComplete: boolean,
-  autosaveState: import('../editing/account-analysis-autosave.service').AccountAnalysisAutosaveState = 'saved'
+  autosaveState: import('../editing/account-analysis-autosave.service').AccountAnalysisAutosaveState = 'saved',
+  facilitySelection: {
+    readonly facilityCount: number;
+    readonly facilityName?: string;
+    readonly currentAssigned: boolean;
+    readonly isLast: boolean;
+    readonly allAssigned: boolean;
+    readonly hasSelectedErrors: boolean;
+  } = {
+    facilityCount: selectionsComplete ? 1 : 0,
+    currentAssigned: selectionsComplete,
+    isLast: true,
+    allAssigned: selectionsComplete,
+    hasSelectedErrors: false
+  }
 ): string | undefined {
   if (autosaveState === 'saving') return 'Saving changes before navigation is available.';
   if (autosaveState === 'invalid') return 'Fix the validation errors before continuing.';
@@ -147,8 +173,16 @@ export function accountAnalysisNavigationRequirement(
   if (stageId === 'setup' && !setupComplete) {
     return 'Complete the analysis name and baseline year before continuing.';
   }
-  if (stageId === 'select-items' && !selectionsComplete) {
-    return 'Select a valid facility analysis or skip every facility before viewing Results.';
+  if (stageId === 'select-items') {
+    if (!facilitySelection.facilityCount) return 'Add a facility before selecting facility analyses.';
+    if (!facilitySelection.currentAssigned) {
+      return `Select a matching facility analysis or skip ${facilitySelection.facilityName || 'this facility'} before continuing.`;
+    }
+    if (!facilitySelection.isLast) return undefined;
+    if (!facilitySelection.allAssigned) return 'Select a matching facility analysis or skip every facility before viewing Results.';
+    if (facilitySelection.hasSelectedErrors || !selectionsComplete) {
+      return 'Resolve facility analysis errors, choose another analysis, or skip the affected facility before viewing Results.';
+    }
   }
   return undefined;
 }

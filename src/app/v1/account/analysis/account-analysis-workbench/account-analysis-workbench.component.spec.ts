@@ -6,6 +6,7 @@ import { AccountAnalysisWorkbenchContext } from './account-analysis-workbench-co
 import { AccountAnalysisWorkbenchComponent } from './account-analysis-workbench.component';
 import { AccountAnalysisWorkbenchNavigationService } from './navigation/account-analysis-workbench-navigation.service';
 import { AccountAnalysisAutosaveService } from './editing/account-analysis-autosave.service';
+import { AccountAnalysisFacilitySelectionService } from './select-facility-items/account-analysis-facility-selection.service';
 
 describe('AccountAnalysisWorkbenchComponent', () => {
   it('shows a recovery destination when the route analysis no longer exists', () => {
@@ -21,7 +22,8 @@ describe('AccountAnalysisWorkbenchComponent', () => {
           {
             provide: AccountAnalysisAutosaveService,
             useValue: { isDirty: signal(false), isBlocked: signal(false) }
-          }
+          },
+          { provide: AccountAnalysisFacilitySelectionService, useValue: {} }
         ]
       }
     });

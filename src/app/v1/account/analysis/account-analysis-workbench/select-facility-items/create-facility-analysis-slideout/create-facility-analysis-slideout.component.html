@@ -1,0 +1,41 @@
+<app-workspace-slideout
+  title="Add facility analysis"
+  description="Create and link a new analysis without leaving the account workflow."
+  [saving]="busy"
+  (closed)="cancelled.emit()">
+  <div class="v1-create-facility-analysis">
+    <dl aria-label="New facility analysis settings">
+      <div><dt>Facility</dt><dd>{{ facility.name }}</dd></div>
+      <div><dt>Category</dt><dd>{{ accountAnalysis.analysisCategory === 'water' ? 'Water' : 'Energy' }}</dd></div>
+      <div><dt>Baseline</dt><dd>{{ baselineYear }}</dd></div>
+      <div>
+        <dt>Basis and units</dt>
+        <dd>
+          {{ accountAnalysis.analysisCategory === 'water'
+            ? 'Water · ' + accountAnalysis.waterUnit
+            : (accountAnalysis.energyIsSource ? 'Source energy · ' : 'Site energy · ') + accountAnalysis.energyUnit }}
+        </dd>
+      </div>
+      <div><dt>Starting method</dt><dd>Regression for each matching meter group</dd></div>
+    </dl>
+
+    <div class="v1-alert v1-alert--info" role="note">
+      <app-ui-icon name="info"></app-ui-icon>
+      <span>The category is fixed by the account analysis. You can finish group and model setup in the facility workbench.</span>
+    </div>
+
+    @if (error) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <app-ui-icon name="warning"></app-ui-icon><span>{{ error }}</span>
+      </div>
+    }
+
+    <footer>
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="busy" (click)="cancelled.emit()">Cancel</button>
+      <button type="button" class="v1-btn v1-btn--action" [disabled]="busy" (click)="submitted.emit()">
+        <app-ui-icon [name]="busy ? 'loading' : 'add'" [spin]="busy"></app-ui-icon>
+        {{ busy ? 'Creating…' : 'Add analysis' }}
+      </button>
+    </footer>
+  </div>
+</app-workspace-slideout>

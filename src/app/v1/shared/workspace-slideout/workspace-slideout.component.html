@@ -9,6 +9,7 @@
   <aside
     class="v1-workspace-slideout"
     [class.v1-workspace-slideout--large]="size === 'large'"
+    [class.v1-workspace-slideout--with-footer]="hasFooter"
     role="dialog"
     aria-modal="true"
     aria-labelledby="v1-workspace-slideout-title"
@@ -28,5 +29,10 @@
     <div class="v1-workspace-slideout__body">
       <ng-content></ng-content>
     </div>
+    @if (hasFooter) {
+      <footer class="v1-workspace-slideout__footer">
+        <ng-content select="[slideoutFooter]"></ng-content>
+      </footer>
+    }
   </aside>
 </div>

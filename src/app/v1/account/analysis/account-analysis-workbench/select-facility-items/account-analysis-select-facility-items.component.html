@@ -1,6 +1,171 @@
-<app-account-analysis-scaffold-page
-  headingId="v1-account-analysis-select-items-heading"
-  title="Select Facility Items"
-  icon="checklist"
-  description="Facility-by-facility analysis selection, skip controls, status details, and cross-workspace actions will be migrated in the next parity pass.">
-</app-account-analysis-scaffold-page>
+@let items = selection.selectionItems();
+@let activeItem = selection.activeItem();
+@let analysis = selection.analysis();
+
+<section class="v1-account-selection" aria-label="Select Facility Items">
+  @if (!items.length) {
+    <article class="v1-account-selection__empty" role="status">
+      <app-ui-icon name="facility"></app-ui-icon>
+      <h3>No facilities available</h3>
+      <p>Add a facility to the account before selecting facility analyses.</p>
+    </article>
+  } @else {
+    <div class="v1-account-selection__workspace">
+      <aside class="v1-account-selection__rail" aria-label="Facility selection progress">
+        <header>
+          <div><strong>Facilities</strong><span>{{ selection.validCount() }} / {{ items.length }} valid</span></div>
+          <div class="v1-account-selection__progress" role="progressbar" aria-label="Valid facilities" [attr.aria-valuenow]="selection.validCount()" aria-valuemin="0" [attr.aria-valuemax]="items.length">
+            <span [style.width.%]="(selection.validCount() / items.length) * 100"></span>
+          </div>
+        </header>
+        <nav aria-label="Facilities">
+          @for (item of items; track item.facility.guid) {
+            <button
+              #facilityNavItem
+              type="button"
+              [class.active]="item.facility.guid === selection.activeFacilityGuid()"
+              [attr.aria-current]="item.facility.guid === selection.activeFacilityGuid() ? 'step' : null"
+              (click)="selection.selectFacility(item.facility.guid)">
+              <app-ui-icon
+                name="facility"
+                class="v1-account-selection__facility-icon"
+                [style.color]="item.facility.color || 'var(--v1-muted)'">
+              </app-ui-icon>
+              <span>{{ item.facility.name }}</span>
+              <span class="v1-account-selection__rail-state v1-account-selection__rail-state--{{ item.state }}">
+                @switch (item.state) {
+                  @case ('ready') { <app-ui-icon name="success"></app-ui-icon><span class="visually-hidden">Ready</span> }
+                  @case ('warning') { <app-ui-icon name="warning"></app-ui-icon><span class="visually-hidden">Has warnings</span> }
+                  @case ('error') { <app-ui-icon name="danger"></app-ui-icon><span class="visually-hidden">Has errors</span> }
+                  @case ('skipped') { <app-ui-icon name="skip"></app-ui-icon><span class="visually-hidden">Skipped</span> }
+                  @default { <app-ui-icon name="danger"></app-ui-icon><span class="visually-hidden">Not configured</span> }
+                }
+              </span>
+            </button>
+          }
+        </nav>
+      </aside>
+
+      <div class="v1-account-selection__content">
+        @if (context.linkedReports().length && !reportWarningDismissed()) {
+          <div class="v1-alert v1-alert--info v1-account-selection__report-warning" role="status">
+            <app-ui-icon name="info"></app-ui-icon>
+            <span>This analysis is used in {{ context.linkedReports().length }} {{ context.linkedReports().length === 1 ? 'report' : 'reports' }}. Selection changes can affect those report results.</span>
+            <button type="button" class="v1-icon-btn" aria-label="Dismiss linked report notice" (click)="reportWarningDismissed.set(true)"><app-ui-icon name="close"></app-ui-icon></button>
+          </div>
+        }
+
+        @if (context.status.state() === 'evaluating' || context.status.state() === 'idle') {
+          <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="loading" spin></app-ui-icon><span>Checking facility analysis status…</span></div>
+        } @else if (context.status.state() === 'error') {
+          <div class="v1-alert v1-alert--danger" role="alert"><app-ui-icon name="warning"></app-ui-icon><span>Facility analysis status is unavailable. Selection changes are preserved, but Results remain unavailable.</span></div>
+        }
+
+        @if (!context.workspace.canWrite()) {
+          <div class="v1-alert v1-alert--info" role="status"><app-ui-icon name="lock"></app-ui-icon><span>The workspace is read-only while account data is loading.</span></div>
+        }
+
+        @if (activeItem && analysis) {
+          <section class="v1-account-selection__table-section" [attr.aria-labelledby]="'facility-analysis-heading-' + activeItem.facility.guid">
+            <header class="v1-account-selection__facility-heading">
+              <div>
+                <h3 [id]="'facility-analysis-heading-' + activeItem.facility.guid">
+                  <app-ui-icon
+                    name="facility"
+                    class="v1-account-selection__facility-icon"
+                    [size]="22"
+                    [style.color]="activeItem.facility.color || 'var(--v1-muted)'">
+                  </app-ui-icon>
+                  {{ activeItem.facility.name }} Analysis Items
+                </h3>
+                <p>{{ analysis.analysisCategory === 'water' ? 'Water' : (analysis.energyIsSource ? 'Source energy' : 'Site energy') }} · Baseline {{ analysis.baselineYear }}</p>
+              </div>
+              <button type="button" class="v1-btn v1-btn--action" [disabled]="!selection.canMutate()" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add Facility Analysis</button>
+            </header>
+
+            @if (activeItem.analysisItemId && activeItem.analysisItemId !== 'skip' && !activeItem.eligible) {
+              <div class="v1-alert v1-alert--danger" role="alert">
+                <app-ui-icon name="warning"></app-ui-icon>
+                <span>The previously selected analysis is missing or no longer matches this account analysis. Choose another analysis or skip this facility.</span>
+              </div>
+            } @else if (selection.selectedCandidate()?.state === 'error') {
+              <div class="v1-alert v1-alert--danger" role="alert">
+                <app-ui-icon name="warning"></app-ui-icon>
+                <span>The selected facility analysis contains errors. View the analysis to resolve them, select another analysis, or skip this facility.</span>
+              </div>
+            }
+
+            <div class="v1-account-selection__table-wrap" role="radiogroup" [attr.aria-labelledby]="'facility-analysis-heading-' + activeItem.facility.guid">
+              <table>
+                <caption class="visually-hidden">Matching facility analyses for {{ activeItem.facility.name }}</caption>
+                <thead><tr><th scope="col"><span class="visually-hidden">Select</span></th><th scope="col">Status</th><th scope="col">Analysis Item</th><th scope="col">Group Analysis</th><th scope="col">Data Through</th><th scope="col">Last Modified</th><th scope="col">Actions</th></tr></thead>
+                <tbody>
+                  @for (candidate of selection.candidates(); track candidate.analysis.guid) {
+                    <tr [class.v1-account-selection__row--error]="candidate.state === 'error'" [class.v1-account-selection__row--warning]="candidate.state === 'warning'">
+                      <td class="v1-account-selection__radio">
+                        <input type="radio" [attr.name]="'facility-analysis-' + activeItem.facility.guid" [formControl]="selectionControl" [value]="candidate.analysis.guid" [attr.aria-label]="'Select ' + candidate.analysis.name + ' for ' + activeItem.facility.name">
+                      </td>
+                      <td>
+                        @switch (candidate.state) {
+                          @case ('evaluating') { <span class="v1-account-selection__status"><app-ui-icon name="loading" spin></app-ui-icon>Checking</span> }
+                          @case ('ready') { <span class="v1-account-selection__status v1-account-selection__status--ready"><app-ui-icon name="success"></app-ui-icon>No Issues</span> }
+                          @case ('error') { <span class="v1-account-selection__status v1-account-selection__status--error"><app-ui-icon name="danger"></app-ui-icon>Errors</span> }
+                          @case ('warning') { <span class="v1-account-selection__status v1-account-selection__status--warning"><app-ui-icon name="warning"></app-ui-icon>Warnings</span> }
+                        }
+                        @if (candidate.badges.length) {
+                          <div class="v1-account-selection__badges">
+                            @for (badge of candidate.badges; track badge.label) { <span class="v1-chip v1-chip--{{ badge.severity === 'error' ? 'danger' : 'warning' }}">{{ badge.label }}</span> }
+                          </div>
+                        }
+                      </td>
+                      <td><strong>{{ candidate.analysis.name || 'Untitled analysis' }}</strong></td>
+                      <td><ul class="v1-account-selection__groups">@for (group of candidate.groups; track group.groupId) { <li><span>{{ group.groupName }}:</span> {{ group.analysisLabel }}</li> }</ul></td>
+                      <td class="v1-account-selection__date">{{ candidate.dataThrough ? (candidate.dataThrough | date:'MMM y') : '—' }}</td>
+                      <td class="v1-account-selection__date">{{ candidate.analysis.modifiedDate | date:'shortDate' }}</td>
+                      <td><button type="button" class="v1-btn v1-btn--secondary" (click)="requestView(candidate.analysis)"><app-ui-icon name="monocle"></app-ui-icon>View Analysis</button></td>
+                    </tr>
+                  }
+                  @if (!selection.candidates().length) {
+                    <tr><td colspan="7" class="v1-account-selection__no-candidates">No matching {{ analysis.analysisCategory === 'energy' ? (analysis.energyIsSource ? 'source-energy' : 'site-energy') : 'water' }} analyses use the required baseline. Add a facility analysis to continue setup.</td></tr>
+                  }
+                  <tr class="v1-account-selection__skip-row">
+                    <td class="v1-account-selection__radio"><input type="radio" [attr.name]="'facility-analysis-' + activeItem.facility.guid" [formControl]="selectionControl" value="skip" [attr.aria-label]="'Skip ' + activeItem.facility.name"></td>
+                    <td colspan="6">
+                      <span class="v1-account-selection__skip-label">
+                        <app-ui-icon name="skip"></app-ui-icon>
+                        <em>Skip this facility</em>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="v1-account-selection__table-note"><app-ui-icon name="info"></app-ui-icon><strong>Data Through</strong> shows the most recent month through which every meter and predictor used by the analysis has data.</p>
+          </section>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+@if (createOpen() && selection.activeFacility() && analysis) {
+  <app-create-facility-analysis-slideout
+    [facility]="selection.activeFacility()!"
+    [accountAnalysis]="analysis"
+    [busy]="selection.busy()"
+    [error]="selection.error()"
+    (submitted)="createAnalysis()"
+    (cancelled)="closeCreate()">
+  </app-create-facility-analysis-slideout>
+}
+
+@if (detailsCard(); as card) {
+  <app-analysis-details-slideout
+    [card]="card"
+    [meterGroups]="context.workspace.meterGroups()"
+    [outcomeDisplay]="detailsOutcomeDisplay()"
+    [opening]="leaving()"
+    (opened)="openDetails()"
+    (closed)="closeDetails()">
+  </app-analysis-details-slideout>
+}

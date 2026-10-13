@@ -12,6 +12,7 @@ import { FacilityAnalysisWorkbenchNavigationService } from './navigation/facilit
 import { FacilityAnalysisWorkbenchHeaderComponent } from './header/facility-analysis-workbench-header.component';
 import { FacilityAnalysisWorkbenchStageNavigationComponent } from './stage-navigation/facility-analysis-workbench-stage-navigation.component';
 import { FacilityAnalysisWorkbenchFooterComponent } from './footer/facility-analysis-workbench-footer.component';
+import { AccountAnalysisReturnService } from './navigation/account-analysis-return.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -23,6 +24,7 @@ import { FacilityAnalysisWorkbenchFooterComponent } from './footer/facility-anal
     FacilityAnalysisResultsService,
     FacilityAnalysisResultsDisplayService,
     RegressionCandidateStore,
+    AccountAnalysisReturnService,
     FacilityAnalysisWorkbenchNavigationService
   ],
   imports: [

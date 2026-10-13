@@ -35,6 +35,10 @@
   width: min(64rem, 100%);
 }
 
+.v1-workspace-slideout--with-footer {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
 .v1-workspace-slideout__header {
   display: flex;
   gap: var(--v1-space-3);
@@ -67,6 +71,16 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   padding: var(--v1-space-4);
+}
+
+.v1-workspace-slideout__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  justify-content: flex-end;
+  padding: var(--v1-space-3) var(--v1-space-4);
+  border-top: 1px solid var(--v1-divider);
+  background: var(--v1-panel);
 }
 
 :host-context(.v1-workspace--panel-closed) .v1-workspace-slideout-layer {
