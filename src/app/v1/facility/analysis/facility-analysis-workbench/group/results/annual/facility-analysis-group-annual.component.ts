@@ -3,15 +3,15 @@ import { Component, computed, inject } from '@angular/core';
 import { MeterResultsChartComponent } from '@app/v1/shared/charts/metric-results-chart/meter-results-chart.component';
 import { FacilityAnalysisGroupContext } from '../../facility-analysis-group-context.service';
 import { FacilityAnalysisGroupResultsService } from '../calculation/facility-analysis-group-results.service';
-import { FacilityAnalysisResultsDisplayService } from '../../../results/presentation/facility-analysis-results-display.service';
+import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import {
   annualImprovementChartRows,
   annualImprovementChartMetrics,
   annualUseChartMetrics,
   annualUseChartRows
 } from '../../../results/presentation/facility-analysis-result.view';
-import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
-import { AnalysisResultColumnChooserComponent } from '../../../results/presentation/column-chooser/analysis-result-column-chooser.component';
+import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
+import { AnalysisResultColumnChooserComponent } from '@app/v1/shared/analysis-results/column-chooser/analysis-result-column-chooser.component';
 import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
 import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
 import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
@@ -21,7 +21,7 @@ import { annualResultMarkers, orderedUniqueResultMarkers } from '@app/v1/shared/
 export class FacilityAnalysisGroupAnnualComponent {
   readonly groupContext = inject(FacilityAnalysisGroupContext);
   readonly results = inject(FacilityAnalysisGroupResultsService);
-  readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
+  readonly displaySettings = inject(AnalysisResultsDisplayService);
   readonly columns = this.displaySettings.annualColumns;
   readonly rows = computed(() => {
     const state = this.results.state();

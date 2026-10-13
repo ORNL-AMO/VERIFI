@@ -8,11 +8,11 @@ import {
   annualImprovementChartMetrics,
   annualUseChartMetrics,
   annualUseChartRows
-} from '../../presentation/facility-analysis-result.view';
-import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
+} from '@app/v1/shared/analysis-results/chart/analysis-result-chart.view';
+import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
 import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
-import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
-import { FacilityAnalysisResultsDisplayService } from '../../presentation/facility-analysis-results-display.service';
+import { AnalysisResultColumnChooserComponent } from '@app/v1/shared/analysis-results/column-chooser/analysis-result-column-chooser.component';
+import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
 import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
 import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
@@ -26,7 +26,7 @@ import {
 export class FacilityAnalysisAnnualComponent {
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly results = inject(FacilityAnalysisResultsService);
-  readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
+  readonly displaySettings = inject(AnalysisResultsDisplayService);
   readonly columns = this.displaySettings.annualColumns;
   readonly rows = computed(() => {
     const state = this.results.state();

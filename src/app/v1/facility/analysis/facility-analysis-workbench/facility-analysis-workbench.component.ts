@@ -5,7 +5,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { FacilityAnalysisAutosaveService } from './editing/facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './results/calculation/facility-analysis-results.service';
-import { FacilityAnalysisResultsDisplayService } from './results/presentation/facility-analysis-results-display.service';
+import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { RegressionCandidateStore } from './group/regression/regression-candidate.store';
 import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysis-period.service';
 import { FacilityAnalysisWorkbenchNavigationService } from './navigation/facility-analysis-workbench-navigation.service';
@@ -22,7 +22,7 @@ import { AccountAnalysisReturnService } from './navigation/account-analysis-retu
     FacilityAnalysisAutosaveService,
     FacilityAnalysisPeriodService,
     FacilityAnalysisResultsService,
-    FacilityAnalysisResultsDisplayService,
+    AnalysisResultsDisplayService,
     RegressionCandidateStore,
     AccountAnalysisReturnService,
     FacilityAnalysisWorkbenchNavigationService

@@ -7,8 +7,8 @@ import {
   monthlySavingsChartView,
   monthlyUseChartMetrics,
   monthlyUseChartRows
-} from '../../presentation/facility-analysis-result.view';
-import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
+} from '@app/v1/shared/analysis-results/chart/analysis-result-chart.view';
+import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
 import { monthlyResultMarkers, orderedUniqueResultMarkers } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers';
 
 @Component({

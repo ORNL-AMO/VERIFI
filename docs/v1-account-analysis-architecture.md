@@ -37,7 +37,7 @@ The fingerprint includes calculation-bearing account-analysis setup, selected fa
 
 ## Shared analysis presentation
 
-Exact reusable analysis presentation belongs under `src/app/v1/shared/analysis-results`. This includes generic metric charts and their contracts, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout. Account and facility dashboards supply feature-owned view builders and commands to those components.
+Exact reusable analysis presentation belongs under `src/app/v1/shared/analysis-results`. This includes generic metric charts and their contracts, annual and monthly chart-row builders, result status presentation, period-specific column preferences and the column chooser, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout. Account and facility features supply feature-owned tables, view builders, and commands to those components. The period-specific column preference continues to use the existing `v1AnalysisTableColumns` key across both scopes.
 
 Page-specific tables remain explicit when their columns, row semantics, formulas, or completeness rules differ. Promote a table or graph only after account and facility consumers use the same semantic contract; do not create configurable abstractions that hide materially different calculations.
 
@@ -57,7 +57,9 @@ View Analysis opens the same facility-analysis details slideout used by the faci
 
 Creating a facility analysis from Select Facility Items stays inside the account workbench until confirmation in a v1 slideout. The standard factory supplies regression groups, the account analysis supplies category and energy basis, and the account baseline is used except for the established later new-facility goal baseline. One native transaction creates the facility analysis, replaces that facility's account-analysis link, and reconciles current facility links. The facility workbench receives a validated transient GUID origin and exposes Return to Account Analysis, restoring the originating facility without accepting an arbitrary return URL.
 
-Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. The four Results destinations and Used By remain explicit content scaffolds for follow-on parity work. Results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench owns its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
+Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip and no selected analysis errors, and Used By remains informational and available. Annual, Monthly Table, and Monthly Chart now have v0 calculation parity through a route-scoped account-results coordinator. The coordinator waits for saved, validated inputs, builds the same deterministic request and fingerprint as the dashboard, cancels stale work, validates returned GUIDs, applies the shared timeout, and caches only matching complete results. A dedicated workbench Worker returns full annual and monthly rows; the dashboard keeps its bounded summary Worker. Warnings do not block results.
+
+The account result pages mirror the v1 facility-result interaction contract while retaining account-owned tables: annual totals and both annual charts, a paginated and copyable monthly table with fiscal-year boundaries, and monthly use plus aggregate rolling savings/loss charts. Account pages intentionally omit facility predictor columns. Banking columns appear when an included facility analysis uses banking, while the account monthly savings chart retains the v0 aggregate series instead of splitting facility banking series. Facility Details and Used By remain explicit content scaffolds for follow-on parity work.
 
 ## Testing map
 
@@ -71,6 +73,8 @@ Setup is always available. Select Facility Items requires a valid editable setup
 | Single facility-analysis create/link and rollback | Fast handler tests plus Chromium IndexedDB tests |
 | Facility-workbench return origin validation | Fast route-service tests |
 | On-demand facility detail results, cancellation, and cache reuse | Focused component tests plus Chromium Worker tests |
+| Account workbench result gating, cache reuse, supersession, and full-result Worker exchange | Fast service tests plus Chromium Worker tests |
+| Account annual/monthly tables, controls, markers, and chart projections | Focused Angular TestBed and pure presentation tests |
 | Calculation formula parity and result projection | Deterministic calculation tests |
 | Worker messaging, cancellation, timeout, and supersession | Chromium browser tests |
 | Atomic deletion and rollback | Chromium IndexedDB tests |

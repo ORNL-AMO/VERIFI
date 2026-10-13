@@ -14,7 +14,7 @@ import {
   buildAccountAnalysisWorkbenchStageNavigation,
   buildAccountAnalysisWorkbenchStages
 } from '@app/v1/account/analysis/account-analysis-workbench/account-analysis-workbench.models';
-import { buildAccountAnalysisFacilitySelections } from '@app/v1/account/analysis/account-analysis-dashboard/account-analysis.models';
+import { buildFacilitySelectionItems } from '@app/v1/account/analysis/account-analysis-workbench/select-facility-items/account-analysis-facility-selection.models';
 import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import { StatusAttentionSummary } from '@app/v1/status/status.models';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -240,17 +240,20 @@ export class SectionNavComponent {
     const findings = this.status.items().filter(item =>
       item.entity.kind === 'account-analysis' && item.entity.guid === analysisGuid
     );
-    const selections = buildAccountAnalysisFacilitySelections(
+    const selections = buildFacilitySelectionItems(
       analysis,
       this.workspace.facilities(),
-      this.workspace.facilityAnalyses()
+      this.workspace.facilityAnalyses(),
+      this.status.items(),
+      this.status.state()
     );
     const readiness = accountAnalysisWorkbenchReadiness(
       analysis,
       findings,
       this.status.state() === 'ready',
-      selections.length === this.workspace.facilities().length
-        && selections.every(item => item.state === 'included' || item.state === 'skipped')
+      selections.length > 0
+        && selections.length === this.workspace.facilities().length
+        && selections.every(item => item.assigned && item.state !== 'error')
     );
     return {
       guid: analysis.guid,

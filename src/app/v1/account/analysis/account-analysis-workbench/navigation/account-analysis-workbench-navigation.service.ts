@@ -39,7 +39,7 @@ export class AccountAnalysisWorkbenchNavigationService {
     this.autosave.draft() || this.context.analysis(),
     this.context.findings(),
     this.context.status.state() === 'ready',
-    this.facilitySelection.allAssigned()
+    this.facilitySelection.resultsReady()
   ));
   readonly stages = computed(() => buildAccountAnalysisWorkbenchStageNavigation(
     this.context.stages(),

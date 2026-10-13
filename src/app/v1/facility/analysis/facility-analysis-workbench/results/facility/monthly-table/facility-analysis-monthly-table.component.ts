@@ -8,10 +8,10 @@ import { DEFAULT_TIME_PERIOD_PAGE_SIZE, TIME_PERIOD_PAGE_SIZE_OPTIONS } from '@s
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-workbench-context.service';
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
-import { AnalysisResultStatusComponent } from '../../presentation/status/analysis-result-status.component';
+import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
 import { AnalysisResultNumberPipe } from '@app/v1/shared/analysis-results/number/analysis-result-number.pipe';
-import { AnalysisResultColumnChooserComponent } from '../../presentation/column-chooser/analysis-result-column-chooser.component';
-import { FacilityAnalysisResultsDisplayService } from '../../presentation/facility-analysis-results-display.service';
+import { AnalysisResultColumnChooserComponent } from '@app/v1/shared/analysis-results/column-chooser/analysis-result-column-chooser.component';
+import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { AnalysisGroupPredictorVariable } from '@data/models/analysis';
 import { AnalysisResultMarkersComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-markers/analysis-result-markers.component';
 import { AnalysisResultMarkerLegendComponent } from '@app/v1/shared/analysis-results/result-markers/analysis-result-marker-legend/analysis-result-marker-legend.component';
@@ -34,7 +34,7 @@ export class FacilityAnalysisMonthlyTableComponent {
   private readonly copyTableService = inject(CopyTableService);
   readonly context = inject(FacilityAnalysisWorkbenchContext);
   readonly results = inject(FacilityAnalysisResultsService);
-  readonly displaySettings = inject(FacilityAnalysisResultsDisplayService);
+  readonly displaySettings = inject(AnalysisResultsDisplayService);
   readonly columns = this.displaySettings.monthlyColumns;
   readonly rows = computed(() => {
     const state = this.results.state();

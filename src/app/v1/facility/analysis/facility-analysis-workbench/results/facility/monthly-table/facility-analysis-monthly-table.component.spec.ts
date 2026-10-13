@@ -5,8 +5,8 @@ import { FacilityAnalysisWorkbenchContext } from '../../../facility-analysis-wor
 import { FacilityAnalysisResultsService } from '../../calculation/facility-analysis-results.service';
 import {
   DEFAULT_ANALYSIS_TABLE_COLUMNS,
-  FacilityAnalysisResultsDisplayService
-} from '../../presentation/facility-analysis-results-display.service';
+  AnalysisResultsDisplayService
+} from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { FacilityAnalysisMonthlyTableComponent } from './facility-analysis-monthly-table.component';
 
 describe('FacilityAnalysisMonthlyTableComponent', () => {
@@ -31,7 +31,7 @@ describe('FacilityAnalysisMonthlyTableComponent', () => {
           useValue: { state: signal({ state: 'ready', monthly: monthlyRows(30) }) }
         },
         {
-          provide: FacilityAnalysisResultsDisplayService,
+          provide: AnalysisResultsDisplayService,
           useValue: { monthlyColumns: signal(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS)) }
         }
       ]

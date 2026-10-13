@@ -31,7 +31,7 @@ import {
 import {
   accountAnalysisResultsFingerprint,
   buildAccountAnalysisResultsRequest
-} from './account-analysis-results-request';
+} from '../results/account-analysis-results-request';
 
 interface DashboardResultRequest {
   readonly analysisGuid: string;

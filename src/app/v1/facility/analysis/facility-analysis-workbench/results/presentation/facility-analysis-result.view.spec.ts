@@ -1,10 +1,10 @@
 import {
   annualImprovementChartRows,
   annualUseChartRows,
-  facilityGroupContributionsView,
   monthlySavingsChartView,
   monthlyUseChartRows
-} from './facility-analysis-result.view';
+} from '@app/v1/shared/analysis-results/chart/analysis-result-chart.view';
+import { facilityGroupContributionsView } from './facility-analysis-result.view';
 
 describe('facility analysis result views', () => {
   it('keeps zero and negative annual values in chart projections', () => {

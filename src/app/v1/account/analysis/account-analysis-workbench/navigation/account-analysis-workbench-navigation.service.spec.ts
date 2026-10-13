@@ -77,7 +77,7 @@ describe('accountAnalysisNavigationRequirement', () => {
         {
           provide: AccountAnalysisFacilitySelectionService,
           useValue: {
-            allAssigned: signal(true), selectionItems: signal([{ facility: { guid: 'facility-a' } }]),
+            allAssigned: signal(true), resultsReady: signal(true), selectionItems: signal([{ facility: { guid: 'facility-a' } }]),
             activeFacility: signal({ guid: 'facility-a', name: 'Facility A' }), currentAssigned: signal(true),
             isLast: signal(true), hasSelectedErrors: signal(false), focusPrevious: vi.fn(), focusNext: vi.fn()
           }
@@ -138,7 +138,7 @@ describe('accountAnalysisNavigationRequirement', () => {
       {
         provide: AccountAnalysisFacilitySelectionService,
         useValue: {
-          allAssigned: signal(true), selectionItems: signal([{ facility: { guid: 'facility-a' } }, { facility: { guid: 'facility-b' } }]),
+          allAssigned: signal(true), resultsReady: signal(true), selectionItems: signal([{ facility: { guid: 'facility-a' } }, { facility: { guid: 'facility-b' } }]),
           activeFacility: signal({ guid: 'facility-a', name: 'Facility A' }), currentAssigned: signal(true),
           isLast, hasSelectedErrors: signal(false), focusPrevious, focusNext
         }
