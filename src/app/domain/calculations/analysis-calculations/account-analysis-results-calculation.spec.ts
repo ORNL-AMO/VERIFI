@@ -36,6 +36,7 @@ describe('account analysis dashboard result projection', () => {
     expect(projected.annualAnalysisSummaries.map(row => row.year)).toEqual([2023, 2024]);
     expect(projected.monthlyAnalysisSummaryData).toHaveLength(1);
     expect(new Date(projected.monthlyAnalysisSummaryData[0].date).getUTCMonth()).toBe(2);
+    expect(projected.facilitySummaries).toBeUndefined();
   });
 
   it('preserves full numeric precision', () => {
@@ -208,6 +209,11 @@ function legacyCalculation(request: AccountAnalysisResultsWorkerRequest): Accoun
     itemId: request.accountAnalysisItem.guid,
     annualAnalysisSummaries: calculation.getAnnualAnalysisSummaries(),
     monthlyAnalysisSummaryData: calculation.monthlyAnalysisSummaryData,
+    facilitySummaries: calculation.facilitySummaries.map(summary => ({
+      facilityGuid: summary.facility.guid,
+      analysisGuid: summary.analysisItem.guid,
+      monthlySummaryData: summary.monthlySummaryData
+    })),
     reportYear: calculation.reportYear
   };
 }

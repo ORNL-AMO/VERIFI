@@ -23,7 +23,7 @@ export type FacilityAnalysisRouteTab = 'setup' | 'used-by';
 export type FacilityAnalysisGroupRouteTab = 'setup' | 'banking' | 'regression' | 'annual' | 'monthly-table' | 'monthly-chart';
 export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'group-contributions';
 export type AccountAnalysisRouteTab = 'setup' | 'select-items' | 'used-by';
-export type AccountAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details';
+export type AccountAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details' | 'facility-contributions';
 export type AccountAnalysisStageScope = 'setup' | 'select-items' | 'results' | 'used-by';
 export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
@@ -688,7 +688,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
           ? 'setup'
           : undefined;
   const accountAnalysisResultTab = accountAnalysisStageScope === 'results'
-    && ['annual', 'monthly-table', 'monthly-chart', 'facility-details'].includes(routeParts[7])
+    && ['annual', 'monthly-table', 'monthly-chart', 'facility-details', 'facility-contributions'].includes(routeParts[7])
       ? routeParts[7] as AccountAnalysisResultRouteTab
       : undefined;
   return {

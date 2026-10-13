@@ -29,5 +29,6 @@ describe('account analysis workbench results Worker', () => {
       throw error;
     }
     expect(response).toEqual({ ok: true, value: calculateAccountAnalysisResults(request) });
+    expect(response.ok && response.value.facilitySummaries).toEqual([]);
   });
 });

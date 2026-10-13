@@ -273,6 +273,16 @@ describe('MeterResultsChartComponent', () => {
     expect(fixture.nativeElement.querySelector('.v1-meter-results-chart')?.classList)
       .toContain('v1-meter-results-chart--joins-following');
   });
+
+  it('uses the compact chart surface in dense result grids', () => {
+    const fixture = setup();
+
+    fixture.componentRef.setInput('compact', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.v1-meter-results-chart')?.classList)
+      .toContain('v1-meter-results-chart--compact');
+  });
 });
 
 @Directive({

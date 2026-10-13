@@ -24,6 +24,11 @@ export function calculateAccountAnalysisResults(
     itemId: request.accountAnalysisItem.guid,
     annualAnalysisSummaries: calculation.getAnnualAnalysisSummaries(),
     monthlyAnalysisSummaryData: calculation.monthlyAnalysisSummaryData,
+    facilitySummaries: calculation.facilitySummaries.map(summary => ({
+      facilityGuid: summary.facility.guid,
+      analysisGuid: summary.analysisItem.guid,
+      monthlySummaryData: summary.monthlySummaryData
+    })),
     reportYear: calculation.reportYear
   };
 }
@@ -38,6 +43,7 @@ export function calculateAccountAnalysisDashboardResults(
 export function projectAccountAnalysisDashboardResults(
   value: AccountAnalysisResultsValue
 ): AccountAnalysisResultsValue {
+  const { facilitySummaries: _facilitySummaries, ...dashboardValue } = value;
   const annualAnalysisSummaries = value.annualAnalysisSummaries.filter(row =>
     Number.isFinite(row.year) && (value.reportYear === undefined || row.year <= value.reportYear)
   );
@@ -45,5 +51,5 @@ export function projectAccountAnalysisDashboardResults(
     .filter(row => Number.isFinite(new Date(row.date).getTime()))
     .sort((first, second) => new Date(second.date).getTime() - new Date(first.date).getTime())
     .slice(0, 1);
-  return { ...value, annualAnalysisSummaries, monthlyAnalysisSummaryData };
+  return { ...dashboardValue, annualAnalysisSummaries, monthlyAnalysisSummaryData };
 }

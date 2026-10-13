@@ -4,7 +4,7 @@ import { summarizeStatusAttention } from '@app/v1/status/status.dismissals';
 import type { StatusAttentionSummary, StatusItem } from '@app/v1/status/status.models';
 
 export type AccountAnalysisWorkbenchStageId = 'setup' | 'select-items' | 'results' | 'used-by';
-export type AccountAnalysisResultTabId = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details';
+export type AccountAnalysisResultTabId = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details' | 'facility-contributions';
 
 export interface AccountAnalysisWorkbenchStage {
   readonly id: AccountAnalysisWorkbenchStageId;
@@ -38,7 +38,8 @@ export const ACCOUNT_ANALYSIS_RESULT_TABS: readonly AccountAnalysisResultTab[] =
   { id: 'annual', label: 'Annual', icon: 'calendar' },
   { id: 'monthly-table', label: 'Monthly Table', icon: 'table' },
   { id: 'monthly-chart', label: 'Monthly Chart', icon: 'chartLine' },
-  { id: 'facility-details', label: 'Facility Details', icon: 'facility' }
+  { id: 'facility-details', label: 'Facility Details', icon: 'facility' },
+  { id: 'facility-contributions', label: 'Facility Contributions', icon: 'barChart' }
 ];
 
 export function buildAccountAnalysisWorkbenchStages(

@@ -25,7 +25,15 @@ export interface AccountAnalysisResultsValue {
   readonly itemId: string;
   readonly annualAnalysisSummaries: readonly AnnualAnalysisSummary[];
   readonly monthlyAnalysisSummaryData: readonly MonthlyAnalysisSummaryData[];
+  /** Present only for the full workbench calculation; dashboard responses stay compact. */
+  readonly facilitySummaries?: readonly AccountAnalysisFacilitySummary[];
   readonly reportYear?: number;
+}
+
+export interface AccountAnalysisFacilitySummary {
+  readonly facilityGuid: string;
+  readonly analysisGuid: string;
+  readonly monthlySummaryData: readonly MonthlyAnalysisSummaryData[];
 }
 
 export type AccountAnalysisResultsWorkerResponse =

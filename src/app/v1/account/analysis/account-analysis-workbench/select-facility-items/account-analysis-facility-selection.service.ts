@@ -20,7 +20,8 @@ import {
 export const ACCOUNT_ANALYSIS_ORIGIN_QUERY = {
   accountGuid: 'returnAccountGuid',
   analysisGuid: 'returnAccountAnalysisGuid',
-  facilityGuid: 'returnFacilityGuid'
+  facilityGuid: 'returnFacilityGuid',
+  resultTab: 'returnAccountResultTab'
 } as const;
 
 @Injectable()
