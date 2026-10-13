@@ -5,13 +5,18 @@ import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-work
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
-import { AccountAnalysisWorkbenchNavigationService } from '../navigation/account-analysis-workbench-navigation.service';
-import { AccountAnalysisAutosaveService } from '../editing/account-analysis-autosave.service';
+import { AccountAnalysisAutosaveService, AccountAnalysisAutosaveState } from '../editing/account-analysis-autosave.service';
+
+import { IdbAccount } from '@data/models/idbModels/account';
+import { AnalysisStatusNotesComponent } from '@app/v1/shared/analysis-results/status-notes/analysis-status-notes.component';
+import { analysisOutcomeDisplay, analysisOutcomeSummary, FacilityAnalysisOutcomeState } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
+import { accountAnalysisSelectionSummary } from '../../account-analysis-dashboard/account-analysis.models';
+import { AccountAnalysisResultsService, AccountAnalysisResultState } from '../results/calculation/account-analysis-results.service';
 
 @Component({
   selector: 'app-account-analysis-workbench-header',
   standalone: true,
-  imports: [RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent],
+  imports: [RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent, AnalysisStatusNotesComponent],
   templateUrl: './account-analysis-workbench-header.component.html',
   styleUrls: ['./account-analysis-workbench-header.component.css']
 })
@@ -19,7 +24,7 @@ export class AccountAnalysisWorkbenchHeaderComponent {
   private readonly router = inject(Router);
   readonly context = inject(AccountAnalysisWorkbenchContext);
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly workflow = inject(AccountAnalysisWorkbenchNavigationService);
+  readonly results = inject(AccountAnalysisResultsService);
   readonly autosave = inject(AccountAnalysisAutosaveService);
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
@@ -35,9 +40,17 @@ export class AccountAnalysisWorkbenchHeaderComponent {
     }
     return { label: 'No Issues', tone: 'success' as const, icon: 'success' as const };
   });
-  readonly selectionSummary = computed(() => {
-    const total = this.context.selections().length;
-    return `${this.context.includedCount()} included · ${this.context.skippedCount()} skipped · ${total} total`;
+  readonly selectionSummary = computed(() => accountAnalysisSelectionSummary(this.context.selectionCounts()));
+  readonly resultDisplay = computed(() => {
+    const analysis = this.autosave.draft() || this.context.analysis();
+    return analysisOutcomeDisplay(accountAnalysisResultOutcome(
+      this.results.state(), this.autosave.state(), this.context.hasBlockingErrors(),
+      this.context.account(), this.context.analysis()?.guid
+    ), analysis?.analysisCategory ?? 'energy');
+  });
+  readonly dependencyMessage = computed(() => {
+    const count = this.context.linkedReports().length;
+    return count ? `Changes can affect ${count} ${count === 1 ? 'report' : 'reports'}.` : undefined;
   });
 
   async switchAnalysis(analysisGuid: string): Promise<void> {
@@ -45,4 +58,28 @@ export class AccountAnalysisWorkbenchHeaderComponent {
     const account = this.context.account();
     if (account) await this.router.navigate(this.navigation.accountAnalysisWorkbenchRoute(account.guid, analysisGuid));
   }
+}
+
+export function accountAnalysisResultOutcome(
+  state: AccountAnalysisResultState,
+  autosaveState: AccountAnalysisAutosaveState,
+  hasBlockingErrors: boolean,
+  account: Pick<IdbAccount, 'fiscalYear'> | undefined,
+  analysisGuid: string | undefined
+): FacilityAnalysisOutcomeState {
+  // A previously published result must never label a new analysis or an unsaved draft.
+  if (autosaveState === 'invalid' || hasBlockingErrors) return { state: 'blocked', message: 'Setup incomplete' };
+  if (autosaveState === 'error') return { state: 'error', message: 'Save failed' };
+  if (autosaveState === 'dirty' || autosaveState === 'saving') return { state: 'loading', message: 'Waiting for save…' };
+  if (state.analysisGuid !== analysisGuid) return { state: 'loading', message: 'Preparing data…' };
+  if (state.state === 'ready') {
+    return { state: 'ready', summary: analysisOutcomeSummary(state.annual, state.monthly, state.reportYear, account) };
+  }
+  if (state.state === 'loading') return { state: 'loading', message: 'Calculating…' };
+  if (state.state === 'error') return { state: 'error', message: 'Calculation failed' };
+  if (state.state === 'waiting') {
+    if (state.reason === 'blocked') return { state: 'blocked', message: 'Setup incomplete' };
+    return { state: 'loading', message: state.reason === 'autosave' ? 'Waiting for save…' : 'Preparing data…' };
+  }
+  return { state: 'error', message: 'Unavailable' };
 }

@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { StatusItem } from '@app/v1/status/status.models';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
@@ -62,6 +63,13 @@ describe('facility analysis workbench header', () => {
         idbGroupId: 'group-a', analysisType: 'absoluteEnergyConsumption', predictorVariables: []
       }]
     } as any;
+    const findings = signal<StatusItem[]>([{
+      id: 'group-warning', code: 'analysis-group.model.invalid', severity: 'warning', category: 'readiness',
+      entity: { name: 'Analysis A', kind: 'analysis-group', guid: 'analysis-a:group-a', accountGuid: 'account-a', facilityGuid: 'facility-a' },
+      evidence: {}, title: 'Review group model', description: 'Model needs review.', todo: true,
+      destination: { kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'regression' }
+    }]);
+    const reviewFinding = vi.fn();
     const factsExpanded = signal(true);
     const returnOrigin = signal({ accountGuid: 'account-a', accountAnalysisGuid: 'account-analysis-a', facilityGuid: 'facility-a' });
     const returnToAccountAnalysis = vi.fn();
@@ -76,9 +84,9 @@ describe('facility analysis workbench header', () => {
             facility: signal({ guid: 'facility-a', name: 'Facility A', fiscalYear: 'nonCalendarYear' }),
             analysis: signal(analysis), analyses: signal([analysis]),
             meterGroups: signal([{ guid: 'group-a', name: 'Electricity' }]),
-            hasBlockingErrors: signal(false),
+            hasBlockingErrors: signal(false), findings,
             workspace: { accountAnalyses: signal([]), selectedFacilityReports: signal([]) },
-            status: { navigateTo: vi.fn() }
+            status: { navigateTo: reviewFinding }
           }
         },
         {
@@ -155,5 +163,13 @@ describe('facility analysis workbench header', () => {
 
     expect(host.querySelector<HTMLElement>('#v1-analysis-workbench-facts')?.hidden).toBe(true);
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    const statusNotes = host.querySelector('app-analysis-status-notes');
+    expect(statusNotes?.closest('[hidden]')).toBeNull();
+    expect(statusNotes?.textContent).toContain('Model needs review.');
+    statusNotes?.querySelector<HTMLButtonElement>('button')?.click();
+    expect(reviewFinding).toHaveBeenCalledWith(findings()[0]);
+    findings.set([]);
+    fixture.detectChanges();
+    expect(statusNotes?.querySelector('ul')).toBeNull();
   });
 });

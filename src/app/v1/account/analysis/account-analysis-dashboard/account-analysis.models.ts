@@ -89,7 +89,7 @@ export function buildAccountAnalysisCards(input: BuildAccountAnalysisCardsInput)
     const facilitySelections = buildAccountAnalysisFacilitySelections(
       analysis, input.facilities, input.facilityAnalyses
     );
-    const selectionCounts = countSelections(facilitySelections);
+    const selectionCounts = countAccountAnalysisSelections(facilitySelections);
     const status = resolveStatus(input.statusState, findings, selectionCounts);
     const linkedReports = input.reports.filter(report => accountReportReferencesAnalysis(report, analysis.guid));
     const isActiveForReporting = analysis.analysisCategory === 'water'
@@ -217,7 +217,7 @@ function selectionView(
   };
 }
 
-function countSelections(selections: readonly AccountAnalysisFacilitySelectionView[]): AccountAnalysisSelectionCounts {
+export function countAccountAnalysisSelections(selections: readonly AccountAnalysisFacilitySelectionView[]): AccountAnalysisSelectionCounts {
   return selections.reduce((counts, selection) => ({
     ...counts,
     [selection.state]: counts[selection.state] + 1
@@ -245,4 +245,10 @@ function formatDate(value: Date): string {
   return timestamp
     ? new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : 'Unknown';
+}
+
+/** Shared dashboard/workbench wording for facility selection facts. */
+export function accountAnalysisSelectionSummary(counts: AccountAnalysisSelectionCounts): string {
+  const exceptions = counts.skipped + counts.missing + counts.invalid;
+  return `${counts.included} included${exceptions ? ` · ${exceptions} need attention` : ''}`;
 }

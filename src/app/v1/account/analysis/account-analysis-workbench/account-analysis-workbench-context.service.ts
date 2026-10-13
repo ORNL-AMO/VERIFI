@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { accountReportReferencesAnalysis } from '@data/models/idbModels/accountReport';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { buildAccountAnalysisFacilitySelections } from '../account-analysis-dashboard/account-analysis.models';
+import { buildAccountAnalysisFacilitySelections, countAccountAnalysisSelections } from '../account-analysis-dashboard/account-analysis.models';
 import { buildFacilitySelectionItems } from './select-facility-items/account-analysis-facility-selection.models';
 import {
   accountAnalysisWorkbenchReadiness,
@@ -50,6 +50,7 @@ export class AccountAnalysisWorkbenchContext {
     const analysis = this.analysis();
     return account && analysis ? buildAccountAnalysisWorkbenchStages(account.guid, analysis.guid) : [];
   });
+  readonly selectionCounts = computed(() => countAccountAnalysisSelections(this.selections()));
   readonly includedCount = computed(() => this.selections().filter(item => item.state === 'included').length);
   readonly skippedCount = computed(() => this.selections().filter(item => item.state === 'skipped').length);
   readonly linkedReports = computed(() => this.reports().filter(report =>

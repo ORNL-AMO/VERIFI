@@ -1,6 +1,29 @@
-<app-account-analysis-scaffold-page
-  headingId="v1-account-analysis-used-by-heading"
-  title="Used By"
-  icon="link"
-  description="Reports and other saved workflows that depend on this account analysis will be listed here in the next parity pass.">
-</app-account-analysis-scaffold-page>
+@let linkedReports = reports();
+<section class="account-analysis-used-by" aria-labelledby="account-analysis-used-by-title">
+  <div class="account-analysis-used-by__heading">
+    <div>
+      <h2 id="account-analysis-used-by-title">Used By</h2>
+      <p>Review reports that use this analysis before changing its baseline or facility selections.</p>
+    </div>
+    <span class="v1-chip">{{ linkedReports.length }} {{ linkedReports.length === 1 ? 'report' : 'reports' }}</span>
+  </div>
+  @if (linkedReports.length) {
+    <section aria-labelledby="account-analysis-linked-reports-title">
+      <h3 id="account-analysis-linked-reports-title">Account reports</h3>
+      <ul class="account-analysis-used-by__reports">
+        @for (report of linkedReports; track report.guid) {
+          <li>
+            <span><strong>{{ report.name }}</strong><small>{{ report.typeLabel }}</small></span>
+            <span class="v1-chip">Opening reports is not yet available in v1</span>
+          </li>
+        }
+      </ul>
+    </section>
+  } @else {
+    <article class="v1-empty-state" role="status">
+      <app-ui-icon name="check"></app-ui-icon>
+      <h3>No dependencies</h3>
+      <p>This analysis is not currently used by another saved workflow.</p>
+    </article>
+  }
+</section>
