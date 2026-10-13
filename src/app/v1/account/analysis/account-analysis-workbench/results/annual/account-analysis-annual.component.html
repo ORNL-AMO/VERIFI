@@ -1,6 +1,68 @@
-<app-account-analysis-scaffold-page
-  headingId="v1-account-analysis-annual-heading"
-  title="Annual"
-  icon="calendar"
-  description="The annual account table, filters, and charts will be rebuilt against the v1 calculation lifecycle in the next results parity pass.">
-</app-account-analysis-scaffold-page>
+@let state = results.state();
+@let columnSettings = columns();
+<section class="v1-analysis-results-page" aria-label="Account annual results">
+  @if (blocking() || state.state !== 'ready' || !rows().length) {
+    <div class="v1-analysis-results-page__intro v1-analysis-results-page__intro--standalone">
+      <app-analysis-result-status scope="account" period="annual" [state]="state" [blocking]="blocking()" [rowCount]="rows().length"></app-analysis-result-status>
+    </div>
+  }
+  @if (!blocking() && state.state === 'ready' && rows().length) {
+    <section class="v1-analysis-results-page__table" aria-label="Account annual analysis table">
+      <div class="v1-analysis-results-page__table-actions" aria-label="Annual table controls">
+        <app-analysis-result-column-chooser period="annual" [hasBanking]="hasBanking()" [showModeled]="false"></app-analysis-result-column-chooser>
+      </div>
+      <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Account annual analysis results">
+        <table class="v1-analysis-results-table">
+          <thead>
+            <tr class="v1-analysis-results-table__section-row">
+              <th aria-hidden="true"></th>
+              @if (useColumnCount()) { <th class="v1-analysis-results-table__section-heading v1-analysis-results-table__section-heading--use" [attr.colspan]="useColumnCount()">{{ context.analysis()?.analysisCategory === 'water' ? 'Consumption' : 'Energy' }}@if (unit()) { <span> ({{ unit() }})</span> }</th> }
+              @if (improvementColumnCount()) { <th class="v1-analysis-results-table__section-heading v1-analysis-results-table__section-heading--improvement" [attr.colspan]="improvementColumnCount()">Incremental Improvement</th> }
+            </tr>
+            <tr>
+              <th scope="col">Year</th>
+              @if (columnSettings.actualEnergy) { <th class="v1-analysis-results-table__group--use" scope="col">Actual</th> }
+              @if (columnSettings.adjusted) { <th class="v1-analysis-results-table__group--use" scope="col">Adjusted</th> }
+              @if (columnSettings.baselineAdjustmentForNormalization) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for normalization</th> }
+              @if (columnSettings.baselineAdjustmentForOther) { <th class="v1-analysis-results-table__group--use" scope="col">Baseline adjustment for other</th> }
+              @if (columnSettings.baselineAdjustment) { <th class="v1-analysis-results-table__group--use" scope="col">Total baseline adjustment</th> }
+              @if (columnSettings.SEnPI) { <th class="v1-analysis-results-table__group--improvement" scope="col">SEnPI</th> }
+              @if (hasBanking() && columnSettings.bankedSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Banked savings</th> }
+              @if (hasBanking() && columnSettings.savingsUnbanked) { <th class="v1-analysis-results-table__group--improvement" scope="col">Unbanked savings</th> }
+              @if (columnSettings.savings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Savings</th> }
+              @if (columnSettings.totalSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Total savings % improvement</th> }
+              @if (columnSettings.newSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">New savings</th> }
+              @if (columnSettings.annualSavingsPercentImprovement) { <th class="v1-analysis-results-table__group--improvement" scope="col">Annual savings % improvement</th> }
+              @if (columnSettings.cummulativeSavings) { <th class="v1-analysis-results-table__group--improvement" scope="col">Cumulative savings</th> }
+            </tr>
+          </thead>
+          <tbody>
+            @for (view of rowViews(); track view.row.year) {
+              <tr [class.v1-analysis-results__missing]="view.row.missingPredictorValue">
+                <th scope="row">{{ view.row.year }} <app-analysis-result-markers [markers]="view.markers"></app-analysis-result-markers></th>
+                @if (columnSettings.actualEnergy) { <td>{{ view.row.energyUse | analysisResultNumber }}</td> }
+                @if (columnSettings.adjusted) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.adjusted | analysisResultNumber) }}</td> }
+                @if (columnSettings.baselineAdjustmentForNormalization) { <td>{{ view.row.baselineAdjustmentForNormalization | analysisResultNumber }}</td> }
+                @if (columnSettings.baselineAdjustmentForOther) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.baselineAdjustmentForOtherV2 | analysisResultNumber) }}</td> }
+                @if (columnSettings.baselineAdjustment) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.baselineAdjustment | analysisResultNumber) }}</td> }
+                @if (columnSettings.SEnPI) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.SEnPI | analysisResultNumber) }}</td> }
+                @if (hasBanking() && columnSettings.bankedSavings) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.savingsBanked | analysisResultNumber) }}</td> }
+                @if (hasBanking() && columnSettings.savingsUnbanked) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.savingsUnbanked | analysisResultNumber) }}</td> }
+                @if (columnSettings.savings) { <td>{{ view.row.isIntermediateBanked ? '—' : (view.row.savings | analysisResultNumber) }}</td> }
+                @if (columnSettings.totalSavingsPercentImprovement) { <td>{{ view.row.totalSavingsPercentImprovement | number:'1.0-2' }}%</td> }
+                @if (columnSettings.newSavings) { <td>{{ view.row.newSavings | analysisResultNumber }}</td> }
+                @if (columnSettings.annualSavingsPercentImprovement) { <td>{{ view.row.annualSavingsPercentImprovement | number:'1.0-2' }}%</td> }
+                @if (columnSettings.cummulativeSavings) { <td>{{ view.row.cummulativeSavings | analysisResultNumber }}</td> }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-analysis-result-marker-legend [markers]="legendMarkers()"></app-analysis-result-marker-legend>
+    </section>
+    <section class="v1-analysis-results-page__charts" aria-label="Account annual analysis charts">
+      <div class="v1-analysis-results-page__chart"><app-meter-results-chart [chartRows]="useChartRows()" [metrics]="useChartMetrics()" defaultLeftMetricId="actual" defaultRightMetricId="calculated" defaultLeftDisplay="bar" defaultRightDisplay="bar" [sharedYAxis]="true" [yAxisTitle]="useChartYAxisTitle()" [allowNegativeValues]="true" [showSeriesControls]="false" [showValueLabels]="true" [compactValueLabels]="true" period="yearly" ariaLabel="Account annual actual and calculated use chart" downloadFileName="account-annual-use" [embedded]="true"></app-meter-results-chart></div>
+      <div class="v1-analysis-results-page__chart"><app-meter-results-chart [chartRows]="improvementChartRows()" [metrics]="improvementChartMetrics()" defaultLeftMetricId="annualImprovement" defaultRightMetricId="totalImprovement" [sharedYAxis]="true" yAxisTitle="Percent Improvement" [allowNegativeValues]="true" [showSeriesControls]="false" [showValueLabels]="true" period="yearly" ariaLabel="Account annual and total improvement chart" downloadFileName="account-annual-improvement" [embedded]="true"></app-meter-results-chart></div>
+    </section>
+  }
+</section>

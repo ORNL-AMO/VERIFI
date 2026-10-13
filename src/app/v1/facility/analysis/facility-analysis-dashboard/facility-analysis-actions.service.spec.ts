@@ -3,14 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
-import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FacilityAnalysisActionsService, getActiveAnalysisEligibility } from './facility-analysis-actions.service';
 
 describe('FacilityAnalysisActionsService', () => {
   it('creates analyses through the factory and command boundary', async () => {
-    const analysisHandler = { addFacilityAnalysis: vi.fn(async item => ({ ...item, id: 5 })) };
+    const analysisHandler = pairHandler(5);
     const boundary = boundaryFake();
     const service = setup([], analysisHandler, boundary);
 
@@ -18,13 +17,14 @@ describe('FacilityAnalysisActionsService', () => {
 
     expect(created).toMatchObject({ id: 5, accountId: 'account-a', facilityId: 'facility-a', analysisCategory: 'energy' });
     expect(created.groups.map(group => group.idbGroupId)).toEqual(['energy-group']);
-    expect(analysisHandler.addFacilityAnalysis).toHaveBeenCalledWith(expect.objectContaining({ analysisCategory: 'energy' }), 'account-a');
+    expect(analysisHandler.addFacilityAnalysisWithSingleSitePair)
+      .toHaveBeenCalledWith(expect.objectContaining({ analysisCategory: 'energy' }), 'account-a');
     expect(boundary.execute).toHaveBeenCalledWith(expect.objectContaining({ changeKind: 'add' }), expect.any(Function));
   });
 
   it('deep copies an analysis with new identity and dates', async () => {
     const source = analysis();
-    const analysisHandler = { addFacilityAnalysis: vi.fn(async item => ({ ...item, id: 8 })) };
+    const analysisHandler = pairHandler(8);
     const service = setup([source], analysisHandler, boundaryFake());
 
     const copy = await service.copyAnalysis(source.guid);
@@ -35,6 +35,18 @@ describe('FacilityAnalysisActionsService', () => {
     expect(copy.groups).toEqual(source.groups);
     expect(copy.groups).not.toBe(source.groups);
     expect(source.name).toBe('Energy model');
+  });
+
+  it('synchronizes the hidden account pair when the active facility analysis changes', async () => {
+    const source = analysis();
+    const analysisHandler = pairHandler(8);
+    const service = setup([source], analysisHandler, boundaryFake());
+
+    const facility = await service.setActiveAnalysis(source.guid);
+
+    expect(facility.selectedEnergyAnalysisId).toBe(source.guid);
+    expect(analysisHandler.setActiveFacilityAnalysisAtomic)
+      .toHaveBeenCalledWith('account-a', 'facility-a', source.guid);
   });
 });
 
@@ -53,7 +65,7 @@ describe('getActiveAnalysisEligibility', () => {
 
 function setup(
   analyses: readonly IdbAnalysisItem[],
-  analysisHandler: { addFacilityAnalysis: ReturnType<typeof vi.fn> },
+  analysisHandler: ReturnType<typeof pairHandler>,
   boundary: ReturnType<typeof boundaryFake>
 ): FacilityAnalysisActionsService {
   const account = {
@@ -74,10 +86,26 @@ function setup(
       predictors: signal([])
     } },
     { provide: WorkspaceCommandBoundary, useValue: boundary },
-    { provide: AnalysisCommandHandler, useValue: analysisHandler },
-    { provide: FacilityCommandHandler, useValue: { update: vi.fn(async value => value) } }
+    { provide: AnalysisCommandHandler, useValue: analysisHandler }
   ] });
   return TestBed.inject(FacilityAnalysisActionsService);
+}
+
+function pairHandler(id: number) {
+  return {
+    addFacilityAnalysisWithSingleSitePair: vi.fn(async item => ({
+      analysis: { ...item, id },
+      accountAnalyses: []
+    })),
+    setActiveFacilityAnalysisAtomic: vi.fn(async (_accountGuid, _facilityGuid, analysisGuid) => ({
+      facility: {
+        guid: 'facility-a',
+        accountId: 'account-a',
+        selectedEnergyAnalysisId: analysisGuid
+      },
+      accountAnalyses: []
+    }))
+  };
 }
 
 function boundaryFake() {

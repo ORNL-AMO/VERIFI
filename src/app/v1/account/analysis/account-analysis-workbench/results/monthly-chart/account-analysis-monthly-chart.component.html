@@ -1,6 +1,16 @@
-<app-account-analysis-scaffold-page
-  headingId="v1-account-analysis-monthly-chart-heading"
-  title="Monthly Chart"
-  icon="chartLine"
-  description="Monthly account use and savings charts, chart controls, and accessible summaries will be migrated in the next results parity pass.">
-</app-account-analysis-scaffold-page>
+@let state = results.state();
+<section class="v1-analysis-results-page" aria-label="Account monthly chart results">
+  @if (blocking() || state.state !== 'ready' || !rows().length) {
+    <div class="v1-analysis-results-page__intro"><app-analysis-result-status scope="account" period="monthly" [state]="state" [blocking]="blocking()" [rowCount]="rows().length"></app-analysis-result-status></div>
+  }
+  @if (!blocking() && state.state === 'ready' && rows().length) {
+    <section class="v1-analysis-results-page__charts" aria-label="Account monthly analysis charts">
+      <div class="v1-analysis-results-page__chart">
+        <app-meter-results-chart [chartRows]="useChartRows()" [metrics]="useChartMetrics()" [showAllMetrics]="true" allMetricsDisplay="line" [comparisonBand]="useComparisonBand" [sharedYAxis]="true" [yAxisTitle]="unit()" [allowNegativeValues]="true" [showSeriesControls]="false" period="monthly" ariaLabel="Account monthly actual and calculated use chart. Green indicates savings where calculated use exceeds actual use; red indicates actual use exceeds calculated use." downloadFileName="account-monthly-use" [embedded]="true"></app-meter-results-chart>
+      </div>
+      <div class="v1-analysis-results-page__chart">
+        <app-meter-results-chart [chartRows]="savingsChart().rows" [metrics]="savingsChart().metrics" [showAllMetrics]="true" allMetricsDisplay="bar" [stackSeries]="true" [sharedYAxis]="true" yAxisTitle="Percent Savings" [allowNegativeValues]="true" [showSeriesControls]="false" period="monthly" ariaLabel="Account monthly rolling savings and losses chart" downloadFileName="account-monthly-savings" [embedded]="true"></app-meter-results-chart>
+      </div>
+    </section>
+  }
+</section>

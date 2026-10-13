@@ -3,6 +3,7 @@ import { PredictorCommandHandler } from '@data/account-workspace/handlers/predic
 import { MeterCommandHandler } from '@data/account-workspace/handlers/meter-command-handler.service';
 import { MeterGroupCommandHandler } from '@data/account-workspace/handlers/meter-group-command-handler.service';
 import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
+import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { dbConfig } from './_dbConfig';
 import { IndexedDbTransactionService } from './indexed-db-transaction.service';
 import { accountAFixture, accountBFixture, twoAccountPersistenceSeed } from './testing/indexed-db-test-fixtures';
@@ -246,6 +247,95 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
     }));
   });
 
+  it('atomically backfills and updates hidden account-analysis pairs for a single-facility account', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const analysisGuid = accountAFixture.facilityAnalysis.guid as string;
+    const account = {
+      ...accountAFixture.account,
+      isSingleFacilityCompany: true,
+      energyUnit: 'MMBtu',
+      volumeLiquidUnit: 'gal',
+      energyIsSource: true,
+      selectedEnergyAnalysisId: undefined,
+      sustainabilityQuestions: {
+        energyReductionBaselineYear: 2022,
+        waterReductionBaselineYear: 2022
+      }
+    };
+    const facility = {
+      ...accountAFixture.facility,
+      selectedEnergyAnalysisId: analysisGuid
+    };
+    const facilityAnalysis: IdbAnalysisItem = {
+      ...accountAFixture.facilityAnalysis,
+      analysisCategory: 'energy',
+      energyIsSource: true,
+      energyUnit: 'MMBtu',
+      waterUnit: 'gal',
+      baselineYear: 2022,
+      hasBanking: false,
+      groups: [],
+      modifiedDate: new Date('2026-10-13T00:00:00Z')
+    } as IdbAnalysisItem;
+    await transactionService.runTransaction(
+      ['accounts', 'facilities', 'analysisItems'],
+      'readwrite',
+      async transaction => {
+        await transaction.put('accounts', account);
+        await transaction.put('facilities', facility);
+        await transaction.put('analysisItems', facilityAnalysis);
+      }
+    );
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    const synchronized = await handler.reconcileSingleFacilityAnalysisPairs(accountGuid);
+
+    expect(synchronized.accountAnalyses).toHaveLength(1);
+    const pair = synchronized.accountAnalyses[0];
+    expect(pair).toMatchObject({
+      accountId: accountGuid,
+      name: facilityAnalysis.name,
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: analysisGuid }]
+    });
+    expect(synchronized.account?.selectedEnergyAnalysisId).toBe(pair.guid);
+    await harness.reopen();
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: pair.guid,
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: analysisGuid }]
+    }));
+
+    await handler.updateFacilityAnalysisWithSingleSitePair({
+      ...facilityAnalysis,
+      name: 'Updated facility analysis',
+      baselineYear: 2023
+    } as any, accountGuid);
+
+    await harness.reopen();
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: pair.guid,
+      name: 'Updated facility analysis',
+      baselineYear: 2023
+    }));
+
+    const copied = await handler.addFacilityAnalysisWithSingleSitePair({
+      ...facilityAnalysis,
+      id: undefined,
+      guid: 'facility-analysis-copy',
+      name: 'Copied facility analysis'
+    } as any, accountGuid);
+
+    expect(copied.analysis.id).toEqual(expect.any(Number));
+    expect(copied.accountAnalyses).toContainEqual(expect.objectContaining({
+      name: 'Copied facility analysis',
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: 'facility-analysis-copy' }]
+    }));
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).toContainEqual(expect.objectContaining({
+      guid: 'facility-analysis-copy'
+    }));
+  });
+
   it('leaves the database unchanged when a report or banking workflow blocks analysis deletion', async () => {
     const accountGuid = accountAFixture.account.guid as string;
     const facilityGuid = accountAFixture.facility.guid as string;
@@ -367,6 +457,80 @@ describe('native multi-store IndexedDB transactions in Chromium', () => {
         { facilityId: facilityGuid, analysisItemId: undefined },
         { facilityId: secondFacilityGuid, analysisItemId: undefined }
       ]
+    }));
+  });
+
+  it('atomically creates and links one facility analysis, replacing only the selected facility link', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const accountAnalysisGuid = accountAFixture.accountAnalysis.guid as string;
+    await transactionService.runTransaction(['facilities', 'accountAnalysisItems'], 'readwrite', async transaction => {
+      await transaction.put('facilities', {
+        ...accountAFixture.facility,
+        sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2021 }
+      });
+      await transaction.put('accountAnalysisItems', {
+        ...accountAFixture.accountAnalysis,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: accountAFixture.facilityAnalysis.guid }]
+      });
+    });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    const result = await handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid,
+      accountAnalysisGuid,
+      facilityGuid,
+      analysis: {
+        guid: 'linked-analysis-a', accountId: accountGuid, facilityId: facilityGuid,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        name: 'Linked analysis', groups: []
+      } as any
+    });
+
+    expect(result.analysis.id).toEqual(expect.any(Number));
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).toContainEqual(expect.objectContaining({ guid: 'linked-analysis-a' }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: accountAnalysisGuid,
+      facilityAnalysisItems: [{ facilityId: facilityGuid, analysisItemId: 'linked-analysis-a' }]
+    }));
+  });
+
+  it('rolls back the account link when the linked analysis cannot be stored', async () => {
+    const accountGuid = accountAFixture.account.guid as string;
+    const facilityGuid = accountAFixture.facility.guid as string;
+    const accountAnalysisGuid = accountAFixture.accountAnalysis.guid as string;
+    const originalLinks = [{ facilityId: facilityGuid, analysisItemId: accountAFixture.facilityAnalysis.guid }];
+    await transactionService.runTransaction(['facilities', 'accountAnalysisItems'], 'readwrite', async transaction => {
+      await transaction.put('facilities', {
+        ...accountAFixture.facility,
+        sustainabilityQuestions: { energyReductionBaselineYear: 2020, waterReductionBaselineYear: 2021 }
+      });
+      await transaction.put('accountAnalysisItems', {
+        ...accountAFixture.accountAnalysis,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        facilityAnalysisItems: originalLinks
+      });
+    });
+    const handler = new AnalysisCommandHandler({} as any, {} as any, {} as any, transactionService);
+
+    await expect(handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid,
+      accountAnalysisGuid,
+      facilityGuid,
+      analysis: {
+        guid: 'linked-analysis-invalid', accountId: accountGuid, facilityId: facilityGuid,
+        analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022,
+        name: 'Invalid analysis', groups: [], invalidCloneValue: () => undefined
+      } as any
+    })).rejects.toBeDefined();
+
+    await harness.reopen();
+    expect(await harness.getAll('analysisItems')).not.toContainEqual(expect.objectContaining({ guid: 'linked-analysis-invalid' }));
+    expect(await harness.getAll('accountAnalysisItems')).toContainEqual(expect.objectContaining({
+      guid: accountAnalysisGuid,
+      facilityAnalysisItems: originalLinks
     }));
   });
 

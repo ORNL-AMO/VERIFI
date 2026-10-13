@@ -5,8 +5,8 @@ import { FacilityAnalysisGroupContext } from '../../facility-analysis-group-cont
 import { FacilityAnalysisGroupResultsService } from '../calculation/facility-analysis-group-results.service';
 import {
   DEFAULT_ANALYSIS_TABLE_COLUMNS,
-  FacilityAnalysisResultsDisplayService
-} from '../../../results/presentation/facility-analysis-results-display.service';
+  AnalysisResultsDisplayService
+} from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { FacilityAnalysisGroupMonthlyTableComponent } from './facility-analysis-group-monthly-table.component';
 
 describe('FacilityAnalysisGroupMonthlyTableComponent', () => {
@@ -32,7 +32,7 @@ describe('FacilityAnalysisGroupMonthlyTableComponent', () => {
           }
         },
         {
-          provide: FacilityAnalysisResultsDisplayService,
+          provide: AnalysisResultsDisplayService,
           useValue: { monthlyColumns: signal(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS)) }
         }
       ]

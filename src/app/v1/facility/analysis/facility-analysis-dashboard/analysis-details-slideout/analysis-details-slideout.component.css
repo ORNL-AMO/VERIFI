@@ -1,0 +1,2 @@
+:host { display: contents; }
+.v1-analysis-details li span { display: block; color: var(--v1-muted); font-size: .82rem; }

@@ -7,6 +7,7 @@ import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-au
 import { FacilityAnalysisWorkbenchContext } from '../facility-analysis-workbench-context.service';
 import { FacilityAnalysisWorkbenchNavigationService } from '../navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisResultsService } from '../results/calculation/facility-analysis-results.service';
+import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
 import {
   FacilityAnalysisWorkbenchHeaderComponent,
   facilityAnalysisDependencyMessage,
@@ -62,6 +63,8 @@ describe('facility analysis workbench header', () => {
       }]
     } as any;
     const factsExpanded = signal(true);
+    const returnOrigin = signal({ accountGuid: 'account-a', accountAnalysisGuid: 'account-analysis-a', facilityGuid: 'facility-a' });
+    const returnToAccountAnalysis = vi.fn();
     await TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchHeaderComponent],
       providers: [
@@ -99,6 +102,10 @@ describe('facility analysis workbench header', () => {
           useValue: { currentStageFindings: signal([]) }
         },
         {
+          provide: AccountAnalysisReturnService,
+          useValue: { origin: returnOrigin, returnToAccountAnalysis }
+        },
+        {
           provide: WorkspaceNavigationService,
           useValue: {
             accountPortfolioRoute: (accountGuid: string, tab: string) => ['/account', accountGuid, 'data', 'portfolio', tab],
@@ -134,6 +141,11 @@ describe('facility analysis workbench header', () => {
     expect(host.textContent).toContain('Latest month · Sep 2026');
     expect(host.textContent).toContain('Electricity');
     expect(host.textContent).toContain('Modeled energy = baseline-period actual consumption');
+    const returnButton = Array.from(host.querySelectorAll<HTMLButtonElement>('button'))
+      .find(button => button.textContent?.includes('Return to Account Analysis'));
+    expect(returnButton).toBeTruthy();
+    returnButton?.click();
+    expect(returnToAccountAnalysis).toHaveBeenCalledOnce();
 
     const toggle = Array.from(host.querySelectorAll<HTMLButtonElement>('button'))
       .find(button => button.textContent?.includes('Hide facts'));

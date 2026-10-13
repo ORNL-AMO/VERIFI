@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { upsertWorkspaceRecords } from '@data/account-workspace/account-workspace-patches';
+import { WorkspacePatch } from '@data/account-workspace/account-workspace.models';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { AnalysisCommandHandler } from '@data/account-workspace/handlers/analysis-command-handler.service';
-import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
+import {
+  AnalysisCommandHandler,
+  SetActiveFacilityAnalysisResult
+} from '@data/account-workspace/handlers/analysis-command-handler.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { AnalysisCategory } from '@data/models/analysis';
@@ -10,6 +12,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { getGUID } from '@shared/sharedHelperFunctions';
+import { facilityAnalysisPairWritePatch } from '../single-facility-analysis-pair.service';
 
 export interface ActiveAnalysisEligibility {
   readonly allowed: boolean;
@@ -21,7 +24,6 @@ export class FacilityAnalysisActionsService {
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly boundary = inject(WorkspaceCommandBoundary);
   private readonly analysisHandler = inject(AnalysisCommandHandler);
-  private readonly facilityHandler = inject(FacilityCommandHandler);
 
   categoryAvailable(category: AnalysisCategory): boolean {
     const groupType = category === 'energy' ? 'Energy' : 'Water';
@@ -48,9 +50,9 @@ export class FacilityAnalysisActionsService {
     const result = await this.boundary.execute({
       entityKind: 'facilityAnalysis', changeKind: 'add', entityGuid: analysis.guid, label: 'Adding facility analysis',
       notification: { successTitle: 'Analysis added', successMessage: analysis.name },
-      publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('facilityAnalyses', [value]) }
-    }, () => this.analysisHandler.addFacilityAnalysis(analysis, account.guid));
-    return result.value;
+      publication: { mode: 'patch', buildPatch: facilityAnalysisPairWritePatch }
+    }, () => this.analysisHandler.addFacilityAnalysisWithSingleSitePair(analysis, account.guid));
+    return result.value.analysis;
   }
 
   async copyAnalysis(analysisGuid: string): Promise<IdbAnalysisItem> {
@@ -66,9 +68,9 @@ export class FacilityAnalysisActionsService {
     const result = await this.boundary.execute({
       entityKind: 'facilityAnalysis', changeKind: 'add', entityGuid: copy.guid, label: 'Copying facility analysis',
       notification: { successTitle: 'Analysis copied', successMessage: copy.name },
-      publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('facilityAnalyses', [value]) }
-    }, () => this.analysisHandler.addFacilityAnalysis(copy, account.guid));
-    return result.value;
+      publication: { mode: 'patch', buildPatch: facilityAnalysisPairWritePatch }
+    }, () => this.analysisHandler.addFacilityAnalysisWithSingleSitePair(copy, account.guid));
+    return result.value.analysis;
   }
 
   async setActiveAnalysis(analysisGuid: string): Promise<IdbFacility> {
@@ -77,15 +79,12 @@ export class FacilityAnalysisActionsService {
     const analysis = this.requireAnalysis(analysisGuid);
     const eligibility = getActiveAnalysisEligibility(account, facility, analysis);
     if (!eligibility.allowed) throw new WorkspaceWriteError('validation-failed', eligibility.reason!);
-    const updated = structuredClone(facility);
-    if (analysis.analysisCategory === 'water') updated.selectedWaterAnalysisId = analysis.guid;
-    else updated.selectedEnergyAnalysisId = analysis.guid;
     const result = await this.boundary.execute({
       entityKind: 'facility', changeKind: 'update', entityGuid: facility.guid, label: 'Setting active analysis',
       notification: { successTitle: 'Active analysis updated', successMessage: analysis.name },
-      publication: { mode: 'patch', buildPatch: value => upsertWorkspaceRecords('facilities', [value]) }
-    }, () => this.facilityHandler.update(updated, account.guid));
-    return result.value;
+      publication: { mode: 'patch', buildPatch: activeFacilityAnalysisPatch }
+    }, () => this.analysisHandler.setActiveFacilityAnalysisAtomic(account.guid, facility.guid, analysis.guid));
+    return result.value.facility;
   }
 
   async deleteAnalysis(analysisGuid: string): Promise<void> {
@@ -124,6 +123,18 @@ export class FacilityAnalysisActionsService {
     if (!analysis) throw new WorkspaceWriteError('validation-failed', 'The analysis is not part of the selected facility.');
     return analysis;
   }
+}
+
+export function activeFacilityAnalysisPatch(result: SetActiveFacilityAnalysisResult): WorkspacePatch {
+  return {
+    account: result.account,
+    collections: [
+      { collection: 'facilities', upsert: [result.facility] },
+      ...(result.accountAnalyses.length
+        ? [{ collection: 'accountAnalyses' as const, upsert: result.accountAnalyses }]
+        : [])
+    ]
+  };
 }
 
 export function getActiveAnalysisEligibility(

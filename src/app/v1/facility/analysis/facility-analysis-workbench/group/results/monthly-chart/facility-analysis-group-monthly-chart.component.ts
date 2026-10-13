@@ -8,7 +8,7 @@ import {
   monthlyUseChartMetrics,
   monthlyUseChartRows
 } from '../../../results/presentation/facility-analysis-result.view';
-import { AnalysisResultStatusComponent } from '../../../results/presentation/status/analysis-result-status.component';
+import { AnalysisResultStatusComponent } from '@app/v1/shared/analysis-results/status/analysis-result-status.component';
 
 @Component({
   selector: 'app-facility-analysis-group-monthly-chart',

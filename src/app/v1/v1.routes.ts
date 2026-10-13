@@ -102,6 +102,7 @@ import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/facility/analysis
 import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
 import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
 import { FacilityAnalysisUsedByComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/used-by/facility-analysis-used-by.component';
+import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
 
 export const V1Routes: Routes = [
   {
@@ -381,6 +382,7 @@ export const V1Routes: Routes = [
           },
           {
             path: 'analysis',
+            canActivateChild: [singleFacilityAnalysisPairGuard],
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
               { path: 'dashboard', component: FacilityAnalysisDashboardComponent },

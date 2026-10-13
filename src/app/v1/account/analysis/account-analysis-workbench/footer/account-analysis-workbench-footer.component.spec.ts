@@ -12,7 +12,7 @@ describe('AccountAnalysisWorkbenchFooterComponent', () => {
         provide: AccountAnalysisWorkbenchNavigationService,
         useValue: {
           requirement: signal('Select a valid facility analysis or skip every facility before viewing Results.'),
-          disabled: signal(true), nextStage: signal({ id: 'results' }), back: vi.fn(), continue: vi.fn(), finish: vi.fn()
+          disabled: signal(true), backDisabled: signal(true), nextStage: signal({ id: 'results' }), back: vi.fn(), continue: vi.fn(), finish: vi.fn()
         }
       }]
     });
@@ -33,7 +33,7 @@ describe('AccountAnalysisWorkbenchFooterComponent', () => {
       providers: [{
         provide: AccountAnalysisWorkbenchNavigationService,
         useValue: {
-          requirement: signal(undefined), disabled: signal(false), nextStage,
+          requirement: signal(undefined), disabled: signal(false), backDisabled: signal(false), nextStage,
           back, continue: continueNavigation, finish
         }
       }]

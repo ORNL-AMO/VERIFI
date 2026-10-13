@@ -4,7 +4,6 @@
 .v1-analysis-dashboard__workspace .v1-data-browse > .v1-empty-state h2, .v1-analysis-dashboard__workspace .v1-data-browse > .v1-empty-state p { margin: 0; }
 .v1-analysis-dashboard__workspace .v1-data-browse > .v1-empty-state h2 { font-size: 1rem; font-weight: 900; }
 .v1-analysis-dashboard__workspace .v1-data-browse > .v1-empty-state p { max-width: 42rem; color: var(--v1-muted); font-size: .88rem; line-height: 1.45; }
-.v1-analysis-details li span { display: block; color: var(--v1-muted); font-size: .82rem; }
 .v1-analysis-active-confirmation { display: grid; gap: var(--v1-space-4); }
 .v1-analysis-active-confirmation footer { display: flex; justify-content: flex-end; gap: var(--v1-space-2); }
 @media (max-width: 760px) { .v1-analysis-dashboard__header-actions { justify-content: flex-start; } }

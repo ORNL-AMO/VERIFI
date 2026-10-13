@@ -312,10 +312,11 @@ describe('SectionNavComponent', () => {
 
     expect([...workflow.querySelectorAll('.v1-workflow-stepper__label')].map(item => item.textContent?.trim()))
       .toEqual(['Setup', 'Select Facility Items', 'Results', 'Used By']);
-    expect(workflow.querySelector('[aria-current="step"]')?.textContent).toContain('Results');
+    expect(workflow.querySelector('.is-current')?.textContent).toContain('Results');
     expect(fixture.nativeElement.textContent).toContain('Active for Reporting');
     expect(fixture.nativeElement.textContent).toContain('Portfolio Water');
-    expect(workflow.querySelectorAll('a')).toHaveLength(4);
+    expect(workflow.querySelectorAll('a')).toHaveLength(3);
+    expect(workflow.querySelector('[aria-disabled="true"]')?.textContent).toContain('Results');
   });
 
   it('ignores stale active selections and omits empty analysis groups', () => {

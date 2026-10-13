@@ -15,6 +15,7 @@ import {
   facilityAnalysisOutcomeSummary
 } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
+import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench-header',
@@ -36,6 +37,7 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly workflow = inject(FacilityAnalysisWorkbenchNavigationService);
+  readonly accountAnalysisReturn = inject(AccountAnalysisReturnService);
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
     label: analysis.name || 'Untitled analysis',

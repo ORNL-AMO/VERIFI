@@ -51,6 +51,7 @@ describe('AnalysisCommandHandler', () => {
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([{ id: 4, guid: FACILITY, accountId: ACCOUNT, selectedEnergyAnalysisId: 'a-1' }])
         .mockResolvedValueOnce([{ id: 5, accountId: ACCOUNT, facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'a-1' }] }]),
+      getAll: vi.fn().mockResolvedValue([{ id: 1, guid: ACCOUNT, isSingleFacilityCompany: false }]),
       put: vi.fn().mockResolvedValue(undefined),
       deleteByKey: vi.fn().mockResolvedValue(undefined)
     };
@@ -58,12 +59,121 @@ describe('AnalysisCommandHandler', () => {
 
     const result = await handler.deleteFacilityAnalysisAtomic({ accountGuid: ACCOUNT, facilityGuid: FACILITY, analysisGuid: 'a-1' });
 
-    expect(result).toMatchObject({ clearedAccountAnalysisCount: 1, clearedActiveSelection: true });
+    expect(result).toMatchObject({
+      clearedAccountAnalysisCount: 1,
+      clearedActiveSelection: true,
+      deletedAccountAnalysisCount: 0
+    });
     expect(context.put).toHaveBeenCalledWith('accountAnalysisItems', expect.objectContaining({
       facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: undefined }]
     }));
     expect(context.put).toHaveBeenCalledWith('facilities', expect.objectContaining({ selectedEnergyAnalysisId: undefined }));
     expect(context.deleteByKey).toHaveBeenCalledWith('analysisItems', 3);
+  });
+
+  it('creates missing single-facility pairs and synchronizes the account active analysis', async () => {
+    const { handler, transactions } = createHandler();
+    const facilityAnalysis = {
+      id: 3, guid: 'a-1', accountId: ACCOUNT, facilityId: FACILITY, name: 'Energy plan',
+      analysisCategory: 'energy', energyIsSource: true, energyUnit: 'MMBtu', waterUnit: 'gal',
+      baselineYear: 2022, hasBanking: false, modifiedDate: new Date('2026-10-13')
+    } as IdbAnalysisItem;
+    const facility = {
+      id: 4, guid: FACILITY, accountId: ACCOUNT, selectedEnergyAnalysisId: facilityAnalysis.guid
+    };
+    const context = {
+      getAll: vi.fn().mockResolvedValue([{
+        id: 1, guid: ACCOUNT, isSingleFacilityCompany: true,
+        energyUnit: 'MMBtu', volumeLiquidUnit: 'gal', energyIsSource: true,
+        sustainabilityQuestions: { energyReductionBaselineYear: 2022, waterReductionBaselineYear: 2022 }
+      }]),
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([facility])
+        .mockResolvedValueOnce([facilityAnalysis])
+        .mockResolvedValueOnce([]),
+      add: vi.fn().mockResolvedValue(11),
+      put: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.reconcileSingleFacilityAnalysisPairs(ACCOUNT);
+
+    expect(result.accountAnalyses).toHaveLength(1);
+    expect(result.accountAnalyses[0]).toMatchObject({
+      id: 11,
+      accountId: ACCOUNT,
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'a-1' }]
+    });
+    expect(result.account?.selectedEnergyAnalysisId).toBe(result.accountAnalyses[0].guid);
+    expect(context.put).toHaveBeenCalledWith('accounts', expect.objectContaining({
+      selectedEnergyAnalysisId: result.accountAnalyses[0].guid
+    }));
+  });
+
+  it('deletes the paired hidden account analysis with its facility analysis', async () => {
+    const { handler, transactions } = createHandler();
+    const pair = {
+      id: 8, guid: 'aa-1', accountId: ACCOUNT,
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'a-1' }]
+    };
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([{ id: 3, guid: 'a-1', accountId: ACCOUNT, facilityId: FACILITY }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: 4, guid: FACILITY, accountId: ACCOUNT, selectedEnergyAnalysisId: 'a-1' }])
+        .mockResolvedValueOnce([pair])
+        .mockResolvedValueOnce([]),
+      getAll: vi.fn().mockResolvedValue([{
+        id: 1, guid: ACCOUNT, isSingleFacilityCompany: true, selectedEnergyAnalysisId: pair.guid
+      }]),
+      put: vi.fn().mockResolvedValue(undefined),
+      deleteByKey: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.deleteFacilityAnalysisAtomic({
+      accountGuid: ACCOUNT,
+      facilityGuid: FACILITY,
+      analysisGuid: 'a-1'
+    });
+
+    expect(result).toMatchObject({ deletedAccountAnalysisCount: 1, clearedAccountAnalysisCount: 0 });
+    expect(context.deleteByKey).toHaveBeenCalledWith('accountAnalysisItems', pair.id);
+    expect(context.put).toHaveBeenCalledWith('accounts', expect.objectContaining({
+      selectedEnergyAnalysisId: undefined
+    }));
+  });
+
+  it('blocks facility-analysis deletion when an account report uses its hidden pair', async () => {
+    const { handler, transactions } = createHandler();
+    const pair = {
+      id: 8, guid: 'aa-1', accountId: ACCOUNT,
+      facilityAnalysisItems: [{ facilityId: FACILITY, analysisItemId: 'a-1' }]
+    };
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([{ id: 3, guid: 'a-1', accountId: ACCOUNT, facilityId: FACILITY }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: 4, guid: FACILITY, accountId: ACCOUNT }])
+        .mockResolvedValueOnce([pair])
+        .mockResolvedValueOnce([{
+          reportType: 'performance',
+          performanceReportSetup: { analysisItemId: pair.guid }
+        }]),
+      getAll: vi.fn().mockResolvedValue([{
+        id: 1, guid: ACCOUNT, isSingleFacilityCompany: true
+      }]),
+      put: vi.fn(),
+      deleteByKey: vi.fn()
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    await expect(handler.deleteFacilityAnalysisAtomic({
+      accountGuid: ACCOUNT,
+      facilityGuid: FACILITY,
+      analysisGuid: 'a-1'
+    })).rejects.toThrow('paired account analysis');
+    expect(context.deleteByKey).not.toHaveBeenCalled();
   });
 
   it('blocks atomic deletion when reports or banking analyses depend on it', async () => {
@@ -142,6 +252,76 @@ describe('AnalysisCommandHandler', () => {
     await expect(handler.createBulkFacilityAnalysesForAccount({
       accountGuid: ACCOUNT, accountAnalysisGuid: 'aa-1', analyses: []
     })).rejects.toThrow('exactly one analysis');
+  });
+
+  it('atomically creates one facility analysis and replaces only its account-analysis link', async () => {
+    const { handler, transactions } = createHandler();
+    const accountAnalysis = {
+      id: 8, guid: 'aa-1', accountId: ACCOUNT, analysisCategory: 'energy', energyIsSource: true,
+      baselineYear: 2022, facilityAnalysisItems: [
+        { facilityId: FACILITY, analysisItemId: 'analysis-old' },
+        { facilityId: 'fac-2', analysisItemId: 'analysis-2' },
+        { facilityId: 'deleted', analysisItemId: 'analysis-deleted' }
+      ]
+    } as IdbAccountAnalysisItem;
+    const generated = {
+      guid: 'analysis-new', accountId: ACCOUNT, facilityId: FACILITY,
+      analysisCategory: 'energy', energyIsSource: true, baselineYear: 2022
+    } as IdbAnalysisItem;
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([accountAnalysis])
+        .mockResolvedValueOnce([
+          { id: 4, guid: FACILITY, accountId: ACCOUNT, sustainabilityQuestions: { energyReductionBaselineYear: 2020 } },
+          { id: 5, guid: 'fac-2', accountId: ACCOUNT, sustainabilityQuestions: { energyReductionBaselineYear: 2020 } }
+        ])
+        .mockResolvedValueOnce([]),
+      add: vi.fn().mockResolvedValue(31),
+      put: vi.fn().mockResolvedValue(undefined)
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    const result = await handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid: ACCOUNT, accountAnalysisGuid: 'aa-1', facilityGuid: FACILITY, analysis: generated
+    });
+
+    expect(result.analysis.id).toBe(31);
+    expect(context.add).toHaveBeenCalledWith('analysisItems', expect.objectContaining({ guid: 'analysis-new' }));
+    expect(context.put).toHaveBeenCalledWith('accountAnalysisItems', expect.objectContaining({
+      facilityItemsInitialized: true,
+      facilityAnalysisItems: [
+        { facilityId: FACILITY, analysisItemId: 'analysis-new' },
+        { facilityId: 'fac-2', analysisItemId: 'analysis-2' }
+      ]
+    }));
+  });
+
+  it('rejects a linked facility analysis with a mismatched basis or baseline before writing', async () => {
+    const { handler, transactions } = createHandler();
+    const context = {
+      getAllByIndex: vi.fn()
+        .mockResolvedValueOnce([{
+          id: 8, guid: 'aa-1', accountId: ACCOUNT, analysisCategory: 'energy', energyIsSource: true,
+          baselineYear: 2022, facilityAnalysisItems: []
+        }])
+        .mockResolvedValueOnce([{
+          id: 4, guid: FACILITY, accountId: ACCOUNT, isNewFacility: false,
+          sustainabilityQuestions: { energyReductionBaselineYear: 2020 }
+        }]),
+      add: vi.fn(), put: vi.fn()
+    };
+    transactions.runTransaction.mockImplementation(async (_stores, _mode, operation) => operation(context));
+
+    await expect(handler.createLinkedFacilityAnalysisForAccount({
+      accountGuid: ACCOUNT,
+      accountAnalysisGuid: 'aa-1',
+      facilityGuid: FACILITY,
+      analysis: {
+        guid: 'analysis-new', accountId: ACCOUNT, facilityId: FACILITY,
+        analysisCategory: 'energy', energyIsSource: false, baselineYear: 2020
+      } as IdbAnalysisItem
+    })).rejects.toThrow('does not match');
+    expect(context.add).not.toHaveBeenCalled();
   });
 
   it('deleteAccountAnalysis rejects cross-account analysis', async () => {

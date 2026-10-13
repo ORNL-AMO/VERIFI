@@ -14,6 +14,7 @@ export class WorkspaceSlideoutComponent {
   @Input() description = '';
   @Input() saving = false;
   @Input() size: 'default' | 'large' = 'default';
+  @Input() hasFooter = false;
   @Output() closed = new EventEmitter<void>();
 
   requestClose(): void {

@@ -4,13 +4,17 @@ This document is the implementation reference for the production v1 account-anal
 
 ## Scope and boundaries
 
-The feature lives under `src/app/v1/account/analysis`. The dashboard owns account-analysis inventory, commands, filters, active-for-reporting presentation, concise result calculation, details, and comparison. The route `/v1/workspace/account/:accountGuid/analysis/workbench/:analysisGuid` is the stable selected-analysis destination; until the workbench is implemented it renders one read-only placeholder.
+The feature lives under `src/app/v1/account/analysis`. The dashboard owns account-analysis inventory, commands, filters, active-for-reporting presentation, concise result calculation, details, and comparison. The route `/v1/workspace/account/:accountGuid/analysis/workbench/:analysisGuid` is the stable selected-analysis destination and owns Setup, Select Facility Items, Results, and Used By.
 
 IndexedDB remains the durable source of truth. Account analyses continue to reference facility analyses by facility and analysis GUID. Production v1 reuses the existing account roll-up calculations, persistence command boundary, workspace snapshot, status evaluation, and Worker infrastructure without importing v0 presentation or services.
 
 The approved dashboard implementation plan deliberately adds a typed, v1-only account-analysis Worker request and response plus a dedicated Worker entry point so multiple dashboard cards can be calculated with bounded concurrency. This is a new orchestration boundary, not a formula change: it shares the deterministic calculation entry point with the synchronous fallback and does not alter legacy Worker messages or v0 behavior. This approved scope decision supersedes the earlier issue wording that excluded Worker contract work.
 
 No account-analysis record shape, database schema, backup format, report output, formula, unit conversion, rounding rule, or Electron contract changes as part of the dashboard.
+
+Valid single-facility accounts do not expose the account-analysis dashboard or workbench. Account Analysis routes redirect to the sole facility's Analysis dashboard or the corresponding facility-analysis workbench view. Each facility analysis has a hidden account-analysis pair containing exactly one selection link to that analysis. The pair mirrors category, basis, display units, baseline, banking state, and name so account-level reports and other consumers retain the existing account-analysis contract without creating a second user-facing editing workflow.
+
+Pair creation and synchronization use the existing account-analysis record shape and GUID relationships. Creating, copying, editing, activating, or deleting a facility analysis commits the paired account-analysis change atomically in v1. The selected account energy or water analysis follows the pair for the facility's active analysis. Route-entry reconciliation backfills missing or stale pairs for existing single-facility workspaces; multi-facility accounts keep the explicit account-analysis workflow unchanged. A paired analysis referenced by an account report blocks deletion through the same dependency rule as an ordinary account analysis.
 
 ## Dashboard ownership
 
@@ -37,7 +41,7 @@ The fingerprint includes calculation-bearing account-analysis setup, selected fa
 
 ## Shared analysis presentation
 
-Exact reusable analysis presentation belongs under `src/app/v1/shared/analysis-results`. This includes generic metric charts and their contracts, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout. Account and facility dashboards supply feature-owned view builders and commands to those components.
+Exact reusable analysis presentation belongs under `src/app/v1/shared/analysis-results`. This includes generic metric charts and their contracts, annual and monthly chart-row builders, result status presentation, period-specific column preferences and the column chooser, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout. Account and facility features supply feature-owned tables, view builders, and commands to those components. The period-specific column preference continues to use the existing `v1AnalysisTableColumns` key across both scopes.
 
 Page-specific tables remain explicit when their columns, row semantics, formulas, or completeness rules differ. Promote a table or graph only after account and facility consumers use the same semantic contract; do not create configurable abstractions that hide materially different calculations.
 
@@ -51,7 +55,15 @@ Setup now has v0 workflow parity through a typed reactive editor. Route-scoped a
 
 Setup also owns the bulk facility-analysis workflow. It builds one new Absolute Consumption or Classic Intensity analysis per current facility and commits the generated analyses and account links in one IndexedDB transaction. Ownership and category relationships are validated before writes; a failure rolls back the complete operation. The operation preserves existing analyses, uses the later facility-goal baseline for new facilities where v0 does, and introduces no schema or record-shape changes.
 
-Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip, and Used By remains informational and available. Select Facility Items, the four Results destinations, and Used By remain explicit content scaffolds for follow-on parity work. Results should reuse the typed calculation entry point and shared analysis presentation where semantics match. The workbench owns its editing, navigation, and full result lifecycle; the dashboard coordinator remains an inventory-scoped projection rather than shared mutable workbench state.
+Select Facility Items now has v0 workflow parity through a route-scoped selection controller. It reconciles GUID links to the current facility set, filters candidates by facility, category, energy basis, and baseline, presents v1 status findings and common-input data coverage, and immediately autosaves a selection or explicit skip. The footer walks the current facility order before opening Results. Selected errors remain editable and can be opened in the facility workbench, but they block Results; warnings do not.
+
+View Analysis opens the same facility-analysis details slideout used by the facility dashboard. Its setup, models, downstream usage, and validation render immediately; annual and monthly outcome facts calculate lazily for only the opened analysis and its banking dependencies. The route-scoped coordinator reuses canonical calendarization, the existing facility-analysis outcome Worker contract, deterministic fingerprints, and one compact matching outcome summary per opened analysis; full annual and monthly result tables are not retained. Closing the panel or opening another analysis cancels stale Worker work. The slideout footer opens the full facility-analysis workbench with the validated account-analysis return origin, without an intermediate confirmation modal.
+
+Creating a facility analysis from Select Facility Items stays inside the account workbench until confirmation in a v1 slideout. The standard factory supplies regression groups, the account analysis supplies category and energy basis, and the account baseline is used except for the established later new-facility goal baseline. One native transaction creates the facility analysis, replaces that facility's account-analysis link, and reconciles current facility links. The facility workbench receives a validated transient GUID origin and exposes Return to Account Analysis, restoring the originating facility without accepting an arbitrary return URL.
+
+Setup is always available. Select Facility Items requires a valid editable setup, Results requires every facility to have a valid matching analysis or an explicit skip and no selected analysis errors, and Used By remains informational and available. Annual, Monthly Table, and Monthly Chart now have v0 calculation parity through a route-scoped account-results coordinator. The coordinator waits for saved, validated inputs, builds the same deterministic request and fingerprint as the dashboard, cancels stale work, validates returned GUIDs, applies the shared timeout, and caches only matching complete results. A dedicated workbench Worker returns full annual and monthly rows; the dashboard keeps its bounded summary Worker. Warnings do not block results.
+
+The account result pages mirror the v1 facility-result interaction contract while retaining account-owned tables: annual totals and both annual charts, a paginated and copyable monthly table with fiscal-year boundaries, and monthly use plus aggregate rolling savings/loss charts. Account pages intentionally omit facility predictor columns. Banking columns appear when an included facility analysis uses banking, while the account monthly savings chart retains the v0 aggregate series instead of splitting facility banking series. Facility Details and Used By remain explicit content scaffolds for follow-on parity work.
 
 ## Testing map
 
@@ -61,8 +73,15 @@ Setup is always available. Select Facility Items requires a valid editable setup
 | Dashboard forms and interactions | Focused Angular TestBed tests |
 | Setup drafts, autosave recovery, locking, and period availability | Fast service and focused Angular TestBed tests |
 | Bulk facility-analysis creation and rollback | Fast handler tests plus Chromium IndexedDB tests |
+| Facility selection, eligibility, progress, and per-facility footer navigation | Fast pure, service, and Angular TestBed tests |
+| Single facility-analysis create/link and rollback | Fast handler tests plus Chromium IndexedDB tests |
+| Facility-workbench return origin validation | Fast route-service tests |
+| On-demand facility detail results, cancellation, and cache reuse | Focused component tests plus Chromium Worker tests |
+| Account workbench result gating, cache reuse, supersession, and full-result Worker exchange | Fast service tests plus Chromium Worker tests |
+| Account annual/monthly tables, controls, markers, and chart projections | Focused Angular TestBed and pure presentation tests |
 | Calculation formula parity and result projection | Deterministic calculation tests |
 | Worker messaging, cancellation, timeout, and supersession | Chromium browser tests |
 | Atomic deletion and rollback | Chromium IndexedDB tests |
+| Single-facility hidden pairing, active synchronization, and route bypass | Fast pure/guard tests plus Chromium IndexedDB tests |
 | Routes and status destinations | Fast route and service tests |
 | Responsive layout, charts, focus, themes, and Electron window constraints | Focused manual review |

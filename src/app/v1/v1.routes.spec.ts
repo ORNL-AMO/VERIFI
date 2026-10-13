@@ -66,6 +66,7 @@ import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/account/analysi
 import { AccountAnalysisUsedByComponent } from '@app/v1/account/analysis/account-analysis-workbench/used-by/account-analysis-used-by.component';
 import { FacilityAnalysisDashboardComponent } from '@app/v1/facility/analysis/facility-analysis-dashboard/facility-analysis-dashboard.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/facility-analysis-workbench.component';
+import { singleFacilityAnalysisPairGuard } from '@app/v1/facility/analysis/single-facility-analysis-pair.guard';
 import { FacilityAnalysisSetupComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/shell/facility-analysis-group-shell.component';
 import { FacilityAnalysisBankingComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/group/banking/facility-analysis-banking.component';
@@ -132,6 +133,7 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'dashboard', component: FacilityAnalysisDashboardComponent }),
       expect.objectContaining({ path: 'workbench/:analysisGuid', component: FacilityAnalysisWorkbenchComponent })
     ]));
+    expect(facilityAnalysis?.canActivateChild).toEqual([singleFacilityAnalysisPairGuard]);
     const workbench = facilityAnalysis?.children?.find(route => route.path === 'workbench/:analysisGuid');
     expect(workbench?.canDeactivate).toEqual([unsavedChangesGuard]);
     expect(workbench?.providers).toBeUndefined();

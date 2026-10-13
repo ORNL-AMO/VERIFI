@@ -1,0 +1,10 @@
+.v1-create-facility-analysis { display: grid; gap: 1rem; }
+.v1-create-facility-analysis dl { display: grid; gap: .75rem; margin: 0; }
+.v1-create-facility-analysis dl div { display: grid; grid-template-columns: minmax(7rem, .45fr) 1fr; gap: .75rem; padding-bottom: .65rem; border-bottom: 1px solid var(--v1-border); }
+.v1-create-facility-analysis dt { color: var(--v1-muted); font-weight: 600; }
+.v1-create-facility-analysis dd { margin: 0; font-weight: 600; }
+.v1-create-facility-analysis footer { display: flex; justify-content: flex-end; gap: .75rem; padding-top: .5rem; }
+
+@media (max-width: 520px) {
+  .v1-create-facility-analysis dl div { grid-template-columns: 1fr; gap: .2rem; }
+}

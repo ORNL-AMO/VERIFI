@@ -38,7 +38,7 @@ export const DEFAULT_ANALYSIS_TABLE_COLUMNS: AnalysisTableColumns = {
 };
 
 @Injectable()
-export class FacilityAnalysisResultsDisplayService {
+export class AnalysisResultsDisplayService {
   private readonly annualColumnsValue = signal<AnalysisTableColumns>(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS));
   private readonly monthlyColumnsValue = signal<AnalysisTableColumns>(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS));
   readonly annualColumns = this.annualColumnsValue.asReadonly();
@@ -104,27 +104,21 @@ export class FacilityAnalysisResultsDisplayService {
           && previous.predictor.name === selection.predictor.name
           && previous.predictor.unit === selection.predictor.unit;
       });
-    if (unchanged) {
-      return;
-    }
-    const updated = { ...current, predictors: selections, predictorGroupId: scopeId };
-    this.setColumnsValue(period, updated);
+    if (unchanged) return;
+    this.setColumnsValue(period, { ...current, predictors: selections, predictorGroupId: scopeId });
     this.persist();
   }
 
   setPredictorVisibility(period: AnalysisResultTablePeriod, scopeId: string, visibility: Readonly<Record<string, boolean>>): void {
     const current = this.columns(period);
-    if (current.predictorGroupId !== scopeId) {
-      return;
-    }
-    const updated = {
+    if (current.predictorGroupId !== scopeId) return;
+    this.setColumnsValue(period, {
       ...current,
       predictors: current.predictors.map(item => ({
         ...item,
         display: visibility[item.predictor.id] ?? item.display
       }))
-    };
-    this.setColumnsValue(period, updated);
+    });
     this.persist();
   }
 

@@ -12,25 +12,28 @@ describe('FacilityAnalysisAutosaveService', () => {
   const analysis = { guid: 'analysis-a', accountId: 'account-a', name: 'Original', groups: [] } as IdbAnalysisItem;
   const analysisState = signal<IdbAnalysisItem | undefined>(analysis);
   const execute = vi.fn();
-  const updateFacilityAnalysis = vi.fn();
+  const updateFacilityAnalysisWithSingleSitePair = vi.fn();
   let service: FacilityAnalysisAutosaveService;
 
   beforeEach(() => {
     vi.useFakeTimers();
     analysisState.set(structuredClone(analysis));
     execute.mockReset();
-    updateFacilityAnalysis.mockReset();
-    execute.mockImplementation(async (_options, persist: () => Promise<IdbAnalysisItem>) => ({
+    updateFacilityAnalysisWithSingleSitePair.mockReset();
+    execute.mockImplementation(async (_options, persist: () => Promise<unknown>) => ({
       value: await persist(),
       change: {}
     }));
-    updateFacilityAnalysis.mockImplementation(async (item: IdbAnalysisItem) => structuredClone(item));
+    updateFacilityAnalysisWithSingleSitePair.mockImplementation(async (item: IdbAnalysisItem) => ({
+      analysis: structuredClone(item),
+      accountAnalyses: []
+    }));
     TestBed.configureTestingModule({
       providers: [
         FacilityAnalysisAutosaveService,
         { provide: FacilityAnalysisWorkbenchContext, useValue: { analysis: analysisState, account: signal({ guid: 'account-a' }) } },
         { provide: WorkspaceCommandBoundary, useValue: { execute } },
-        { provide: AnalysisCommandHandler, useValue: { updateFacilityAnalysis } },
+        { provide: AnalysisCommandHandler, useValue: { updateFacilityAnalysisWithSingleSitePair } },
         UnsavedChangesService
       ]
     });
@@ -52,7 +55,7 @@ describe('FacilityAnalysisAutosaveService', () => {
     await vi.advanceTimersByTimeAsync(ANALYSIS_AUTOSAVE_DEBOUNCE_MS);
 
     expect(execute).toHaveBeenCalledTimes(1);
-    expect(updateFacilityAnalysis.mock.calls[0][0].name).toBe('Final');
+    expect(updateFacilityAnalysisWithSingleSitePair.mock.calls[0][0].name).toBe('Final');
     expect(service.state()).toBe('saved');
     expect(service.committed()?.name).toBe('Final');
   });

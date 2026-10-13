@@ -5,6 +5,7 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { accountReportReferencesAnalysis } from '@data/models/idbModels/accountReport';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { buildAccountAnalysisFacilitySelections } from '../account-analysis-dashboard/account-analysis.models';
+import { buildFacilitySelectionItems } from './select-facility-items/account-analysis-facility-selection.models';
 import {
   accountAnalysisWorkbenchReadiness,
   buildAccountAnalysisWorkbenchStages
@@ -39,8 +40,10 @@ export class AccountAnalysisWorkbenchContext {
     this.analysis(),
     this.findings(),
     this.status.state() === 'ready',
-    this.selections().length === this.facilities().length
-      && this.selections().every(item => item.state === 'included' || item.state === 'skipped')
+    !!this.analysis() && buildFacilitySelectionItems(
+      this.analysis()!, this.facilities(), this.facilityAnalyses(), this.status.items(), this.status.state()
+    ).every(item => item.assigned && item.state !== 'error')
+      && this.facilities().length > 0
   ));
   readonly stages = computed(() => {
     const account = this.account();

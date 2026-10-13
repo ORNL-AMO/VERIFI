@@ -4,8 +4,8 @@ import { FacilityAnalysisGroupContext } from '../../facility-analysis-group-cont
 import { FacilityAnalysisGroupResultsService } from '../calculation/facility-analysis-group-results.service';
 import {
   DEFAULT_ANALYSIS_TABLE_COLUMNS,
-  FacilityAnalysisResultsDisplayService
-} from '../../../results/presentation/facility-analysis-results-display.service';
+  AnalysisResultsDisplayService
+} from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { FacilityAnalysisGroupAnnualComponent } from './facility-analysis-group-annual.component';
 
 describe('FacilityAnalysisGroupAnnualComponent', () => {
@@ -48,7 +48,7 @@ describe('FacilityAnalysisGroupAnnualComponent', () => {
           }
         },
         {
-          provide: FacilityAnalysisResultsDisplayService,
+          provide: AnalysisResultsDisplayService,
           useValue: { annualColumns: signal(structuredClone(DEFAULT_ANALYSIS_TABLE_COLUMNS)) }
         }
       ]

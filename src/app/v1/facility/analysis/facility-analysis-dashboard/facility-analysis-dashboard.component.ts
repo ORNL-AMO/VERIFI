@@ -3,7 +3,6 @@ import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, compute
 import { Router } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
-import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AnalysisBrowseCardComponent } from './analysis-browse-card/analysis-browse-card.component';
 import { FacilityAnalysisWorkspaceService } from './facility-analysis-workspace.service';
@@ -17,9 +16,9 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FacilityAnalysisDashboardResultsService } from './facility-analysis-dashboard-results.service';
 import { facilityAnalysisOutcomeDisplay } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
-import { FacilityAnalysisGroupModelRosterComponent } from '../group-model-roster/facility-analysis-group-model-roster.component';
 import { AnalysisComparisonSlideoutComponent } from './analysis-comparison-slideout/analysis-comparison-slideout.component';
 import { ActiveSummaryCardComponent } from '@app/v1/shared/analysis-results/active-summary-card/active-summary-card.component';
+import { AnalysisDetailsSlideoutComponent } from './analysis-details-slideout/analysis-details-slideout.component';
 
 type AnalysisCategoryFilter = 'all' | 'energy' | 'water';
 type AnalysisStatusFilter = 'all' | 'ready' | 'warning' | 'error' | 'active';
@@ -29,7 +28,7 @@ type AnalysisSort = 'attention' | 'modified' | 'name' | 'baseline';
   selector: 'app-facility-analysis-dashboard',
   host: { class: 'v1-analysis-dashboard-host' },
   standalone: true,
-  imports: [IconComponent, DataEmptyStateModule, WorkspaceSlideoutComponent, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, FacilityAnalysisGroupModelRosterComponent, AnalysisComparisonSlideoutComponent, ActiveSummaryCardComponent],
+  imports: [IconComponent, DataEmptyStateModule, AnalysisBrowseCardComponent, AnalysisDraftSlideoutComponent, ConfirmationDialogComponent, ReactiveFormsModule, AnalysisComparisonSlideoutComponent, ActiveSummaryCardComponent, AnalysisDetailsSlideoutComponent],
   providers: [FacilityAnalysisDashboardResultsService],
   templateUrl: './facility-analysis-dashboard.component.html',
   styleUrls: ['./facility-analysis-dashboard.component.css']

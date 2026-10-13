@@ -5,13 +5,14 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { FacilityAnalysisWorkbenchContext } from './facility-analysis-workbench-context.service';
 import { FacilityAnalysisAutosaveService } from './editing/facility-analysis-autosave.service';
 import { FacilityAnalysisResultsService } from './results/calculation/facility-analysis-results.service';
-import { FacilityAnalysisResultsDisplayService } from './results/presentation/facility-analysis-results-display.service';
+import { AnalysisResultsDisplayService } from '@app/v1/shared/analysis-results/display/analysis-results-display.service';
 import { RegressionCandidateStore } from './group/regression/regression-candidate.store';
 import { FacilityAnalysisPeriodService } from './analysis-setup/facility-analysis-period.service';
 import { FacilityAnalysisWorkbenchNavigationService } from './navigation/facility-analysis-workbench-navigation.service';
 import { FacilityAnalysisWorkbenchHeaderComponent } from './header/facility-analysis-workbench-header.component';
 import { FacilityAnalysisWorkbenchStageNavigationComponent } from './stage-navigation/facility-analysis-workbench-stage-navigation.component';
 import { FacilityAnalysisWorkbenchFooterComponent } from './footer/facility-analysis-workbench-footer.component';
+import { AccountAnalysisReturnService } from './navigation/account-analysis-return.service';
 
 @Component({
   selector: 'app-facility-analysis-workbench',
@@ -21,8 +22,9 @@ import { FacilityAnalysisWorkbenchFooterComponent } from './footer/facility-anal
     FacilityAnalysisAutosaveService,
     FacilityAnalysisPeriodService,
     FacilityAnalysisResultsService,
-    FacilityAnalysisResultsDisplayService,
+    AnalysisResultsDisplayService,
     RegressionCandidateStore,
+    AccountAnalysisReturnService,
     FacilityAnalysisWorkbenchNavigationService
   ],
   imports: [
