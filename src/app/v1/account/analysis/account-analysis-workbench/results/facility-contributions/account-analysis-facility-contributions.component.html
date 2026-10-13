@@ -9,17 +9,12 @@
 
   @if (!blocking() && state.state === 'ready' && rows().length) {
     @if (hasContributionData()) {
-      <section class="v1-account-facility-contributions__chart" aria-label="Facility contribution chart">
-        <div class="v1-account-facility-contributions__chart-actions">
-          <h2>Facility Contributions by Fiscal Year</h2>
-          <button type="button" class="v1-icon-btn" title="Download PNG" aria-label="Download facility contribution heatmap as PNG" (click)="downloadHeatmap()">
-            <app-ui-icon name="download"></app-ui-icon>
-          </button>
-        </div>
-        <div class="v1-account-facility-contributions__chart-scroll" tabindex="0" role="region" aria-label="Scrollable facility contribution heatmap">
-          <div #contributionHeatmap class="v1-account-facility-contributions__heatmap" [style.height.px]="heatmapHeight()" [style.min-width.px]="heatmapWidth()" [appV1ECharts]="heatmapOption()" role="img" aria-label="Facility percent contribution heatmap by fiscal year. Green indicates savings and red indicates losses."></div>
-        </div>
-      </section>
+      <app-contribution-heatmap
+        [view]="heatmapView()"
+        scopeLabel="Facility"
+        [compact]="true"
+        downloadFileName="account-facility-contributions">
+      </app-contribution-heatmap>
 
       <section class="v1-account-facility-contributions__table" aria-label="Facility contribution table">
         <div class="v1-table-scroll" tabindex="0" role="region" aria-label="Facility contributions by fiscal year">

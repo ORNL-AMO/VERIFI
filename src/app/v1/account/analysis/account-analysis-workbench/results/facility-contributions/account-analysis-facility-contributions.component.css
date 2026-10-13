@@ -19,7 +19,6 @@
 
 .v1-account-facility-contributions__intro,
 .v1-account-facility-contributions__table,
-.v1-account-facility-contributions__chart,
 .v1-account-facility-contributions__empty {
   border: 1px solid var(--v1-border);
   border-top: 0;
@@ -33,14 +32,6 @@
 }
 
 .v1-account-facility-contributions__table { display: block; flex: 0 0 auto; min-width: 0; overflow: hidden; border-radius: 0 0 var(--v1-radius) var(--v1-radius); }
-.v1-account-facility-contributions__chart { display: grid; flex: 0 0 auto; min-height: 0; gap: var(--v1-space-2); padding: var(--v1-space-3) var(--v1-space-4); }
-.v1-account-facility-contributions__chart-actions { display: flex; gap: var(--v1-space-3); align-items: center; justify-content: flex-end; }
-.v1-account-facility-contributions__chart-actions h2 { margin: 0 auto 0 0; color: var(--v1-text); font-size: 1rem; font-weight: 900; }
-.v1-account-facility-contributions__chart-actions .v1-icon-btn:hover,
-.v1-account-facility-contributions__chart-actions .v1-icon-btn:focus-visible { border-color: var(--v1-content-control); color: var(--v1-content-control); }
-.v1-account-facility-contributions__chart-scroll { max-width: 100%; overflow-x: auto; overflow-y: hidden; contain: paint; }
-.v1-account-facility-contributions__chart-scroll:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: 2px; }
-.v1-account-facility-contributions__heatmap { width: 100%; background: var(--v1-surface); }
 .v1-account-facility-contributions__table .v1-table-scroll { min-width: 0; max-width: 100%; overflow-x: auto; overflow-y: hidden; contain: paint; background: var(--v1-surface); }
 
 .v1-account-facility-contributions-table { width: 100%; min-width: 52rem; border-collapse: collapse; color: var(--v1-text); font-size: .88rem; }

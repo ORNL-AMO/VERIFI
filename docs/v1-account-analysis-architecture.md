@@ -10,6 +10,8 @@ IndexedDB remains the durable source of truth. Account analyses continue to refe
 
 The approved dashboard implementation plan deliberately adds a typed, v1-only account-analysis Worker request and response plus a dedicated Worker entry point so multiple dashboard cards can be calculated with bounded concurrency. This is a new orchestration boundary, not a formula change: it shares the deterministic calculation entry point with the synchronous fallback and does not alter legacy Worker messages or v0 behavior. This approved scope decision supersedes the earlier issue wording that excluded Worker contract work.
 
+The approved Facility Details and Facility Contributions implementation in [PR #2771](https://github.com/ORNL-AMO/VERIFI/pull/2771) extends that v1-only workbench response with selected facility GUIDs, analysis GUIDs, and monthly summaries already produced by the existing calculation. The maintainer approved committing and opening this implementation after local review, including disclosure of the added response field. This records the workbench payload extension as an explicit exception to issue #2736's original Worker-contract exclusion. Dashboard responses still omit these summaries; legacy Worker messages, formulas, persisted records, backups, and reports remain unchanged.
+
 No account-analysis record shape, database schema, backup format, report output, formula, unit conversion, rounding rule, or Electron contract changes as part of the dashboard.
 
 Valid single-facility accounts do not expose the account-analysis dashboard or workbench. Account Analysis routes redirect to the sole facility's Analysis dashboard or the corresponding facility-analysis workbench view. Each facility analysis has a hidden account-analysis pair containing exactly one selection link to that analysis. The pair mirrors category, basis, display units, baseline, banking state, and name so account-level reports and other consumers retain the existing account-analysis contract without creating a second user-facing editing workflow.
@@ -42,6 +44,8 @@ The fingerprint includes calculation-bearing account-analysis setup, selected fa
 ## Shared analysis presentation
 
 Exact reusable analysis presentation belongs under `src/app/v1/shared/analysis-results`. This includes generic metric charts and their contracts, annual and monthly chart-row builders, result status presentation, period-specific column preferences and the column chooser, result number formatting, result markers and legends, annual/monthly outcome facts, active-reporting summaries, and the common comparison layout. Account and facility features supply feature-owned tables, view builders, and commands to those components. The period-specific column preference continues to use the existing `v1AnalysisTableColumns` key across both scopes.
+
+The shared `ContributionHeatmapComponent` owns the diverging fiscal-year heatmap, percentage formatting, theme-aware labels, horizontal overflow, and PNG download for both account facility contributions and facility group contributions. Features supply aligned row labels and precomputed contribution percentages; their calculations, grouped tables, drill-in links, and vertical scroll ownership remain local.
 
 Page-specific tables remain explicit when their columns, row semantics, formulas, or completeness rules differ. Promote a table or graph only after account and facility consumers use the same semantic contract; do not create configurable abstractions that hide materially different calculations.
 

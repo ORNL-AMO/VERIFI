@@ -29,7 +29,9 @@ describe('AccountAnalysisFacilityContributionsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('North Plant');
     expect(fixture.nativeElement.textContent).toContain('View group contributions');
     expect(fixture.componentInstance.view().years[0].facilities[0].contributionPercent).toBe(10);
-    expect(fixture.componentInstance.heatmapHeight()).toBe(220);
+    expect(fixture.componentInstance.heatmapView()).toEqual({
+      labels: ['North Plant'], years: [{ year: 2025, totalContributionPercent: 10, contributions: [10] }]
+    });
     expect(fixture.nativeElement.querySelector('a.v1-text-link')?.getAttribute('href')).toContain(
       'returnAccountGuid=account-a&returnAccountAnalysisGuid=account-analysis-a&returnFacilityGuid=facility-a'
     );
