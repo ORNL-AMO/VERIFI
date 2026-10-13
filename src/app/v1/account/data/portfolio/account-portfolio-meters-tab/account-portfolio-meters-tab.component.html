@@ -2,24 +2,25 @@
 @let visibleCards = filteredMeterCards();
 
 <section class="v1-account-portfolio-meters" aria-label="Portfolio meters">
-  <form class="v1-data-browse-toolbar v1-account-portfolio-meters__toolbar" aria-label="Meter filters">
-    <div class="v1-data-browse-search v1-account-portfolio-meters__search">
-      <span class="input-group-text">
-        <app-ui-icon name="search"></app-ui-icon>
-      </span>
-      <input
-        id="v1-portfolio-meter-search"
-        type="search"
-        aria-label="Find meter, facility, source, group, or status"
-        placeholder="Find meter, facility, source, group, or status"
-        [value]="search()"
-        #meterSearch
-        (input)="setSearch(meterSearch.value)">
+  <form class="v1-data-browse-toolbar v1-account-portfolio-meters__toolbar" aria-label="Meter filters" [formGroup]="filtersForm">
+    <div class="v1-portfolio-browse-search">
+      <p class="v1-portfolio-browse-count" role="status">Showing {{ visibleCards.length }} of {{ allCards.length }} meters</p>
+      <div class="v1-data-browse-search v1-account-portfolio-meters__search">
+        <span class="input-group-text">
+          <app-ui-icon name="search"></app-ui-icon>
+        </span>
+        <input
+          id="v1-portfolio-meter-search"
+          type="search"
+          aria-label="Find meter, facility, source, group, or status"
+          placeholder="Find meter, facility, source, group, or status"
+          formControlName="search">
+      </div>
     </div>
 
     <label>
       <span>Status</span>
-      <select #meterStatus [value]="statusFilter()" (change)="setStatusFilter(meterStatus.value)">
+      <select class="v1-select" formControlName="status">
         <option value="all">All</option>
         <option value="attention">Needs attention</option>
         <option value="noReadings">No readings</option>
@@ -30,7 +31,7 @@
 
     <label>
       <span>Sort</span>
-      <select #meterSort [value]="sortBy()" (change)="setSortBy(meterSort.value)">
+      <select class="v1-select" formControlName="sort">
         <option value="attention">Attention first</option>
         <option value="meterName">Meter name</option>
         <option value="facilityName">Facility name</option>

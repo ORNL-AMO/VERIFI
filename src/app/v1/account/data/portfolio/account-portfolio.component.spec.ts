@@ -61,6 +61,7 @@ describe('AccountPortfolioComponent', () => {
             ]),
             predictorData: signal([]),
             facilityAnalyses: signal([{ guid: 'analysis-a', facilityId: 'facility-a' }]),
+            accountAnalyses: signal([{ guid: 'account-analysis-a' }]),
             facilityReports: signal([{ guid: 'report-a', facilityId: 'facility-a' }]),
             energyUseEquipment: signal([{ guid: 'equipment-a', facilityId: 'facility-a' }]),
             canWrite,
@@ -94,6 +95,7 @@ describe('AccountPortfolioComponent', () => {
 
   it('renders the portfolio shell and delegates the default content to the facilities tab', () => {
     expect(fixture.nativeElement.textContent).toContain('Portfolio');
+    expect(fixture.nativeElement.querySelector('#v1-account-portfolio-title app-ui-icon[name="portfolio"]')).not.toBeNull();
     expect(selectorLabels()).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
     expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.path === 'meters')?.total).toBe(1);
     expect(fixture.componentInstance.portfolioSelectors().find(selector => selector.path === 'predictors')?.total).toBe(2);
@@ -107,6 +109,42 @@ describe('AccountPortfolioComponent', () => {
     ]);
     expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
     expect(buttonByText('Add facility').classList.contains('v1-btn--action')).toBe(true);
+  });
+
+  it('counts both account and facility analyses and keeps existing analyses reachable without facilities', () => {
+    expect(fixture.componentInstance.totals().analyses).toBe(2);
+    account.set({ ...account()!, isSingleFacilityCompany: true });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.totals().analyses).toBe(1);
+    account.set({ ...account()!, isSingleFacilityCompany: false });
+    facilities.set([]);
+    (TestBed.inject(AccountWorkspaceStore).facilityAnalyses as ReturnType<typeof signal<any[]>>).set([]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.totals().analyses).toBe(1);
+    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
+  });
+
+  it('updates the routed-toolbar offset after header resizing and releases its observer', () => {
+    let resized: ResizeObserverCallback;
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: ResizeObserverCallback) { resized = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    });
+    const bounds = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ height: 180 } as DOMRect);
+    const resizedFixture = TestBed.createComponent(AccountPortfolioComponent);
+    try {
+      resizedFixture.detectChanges();
+      expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('180px');
+      expect(observe).toHaveBeenCalled();
+      bounds.mockReturnValue({ height: 220 } as DOMRect);
+      resized!([], {} as ResizeObserver);
+      expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
+      resizedFixture.destroy();
+      expect(disconnect).toHaveBeenCalled();
+    } finally { vi.unstubAllGlobals(); }
   });
 
   it('renders selector links for each routed portfolio tab', () => {
@@ -128,6 +166,9 @@ describe('AccountPortfolioComponent', () => {
 
   it('shows a shell-level empty state when the account has no facilities', () => {
     facilities.set([]);
+    const workspace = TestBed.inject(AccountWorkspaceStore);
+    (workspace.accountAnalyses as ReturnType<typeof signal<any[]>>).set([]);
+    (workspace.facilityAnalyses as ReturnType<typeof signal<any[]>>).set([]);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No facilities');

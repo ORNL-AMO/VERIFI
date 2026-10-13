@@ -1,15 +1,36 @@
-@let cards = predictorCards();
+@let allCards = predictorCards();
+@let cards = filteredPredictorCards();
 
 <section class="v1-account-portfolio-predictors" aria-label="Portfolio predictors">
-  @if (cards.length === 0) {
+  <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four" aria-label="Predictor filters" [formGroup]="filtersForm">
+    <div class="v1-portfolio-browse-search">
+      <p class="v1-portfolio-browse-count" role="status">Showing {{ cards.length }} of {{ allCards.length }} predictor cards</p>
+      <div class="v1-data-browse-search">
+        <span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span>
+        <input type="search" formControlName="search" aria-label="Find predictor, facility, station, unit, or status" placeholder="Find predictor, facility, station, unit, or status">
+      </div>
+    </div>
+    <label><span>Type</span><select class="v1-select" formControlName="type">
+      <option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option>
+    </select></label>
+    <label><span>Status</span><select class="v1-select" formControlName="status">
+      <option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">Valid</option>
+    </select></label>
+    <label><span>Sort</span><select class="v1-select" formControlName="sort">
+      <option value="attention">Attention first</option><option value="predictorName">Predictor name</option><option value="facilityName">Facility name</option><option value="latestReading">Latest reading</option>
+    </select></label>
+  </form>
+  @if (allCards.length === 0) {
     <app-data-empty-state
       icon="predictor"
       title="No predictors"
       description="Predictors will appear here after you add or upload them for a facility.">
     </app-data-empty-state>
+  } @else if (cards.length === 0) {
+    <app-data-empty-state icon="clearFilter" title="No predictors match these filters" description="Adjust the search, type, or status to return to the full predictor list."></app-data-empty-state>
   } @else {
     <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-predictors__cards" role="list" aria-label="Account predictors">
-      @for (entry of cards; track entry.item.kind === 'standard' ? entry.item.card.predictor.guid : entry.item.group.routeKey) {
+      @for (entry of cards; track entry.key) {
         <app-resource-browse-card
           [view]="entry.view"
           readOnly

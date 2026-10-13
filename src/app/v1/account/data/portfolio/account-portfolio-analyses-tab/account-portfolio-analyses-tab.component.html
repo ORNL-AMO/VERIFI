@@ -3,19 +3,31 @@
 
 <section class="v1-account-portfolio-analyses" aria-label="Portfolio analyses">
   <form
-    class="v1-data-browse-toolbar v1-data-browse-toolbar--four"
+    class="v1-data-browse-toolbar v1-account-portfolio-analyses__toolbar"
     aria-label="Analysis filters"
     [formGroup]="filtersForm">
-    <div class="v1-data-browse-search">
-      <span class="input-group-text">
-        <app-ui-icon name="search"></app-ui-icon>
-      </span>
-      <input
-        type="search"
-        aria-label="Find analysis, facility, group, status, or dependency"
-        placeholder="Find analysis, facility, group, status, or dependency"
-        formControlName="search">
+    <div class="v1-portfolio-browse-search v1-account-portfolio-analyses__search">
+      <p class="v1-portfolio-browse-count v1-account-portfolio-analyses__count" role="status">Showing {{ visibleCards.length }} of {{ allCards.length }} analyses</p>
+      <div class="v1-data-browse-search">
+        <span class="input-group-text">
+          <app-ui-icon name="search"></app-ui-icon>
+        </span>
+        <input
+          type="search"
+          aria-label="Find analysis, account, facility, group, status, or dependency"
+          placeholder="Find analysis, account, facility, group, status, or dependency"
+          formControlName="search">
+      </div>
     </div>
+
+    <label>
+      <span>Analysis scope</span>
+      <select class="v1-select" formControlName="scope">
+        <option value="all">All analyses</option>
+        <option value="account">Account analyses</option>
+        <option value="facility">Facility analyses</option>
+      </select>
+    </label>
 
     <label>
       <span>Category</span>
@@ -43,7 +55,7 @@
         <option value="attention">Attention first</option>
         <option value="modified">Recently modified</option>
         <option value="name">Analysis name</option>
-        <option value="facility">Facility name</option>
+        <option value="facility">Account / facility name</option>
         <option value="baseline">Baseline year</option>
       </select>
     </label>
@@ -53,17 +65,17 @@
     <app-data-empty-state
       icon="analysis"
       title="No analyses"
-      description="Analyses will appear here after you create them for a facility.">
+      description="Account and facility analyses will appear here after you create them.">
     </app-data-empty-state>
   } @else if (visibleCards.length === 0) {
     <app-data-empty-state
       icon="clearFilter"
       title="No analyses match these filters"
-      description="Adjust the search or filters to return to the full analysis list.">
+      description="Change the analysis scope or adjust the search and filters to return to the full analysis list.">
     </app-data-empty-state>
   } @else {
-    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-analyses__cards" role="list" aria-label="Account facility analyses">
-      @for (entry of visibleCards; track entry.card.analysis.guid) {
+    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-analyses__cards" role="list" aria-label="Account and facility analyses">
+      @for (entry of visibleCards; track entry.key) {
         <app-resource-browse-card
           [view]="entry.view"
           readOnly

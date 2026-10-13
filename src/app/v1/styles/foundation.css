@@ -1964,3 +1964,15 @@
   .v1-root .v1-wizard-actions { padding: .75rem; }
   .v1-root .v1-wizard-actions__next { display: grid; justify-items: end; }
 }
+
+/* Portfolio headers and routed browse controls share one responsive sticky stack. */
+.v1-root .v1-account-portfolio .v1-data-browse-toolbar { position: sticky; top: var(--portfolio-sticky-height, 0px); z-index: 3; }
+.v1-root .v1-account-portfolio .v1-portfolio-browse-search { display: grid; gap: .35rem; min-width: 0; }
+.v1-root .v1-account-portfolio .v1-portfolio-browse-count { margin: 0; color: var(--v1-text); font-size: .85rem; }
+@media (max-width: 76rem) {
+  .v1-root .v1-account-portfolio .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v1-root .v1-account-portfolio .v1-portfolio-browse-search { grid-column: 1 / -1; }
+}
+@media (max-width: 48rem) {
+  .v1-root .v1-account-portfolio .v1-data-browse-toolbar { gap: .5rem; padding: .65rem; }
+}

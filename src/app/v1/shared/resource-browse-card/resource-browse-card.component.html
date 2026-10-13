@@ -5,7 +5,7 @@
   [class.v1-resource-browse-card--status-warning]="view.statusTone === 'warning'"
   [class.v1-resource-browse-card--status-danger]="view.statusTone === 'danger'">
   @if (view.owner; as owner) {
-    <div class="v1-resource-browse-card__owner">
+    <div class="v1-resource-browse-card__owner" [class.v1-resource-browse-card__owner--accented]="!!owner.accentColor" [style.--v1-resource-owner-accent]="owner.accentColor || null">
       <app-ui-icon [name]="owner.icon || 'facility'"></app-ui-icon>
       <span>{{ owner.label }}</span>
     </div>

@@ -1,5 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -38,9 +38,28 @@ const PORTFOLIO_SELECTORS: ReadonlyArray<Omit<PortfolioSelectorSummary, 'total'>
   standalone: false
 })
 export class AccountPortfolioComponent implements OnDestroy {
+  private readonly element = inject(ElementRef<HTMLElement>);
+  private headerResizeObserver?: ResizeObserver;
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+
+  @ViewChild('portfolioSticky') set stickyHeader(header: ElementRef<HTMLElement> | undefined) {
+    this.headerResizeObserver?.disconnect();
+    this.headerResizeObserver = undefined;
+    if (!header) {
+      this.element.nativeElement.style.removeProperty('--portfolio-sticky-height');
+      return;
+    }
+    const updateHeight = () => this.element.nativeElement.style.setProperty(
+      '--portfolio-sticky-height', `${header.nativeElement.getBoundingClientRect().height}px`
+    );
+    updateHeight();
+    if (typeof ResizeObserver !== 'undefined') {
+      this.headerResizeObserver = new ResizeObserver(updateHeight);
+      this.headerResizeObserver.observe(header.nativeElement, { box: 'border-box' });
+    }
+  }
 
   @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
 
@@ -50,6 +69,7 @@ export class AccountPortfolioComponent implements OnDestroy {
   readonly isCreateFacilityDrawerOpen = signal(false);
 
   ngOnDestroy(): void {
+    this.headerResizeObserver?.disconnect();
     this.modalPortal.hide();
   }
 
@@ -59,7 +79,8 @@ export class AccountPortfolioComponent implements OnDestroy {
       meters: this.workspace.meters().length,
       predictors: this.workspace.predictors().length,
       energyUses: this.workspace.energyUseEquipment().length,
-      analyses: this.workspace.facilityAnalyses().length,
+      analyses: this.workspace.facilityAnalyses().length
+        + (this.workspace.account()?.isSingleFacilityCompany ? 0 : this.workspace.accountAnalyses().length),
       reports: this.workspace.facilityReports().length
     };
   });

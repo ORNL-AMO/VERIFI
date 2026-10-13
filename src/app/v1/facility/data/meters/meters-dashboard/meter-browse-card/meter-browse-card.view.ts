@@ -26,7 +26,7 @@ export function buildMeterResourceView(
     icon: card.sourceIcon || 'meter',
     iconColor: card.sourceColor,
     statusTone: card.statusTone,
-    owner: options.facility ? { label: options.facility.name, icon: 'facility' } : undefined,
+    owner: options.facility ? { label: options.facility.name, icon: 'facility', accentColor: 'var(--v1-facility)' } : undefined,
     chips: [
       { id: 'source', label: card.meter.source, icon: card.sourceIcon || 'meter', accentColor: card.sourceColor },
       {

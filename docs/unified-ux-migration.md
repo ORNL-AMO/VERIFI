@@ -189,6 +189,22 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** No IndexedDB schema, migration, backup, import/export, calculation, Worker, report, or Electron contract changes should be introduced by the presentational extraction itself.
 - **Tests:** Cover the shared presentational card behavior separately, then cover each resource wrapper in both facility and account portfolio contexts. Account portfolio cards are read-only and must not use account-portfolio shims, fake workspace providers, or optional injection for facility-only mutation services.
 
+### Portfolio Analysis Scope Browsing
+
+- **Workflow:** Account Data > Portfolio > Analyses.
+- **Decision:** Browse account and facility analyses together as read-only setup/status summaries. Reuse the feature card projections without starting result calculations. Identify scope with a text chip and icon, and tint the owner header with the account or facility theme accent. The shared resource-card owner supports an optional accent; existing owners retain their normal presentation when none is supplied.
+- **Filtering:** Default to All analyses. Account/Facility scope narrows the current search alongside category and status without clearing the query. Search includes owner names and the existing feature search fields, including facility selections for account analyses. Show the result count above search inside the filter toolbar surface.
+- **Navigation and totals:** Each card opens its matching account or facility workbench. The portfolio selector counts both visible analysis scopes; hidden single-facility account pairs remain excluded. Existing account analyses remain reachable when the account has no facilities.
+- **Shared contracts and tests:** No persisted-model, formula, Worker, backup, or Electron changes. Cover mixed scopes, combined search/filter behavior, owner accents, workbench routing, live updates, totals, empty states, and dashboard outcome preservation.
+
+### Portfolio Browse Consistency
+
+- **Workflow:** Account Data > Portfolio card tabs.
+- **Decision:** Use themed owner headers across analysis, meter, and predictor cards and the same facility tint on facility names. Facility headers contain only the name/link; location and status share the first body row. Facility chips summarize active workspace errors and warnings (including child records); healthy facilities have no status chip. Keep facility setup-count facets available separately from validation status.
+- **Controls:** Facilities, Meters, Predictors, and Analyses use typed reactive browse forms with live counts above search. Predictor search includes owning facility names and station/predictor fields; type and status filters combine with the query and preserve weather grouping per facility.
+- **Layout:** Add the portfolio icon and vertically centered header actions. Header and selectors share a transparent sticky region; a cleaned-up ResizeObserver watches its border box and publishes its height as a CSS offset for each routed toolbar. Narrow views use horizontally scrolling selectors and a two-column filter layout so the sticky stack leaves room for cards.
+- **Validation:** Cover status-derived facility chips, compound predictor filters, existing browse/navigation behavior, owner accents, resize-observer cleanup, and focused browser scroll/resize/theme checks. No persistence, calculation, Worker-payload, or Electron interface changes.
+
 ### V1 Workbench Header Behavior
 
 - **Workflow:** Production v1 selected-record workbenches, beginning with Facility Data > Meters.

@@ -1,4 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -35,9 +37,12 @@ export class AccountPortfolioMetersTabComponent {
   private readonly status = inject(WorkspaceStatusService);
   private readonly router = inject(Router);
   private readonly navigation = inject(WorkspaceNavigationService);
-  readonly search = signal('');
-  readonly statusFilter = signal<PortfolioMeterStatusFilter>('all');
-  readonly sortBy = signal<PortfolioMeterSort>('attention');
+  readonly filtersForm = new FormGroup({
+    search: new FormControl('', { nonNullable: true }),
+    status: new FormControl<PortfolioMeterStatusFilter>('all', { nonNullable: true }),
+    sort: new FormControl<PortfolioMeterSort>('attention', { nonNullable: true })
+  });
+  readonly filters = toSignal(this.filtersForm.valueChanges, { initialValue: this.filtersForm.getRawValue() });
 
   readonly meterCards = computed<PortfolioMeterCard[]>(() => {
     const facilities = this.workspace.facilities();
@@ -56,8 +61,8 @@ export class AccountPortfolioMetersTabComponent {
   });
 
   readonly filteredMeterCards = computed<PortfolioMeterCard[]>(() => {
-    const search = this.search().trim().toLowerCase();
-    const statusFilter = this.statusFilter();
+    const search = this.filters().search.trim().toLowerCase();
+    const statusFilter = this.filters().status;
     return this.meterCards()
       .filter(item => this.matchesSearch(item, search))
       .filter(item => this.matchesStatusFilter(item, statusFilter))
@@ -65,18 +70,18 @@ export class AccountPortfolioMetersTabComponent {
   });
 
   setSearch(value: string): void {
-    this.search.set(value);
+    this.filtersForm.controls.search.setValue(value);
   }
 
   setStatusFilter(value: string): void {
     if (this.isStatusFilter(value)) {
-      this.statusFilter.set(value);
+      this.filtersForm.controls.status.setValue(value);
     }
   }
 
   setSortBy(value: string): void {
     if (this.isMeterSort(value)) {
-      this.sortBy.set(value);
+      this.filtersForm.controls.sort.setValue(value);
     }
   }
 
@@ -138,15 +143,15 @@ export class AccountPortfolioMetersTabComponent {
   }
 
   private compareMeterCards(first: PortfolioMeterCard, second: PortfolioMeterCard): number {
-    if (this.sortBy() === 'meterName') {
+    if (this.filters().sort === 'meterName') {
       return first.card.meter.name.localeCompare(second.card.meter.name)
         || first.facility.name.localeCompare(second.facility.name);
     }
-    if (this.sortBy() === 'facilityName') {
+    if (this.filters().sort === 'facilityName') {
       return first.facility.name.localeCompare(second.facility.name)
         || first.card.meter.name.localeCompare(second.card.meter.name);
     }
-    if (this.sortBy() === 'latestReading') {
+    if (this.filters().sort === 'latestReading') {
       return second.latestReadingSortValue - first.latestReadingSortValue
         || first.card.meter.name.localeCompare(second.card.meter.name);
     }

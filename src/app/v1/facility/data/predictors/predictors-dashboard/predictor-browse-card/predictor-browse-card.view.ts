@@ -12,7 +12,7 @@ export function buildPredictorResourceView(
     openLabel: `Open ${card.predictor.name || 'untitled predictor'} settings`,
     icon: card.icon,
     statusTone: card.statusTone,
-    owner: facility ? { label: facility.name, icon: 'facility' } : undefined,
+    owner: facility ? { label: facility.name, icon: 'facility', accentColor: 'var(--v1-facility)' } : undefined,
     chips: [
       { id: 'production', label: card.productionLabel, icon: card.icon, accentColor: 'var(--v1-facility)' },
       { id: 'status', label: card.statusLabel, icon: card.statusIcon, tone: card.statusTone, loading: card.statusTone === 'info' }
@@ -55,7 +55,7 @@ export function buildWeatherStationResourceView(
     openLabel: `Open ${group.stationName} weather workbench`,
     icon: 'cloudRain',
     statusTone: group.statusTone,
-    owner: facility ? { label: facility.name, icon: 'facility' } : undefined,
+    owner: facility ? { label: facility.name, icon: 'facility', accentColor: 'var(--v1-facility)' } : undefined,
     chips: [
       { id: 'type', label: 'Weather station', icon: 'cloudRain', accentColor: 'var(--v1-facility)' },
       { id: 'status', label: group.statusLabel, icon: statusIcon, tone: group.statusTone, loading: group.statusTone === 'info' }

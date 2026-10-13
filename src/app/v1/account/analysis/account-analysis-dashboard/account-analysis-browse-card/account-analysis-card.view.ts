@@ -1,7 +1,8 @@
 import { ResourceBrowseCardView } from '@app/v1/shared/resource-browse-card/resource-browse-card.models';
-import { AccountAnalysisDashboardCard, accountAnalysisSelectionSummary } from '../account-analysis.models';
+import { AccountAnalysisCard, AccountAnalysisDashboardCard, accountAnalysisSelectionSummary } from '../account-analysis.models';
 
-export function buildAccountAnalysisResourceView(card: AccountAnalysisDashboardCard): ResourceBrowseCardView {
+export function buildAccountAnalysisResourceView(card: AccountAnalysisCard | AccountAnalysisDashboardCard): ResourceBrowseCardView {
+  const outcomeDisplay = 'outcomeDisplay' in card ? card.outcomeDisplay : undefined;
   const categoryLabel = card.category === 'water' ? 'Water' : 'Energy';
   const tone = card.status === 'ready'
     ? 'success'
@@ -26,24 +27,27 @@ export function buildAccountAnalysisResourceView(card: AccountAnalysisDashboardC
         id: 'active', label: 'Active for Reporting', icon: 'target' as const, accentColor: 'var(--v1-primary)'
       }] : [])
     ],
-    factSections: [{
-      id: 'outcomes',
-      ariaLabel: 'Latest account analysis results',
-      emphasis: 'primary',
-      facts: [
-        { id: 'annual', ...card.outcomeDisplay.annual },
-        { id: 'monthly', ...card.outcomeDisplay.monthly }
-      ]
-    }, {
-      id: 'setup',
-      ariaLabel: 'Account analysis context',
-      emphasis: 'secondary',
-      facts: [
-        { id: 'baseline', label: 'Baseline', valueLabel: card.analysis.baselineYear ? String(card.analysis.baselineYear) : 'Not set', unavailable: !card.analysis.baselineYear },
-        { id: 'basis', label: 'Basis and units', valueLabel: `${card.basisLabel} · ${card.unitLabel}` },
-        { id: 'facilities', label: 'Facility selections', valueLabel: accountAnalysisSelectionSummary(card.selectionCounts) }
-      ]
-    }],
+    factSections: [
+      ...(outcomeDisplay ? [{
+        id: 'outcomes',
+        ariaLabel: 'Latest account analysis results',
+        emphasis: 'primary' as const,
+        facts: [
+          { id: 'annual', ...outcomeDisplay.annual },
+          { id: 'monthly', ...outcomeDisplay.monthly }
+        ]
+      }] : []),
+      {
+        id: 'setup',
+        ariaLabel: 'Account analysis context',
+        emphasis: 'secondary',
+        facts: [
+          { id: 'baseline', label: 'Baseline', valueLabel: card.analysis.baselineYear ? String(card.analysis.baselineYear) : 'Not set', unavailable: !card.analysis.baselineYear },
+          { id: 'basis', label: 'Basis and units', valueLabel: `${card.basisLabel} · ${card.unitLabel}` },
+          { id: 'facilities', label: 'Facility selections', valueLabel: accountAnalysisSelectionSummary(card.selectionCounts) }
+        ]
+      }
+    ],
     notes: card.findings.slice(0, 2).map(item => ({
       id: item.id,
       label: item.description,

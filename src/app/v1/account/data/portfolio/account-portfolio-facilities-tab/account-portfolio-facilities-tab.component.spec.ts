@@ -5,6 +5,9 @@ import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
+import { presentFinding } from '@app/v1/status/status.catalog';
+import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
@@ -25,10 +28,14 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(text).toContain('Energy Uses');
     expect(firstCard.textContent).not.toContain('Readings');
     expect(fixture.nativeElement.querySelector('.v1-facility-card__chips')).toBeNull();
-    expect(firstCard.querySelector('.v1-facility-card__header > .v1-facility-card__status')).not.toBeNull();
+    expect(firstCard.querySelector('.v1-facility-card__header .v1-facility-card__status')).toBeNull();
+    expect(firstCard.querySelector('.v1-facility-card__header .v1-facility-card__location')).toBeNull();
+    expect(firstCard.querySelector('.v1-facility-card__context .v1-facility-card__status')).not.toBeNull();
+    expect(firstCard.querySelector('.v1-facility-card__context .v1-facility-card__location')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Set up');
+    expect(fixture.nativeElement.querySelectorAll('.v1-select')).toHaveLength(2);
     expect(Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-facility-card__status')).map(chip => chip.textContent?.trim())).toEqual([
-      'Needs meters',
-      'Set up'
+      '1 error'
     ]);
     expect(fixture.nativeElement.querySelectorAll('.v1-facility-card__title app-ui-icon[name="facility"]').length).toBe(2);
     expect(fixture.nativeElement.querySelectorAll('.v1-facility-card__title-chevron').length).toBe(2);
@@ -62,6 +69,26 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     fixture.componentInstance.setSortBy('facilityName');
     fixture.detectChanges();
     expect(cardTitles(fixture)).toEqual(['Alpha Plant', 'Beta Works']);
+  });
+
+  it('shows active errors and warnings only, including child records, and hides stale evaluation details', () => {
+    const fixture = setup();
+    const status = TestBed.inject(WorkspaceStatusService);
+    const warning = presentFinding(makeFinding('meter.currency.stale', 'warning', 'currency', {
+      kind: 'meter', guid: 'meter-a', name: 'Meter A', accountGuid: 'account-a', facilityGuid: 'facility-a'
+    }, { latestPeriod: '2026-01', thresholdMonths: 3 }));
+    const unrelated = { ...warning, id: 'other-facility', entity: { ...warning.entity, facilityGuid: 'facility-other' } };
+    (status.items as ReturnType<typeof signal<StatusItem[]>>).set([warning, unrelated]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.v1-facility-card__status')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.v1-facility-card__status').textContent).toContain('1 warning');
+    fixture.componentInstance.filtersForm.controls.status.setValue('warning');
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toEqual(['Alpha Plant']);
+    (status.state as ReturnType<typeof signal<string>>).set('evaluating');
+    fixture.componentInstance.filtersForm.controls.status.setValue('all');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.v1-facility-card__status')).toBeNull();
   });
 
   it('navigates linked facts to facility data and analyses and owns facility deletion', async () => {
@@ -124,6 +151,11 @@ function setup(): ComponentFixture<AccountPortfolioFacilitiesTabComponent> {
           facilityAnalysisRoute: (facilityGuid: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'analysis', 'dashboard']
         }
       },
+      { provide: WorkspaceStatusService, useValue: {
+        state: signal('ready'), items: signal([presentFinding(makeFinding('facility.meters.missing', 'error', 'readiness', {
+          kind: 'facility', guid: 'facility-b', name: 'Beta Works', accountGuid: 'account-a', facilityGuid: 'facility-b'
+        }))])
+      } },
       { provide: AccountWorkspaceService, useValue: { selectFacility: vi.fn() } },
       { provide: PortfolioFacilityService, useValue: { deleteFacility: vi.fn(async () => undefined) } },
       { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
