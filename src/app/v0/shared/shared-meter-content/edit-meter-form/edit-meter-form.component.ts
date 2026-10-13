@@ -43,7 +43,6 @@ export class EditMeterFormComponent implements OnInit {
   fuelTypeOptions: Array<FuelTypeOption>;
   selectedFuelTypeOption: FuelTypeOption;
   startingUnitOptions: Array<UnitOption>;
-  energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
   displaySiteToSource: boolean;
   displayEmissionsOutputRate: boolean;
@@ -177,12 +176,14 @@ export class EditMeterFormComponent implements OnInit {
   }
 
 
-  setEnergySourceLabel() {
+  get setEnergySourceLabel(): string {
+    let energySourceLabel: string;
     if (this.meterForm.controls.source.value == 'Other Fuels') {
-      this.energySourceLabel = 'Fuel Type';
+      energySourceLabel = 'Fuel Type';
     } else if (this.meterForm.controls.source.value == 'Other Energy') {
-      this.energySourceLabel = 'Energy Type'
+      energySourceLabel = 'Energy Type'
     }
+    return energySourceLabel;
   }
 
   checkDisplayPhase() {
@@ -509,5 +510,21 @@ export class EditMeterFormComponent implements OnInit {
       this.meterForm.controls.noLongerInUseYear.patchValue(parseInt(yearStr, 10));
       this.meterForm.markAsDirty();
     }
+  }
+
+  get heatCapacityLabel(): string {
+    if (this.meterForm.controls.source.value !== 'Other Energy') {
+      return 'Heat Capacity';
+    }
+
+    const selectedFuel = this.meterForm.controls.fuel.value;
+    const otherEnergyType = this.fuelTypeOptions.find(option => option.value === selectedFuel)?.otherEnergyType;
+    if (otherEnergyType === 'Steam') {
+      return 'Specific Enthalpy';
+    }
+    if (otherEnergyType === 'Chilled Water' || otherEnergyType === 'Compressed Air') {
+      return 'Efficiency';
+    }
+    return 'Heat Capacity';
   }
 }
