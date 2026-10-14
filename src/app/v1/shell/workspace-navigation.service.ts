@@ -123,8 +123,8 @@ const FACILITY_DATA_DETAILS = new Set([
   'custom-fuels',
   'custom-gwps'
 ]);
-const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete']);
-const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'delete']);
+const ACCOUNT_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'portfolio', 'delete']);
+const FACILITY_SETTINGS_DETAILS = new Set(['profile', 'units', 'goals', 'financial', 'data-validation', 'backup', 'delete']);
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceNavigationService {
@@ -249,6 +249,7 @@ export class WorkspaceNavigationService {
   }
 
   setFacility(facilityGuid: string): void {
+    if (!this.unsavedChanges.confirmDiscard()) return;
     const state = this.routeState();
     this.workspaceService.selectFacility(facilityGuid);
     void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail));
@@ -491,10 +492,12 @@ export class WorkspaceNavigationService {
   }
 
   private resolveAccountSettingsDetail(detail: string): string {
+    if (detail === 'staleness') return 'data-validation';
     return ACCOUNT_SETTINGS_DETAILS.has(detail) ? detail : DEFAULT_DETAILS.settings;
   }
 
   private resolveFacilitySettingsDetail(detail: string): string {
+    if (detail === 'staleness') return 'data-validation';
     return FACILITY_SETTINGS_DETAILS.has(detail) ? detail : DEFAULT_FACILITY_DETAILS.settings;
   }
 

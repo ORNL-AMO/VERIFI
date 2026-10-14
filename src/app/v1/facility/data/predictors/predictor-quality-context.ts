@@ -7,6 +7,7 @@ export interface PredictorQualityContext {
   readonly predictor: Signal<IdbPredictor | undefined>;
   readonly readings: Signal<readonly IdbPredictorData[]>;
   readonly findings: Signal<readonly StatusItem[]>;
+  readonly expectedRangeEnabled: Signal<boolean>;
   readonly idPrefix: Signal<string>;
   readonly settingsLabel: string;
   openReadings(): void;

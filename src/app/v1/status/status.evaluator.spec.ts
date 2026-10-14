@@ -10,6 +10,24 @@ import { evaluateWorkspaceStatus, isOlderThanThreshold } from './status.evaluato
 import { StatusRuleCode } from './status.models';
 
 describe('v1 workspace status evaluator', () => {
+  it('suppresses only range findings and restores them when re-enabled or overridden', () => {
+    const amounts = [10, 10, 11, 12, 100];
+    const value = snapshot({
+      predictors: [predictor({ predictorType: 'Weather', weatherDataType: 'CDD' })],
+      meterData: amounts.map((amount, index) => reading({ guid: `m${index}`, month: index + 1, totalEnergyUse: amount, totalCost: amount * 2 })),
+      predictorData: amounts.map((amount, index) => predictorData({ guid: `p${index}`, month: index + 1, amount, weatherDataChanged: true }))
+    });
+    const rangeCodes = ['meter.quality.consumption-outlier', 'meter.quality.cost-outlier', 'predictor.quality.outlier'];
+    const enabled = evaluate(value);
+    expect(codes(enabled)).toEqual(expect.arrayContaining(rangeCodes));
+    const disabledValue = { ...value, account: { ...value.account, expectedRangeSettings: { enabled: false } } };
+    const disabled = evaluate(disabledValue);
+    expect(codes(disabled)).toEqual(codes(enabled).filter(code => !rangeCodes.includes(code)));
+    expect(codes(disabled)).toContain('predictor.weather.warning');
+    expect(codes(evaluate({ ...disabledValue, facilities: [{ ...value.facilities[0], expectedRangeSettings: { enabled: true, useAccountSettings: false } }] }))).toEqual(codes(enabled));
+    expect(codes(evaluate({ ...disabledValue, facilities: [{ ...value.facilities[0], expectedRangeSettings: { enabled: true, useAccountSettings: true } }] }))).toEqual(codes(disabled));
+    expect(codes(evaluate({ ...disabledValue, account: { ...disabledValue.account, expectedRangeSettings: { enabled: true } } }))).toEqual(codes(enabled));
+  });
   it('reports account and facility readiness without creating parent duplicates', () => {
     const emptyAccount = evaluate(snapshot({ facilities: [] }));
     expect(codes(emptyAccount)).toContain('account.facilities.missing');

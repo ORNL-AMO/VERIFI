@@ -1,3 +1,4 @@
+import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,6 +34,10 @@ export class PredictorWorkbenchContextService implements PredictorQualityContext
   readonly findings = computed(() => {
     const guid = this.predictorGuid();
     return guid ? this.status.predictorFindings(guid) : [];
+  });
+  readonly expectedRangeEnabled = computed(() => {
+    const account = this.workspace.account();
+    return account ? effectiveExpectedRangeSettings(account, this.workspace.facility()).enabled : true;
   });
   readonly idPrefix = computed(() => `predictor-quality-${safeId(this.predictorGuid() ?? 'missing')}`);
   readonly settingsLabel = 'Open Settings';

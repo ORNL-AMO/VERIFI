@@ -1,0 +1,77 @@
+@let account = editor.account();
+@let state = editor.saveState();
+@if (account) {
+  <div class="data-validation-settings">
+    @if (editor.saveError()) {
+      <div class="v1-alert v1-alert--danger" role="alert">
+        <span>{{ editor.saveError() }}</span>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canWrite() || state === 'saving'" (click)="editor.retry()">Retry save</button>
+      </div>
+    }
+    <form class="v1-settings-panel" [class.v1-settings-panel--facility]="facilityContext" [formGroup]="editor.stalenessForm" aria-label="Data staleness">
+      <div class="v1-settings-panel__heading">
+        <div><p>Data Validation</p><h2>Data staleness alerts</h2></div>
+        <span role="status" aria-live="polite" class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="state === 'error'">
+          @if (state === 'saving') { <app-ui-icon name="loading" spin></app-ui-icon> Saving }
+          @else if (state === 'saved') { <app-ui-icon name="check"></app-ui-icon> Saved }
+          @else if (state === 'error') { <app-ui-icon name="warning"></app-ui-icon> Not saved }
+        </span>
+      </div>
+      @if (facilityContext) {
+        @if (editor.stalenessDiffer()) {
+          <div class="v1-alert v1-alert--info">
+            <span>Facility staleness settings differ from {{ account.name }}.</span>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canWrite()" (click)="openAccountUpdateConfirm('staleness')">Update from account settings</button>
+          </div>
+        }
+        <label class="v1-settings-choice v1-settings-choice--block">
+          <input type="checkbox" formControlName="useAccountSettings"><span>Use account-level settings</span>
+        </label>
+        @if (editor.stalenessForm.controls.useAccountSettings.value) {
+          <p>This facility inherits staleness settings from {{ account.name }}.</p>
+        }
+      }
+      <label class="v1-settings-choice v1-settings-choice--block">
+        <input type="checkbox" formControlName="enabled"><span>Enable time-based staleness alerts</span>
+      </label>
+      @if (editor.stalenessForm.controls.enabled.value) {
+        <label><span>Alert when data is older than</span>
+          <select class="v1-select" formControlName="thresholdMonths">
+            @for (option of stalenessOptions; track option.value) { <option [ngValue]="option.value">{{ option.label }}</option> }
+          </select>
+        </label>
+      }
+    </form>
+    <form class="v1-settings-panel" [class.v1-settings-panel--facility]="facilityContext" [formGroup]="editor.expectedRangeForm" aria-label="Expected-range warnings">
+      <div class="v1-settings-panel__heading"><div><p>Data Validation</p><h2>Expected-range warnings</h2></div></div>
+      @if (facilityContext) {
+        @if (editor.expectedRangeDiffer()) {
+          <div class="v1-alert v1-alert--info">
+            <span>Facility expected-range settings differ from {{ account.name }}.</span>
+            <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canWrite()" (click)="openAccountUpdateConfirm('expectedRange')">Update from account settings</button>
+          </div>
+        }
+        <label class="v1-settings-choice v1-settings-choice--block">
+          <input type="checkbox" formControlName="useAccountSettings"><span>Use account-level settings</span>
+        </label>
+        @if (editor.expectedRangeForm.controls.useAccountSettings.value) {
+          <p>This facility inherits expected-range settings from {{ account.name }}.</p>
+        }
+      }
+      <label class="v1-settings-choice v1-settings-choice--block">
+        <input type="checkbox" formControlName="enabled" aria-describedby="expected-range-help"><span>Enable expected-range warnings</span>
+      </label>
+      <div id="expected-range-help" class="data-validation-settings__help">
+        <p>Show status warnings for meter consumption, meter cost, and predictor values outside the expected range.</p>
+        <p>Data Quality Reports calculate the expected range from your readings using the median and median absolute deviation (MAD). The reports continue to show expected ranges, outlier statistics, and highlighting when these warnings are disabled.</p>
+      </div>
+    </form>
+  </div>
+}
+<ng-template #accountUpdateConfirm>
+  <app-confirmation-dialog title="Update this facility with the account settings?" titleId="data-quality-update-title"
+    cancelAriaLabel="Cancel account settings update" confirmLabel="Update facility" confirmClass="v1-btn--primary"
+    (cancelled)="cancelAccountUpdateConfirm()" (confirmed)="confirmAccountSettingsUpdate()">
+    <p>The facility {{ confirmGroup() === 'staleness' ? 'data staleness' : 'expected-range' }} settings will be replaced with the settings from {{ account?.name }} and will inherit future account changes.</p>
+  </app-confirmation-dialog>
+</ng-template>

@@ -1,8 +1,26 @@
 import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.service';
 import { CURRENT_DATA_VERSION } from '@data/indexedDB/data-migrations/data-migration.models';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { BackupPreparationService } from './backup-preparation.service';
+import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 
 describe('WorkspaceBackupSnapshotBuilder', () => {
+  it('round trips account and facility expected-range settings without a version change', () => {
+    const original = createSnapshot();
+    const snapshot = { ...original,
+      account: { ...original.account, expectedRangeSettings: { enabled: false } },
+      facilities: original.facilities.map(facility => ({ ...facility, expectedRangeSettings: { enabled: true, useAccountSettings: false } }))
+    };
+    const builder = new WorkspaceBackupSnapshotBuilder();
+    const preparation = new BackupPreparationService();
+    const accountBackup = preparation.prepare(JSON.parse(JSON.stringify(builder.buildAccountBackup(snapshot))));
+    expect(accountBackup.dataVersion).toBe(CURRENT_DATA_VERSION);
+    expect(accountBackup.account.expectedRangeSettings).toEqual({ enabled: false });
+    expect(accountBackup.facilities[0].expectedRangeSettings).toEqual({ enabled: true, useAccountSettings: false });
+    const facilityBackup = preparation.prepare(JSON.parse(JSON.stringify(builder.buildFacilityBackup(snapshot, 'facility-a'))));
+    expect(facilityBackup.facility.expectedRangeSettings).toEqual({ enabled: true, useAccountSettings: false });
+    expect(effectiveExpectedRangeSettings(accountBackup.account, accountBackup.facilities[0]).enabled).toBe(true);
+  });
   it('builds an account backup from one snapshot and removes local machine backup fields', () => {
     const builder = new WorkspaceBackupSnapshotBuilder();
     const snapshot = createSnapshot();

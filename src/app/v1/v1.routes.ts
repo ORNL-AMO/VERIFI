@@ -19,7 +19,7 @@ import { AccountSettingsFinancialComponent } from '@app/v1/account/settings/fina
 import { AccountSettingsGoalsComponent } from '@app/v1/account/settings/goals/account-settings-goals.component';
 import { AccountSettingsPortfolioComponent } from '@app/v1/account/settings/portfolio/account-settings-portfolio.component';
 import { AccountSettingsProfileComponent } from '@app/v1/account/settings/profile/account-settings-profile.component';
-import { AccountSettingsStalenessComponent } from '@app/v1/account/settings/staleness/account-settings-staleness.component';
+import { AccountSettingsDataValidationComponent } from '@app/v1/account/settings/data-validation/account-settings-data-validation.component';
 import { AccountSettingsUnitsComponent } from '@app/v1/account/settings/units/account-settings-units.component';
 import { FacilityDataPlaceholderComponent } from '@app/v1/facility/data/facility-data-placeholder.component';
 import { FacilityMetersComponent } from '@app/v1/facility/data/meters/facility-meters.component';
@@ -56,7 +56,7 @@ import { FacilitySettingsFinancialComponent } from '@app/v1/facility/settings/fi
 import { FacilitySettingsGoalsComponent } from '@app/v1/facility/settings/goals/facility-settings-goals.component';
 import { PortfolioTransitionSettingsComponent } from '@app/v1/facility/settings/portfolio-transition/portfolio-transition-settings.component';
 import { FacilitySettingsProfileComponent } from '@app/v1/facility/settings/profile/facility-settings-profile.component';
-import { FacilitySettingsStalenessComponent } from '@app/v1/facility/settings/staleness/facility-settings-staleness.component';
+import { FacilitySettingsDataValidationComponent } from '@app/v1/facility/settings/data-validation/facility-settings-data-validation.component';
 import { FacilitySettingsUnitsComponent } from '@app/v1/facility/settings/units/facility-settings-units.component';
 import { accountHomeCanonicalGuard, facilityHomeCanonicalGuard, singleSiteAccountRedirectGuard } from '@app/v1/routing/canonical-route.guards';
 import { ShellComponent } from '@app/v1/shell/shell.component';
@@ -157,7 +157,8 @@ export const V1Routes: Routes = [
               { path: 'units', component: AccountSettingsUnitsComponent },
               { path: 'goals', component: AccountSettingsGoalsComponent },
               { path: 'financial', component: AccountSettingsFinancialComponent },
-              { path: 'staleness', component: AccountSettingsStalenessComponent },
+              { path: 'data-validation', component: AccountSettingsDataValidationComponent, canDeactivate: [unsavedChangesGuard] },
+              { path: 'staleness', redirectTo: 'data-validation', pathMatch: 'full' },
               { path: 'backup', component: AccountSettingsBackupComponent },
               { path: 'portfolio', component: AccountSettingsPortfolioComponent },
               { path: 'delete', component: AccountSettingsDeleteComponent },
@@ -375,7 +376,8 @@ export const V1Routes: Routes = [
               { path: 'units', component: FacilitySettingsUnitsComponent },
               { path: 'goals', component: FacilitySettingsGoalsComponent },
               { path: 'financial', component: FacilitySettingsFinancialComponent },
-              { path: 'staleness', component: FacilitySettingsStalenessComponent },
+              { path: 'data-validation', component: FacilitySettingsDataValidationComponent, canDeactivate: [unsavedChangesGuard] },
+              { path: 'staleness', redirectTo: 'data-validation', pathMatch: 'full' },
               { path: 'backup', component: FacilitySettingsBackupComponent },
               { path: 'portfolio', component: PortfolioTransitionSettingsComponent },
               { path: 'delete', component: FacilitySettingsDeleteComponent },

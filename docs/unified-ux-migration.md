@@ -162,6 +162,13 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** Reuse the existing calendarization Worker formulas and pure analysis/report validators behind a v1-only canonical service. One current-account base result uses stable units, calendar months, and site energy. Status consumes it without display conversion; workbenches select a meter or facility slice and project units, site/source basis, and fiscal periods on demand. Meter display preferences are optional account-data fields and inherit facility settings when absent. JSON backups preserve them, while v0 and spreadsheet formats remain unchanged.
 - **Tests:** Table-driven rule/catalog tests, v1 consumer specs, and a browser Worker test that rejects superseded account revisions. Run the validation planner, fast and browser suites, app type-check, and production web build.
 
+### Data Validation Settings Workflow
+
+- **Workflow:** Account and facility Settings > Data Validation, replacing Staleness navigation. Existing `settings/staleness` links redirect to `settings/data-validation`.
+- **Decision:** Separate staleness and expected-range sections with independent facility inheritance, account-copy confirmations, and serialized autosave. Navigation is blocked while saves are queued or in progress. Failed drafts can be retried, reverted, or explicitly discarded; reverting all edits to stored values clears the save error. One expected-range switch controls consumption, cost, and predictor status warnings; statistical Quality Report details remain available.
+- **Shared contracts:** Optional account/facility `expectedRangeSettings` defaults to enabled, with facilities inheriting unless `useAccountSettings` is explicitly false. Older records and backups require no rewrite or data-version change. JSON backups retain the preference; spreadsheet formats, v0 checks, formulas, and Worker contracts remain unchanged. Single-facility account/facility synchronization commits atomically through a compound command handler.
+- **Tests:** Defaults, inheritance, autosave/retry/serialization, route compatibility, portfolio propagation, report fallback alerts, JSON round trips, and native IndexedDB commit/rollback/reopen. Run the validation planner, fast/browser suites, app type-check, and production web build.
+
 ### Facility Meter Bill Inspection Workflow
 
 - **Workflow:** v1 selected-meter Bill Inspection tab.

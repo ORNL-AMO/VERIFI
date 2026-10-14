@@ -1,3 +1,4 @@
+import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -71,6 +72,10 @@ export class MeterWorkbenchQualityReportComponent {
   @ViewChild('statisticsTable', { static: false }) statisticsTable?: ElementRef<HTMLTableElement>;
   @ViewChild('qualityChart', { static: false, read: EChartsChartDirective }) qualityChart?: EChartsChartDirective;
 
+  readonly expectedRangeEnabled = computed(() => {
+    const account = this.workspace.account();
+    return account ? effectiveExpectedRangeSettings(account, this.facility()).enabled : true;
+  });
   readonly report = computed<MeterDataQualityReport | undefined>(() => {
     const selectedMeter = this.meter();
     if (!selectedMeter) {
@@ -92,9 +97,10 @@ export class MeterWorkbenchQualityReportComponent {
       return [];
     }
     if (this.status.state() !== 'ready') {
-      return buildIssueSummaries(report);
+      return buildIssueSummaries(report, this.expectedRangeEnabled());
     }
     return this.status.meterFindings(meter.guid)
+      .filter(finding => this.expectedRangeEnabled() || !['meter.quality.consumption-outlier', 'meter.quality.cost-outlier'].includes(finding.code))
       .filter(finding => finding.category === 'quality' || finding.code === 'meter.data.duplicate-date')
       .map(finding => finding.description);
   });
@@ -196,12 +202,12 @@ function statisticRow(
   };
 }
 
-function buildIssueSummaries(report: MeterDataQualityReport): string[] {
+function buildIssueSummaries(report: MeterDataQualityReport, expectedRangeEnabled: boolean): string[] {
   const issues: string[] = [];
-  if (report.showConsumption && report.energyOutlierCount > 0) {
+  if (expectedRangeEnabled && report.showConsumption && report.energyOutlierCount > 0) {
     issues.push(`${report.energyOutlierCount} consumption reading${report.energyOutlierCount === 1 ? '' : 's'} outside the expected range.`);
   }
-  if (report.includeCosts && report.costOutlierCount > 0) {
+  if (expectedRangeEnabled && report.includeCosts && report.costOutlierCount > 0) {
     issues.push(`${report.costOutlierCount} cost reading${report.costOutlierCount === 1 ? '' : 's'} outside the expected range.`);
   }
   if (report.duplicateMonths.length > 0) {

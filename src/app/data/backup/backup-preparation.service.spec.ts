@@ -1,4 +1,5 @@
 import { BackupFile } from '@data/models/backup-file';
+import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 import { BackupPreparationService, BackupRelationshipError, FutureBackupVersionError, InvalidBackupError } from './backup-preparation.service';
 
 describe('BackupPreparationService', () => {
@@ -29,6 +30,8 @@ describe('BackupPreparationService', () => {
     expect(prepared.meterData[0]).toMatchObject({ year: 2024, month: 1, day: 31 });
     expect(input.dataVersion).toBeUndefined();
     expect(input.account.electricityUnit).toBeUndefined();
+    expect(effectiveExpectedRangeSettings(prepared.account, prepared.facilities[0]).enabled).toBe(true);
+    expect(prepared.account.expectedRangeSettings).toBeUndefined();
   });
 
   it('defaults missing legacy collections and preserves optional dangling references', () => {

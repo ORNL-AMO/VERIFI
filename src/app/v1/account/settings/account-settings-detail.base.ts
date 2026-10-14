@@ -6,7 +6,7 @@ import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-comm
 import { IdbAccount } from '@data/models/idbModels/account';
 import { SettingsDetailBase, SettingsSaveState } from '@app/v1/shared/settings/settings-detail.base';
 
-export type AccountSettingsDetail = 'profile' | 'units' | 'goals' | 'financial' | 'staleness' | 'backup' | 'portfolio' | 'delete';
+export type AccountSettingsDetail = 'profile' | 'units' | 'goals' | 'financial' | 'data-validation' | 'backup' | 'portfolio' | 'delete';
 export type AccountSettingsSaveState = SettingsSaveState;
 
 export const ACCOUNT_SETTINGS_DETAILS: ReadonlyArray<AccountSettingsDetail> = [
@@ -14,7 +14,7 @@ export const ACCOUNT_SETTINGS_DETAILS: ReadonlyArray<AccountSettingsDetail> = [
   'units',
   'goals',
   'financial',
-  'staleness',
+  'data-validation',
   'backup',
   'portfolio',
   'delete'

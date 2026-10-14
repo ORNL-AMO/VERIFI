@@ -14,6 +14,13 @@ export interface DataStalenessSettings {
     useAccountSettings?: boolean;
 }
 
+/** Controls v1 statistical-outlier status warnings, independently of quality reports. */
+export interface ExpectedRangeSettings {
+    enabled: boolean;
+    /** Only applicable to facilities; omitted means inherit from the account. */
+    useAccountSettings?: boolean;
+}
+
 export interface AccountAndFacility {
     name: string,
     country: string,
@@ -45,5 +52,6 @@ export interface AccountAndFacility {
     selectedEnergyAnalysisId?: string,
     selectedWaterAnalysisId?: string,
     /** Settings for time-based data staleness checks */
-    dataStalenessSettings?: DataStalenessSettings
+    dataStalenessSettings?: DataStalenessSettings,
+    expectedRangeSettings?: ExpectedRangeSettings
 }

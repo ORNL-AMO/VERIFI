@@ -59,6 +59,7 @@ export function getNewIdbFacility(account: IdbAccount): IdbFacility {
         contactPhone: undefined,
         facilityOrder: undefined,
         classification: 'Manufacturing',
+        expectedRangeSettings: { enabled: account.expectedRangeSettings?.enabled ?? true, useAccountSettings: true },
         dataStalenessSettings: {
             enabled: true,
             thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS,

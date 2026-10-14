@@ -82,6 +82,7 @@ export function getNewIdbAccount(): IdbAccount {
         displayEmissions: false,
         isSingleFacilityCompany: false,
         statusWarningDismissals: [],
+        expectedRangeSettings: { enabled: true },
         dataStalenessSettings: {
             enabled: true,
             thresholdMonths: DEFAULT_DATA_STALENESS_MONTHS

@@ -11,6 +11,8 @@ import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service'
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 
 describe('WorkspaceNavigationService', () => {
+  afterEach(() => vi.restoreAllMocks());
+
   let service: WorkspaceNavigationService;
   let router: { url: string; events: Subject<unknown>; navigate: ReturnType<typeof vi.fn> };
   let workspaceService: { selectAccount: ReturnType<typeof vi.fn>; selectFacility: ReturnType<typeof vi.fn> };
@@ -733,6 +735,17 @@ describe('WorkspaceNavigationService', () => {
     ]);
   });
 
+  it('preserves the active facility while a registered editor is saving', () => {
+    TestBed.inject(UnsavedChangesService).register(() => true, vi.fn(), () => true);
+    const confirm = vi.spyOn(window, 'confirm');
+
+    service.setFacility('facility-b');
+
+    expect(workspaceService.selectFacility).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
   it('keeps the active facility rail route when switching facilities', () => {
     router.events.next(new NavigationEnd(
       1,
@@ -774,7 +787,7 @@ describe('WorkspaceNavigationService', () => {
     router.events.next(new NavigationEnd(
       3,
       '/v1/workspace/facility/facility-b/settings/staleness',
-      '/v1/workspace/facility/facility-b/settings/staleness'
+      '/v1/workspace/facility/facility-b/settings/data-validation'
     ));
 
     service.setFacility('facility-a');
@@ -785,7 +798,7 @@ describe('WorkspaceNavigationService', () => {
       'facility',
       'facility-a',
       'settings',
-      'staleness'
+      'data-validation'
     ]);
   });
 

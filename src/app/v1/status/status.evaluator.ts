@@ -1,8 +1,8 @@
+import { effectiveExpectedRangeSettings, effectiveStalenessSettings } from '@shared/settings-forms/data-validation-settings';
 import { CalanderizedMeter, MonthlyData } from '@data/models/calanderization';
 import { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { IdbAccount } from '@data/models/idbModels/account';
-import { DataStalenessSettings } from '@data/models/idbModels/accountAndFacility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbCustomFuel } from '@data/models/idbModels/customFuel';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -34,7 +34,7 @@ import {
   evaluateBankingSource
 } from '@shared/shared-analysis/banking-configuration';
 import { StatusEntityRef, StatusEvaluation, StatusFinding, makeFinding } from './status.models';
-import { DEFAULT_DATA_STALENESS_MONTHS, DataStalenessMonths } from './status.settings';
+import { DataStalenessMonths } from './status.settings';
 
 /** Executable implementation of docs/v1-data-validation-rules.md. */
 
@@ -64,7 +64,8 @@ export function evaluateWorkspaceStatus(context: EvaluationContext): StatusEvalu
     const facilityCalendarized = calendarizedMeters.filter(item => item.meter.facilityId === facility.guid);
     const calendarizedByMeter = new Map(facilityCalendarized.map(item => [item.meter.guid, item]));
     const latestFacilityMonth = latestCalendarizedMonth(facilityCalendarized);
-    const staleness = effectiveStaleness(snapshot.account, facility);
+    const staleness = effectiveStalenessSettings(snapshot.account, facility);
+    const expectedRangeEnabled = effectiveExpectedRangeSettings(snapshot.account, facility).enabled;
 
     findings.push(...evaluateFacility(snapshot.account, facility, facilityMeters, facilityGroups.length, facilityPredictors));
     for (const meter of facilityMeters) {
@@ -75,11 +76,12 @@ export function evaluateWorkspaceStatus(context: EvaluationContext): StatusEvalu
         snapshot.customFuels,
         latestFacilityMonth,
         staleness,
+        expectedRangeEnabled,
         asOfDate
       ));
     }
     for (const predictor of facilityPredictors) {
-      findings.push(...evaluatePredictor(predictor, facilityPredictorData.filter(data => data.predictorId === predictor.guid), latestFacilityMonth, staleness, asOfDate));
+      findings.push(...evaluatePredictor(predictor, facilityPredictorData.filter(data => data.predictorId === predictor.guid), latestFacilityMonth, staleness, expectedRangeEnabled, asOfDate));
     }
   }
 
@@ -138,6 +140,7 @@ function evaluateMeter(
   customFuels: readonly IdbCustomFuel[],
   facilityLatest: Date | undefined,
   staleness: { enabled: boolean; thresholdMonths: DataStalenessMonths },
+  expectedRangeEnabled: boolean,
   asOfDate: Date
 ): StatusFinding[] {
   const entity = meterEntity(meter);
@@ -177,10 +180,10 @@ function evaluateMeter(
   findings.push(...currencyFindings('meter', entity, latest, facilityLatest, meter.ignoreDateStatusChecks, meter.noLongerInUse, meter.noLongerInUseMonth, meter.noLongerInUseYear, staleness, asOfDate));
 
   const quality = buildMeterDataQualityReport(readings, meter);
-  if (quality.energyOutlierCount > 0) {
+  if (expectedRangeEnabled && quality.energyOutlierCount > 0) {
     findings.push(makeFinding('meter.quality.consumption-outlier', 'warning', 'quality', entity, { count: quality.energyOutlierCount }));
   }
-  if (quality.costOutlierCount > 0) {
+  if (expectedRangeEnabled && quality.costOutlierCount > 0) {
     findings.push(makeFinding('meter.quality.cost-outlier', 'warning', 'quality', entity, { count: quality.costOutlierCount }));
   }
   return findings;
@@ -191,6 +194,7 @@ function evaluatePredictor(
   data: readonly IdbPredictorData[],
   facilityLatest: Date | undefined,
   staleness: { enabled: boolean; thresholdMonths: DataStalenessMonths },
+  expectedRangeEnabled: boolean,
   asOfDate: Date
 ): StatusFinding[] {
   const entity = predictorEntity(predictor);
@@ -221,7 +225,7 @@ function evaluatePredictor(
     findings.push(makeFinding('predictor.weather.warning', 'warning', 'quality', entity));
   }
   const quality = buildPredictorDataQualityReport(data, predictor);
-  if (quality.outlierCount > 0) {
+  if (expectedRangeEnabled && quality.outlierCount > 0) {
     findings.push(makeFinding('predictor.quality.outlier', 'warning', 'quality', entity, {
       count: quality.outlierCount,
       periods: quality.outlierPeriods
@@ -611,13 +615,6 @@ function latestCalendarizedMonth(meters: readonly CalanderizedMeter[]): Date | u
     const date = new Date(data.year, data.monthNumValue, 1);
     return !latest || date > latest ? date : latest;
   }, undefined);
-}
-
-function effectiveStaleness(account: IdbAccount, facility: IdbFacility): { enabled: boolean; thresholdMonths: DataStalenessMonths } {
-  const facilitySettings: DataStalenessSettings | undefined = facility.dataStalenessSettings;
-  const accountSettings: DataStalenessSettings | undefined = account.dataStalenessSettings;
-  const settings = facilitySettings?.useAccountSettings ? accountSettings : facilitySettings ?? accountSettings;
-  return { enabled: settings?.enabled ?? true, thresholdMonths: settings?.thresholdMonths ?? DEFAULT_DATA_STALENESS_MONTHS };
 }
 
 export function isOlderThanThreshold(date: Date, asOfDate: Date, thresholdMonths: number): boolean {

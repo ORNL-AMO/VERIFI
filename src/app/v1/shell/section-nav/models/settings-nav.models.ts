@@ -5,7 +5,7 @@ const ACCOUNT_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'units', label: 'Units', icon: 'ruler' },
   { id: 'goals', label: 'Goals', icon: 'target' },
   { id: 'financial', label: 'Financial', icon: 'calendar' },
-  { id: 'staleness', label: 'Staleness', icon: 'clock' },
+  { id: 'data-validation', label: 'Data Validation', icon: 'warning' },
   { id: 'backup', label: 'Backup', icon: 'fileDownload' },
   { id: 'portfolio', label: 'Portfolio', icon: 'portfolio' },
   { id: 'delete', label: 'Delete account', icon: 'delete', tone: 'danger' }
@@ -16,7 +16,7 @@ const FACILITY_SETTINGS_ITEMS: ReadonlyArray<SettingsNavItem> = [
   { id: 'units', label: 'Units', icon: 'ruler' },
   { id: 'goals', label: 'Goals', icon: 'target' },
   { id: 'financial', label: 'Financial', icon: 'calendar' },
-  { id: 'staleness', label: 'Staleness', icon: 'clock' },
+  { id: 'data-validation', label: 'Data Validation', icon: 'warning' },
   { id: 'backup', label: 'Backup', icon: 'fileDownload' }
 ];
 
