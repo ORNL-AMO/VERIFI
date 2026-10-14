@@ -22,7 +22,41 @@ describe('MeterResultsChartComponent', () => {
     expect(option.yAxis.every((axis: { alignTicks?: boolean }) => axis.alignTicks)).toBe(true);
     expect('axisLabel' in option.yAxis[0]).toBe(false);
     expect(option.yAxis[1].axisLabel).toEqual({ formatter: '${value}' });
+    expect(option.xAxis.axisLine).toBeUndefined();
     expect(option.dataZoom).toHaveLength(2);
+  });
+
+  it.each([
+    ['yearly', 'line', false],
+    ['monthly', 'bar', true]
+  ] as const)('emphasizes the zero-percent axis for %s %s charts that allow negative values', (period, display, showAllMetrics) => {
+    const fixture = setup();
+    fixture.componentRef.setInput('metrics', [
+      { id: 'utility', label: 'Annual Improvement', unit: '%' },
+      { id: 'cost', label: 'Total Improvement', unit: '%' }
+    ]);
+    fixture.componentRef.setInput('chartRows', [
+      { periodKey: '1', periodLabel: '2023', sortValue: 1, values: { utility: -2, cost: -1 } },
+      { periodKey: '2', periodLabel: '2024', sortValue: 2, values: { utility: 3, cost: 4 } }
+    ]);
+    fixture.componentRef.setInput('period', period);
+    fixture.componentRef.setInput('sharedYAxis', true);
+    fixture.componentRef.setInput('allowNegativeValues', true);
+    fixture.componentRef.setInput('showAllMetrics', showAllMetrics);
+    fixture.componentRef.setInput('allMetricsDisplay', display);
+    fixture.componentRef.setInput('stackSeries', showAllMetrics);
+    fixture.detectChanges();
+
+    const option = fixture.componentInstance.chartOption() as Record<string, any>;
+    expect(option.xAxis.axisLine).toEqual({
+      show: true,
+      onZero: true,
+      onZeroAxisIndex: 0,
+      lineStyle: { width: 2, color: 'var(--v1-chart-annotation)' }
+    });
+    expect(option.yAxis).toHaveLength(1);
+    expect(option.yAxis[0].min).toBeUndefined();
+    expect(option.series[0].data).toEqual([-2, 3]);
   });
 
   it('uses the grouping-style display toggles for each visible series', () => {
