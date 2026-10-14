@@ -10,26 +10,21 @@ const finding: StatusItem = {
 };
 
 describe('AnalysisStatusNotesComponent', () => {
-  it('renders severity, copy, and an accessible typed Review action only for available destinations', () => {
+  it('renders labeled status messages without links or extra keyboard stops', () => {
     TestBed.configureTestingModule({ imports: [AnalysisStatusNotesComponent] });
     const fixture = TestBed.createComponent(AnalysisStatusNotesComponent);
-    const reviewed = vi.fn();
-    fixture.componentInstance.reviewed.subscribe(reviewed);
     fixture.componentRef.setInput('findings', [finding, {
       ...finding, id: 'finding-b', severity: 'warning', title: 'Review inputs', destination: { kind: 'unavailable' }
     }]);
     fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;
     expect(host.querySelectorAll('li')).toHaveLength(2);
-    expect(host.querySelector('ul')?.getAttribute('tabindex')).toBe('0');
+    expect(host.querySelector('ul')?.getAttribute('aria-label')).toBe('Analysis status items');
+    expect(host.querySelector('ul')?.getAttribute('tabindex')).toBeNull();
     expect(host.querySelectorAll('.analysis-status-note--error')).toHaveLength(1);
     expect(host.textContent).toContain('Complete analysis setup');
     expect(host.textContent).toContain('Choose a baseline year.');
-    const buttons = host.querySelectorAll<HTMLButtonElement>('button');
-    expect(buttons).toHaveLength(1);
-    expect(buttons[0].getAttribute('aria-label')).toBe('Review: Complete analysis setup');
-    buttons[0].click();
-    expect(reviewed).toHaveBeenCalledWith(finding);
+    expect(host.querySelectorAll('button, a')).toHaveLength(0);
     fixture.componentRef.setInput('findings', []);
     fixture.detectChanges();
     expect(host.querySelector('ul')).toBeNull();

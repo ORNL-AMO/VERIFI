@@ -74,7 +74,7 @@ function configureHeader() {
 
 describe('AccountAnalysisWorkbenchHeaderComponent', () => {
   it('renders the five dashboard facts and keeps status and dependencies visible with facts collapsed', () => {
-    const { fixture, findings, navigateTo } = configureHeader();
+    const { fixture } = configureHeader();
     const host = fixture.nativeElement as HTMLElement;
     expect(host.querySelectorAll('dl > div')).toHaveLength(5);
     expect(host.textContent).toContain('Latest full year · 2025');
@@ -94,8 +94,7 @@ describe('AccountAnalysisWorkbenchHeaderComponent', () => {
     const notes = host.querySelector('app-analysis-status-notes');
     expect(notes?.closest('[hidden]')).toBeNull();
     expect(notes?.textContent).toContain('Included analyses have warnings.');
-    notes?.querySelector<HTMLButtonElement>('button')?.click();
-    expect(navigateTo).toHaveBeenCalledWith(findings()[0]);
+    expect(notes?.querySelector('button, a')).toBeNull();
   });
 
   it('updates dependencies and selection facts as the workspace changes', () => {

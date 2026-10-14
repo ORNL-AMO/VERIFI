@@ -16,6 +16,8 @@ import {
 } from '@app/v1/shared/analysis-results/analysis-outcome-summary';
 import { FacilityAnalysisGroupModelRosterComponent } from '../../group-model-roster/facility-analysis-group-model-roster.component';
 import { AccountAnalysisReturnService } from '../navigation/account-analysis-return.service';
+import { StatusItem } from '@app/v1/status/status.models';
+import { presentFinding } from '@app/v1/status/status.catalog';
 
 @Component({
   selector: 'app-facility-analysis-workbench-header',
@@ -38,6 +40,7 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
   readonly autosave = inject(FacilityAnalysisAutosaveService);
   readonly results = inject(FacilityAnalysisResultsService);
   readonly accountAnalysisReturn = inject(AccountAnalysisReturnService);
+  readonly statusNotes = computed(() => facilityAnalysisHeaderFindings(this.context.findings()));
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
     label: analysis.name || 'Untitled analysis',
@@ -68,6 +71,33 @@ export class FacilityAnalysisWorkbenchHeaderComponent {
     const facility = this.context.facility();
     if (facility) void this.router.navigate(this.navigation.facilityAnalysisWorkbenchRoute(facility.guid, analysisGuid));
   }
+}
+
+export function facilityAnalysisHeaderFindings(findings: readonly StatusItem[]): readonly StatusItem[] {
+  const regressionFindings = findings.filter(isRegressionSetupNote);
+  if (regressionFindings.length < 2) return findings;
+
+  const first = regressionFindings[0];
+  const reasons = [...new Set<string>(regressionFindings.flatMap(finding => {
+    const values = finding.evidence['reasons'];
+    return Array.isArray(values) ? values : [];
+  }))];
+  const combined = presentFinding({ ...first, evidence: { ...first.evidence, reasons } });
+  const summary = {
+    ...combined,
+    description: `${regressionFindings.length} groups need regression setup. ${combined.description}`
+  };
+  return findings.flatMap(finding => {
+    if (!isRegressionSetupNote(finding)) return [finding];
+    return finding.id === first.id ? [summary] : [];
+  });
+}
+
+function isRegressionSetupNote(finding: StatusItem): boolean {
+  return finding.code === 'analysis-group.setup.invalid'
+    && finding.destination.kind === 'facility-analysis'
+    && finding.destination.scope === 'group'
+    && finding.destination.tab === 'regression';
 }
 
 export function facilityAnalysisResultOutcome(
