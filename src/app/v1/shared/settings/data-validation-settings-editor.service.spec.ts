@@ -4,6 +4,7 @@ import { DataValidationSettingsEditor } from './data-validation-settings-editor.
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { vi } from 'vitest';
+import { applyDataValidationSettings, DataValidationSettingsGroup } from '@shared/settings-forms/data-validation-settings';
 
 describe('DataValidationSettingsEditor', () => {
   afterEach(() => vi.restoreAllMocks());
@@ -69,6 +70,109 @@ describe('DataValidationSettingsEditor', () => {
     expect(accountUpdate).toHaveBeenCalledTimes(2);
     expect(account().expectedRangeSettings?.enabled).toBe(true);
     expect(editor.saveState()).toBe('saved');
+  });
+
+  const refreshFailures = [
+    { context: 'account', failure: 'workspace' },
+    { context: 'facility', failure: 'workspace' },
+    { context: 'singleFacility', failure: 'workspace' },
+    { context: 'account', failure: 'catalog' },
+    { context: 'singleFacility', failure: 'catalog' }
+  ] as const;
+
+  function setupRefreshFailure(context: typeof refreshFailures[number]['context'], failure: 'workspace' | 'catalog') {
+    const state = configureDataValidationSettingsTest();
+    state.account.set({ ...state.account(), isSingleFacilityCompany: context === 'singleFacility' });
+    state.facility.set({ ...state.facility(),
+      expectedRangeSettings: { enabled: true, useAccountSettings: false },
+      dataStalenessSettings: { enabled: true, thresholdMonths: 3, useAccountSettings: false }
+    });
+    let storedAccount = state.account();
+    let storedFacility = state.facility();
+    // Persistence and workspace publication are separate, as in the real command boundary.
+    state.accountUpdate.mockImplementation(async updated => { storedAccount = updated; return updated; });
+    state.facilityUpdate.mockImplementation(async updated => { storedFacility = updated; return updated; });
+    state.compoundUpdate.mockImplementation(async (_account, _facility, change) => {
+      storedAccount = applyDataValidationSettings(storedAccount, change, true);
+      storedFacility = applyDataValidationSettings(storedFacility, change);
+      return { account: storedAccount, facility: storedFacility };
+    });
+    let failWorkspace = failure === 'workspace';
+    state.execute.mockImplementation(async (_metadata, persist) => {
+      const value = await persist();
+      if (failWorkspace) {
+        failWorkspace = false;
+        throw new Error('Committed workspace reload failed');
+      }
+      state.account.set(storedAccount);
+      state.facility.set(storedFacility);
+      return { value };
+    });
+    if (failure === 'catalog') state.refreshAccountCatalog.mockRejectedValueOnce(new Error('Account catalog refresh failed'));
+    const editor = TestBed.inject(DataValidationSettingsEditor);
+    editor.initialize(context !== 'account');
+    TestBed.tick();
+    const update = context === 'account' ? state.accountUpdate
+      : context === 'facility' ? state.facilityUpdate : state.compoundUpdate;
+    return { editor, ...state, update, storedAccount: () => storedAccount, storedFacility: () => storedFacility };
+  }
+
+  describe.each<DataValidationSettingsGroup>(['expectedRange', 'staleness'])('%s post-commit failures', group => {
+    it.each(refreshFailures)('persists a reversal after a $context $failure refresh failure', async ({ context, failure }) => {
+      const { editor, update, storedAccount, storedFacility } = setupRefreshFailure(context, failure);
+      const form = group === 'expectedRange' ? editor.expectedRangeForm : editor.stalenessForm;
+      const enabled = () => group === 'expectedRange'
+        ? (context === 'account' ? storedAccount() : storedFacility()).expectedRangeSettings?.enabled
+        : (context === 'account' ? storedAccount() : storedFacility()).dataStalenessSettings?.enabled;
+      form.controls.enabled.setValue(false);
+      await editor.save(group);
+      expect(enabled()).toBe(false);
+      expect(editor.saveState()).toBe('error');
+      TestBed.tick();
+      expect(form.controls.enabled.value).toBe(false);
+      form.controls.enabled.setValue(true);
+      await editor.save(group);
+      expect(update).toHaveBeenCalledTimes(2);
+      expect(enabled()).toBe(true);
+      if (context === 'singleFacility') {
+        expect(group === 'expectedRange' ? storedAccount().expectedRangeSettings?.enabled
+          : storedAccount().dataStalenessSettings?.enabled).toBe(true);
+      }
+      expect(editor.saveState()).toBe('saved');
+      expect(editor.saveError()).toBe('');
+      expect(editor.hasUnsavedChanges()).toBe(false);
+    });
+  });
+
+  it.each(['workspace', 'catalog'] as const)('retries reconciliation after a %s failure even when the draft already committed', async failure => {
+    const { editor, update, execute, storedAccount } = setupRefreshFailure('account', failure);
+    editor.expectedRangeForm.controls.enabled.setValue(false);
+    await editor.save('expectedRange');
+    expect(editor.saveState()).toBe('error');
+    expect(storedAccount().expectedRangeSettings?.enabled).toBe(false);
+    await editor.retry();
+    expect(update).toHaveBeenCalledTimes(2);
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(storedAccount().expectedRangeSettings?.enabled).toBe(false);
+    expect(editor.saveState()).toBe('saved');
+    expect(editor.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('retains a failed reversal for retry after the previous edit committed without refreshing', async () => {
+    const { editor, update, storedAccount } = setupRefreshFailure('account', 'workspace');
+    editor.expectedRangeForm.controls.enabled.setValue(false);
+    await editor.save('expectedRange');
+    update.mockRejectedValueOnce(new Error('Reversal persistence failed'));
+    editor.expectedRangeForm.controls.enabled.setValue(true);
+    await editor.save('expectedRange');
+    expect(storedAccount().expectedRangeSettings?.enabled).toBe(false);
+    expect(editor.expectedRangeForm.controls.enabled.value).toBe(true);
+    expect(editor.saveState()).toBe('error');
+    expect(editor.hasUnsavedChanges()).toBe(true);
+    await editor.retry();
+    expect(storedAccount().expectedRangeSettings?.enabled).toBe(true);
+    expect(editor.saveState()).toBe('saved');
+    expect(update).toHaveBeenCalledTimes(3);
   });
 
   it('protects both queued groups from navigation until all saves finish', async () => {

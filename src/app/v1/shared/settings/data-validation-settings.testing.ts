@@ -17,6 +17,8 @@ export function configureDataValidationSettingsTest() {
     const canWrite = signal(true);
     const accountUpdate = vi.fn(async updated => { account.set(updated); return updated; });
     const facilityUpdate = vi.fn(async updated => { facility.set(updated); return updated; });
+    const compoundUpdate = vi.fn();
+    const refreshAccountCatalog = vi.fn(async () => undefined);
     const execute = vi.fn(async (_metadata, persist) => ({ value: await persist() }));
     TestBed.configureTestingModule({ providers: [
       DataValidationSettingsEditor,
@@ -24,8 +26,8 @@ export function configureDataValidationSettingsTest() {
       { provide: WorkspaceCommandBoundary, useValue: { execute } },
       { provide: AccountCommandHandler, useValue: { update: accountUpdate } },
       { provide: FacilityCommandHandler, useValue: { update: facilityUpdate } },
-      { provide: DataValidationSettingsCommandHandler, useValue: { updateSingleFacility: vi.fn() } },
-      { provide: ApplicationLifecycleService, useValue: { refreshAccountCatalog: vi.fn(async () => undefined) } }
+      { provide: DataValidationSettingsCommandHandler, useValue: { updateSingleFacility: compoundUpdate } },
+      { provide: ApplicationLifecycleService, useValue: { refreshAccountCatalog } }
     ] });
-    return { account, facility, canWrite, accountUpdate, facilityUpdate, execute };
+    return { account, facility, canWrite, accountUpdate, facilityUpdate, compoundUpdate, refreshAccountCatalog, execute };
 }

@@ -221,9 +221,15 @@ export class DataValidationSettingsEditor {
           if (currentAccount?.guid !== account.guid || (facility && currentFacility?.guid !== facility.guid)) {
             throw new WorkspaceWriteError('stale-workspace', 'The settings context changed before saving.');
           }
-          if (currentFacility && currentAccount.isSingleFacilityCompany) return this.compoundHandler.updateSingleFacility(currentAccount, currentFacility, change, account.guid);
-          if (currentFacility) return this.facilityHandler.update(applyDataValidationSettings(structuredClone(currentFacility), change), account.guid);
-          return this.accountHandler.update(applyDataValidationSettings(structuredClone(currentAccount), change, true), account.guid);
+          const value = currentFacility && currentAccount.isSingleFacilityCompany
+            ? await this.compoundHandler.updateSingleFacility(currentAccount, currentFacility, change, account.guid)
+            : currentFacility
+              ? await this.facilityHandler.update(applyDataValidationSettings(structuredClone(currentFacility), change), account.guid)
+              : await this.accountHandler.update(applyDataValidationSettings(structuredClone(currentAccount), change, true), account.guid);
+          // Persistence committed. The old baseline cannot deduplicate a reversal if a
+          // subsequent workspace or catalog refresh fails; restore it only on full success.
+          if (key === this.scopeKey && !this.destroyed) this.saved.delete(group);
+          return value;
         });
         if (!facility || account.isSingleFacilityCompany) await this.lifecycle.refreshAccountCatalog();
         if (key === this.scopeKey && !this.destroyed) {
