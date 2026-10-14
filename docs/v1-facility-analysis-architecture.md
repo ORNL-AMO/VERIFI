@@ -145,6 +145,8 @@ Regression uses two distinct Worker operations:
 
 User-defined model construction is a shared pure function used by the synchronous service and validation calculation. Generated-to-user-defined conversion, model invalidation, and selection are centralized in `regression-draft.ts`; pages must not clear model fields ad hoc.
 
+Predictor selection changes invalidate generated models. In user-defined models, they preserve the constant and every predictor coefficient, including excluded predictors; only selected predictors contribute to the equation and validation. Excluded coefficient controls retain their values while disabled, so selecting the predictor again restores its term.
+
 Regression validation states are `idle`, `invalid`, `loading`, `ready`, and `error`. Invalid user input is rejected before Worker creation. Worker responses use typed success/error unions, and thrown or browser Worker errors are mapped to the page error state.
 
 ## Worker contract rules

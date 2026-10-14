@@ -101,7 +101,7 @@ export class FacilityAnalysisRegressionFacade {
     this.updateGroup(group => {
       const variable = group.predictorVariables.find(item => item.id === predictorId);
       if (variable) variable.productionInAnalysis = selected;
-      invalidateRegressionModel(group);
+      if (group.isGeneratedModel) invalidateRegressionModel(group);
       const selectedCount = group.predictorVariables.filter(item => item.productionInAnalysis).length;
       if (group.maxModelVariables > selectedCount) group.maxModelVariables = Math.max(1, selectedCount);
     }, true);
