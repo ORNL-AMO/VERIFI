@@ -5,6 +5,7 @@ import { AccountOverviewService } from '@v0/data-evaluation/account/account-over
 import * as _ from 'lodash';
 import { AccountOverviewFacility } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
 import { getEmissionsTypeColor } from '@data/models/eGridEmissions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-facilities-emissions-stacked-bar-chart',
@@ -171,18 +172,6 @@ export class FacilitiesEmissionsStackedBarChartComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.stackedBarChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.stackedBarChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.stackedBarChart?.nativeElement);
   }
 }

@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AccountOverviewData } from '@domain/calculations/dashboard-calculations/accountOverviewClass';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-account-water-usage-donut',
@@ -105,18 +106,6 @@ export class AccountWaterUsageDonutComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.donutChart?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.donutChart.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.donutChart?.nativeElement);
   }
 }

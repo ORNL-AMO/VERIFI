@@ -5,6 +5,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-rolling-energy-savings-graph',
@@ -304,19 +305,7 @@ export class RollingEnergySavingsGraphComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.rollingEnergySavingsGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.rollingEnergySavingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.rollingEnergySavingsGraph?.nativeElement);
   }
 
   private toNumber(value: number): number {

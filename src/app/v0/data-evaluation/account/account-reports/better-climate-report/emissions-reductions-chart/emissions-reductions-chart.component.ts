@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { BetterClimateYearDetails } from '@domain/calculations/carbon-calculations/betterClimateYearsDetails';
 import { getEmissionsTypeColor } from '@data/models/eGridEmissions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-emissions-reductions-chart',
@@ -99,6 +100,10 @@ export class EmissionsReductionsChartComponent {
       responsive: true,
     };
     this.plotlyService.newPlot(this.emissionsReductionChart.nativeElement, traceData, layout, config);
+  }
+
+  async getChartAsBase64Image(): Promise<string> {
+    return chartToImage(this.plotlyService, this.emissionsReductionChart?.nativeElement);
   }
 }
 

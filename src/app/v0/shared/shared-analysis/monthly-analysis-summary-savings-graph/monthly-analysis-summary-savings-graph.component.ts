@@ -6,6 +6,7 @@ import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisIt
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import * as _ from 'lodash';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
     selector: 'app-monthly-analysis-summary-savings-graph',
@@ -249,18 +250,6 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
 
   
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.monthlyAnalysisSavingsGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.monthlyAnalysisSavingsGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.monthlyAnalysisSavingsGraph?.nativeElement);
   }
 }
