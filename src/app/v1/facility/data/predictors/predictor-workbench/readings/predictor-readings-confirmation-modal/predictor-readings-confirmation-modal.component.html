@@ -15,8 +15,10 @@
   @switch (confirmation.kind) {
     @case ('fill-missing') {
       <p>Zero-valued predictor readings will be added for these missing months:</p>
-      <ul class="predictor-readings-confirmation__months" aria-label="Missing months">
-        @for (month of confirmation.months; track month.key) { <li>{{ month.label }}</li> }
+      <ul class="v1-month-chip-list" aria-label="Missing months">
+        @for (month of confirmation.months; track month.key) {
+          <li class="v1-chip">{{ month.label }}</li>
+        }
       </ul>
       @if (isWeather) {
         <p class="predictor-readings-confirmation__note">Weather predictor values added here will be saved as manual overrides.</p>

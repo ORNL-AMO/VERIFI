@@ -36,10 +36,17 @@ export interface MeterReadingTableView {
 
 export type MeterReadingsBulkDeleteRequest = readonly IdbUtilityMeterData[];
 
+export interface MeterMissingMonth {
+  readonly month: number;
+  readonly year: number;
+  readonly key: string;
+  readonly label: string;
+}
+
 export type MeterReadingsConfirmation =
   | { readonly kind: 'delete-one'; readonly reading: IdbUtilityMeterData }
   | { readonly kind: 'delete-many'; readonly readings: readonly IdbUtilityMeterData[] }
-  | { readonly kind: 'fill-missing'; readonly count: number };
+  | { readonly kind: 'fill-missing'; readonly months: readonly MeterMissingMonth[] };
 
 export interface MeterReadingColumnDraft {
   electricityFilters?: ElectricityDataFilters;

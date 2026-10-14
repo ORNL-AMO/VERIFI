@@ -1,8 +1,19 @@
 :host { display: contents; }
 
+.v1-modal {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.v1-modal__header,
+.v1-modal__footer { flex-shrink: 0; }
+
 .confirmation-dialog--wide { width: min(42rem, calc(100vw - 2rem)); }
 
 .confirmation-dialog__body {
+  min-height: 0;
+  overflow-y: auto;
   display: grid;
   gap: var(--v1-space-2);
 }

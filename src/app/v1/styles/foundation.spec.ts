@@ -25,6 +25,15 @@ describe('v1 foundation styles', () => {
     expect(disabledControlRule).toContain('opacity: 1');
   });
 
+  it.each(['success', 'warning', 'danger', 'info'])('gives %s alerts and status rows an opaque themed background', tone => {
+    for (const selector of [`.v1-alert--${tone}`, `.v1-status-row--${tone}`]) {
+      const rule = ruleFor(selector);
+      expect(rule).toContain(`background: color-mix(in srgb, var(--v1-${tone}) 12%, var(--v1-surface))`);
+      expect(rule).toContain('var(--v1-border)');
+      expect(rule).not.toContain('transparent');
+    }
+  });
+
   it('provides shared breadcrumb and status-note styles for data workbenches', () => {
     expect(ruleFor('.v1-root .v1-data-context-breadcrumb ol')).toContain('display: flex');
     expect(ruleFor('.v1-root .v1-data-context-breadcrumb > ol > li > a')).toContain('color: var(--v1-link)');

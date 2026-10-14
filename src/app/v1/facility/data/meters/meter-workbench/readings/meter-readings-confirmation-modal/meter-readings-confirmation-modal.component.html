@@ -8,7 +8,12 @@
   (cancelled)="cancelled.emit()">
   @switch (confirmation.kind) {
     @case ('fill-missing') {
-      <p>Zero-valued meter readings will be added for {{ confirmation.count }} missing month{{ confirmation.count === 1 ? '' : 's' }}.</p>
+      <p>Zero-valued meter readings will be added for {{ confirmation.months.length }} missing month{{ confirmation.months.length === 1 ? '' : 's' }}.</p>
+      <ul class="v1-month-chip-list" aria-label="Missing months">
+        @for (month of confirmation.months; track month.key) {
+          <li class="v1-chip">{{ month.label }}</li>
+        }
+      </ul>
     }
     @case ('delete-many') {
       <p>Deleting {{ confirmation.readings.length }} selected meter reading{{ confirmation.readings.length === 1 ? '' : 's' }} cannot be undone.</p>

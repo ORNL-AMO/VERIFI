@@ -27,6 +27,8 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchReadingsComponent', () => {
+  const monthFormatter = new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric' });
+
   it('renders readings table actions without legacy navigation buttons', () => {
     const fixture = setup();
 
@@ -258,6 +260,9 @@ describe('MeterWorkbenchReadingsComponent', () => {
     const component = fixture.componentInstance;
 
     component.requestFillMissing();
+    expect(component.confirmation()).toEqual({ kind: 'fill-missing', months: [
+      { month: 3, year: 2026, key: '2026-03', label: monthFormatter.format(new Date(2026, 2, 1)) }
+    ] });
     await component.confirmFillMissing();
 
     expect(meterHandler.addMeterData).toHaveBeenCalledWith(
@@ -270,6 +275,41 @@ describe('MeterWorkbenchReadingsComponent', () => {
       }),
       'account-a'
     );
+    expect(component.confirmation()).toBeUndefined();
+  });
+
+  it('previews gaps chronologically across years without including existing months', () => {
+    const fixture = setup({
+      readings: [
+        reading({ guid: 'reading-b', month: 3, year: 2026 }),
+        reading({ guid: 'reading-a', month: 11, year: 2025 }),
+        reading({ guid: 'reading-c', month: 2, year: 2026 })
+      ],
+      meterValue: meter({ meterReadingDataApplication: 'fullMonth' })
+    });
+
+    fixture.componentInstance.requestFillMissing();
+
+    expect(fixture.componentInstance.confirmation()).toEqual({ kind: 'fill-missing', months: [
+      { month: 12, year: 2025, key: '2025-12', label: monthFormatter.format(new Date(2025, 11, 1)) },
+      { month: 1, year: 2026, key: '2026-01', label: monthFormatter.format(new Date(2026, 0, 1)) }
+    ] });
+  });
+
+  it('does not duplicate a month added while the fill confirmation is open', async () => {
+    const { fixture, meterHandler, selectedMeterData } = setupHarness({
+      readings: [reading({ month: 2, year: 2026 }), reading({ guid: 'reading-b', month: 4, year: 2026 })],
+      meterValue: meter({ meterReadingDataApplication: 'fullMonth' })
+    });
+    const component = fixture.componentInstance;
+    component.requestFillMissing();
+    selectedMeterData.set([
+      ...component.selectedMeterData(), reading({ guid: 'reading-c', month: 3, year: 2026 })
+    ]);
+
+    await component.confirmFillMissing();
+
+    expect(meterHandler.addMeterData).not.toHaveBeenCalled();
     expect(component.confirmation()).toBeUndefined();
   });
 
@@ -366,6 +406,7 @@ function setupHarness(options: SetupOptions = {}) {
   const readings = options.readings ?? [
     reading({ guid: 'reading-a', meterId: 'meter-a', month: 1, totalEnergyUse: 10 })
   ];
+  const selectedMeterData = signal(readings);
   const commandBoundary = {
     execute: vi.fn(async (
       metadata: { publication?: { mode?: string; buildPatch?: (value: unknown) => unknown } },
@@ -417,7 +458,7 @@ function setupHarness(options: SetupOptions = {}) {
           account: signal(accountValue),
           facility: signal(facilityValue),
           selectedMeter: signal(meterValue),
-          selectedMeterData: signal(readings),
+          selectedMeterData,
           canWrite: signal(options.canWrite ?? true),
           hasPending: signal(options.hasPending ?? false)
         }
@@ -478,6 +519,7 @@ function setupHarness(options: SetupOptions = {}) {
 
   return {
     fixture: TestBed.createComponent(MeterWorkbenchReadingsComponent),
+    selectedMeterData,
     commandBoundary,
     meterHandler,
     modalPortal,

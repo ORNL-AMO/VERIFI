@@ -1297,6 +1297,16 @@
   white-space: nowrap;
 }
 
+.v1-month-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .v1-chip--success,
 .v1-badge--success {
   border-color: color-mix(in srgb, var(--v1-success) 55%, var(--v1-border));
@@ -1337,30 +1347,30 @@
 
 .v1-alert--success,
 .v1-status-row--success {
-  border-color: color-mix(in srgb, var(--v1-success) 35%, transparent);
-  background: color-mix(in srgb, var(--v1-success) 8%, transparent);
-  color: var(--v1-success);
+  border-color: color-mix(in srgb, var(--v1-success) 35%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-success) 12%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-success) 80%, var(--v1-text));
 }
 
 .v1-alert--warning,
 .v1-status-row--warning {
-  border-color: color-mix(in srgb, var(--v1-warning) 35%, transparent);
-  background: color-mix(in srgb, var(--v1-warning) 8%, transparent);
-  color: var(--v1-warning);
+  border-color: color-mix(in srgb, var(--v1-warning) 35%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-warning) 12%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-warning) 80%, var(--v1-text));
 }
 
 .v1-alert--danger,
 .v1-status-row--danger {
-  border-color: color-mix(in srgb, var(--v1-danger) 35%, transparent);
-  background: color-mix(in srgb, var(--v1-danger) 8%, transparent);
-  color: var(--v1-danger);
+  border-color: color-mix(in srgb, var(--v1-danger) 35%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-danger) 12%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-danger) 80%, var(--v1-text));
 }
 
 .v1-alert--info,
 .v1-status-row--info {
-  border-color: color-mix(in srgb, var(--v1-info) 25%, transparent);
-  background: color-mix(in srgb, var(--v1-info) 6%, transparent);
-  color: var(--v1-info);
+  border-color: color-mix(in srgb, var(--v1-info) 25%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-info) 12%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-info) 80%, var(--v1-text));
 }
 
 .v1-settings-panel {

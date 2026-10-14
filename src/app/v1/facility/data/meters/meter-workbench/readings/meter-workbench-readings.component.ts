@@ -169,9 +169,14 @@ export class MeterWorkbenchReadingsComponent implements OnDestroy {
   }
 
   requestFillMissing(): void {
-    const count = this.missingDataMonths().length;
-    if (this.canAct() && count > 0) {
-      this.confirmation.set({ kind: 'fill-missing', count });
+    const months = this.missingDataMonths().map(({ month, year }) => ({
+      month,
+      year,
+      key: `${year}-${String(month).padStart(2, '0')}`,
+      label: new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+    }));
+    if (this.canAct() && months.length > 0) {
+      this.confirmation.set({ kind: 'fill-missing', months });
       this.showConfirmModal();
     }
   }
