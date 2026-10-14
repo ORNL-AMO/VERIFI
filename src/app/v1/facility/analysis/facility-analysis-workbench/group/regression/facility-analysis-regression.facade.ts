@@ -5,7 +5,7 @@ import { Months } from '@shared/form-data/months';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
 import { RegressionCandidateStore } from './regression-candidate.store';
 import { RegressionModelValidationService, modelPeriodMonthCount, userDefinedValidationMessage } from './regression-model-validation.service';
-import { applySelectedRegressionModel, convertRegressionGroupToUserDefined, invalidateRegressionModel } from './regression-draft';
+import { alignRegressionModelEndToStart, applySelectedRegressionModel, convertRegressionGroupToUserDefined, invalidateRegressionModel } from './regression-draft';
 import type { RegressionRangeField } from './facility-analysis-regression.controller';
 
 /** Owns regression workflow state and data transitions for one workbench group route. */
@@ -116,8 +116,20 @@ export class FacilityAnalysisRegressionFacade {
     this.clearCandidates();
   }
 
-  setRange(field: RegressionRangeField, value: number | undefined): void {
-    this.updateGroup(group => { group[field] = value; });
+  setRange(field: RegressionRangeField, value: number | undefined, followStart = false): void {
+    this.updateGroup(group => {
+      group[field] = value;
+      if (!group.isGeneratedModel && followStart
+        && (field === 'regressionModelStartMonth' || field === 'regressionStartYear')) {
+        alignRegressionModelEndToStart(group);
+      }
+    });
+  }
+
+  useTwelveMonthPeriod(): void {
+    this.updateGroup(group => {
+      if (!group.isGeneratedModel) alignRegressionModelEndToStart(group);
+    });
   }
 
   setConstant(value: number | undefined): void {

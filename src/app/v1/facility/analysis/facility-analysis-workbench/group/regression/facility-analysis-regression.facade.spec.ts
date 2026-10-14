@@ -10,7 +10,93 @@ import { RegressionCandidateStore } from './regression-candidate.store';
 import { RegressionModelValidationService } from './regression-model-validation.service';
 import { UserDefinedRegressionWorkflowComponent } from './user-defined-regression-workflow/user-defined-regression-workflow.component';
 
-describe('facility analysis regression predictor toggles', () => {
+describe('facility analysis regression draft controls', () => {
+  it('locks the end date to twelve inclusive months and updates both end fields with each start edit', async () => {
+    const { group, draft, update } = await configureWorkflow(false, 2.5, -3);
+    const fixture = TestBed.createComponent(UserDefinedRegressionWorkflowComponent);
+    fixture.detectChanges();
+    const controller = TestBed.inject(FacilityAnalysisRegressionController);
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(controller.endMonth.disabled).toBe(true);
+    expect(controller.endYear.disabled).toBe(true);
+    expect(element.textContent).toContain('Selected duration: 12 months');
+    expect(update).not.toHaveBeenCalled();
+
+    controller.startMonth.setValue(6);
+    fixture.detectChanges();
+
+    expect(group()).toMatchObject({ regressionModelStartMonth: 6, regressionStartYear: 2024, regressionModelEndMonth: 5, regressionEndYear: 2025 });
+    expect(controller.endMonth.value).toBe(5);
+    expect(controller.endYear.value).toBe(2025);
+    expect(update).toHaveBeenCalledOnce();
+    expect(update.mock.lastCall![1].valid(draft())).toBe(true);
+
+    controller.startYear.setValue(2025);
+    fixture.detectChanges();
+
+    expect(group()).toMatchObject({ regressionModelEndMonth: 5, regressionEndYear: 2026 });
+    expect(controller.endYear.value).toBe(2026);
+    expect(element.textContent).toContain('Selected duration: 12 months');
+    expect(update).toHaveBeenCalledTimes(2);
+  });
+
+  it('unlocks custom end dates, keeps them while changing the start, and can return to twelve months', async () => {
+    const { group, update } = await configureWorkflow(false, 2.5, -3);
+    const fixture = TestBed.createComponent(UserDefinedRegressionWorkflowComponent);
+    fixture.detectChanges();
+    const controller = TestBed.inject(FacilityAnalysisRegressionController);
+    const element = fixture.nativeElement as HTMLElement;
+    const toggle = element.querySelector<HTMLButtonElement>('.v1-user-regression__range-toggle')!;
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(controller.endMonth.disabled).toBe(false);
+    expect(controller.endYear.disabled).toBe(false);
+    expect(update).not.toHaveBeenCalled();
+    controller.endYear.setValue(2025);
+    fixture.detectChanges();
+    expect(element.textContent).toContain('Selected duration: 24 months');
+    controller.startMonth.setValue(6);
+    fixture.detectChanges();
+    expect(group()).toMatchObject({ regressionModelEndMonth: 11, regressionEndYear: 2025 });
+    expect(element.textContent).toContain('Selected duration: 18 months');
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(controller.endMonth.disabled).toBe(true);
+    expect(controller.endYear.disabled).toBe(true);
+    expect(group()).toMatchObject({ regressionModelEndMonth: 5, regressionEndYear: 2025 });
+    expect(element.textContent).toContain('Selected duration: 12 months');
+    expect(group().regressionConstant).toBe(2);
+    expect(group().predictorVariables.map(variable => variable.regressionCoefficient)).toEqual([2.5, -3]);
+  });
+
+  it('preserves an existing custom period on hydration and still validates the twelve-month minimum', async () => {
+    const { group, draft, update } = await configureWorkflow(false, 2.5, -3);
+    draft.update(analysis => ({ ...analysis, groups: [{ ...analysis.groups[0], regressionEndYear: 2025 }] }));
+    const fixture = TestBed.createComponent(UserDefinedRegressionWorkflowComponent);
+    fixture.detectChanges();
+    const controller = TestBed.inject(FacilityAnalysisRegressionController);
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(group().regressionEndYear).toBe(2025);
+    expect(controller.endYear.disabled).toBe(false);
+    expect(element.textContent).toContain('Selected duration: 24 months');
+    expect(update).not.toHaveBeenCalled();
+
+    controller.endYear.setValue(2024);
+    controller.endMonth.setValue(10);
+    fixture.detectChanges();
+
+    expect(element.textContent).toContain('Selected duration: 11 months');
+    expect(element.textContent).toContain('Select at least 12 complete months.');
+    expect(update.mock.lastCall![1].valid(draft())).toBe(false);
+    expect(controller.endMonth.disabled).toBe(false);
+  });
+
   it.each([[0, -3], [2.5, 4]])('retains user-defined coefficients %s and %s when toggling off and on', async (productionCoefficient, weatherCoefficient) => {
     const { group, draft, update, validation } = await configureWorkflow(false, productionCoefficient, weatherCoefficient);
     const fixture = TestBed.createComponent(UserDefinedRegressionWorkflowComponent);

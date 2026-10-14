@@ -21,6 +21,9 @@ fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .v1-user-regression__details > label, .v1-user-regression__period label { display: grid; gap: .3rem; font-weight: 750; }
 .v1-user-regression__period { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-2); }
 .v1-user-regression__help, .v1-user-regression__form-message { margin: 0; color: var(--v1-muted); font-size: .8rem; }
+.v1-user-regression__duration { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .75rem; }
+.v1-user-regression__range-toggle { padding: 0; border: 0; background: transparent; color: var(--v1-link); font-size: .8rem; text-decoration: underline; cursor: pointer; }
+.v1-user-regression__range-toggle:hover { color: var(--v1-text); }
 .v1-user-regression__help--error, .v1-user-regression__form-message { color: var(--v1-danger); font-weight: 750; }
 @media (max-width: 900px) {
   .v1-user-regression__top,
@@ -32,5 +35,5 @@ fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
   .v1-user-regression__period { grid-template-columns: 1fr; }
   .v1-user-regression__variable-head { display: none; }
   .v1-user-regression__variable-row { grid-template-columns: 2rem minmax(0, 1fr); }
-  .v1-user-regression__variable-row .form-control { grid-column: 2; }
+  .v1-user-regression__variable-row .v1-input { grid-column: 2; }
 }

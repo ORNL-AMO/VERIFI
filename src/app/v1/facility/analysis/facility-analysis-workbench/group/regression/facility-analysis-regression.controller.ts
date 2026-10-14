@@ -4,6 +4,7 @@ import { FormControl } from '@angular/forms';
 import { distinctUntilChanged } from 'rxjs';
 import { JStatRegressionModel } from '@data/models/analysis';
 import { FacilityAnalysisRegressionFacade } from './facility-analysis-regression.facade';
+import { modelPeriodMonthCount } from './regression-model-validation.service';
 
 export type RegressionRangeField = 'regressionModelStartMonth' | 'regressionStartYear' | 'regressionModelEndMonth' | 'regressionEndYear';
 export type RegressionMethod = 'generated' | 'userDefined';
@@ -20,6 +21,7 @@ export class FacilityAnalysisRegressionController {
   private readonly coefficientControls = new Map<string, FormControl<number | null>>();
   private syncing = false;
   private reviewTrigger: HTMLElement | undefined;
+  private periodContext = '';
 
   readonly method = new FormControl<RegressionMethod>('generated', { nonNullable: true });
   readonly maxVariables = new FormControl<number | null>(null);
@@ -37,6 +39,7 @@ export class FacilityAnalysisRegressionController {
   readonly showInvalidValue = toSignal(this.showInvalid.valueChanges, { initialValue: false });
   readonly showFailedValidationValue = toSignal(this.showFailedValidation.valueChanges, { initialValue: false });
   readonly pendingChange = signal<RegressionPendingChange | undefined>(undefined);
+  readonly endDateLocked = signal(true);
 
   constructor() {
     effect(() => this.syncFromGroup());
@@ -129,14 +132,29 @@ export class FacilityAnalysisRegressionController {
 
   selectModel(model: JStatRegressionModel): void { this.workflow.selectModel(model); this.closeReview(); }
 
+  toggleEndDateLock(): void {
+    const locked = !this.endDateLocked();
+    this.endDateLocked.set(locked);
+    if (locked) this.workflow.useTwelveMonthPeriod();
+  }
+
   private bindRange(control: FormControl<number | null>, field: RegressionRangeField): void {
     control.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(value => { if (!this.syncing) this.workflow.setRange(field, value ?? undefined); });
+      .subscribe(value => {
+        if (!this.syncing) this.workflow.setRange(field, value ?? undefined, this.endDateLocked());
+      });
   }
 
   private syncFromGroup(): void {
     const group = this.workflow.group();
     if (!group) return;
+    const periodContext = `${this.workflow.analysis()?.guid ?? ''}:${group.idbGroupId ?? ''}:${group.isGeneratedModel}`;
+    if (periodContext !== this.periodContext) {
+      this.periodContext = periodContext;
+      const hasPeriod = [group.regressionModelStartMonth, group.regressionStartYear, group.regressionModelEndMonth, group.regressionEndYear]
+        .some(value => Number.isFinite(value));
+      this.endDateLocked.set(!hasPeriod || modelPeriodMonthCount(group) === 12);
+    }
     this.syncing = true;
     this.method.setValue(group.isGeneratedModel ? 'generated' : 'userDefined', { emitEvent: false });
     this.maxVariables.setValue(group.maxModelVariables ?? null, { emitEvent: false });
@@ -145,6 +163,9 @@ export class FacilityAnalysisRegressionController {
     this.startYear.setValue(group.regressionStartYear ?? null, { emitEvent: false });
     this.endMonth.setValue(group.regressionModelEndMonth ?? null, { emitEvent: false });
     this.endYear.setValue(group.regressionEndYear ?? null, { emitEvent: false });
+    for (const control of [this.endMonth, this.endYear]) {
+      this.endDateLocked() ? control.disable({ emitEvent: false }) : control.enable({ emitEvent: false });
+    }
     this.notes.setValue(group.regressionModelNotes ?? '', { emitEvent: false });
     this.selectedModelId.setValue(group.selectedModelId ?? null, { emitEvent: false });
     for (const predictor of group.predictorVariables) {

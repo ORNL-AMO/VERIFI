@@ -147,6 +147,10 @@ User-defined model construction is a shared pure function used by the synchronou
 
 Predictor selection changes invalidate generated models. In user-defined models, they preserve the constant and every predictor coefficient, including excluded predictors; only selected predictors contribute to the equation and validation. Excluded coefficient controls retain their values while disabled, so selecting the predictor again restores its term.
 
+The user-defined model editor uses the shared themed input, select, and textarea controls, including focus and disabled states, to keep values readable in light, dark, and high-contrast modes.
+
+New and existing twelve-month user-defined periods lock the end month and year. Start-date edits update the end date atomically to twelve inclusive months (January–December or July–June of the following year). The duration row offers an end-date unlock and a return to the twelve-month default. This lock is transient UI state; existing custom or incomplete saved periods reopen unlocked without rewriting their dates during hydration. Custom periods retain the existing minimum of twelve complete months.
+
 Regression validation states are `idle`, `invalid`, `loading`, `ready`, and `error`. Invalid user input is rejected before Worker creation. Worker responses use typed success/error unions, and thrown or browser Worker errors are mapped to the page error state.
 
 ## Worker contract rules
@@ -164,6 +168,8 @@ For every Worker path:
 Calendarization is already coordinated at workspace scope for facility results. Do not calendarize again inside a result component. Regression generation and validation accept raw inputs because their model-specific calculations have an independent lifecycle; validation combines candidate and comparison work so it calendarizes only once per request.
 
 ## Results presentation
+
+Shared modeled-equation labels parenthesize regression multiplication terms and additive modified-intensity products while preserving their signs and significant-digit formatting.
 
 Result pages are projections, not calculation owners. Facility pages read `FacilityAnalysisResultsService.state`; ordinary group pages read `FacilityAnalysisGroupResultsService.state`; the Banking tab and setup preview read `FacilityAnalysisBankingResultsService.state`. Annual and monthly tables share accessible banked-source, banked-savings, transition, and group model-period markers, and render only the markers present in each table's legend. Transition rows preserve actual use, the applied year's carried total improvement, cumulative values supplied by calculation, and rolling values while suppressing adjusted/model-derived, annual-improvement, and directly attributed savings fields that are not meaningful. Chart row values use `null` for those unavailable points so charts create a gap, omit comparison bands across it, display an em dash visually, and announce the value as unavailable rather than plotting zero. Positive and negative values belong to exactly one ordinary or banked savings series.
 

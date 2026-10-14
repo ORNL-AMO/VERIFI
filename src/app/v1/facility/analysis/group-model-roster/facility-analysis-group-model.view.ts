@@ -81,7 +81,7 @@ export function buildFacilityAnalysisGroupModelView(
         name,
         methodLabel: 'Modified intensity',
         modelLabel: `Baseline ${baselineYear} · ${baseload}`,
-        equationLabel: `${quantity} = baseline intensity × ${production} × (1 − baseload share) + baseline-period actual × baseload share`,
+        equationLabel: `${quantity} = (baseline intensity × ${production} × (1 − baseload share)) + (baseline-period actual × baseload share)`,
         unavailable: false,
         excluded: false
       };
@@ -129,7 +129,7 @@ function productionExpression(group: AnalysisGroup): string {
 }
 
 function regressionTerm(value: number | undefined, variableName: string): string {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return ` + — × ${variableName}`;
+  if (typeof value !== 'number' || !Number.isFinite(value)) return ` + (— × ${variableName})`;
   const sign = value < 0 ? ' − ' : ' + ';
-  return `${sign}${formatRegressionNumber(Math.abs(value), '—')} × ${variableName}`;
+  return `${sign}(${formatRegressionNumber(Math.abs(value), '—')} × ${variableName})`;
 }

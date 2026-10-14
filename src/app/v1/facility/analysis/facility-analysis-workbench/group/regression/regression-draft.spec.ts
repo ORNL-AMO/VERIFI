@@ -1,6 +1,7 @@
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import {
+  alignRegressionModelEndToStart,
   applySelectedRegressionModel,
   convertRegressionGroupToUserDefined,
   invalidateAllRegressionModels,
@@ -8,6 +9,24 @@ import {
 } from './regression-draft';
 
 describe('regression draft transitions', () => {
+  it.each([
+    [0, 2024, 11, 2024],
+    [6, 2024, 5, 2025],
+    [11, 2024, 10, 2025],
+    [undefined, 2024, undefined, undefined],
+    [6, undefined, undefined, undefined],
+    [12, 2024, undefined, undefined]
+  ])('derives twelve inclusive months from start month %s and year %s', (month, year, endMonth, endYear) => {
+    const group = { ...populatedGroup(), regressionModelStartMonth: month, regressionStartYear: year };
+
+    alignRegressionModelEndToStart(group);
+
+    expect(group.regressionModelEndMonth).toBe(endMonth);
+    expect(group.regressionEndYear).toBe(endYear);
+    expect(group.regressionConstant).toBe(5);
+    expect(group.predictorVariables[0].regressionCoefficient).toBe(3);
+  });
+
   it('clears every generated-model field together', () => {
     const group = populatedGroup();
 
