@@ -1,7 +1,8 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { StatusItem } from '@app/v1/status/status.models';
+import { makeFinding, StatusItem } from '@app/v1/status/status.models';
+import { presentFinding } from '@app/v1/status/status.catalog';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { FacilityAnalysisAutosaveService } from '../editing/facility-analysis-autosave.service';
@@ -69,7 +70,6 @@ describe('facility analysis workbench header', () => {
       evidence: {}, title: 'Review group model', description: 'Model needs review.', todo: true,
       destination: { kind: 'facility-analysis', facilityGuid: 'facility-a', analysisGuid: 'analysis-a', scope: 'group', groupGuid: 'group-a', tab: 'regression' }
     }]);
-    const reviewFinding = vi.fn();
     const factsExpanded = signal(true);
     const returnOrigin = signal({ accountGuid: 'account-a', accountAnalysisGuid: 'account-analysis-a', facilityGuid: 'facility-a' });
     const returnToAccountAnalysis = vi.fn();
@@ -86,7 +86,6 @@ describe('facility analysis workbench header', () => {
             meterGroups: signal([{ guid: 'group-a', name: 'Electricity' }]),
             hasBlockingErrors: signal(false), findings,
             workspace: { accountAnalyses: signal([]), selectedFacilityReports: signal([]) },
-            status: { navigateTo: reviewFinding }
           }
         },
         {
@@ -166,8 +165,33 @@ describe('facility analysis workbench header', () => {
     const statusNotes = host.querySelector('app-analysis-status-notes');
     expect(statusNotes?.closest('[hidden]')).toBeNull();
     expect(statusNotes?.textContent).toContain('Model needs review.');
-    statusNotes?.querySelector<HTMLButtonElement>('button')?.click();
-    expect(reviewFinding).toHaveBeenCalledWith(findings()[0]);
+    expect(statusNotes?.querySelector('button, a')).toBeNull();
+
+    const groupWarning = findings()[0];
+    const regressionFindings = ['group-a', 'group-b', 'group-c'].map((groupGuid, index) => presentFinding(makeFinding(
+      'analysis-group.setup.invalid', 'error', 'readiness',
+      { kind: 'analysis-group', guid: `analysis-a:${groupGuid}`, name: groupGuid, accountGuid: 'account-a', facilityGuid: 'facility-a' },
+      { analysisType: 'regression', reasons: [index === 0 ? 'missingRegressionConstant' : 'missingRegressionPredictorCoef'] }
+    )));
+    findings.set([...regressionFindings, groupWarning]);
+    fixture.detectChanges();
+
+    expect(statusNotes?.querySelectorAll('li')).toHaveLength(2);
+    expect(statusNotes?.textContent?.match(/Complete regression setup/g)).toHaveLength(1);
+    expect(statusNotes?.textContent).toContain('3 groups need regression setup.');
+    expect(statusNotes?.textContent).toContain('regression constant, predictor coefficients');
+    expect(statusNotes?.textContent).toContain('Model needs review.');
+
+    findings.set([regressionFindings[1], regressionFindings[2], groupWarning]);
+    fixture.detectChanges();
+    expect(statusNotes?.querySelectorAll('li')).toHaveLength(2);
+    expect(statusNotes?.textContent).toContain('2 groups need regression setup.');
+
+    findings.set([regressionFindings[2], groupWarning]);
+    fixture.detectChanges();
+    expect(statusNotes?.textContent).toContain(regressionFindings[2].description);
+    expect(statusNotes?.textContent).not.toContain('groups need regression setup.');
+
     findings.set([]);
     fixture.detectChanges();
     expect(statusNotes?.querySelector('ul')).toBeNull();

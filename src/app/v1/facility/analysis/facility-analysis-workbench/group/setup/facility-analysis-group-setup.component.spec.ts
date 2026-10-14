@@ -119,7 +119,7 @@ describe('facility analysis group setup behavior', () => {
 
     const productionPanel = fixture.nativeElement.querySelector('[aria-labelledby="production-variables-heading"]') as HTMLElement;
     expect(productionPanel.querySelector('.v1-analysis-group-setup__equation')?.textContent)
-      .toContain('Modeled energy = baseline intensity × Production × (1 − baseload share) + baseline-period actual × baseload share');
+      .toContain('Modeled energy = (baseline intensity × Production × (1 − baseload share)) + (baseline-period actual × baseload share)');
   });
 
   it('shows the selected regression equation in the middle setup panel', () => {
@@ -128,7 +128,7 @@ describe('facility analysis group setup behavior', () => {
     const equationPanel = fixture.nativeElement.querySelector('[aria-labelledby="regression-equation-heading"]') as HTMLElement;
     const inspectButton = equationPanel.querySelector('button') as HTMLButtonElement;
     expect(equationPanel.textContent).toContain('Modeled energy equation');
-    expect(equationPanel.textContent).toContain('Modeled energy = 10 + 2 × Production');
+    expect(equationPanel.textContent).toContain('Modeled energy = 10 + (2 × Production)');
     expect(equationPanel.textContent).not.toContain('No model selected');
     expect(inspectButton.getAttribute('aria-label')).toBe('Inspect selected regression model');
     expect(inspectButton.querySelector('app-ui-icon')).not.toBeNull();

@@ -2,6 +2,19 @@ import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { FiscalYearSettings, getUserDefinedModelDateRange } from '@shared/shared-analysis/calculations/regression-model-recovery';
 
+/** The end month is inclusive, so a twelve-month period ends eleven months after its start. */
+export function alignRegressionModelEndToStart(group: AnalysisGroup): void {
+  const month = group.regressionModelStartMonth;
+  const year = group.regressionStartYear;
+  if (!Number.isInteger(month) || month < 0 || month > 11 || !Number.isInteger(year)) {
+    group.regressionModelEndMonth = undefined;
+    group.regressionEndYear = undefined;
+    return;
+  }
+  group.regressionModelEndMonth = (month + 11) % 12;
+  group.regressionEndYear = year + Math.floor((month + 11) / 12);
+}
+
 /** Clears every persisted field derived from a generated regression model. */
 export function invalidateRegressionModel(group: AnalysisGroup): void {
   group.models = undefined;

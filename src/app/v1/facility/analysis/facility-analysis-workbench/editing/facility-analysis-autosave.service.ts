@@ -18,6 +18,7 @@ export class FacilityAnalysisAutosaveService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly stateValue = signal<AnalysisAutosaveState>('idle');
   private readonly draftValue = signal<IdbAnalysisItem | undefined>(undefined);
+  private readonly draftResetVersionValue = signal(0);
   private readonly committedValue = signal<IdbAnalysisItem | undefined>(undefined);
   private readonly errorValue = signal<string | undefined>(undefined);
   private debounceHandle: ReturnType<typeof setTimeout> | undefined;
@@ -28,6 +29,8 @@ export class FacilityAnalysisAutosaveService {
 
   readonly state = this.stateValue.asReadonly();
   readonly draft = this.draftValue.asReadonly();
+  /** Changes only when the draft is discarded or a new analysis context is loaded. */
+  readonly draftResetVersion = this.draftResetVersionValue.asReadonly();
   readonly committed = this.committedValue.asReadonly();
   readonly error = this.errorValue.asReadonly();
   readonly isDirty = computed(() => ['dirty', 'invalid', 'error'].includes(this.stateValue()));
@@ -114,6 +117,7 @@ export class FacilityAnalysisAutosaveService {
     this.saveQueued = false;
     this.errorValue.set(undefined);
     this.draftValue.set(cloneAnalysis(this.committedValue()));
+    this.draftResetVersionValue.set(this.editVersion);
     this.stateValue.set(this.draftValue() ? 'saved' : 'idle');
   }
 
@@ -183,6 +187,7 @@ export class FacilityAnalysisAutosaveService {
     this.errorValue.set(undefined);
     this.committedValue.set(cloneAnalysis(analysis));
     this.draftValue.set(cloneAnalysis(analysis));
+    this.draftResetVersionValue.set(this.editVersion);
     this.stateValue.set(analysis ? 'idle' : 'idle');
   }
 

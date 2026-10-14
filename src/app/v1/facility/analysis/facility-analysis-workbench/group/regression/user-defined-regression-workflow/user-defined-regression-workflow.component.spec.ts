@@ -13,7 +13,7 @@ describe('UserDefinedRegressionWorkflowComponent', () => {
       predictorVariables: [{ id: 'production', name: 'Production', productionInAnalysis: true, regressionCoefficient: 3 }]
     } as AnalysisGroup);
     const facade = {
-      group, analysis: signal({ analysisCategory: 'water', waterUnit: 'gal' }),
+      group, analysis: signal({ analysisCategory: 'water', waterUnit: 'gal' }), draftResetVersion: signal(0),
       months: [{ name: 'January', monthNumValue: 0 }, { name: 'December', monthNumValue: 11 }],
       yearOptions: signal([2024]), hasUserDefinedDataIssue: signal(false), generatedModels: signal([]),
       validation: { state: signal({ state: 'idle', source: 'user-defined' }), retry: vi.fn() },

@@ -1,12 +1,4 @@
 :host { display: contents; }
-.v1-data-workbench-status-notes { max-height: min(12rem, 25vh); overflow: auto; padding-inline-end: var(--v1-space-1); }
-.v1-data-workbench-status-notes li.analysis-status-note { grid-template-columns: 1rem minmax(0, 1fr) auto; }
 strong { color: var(--v1-text); }
 .v1-data-workbench-status-notes li.analysis-status-note--error > .v1-icon { color: var(--v1-danger); }
 li span { min-width: 0; overflow-wrap: anywhere; }
-button { align-self: center; padding: 0; border: 0; background: transparent; color: var(--v1-link); font: inherit; font-size: .8rem; font-weight: 800; text-decoration: underline; cursor: pointer; }
-button:hover, button:focus-visible { color: var(--v1-text); }
-@media (max-width: 640px) {
-  .v1-data-workbench-status-notes li.analysis-status-note { grid-template-columns: 1rem minmax(0, 1fr); }
-  button { grid-column: 2; justify-self: start; }
-}

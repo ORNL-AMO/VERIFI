@@ -21,7 +21,7 @@ describe('GeneratedRegressionWorkflowComponent', () => {
     group = signal<AnalysisGroup | undefined>(structuredClone(baseGroup));
     models = signal<readonly JStatRegressionModel[]>([]);
     facade = {
-      group, analysis: signal({ analysisCategory: 'energy' }), generatedModels: models, generating: signal(false), generationError: signal(undefined),
+      group, analysis: signal({ analysisCategory: 'energy' }), draftResetVersion: signal(0), generatedModels: models, generating: signal(false), generationError: signal(undefined),
       configurationExpanded: signal(true), generatedThisSession: signal(false), maxVariableOptions: signal([1]),
       setPredictorSelected: vi.fn(), changeMaxVariables: vi.fn(), setConstant: vi.fn(), setRange: vi.fn(),
       setNotes: vi.fn(), setCoefficient: vi.fn(), changeMethod: vi.fn(), inspectModel: vi.fn(), clearReview: vi.fn(),

@@ -25,12 +25,25 @@ describe('buildFacilityAnalysisGroupModelViews', () => {
 
     expect(views[0]).toMatchObject({
       name: 'Main process', methodLabel: 'Regression', modelLabel: 'Model year 2024',
-      equationLabel: 'Modeled energy = 10.123 + 2.5 × Production', unavailable: false
+      equationLabel: 'Modeled energy = 10.123 + (2.5 × Production)', unavailable: false
     });
     expect(views[1]).toMatchObject({
       modelLabel: 'User-defined model · Model year 2023',
-      equationLabel: 'Modeled energy = 8 − 1.25 × Hours'
+      equationLabel: 'Modeled energy = 8 − (1.25 × Hours)'
     });
+  });
+
+  it('groups positive, negative, and zero regression products without changing their signs', () => {
+    const [view] = buildFacilityAnalysisGroupModelViews(fixture('energy', [{
+      idbGroupId: 'custom', analysisType: 'regression', isGeneratedModel: false, regressionConstant: 10,
+      predictorVariables: [
+        { name: 'Production', productionInAnalysis: true, regressionCoefficient: 2 },
+        { name: 'HDD', productionInAnalysis: true, regressionCoefficient: -1.25 },
+        { name: 'CDD', productionInAnalysis: true, regressionCoefficient: 0 }
+      ]
+    }]), []);
+
+    expect(view.equationLabel).toBe('Modeled energy = 10 + (2 × Production) − (1.25 × HDD) + (0 × CDD)');
   });
 
   it('renders method-specific equations and water terminology', () => {
@@ -48,6 +61,7 @@ describe('buildFacilityAnalysisGroupModelViews', () => {
     expect(views[0].equationLabel).toBe('Modeled water = baseline-period actual consumption');
     expect(views[1].equationLabel).toBe('Modeled water = baseline intensity × Gallons produced');
     expect(views[2].modelLabel).toContain('20% baseload share');
+    expect(views[2].equationLabel).toBe('Modeled water = (baseline intensity × Units × (1 − baseload share)) + (baseline-period actual × baseload share)');
     expect(views[3].modelLabel).toContain('monthly baseload share');
     expect(views[4]).toMatchObject({ equationLabel: 'No modeled equation is applied.', excluded: true });
   });

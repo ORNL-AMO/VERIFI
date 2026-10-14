@@ -103,7 +103,7 @@
         </ul>
       }
 
-      <app-analysis-status-notes [findings]="context.findings()" (reviewed)="context.status.navigateTo($event)"></app-analysis-status-notes>
+      <app-analysis-status-notes [findings]="statusNotes()"></app-analysis-status-notes>
     </header>
   }
 }

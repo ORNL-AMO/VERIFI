@@ -22,7 +22,7 @@ section.v1-account-selection { display: flex; flex: 1 1 auto; flex-direction: co
 .v1-account-selection__facility-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .v1-account-selection__facility-heading h3 { display: flex; align-items: center; gap: .6rem; margin: 0 0 .25rem; font-size: 1.2rem; }
 .v1-account-selection__facility-heading p { margin: 0; color: var(--v1-muted); font-size: .85rem; }
-.v1-account-selection__table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--v1-border); }
+.v1-account-selection__table-wrap { width: 100%; overflow-x: auto; overflow-y: hidden; border: 1px solid var(--v1-border); }
 .v1-account-selection table { width: 100%; min-width: 58rem; border-collapse: collapse; }
 .v1-account-selection th { padding: .65rem; background: var(--v1-surface-muted); border-bottom: 1px solid var(--v1-border); color: var(--v1-muted); font-size: .75rem; letter-spacing: .03em; text-align: left; text-transform: uppercase; }
 .v1-account-selection td { padding: .7rem .65rem; border-bottom: 1px solid var(--v1-border); vertical-align: middle; }

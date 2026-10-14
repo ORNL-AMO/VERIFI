@@ -207,12 +207,24 @@ export class MeterResultsChartComponent implements OnChanges {
     }
 
     const alignedYAxis = alignDualYAxis(yAxis);
+    const visibleMetrics = this.visibleMetrics();
+    const emphasizeZeroPercent = this.sharedYAxis && this.allowNegativeValues
+      && visibleMetrics.length > 0 && visibleMetrics.every(metric => metric.unit === '%');
 
     return {
       tooltip: { trigger: 'axis', formatter: params => formatChartTooltip(params, this.metricOptions()) },
       legend: { top: 0, left: 'center', right: 88, data: this.visibleMetrics().map(metric => metric.label) },
       grid: { top: this.showValueLabels ? 84 : 72, right: alignedYAxis.length > 1 ? 56 : 18, bottom: this.canZoom() ? 74 : 36, left: 54, containLabel: true },
-      xAxis: { type: 'category', data: rows.map(row => row.periodLabel) },
+      xAxis: {
+        type: 'category',
+        data: rows.map(row => row.periodLabel),
+        axisLine: emphasizeZeroPercent ? {
+          show: true,
+          onZero: true,
+          onZeroAxisIndex: 0,
+          lineStyle: { width: 2, color: 'var(--v1-chart-annotation)' }
+        } : undefined
+      },
       yAxis: alignedYAxis.length > 0 ? alignedYAxis : [{ type: 'value', min: 0 }],
       dataZoom: this.canZoom()
         ? [

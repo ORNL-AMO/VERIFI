@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { StatusItem } from '@app/v1/status/status.models';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 
@@ -12,5 +12,4 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 export class AnalysisStatusNotesComponent {
   readonly findings = input.required<readonly StatusItem[]>();
   readonly label = input('Analysis status items');
-  readonly reviewed = output<StatusItem>();
 }
