@@ -1,9 +1,33 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { AnalysisStageNavigationComponent } from './analysis-stage-navigation.component';
+import { AnalysisNavigationStage, AnalysisStageNavigationComponent } from './analysis-stage-navigation.component';
 
 describe('AnalysisStageNavigationComponent', () => {
+  it.each(['vertical', 'horizontal'] as const)('announces blocking errors for every stage kind without an attention summary in %s layout', layout => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const fixture = TestBed.createComponent(AnalysisStageNavigationComponent);
+    const kinds: readonly AnalysisNavigationStage['kind'][] = ['analysis', 'group', 'facility', 'used-by', undefined];
+    fixture.componentRef.setInput('layout', layout);
+    fixture.componentRef.setInput('ariaLabel', 'Analysis progress');
+    fixture.componentRef.setInput('stages', kinds.flatMap(kind => [true, false].map(canOpen => ({
+      id: `${kind ?? 'account'}-${canOpen}`, kind, label: kind === 'facility' ? 'Facility Results' : 'Stage',
+      route: ['/stage'], current: false, completed: false, hasBlockingErrors: true, canOpen
+    }))));
+    fixture.detectChanges();
+
+    const rows = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('li'));
+    expect(rows).toHaveLength(10);
+    for (const [index, row] of rows.entries()) {
+      expect(row.textContent).toContain('Has blocking errors');
+      expect(row.querySelector('.v1-status-attention')).toBeNull();
+      expect(row.querySelector('a') !== null).toBe(index % 2 === 0);
+      if (index % 2 === 1) expect(row.querySelector('[aria-disabled="true"]')).not.toBeNull();
+    }
+    const icons = fixture.debugElement.queryAll(By.css('.v1-analysis-stages__marker app-ui-icon'));
+    expect(icons.map(icon => icon.componentInstance.name)).toEqual(Array(10).fill('badgeAlert'));
+  });
+
   it.each(['vertical', 'horizontal'] as const)('preserves warning completion and disabled-stage descriptions in %s layout', layout => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(AnalysisStageNavigationComponent);

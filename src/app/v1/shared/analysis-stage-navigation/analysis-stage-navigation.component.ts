@@ -32,16 +32,16 @@ export class AnalysisStageNavigationComponent {
   readonly layout = input<'vertical' | 'horizontal'>('vertical');
   readonly withContext = input(false);
   readonly views = computed(() => this.stages().map(stage => {
-    // Result/dependency icons remain semantic; setup/group stages show completion.
+    // Blocking errors take precedence over completion and semantic stage icons.
     const tracksCompletion = stage.kind === undefined || stage.kind === 'analysis' || stage.kind === 'group';
-    const markerIcon: IconName | undefined = tracksCompletion && stage.hasBlockingErrors
+    const markerIcon: IconName | undefined = stage.hasBlockingErrors
       ? 'badgeAlert'
       : tracksCompletion && stage.completed
         ? 'checkmarkBadge'
         : stage.kind === 'analysis' || stage.kind === 'group'
           ? undefined
           : stage.kind === 'facility' ? 'chartAnalysis' : stage.kind === 'used-by' ? 'link' : stage.icon || 'analysis';
-    const markerLabel = tracksCompletion && stage.hasBlockingErrors ? 'Has blocking errors'
+    const markerLabel = stage.hasBlockingErrors ? 'Has blocking errors'
       : tracksCompletion && stage.completed ? 'Complete'
         : stage.kind === 'analysis' || stage.kind === 'group' ? 'Not complete'
           : stage.kind === 'facility' ? 'Results' : stage.kind === 'used-by' ? 'Dependencies' : '';
