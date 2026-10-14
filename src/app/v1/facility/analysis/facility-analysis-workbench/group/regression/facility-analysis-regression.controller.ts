@@ -148,7 +148,7 @@ export class FacilityAnalysisRegressionController {
   private syncFromGroup(): void {
     const group = this.workflow.group();
     if (!group) return;
-    const periodContext = `${this.workflow.analysis()?.guid ?? ''}:${group.idbGroupId ?? ''}:${group.isGeneratedModel}`;
+    const periodContext = `${this.workflow.analysis()?.guid ?? ''}:${group.idbGroupId ?? ''}:${group.isGeneratedModel}:${this.workflow.draftResetVersion()}`;
     if (periodContext !== this.periodContext) {
       this.periodContext = periodContext;
       const hasPeriod = [group.regressionModelStartMonth, group.regressionStartYear, group.regressionModelEndMonth, group.regressionEndYear]

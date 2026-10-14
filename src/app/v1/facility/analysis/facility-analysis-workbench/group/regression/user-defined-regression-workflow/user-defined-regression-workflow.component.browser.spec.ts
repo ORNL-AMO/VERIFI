@@ -24,7 +24,7 @@ describe('user-defined model control themes', () => {
       providers: [
         FacilityAnalysisRegressionController,
         { provide: FacilityAnalysisRegressionFacade, useValue: {
-          group, analysis: signal({ analysisCategory: 'energy' }),
+          group, analysis: signal({ analysisCategory: 'energy' }), draftResetVersion: signal(0),
           months: [{ name: 'January', monthNumValue: 0 }, { name: 'December', monthNumValue: 11 }],
           yearOptions: signal([2024]), hasUserDefinedDataIssue: signal(false), generatedModels: signal([]),
           validation: { state: signal({ state: 'idle', source: 'user-defined' }), retry: vi.fn() },

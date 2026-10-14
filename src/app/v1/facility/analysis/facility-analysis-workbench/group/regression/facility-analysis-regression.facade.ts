@@ -23,6 +23,7 @@ export class FacilityAnalysisRegressionFacade {
 
   readonly group = this.groupContext.group;
   readonly analysis = this.autosave.draft;
+  readonly draftResetVersion = this.autosave.draftResetVersion;
   readonly months = Months;
   readonly generating = signal(false);
   readonly generationError = signal<string | undefined>(undefined);

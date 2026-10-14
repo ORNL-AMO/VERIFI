@@ -131,7 +131,7 @@ describe('facility analysis regression behavior', () => {
             groupGuid: signal('group-1'),
             meters: signal([]),
             findings: signal([]),
-            autosave: { draft: analysis, update: vi.fn() },
+            autosave: { draft: analysis, update: vi.fn(), draftResetVersion: signal(0) },
             workbench: {
               analysisGuid: signal('analysis-1'),
               account: signal(undefined), facility: signal(undefined),

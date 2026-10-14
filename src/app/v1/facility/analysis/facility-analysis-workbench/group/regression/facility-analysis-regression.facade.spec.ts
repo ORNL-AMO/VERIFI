@@ -216,7 +216,7 @@ async function configureWorkflow(generated: boolean, productionCoefficient: numb
         provide: FacilityAnalysisGroupContext,
         useValue: {
           group, groupGuid: signal('group-1'), meters: signal([]), findings: signal([]),
-          autosave: { draft, update },
+          autosave: { draft, update, draftResetVersion: signal(0) },
           workbench: {
             analysisGuid: signal('analysis-1'), account: signal(undefined), facility: signal(undefined),
             workspace: { facilityMeterData: signal([]), facilityPredictorData: signal([]) }
