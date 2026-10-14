@@ -53,7 +53,7 @@
         @for (finding of predictorFindings; track finding.id) {
           <li>
             <div class="v1-alert" [class.v1-alert--danger]="finding.severity === 'error'"
-              [class.v1-alert--warning]="finding.severity === 'warning'" role="alert">
+              [class.v1-alert--warning]="finding.severity === 'warning'" [class.v1-alert--info]="finding.severity === 'information'" role="alert">
               <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : finding.category === 'currency' ? 'clock' : 'warning'"></app-ui-icon>
               <span><strong>{{ finding.title }}.</strong> {{ finding.description }}</span>
               @switch (finding.code) {
