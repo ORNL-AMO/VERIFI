@@ -21,7 +21,7 @@
       @if (open) {
         <div class="v1-facility-picker__backdrop" (click)="close()" aria-hidden="true"></div>
         <div class="v1-facility-picker__menu" role="menu" aria-label="Switch facility">
-          @if (showSearch) {
+          @if (showSearch()) {
             <div class="v1-facility-picker__search">
               <app-ui-icon name="search" class="v1-facility-picker__search-icon"></app-ui-icon>
               <input
@@ -30,11 +30,11 @@
                 placeholder="Search facilities…"
                 aria-label="Search facilities"
                 autocomplete="off"
-                [(ngModel)]="search" />
+                [formControl]="search" />
             </div>
           }
           <div class="v1-facility-picker__list">
-            @for (facility of filteredFacilities; track facility.guid) {
+            @for (facility of filteredFacilities(); track facility.guid) {
               <button
                 type="button"
                 class="v1-facility-picker__item"
@@ -44,13 +44,13 @@
                 <app-ui-icon name="check" class="v1-facility-picker__check"></app-ui-icon>
                 <span class="v1-facility-picker__item-text">
                   {{ facility.name }}
-                  @if (facilityLocation(facility)) {
-                    <small>{{ facilityLocation(facility) }}</small>
+                  @if (facility.location) {
+                    <small>{{ facility.location }}</small>
                   }
                 </span>
               </button>
             }
-            @if (filteredFacilities.length === 0) {
+            @if (filteredFacilities().length === 0) {
               <span class="v1-facility-picker__empty">No facilities match</span>
             }
           </div>

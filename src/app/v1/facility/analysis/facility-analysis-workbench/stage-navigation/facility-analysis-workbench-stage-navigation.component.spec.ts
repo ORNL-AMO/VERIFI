@@ -52,12 +52,13 @@ describe('FacilityAnalysisWorkbenchStageNavigationComponent', () => {
     expect(stages[1].classList).toContain('is-blocked');
     expect(stages[1].querySelector('[aria-disabled="true"]')).not.toBeNull();
     expect(stages[1].textContent).toContain('Has blocking errors');
-    expect(stages[1].querySelector('.v1-analysis-workbench__stage-attention')).toBeNull();
+    expect(stages[1].querySelector('.v1-status-attention')).toBeNull();
+    expect(stages[2].textContent).toContain('Has blocking errors');
     expect(fixture.nativeElement.querySelector('.v1-analysis-workbench__stage-number')).toBeNull();
     expect(stages[0].textContent).toContain('Complete');
-    const icons = fixture.debugElement.queryAll(By.css('.v1-analysis-workbench__stage-marker app-ui-icon'))
+    const icons = fixture.debugElement.queryAll(By.css('.v1-analysis-stages__marker app-ui-icon'))
       .map(element => element.componentInstance.name);
-    expect(icons).toEqual(['checkmarkBadge', 'badgeAlert', 'chartAnalysis', 'link']);
+    expect(icons).toEqual(['checkmarkBadge', 'badgeAlert', 'badgeAlert', 'link']);
   });
 
   it('renders and delegates the current stage contextual tabs', () => {

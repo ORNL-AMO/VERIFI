@@ -1,0 +1,54 @@
+@let account = navigation.account();
+@let selectedFacility = navigation.facility();
+@let contextMode = navigation.contextMode();
+@if (account) {
+  <section class="v1-nav__group" aria-labelledby="v1-analysis-nav-title">
+    <app-status-evaluation-message [state]="status.state()" [compact]="true"></app-status-evaluation-message>
+    <span id="v1-analysis-nav-title" class="v1-nav__label">
+      {{ contextMode === 'facility' ? 'Facility Analysis' : 'Account Analysis' }}
+    </span>
+    <a class="v1-nav__link"
+      [class.active]="navigation.activeDetail() === 'dashboard'"
+      [routerLink]="contextMode === 'facility' && selectedFacility
+        ? navigation.facilityAnalysisRoute(selectedFacility.guid)
+        : navigation.accountAnalysisRoute(account.guid)"
+      [attr.aria-current]="navigation.activeDetail() === 'dashboard' ? 'page' : null">
+      <app-ui-icon name="analysis"></app-ui-icon>
+      Dashboard
+    </a>
+    @if ((contextMode === 'facility' && selectedFacility) || contextMode === 'account') {
+      @let workflow = contextMode === 'facility' ? activeAnalysisNavigation() : activeAccountAnalysisNavigation();
+      @let groups = analysisGroups();
+      @for (group of groups; track group.id) {
+        <section
+          class="v1-nav__analysis-section"
+          [attr.aria-labelledby]="'v1-analysis-' + group.id + '-title'">
+          <span
+            class="v1-nav__sublabel"
+            [id]="'v1-analysis-' + group.id + '-title'">
+            {{ group.label }}
+          </span>
+          @for (analysis of group.items; track analysis.guid) {
+            <div class="v1-nav__analysis-entry">
+              <a class="v1-nav__link v1-nav__analysis-link"
+                [class.active]="analysis.expanded"
+                [routerLink]="analysis.route"
+                [attr.aria-expanded]="analysis.expanded"
+                [attr.title]="analysis.label">
+                <app-ui-icon [name]="analysis.icon"></app-ui-icon>
+                <span class="v1-nav__item-label">{{ analysis.label }}</span>
+              </a>
+              @if (analysis.expanded && workflow && workflow.guid === analysis.guid) {
+                <app-analysis-stage-navigation
+                  class="v1-nav__analysis-workflow"
+                  [stages]="workflow.steps"
+                  [ariaLabel]="'Analysis progress for ' + workflow.name">
+                </app-analysis-stage-navigation>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
+  </section>
+}

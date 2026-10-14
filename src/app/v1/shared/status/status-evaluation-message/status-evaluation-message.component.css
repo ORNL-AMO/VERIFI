@@ -1,0 +1,4 @@
+:host { display: block; min-width: 0; }
+:host:empty { display: none; }
+.v1-alert { color: var(--v1-text); }
+.is-compact { padding: .45rem .55rem; font-size: .78rem; line-height: 1.35; }

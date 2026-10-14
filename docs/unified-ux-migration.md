@@ -222,6 +222,15 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Shared contracts:** Preserve GUID references, formulas, Worker payloads, persistence, backups, v0 routes, and Electron boundaries. Unsaved drafts and switched analyses must not show stale outcome values.
 - **Tests:** Header/dashboard outcome parity, persistent status and typed Review actions, facts disclosure, report reference types and live updates, and workbench Worker reuse/cancellation.
 
+### Section navigation composition and status presentation
+
+- The [section navigation module](../src/app/v1/shell/section-nav/section-nav.module.ts) composes focused context, Settings, Data, Imports, and Analysis children. Keep deterministic projections in its local `models/` folder and keep weather grouping and analysis readiness with their existing feature builders.
+- Resource groups own disclosure interaction, backed by container-scoped transient state. Preserve independent meter, meter-group, and predictor disclosure choices across section changes, with the existing facility matching behavior.
+- Use the [shared analysis stage navigation](../src/app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component.ts) for sidebar and horizontal workbench presentation; feature services retain availability and autosave policy. Attach facility stage-attention summaries as well as blocking-error state.
+- Use the [shared status attention](../src/app/v1/shared/status/status-attention/status-attention.component.ts) for counts and indicators. Blocking markers may suppress a redundant badge but must retain accessible issue totals. Keep labeled resource-card statuses distinct and use existing theme tone classes.
+- Data and Analysis navigation show the same checking/failure copy as the support panel through the [status-evaluation message](../src/app/v1/shared/status/status-evaluation-message/status-evaluation-message.component.ts). Suppress counts while checks are unavailable. Common navigation row styles are scoped under the v1 section-navigation surface so import and analysis steppers retain their own styles.
+- Protect composition, disclosure persistence, direct links, weather grouping, active warning changes, status transitions, and both stage layouts with focused fast tests. Validate themes, keyboard use, narrow layouts, and contrast in a browser.
+
 ### Production v1 Data workbench model organization
 
 - Use a feature-local `models/` folder when presentation state and deterministic builders serve multiple components in a production v1 Data workbench. Split modules by business responsibility and reason to change, not arbitrary line limits or separate type/function buckets.

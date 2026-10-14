@@ -43,7 +43,7 @@ describe('DataWorkbenchTabsComponent', () => {
     });
     fixture.detectChanges();
 
-    const indicator = fixture.nativeElement.querySelector('.v1-data-tabs__attention') as HTMLElement;
+    const indicator = fixture.nativeElement.querySelector('.v1-status-attention') as HTMLElement;
     expect(fixture.nativeElement.querySelector('nav').classList).toContain('v1-data-tabs--secondary');
     expect(indicator.textContent).toContain('!');
     expect(indicator.textContent).toContain('2 issues');

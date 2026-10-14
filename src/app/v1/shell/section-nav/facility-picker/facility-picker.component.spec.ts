@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { FacilityPickerComponent } from './facility-picker.component';
@@ -12,7 +12,7 @@ describe('FacilityPickerComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [FacilityPickerComponent],
-      imports: [FormsModule, IconComponent]
+      imports: [ReactiveFormsModule, IconComponent]
     });
   });
 
@@ -125,5 +125,26 @@ describe('FacilityPickerComponent', () => {
 
     expect(element.querySelector('.v1-facility-picker__menu')).toBeNull();
     expect(document.activeElement).toBe(toggle);
+  });
+
+  it('searches normalized location text and clears the filter when reopened', () => {
+    const { fixture, component } = createComponent();
+    component.facilities = Array.from({ length: 6 }, (_, index) =>
+      facility(`f${index}`, `Facility ${index}`, index === 5 ? 'Memphis' : 'Knoxville', 'TN'));
+    fixture.detectChanges();
+    const toggle: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-facility-picker__toggle');
+    toggle.click();
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = '  MEMPHIS  ';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.v1-facility-picker__item')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.v1-facility-picker__item')?.textContent).toContain('Memphis');
+    toggle.click();
+    toggle.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('input').value).toBe('');
+    expect(fixture.nativeElement.querySelectorAll('.v1-facility-picker__item')).toHaveLength(6);
   });
 });

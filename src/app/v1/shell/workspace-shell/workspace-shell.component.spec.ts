@@ -10,9 +10,9 @@ import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
-import { FacilityPickerComponent } from '../section-nav/facility-picker/facility-picker.component';
+import { SectionNavModule } from '../section-nav/section-nav.module';
+import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
 import { PrimaryRailComponent } from '../primary-rail/primary-rail.component';
-import { SectionNavComponent } from '../section-nav/section-nav.component';
 import { SupportPanelComponent } from '../support-panel/support-panel.component';
 import { WorkspaceNavigationService, SUPPORT_PANEL_TABS, WORKSPACE_SECTIONS } from '../workspace-navigation.service';
 import { WorkspaceShellComponent } from './workspace-shell.component';
@@ -21,12 +21,10 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
+  imports: [SectionNavModule, StatusEvaluationMessageComponent, CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,
-    SectionNavComponent,
-    FacilityPickerComponent,
     SupportPanelComponent
   ]
 })
@@ -99,6 +97,23 @@ describe('WorkspaceShellComponent', () => {
     expect(fixture.nativeElement.querySelector('app-primary-rail')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-section-nav')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-support-panel')).not.toBeNull();
+  });
+
+  it('shows shared checking and failure messages instead of reporting unavailable status as valid', () => {
+    navigation.activePanelTab.mockReturnValue('todos');
+    navigation.panelContent.mockReturnValue({ help: [], todos: [], discardedWarnings: [], results: [], details: [] });
+    for (const state of ['evaluating', 'error', 'ready']) {
+      status.state.mockReturnValue(state);
+      fixture.destroy();
+      fixture = TestBed.createComponent(WorkspaceShellComponent);
+      fixture.detectChanges();
+      const content: HTMLElement = fixture.nativeElement.querySelector('.v1-panel__content');
+      if (state === 'ready') expect(content.textContent).toContain('No data issues need attention.');
+      else {
+        expect(content.textContent).not.toContain('No data issues need attention.');
+        expect(content.textContent).toContain(state === 'error' ? 'Workspace status could not be evaluated.' : 'Checking workspace data...');
+      }
+    }
   });
 
   it('presents spreadsheet imports as Upload with the upload icon', () => {

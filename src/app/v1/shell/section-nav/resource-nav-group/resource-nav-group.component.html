@@ -1,0 +1,40 @@
+@let item = group();
+<div class="v1-nav__item" [class.v1-nav__item--open]="open()">
+  <div class="v1-nav__item-row">
+    <a class="v1-nav__link" [class.active]="item.active" [routerLink]="item.route" [attr.aria-current]="item.active ? 'page' : null">
+      <app-ui-icon [name]="item.icon"></app-ui-icon>
+      <span class="v1-nav__item-label">{{ item.label }}</span>
+      <app-status-attention [summary]="item.attention" [contextLabel]="item.label"></app-status-attention>
+    </a>
+    @if (canToggle()) {
+      <button type="button" class="v1-nav__link v1-nav__child-toggle" [attr.aria-expanded]="open()" [attr.aria-controls]="item.childrenId" [attr.aria-label]="toggleLabel()" (click)="toggle()">
+        <app-ui-icon name="chevronRight"></app-ui-icon>
+      </button>
+    }
+  </div>
+  @if (canToggle()) {
+    <div class="v1-nav__children" [id]="item.childrenId" [attr.aria-label]="item.childrenLabel" [hidden]="!open()">
+      @if (open()) {
+        @for (child of item.children; track child.id) {
+          <div class="v1-nav__resource-entry">
+            <a class="v1-nav__link v1-nav__child" [class.active]="child.active" [routerLink]="child.route" [attr.aria-current]="child.active ? 'page' : null" [title]="child.label">
+              <app-ui-icon [name]="child.icon"></app-ui-icon>
+              <span class="v1-nav__item-label">{{ child.label }}</span>
+              <app-status-attention [summary]="child.attention" [contextLabel]="child.label"></app-status-attention>
+            </a>
+            @if (child.outputs?.length) {
+              <ul class="v1-nav__weather-outputs" [attr.aria-label]="'Predictors at ' + child.label">
+                @for (output of child.outputs; track output.guid) {
+                  <li class="v1-nav__weather-output" [title]="output.label">
+                    <app-ui-icon [name]="output.icon"></app-ui-icon>
+                    <span>{{ output.label }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

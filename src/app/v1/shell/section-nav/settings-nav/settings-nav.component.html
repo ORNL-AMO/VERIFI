@@ -1,0 +1,18 @@
+@let account = navigation.account();
+@let selectedFacility = navigation.facility();
+@let contextMode = navigation.contextMode();
+@if (account && (contextMode === 'account' || selectedFacility)) {
+  <section class="v1-nav__group" aria-labelledby="v1-settings-nav-title">
+    <span id="v1-settings-nav-title" class="v1-nav__label">{{ settingsTitle() }}</span>
+    @for (item of settingsItems(); track item.id) {
+      <a class="v1-nav__link"
+        [class.active]="item.active"
+        [class.v1-nav__item--danger]="item.tone === 'danger'"
+        [routerLink]="item.route"
+        [attr.aria-current]="item.active ? 'page' : null">
+        <app-ui-icon [name]="item.icon"></app-ui-icon>
+        {{ item.label }}
+      </a>
+    }
+  </section>
+}

@@ -177,6 +177,8 @@ In v1, content-navigation controls use the themed content-control color (`--v1-c
 
 The repository does not define a separate design system. Do not introduce one implicitly as part of a feature issue.
 
+The v1 section navigation is composed by [`SectionNavModule`](src/app/v1/shell/section-nav/section-nav.module.ts). Its container owns section selection and scrolling; focused children own workspace context, Settings, Data, Imports, and Analysis projections. Resource disclosure state is scoped to the container so section changes preserve it without persisting UI state. Feature-local navigation models reuse the existing resource and analysis builders. Sidebar and workbench analysis stages share [`AnalysisStageNavigationComponent`](src/app/v1/shared/analysis-stage-navigation/analysis-stage-navigation.component.ts), while [`StatusAttentionComponent`](src/app/v1/shared/status/status-attention/status-attention.component.ts) owns count/indicator presentation and accessible severity descriptions. Data/Analysis navigation and the support panel share the status-evaluation message; unavailable checks never imply valid data. These presentation boundaries do not own validation rules, readiness, autosave, or route guards.
+
 Shared v1 analysis presentation lives under `src/app/v1/shared/analysis-results`. Its contribution heatmap owns the common fiscal-year chart, formatting, themed labels, horizontal overflow, and PNG download for account facility contributions and facility group contributions. Features supply precomputed percentages and retain ownership of calculations, tables, navigation, and vertical scrolling. See [V1 Account Analysis Architecture](docs/v1-account-analysis-architecture.md#shared-analysis-presentation).
 
 ## Tests, builds, and delivery

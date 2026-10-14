@@ -1,0 +1,13 @@
+@if (summary(); as attention) {
+  @if (attention.total > 0) {
+    <span
+      class="v1-status-attention v1-badge"
+      [class.v1-badge--danger]="attention.state === 'error'"
+      [class.v1-badge--warning]="attention.state === 'warning'"
+      [class.v1-status-attention--indicator]="display() === 'indicator'"
+      [title]="title()">
+      <span aria-hidden="true">{{ display() === 'indicator' ? '!' : attention.total }}</span>
+      <span class="visually-hidden">{{ description() }}</span>
+    </span>
+  }
+}

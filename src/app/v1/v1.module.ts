@@ -7,15 +7,14 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
-import { ImportStepperComponent } from '@app/v1/account/imports/import-stepper/import-stepper.component';
 import { AccountSettingsModule } from '@app/v1/account/settings/account-settings.module';
 import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
 import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
 import { FacilitySettingsModule } from '@app/v1/facility/settings/facility-settings.module';
 import { ShellHeaderComponent } from '@app/v1/shell/header/shell-header.component';
 import { PrimaryRailComponent } from '@app/v1/shell/primary-rail/primary-rail.component';
-import { FacilityPickerComponent } from '@app/v1/shell/section-nav/facility-picker/facility-picker.component';
-import { SectionNavComponent } from '@app/v1/shell/section-nav/section-nav.component';
+import { SectionNavModule } from '@app/v1/shell/section-nav/section-nav.module';
+import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-evaluation-message/status-evaluation-message.component';
 import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { ShellComponent } from '@app/v1/shell/shell.component';
@@ -30,14 +29,14 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     ShellHeaderComponent,
     WorkspaceShellComponent,
     PrimaryRailComponent,
-    SectionNavComponent,
-    FacilityPickerComponent,
     SupportPanelComponent,
     AccountHomeComponent,
     FacilityHomeComponent
   ],
   imports: [
     CommonModule,
+    SectionNavModule,
+    StatusEvaluationMessageComponent,
     FormsModule,
     IconsModule,
     NotificationsModule,
@@ -47,7 +46,6 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     FacilityDataModule,
     AccountSettingsModule,
     FacilitySettingsModule,
-    ImportStepperComponent,
     WelcomeComponent,
     RouterModule.forChild(V1Routes)
   ]
