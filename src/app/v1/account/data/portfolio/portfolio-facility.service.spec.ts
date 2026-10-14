@@ -57,6 +57,7 @@ describe('PortfolioFacilityService', () => {
 
     expect(facility.name).toBe('First Plant');
     expect(facility.accountId).toBe('account-a');
+    expect(facility.expectedRangeSettings).toEqual({ enabled: false, useAccountSettings: true });
     expect(facility.city).toBe('Oak Ridge');
     expect(facility.energyUnit).toBe('GJ');
     expect(facility.fiscalYear).toBe('nonCalendarYear');
@@ -123,6 +124,7 @@ describe('PortfolioFacilityService', () => {
         energyUnit: 'GJ',
         fiscalYear: 'nonCalendarYear',
         dataStalenessSettings: { enabled: true, thresholdMonths: 6, useAccountSettings: true },
+        expectedRangeSettings: { enabled: false, useAccountSettings: true },
         sustainabilityQuestions: expect.objectContaining({ energyReductionPercent: 30 })
       }),
       'account-a'
@@ -165,6 +167,7 @@ function accountFixture(): IdbAccount {
       ...getNewIdbAccount().sustainabilityQuestions,
       energyReductionPercent: 30
     },
+    expectedRangeSettings: { enabled: false },
     dataStalenessSettings: { enabled: true, thresholdMonths: 6 }
   };
 }

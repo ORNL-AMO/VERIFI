@@ -1,3 +1,4 @@
+import { DataValidationSettingsPanelComponent } from '@app/v1/shared/settings/data-validation-settings-panel/data-validation-settings-panel.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { AccountSettingsFinancialComponent } from './financial/account-settings-
 import { AccountSettingsGoalsComponent } from './goals/account-settings-goals.component';
 import { AccountSettingsPortfolioComponent } from './portfolio/account-settings-portfolio.component';
 import { AccountSettingsProfileComponent } from './profile/account-settings-profile.component';
-import { AccountSettingsStalenessComponent } from './staleness/account-settings-staleness.component';
+import { AccountSettingsDataValidationComponent } from './data-validation/account-settings-data-validation.component';
 import { AccountSettingsUnitsComponent } from './units/account-settings-units.component';
 import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 
@@ -22,13 +23,14 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
     AccountSettingsUnitsComponent,
     AccountSettingsGoalsComponent,
     AccountSettingsFinancialComponent,
-    AccountSettingsStalenessComponent,
+    AccountSettingsDataValidationComponent,
     AccountSettingsBackupComponent,
     AccountSettingsPortfolioComponent,
     AccountSettingsDeleteComponent
   ],
   imports: [
     CommonModule,
+    DataValidationSettingsPanelComponent,
     IconsModule,
     ReactiveFormsModule,
     RouterModule,

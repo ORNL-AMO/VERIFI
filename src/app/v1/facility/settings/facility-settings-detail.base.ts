@@ -8,7 +8,7 @@ import { IdbAccount } from '@data/models/idbModels/account';
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { SettingsDetailBase, SettingsSaveState } from '@app/v1/shared/settings/settings-detail.base';
 
-export type FacilitySettingsDetail = 'profile' | 'units' | 'goals' | 'financial' | 'staleness' | 'backup' | 'portfolio' | 'delete';
+export type FacilitySettingsDetail = 'profile' | 'units' | 'goals' | 'financial' | 'data-validation' | 'backup' | 'portfolio' | 'delete';
 export type FacilitySettingsSaveState = SettingsSaveState;
 
 export const FACILITY_SETTINGS_DETAILS: ReadonlyArray<FacilitySettingsDetail> = [
@@ -16,7 +16,7 @@ export const FACILITY_SETTINGS_DETAILS: ReadonlyArray<FacilitySettingsDetail> = 
   'units',
   'goals',
   'financial',
-  'staleness',
+  'data-validation',
   'backup',
   'portfolio',
   'delete'

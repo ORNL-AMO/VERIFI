@@ -16,6 +16,16 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
 
 describe('MeterWorkbenchQualityReportComponent', () => {
+  it.each(['ready', 'evaluating', 'error'] as const)('keeps outlier statistics and charts while suppressing range alerts in %s state', statusState => {
+    const fixture = setup({ statusState, expectedRangeEnabled: false,
+      meterData: [10, 10, 11, 12, 100].map((amount, index) => reading({ guid: `r${index}`, month: index + 1, totalEnergyUse: amount, totalCost: amount * 2 }))
+    });
+    expect(fixture.componentInstance.report()?.energyOutlierCount).toBeGreaterThan(0);
+    expect(fixture.componentInstance.issueSummaries()).toEqual([]);
+    expect(JSON.stringify(fixture.componentInstance.qualityChartOption())).toContain('Outliers');
+    expect(fixture.componentInstance.statisticRows().some(row => row.cells.some(cell => cell.id === 'outliers' && cell.tone === 'warning'))).toBe(true);
+  });
+
   it('renders an empty state and routes users to readings when no meter readings exist', () => {
     const fixture = setup({ meterData: [] });
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
@@ -232,6 +242,7 @@ function setup(options: {
   selectedMeter?: ReturnType<typeof meter>;
   meterData?: ReturnType<typeof reading>[];
   copyTable?: ReturnType<typeof vi.fn>;
+  expectedRangeEnabled?: boolean;
   statusState?: 'idle' | 'evaluating' | 'ready' | 'error';
   statusFindings?: StatusItem[];
 } = {}): ComponentFixture<MeterWorkbenchQualityReportComponent> {
@@ -257,6 +268,7 @@ function setup(options: {
       {
         provide: FacilityMetersWorkspaceService,
         useValue: {
+          account: signal({ expectedRangeSettings: { enabled: options.expectedRangeEnabled ?? true } }),
           facility: signal(facility({ guid: 'facility-a', energyUnit: 'MMBtu' })),
           selectedMeter: signal(selectedMeter),
           selectedMeterData: signal(meterData)

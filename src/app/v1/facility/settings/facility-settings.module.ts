@@ -1,3 +1,4 @@
+import { DataValidationSettingsPanelComponent } from '@app/v1/shared/settings/data-validation-settings-panel/data-validation-settings-panel.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { FacilitySettingsFinancialComponent } from './financial/facility-setting
 import { FacilitySettingsGoalsComponent } from './goals/facility-settings-goals.component';
 import { PortfolioTransitionSettingsComponent } from './portfolio-transition/portfolio-transition-settings.component';
 import { FacilitySettingsProfileComponent } from './profile/facility-settings-profile.component';
-import { FacilitySettingsStalenessComponent } from './staleness/facility-settings-staleness.component';
+import { FacilitySettingsDataValidationComponent } from './data-validation/facility-settings-data-validation.component';
 import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.component';
 
 @NgModule({
@@ -21,13 +22,14 @@ import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.
     FacilitySettingsUnitsComponent,
     FacilitySettingsGoalsComponent,
     FacilitySettingsFinancialComponent,
-    FacilitySettingsStalenessComponent,
+    FacilitySettingsDataValidationComponent,
     FacilitySettingsBackupComponent,
     PortfolioTransitionSettingsComponent,
     FacilitySettingsDeleteComponent
   ],
   imports: [
     CommonModule,
+    DataValidationSettingsPanelComponent,
     IconsModule,
     ReactiveFormsModule,
     RouterModule,

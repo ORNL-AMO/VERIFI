@@ -78,6 +78,15 @@ import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/facility/analysis
 import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/facility/analysis/facility-analysis-workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
 
 describe('V1Routes facility data meters routes', () => {
+  it.each(['account', 'facility'])('redirects legacy %s staleness links to Data Validation', scope => {
+    const workspaceRoute = V1Routes[0].children?.find(route => route.path === `workspace/${scope}/:${scope}Guid`);
+    const settingsRoutes = workspaceRoute?.children?.find(route => route.path === 'settings')?.children;
+    expect(settingsRoutes?.find(route => route.path === 'data-validation')?.component).toBeDefined();
+    expect(settingsRoutes?.find(route => route.path === 'data-validation')?.canDeactivate).toEqual([unsavedChangesGuard]);
+    expect(settingsRoutes?.find(route => route.path === 'staleness')).toEqual({
+      path: 'staleness', redirectTo: 'data-validation', pathMatch: 'full'
+    });
+  });
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [

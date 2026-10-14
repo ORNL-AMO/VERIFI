@@ -12,6 +12,8 @@ describe('WeatherPredictorQualityContextService', () => {
   it('owns quality selection, report data, and weather route navigation', () => {
     const routeParameters = new BehaviorSubject(convertToParamMap({ predictorGuid: 'weather-b' }));
     const navigate = vi.fn();
+    const account = signal<any>({ expectedRangeSettings: { enabled: false } });
+    const facility = signal<any>({ guid: 'facility-a' });
     const predictors = signal<any[]>([
       { guid: 'weather-a', name: 'HDD 65' },
       { guid: 'weather-b', name: 'CDD 70' }
@@ -40,7 +42,7 @@ describe('WeatherPredictorQualityContextService', () => {
         },
         {
           provide: FacilityPredictorsWorkspaceService,
-          useValue: { facility: signal({ guid: 'facility-a' }) }
+          useValue: { account, facility }
         },
         {
           provide: WeatherPredictorWorkbenchContextService,
@@ -61,6 +63,9 @@ describe('WeatherPredictorQualityContextService', () => {
     expect(context.readings().map(reading => reading.guid)).toEqual(['reading-b']);
     expect(context.findings().map(finding => finding.id)).toEqual(['b']);
     expect(context.settingsLabel).toBe('Open Setup');
+    expect(context.expectedRangeEnabled()).toBe(false);
+    facility.set({ ...facility(), expectedRangeSettings: { enabled: true, useAccountSettings: false } });
+    expect(context.expectedRangeEnabled()).toBe(true);
 
     context.openSettings();
     expect(navigate).toHaveBeenCalledWith(['/weather', 'station:KORD', 'setup']);

@@ -13,6 +13,16 @@ import { PREDICTOR_QUALITY_CONTEXT } from '../../predictor-quality-context';
 import { PredictorWorkbenchQualityReportComponent } from './predictor-workbench-quality-report.component';
 
 describe('PredictorWorkbenchQualityReportComponent', () => {
+  it.each(['ready', 'evaluating', 'error'] as const)('retains outlier details but suppresses range alerts in %s state', statusState => {
+    const fixture = setup({ statusState, expectedRangeEnabled: false,
+      readings: [10, 10, 11, 12, 100].map((amount, index) => reading({ guid: `r${index}`, month: index + 1, amount }))
+    });
+    expect(fixture.componentInstance.report()?.outlierCount).toBe(1);
+    expect(fixture.componentInstance.findings().some(finding => finding.code === 'predictor.quality.outlier')).toBe(false);
+    expect(fixture.componentInstance.accessibleChartRows().some(row => row.expectedRangeLabel === 'Outlier')).toBe(true);
+    expect(JSON.stringify(fixture.componentInstance.qualityChartOption())).toContain('Outliers');
+  });
+
   it('renders an empty state and routes users to Readings', () => {
     const fixture = setup({ readings: [] });
     fixture.detectChanges();
@@ -142,6 +152,7 @@ function setup(options: {
   selectedPredictor?: IdbPredictor;
   readings?: IdbPredictorData[];
   copyTable?: ReturnType<typeof vi.fn>;
+  expectedRangeEnabled?: boolean;
   statusState?: 'idle' | 'evaluating' | 'ready' | 'error';
   statusFindings?: StatusItem[];
   discardWarning?: ReturnType<typeof vi.fn>;
@@ -171,6 +182,7 @@ function setup(options: {
           predictor: signal(selectedPredictor),
           readings: signal(readings),
           findings: signal(statusFindings),
+          expectedRangeEnabled: signal(options.expectedRangeEnabled ?? true),
           idPrefix: signal('predictor-quality'),
           settingsLabel: 'Open Settings',
           openReadings: vi.fn(),

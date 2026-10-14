@@ -21,6 +21,8 @@ Findings use one of five categories: **configuration**, **completeness**, **curr
 - Available fixes link to the narrowest useful v1 screen. Unavailable fixes are labeled **Fix workflow not yet available in v1** and never link back to v0.
 - Errors and informational findings cannot be discarded. Any warning can be discarded for its current evidence occurrence; it is removed from active status summaries, Todos, cards, inline findings, and navigation indicators until its evidence changes or the user restores it from the Todos panel.
 - Warning dismissal is an account-owned presentation preference. It does not change validation inputs, rule evaluation, stored source data, or domain exceptions. Full account backups preserve it; facility-only backups do not transfer it.
+- Settings > Data Validation controls expected-range status warnings for meter consumption, meter cost, and predictor values together. The setting defaults to enabled; facilities inherit the account unless they explicitly override it. Its inheritance is independent of data staleness.
+- Disabling expected-range warnings suppresses the three statistical-outlier findings, including locally generated report alerts while status is unavailable. Quality Report statistics, expected ranges, chart markers, and accessible outlier information remain unchanged. Other warnings and errors still apply. Re-enabling resumes existing evidence-based dismissal behavior without clearing saved dismissals.
 - Todos are grouped and sorted by severity, affected record, and stable rule code.
 
 ## Account and facility rules
@@ -117,5 +119,5 @@ Every validation change must update this document, the stable rule catalog, pres
 - Staleness uses the evaluation date supplied to the engine; it does not read the wall clock inside individual record checks.
 - Findings contain stable codes and evidence only. URLs, user-facing copy, Todo inclusion, and workflow availability live in the v1 presentation catalog.
 - Meter configuration findings identify all affected fields instead of exposing only one invalid flag.
-- Statistical outliers are visible on resource cards and Quality Reports but are intentionally excluded from global Todos.
+- Statistical outliers appear as resource status warnings when enabled and are intentionally excluded from global Todos. Quality Reports retain their statistical outlier information even when these warnings are disabled.
 - v1 may therefore show more findings than v0 for the same account. This is expected; no v0 status behavior is changed.

@@ -1,3 +1,4 @@
+import { normalizeExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 import { Injectable, inject } from '@angular/core';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { FacilityCommandHandler } from '@data/account-workspace/handlers/facility-command-handler.service';
@@ -167,6 +168,7 @@ export class PortfolioFacilityService {
       fiscalYear: account.fiscalYear,
       fiscalYearMonth: account.fiscalYearMonth,
       fiscalYearCalendarEnd: account.fiscalYearCalendarEnd,
+      expectedRangeSettings: { ...normalizeExpectedRangeSettings(account.expectedRangeSettings), useAccountSettings: true },
       dataStalenessSettings: {
         ...this.settingsForms.normalizeDataStalenessSettings(account.dataStalenessSettings),
         useAccountSettings: true

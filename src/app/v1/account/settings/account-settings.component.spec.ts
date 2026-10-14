@@ -162,7 +162,7 @@ describe('Account settings routed components', () => {
     const childPaths = settingsRoute?.children?.map(route => route.path);
 
     expect(settingsRoute?.component).toBe(AccountSettingsComponent);
-    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete', '**']);
+    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'data-validation', 'staleness', 'backup', 'portfolio', 'delete', '**']);
   });
 
   it('autosaves profile text locally after a debounce', async () => {

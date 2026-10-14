@@ -1,0 +1,5 @@
+:host { display: block; min-width: 0; }
+.data-validation-settings { display: grid; gap: 1rem; }
+.data-validation-settings .v1-settings-panel > p { margin: 0; }
+.data-validation-settings__help { display: grid; gap: .5rem; }
+.data-validation-settings__help p { margin: 0; line-height: 1.5; }

@@ -112,10 +112,11 @@ export class PredictorWorkbenchQualityReportComponent {
     if (!report || !predictor) return [];
     if (this.status.state() === 'ready') {
       return this.context.findings()
-        .filter(finding => QUALITY_FINDING_CODES.has(finding.code))
+        .filter(finding => QUALITY_FINDING_CODES.has(finding.code)
+          && (this.context.expectedRangeEnabled() || finding.code !== 'predictor.quality.outlier'))
         .map(toFindingView);
     }
-    return localFindings(report);
+    return localFindings(report, this.context.expectedRangeEnabled());
   });
   readonly qualityChartOption = computed(() => {
     const report = this.report();
@@ -184,7 +185,7 @@ function toFindingView(finding: StatusItem): PredictorQualityFindingView {
   };
 }
 
-function localFindings(report: PredictorDataQualityReport): PredictorQualityFindingView[] {
+function localFindings(report: PredictorDataQualityReport, expectedRangeEnabled: boolean): PredictorQualityFindingView[] {
   const findings: PredictorQualityFindingView[] = [];
   if (report.duplicateMonths.length > 0) {
     findings.push(localFinding(
@@ -221,7 +222,7 @@ function localFindings(report: PredictorDataQualityReport): PredictorQualityFind
       'warning'
     ));
   }
-  if (report.outlierCount > 0) {
+  if (expectedRangeEnabled && report.outlierCount > 0) {
     findings.push(localFinding(
       'predictor.quality.outlier',
       'Review predictor outliers',

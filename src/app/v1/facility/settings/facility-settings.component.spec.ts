@@ -1,3 +1,5 @@
+import { DataValidationSettingsCommandHandler } from '@data/account-workspace/handlers/data-validation-settings-command-handler.service';
+import { applyDataValidationSettings } from '@shared/settings-forms/data-validation-settings';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
@@ -28,7 +30,7 @@ import { FacilitySettingsFinancialComponent } from './financial/facility-setting
 import { FacilitySettingsGoalsComponent } from './goals/facility-settings-goals.component';
 import { PortfolioTransitionSettingsComponent } from './portfolio-transition/portfolio-transition-settings.component';
 import { FacilitySettingsProfileComponent } from './profile/facility-settings-profile.component';
-import { FacilitySettingsStalenessComponent } from './staleness/facility-settings-staleness.component';
+import { FacilitySettingsDataValidationComponent } from './data-validation/facility-settings-data-validation.component';
 import { FacilitySettingsUnitsComponent } from './units/facility-settings-units.component';
 
 describe('Facility settings routed components', () => {
@@ -123,6 +125,7 @@ describe('Facility settings routed components', () => {
         { provide: WorkspaceCommandBoundary, useValue: commandBoundary },
         { provide: AccountCommandHandler, useValue: accountHandler },
         { provide: FacilityCommandHandler, useValue: facilityHandler },
+        { provide: DataValidationSettingsCommandHandler, useValue: { updateSingleFacility: vi.fn(async (a, f, change) => ({ account: applyDataValidationSettings(a, change, true), facility: applyDataValidationSettings(f, change) })) } },
         { provide: ApplicationLifecycleService, useValue: lifecycle },
         { provide: BackupExportCoordinator, useValue: backupExportCoordinator },
         { provide: BackupImportCoordinator, useValue: backupImportCoordinator },
@@ -180,7 +183,7 @@ describe('Facility settings routed components', () => {
     const childPaths = settingsRoute?.children?.map(route => route.path);
 
     expect(settingsRoute?.component).toBe(FacilitySettingsComponent);
-    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'staleness', 'backup', 'portfolio', 'delete', '**']);
+    expect(childPaths).toEqual(['', 'profile', 'units', 'goals', 'financial', 'data-validation', 'staleness', 'backup', 'portfolio', 'delete', '**']);
   });
 
   it('autosaves facility profile text after a debounce without stealing focus', async () => {
@@ -444,48 +447,26 @@ describe('Facility settings routed components', () => {
 
   it('honors facility staleness inheritance and copies current account values', async () => {
     account.set({ ...accountFixture(), dataStalenessSettings: { enabled: false, thresholdMonths: 12 } });
-    selectedFacility.set({
-      ...facilityFixture('facility-a'),
-      dataStalenessSettings: { enabled: true, thresholdMonths: 3, useAccountSettings: false }
-    });
-    const fixture = createDetail(FacilitySettingsStalenessComponent);
-
-    fixture.componentInstance.form.controls['useAccountSettings'].setValue(true);
-    await fixture.componentInstance.onUseAccountStalenessChange();
-
-    expect(facilityHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dataStalenessSettings: { enabled: false, thresholdMonths: 12, useAccountSettings: true }
-      }),
-      'account-a'
-    );
-    expect(fixture.componentInstance.form.controls['enabled'].disabled).toBe(true);
+    selectedFacility.set({ ...facilityFixture('facility-a'), dataStalenessSettings: { enabled: true, thresholdMonths: 3, useAccountSettings: false } });
+    const fixture = createDetail(FacilitySettingsDataValidationComponent);
+    fixture.componentInstance.editor.stalenessForm.controls.useAccountSettings.setValue(true);
+    await fixture.componentInstance.editor.save('staleness');
+    expect(facilityHandler.update).toHaveBeenCalledWith(expect.objectContaining({
+      dataStalenessSettings: { enabled: false, thresholdMonths: 12, useAccountSettings: true }
+    }), 'account-a');
+    expect(fixture.componentInstance.editor.stalenessForm.controls.enabled.disabled).toBe(true);
   });
 
-  it('mirrors matching staleness fields to the account for single-facility accounts', async () => {
+  it('mirrors staleness through the atomic single-facility command', async () => {
     account.set({ ...accountFixture(), isSingleFacilityCompany: true });
-    facilities.set([selectedFacility()!]);
-    const fixture = createDetail(FacilitySettingsStalenessComponent);
-    fixture.componentInstance.form.patchValue({
-      useAccountSettings: false,
-      enabled: false,
-      thresholdMonths: 12
-    });
-
-    await fixture.componentInstance.saveStaleness();
-
-    expect(accountHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dataStalenessSettings: { enabled: false, thresholdMonths: 12 }
-      }),
-      'account-a'
+    const fixture = createDetail(FacilitySettingsDataValidationComponent);
+    fixture.componentInstance.editor.stalenessForm.patchValue({ useAccountSettings: false, enabled: false, thresholdMonths: 12 });
+    await fixture.componentInstance.editor.save('staleness');
+    expect(TestBed.inject(DataValidationSettingsCommandHandler).updateSingleFacility).toHaveBeenCalledWith(
+      account(), selectedFacility(), { group: 'staleness', settings: { enabled: false, thresholdMonths: 12, useAccountSettings: false } }, 'account-a'
     );
-    expect(facilityHandler.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dataStalenessSettings: { enabled: false, thresholdMonths: 12, useAccountSettings: false }
-      }),
-      'account-a'
-    );
+    expect(accountHandler.update).not.toHaveBeenCalled();
+    expect(facilityHandler.update).not.toHaveBeenCalled();
   });
 
   it('confirms before exporting a facility backup and opens the v1 import panel', async () => {

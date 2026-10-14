@@ -1,3 +1,4 @@
+import { effectiveExpectedRangeSettings } from '@shared/settings-forms/data-validation-settings';
 import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -36,6 +37,10 @@ export class WeatherPredictorQualityContextService implements PredictorQualityCo
       ? this.weatherContext.group()?.statusFindings.filter(finding =>
         finding.entity.kind === 'predictor' && finding.entity.guid === predictor.guid) ?? []
       : [];
+  });
+  readonly expectedRangeEnabled = computed(() => {
+    const account = this.workspace.account();
+    return account ? effectiveExpectedRangeSettings(account, this.workspace.facility()).enabled : true;
   });
   readonly idPrefix = computed(() =>
     `weather-quality-${safeId(this.predictor()?.guid ?? 'missing')}`);

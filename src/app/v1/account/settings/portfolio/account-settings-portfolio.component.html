@@ -110,7 +110,7 @@
       </header>
       <div class="v1-modal__body">
         @if (pendingAction === 'apply') {
-          <p>Apply units, goals, financial reporting, and data staleness from {{ account()?.name }} to {{ selectedCount }} selected facilities.</p>
+          <p>Apply units, goals, financial reporting, and data validation from {{ account()?.name }} to {{ selectedCount }} selected facilities.</p>
           <p>Facility profile, location, and classification details will not be changed.</p>
         } @else {
           <p>Deleting {{ selectedCount }} selected facilities also deletes their meters, predictors, analyses, reports, equipment, and related data.</p>
