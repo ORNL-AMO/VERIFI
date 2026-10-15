@@ -580,7 +580,7 @@ export class WorkspaceNavigationService {
     const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
     const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
     const help = this.activeSection() === 'reports'
-      ? ['Use the facility dashboard to create, copy, rename, and delete saved reports. Report-specific settings and previews are coming in later migrations.', 'The account Reports landing links to facility dashboards; account report management is coming in phase 3.']
+      ? ['Use the facility dashboard to create, copy, and delete saved reports. Report-specific settings and previews are coming in later migrations.', 'The account Reports landing links to facility dashboards; account report management is coming in phase 3.']
       : isFacility && this.activeSection() === 'data'
       ? this.buildFacilityDataHelp()
       : [
