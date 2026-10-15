@@ -1,3 +1,6 @@
+import { FacilityReportsDashboardComponent } from '@app/v1/facility/reports/facility-reports-dashboard/facility-reports-dashboard.component';
+import { FacilityReportLandingComponent } from '@app/v1/facility/reports/facility-report-landing/facility-report-landing.component';
+import { AccountReportsLandingComponent } from '@app/v1/account/reports/account-reports-landing/account-reports-landing.component';
 import { Routes } from '@angular/router';
 import { accountGuidReadyGuard, facilityReadyGuard, persistenceReadyGuard } from '@app/routing/workspace-readiness.guards';
 import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-factors/custom-grid-factors.component';
@@ -227,6 +230,13 @@ export const V1Routes: Routes = [
               { path: '**', redirectTo: 'dashboard' }
             ]
           },
+          {
+            path: 'reports', children: [
+              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+              { path: 'dashboard', component: AccountReportsLandingComponent },
+              { path: '**', redirectTo: 'dashboard' }
+            ]
+          },
           { path: '**', redirectTo: 'home/overview' }
         ]
       },
@@ -426,6 +436,20 @@ export const V1Routes: Routes = [
                     ]
                   },
                   { path: 'used-by', component: FacilityAnalysisUsedByComponent, data: { analysisScope: 'used-by' } },
+                  { path: '**', redirectTo: 'setup' }
+                ]
+              },
+              { path: '**', redirectTo: 'dashboard' }
+            ]
+          },
+          {
+            path: 'reports', children: [
+              { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+              { path: 'dashboard', component: FacilityReportsDashboardComponent, canDeactivate: [unsavedChangesGuard] },
+              {
+                path: 'workbench/:reportGuid', children: [
+                  { path: '', pathMatch: 'full', redirectTo: 'setup' },
+                  { path: 'setup', component: FacilityReportLandingComponent },
                   { path: '**', redirectTo: 'setup' }
                 ]
               },

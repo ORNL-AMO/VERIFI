@@ -1,0 +1,53 @@
+@let selectedFacility = facility();
+@let account = workspace.account();
+@let currentEditor = editor();
+@let visible = visibleCards();
+<header class="v1-section-header">
+  <div><p class="v1-eyebrow">{{ account?.name || 'Account' }} / Facility Reports</p><h1><app-ui-icon name="reports"></app-ui-icon> {{ selectedFacility?.name || 'Facility' }} Reports</h1></div>
+  <button type="button" class="v1-btn v1-btn--action" [disabled]="!canAct()" (click)="openCreate()"><app-ui-icon name="add"></app-ui-icon>Add report</button>
+</header>
+@if (workspace.status() === 'loading' || workspace.status() === 'switching') {
+  <div class="v1-alert v1-alert--info" role="status">Loading reports…</div>
+} @else if (workspace.status() === 'error') {
+  <div class="v1-alert v1-alert--danger" role="alert">{{ workspace.error()?.message || 'The report workspace could not be loaded.' }}</div>
+} @else if (!selectedFacility) {
+  <app-data-empty-state icon="reports" context="facility" title="Facility unavailable" description="Select a facility before managing reports."></app-data-empty-state>
+} @else {
+  @if (status.state() === 'error') { <div class="v1-alert v1-alert--warning" role="alert">Setup status is unavailable. Saved reports and lifecycle actions remain available.</div> }
+  @if (status.state() === 'evaluating' || status.state() === 'idle') { <div class="v1-alert v1-alert--info" role="status">Checking saved report setup…</div> }
+  @if (!workspace.canWrite() || workspace.hasPending() || saving()) { <div class="v1-alert v1-alert--info" role="status">Report actions are unavailable while workspace changes are pending.</div> }
+  @if (actionError() && !currentEditor && !deleteCandidate()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
+  <div class="v1-data-dashboard-workspace"><div class="v1-data-browse">
+    <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four" aria-label="Report filters" [formGroup]="filtersForm">
+      <div class="v1-data-browse-search"><span class="input-group-text"><app-ui-icon name="search"></app-ui-icon></span><input type="search" aria-label="Find report, type, analysis, or period" placeholder="Find report, type, analysis, or period" formControlName="search"></div>
+      <label><span>Report type</span><select class="v1-select" formControlName="type"><option value="all">All</option>@for (option of reportTypes(); track option.value) { <option [value]="option.value">{{ option.label }}</option> }</select></label>
+      <label><span>Setup status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="ready">Ready</option><option value="warning">Warning</option><option value="error">Error</option></select></label>
+      <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="modified">Recently modified</option><option value="name">Name</option></select></label>
+    </form>
+    @if (cards().length === 0) {
+      <app-data-empty-state icon="reports" context="facility" title="No reports" description="Add a report to start organizing this facility’s reporting."></app-data-empty-state>
+    } @else if (visible.length === 0) {
+      <app-data-empty-state icon="reports" context="facility" title="No reports match these filters" description="Adjust the search or filters to see your reports."></app-data-empty-state>
+    } @else {
+      <div class="v1-data-browse-grid" role="list" aria-label="Facility reports">
+        @for (card of visible; track card.report.guid) {
+          <app-resource-browse-card [view]="card.view" [actions]="cardActions()" [canOpen]="!navigationBlocked()" (opened)="open(card.report.guid)" (actionSelected)="action(card, $event)"></app-resource-browse-card>
+        }
+      </div>
+    }
+  </div></div>
+}
+@if (currentEditor) {
+  <app-report-draft-slideout [form]="editorForm" [reportTypes]="reportTypes()" [saving]="saving()" [canSave]="canSave()" [error]="actionError() || editorAvailabilityError()" (submitted)="submitEditor()" (cancelled)="cancelEditor()" (closeRequested)="requestCloseEditor()"></app-report-draft-slideout>
+}
+<ng-template #deleteConfirmation>
+  @if (deleteCandidate(); as candidate) {
+    <app-confirmation-dialog title="Delete report?" titleId="delete-facility-report-title" cancelAriaLabel="Cancel report deletion" confirmLabel="Delete report" confirmIcon="delete" [busy]="saving()" [disabled]="!canAct()" (confirmed)="confirmDelete()" (cancelled)="cancelConfirmation()">
+      <p>Permanently delete <strong>{{ candidate.report.name || 'Untitled facility report' }}</strong>? Its analyses and source data will remain available.</p>
+      @if (actionError()) { <div class="v1-alert v1-alert--danger" role="alert">{{ actionError() }}</div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>
+<ng-template #discardConfirmation>
+  <app-confirmation-dialog title="Discard report edits?" titleId="discard-report-edits-title" cancelAriaLabel="Keep editing report" confirmLabel="Discard edits" (confirmed)="discardEditor()" (cancelled)="cancelConfirmation()"><p>Your unsaved report edits will be discarded.</p></app-confirmation-dialog>
+</ng-template>

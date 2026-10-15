@@ -31,6 +31,9 @@ export const singleSiteAccountRedirectGuard: CanActivateFn = async (_route, stat
     return true;
   }
 
+  // Reports retain account scope even for a single-facility workspace.
+  if (accountRouteParts(state)[3] === 'reports') return true;
+
   await inject(SingleFacilityAnalysisPairService).ensurePairs();
   if (isAccountDataRoute(state) && !isAccountCustomDataRoute(state)) {
     return true;

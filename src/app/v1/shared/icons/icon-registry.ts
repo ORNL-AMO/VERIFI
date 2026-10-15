@@ -46,6 +46,8 @@ import ElectricPlugsIcon from '@hugeicons/core-free-icons/ElectricPlugsIcon';
 import EnergyIcon from '@hugeicons/core-free-icons/EnergyIcon';
 import FactoryIcon from '@hugeicons/core-free-icons/FactoryIcon';
 import File01Icon from '@hugeicons/core-free-icons/File01Icon';
+import Files02Icon from '@hugeicons/core-free-icons/Files02Icon';
+import FileChartColumnIcon from '@hugeicons/core-free-icons/FileChartColumnIcon';
 import FileAddIcon from '@hugeicons/core-free-icons/FileAddIcon';
 import FileDownloadIcon from '@hugeicons/core-free-icons/FileDownloadIcon';
 import FileImportIcon from '@hugeicons/core-free-icons/FileImportIcon';
@@ -173,7 +175,8 @@ export const ICON_REGISTRY = {
   predictor: ShippingLoadingIcon,
   otherEnergy: EnergyIcon,
   otherFuel: Fuel01Icon,
-  reports: File01Icon,
+  reports: Files02Icon,
+  report: FileChartColumnIcon,
   refresh: RefreshIcon,
   rainDrop: RainDropIcon,
   ruler: RulerIcon,

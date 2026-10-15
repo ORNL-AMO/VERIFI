@@ -1,0 +1,4 @@
+form, fieldset { display: grid; gap: var(--v1-space-3); min-width: 0; }
+label { font-weight: 700; }
+p { color: var(--v1-muted); }
+.report-draft-actions { display: flex; justify-content: flex-end; gap: var(--v1-space-2); }
