@@ -16,12 +16,27 @@ describe('DataNavComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Account Data');
-    expect(fixture.nativeElement.textContent).toContain('Portfolio');
+    expect(fixture.nativeElement.textContent).toContain('Facilities');
     expect(fixture.nativeElement.textContent).toContain('Custom Database Items');
     expect(fixture.nativeElement.textContent).toContain('Fuels');
     expect(fixture.nativeElement.textContent).not.toContain('Grid Factors');
     expect(fixture.nativeElement.textContent).not.toContain('Global Warming Potentials');
     expect(fixture.nativeElement.textContent).not.toContain('Account Settings');
+  });
+
+  it('links every portfolio destination in the sidebar and highlights its existing URL', () => {
+    state.activeSection.set('data');
+    state.activeDetail.set('portfolio');
+    state.activePortfolioTab.set('meters');
+    const fixture = TestBed.createComponent(DataNavComponent);
+    fixture.detectChanges();
+    const links = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.v1-nav__link'));
+    expect(links.slice(0, 6).map(link => link.textContent?.trim())).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
+    expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Meters']);
+    expect(links[1].getAttribute('href')).toContain('/account/account-a/data/portfolio/meters');
+    state.activePortfolioTab.set('reports');
+    fixture.detectChanges();
+    expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Reports']);
   });
 
   it('shows emissions custom data navigation only when emissions display is enabled', () => {

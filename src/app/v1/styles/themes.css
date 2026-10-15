@@ -39,6 +39,7 @@
 }
 
 .v1-palette-neon {
+  --v1-inverse-text: #07100c;
   --v1-bg: #081121;
   --v1-surface: #101a2d;
   --v1-surface-muted: #172642;

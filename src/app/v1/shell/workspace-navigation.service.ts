@@ -62,6 +62,7 @@ export interface AccountDropdownOption {
 }
 
 export interface RouteState {
+  readonly portfolioTab?: AccountPortfolioTab;
   readonly view: 'welcome' | 'workspace';
   readonly contextMode: ContextMode;
   readonly accountGuid?: string;
@@ -156,6 +157,7 @@ export class WorkspaceNavigationService {
   readonly contextMode = computed(() => this.routeState().contextMode);
   readonly activeSection = computed(() => this.routeState().section);
   readonly activeDetail = computed(() => this.routeState().detail);
+  readonly activePortfolioTab = computed(() => this.routeState().portfolioTab);
   readonly activeMeterGuid = computed(() => this.routeState().meterGuid);
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
@@ -724,6 +726,9 @@ export function parseWorkspaceRoute(url: string): RouteState {
     view: 'workspace',
     contextMode: 'account',
     accountGuid: routeParts[2],
+    portfolioTab: section === 'data' && routeParts[4] === 'portfolio'
+      ? (['facilities', 'meters', 'predictors', 'energy-uses', 'analyses', 'reports'].includes(routeParts[5]) ? routeParts[5] as AccountPortfolioTab : 'facilities')
+      : undefined,
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],
     analysisGuid: isAccountAnalysisWorkbenchRoute

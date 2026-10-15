@@ -1,10 +1,13 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { page } from 'vitest/browser';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountDataModule } from '../account-data.module';
 import { AccountPortfolioComponent } from './account-portfolio.component';
+import { PORTFOLIO_PALETTES, textContrast } from './portfolio-browser-test.helpers';
 
 // Exercise native ResizeObserver and the same scroll ancestry as the routed browse tabs.
 describe('portfolio sticky browse layout', () => {
@@ -13,6 +16,7 @@ describe('portfolio sticky browse layout', () => {
       imports: [AccountDataModule],
       providers: [
         provideRouter([]),
+        { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities') } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         { provide: AccountWorkspaceStore, useValue: {
           account: signal({ guid: 'account-a', name: 'Account A' }), facilities: signal([{ guid: 'facility-a' }]),
@@ -27,6 +31,26 @@ describe('portfolio sticky browse layout', () => {
     const host = fixture.nativeElement as HTMLElement;
     host.classList.add('v1-root');
     Object.assign(host.style, { width: '900px', height: '500px', overflow: 'auto' });
+    const actions = [...host.querySelectorAll<HTMLElement>('.v1-account-portfolio__header-actions .v1-btn')];
+    expect(actions).toHaveLength(3);
+    const typography = actions.map(action => {
+      const style = getComputedStyle(action);
+      return { size: style.fontSize, weight: style.fontWeight, lineHeight: style.lineHeight };
+    });
+    expect(typography[1]).toEqual(typography[0]);
+    expect(typography[2]).toEqual(typography[0]);
+    for (const palette of PORTFOLIO_PALETTES) {
+      for (const dark of [false, true]) {
+        for (const highContrast of [false, true]) {
+          host.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''}${highContrast ? ' v1-contrast-strong' : ''}`;
+          for (const action of actions) {
+            expect(textContrast(action), `${action.textContent}, ${palette}, dark=${dark}, highContrast=${highContrast}`).toBeGreaterThanOrEqual(4.5);
+          }
+        }
+      }
+    }
+    host.className = 'v1-root';
+    await page.screenshot({ element: host.querySelector('header')!, path: '../../../../../../.angular/portfolio-spike/header-actions.png' });
     const content = document.createElement('section');
     // A simple routed-toolbar probe avoids unrelated resource services and calculations.
     content.innerHTML = '<form class="v1-data-browse-toolbar">Search controls</form><div style="height:1400px"></div>';

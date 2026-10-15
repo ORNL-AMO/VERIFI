@@ -46,7 +46,7 @@ describe('WorkspaceNavigationService', () => {
     };
     usableAccounts = vi.fn(() => []);
     accountSignal = signal({ guid: 'account-a', name: 'Account A' });
-    facilitiesSignal = signal([{ guid: 'facility-a', name: 'Facility A' }]);
+    facilitiesSignal = signal([{ guid: 'facility-a', name: 'Facility A', accountId: 'account-a' }]);
     selectedFacilitySignal = signal({ guid: 'facility-a', name: 'Facility A' });
     workspaceStore = {
       account: vi.fn(() => accountSignal()),
@@ -81,6 +81,14 @@ describe('WorkspaceNavigationService', () => {
       ]
     });
     service = TestBed.inject(WorkspaceNavigationService);
+  });
+
+  it('tracks the active portfolio destination without changing existing route detail', () => {
+    const url = '/v1/workspace/account/account-a/data/portfolio/predictors';
+    router.events.next(new NavigationEnd(1, url, url));
+    expect(service.activeDetail()).toBe('portfolio');
+    expect(service.activePortfolioTab()).toBe('predictors');
+    expect(parseWorkspaceRoute('/v1/workspace/account/account-a/data/portfolio').portfolioTab).toBe('facilities');
   });
 
   it('enables Reports and retains its dashboard on context and facility switches', () => {

@@ -1,5 +1,4 @@
 @let currentAccount = account();
-@let selectors = portfolioSelectors();
 
 <section class="v1-account-portfolio" aria-labelledby="v1-account-portfolio-title">
   @if (currentAccount) {
@@ -10,27 +9,16 @@
         <h1 id="v1-account-portfolio-title"><app-ui-icon name="portfolio"></app-ui-icon> Portfolio</h1>
       </div>
       <div class="v1-account-portfolio__header-actions">
-        <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
-        <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openCreateFacilityDrawer()"><app-ui-icon name="add"></app-ui-icon>Add facility</button>
+        @if (showUpload()) {
+          <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
+        }
+        @if (isFacilities()) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openCreateFacilityDrawer()"><app-ui-icon name="add"></app-ui-icon>Add facility</button>
+          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount.guid, 'settings', 'portfolio']"><app-ui-icon name="settings"></app-ui-icon>Manage Portfolio</a>
+        }
       </div>
     </header>
 
-    <nav class="v1-account-portfolio__selectors" aria-label="Portfolio content">
-      @for (selector of selectors; track selector.path) {
-        <a
-          class="v1-portfolio-selector"
-          [routerLink]="selector.path"
-          routerLinkActive="v1-portfolio-selector--active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          ariaCurrentWhenActive="page">
-          <span class="v1-portfolio-selector__label">{{ selector.label }}</span>
-          <span class="v1-portfolio-selector__count">
-            <app-ui-icon [name]="selector.icon"></app-ui-icon>
-            <strong>{{ selector.total }}</strong>
-          </span>
-        </a>
-      }
-    </nav>
     </div>
 
     @if (!canWrite()) {

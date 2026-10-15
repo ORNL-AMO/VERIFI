@@ -26,6 +26,7 @@ import { AccountPortfolioPredictorsTabComponent } from './portfolio/account-port
 import { AccountPortfolioReportsTabComponent } from './portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountPortfolioComponent } from './portfolio/account-portfolio.component';
 import { CreateFacilityDrawerComponent } from './portfolio/create-facility-drawer/create-facility-drawer.component';
+import { FacilityDirectoryComponent } from './portfolio/facility-directory/facility-directory.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { CreateFacilityDrawerComponent } from './portfolio/create-facility-drawe
     ExistingGwpPickerComponent,
     AccountPortfolioComponent,
     AccountPortfolioFacilitiesTabComponent,
+    FacilityDirectoryComponent,
     AccountPortfolioMetersTabComponent,
     AccountPortfolioPlaceholderTabComponent,
     AccountPortfolioPredictorsTabComponent,

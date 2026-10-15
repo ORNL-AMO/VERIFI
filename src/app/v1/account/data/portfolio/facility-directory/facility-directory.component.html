@@ -1,0 +1,17 @@
+<ul class="facility-directory" role="list" [class.facility-directory--single-column]="singleColumn()" aria-label="Facilities">
+  @for (view of facilities(); track view.facility.guid) {
+    <li>
+      <button type="button" class="facility-directory__entry" [attr.data-tone]="view.tone" (click)="openFacility.emit(view.facility.guid)">
+        <span class="facility-directory__icon"><app-ui-icon name="facility"></app-ui-icon></span>
+        <span class="facility-directory__identity">
+          <strong>{{ view.facility.name }}</strong>
+        </span>
+        <span class="facility-directory__status">
+          <app-ui-icon [name]="view.icon"></app-ui-icon>
+          <span [class.visually-hidden]="view.tone === 'success'">{{ view.statusLabel }}</span>
+        </span>
+        <app-ui-icon class="facility-directory__arrow" name="chevronRight"></app-ui-icon>
+      </button>
+    </li>
+  }
+</ul>
