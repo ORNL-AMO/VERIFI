@@ -12,7 +12,7 @@ import { reportFacility, reportFixture, reportSnapshot } from './testing/report-
 describe('FacilityReportActionsService', () => {
   let store: AccountWorkspaceStore;
   let service: FacilityReportActionsService;
-  let handler: { addFacilityReport: ReturnType<typeof vi.fn>; deleteFacilityReport: ReturnType<typeof vi.fn> };
+  let handler: { addFacilityReport: ReturnType<typeof vi.fn>; updateFacilityReport: ReturnType<typeof vi.fn>; deleteFacilityReport: ReturnType<typeof vi.fn> };
   let boundary: { execute: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
@@ -20,6 +20,7 @@ describe('FacilityReportActionsService', () => {
     store.publish(reportSnapshot(), { facility: reportFacility });
     handler = {
       addFacilityReport: vi.fn(async report => ({ ...report, id: 11 })),
+      updateFacilityReport: vi.fn(async report => report),
       deleteFacilityReport: vi.fn(async report => report.id)
     };
     boundary = { execute: vi.fn(async (options, persist) => {
@@ -58,6 +59,40 @@ describe('FacilityReportActionsService', () => {
     expect(copy.analysisReportSettings).not.toBe(source.analysisReportSettings);
     expect(copy.checked).toBe(false);
     expect(copy.createdDate.getTime()).toBeGreaterThan(source.createdDate.getTime());
+  });
+
+  it('updates only the name from the latest owned record and skips unchanged names', async () => {
+    const source = store.facilityReports()[0];
+    expect(await service.updateName('facility-a', source.guid, ` ${source.name} `)).toBe(source);
+    expect(boundary.execute).not.toHaveBeenCalled();
+    const latest = structuredClone(source);
+    latest.costSavingsReportSettings.unitCostTable = { 2024: { 'group-a': 6.2 } };
+    boundary.execute.mockImplementationOnce(async (options, persist) => {
+      store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [latest] }] });
+      const value = await persist();
+      store.publishCommittedPatch(options.publication.buildPatch(value));
+      return { value };
+    });
+    const updated = await service.updateName('facility-a', source.guid, ' Revised name ');
+    expect(updated).toEqual({ ...latest, name: 'Revised name' });
+    expect(source.name).toBe('Saved report');
+    expect(handler.updateFacilityReport).toHaveBeenCalledTimes(1);
+    await expect(service.updateName('facility-a', source.guid, ' ')).rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(service.updateName('facility-b', source.guid, 'Wrong facility')).rejects.toMatchObject({ code: 'workspace-not-ready' });
+  });
+
+  it('does not rewrite a name that another queued operation has already saved', async () => {
+    boundary.execute.mockImplementationOnce(async (options, persist) => {
+      const latest = reportFixture({ name: 'Already saved' });
+      store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [latest] }] });
+      const value = await persist();
+      store.publishCommittedPatch(options.publication.buildPatch(value));
+      return { value };
+    });
+    const saved = await service.updateName('facility-a', 'report-a', 'Already saved');
+    expect(saved.name).toBe('Already saved');
+    expect(saved.modifiedDate).toEqual(reportFixture().modifiedDate);
+    expect(handler.updateFacilityReport).not.toHaveBeenCalled();
   });
 
   it('creates Data Quality reports with incomplete setup until a source selection is made', async () => {

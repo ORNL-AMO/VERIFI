@@ -89,6 +89,9 @@ describe('WorkspaceNavigationService', () => {
     expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
     expect(service.activeReportGuid()).toBe('report-a');
+    expect(service.routeState().reportStage).toBe('setup');
+    expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports/workbench/report-a/data-checks').reportStage).toBe('data-checks');
+    expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports/workbench/report-a/report').reportStage).toBe('report');
     service.setContext('account');
     expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
     service.setFacility('facility-b');
@@ -96,6 +99,27 @@ describe('WorkspaceNavigationService', () => {
     service.openSection('reports');
     expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-a'));
     expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports').detail).toBe('dashboard');
+  });
+
+  it('lets report route guards finish edits before changing the selected facility', () => {
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
+    service.setFacility('facility-b');
+    expect(router.navigate).toHaveBeenCalledWith(service.facilityReportsRoute('facility-b'));
+    expect(workspaceService.selectFacility).not.toHaveBeenCalled();
+  });
+
+  it('flushes report edits before account selection and retains a failed draft in its current account', async () => {
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
+    const flush = vi.fn().mockResolvedValue(false);
+    const unregister = TestBed.inject(UnsavedChangesService).register(() => true, vi.fn(), () => false, flush);
+    await service.openWorkspace('account-b');
+    expect(flush).toHaveBeenCalledTimes(1);
+    expect(workspaceService.selectAccount).not.toHaveBeenCalled();
+    unregister();
+    let dirty = true;
+    TestBed.inject(UnsavedChangesService).register(() => dirty, vi.fn(), () => false, async () => { dirty = false; return true; });
+    await service.openWorkspace('account-b');
+    expect(workspaceService.selectAccount).toHaveBeenCalledWith('account-b');
   });
 
   it('builds workspace routes without support panel tab state', () => {

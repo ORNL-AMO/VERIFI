@@ -1,0 +1,25 @@
+@let card = context.card();
+@if (card) {
+  <section class="report-section report-setup" aria-label="Report setup">
+    <div class="report-setup-panel" aria-labelledby="report-details-heading">
+      <h2 id="report-details-heading">Report details</h2>
+      <label for="report-workbench-name">Name <span aria-hidden="true">*</span></label>
+      <input id="report-workbench-name" class="v1-input" [formControl]="editor.name" autocomplete="off" required [attr.aria-invalid]="editor.state() === 'invalid' ? true : null" aria-describedby="report-name-help">
+      @if (editor.state() === 'invalid') {
+        <p id="report-name-help" class="v1-field-error" role="alert">Enter a nonblank report name.</p>
+      } @else {
+        <p id="report-name-help" class="report-setup-help">Give this report a name that makes it easy to find. Changes save automatically.</p>
+      }
+    </div>
+    <div class="report-setup-panel" aria-labelledby="report-settings-heading">
+      <h2 id="report-settings-heading">Report-specific settings</h2>
+      <p class="report-setup-help">{{ card.view.chips?.[0]?.label }} settings are pending migration. Your saved settings are preserved.</p>
+    </div>
+  </section>
+  @if (context.findings().length) {
+    <section class="report-section" aria-labelledby="report-configuration-heading">
+      <h2 id="report-configuration-heading">Configuration findings</h2>
+      <ul>@for (finding of context.findings(); track finding.id) { <li>{{ finding.description }}</li> }</ul>
+    </section>
+  }
+}

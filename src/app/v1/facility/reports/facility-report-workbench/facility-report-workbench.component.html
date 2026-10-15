@@ -1,0 +1,90 @@
+@let report = context.report();
+@let card = context.card();
+@let facility = context.facility();
+@let account = context.workspace.account();
+@if (context.workspace.status() === 'loading' || context.workspace.status() === 'switching') {
+  <p role="status">Loading report…</p>
+} @else if (context.workspace.status() === 'error') {
+  <div class="v1-alert v1-alert--danger" role="alert">{{ context.workspace.error()?.message || 'The report workspace could not be loaded.' }}</div>
+  <a [routerLink]="context.dashboardRoute()">Return to facility reports</a>
+} @else if (!report || !card || !facility) {
+  <app-data-empty-state icon="report" context="facility" title="Report unavailable" description="This report may have been deleted, belong to another facility, or be hidden by the account’s Other Impacts setting."></app-data-empty-state>
+  <a class="v1-btn v1-btn--secondary" [routerLink]="context.dashboardRoute()">Return to facility reports</a>
+} @else {
+  <div class="v1-data-workbench-sticky report-workbench-sticky">
+    <header class="v1-data-workbench-header">
+      <nav class="v1-data-workbench-breadcrumb" aria-label="Facility report breadcrumb">
+        <ol>
+          @if (account) {
+            <li><a [routerLink]="context.navigation.accountReportsRoute(account.guid)">{{ account.name || 'Account' }}</a></li>
+          } @else {
+            <li>Account</li>
+          }
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          <li><a [routerLink]="context.dashboardRoute()">{{ facility.name || 'Facility' }}</a></li>
+          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
+          <li><a [routerLink]="context.dashboardRoute()">Facility Reports</a></li>
+        </ol>
+      </nav>
+      <div class="v1-data-workbench-title-row">
+        <div class="v1-data-workbench-title">
+          <h1 id="facility-report-workbench-title"><app-ui-icon name="report"></app-ui-icon>
+            <app-data-workbench-resource-switcher [resources]="context.resources()" [selectedId]="report.guid" [currentLabel]="report.name || 'Untitled facility report'" ariaLabel="Switch facility report" (resourceSelected)="switchReport($event)"></app-data-workbench-resource-switcher>
+          </h1>
+        </div>
+        <div class="v1-data-workbench-actions" aria-label="Report summary and controls">
+          <span class="report-save-state" [class.report-save-state--saved]="editor.state() === 'saved'" [class.report-save-state--error]="editor.state() === 'error' || editor.state() === 'invalid'" role="status" aria-live="polite">
+            @if (editor.saving()) { <app-ui-icon name="loading" spin></app-ui-icon> Saving… }
+            @else {
+              @switch (editor.state()) {
+                @case ('idle') { Changes save automatically. }
+                @case ('dirty') { <app-ui-icon name="clock"></app-ui-icon> Changes save automatically. }
+                @case ('saved') { <app-ui-icon name="check"></app-ui-icon> Saved. }
+                @case ('invalid') { <app-ui-icon name="warning"></app-ui-icon> Fix validation errors. }
+                @case ('error') { <app-ui-icon name="warning"></app-ui-icon> Save failed. }
+              }
+            }
+          </span>
+          <span class="v1-chip">{{ card.view.chips?.[0]?.label }}</span>
+          <span class="v1-chip" [class.v1-chip--danger]="card.status === 'error'" [class.v1-chip--warning]="card.status === 'warning'" [class.v1-chip--success]="card.status === 'ready'" role="status">
+            @switch (card.status) {
+              @case ('ready') { <app-ui-icon name="success"></app-ui-icon> No Issues }
+              @case ('error') { <app-ui-icon name="warning"></app-ui-icon> Needs attention }
+              @case ('warning') { <app-ui-icon name="warning"></app-ui-icon> Needs review }
+              @case ('checking') { <app-ui-icon name="loading" spin></app-ui-icon> Checking setup }
+              @case ('unavailable') { <app-ui-icon name="warning"></app-ui-icon> Setup status unavailable }
+            }
+          </span>
+          <app-data-workbench-facts-toggle #factsToggle controls="report-workbench-facts"></app-data-workbench-facts-toggle>
+        </div>
+      </div>
+      @if (editor.isDirty() || editor.error()) {
+        <div class="v1-alert" [class.v1-alert--danger]="editor.state() === 'error' || editor.state() === 'invalid'" [class.v1-alert--info]="editor.state() === 'dirty'" role="status">
+          @if (editor.error()) { <span>{{ editor.error() }}</span> }
+          @else if (editor.state() === 'invalid') { <span>Enter a nonblank name in Setup or discard your changes before leaving this report.</span> }
+          @else { <span>Your edits will save automatically before leaving this report.</span> }
+          @if (editor.state() === 'error') { <button type="button" class="v1-btn v1-btn--secondary" [disabled]="editor.saving()" (click)="editor.retry()">Retry</button> }
+          <button type="button" class="v1-btn v1-btn--ghost" [disabled]="editor.saving()" (click)="editor.discard()">Discard changes</button>
+        </div>
+      }
+      <div id="report-workbench-facts" [hidden]="!factsToggle.expanded()">
+        <dl class="report-facts" aria-label="Saved report configuration">
+          <div><dt>Report type</dt><dd>{{ card.view.chips?.[0]?.label }}</dd></div>
+          @for (section of card.view.factSections; track section.id) {
+            @for (fact of section.facts; track fact.id) { <div><dt>{{ fact.label }}</dt><dd>{{ fact.valueLabel }}</dd></div> }
+          }
+        </dl>
+      </div>
+    </header>
+    <app-analysis-stage-navigation [stages]="context.stages()" layout="horizontal" ariaLabel="Facility report workflow stages"></app-analysis-stage-navigation>
+  </div>
+  <main class="report-workbench-content" aria-labelledby="facility-report-workbench-title"><router-outlet></router-outlet></main>
+  <footer class="v1-wizard-actions" aria-label="Report workflow navigation">
+    <a class="v1-btn v1-btn--quiet" [routerLink]="previous()?.route || context.dashboardRoute()"><app-ui-icon name="chevronLeft"></app-ui-icon>Back</a>
+    @if (next(); as nextStage) {
+      <a class="v1-btn v1-btn--action" [routerLink]="nextStage.route">Continue<app-ui-icon name="chevronRight"></app-ui-icon></a>
+    } @else {
+      <a class="v1-btn v1-btn--action" [routerLink]="context.dashboardRoute()">Back to reports<app-ui-icon name="arrowLeft"></app-ui-icon></a>
+    }
+  </footer>
+}

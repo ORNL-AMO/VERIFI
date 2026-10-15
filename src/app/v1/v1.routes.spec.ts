@@ -514,7 +514,7 @@ describe('V1 Reports route entry and canonicalization', () => {
   }
   function routeStubs(routes: Route[]): Route[] {
     return routes.map(route => ({ ...route,
-      ...(route.component ? { component: ReportsRouteTestComponent, canDeactivate: [] } : {}),
+      ...(route.component ? { component: ReportsRouteTestComponent, canDeactivate: [], canActivate: [] } : {}),
       ...(route.children ? { children: routeStubs(route.children) } : {})
     }));
   }
@@ -539,6 +539,8 @@ describe('V1 Reports route entry and canonicalization', () => {
       ['/facility/facility-a/reports/unknown', '/facility/facility-a/reports/dashboard'],
       ['/facility/facility-a/reports/workbench/report-a', '/facility/facility-a/reports/workbench/report-a/setup'],
       ['/facility/facility-a/reports/workbench/report-a/setup', '/facility/facility-a/reports/workbench/report-a/setup'],
+      ['/facility/facility-a/reports/workbench/report-a/data-checks', '/facility/facility-a/reports/workbench/report-a/data-checks'],
+      ['/facility/facility-a/reports/workbench/report-a/report', '/facility/facility-a/reports/workbench/report-a/report'],
       ['/facility/facility-a/reports/workbench/report-a/unknown', '/facility/facility-a/reports/workbench/report-a/setup'],
       ['/account/account-a/reports', '/account/account-a/reports/dashboard'],
       ['/account/account-a/reports/unknown', '/account/account-a/reports/dashboard']
