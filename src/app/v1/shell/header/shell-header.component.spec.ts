@@ -1,3 +1,5 @@
+import { signal } from '@angular/core';
+import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
@@ -7,11 +9,35 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { ShellHeaderComponent } from './shell-header.component';
 
 describe('ShellHeaderComponent', () => {
+  it('downloads the whole account immediately, including in facility context', () => {
+    const { fixture, backups, navigation } = setup(true);
+    navigation.contextMode.mockReturnValue('facility');
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-header-backup__button');
+    button.click();
+    expect(backups.download).toHaveBeenCalledWith({ scope: 'account', accountGuid: 'account-a', format: 'json' });
+    button.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role=tooltip]').hidden).toBe(false);
+    expect(button.getAttribute('aria-label')).toContain('Account A');
+    expect(button.getAttribute('aria-label')).toContain('Backup recommended');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role=tooltip]').hidden).toBe(true);
+    backups.preparing.set(true);
+    backups.available.set(false);
+    fixture.detectChanges();
+    expect(button.disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('[role=status]').textContent).toContain('Preparing');
+    button.click();
+    expect(backups.download).toHaveBeenCalledTimes(1);
+  });
+
   it('shows brand and appearance controls on the welcome screen', () => {
     const { fixture, appearance } = setup(false);
 
     expect(fixture.nativeElement.querySelector('.v1-workspace__brand')?.textContent).toContain('VERIFI');
     expect(fixture.nativeElement.querySelector('.v1-workspace__account-menu')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.v1-header-backup')).toBeNull();
     expect(fixture.nativeElement.querySelector('[aria-label="Toggle support panel"]')).toBeNull();
 
     const settingsButton: HTMLButtonElement = fixture.nativeElement.querySelector('[aria-label="Appearance settings"]');
@@ -102,6 +128,7 @@ function setup(isWorkspaceRoute: boolean): {
   fixture: ComponentFixture<ShellHeaderComponent>;
   appearance: any;
   navigation: any;
+  backups: any;
 } {
   const appearance = {
     settings: vi.fn(() => ({
@@ -136,15 +163,21 @@ function setup(isWorkspaceRoute: boolean): {
     toggleSupportPanel: vi.fn()
   };
 
+  const backups = {
+    available: signal(true), preparing: signal(false),
+    reminder: signal({ tone: 'recommended', label: 'No backup recorded', detail: 'Backup recommended.' }),
+    download: vi.fn(async () => undefined)
+  };
   TestBed.configureTestingModule({
     imports: [CommonModule, IconComponent],
     declarations: [ShellHeaderComponent],
     providers: [
+      { provide: ManualBackupDownloadService, useValue: backups },
       { provide: AppearanceService, useValue: appearance },
       { provide: WorkspaceNavigationService, useValue: navigation }
     ]
   });
   const fixture = TestBed.createComponent(ShellHeaderComponent);
   fixture.detectChanges();
-  return { fixture, appearance, navigation };
+  return { fixture, appearance, navigation, backups };
 }

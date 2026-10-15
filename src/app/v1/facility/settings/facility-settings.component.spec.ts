@@ -1,3 +1,4 @@
+import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { DataValidationSettingsCommandHandler } from '@data/account-workspace/handlers/data-validation-settings-command-handler.service';
 import { applyDataValidationSettings } from '@shared/settings-forms/data-validation-settings';
 import { signal } from '@angular/core';
@@ -49,6 +50,7 @@ describe('Facility settings routed components', () => {
     refreshAccountCatalog: ReturnType<typeof vi.fn>;
     handleMarkedAccountDeletion: ReturnType<typeof vi.fn>;
   };
+  let manualBackups: { available: ReturnType<typeof signal<boolean>>; preparing: ReturnType<typeof signal<boolean>>; reminder: ReturnType<typeof signal>; download: ReturnType<typeof vi.fn> };
   let backupExportCoordinator: { exportFacility: ReturnType<typeof vi.fn> };
   let backupImportCoordinator: {
     prepareTextBackup: ReturnType<typeof vi.fn>;
@@ -83,6 +85,11 @@ describe('Facility settings routed components', () => {
     lifecycle = {
       refreshAccountCatalog: vi.fn(async () => undefined),
       handleMarkedAccountDeletion: vi.fn(async () => [])
+    };
+    manualBackups = {
+      available: signal(true), preparing: signal(false),
+      reminder: signal({ tone: 'recommended', label: 'No backup recorded', detail: 'Backup recommended.' }),
+      download: vi.fn(async () => undefined)
     };
     backupExportCoordinator = {
       exportFacility: vi.fn(async () => facilityBackupFile())
@@ -127,6 +134,7 @@ describe('Facility settings routed components', () => {
         { provide: FacilityCommandHandler, useValue: facilityHandler },
         { provide: DataValidationSettingsCommandHandler, useValue: { updateSingleFacility: vi.fn(async (a, f, change) => ({ account: applyDataValidationSettings(a, change, true), facility: applyDataValidationSettings(f, change) })) } },
         { provide: ApplicationLifecycleService, useValue: lifecycle },
+        { provide: ManualBackupDownloadService, useValue: manualBackups },
         { provide: BackupExportCoordinator, useValue: backupExportCoordinator },
         { provide: BackupImportCoordinator, useValue: backupImportCoordinator },
         { provide: WorkspaceNavigationService, useValue: navigation },
@@ -472,14 +480,14 @@ describe('Facility settings routed components', () => {
   it('confirms before exporting a facility backup and opens the v1 import panel', async () => {
     const fixture = createDetail(FacilitySettingsBackupComponent);
 
-    buttonByText(fixture, 'Backup facility').click();
+    buttonByText(fixture, 'Download facility JSON').click();
     fixture.detectChanges(false);
 
-    expect(backupExportCoordinator.exportFacility).not.toHaveBeenCalled();
+    expect(manualBackups.download).not.toHaveBeenCalled();
 
     await fixture.componentInstance.confirmBackupDownload();
 
-    expect(backupExportCoordinator.exportFacility).toHaveBeenCalledWith('facility-a');
+    expect(manualBackups.download).toHaveBeenCalledWith({ scope: 'facility', accountGuid: 'account-a', facilityGuid: 'facility-a', format: 'json' });
 
     buttonByText(fixture, 'Import backup').click();
     fixture.detectChanges(false);

@@ -272,3 +272,30 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Backup Settings keeps each section icon with its title and related actions. */
+.v1-backup-settings .v1-settings-card {
+  align-content: start;
+  gap: .45rem;
+}
+
+.v1-backup-settings__heading {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.v1-backup-settings__heading .v1-icon {
+  flex: 0 0 auto;
+  color: var(--v1-muted);
+}
+
+.v1-backup-settings .v1-backup-settings__note {
+  color: var(--v1-muted);
+  font-size: .78rem;
+  line-height: 1.4;
+}
+
+.v1-backup-settings .v1-settings-actions {
+  margin-top: .15rem;
+}

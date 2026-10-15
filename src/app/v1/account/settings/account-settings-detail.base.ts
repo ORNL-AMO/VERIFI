@@ -49,10 +49,10 @@ export abstract class AccountSettingsDetailBase extends SettingsDetailBase {
         () => this.accountHandler.update({ ...updatedAccount }, updatedAccount.guid)
       );
       await this.lifecycle.refreshAccountCatalog();
-    });
+    }, true);
   }
 
-  protected override async runSave(label: string, save: () => Promise<void>): Promise<void> {
-    await super.runSave(label, save, 'v1 account settings');
+  protected override async runSave(label: string, save: () => Promise<void>, savesForm = false): Promise<void> {
+    await super.runSave(label, save, savesForm, 'v1 account settings');
   }
 }

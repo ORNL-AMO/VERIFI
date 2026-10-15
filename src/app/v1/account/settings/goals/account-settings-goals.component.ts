@@ -22,11 +22,7 @@ export class AccountSettingsGoalsComponent extends AccountSettingsDetailBase {
     super();
     effect(() => {
       const account = this.account();
-      if (!account) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!account || !this.shouldRefreshSettingsForm(account.guid)) {
         return;
       }
       this.buildForm(account);
@@ -63,6 +59,7 @@ export class AccountSettingsGoalsComponent extends AccountSettingsDetailBase {
   private buildForm(account: IdbAccount): void {
     this.form = this.settingsForms.getSustainabilityQuestionsForm(account);
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, account.guid, () => this.saveGoals());
   }
 
   private applyFormAvailability(canWrite: boolean): void {

@@ -134,6 +134,8 @@ Electron conflict reconciliation compares the file `dataBackupId` against the pe
 
 Every JSON restore path first clones and prepares the file through [`backup-preparation.service.ts`](src/app/data/backup/backup-preparation.service.ts): validate the envelope and data version, run the same ordered migrations as local data, validate core GUID relationships, then remap GUIDs and persist. [`BackupImportCoordinator`](src/app/data/backup/backup-import-coordinator.service.ts) is the single coordinated restore entry point for account import, facility import, replacement, selective facility import, example-data loading, and Electron conflict flows. Missing version metadata means version `0`; future versions are rejected before replacement or import mutation.
 
+V1 header and Settings downloads share [`ManualBackupDownloadService`](src/app/v1/shared/backup/manual-backup-download.service.ts), which wraps the export coordinator with pending-edit flushing, duplicate prevention, account-switch cancellation, and initiation feedback. Successful account JSON/ZIP initiation updates the existing local `lastBackup` through the workspace command boundary; facility-only downloads do not. The header derives weekly reminders from that local timestamp. Backup shape and automatic Electron orchestration remain unchanged.
+
 See [Backup workflows and services](docs/data-access-and-workspace.md#backup-workflows-and-services) for developer-facing service responsibilities and the expected manual, restore, and automatic Electron backup flows. For import/export changes, define compatibility before editing, keep parsers pure where possible, and verify a representative round trip from import through persistence to export.
 
 ## Web and Electron boundary

@@ -28,11 +28,7 @@ export class AccountSettingsUnitsComponent extends AccountSettingsDetailBase {
     super();
     effect(() => {
       const account = this.account();
-      if (!account) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!account || !this.shouldRefreshSettingsForm(account.guid)) {
         return;
       }
       this.buildForm(account);
@@ -65,6 +61,7 @@ export class AccountSettingsUnitsComponent extends AccountSettingsDetailBase {
     this.form = this.settingsForms.getUnitsForm(account);
     this.ensureSelectedSubregion();
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, account.guid, () => this.saveUnits());
   }
 
   private getSubregionOptions(zip: string | undefined): string[] {

@@ -74,6 +74,31 @@
   }
 
   <div class="v1-workspace__actions">
+    @if (isWorkspaceRoute && navigation.account()) {
+      @let reminder = backups.reminder();
+      @let preparing = backups.preparing();
+      <div class="v1-header-backup" (mouseenter)="backupTooltipOpen = true" (mouseleave)="backupTooltipOpen = false">
+        <button type="button" class="v1-btn v1-header-backup__button"
+          [class.v1-header-backup__button--recommended]="reminder.tone === 'recommended'"
+          [class.v1-header-backup__button--overdue]="reminder.tone === 'overdue'"
+          [disabled]="!backups.available()" [attr.aria-busy]="preparing"
+          [attr.aria-label]="'Backup account. ' + backupDescription()"
+          aria-describedby="account-backup-tooltip"
+          (focus)="backupTooltipOpen = true" (blur)="backupTooltipOpen = false"
+          (click)="downloadAccountBackup()">
+          <app-ui-icon [name]="preparing ? 'loading' : 'download'" [spin]="preparing"></app-ui-icon>
+          <span class="v1-header-backup__text">
+            <span class="v1-header-backup__full">{{ preparing ? 'Preparing…' : 'Backup account' }}</span>
+            <span class="v1-header-backup__compact">{{ preparing ? 'Preparing…' : 'Backup' }}</span>
+            <small>{{ reminder.label }}</small>
+          </span>
+        </button>
+        <span id="account-backup-tooltip" class="v1-header-backup__tooltip" role="tooltip" [hidden]="!backupTooltipOpen">
+          {{ backupDescription() }}
+        </span>
+      </div>
+      <span class="visually-hidden" role="status">{{ preparing ? 'Preparing backup download.' : '' }}</span>
+    }
     <div class="v1-settings">
       <button
         type="button"
