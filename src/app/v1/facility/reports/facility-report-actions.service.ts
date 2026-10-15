@@ -25,6 +25,7 @@ export class FacilityReportActionsService {
       this.requireAvailable(type);
       const groups = this.workspace.meterGroups().filter(group => group.facilityId === facilityGuid);
       const report = getNewIdbFacilityReport(facilityGuid, accountGuid, type, groups);
+      if (type === 'dataQuality') report.dataQualityReportSettings.missingSelection = true;
       return this.handler.addFacilityReport({ ...report, name: trimmed }, accountGuid);
     });
   }

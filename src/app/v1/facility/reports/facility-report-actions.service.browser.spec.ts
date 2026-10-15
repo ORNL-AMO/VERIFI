@@ -39,14 +39,15 @@ describe('facility report lifecycle in Chromium IndexedDB', () => {
     const subscription = boundary.committedChange$.subscribe(change => committed.push(change.changeKind));
     try {
       const created = await service.create('facility-a', 'New overview', 'overview');
+      const quality = await service.create('facility-a', 'Data quality', 'dataQuality');
       const copy = await service.copy('facility-a', source.guid);
       expect(copy.id).not.toBe(source.id);
       expect(copy.guid).not.toBe(source.guid);
       expect(copy.checked).toBe(false);
       expect(copy.costSavingsReportSettings).toEqual(source.costSavingsReportSettings);
       await service.delete('facility-a', source.guid);
-      expect(store.revision()).toBe(3);
-      expect(committed).toEqual(['add', 'add', 'delete']);
+      expect(store.revision()).toBe(4);
+      expect(committed).toEqual(['add', 'add', 'add', 'delete']);
       await harness.reopen();
       const reopened = new FacilityReportsDbService(harness.dbService, new IndexedDbAccessService(harness.dbService));
       const saved = await reopened.getStoredByGuid(copy.guid);
@@ -57,6 +58,9 @@ describe('facility report lifecycle in Chromium IndexedDB', () => {
       expect(await reopened.getStoredByGuid(source.guid)).toBeUndefined();
       expect(await reopened.getStoredByGuid(other.guid)).toEqual(other);
       expect((await reopened.getStoredByGuid(created.guid))?.facilityReportType).toBe('overview');
+      const savedQuality = await reopened.getStoredByGuid(quality.guid);
+      expect(savedQuality?.dataQualityReportSettings.missingSelection).toBe(true);
+      expect(savedQuality?.dataQualityReportSettings.selectedAnalysisItemId).toBeUndefined();
       expect(await firstValueFrom(harness.dbService.count('analysisItems'))).toBe(twoAccountPersistenceSeed.analysisItems.length);
       store.publish(reportSnapshot([saved!]), { facility: reportFacility, facilityReport: saved });
       expect(store.selectedFacilityReport()?.guid).toBe(copy.guid);

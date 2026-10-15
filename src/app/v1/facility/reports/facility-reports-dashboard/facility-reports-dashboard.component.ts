@@ -19,6 +19,7 @@ type Editor = { readonly name: string; readonly type: FacilityReportType };
 
 @Component({
   selector: 'app-facility-reports-dashboard', standalone: false,
+  host: { '(window:beforeunload)': 'beforeUnload($event)' },
   templateUrl: './facility-reports-dashboard.component.html',
   styleUrls: ['./facility-reports-dashboard.component.css']
 })
@@ -99,6 +100,13 @@ export class FacilityReportsDashboardComponent implements OnDestroy {
   hasUnsavedChanges(): boolean { return this.draftChanged(); }
   readonly navigationBlocked = computed(() => this.saving() || this.draftChanged());
   isNavigationBlocked(): boolean { return this.navigationBlocked(); }
+
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isNavigationBlocked()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
 
   open(guid: string): void {
     const facility = this.facility();

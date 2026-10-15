@@ -100,6 +100,41 @@ describe('FacilityReportsDashboardComponent', () => {
     expect(actions.create).not.toHaveBeenCalled();
   });
 
+  it('warns on browser unload only for edited drafts or pending report actions and cleans up on destruction', async () => {
+    const unload = () => {
+      const event = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect(unload()).toBe(false);
+    component.openCreate();
+    expect(unload()).toBe(false);
+    component.editorForm.controls.name.setValue('Edited report');
+    expect(unload()).toBe(true);
+    component.cancelEditor();
+    expect(unload()).toBe(false);
+    component.openCreate();
+    component.editorForm.controls.type.setValue('overview');
+    expect(unload()).toBe(true);
+    component.cancelEditor();
+
+    let resolve!: (value: ReturnType<typeof reportFixture>) => void;
+    actions.create.mockImplementation(() => new Promise(done => { resolve = done; }));
+    component.openCreate();
+    const saving = component.submitEditor();
+    expect(component.hasUnsavedChanges()).toBe(false);
+    expect(unload()).toBe(true);
+    resolve(reportFixture());
+    await saving;
+    expect(unload()).toBe(false);
+
+    component.openCreate();
+    component.editorForm.controls.name.setValue('Another edit');
+    expect(unload()).toBe(true);
+    fixture.destroy();
+    expect(unload()).toBe(false);
+  });
+
   it('retains failed drafts for retry and navigates only after successful creation', async () => {
     actions.create.mockRejectedValueOnce(new Error('Storage unavailable. Try again.'));
     component.openCreate();
