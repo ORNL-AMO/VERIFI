@@ -1,0 +1,54 @@
+/* Shared fields, inputs, selects, textareas, and field errors. */
+
+.v1-field {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+}
+
+.v1-input,
+.v1-select,
+.v1-textarea {
+  width: 100%;
+  min-height: var(--v1-control-height);
+  padding: .45rem .6rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-control-surface);
+  color: var(--v1-text);
+  font: inherit;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--v1-surface) 70%, transparent);
+}
+
+.v1-select {
+  appearance: none;
+  padding-right: 2.1rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--v1-muted) 50%),
+    linear-gradient(135deg, var(--v1-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1rem) 50%,
+    calc(100% - .75rem) 50%;
+  background-repeat: no-repeat;
+  background-size: .3rem .3rem, .3rem .3rem;
+}
+
+.v1-textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.v1-input:focus,
+.v1-select:focus,
+.v1-textarea:focus {
+  outline: 3px solid var(--v1-focus);
+  outline-offset: 2px;
+  border-color: var(--v1-facility);
+  background: var(--v1-surface);
+}
+
+.v1-field__error {
+  color: var(--v1-danger);
+  font-size: .78rem;
+  font-style: normal;
+}

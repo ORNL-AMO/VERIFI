@@ -1,0 +1,145 @@
+/* Scoped reset, root layout, typography, icons, and shared surfaces. */
+
+.v1-root,
+.v1-root * {
+  box-sizing: border-box;
+  color: inherit;
+  font-size: inherit;
+}
+
+.v1-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--v1-bg);
+  color: var(--v1-text);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  overflow: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+.v1-root > router-outlet + * {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.v1-root a:not(.v1-btn) {
+  color: var(--v1-link);
+}
+
+.v1-root button,
+.v1-root input,
+.v1-root select,
+.v1-root textarea {
+  font: inherit;
+}
+
+.v1-root ::placeholder {
+  color: var(--v1-placeholder);
+}
+
+.v1-root :focus-visible {
+  outline: 3px solid var(--v1-focus);
+  outline-offset: 2px;
+}
+
+.v1-root .v1-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  line-height: 0;
+}
+
+.v1-root .v1-icon svg {
+  display: block;
+}
+
+.v1-root .v1-icon--spin {
+  animation: v1-icon-spin .8s linear infinite;
+}
+
+@keyframes v1-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.v1-root button .v1-icon,
+.v1-root a .v1-icon {
+  color: inherit;
+}
+
+.v1-eyebrow,
+.v1-label--upper {
+  display: block;
+  margin: 0;
+  color: var(--v1-primary);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.v1-section-header {
+  display: grid;
+  gap: .35rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+}
+
+.v1-section-header h1,
+.v1-section-header p {
+  margin: 0;
+}
+
+.v1-section-header h1 {
+  color: var(--v1-text);
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.v1-section-header__summary {
+  max-width: 44rem;
+  color: var(--v1-muted);
+}
+
+.v1-label {
+  display: block;
+  color: var(--v1-muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.v1-panel-surface,
+.v1-card {
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius);
+  background: var(--v1-surface);
+  box-shadow: 0 1px 4px var(--v1-shadow-soft);
+}
+
+.v1-panel-surface--muted,
+.v1-card--panel {
+  background: var(--v1-panel);
+}
+
+.v1-dense-row {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  min-height: var(--v1-dense-row-height);
+  min-width: 0;
+  padding: .35rem .55rem;
+  border-bottom: 1px solid var(--v1-divider);
+}
