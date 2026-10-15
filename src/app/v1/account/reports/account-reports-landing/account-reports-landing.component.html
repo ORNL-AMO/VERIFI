@@ -1,0 +1,10 @@
+@let account = workspace.account();
+<header class="v1-section-header"><div><p class="v1-eyebrow">Account Reports</p><h1><app-ui-icon name="reports"></app-ui-icon> {{ account?.name || 'Account' }} Reports</h1></div></header>
+<div class="v1-alert v1-alert--info" role="status">The account report dashboard is coming in phase 3. Existing account reports remain preserved. Facility report dashboards are available below.</div>
+@if (workspace.facilities().length) {
+  <nav aria-label="Facility report dashboards"><ul>
+    @for (facility of workspace.facilities(); track facility.guid) {
+      <li><a class="v1-btn v1-btn--secondary" [routerLink]="navigation.facilityReportsRoute(facility.guid)"><app-ui-icon name="facility"></app-ui-icon>{{ facility.name || 'Unnamed facility' }} Reports<app-ui-icon name="chevronRight"></app-ui-icon></a></li>
+    }
+  </ul></nav>
+} @else { <p role="status">No facilities are available. Add a facility before creating facility reports.</p> }

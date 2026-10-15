@@ -1,0 +1,63 @@
+# V1 Reports: phased implementation roadmap
+
+Tracking document for [issue #2790 — Build v1 Reports navigation, dashboards, and report lifecycle](https://github.com/ORNL-AMO/VERIFI/issues/2790).
+
+This document defines the implementation sequence only. Each phase will be planned, implemented, validated, and reviewed separately. Creating this document does not implement any phase.
+
+## Phase 1 — Facility report dashboard
+
+- [x] Enable facility Reports navigation.
+- [x] Display saved reports with search, filtering, sorting, and status.
+- [x] Support creating, opening, copying, and deleting reports.
+- [x] Provide a minimal selected-report landing until the workbench is implemented.
+- [x] Clearly identify report-specific content that is pending migration.
+
+**Completion checkpoint:** facility reports can be discovered and managed without losing existing settings.
+
+Implemented with a limited account Reports landing and facility dashboard links. The account report inventory and lifecycle actions remain in phase 3. Emission Factors reports are available only when account Other Impacts is enabled; apply the shared rule to account Emission Factors and Better Climate in phase 3.
+
+## Phase 2 — Facility report workbench
+
+- [ ] Establish the selected-report layout, header, switching, and return navigation.
+- [ ] Provide shared Setup, applicable Data Checks, and Report stages.
+- [ ] Establish integration points for individual report migrations.
+- [ ] Include save feedback, error recovery, and unsaved-navigation protection.
+
+**Completion checkpoint:** individual facility report issues can supply their settings, checks, and previews within the shared workbench.
+
+## Phase 3 — Account report dashboard
+
+- [ ] Enable account Reports navigation and lifecycle actions.
+- [ ] Connect the portfolio Reports inventory across account and facility scopes.
+- [ ] Provide a minimal selected-account-report landing.
+- [ ] Make account-required reports accessible from single-facility workspaces.
+
+**Completion checkpoint:** account and facility reports are discoverable and route to the correct owning workspace.
+
+## Phase 4 — Account report workbench
+
+- [ ] Apply the shared workbench structure to account reports.
+- [ ] Preserve account-specific settings and analysis references.
+- [ ] Support single-facility workflows through the existing hidden account-analysis pairing.
+- [ ] Provide integration points for individual account report migrations.
+
+**Completion checkpoint:** account report issues can add their content without rebuilding common workflow infrastructure or requiring redundant analysis setup.
+
+## Phase 5 — Shared workflow wrapup
+
+- [ ] Audit the remaining acceptance criteria in [#2790](https://github.com/ORNL-AMO/VERIFI/issues/2790).
+- [ ] Connect available analysis Used By references and report status destinations.
+- [ ] Verify navigation, ownership, saved-report compatibility, and lifecycle behavior.
+- [ ] Complete accessibility, theme, responsive, and practical Electron-window checks.
+- [ ] Record remaining report-specific work under its owning issues.
+
+**Completion checkpoint:** the shared Reports foundation satisfies #2790, with unfinished report content explicitly tracked elsewhere.
+
+## Boundaries and working rules
+
+- Complete and review one phase before starting the next.
+- Allow lifecycle actions for existing report types while clearly marking unfinished settings and previews.
+- Include focused validation and documentation in each implementation phase.
+- Preserve persisted records, GUID relationships, backups, and v0 compatibility.
+- Keep report-specific content in its individual migration issue.
+- Keep export infrastructure in [#2791](https://github.com/ORNL-AMO/VERIFI/issues/2791) and final cross-report output verification in [#2806](https://github.com/ORNL-AMO/VERIFI/issues/2806).

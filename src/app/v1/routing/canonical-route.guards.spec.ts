@@ -53,6 +53,14 @@ describe('v1 canonical route guards', () => {
       .toEqual({ commands: facilityHomeCommands('facility-a') });
   });
 
+  it('allows single-facility Account Reports without reconciling analysis pairs', async () => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
+      { url: '/v1/workspace/account/account-a/reports/dashboard' })).resolves.toBe(true);
+    expect(ensurePairs).not.toHaveBeenCalled();
+  });
+
   it('redirects valid single-site account routes to the sole facility route', async () => {
     workspace.account.mockReturnValue({ guid: 'account-a', name: 'Account A', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', name: 'Site A', accountId: 'account-a' }]);

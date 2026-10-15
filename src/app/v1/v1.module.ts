@@ -1,3 +1,5 @@
+import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
+import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -44,6 +46,8 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     ScrollingModule,
     AccountDataModule,
     FacilityDataModule,
+    FacilityReportsModule,
+    AccountReportsModule,
     AccountSettingsModule,
     FacilitySettingsModule,
     WelcomeComponent,

@@ -1,0 +1,19 @@
+@let account = navigation.account();
+@let facilityGuid = navigation.routeState().facilityGuid;
+@let active = navigation.activeReportGuid();
+<section class="v1-nav__group" aria-labelledby="reports-nav-title">
+  <span id="reports-nav-title" class="v1-nav__label">{{ navigation.contextMode() === 'facility' ? 'Facility Reports' : 'Reports' }}</span>
+  @if (navigation.contextMode() === 'facility' && facilityGuid) {
+    <a class="v1-nav__link" [class.active]="!active" [attr.aria-current]="!active ? 'page' : null" [routerLink]="navigation.facilityReportsRoute(facilityGuid)"><app-ui-icon name="reports"></app-ui-icon>Dashboard</a>
+    @for (group of reportGroups(); track group.id) {
+      <section class="v1-nav__report-section" [attr.aria-labelledby]="'reports-nav-' + group.id + '-title'">
+        <span class="v1-nav__sublabel" [id]="'reports-nav-' + group.id + '-title'">{{ group.label }}</span>
+        @for (report of group.reports; track report.guid) {
+          <a class="v1-nav__link" [class.active]="active === report.guid" [attr.aria-current]="active === report.guid ? 'page' : null" [routerLink]="navigation.facilityReportWorkbenchRoute(facilityGuid, report.guid)" [title]="report.name"><app-ui-icon name="report"></app-ui-icon><span class="v1-nav__item-label">{{ report.name }}</span></a>
+        }
+      </section>
+    }
+  } @else if (account) {
+    <a class="v1-nav__link active" aria-current="page" [routerLink]="navigation.accountReportsRoute(account.guid)"><app-ui-icon name="reports"></app-ui-icon>Dashboard</a>
+  }
+</section>

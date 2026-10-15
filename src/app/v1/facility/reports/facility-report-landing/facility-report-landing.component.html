@@ -1,0 +1,15 @@
+@let selected = card();
+<a class="v1-btn v1-btn--quiet" [routerLink]="dashboardRoute()"><app-ui-icon name="chevronLeft"></app-ui-icon>Facility report dashboard</a>
+@if (workspace.status() === 'loading' || workspace.status() === 'switching') {
+  <p role="status">Loading report…</p>
+} @else if (workspace.status() === 'error') {
+  <div class="v1-alert v1-alert--danger" role="alert">{{ workspace.error()?.message || 'The report workspace could not be loaded.' }}</div>
+} @else if (selected) {
+  <header class="v1-section-header"><div><p class="v1-eyebrow">{{ workspace.account()?.name || 'Account' }} / {{ workspace.selectedFacility()?.name || 'Facility' }} / Reports</p><h1><app-ui-icon name="reports"></app-ui-icon> {{ selected.view.title }}</h1></div></header>
+  <section class="report-landing" aria-label="Saved report">
+    <app-resource-browse-card [view]="selected.view" [canOpen]="false" [readOnly]="true"></app-resource-browse-card>
+    <div class="v1-alert v1-alert--info" role="status">The report workbench is coming in phase 2. Report-specific settings, checks, and previews will follow in their own migrations. Your saved configuration is preserved.</div>
+  </section>
+} @else {
+  <app-data-empty-state icon="reports" context="facility" title="Report unavailable" description="This report may have been deleted, belong to another facility, or be hidden by the account’s Other Impacts setting. Return to the dashboard to choose another report."></app-data-empty-state>
+}

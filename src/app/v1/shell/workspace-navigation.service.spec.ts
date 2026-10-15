@@ -83,6 +83,21 @@ describe('WorkspaceNavigationService', () => {
     service = TestBed.inject(WorkspaceNavigationService);
   });
 
+  it('enables Reports and retains its dashboard on context and facility switches', () => {
+    expect(service.sections().find(section => section.id === 'reports')?.enabled).toBe(true);
+    service.openSection('reports');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/reports/workbench/report-a/setup'));
+    expect(service.activeReportGuid()).toBe('report-a');
+    service.setContext('account');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.accountReportsRoute('account-a'));
+    service.setFacility('facility-b');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-b'));
+    service.openSection('reports');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityReportsRoute('facility-a'));
+    expect(parseWorkspaceRoute('/v1/workspace/facility/facility-a/reports').detail).toBe('dashboard');
+  });
+
   it('builds workspace routes without support panel tab state', () => {
     expect(service.accountRoute('account-a')).toEqual([
       '/v1',

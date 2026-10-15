@@ -1,3 +1,8 @@
+import { Component } from '@angular/core';
+import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { FacilityReportsModule } from '@app/v1/facility/reports/facility-reports.module';
+import { AccountReportsModule } from '@app/v1/account/reports/account-reports.module';
 import { TestBed } from '@angular/core/testing';
 import { Route } from '@angular/router';
 import { RouterModule } from '@angular/router';
@@ -91,6 +96,8 @@ describe('V1Routes facility data meters routes', () => {
     TestBed.configureTestingModule({
       imports: [
         AccountDataModule,
+        FacilityReportsModule,
+        AccountReportsModule,
         RouterModule.forRoot([]),
         FacilityDataModule
       ]
@@ -496,3 +503,48 @@ function tabRoute(path: string): Route {
   }
   return route;
 }
+
+@Component({ selector: 'app-reports-route-test', standalone: true, template: 'Reports route' })
+class ReportsRouteTestComponent { }
+
+describe('V1 Reports route entry and canonicalization', () => {
+  function reportsChildren(scope: 'account' | 'facility'): Route[] {
+    const workspace = V1Routes[0].children!.find(route => route.path === `workspace/${scope}/:${scope}Guid`)!;
+    return workspace.children!.find(route => route.path === 'reports')!.children!;
+  }
+  function routeStubs(routes: Route[]): Route[] {
+    return routes.map(route => ({ ...route,
+      ...(route.component ? { component: ReportsRouteTestComponent, canDeactivate: [] } : {}),
+      ...(route.children ? { children: routeStubs(route.children) } : {})
+    }));
+  }
+
+  it('protects facility dashboard drafts and uses existing workspace readiness guards', () => {
+    expect(reportsChildren('facility').find(route => route.path === 'dashboard')!.canDeactivate).toEqual([unsavedChangesGuard]);
+    for (const scope of ['facility', 'account']) {
+      const workspace = V1Routes[0].children!.find(route => route.path === `workspace/${scope}/:${scope}Guid`)!;
+      expect(workspace.canActivate!.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('canonicalizes reports roots and unknown paths while preserving direct selected-report links', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([
+      { path: 'facility/:facilityGuid/reports', children: routeStubs(reportsChildren('facility')) },
+      { path: 'account/:accountGuid/reports', children: routeStubs(reportsChildren('account')) }
+    ])] });
+    const harness = await RouterTestingHarness.create();
+    const router = TestBed.inject(Router);
+    for (const [input, canonical] of [
+      ['/facility/facility-a/reports', '/facility/facility-a/reports/dashboard'],
+      ['/facility/facility-a/reports/unknown', '/facility/facility-a/reports/dashboard'],
+      ['/facility/facility-a/reports/workbench/report-a', '/facility/facility-a/reports/workbench/report-a/setup'],
+      ['/facility/facility-a/reports/workbench/report-a/setup', '/facility/facility-a/reports/workbench/report-a/setup'],
+      ['/facility/facility-a/reports/workbench/report-a/unknown', '/facility/facility-a/reports/workbench/report-a/setup'],
+      ['/account/account-a/reports', '/account/account-a/reports/dashboard'],
+      ['/account/account-a/reports/unknown', '/account/account-a/reports/dashboard']
+    ]) {
+      await harness.navigateByUrl(input, ReportsRouteTestComponent);
+      expect(router.url).toBe(canonical);
+    }
+  });
+});

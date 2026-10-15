@@ -70,6 +70,7 @@ export interface RouteState {
   readonly meterGroupGuid?: string;
   readonly predictorGuid?: string;
   readonly weatherPredictorGroupKey?: string;
+  readonly reportGuid?: string;
   readonly analysisGuid?: string;
   readonly analysisGroupGuid?: string;
   readonly analysisStageScope?: FacilityAnalysisStageScope;
@@ -105,7 +106,7 @@ const DEFAULT_DETAILS: Record<SectionId, string> = {
   data: 'portfolio',
   visualization: 'time-series',
   analysis: 'dashboard',
-  reports: 'setup',
+  reports: 'dashboard',
   settings: 'profile',
   imports: 'upload'
 };
@@ -141,7 +142,7 @@ export class WorkspaceNavigationService {
 
   readonly sections = computed(() => WORKSPACE_SECTIONS.map(section => ({
     ...section,
-    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'analysis' || section.id === 'imports'
+    enabled: section.id === 'settings' || section.id === 'data' || section.id === 'analysis' || section.id === 'reports' || section.id === 'imports'
       ? this.isWorkspaceRoute()
       : section.enabled
   })));
@@ -159,6 +160,7 @@ export class WorkspaceNavigationService {
   readonly activeMeterGroupGuid = computed(() => this.routeState().meterGroupGuid);
   readonly activePredictorGuid = computed(() => this.routeState().predictorGuid);
   readonly activeWeatherPredictorGroupKey = computed(() => this.routeState().weatherPredictorGroupKey);
+  readonly activeReportGuid = computed(() => this.routeState().reportGuid);
   readonly activeAnalysisGuid = computed(() => this.routeState().analysisGuid);
   readonly activeAnalysisGroupGuid = computed(() => this.routeState().analysisGroupGuid);
   readonly activeAnalysisStageScope = computed(() => this.routeState().analysisStageScope);
@@ -295,6 +297,13 @@ export class WorkspaceNavigationService {
       }
       return;
     }
+    if (sectionId === 'reports') {
+      const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
+      const accountGuid = this.account()?.guid || this.routeState().accountGuid;
+      if (contextMode === 'facility' && facilityGuid) void this.router.navigate(this.facilityReportsRoute(facilityGuid));
+      else if (accountGuid) void this.router.navigate(this.accountReportsRoute(accountGuid));
+      return;
+    }
     if (sectionId === 'analysis') {
       if (contextMode === 'facility') {
         const facilityGuid = this.facility()?.guid || this.routeState().facilityGuid;
@@ -347,6 +356,18 @@ export class WorkspaceNavigationService {
 
   accountImportsRoute(accountGuid: string): Array<string> {
     return ['/v1', 'workspace', 'account', accountGuid, 'imports', 'upload'];
+  }
+
+  accountReportsRoute(accountGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'account', accountGuid, 'reports', 'dashboard'];
+  }
+
+  facilityReportsRoute(facilityGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'dashboard'];
+  }
+
+  facilityReportWorkbenchRoute(facilityGuid: string, reportGuid: string): Array<string> {
+    return ['/v1', 'workspace', 'facility', facilityGuid, 'reports', 'workbench', reportGuid, 'setup'];
   }
 
   accountAnalysisRoute(accountGuid: string): Array<string> {
@@ -464,6 +485,7 @@ export class WorkspaceNavigationService {
       return this.accountDataRoute(accountGuid, this.resolveAccountDataDetail(detail));
     }
     if (section === 'imports') return this.accountImportsRoute(accountGuid);
+    if (section === 'reports') return this.accountReportsRoute(accountGuid);
     if (section === 'analysis') return this.accountAnalysisRoute(accountGuid);
     return this.accountRoute(accountGuid);
   }
@@ -479,6 +501,7 @@ export class WorkspaceNavigationService {
       const accountGuid = this.account()?.guid || this.routeState().accountGuid;
       return accountGuid ? this.accountImportsRoute(accountGuid) : this.facilityRoute(facilityGuid);
     }
+    if (section === 'reports') return this.facilityReportsRoute(facilityGuid);
     if (section === 'analysis') return this.facilityAnalysisRoute(facilityGuid);
     return this.facilityRoute(facilityGuid);
   }
@@ -556,7 +579,9 @@ export class WorkspaceNavigationService {
     const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
     const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
     const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
-    const help = isFacility && this.activeSection() === 'data'
+    const help = this.activeSection() === 'reports'
+      ? ['Use the facility dashboard to create, copy, rename, and delete saved reports. Report-specific settings and previews are coming in later migrations.', 'The account Reports landing links to facility dashboards; account report management is coming in phase 3.']
+      : isFacility && this.activeSection() === 'data'
       ? this.buildFacilityDataHelp()
       : [
         `This v1 Home page is the production shell starter for ${name || 'the selected workspace'}.`,
@@ -654,6 +679,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       facilityGuid: routeParts[2],
       section,
       detail,
+      reportGuid: section === 'reports' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
       meterGuid: section === 'data' && detail === 'meters' && routeParts[5]
         ? safeDecodeRoutePart(routeParts[5])
         : undefined,

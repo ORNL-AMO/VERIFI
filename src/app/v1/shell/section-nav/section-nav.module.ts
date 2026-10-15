@@ -1,3 +1,4 @@
+import { ReportsNavComponent } from './reports-nav/reports-nav.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -17,7 +18,7 @@ import { AnalysisNavComponent } from './analysis-nav/analysis-nav.component';
 import { ResourceNavGroupComponent } from './resource-nav-group/resource-nav-group.component';
 
 @NgModule({
-  declarations: [SectionNavComponent, FacilityPickerComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent],
+  declarations: [ReportsNavComponent, SectionNavComponent, FacilityPickerComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent],
   imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
   exports: [SectionNavComponent]
 })
