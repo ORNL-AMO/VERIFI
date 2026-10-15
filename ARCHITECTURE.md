@@ -175,6 +175,8 @@ Use neighboring screens as the primary visual reference. Reuse shared components
 - Keyboard operation, visible focus, semantic labels, contrast, and screen-reader announcements.
 - Print and report styles when a changed component can appear in generated output.
 
+Production v1 global styles enter through [`foundation.css`](src/app/v1/styles/foundation.css), which imports focused stylesheets by responsibility. Shared patterns and their responsive rules belong in the appropriate stylesheet under `src/app/v1/styles/`; feature-specific styles stay with their Angular component. Keep section navigation first and cross-pattern appearance overrides last to preserve the cascade. See the [v1 visual foundation maintenance guidance](docs/agents/v1-visual-foundation.md#maintenance).
+
 In v1, content-navigation controls use the themed content-control color (`--v1-content-control`, orange in the default theme) while additive page actions use the themed action color (`--v1-action`, blue in the default theme). Tabs, segmented toggles, selector controls, and nav-panel active indicators should use the content-control token as the active fill, border, or indicator while keeping labels neutral unless contrast requires otherwise. Add facility, Add meter, Add group, and similar creation entry points should use the action button style.
 
 The repository does not define a separate design system. Do not introduce one implicitly as part of a feature issue.

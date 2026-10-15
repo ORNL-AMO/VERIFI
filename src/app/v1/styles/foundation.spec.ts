@@ -2,7 +2,10 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('v1 foundation styles', () => {
-  const foundationCss = readFileSync(join(__dirname, 'foundation.css'), 'utf8');
+  const foundationEntry = readFileSync(join(__dirname, 'foundation.css'), 'utf8');
+  const foundationCss = foundationEntry.replace(/@import\s+['"]\.\/([^'"]+)['"];\s*/g, (_import, file: string) =>
+    `${readFileSync(join(__dirname, file), 'utf8')}\n`
+  );
 
   it('uses action color only for action buttons and content-control color for navigation buttons', () => {
     expect(ruleFor('.v1-btn--action')).toContain('background: var(--v1-action)');

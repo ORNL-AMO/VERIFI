@@ -1,0 +1,59 @@
+/* Final cross-pattern high-contrast and square-corner overrides. */
+
+.v1-contrast-strong :is(
+  .v1-btn,
+  .v1-icon-btn,
+  .v1-chip,
+  .v1-badge,
+  .v1-input,
+  .v1-select,
+  .v1-textarea,
+  .v1-alert,
+  .v1-status-row,
+  .v1-card,
+  .v1-panel-surface,
+  .v1-dropdown,
+  .v1-drawer,
+  .v1-modal,
+  .v1-rail,
+  .v1-nav,
+  .v1-panel,
+  .v1-panel__item,
+  .v1-panel__result
+) {
+  border-width: 2px;
+}
+
+.v1-corners-square :is(
+  button,
+  select,
+  input:not([type="radio"]),
+  textarea,
+  a,
+  article,
+  aside,
+  header,
+  section,
+  .v1-btn,
+  .v1-icon-btn,
+  .v1-chip,
+  .v1-badge,
+  .v1-alert,
+  .v1-status-row,
+  .v1-panel-surface,
+  .v1-card,
+  .v1-segmented,
+  .v1-segmented__btn,
+  .v1-tabs,
+  .v1-tab,
+  .v1-input,
+  .v1-select,
+  .v1-textarea,
+  .v1-dropdown,
+  .v1-dropdown__item,
+  .v1-drawer,
+  .v1-modal,
+  [class*="v1-"]
+) {
+  border-radius: var(--v1-radius-sm) !important;
+}

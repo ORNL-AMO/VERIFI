@@ -133,6 +133,8 @@ When a drawer or modal opens, move focus into it and return focus to the opener 
 
 Maintain this foundation just-in-time:
 
+- Keep [`foundation.css`](../../src/app/v1/styles/foundation.css) as the global import entry point. Put shared patterns in the stylesheet that owns their responsibility under `src/app/v1/styles/`, with responsive rules beside those patterns; keep feature-specific styles with their Angular component.
+- Preserve the documented import order: section navigation first, shared defaults before their overrides, and cross-pattern appearance overrides last. Imported stylesheets own rules and do not import one another.
 - Add or revise a pattern only when production v1 uses it in a real workflow.
 - Link to the workflow issue or pull request when a durable decision is made.
 - Keep volatile implementation details in source rather than duplicating them here.

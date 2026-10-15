@@ -1,0 +1,171 @@
+/* Background artwork, patterns, scrims, and responsive artwork variants. */
+
+.v1-background-skyline-rocket,
+.v1-background-skyline-rocket-night,
+.v1-background-skyline-green,
+.v1-background-skyline-neon,
+.v1-background-skyline-aurora,
+.v1-background-skyline-blueprint,
+.v1-background-skyline-steel {
+  --v1-skyline-scrim: transparent;
+  --v1-skyline-background:
+    linear-gradient(var(--v1-skyline-scrim), var(--v1-skyline-scrim)),
+    var(--v1-skyline-art);
+
+  background-image: var(--v1-skyline-background);
+  background-position: center, center bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, cover;
+}
+
+.v1-root.v1-background-skyline-rocket {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket.png');
+}
+
+.v1-root.v1-background-skyline-rocket-night {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night.png');
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 28%, transparent);
+}
+
+.v1-root.v1-background-skyline-green {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-green.png');
+}
+
+.v1-root.v1-background-skyline-neon {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-neon.png');
+}
+
+.v1-root.v1-background-skyline-aurora {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-aurora.png');
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 24%, transparent);
+}
+
+.v1-root.v1-background-skyline-blueprint {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-engineering-sketch.png');
+}
+
+.v1-root.v1-background-skyline-steel {
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-steel-cnc.png');
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 18%, transparent);
+}
+
+.v1-root:is(.v1-background-skyline-rocket, .v1-background-skyline-rocket-night, .v1-background-skyline-green, .v1-background-skyline-neon, .v1-background-skyline-aurora, .v1-background-skyline-blueprint, .v1-background-skyline-steel) .v1-workspace .v1-workspace__main {
+  background-image: var(--v1-skyline-background);
+  background-position: center, center bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, cover;
+}
+
+.v1-theme-dark.v1-background-skyline-rocket {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+  --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night.png');
+}
+
+.v1-theme-dark.v1-background-skyline-rocket-night {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+}
+
+@media (max-width: 760px) {
+  .v1-root.v1-background-skyline-rocket {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-mobile.png');
+  }
+
+  .v1-theme-dark.v1-background-skyline-rocket {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-rocket-night {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-rocket-night-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-green {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-green-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-neon {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-neon-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-aurora {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-aurora-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-blueprint {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-engineering-sketch-mobile.png');
+  }
+
+  .v1-root.v1-background-skyline-steel {
+    --v1-skyline-art: url('../../../assets/images/skylines/skyline-steel-cnc-mobile.png');
+  }
+}
+
+.v1-theme-dark.v1-background-skyline-green {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 58%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-neon {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-aurora {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 12%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-blueprint {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 68%, transparent);
+}
+
+.v1-theme-dark.v1-background-skyline-steel {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 34%, transparent);
+}
+
+.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-rocket-night, .v1-background-skyline-green, .v1-background-skyline-neon, .v1-background-skyline-aurora, .v1-background-skyline-blueprint, .v1-background-skyline-steel) {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 65%, transparent);
+}
+
+.v1-theme-dark.v1-contrast-strong:is(.v1-background-skyline-rocket, .v1-background-skyline-rocket-night, .v1-background-skyline-neon, .v1-background-skyline-aurora) {
+  --v1-skyline-scrim: color-mix(in srgb, var(--v1-bg) 35%, transparent);
+}
+
+.v1-background-blueprint-grid {
+  background:
+    linear-gradient(color-mix(in srgb, var(--v1-facility) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--v1-facility) 10%, transparent) 1px, transparent 1px),
+    var(--v1-bg);
+  background-size: 1.5rem 1.5rem, 1.5rem 1.5rem, auto;
+}
+
+.v1-background-steel-hatch {
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--v1-info) 13%, transparent) 1px, transparent 1.7px),
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--v1-facility) 5%, transparent) 0 1px, transparent 1px 1.35rem),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--v1-border) 22%, transparent) 0 1px, transparent 1px 2.8rem),
+    var(--v1-bg);
+  background-size: 5.6rem 5.6rem, auto, auto, auto;
+}
+
+.v1-background-neon-grid {
+  background:
+    linear-gradient(color-mix(in srgb, var(--v1-info) 14%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--v1-info) 10%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--v1-facility) 20%, transparent), transparent 24rem),
+    var(--v1-bg);
+  background-size: 2.25rem 2.25rem, 2.25rem 2.25rem, auto, auto;
+}
+
+.v1-background-aurora-flow {
+  background:
+    repeating-radial-gradient(ellipse at 50% -12%, transparent 0 3.3rem, color-mix(in srgb, var(--v1-facility) 5%, transparent) 3.3rem 3.42rem, transparent 3.42rem 6.5rem),
+    linear-gradient(108deg, transparent 0 10%, color-mix(in srgb, var(--v1-account) 11%, transparent) 19%, transparent 34%),
+    linear-gradient(75deg, transparent 0 52%, color-mix(in srgb, var(--v1-facility) 10%, transparent) 61%, transparent 76%),
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--v1-account) 18%, transparent), transparent 25rem),
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--v1-facility) 16%, transparent), transparent 28rem),
+    var(--v1-bg);
+}
+
+.v1-background-topographic-contours {
+  background:
+    repeating-radial-gradient(ellipse at 18% 12%, transparent 0 2.35rem, color-mix(in srgb, var(--v1-account) 7%, transparent) 2.35rem 2.48rem, transparent 2.48rem 4.9rem),
+    repeating-radial-gradient(ellipse at 84% 72%, transparent 0 2.8rem, color-mix(in srgb, var(--v1-facility) 6%, transparent) 2.8rem 2.94rem, transparent 2.94rem 5.7rem),
+    var(--v1-bg);
+}

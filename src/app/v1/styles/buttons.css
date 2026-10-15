@@ -1,0 +1,133 @@
+/* Shared buttons, icon buttons, variants, and disabled control states. */
+
+.v1-btn {
+  display: inline-flex;
+  gap: .45rem;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--v1-control-height);
+  padding: .48rem .8rem;
+  border: 1px solid transparent;
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-surface);
+  color: var(--v1-text);
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Button color semantics:
+   primary = one main recommended/commit action in the local area;
+   action = additive page-level actions such as adding a facility, meter, or group;
+   secondary/blue = navigation, workspace movement, or structural context changes;
+   success = completed/success/account-context continuation;
+   danger = destructive action;
+   quiet/ghost = cancel, close, support, optional, or low-emphasis alternatives. */
+
+.v1-btn--primary {
+  border-color: var(--v1-primary);
+  background: var(--v1-primary);
+  color: #fff;
+}
+
+.v1-btn--action {
+  border-color: var(--v1-action);
+  background: var(--v1-action);
+  color: #fff;
+}
+
+.v1-btn--secondary,
+.v1-btn--blue {
+  border-color: var(--v1-content-control);
+  background: var(--v1-content-control);
+  color: #fff;
+}
+
+.v1-btn--success {
+  border-color: var(--v1-account);
+  background: var(--v1-account);
+  color: #fff;
+}
+
+.v1-btn--danger {
+  border-color: var(--v1-danger);
+  background: var(--v1-danger);
+  color: #fff;
+}
+
+.v1-btn--quiet,
+.v1-btn--ghost {
+  border-color: var(--v1-border);
+  background: var(--v1-surface);
+  color: var(--v1-muted);
+}
+
+.v1-btn--deactivate {
+  border-color: color-mix(in srgb, var(--v1-warning) 58%, var(--v1-border));
+  background: color-mix(in srgb, var(--v1-warning) 10%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-warning) 88%, var(--v1-text));
+}
+
+.v1-btn--deactivate:hover,
+.v1-btn--deactivate:focus-visible,
+.v1-btn--deactivate[aria-pressed="true"] {
+  border-color: var(--v1-warning);
+  background: color-mix(in srgb, var(--v1-warning) 18%, var(--v1-surface));
+  color: color-mix(in srgb, var(--v1-warning) 82%, var(--v1-text));
+}
+
+.v1-btn--sm {
+  min-height: var(--v1-control-height-sm);
+  padding: .3rem .55rem;
+  font-size: .82rem;
+}
+
+.v1-btn--lg {
+  min-height: 2.75rem;
+  padding: .65rem .95rem;
+}
+
+.v1-btn:hover,
+.v1-btn:focus-visible {
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.v1-btn:disabled,
+.v1-icon-btn:disabled,
+.v1-segmented__btn:disabled,
+.v1-tab:disabled,
+.v1-input:disabled,
+.v1-select:disabled,
+.v1-textarea:disabled {
+  cursor: not-allowed;
+  opacity: var(--v1-disabled-opacity);
+}
+
+.v1-icon-btn {
+  display: inline-grid;
+  flex-shrink: 0;
+  width: var(--v1-control-height);
+  height: var(--v1-control-height);
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-panel);
+  color: var(--v1-muted);
+  cursor: pointer;
+}
+
+.v1-icon-btn:hover,
+.v1-icon-btn:focus-visible {
+  border-color: var(--v1-facility);
+  background: var(--v1-surface);
+  color: var(--v1-facility);
+}
+
+.v1-icon-btn--danger,
+.v1-icon-btn--danger:hover,
+.v1-icon-btn--danger:focus-visible {
+  border-color: var(--v1-danger);
+  color: var(--v1-danger);
+}
