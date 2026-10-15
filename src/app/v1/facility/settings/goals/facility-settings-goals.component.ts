@@ -33,11 +33,7 @@ export class FacilitySettingsGoalsComponent extends FacilitySettingsDetailBase {
     super();
     effect(() => {
       const facility = this.facility();
-      if (!facility) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!facility || !this.shouldRefreshSettingsForm(facility.guid)) {
         return;
       }
       this.buildForm(facility);
@@ -107,6 +103,7 @@ export class FacilitySettingsGoalsComponent extends FacilitySettingsDetailBase {
   private buildForm(facility: IdbFacility): void {
     this.form = this.settingsForms.getFacilitySustainabilityQuestionsForm(facility);
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, facility.guid, () => this.saveGoals());
   }
 
   private applyFormAvailability(canWrite: boolean): void {

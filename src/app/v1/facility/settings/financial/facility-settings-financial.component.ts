@@ -33,11 +33,7 @@ export class FacilitySettingsFinancialComponent extends FacilitySettingsDetailBa
     super();
     effect(() => {
       const facility = this.facility();
-      if (!facility) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!facility || !this.shouldRefreshSettingsForm(facility.guid)) {
         return;
       }
       this.buildForm(facility);
@@ -93,6 +89,7 @@ export class FacilitySettingsFinancialComponent extends FacilitySettingsDetailBa
   private buildForm(facility: IdbFacility): void {
     this.form = this.settingsForms.getFiscalYearForm(facility);
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, facility.guid, () => this.saveFinancial());
   }
 
   private applyFormAvailability(canWrite: boolean): void {

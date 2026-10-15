@@ -416,7 +416,7 @@
   padding: .55rem .65rem;
   border-radius: var(--v1-radius-sm);
   background: var(--v1-text);
-  color: var(--v1-inverse-text);
+  color: var(--v1-surface);
   font-size: .78rem;
   line-height: 1.4;
   overflow-wrap: anywhere;

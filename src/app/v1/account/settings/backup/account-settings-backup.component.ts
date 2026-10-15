@@ -75,11 +75,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
     super();
     effect(() => {
       const account = this.account();
-      if (!account) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!account || !this.shouldRefreshSettingsForm(account.guid)) {
         return;
       }
       this.buildForm(account);
@@ -193,6 +189,7 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
       archiveOption: new FormControl(account.archiveOption || 'skip')
     });
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, account.guid, () => this.saveBackupSettings());
   }
 
   private applyFormAvailability(canWrite: boolean): void {

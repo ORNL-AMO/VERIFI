@@ -25,11 +25,7 @@ export class AccountSettingsFinancialComponent extends AccountSettingsDetailBase
     super();
     effect(() => {
       const account = this.account();
-      if (!account) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!account || !this.shouldRefreshSettingsForm(account.guid)) {
         return;
       }
       this.buildForm(account);
@@ -76,12 +72,13 @@ export class AccountSettingsFinancialComponent extends AccountSettingsDetailBase
         }
       );
       await this.lifecycle.refreshAccountCatalog();
-    });
+    }, true);
   }
 
   private buildForm(account: IdbAccount): void {
     this.form = this.settingsForms.getFiscalYearForm(account);
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, account.guid, () => this.saveFinancial());
   }
 
   private applyFormAvailability(canWrite: boolean): void {

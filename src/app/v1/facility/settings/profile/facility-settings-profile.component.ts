@@ -26,11 +26,7 @@ export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase
     super();
     effect(() => {
       const facility = this.facility();
-      if (!facility) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!facility || !this.shouldRefreshSettingsForm(facility.guid)) {
         return;
       }
       this.buildForm(facility);
@@ -99,6 +95,7 @@ export class FacilitySettingsProfileComponent extends FacilitySettingsDetailBase
     this.form = this.settingsForms.getGeneralInformationForm(facility);
     this.form.addControl('classification', new FormControl(facility.classification || 'Manufacturing'));
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, facility.guid, () => this.saveProfile());
   }
 
   private normalizeRequiredProfileText(): void {

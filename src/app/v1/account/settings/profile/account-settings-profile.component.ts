@@ -25,11 +25,7 @@ export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
     super();
     effect(() => {
       const account = this.account();
-      if (!account) {
-        return;
-      }
-      if (this.skipNextWorkspaceRefresh) {
-        this.skipNextWorkspaceRefresh = false;
+      if (!account || !this.shouldRefreshSettingsForm(account.guid)) {
         return;
       }
       this.buildForm(account);
@@ -91,6 +87,7 @@ export class AccountSettingsProfileComponent extends AccountSettingsDetailBase {
   private buildForm(account: IdbAccount): void {
     this.form = this.settingsForms.getGeneralInformationForm(account);
     this.applyFormAvailability(untracked(() => this.canWrite()));
+    this.trackSettingsForm(this.form, account.guid, () => this.saveProfile());
   }
 
   private normalizeRequiredProfileText(): void {

@@ -86,10 +86,10 @@ export abstract class FacilitySettingsDetailBase extends SettingsDetailBase {
       if (updatedAccount) {
         await this.lifecycle.refreshAccountCatalog();
       }
-    });
+    }, true);
   }
 
-  protected override async runSave(label: string, save: () => Promise<void>): Promise<void> {
-    await super.runSave(label, save, 'v1 facility settings');
+  protected override async runSave(label: string, save: () => Promise<void>, savesForm = false): Promise<void> {
+    await super.runSave(label, save, savesForm, 'v1 facility settings');
   }
 }
