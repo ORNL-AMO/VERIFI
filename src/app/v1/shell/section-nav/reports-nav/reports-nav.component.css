@@ -1,4 +1,6 @@
 :host { display: contents; }
+.v1-nav__report-entry { display: grid; min-width: 0; }
+.v1-nav__report-workflow { min-width: 0; margin: .05rem 0 .45rem .75rem; padding-left: .65rem; border-left: 1px solid var(--v1-divider); }
 
 .v1-nav__report-section {
   display: grid;

@@ -1,0 +1,12 @@
+@import '../report-workbench-stage.css';
+
+.report-section:last-child { border-radius: 0 0 var(--v1-radius) var(--v1-radius); }
+.report-setup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--v1-space-4); }
+.report-setup-panel { min-width: 0; }
+.report-setup-panel + .report-setup-panel { padding-left: var(--v1-space-4); border-left: 1px solid var(--v1-border); }
+.report-setup label { font-weight: 800; }
+.report-setup-help { margin-top: var(--v1-space-2); color: var(--v1-muted); font-size: .85rem; }
+@media (max-width: 760px) {
+  .report-setup { grid-template-columns: 1fr; }
+  .report-setup-panel + .report-setup-panel { padding: var(--v1-space-4) 0 0; border-left: 0; border-top: 1px solid var(--v1-border); }
+}

@@ -1,0 +1,6 @@
+@if (context.card(); as card) {
+  <section class="report-section" aria-labelledby="report-preview-heading">
+    <h2 id="report-preview-heading">{{ card.view.chips?.[0]?.label }} Report</h2>
+    <p role="status">The report preview is pending migration. Saved configuration is preserved; preview and export content will be supplied by the owning report migration.</p>
+  </section>
+}

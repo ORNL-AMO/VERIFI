@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { SectionNavModule } from '../section-nav.module';
 import { ReportsNavComponent } from './reports-nav.component';
 
@@ -11,8 +12,9 @@ describe('ReportsNavComponent', () => {
     const active = signal<string | undefined>('z');
     const account = signal({ guid: 'account-a', displayEmissions: false });
     await TestBed.configureTestingModule({ imports: [SectionNavModule], providers: [provideRouter([]),
+      { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal([]) } },
       { provide: AccountWorkspaceStore, useValue: {
-        account, facilityReports: signal([
+        account, selectedFacilityAnalyses: signal([]), facilityReports: signal([
           { guid: 'z', name: 'Zebra', facilityReportType: 'analysis', facilityId: 'facility-a', accountId: 'account-a' },
           { guid: 'a', name: 'Alpha', facilityReportType: 'analysis', facilityId: 'facility-a', accountId: 'account-a' },
           { guid: 'overview', name: 'Overview report', facilityReportType: 'overview', facilityId: 'facility-a', accountId: 'account-a' },
@@ -37,7 +39,18 @@ describe('ReportsNavComponent', () => {
     expect(sections.every(section => section.querySelector(`#${section.getAttribute('aria-labelledby')}`))).toBe(true);
     expect(sections[0].querySelectorAll('app-ui-icon[name="report"]')).toHaveLength(2);
     expect(fixture.nativeElement.querySelector('a app-ui-icon[name="reports"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-current="page"]').textContent).toContain('Zebra');
+    expect(fixture.nativeElement.querySelector('a[aria-expanded="true"]').textContent).toContain('Zebra');
+    expect(fixture.nativeElement.querySelectorAll('app-analysis-stage-navigation')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('[aria-current="step"]').textContent).toContain('Setup');
+    expect(fixture.componentInstance.activeStages().map(stage => stage.id)).toEqual(['setup', 'data-checks', 'report']);
+    expect(fixture.componentInstance.activeStages()[0].completed).toBe(true);
+    expect(fixture.nativeElement.querySelector('.v1-analysis-stages__marker.is-complete')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Analysis Report');
+    active.set('overview');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.activeStages().map(stage => stage.id)).toEqual(['setup', 'report']);
+    active.set('z');
+    fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('Account Reports');
     expect(fixture.nativeElement.textContent).not.toContain('Other facility');
     expect(fixture.nativeElement.textContent).not.toContain('Other account');
