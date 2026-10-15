@@ -1,14 +1,14 @@
 @let currentFacility = facility();
 
 @if (currentFacility) {
-  <section class="v1-settings-panel v1-settings-panel--facility" aria-label="Facility backup and import">
+  <section class="v1-settings-panel v1-backup-settings v1-settings-panel--facility" aria-label="Facility backup and import">
     <div class="v1-settings-panel__heading">
       <div>
         <p>Backup</p>
         <h2>Backup and import</h2>
       </div>
       <span class="v1-settings-panel__status" [class.v1-settings-panel__status--error]="saveState === 'error'">
-        @if (saveState === 'saving' || isBackingUp) {
+        @if (saveState === 'saving' || isBackingUp()) {
           <app-ui-icon name="loading" spin></app-ui-icon>
           Working
         } @else if (saveState === 'saved') {
@@ -23,20 +23,24 @@
 
     <div class="v1-settings-grid v1-settings-grid--2">
       <article class="v1-settings-card">
-        <app-ui-icon name="fileDownload"></app-ui-icon>
-        <h3>Manual facility backup</h3>
-        <p>Download a JSON backup for this facility.</p>
+        <div class="v1-backup-settings__heading">
+          <app-ui-icon name="fileDownload"></app-ui-icon>
+          <h3>Manual facility backup</h3>
+        </div>
+        <p>Download data for this facility only. Account backup reminders stay unchanged.</p>
         <div class="v1-settings-actions">
-          <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="openBackupConfirm()">
-            Backup facility
-            <app-ui-icon name="download"></app-ui-icon>
+          <button type="button" class="v1-btn v1-btn--primary" [disabled]="!backups.available()" (click)="openBackupConfirm()">
+            <app-ui-icon [name]="isBackingUp() ? 'loading' : 'download'" [spin]="isBackingUp()"></app-ui-icon>
+            {{ isBackingUp() ? 'Preparing…' : 'Download facility JSON' }}
           </button>
         </div>
       </article>
 
       <article class="v1-settings-card">
-        <app-ui-icon name="fileImport"></app-ui-icon>
-        <h3>Import facility backup</h3>
+        <div class="v1-backup-settings__heading">
+          <app-ui-icon name="fileImport"></app-ui-icon>
+          <h3>Import facility backup</h3>
+        </div>
         <p>Import a facility JSON backup into the active account.</p>
         <div class="v1-settings-actions">
           <button type="button" class="v1-btn v1-btn--secondary" (click)="openImportPanel()">
@@ -46,38 +50,19 @@
         </div>
       </article>
     </div>
+    <span class="visually-hidden" role="status">{{ isBackingUp() ? 'Preparing backup download.' : '' }}</span>
   </section>
 }
 
 <ng-template #backupConfirmModal>
-  <div class="v1-modal-layer">
-    <button type="button" class="v1-modal-backdrop" aria-label="Cancel facility backup" [disabled]="isBackingUp"
-      (click)="cancelBackupConfirm()"></button>
-    <section class="v1-modal" role="dialog" aria-modal="true" aria-labelledby="v1-facility-backup-confirm-title">
-      <header class="v1-modal__header">
-        <h2 id="v1-facility-backup-confirm-title">Backup {{ facility()?.name }}</h2>
-        <button type="button" class="v1-icon-btn" aria-label="Cancel facility backup" [disabled]="isBackingUp"
-          (click)="cancelBackupConfirm()">
-          <app-ui-icon name="close"></app-ui-icon>
-        </button>
-      </header>
-      <div class="v1-modal__body">
-        <p>Download a JSON backup for this facility, including its meters, predictors, analyses, reports, and settings.</p>
-      </div>
-      <footer class="v1-modal__footer">
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="isBackingUp" (click)="cancelBackupConfirm()">Cancel</button>
-        <button type="button" class="v1-btn v1-btn--primary" [disabled]="isBackingUp" (click)="confirmBackupDownload()">
-          @if (isBackingUp) {
-            <app-ui-icon name="loading" spin></app-ui-icon>
-            Preparing
-          } @else {
-            Download JSON backup
-            <app-ui-icon name="download"></app-ui-icon>
-          }
-        </button>
-      </footer>
-    </section>
-  </div>
+  <app-confirmation-dialog
+    [title]="'Backup ' + backupName" titleId="facility-backup-confirm-title"
+    cancelAriaLabel="Cancel facility backup"
+    [confirmLabel]="'Download ' + (backupRequest?.format === 'zip' ? 'ZIP' : 'JSON') + ' backup'"
+    confirmClass="v1-btn--primary" confirmIcon="download"
+    (confirmed)="confirmBackupDownload()" (cancelled)="cancelBackupConfirm()">
+    <p>Download a JSON backup for this facility only, including its meters, predictors, analyses, reports, and settings.</p>
+  </app-confirmation-dialog>
 </ng-template>
 
 @if (showImportPanel) {

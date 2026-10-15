@@ -59,14 +59,18 @@ export class BackupExportCoordinator {
     return this.builder.buildFacilityBackup(snapshot, facilityGuid);
   }
 
-  async deliverToBrowser(backup: BackupFile, downloadAsZip = false): Promise<void> {
+  async deliverToBrowser(backup: BackupFile, downloadAsZip = false, signal?: AbortSignal): Promise<void> {
+    signal?.throwIfAborted();
     if (downloadAsZip) {
       const blob = await this.serializer.createZip(backup);
+      signal?.throwIfAborted();
       this.browserDownloads.downloadBlob(blob, this.serializer.getFileName(backup, 'zip'));
       return;
     }
+    const contents = this.serializer.serialize(backup);
+    signal?.throwIfAborted();
     this.browserDownloads.downloadText(
-      this.serializer.serialize(backup),
+      contents,
       this.serializer.getFileName(backup)
     );
   }

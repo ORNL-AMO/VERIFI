@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AppearanceService } from '@app/v1/appearance/appearance.service';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { ShellHeaderComponent } from './header/shell-header.component';
 import { ShellComponent } from './shell.component';
 import { WorkspaceNavigationService } from './workspace-navigation.service';
@@ -36,6 +37,7 @@ describe('ShellComponent', () => {
     TestBed.configureTestingModule({
       imports: [ShellTestModule],
       providers: [
+        { provide: ManualBackupDownloadService, useValue: {} },
         { provide: AppearanceService, useValue: appearance },
         { provide: WorkspaceNavigationService, useValue: createNavigation() }
       ]

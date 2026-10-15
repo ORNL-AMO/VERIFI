@@ -260,6 +260,13 @@ If the workflow needs current-state detail, add a short current-state note using
 - **Testing:** Cover deterministic builders without Angular, route-context direct links and parameter changes, component ownership with focused TestBed specs, keyboard/focus behavior on shared controls, and native IndexedDB rollback for every multi-store command. Add reordered-input regressions where collection order is not part of the domain contract. Use the validation planner to select broader browser, web, or Electron checks.
 - **Portfolio cards:** Account portfolio resource cards are read-only projections with explicit capabilities. They use the shared presentation boundary and never construct fake facility workspace providers or optionally inject a mutation service.
 
+### Manual account and facility backup downloads (#2783)
+
+- **Workflow:** Rebuild the v0 header account download and Settings account/facility exports in v1. The header immediately downloads full-account JSON from either account or facility context; Settings retains scoped confirmations and offers account JSON/ZIP and facility JSON.
+- **Shared logic:** One v1 manual-download service flushes registered edits, captures coherent snapshots through `BackupExportCoordinator`, prevents duplicates, handles cancellation and feedback, and records account download initiation in the existing local `lastBackup` field. Seven- and thirty-day header reminders encourage weekly backups without interrupting work.
+- **Compatibility:** Preserve backup shape, GUID relationships, filenames, ZIP packaging, import preparation, automatic backups, and Electron IPC. Facility downloads do not count as full-account backups; download initiation does not confirm a disk save.
+- **Validation:** Reminder boundaries and date refresh, flush/failure/cancellation/account-switch behavior, shared header/Settings actions, Chromium JSON/ZIP and facility filtering, persisted timestamp isolation, and an export/restore round trip. Check responsive layout, themes, keyboard/tooltips, and confirmation focus.
+
 ## Implementation Rules
 
 ### Facility analysis workbench (#2739 and #2737)

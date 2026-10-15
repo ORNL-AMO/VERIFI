@@ -1,3 +1,4 @@
+import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
@@ -44,6 +45,7 @@ describe('Account settings routed components', () => {
     refreshAccountCatalog: ReturnType<typeof vi.fn>;
     handleMarkedAccountDeletion: ReturnType<typeof vi.fn>;
   };
+  let manualBackups: { available: ReturnType<typeof signal<boolean>>; preparing: ReturnType<typeof signal<boolean>>; reminder: ReturnType<typeof signal>; download: ReturnType<typeof vi.fn> };
   let backupExportCoordinator: {
     exportActiveAccount: ReturnType<typeof vi.fn>;
     buildActiveAccountBackup: ReturnType<typeof vi.fn>;
@@ -83,6 +85,11 @@ describe('Account settings routed components', () => {
     lifecycle = {
       refreshAccountCatalog: vi.fn(async () => undefined),
       handleMarkedAccountDeletion: vi.fn(async () => [])
+    };
+    manualBackups = {
+      available: signal(true), preparing: signal(false),
+      reminder: signal({ tone: 'recommended', label: 'No backup recorded', detail: 'Backup recommended.' }),
+      download: vi.fn(async () => undefined)
     };
     backupExportCoordinator = {
       exportActiveAccount: vi.fn(async () => backupFile()),
@@ -127,6 +134,7 @@ describe('Account settings routed components', () => {
         { provide: AccountCommandHandler, useValue: accountHandler },
         { provide: FacilityCommandHandler, useValue: facilityHandler },
         { provide: ApplicationLifecycleService, useValue: lifecycle },
+        { provide: ManualBackupDownloadService, useValue: manualBackups },
         { provide: BackupExportCoordinator, useValue: backupExportCoordinator },
         { provide: ElectronBackupFileGateway, useValue: backupGateway },
         { provide: AutomaticBackupsService, useValue: automaticBackups },
@@ -282,15 +290,21 @@ describe('Account settings routed components', () => {
   it('owns backup confirmation and import panel in the routed backup component', async () => {
     const fixture = createDetail(AccountSettingsBackupComponent);
 
-    buttonByText(fixture, 'Backup account').click();
+    buttonByText(fixture, 'Download JSON').click();
     fixture.detectChanges(false);
 
-    expect(backupExportCoordinator.exportActiveAccount).not.toHaveBeenCalled();
+    expect(manualBackups.download).not.toHaveBeenCalled();
 
     await fixture.componentInstance.confirmBackupDownload();
     fixture.detectChanges(false);
 
-    expect(backupExportCoordinator.exportActiveAccount).toHaveBeenCalledWith({ downloadAsZip: false });
+    expect(manualBackups.download).toHaveBeenCalledWith({ scope: 'account', accountGuid: 'account-a', format: 'json' });
+
+    buttonByText(fixture, 'Download ZIP').click();
+    fixture.detectChanges(false);
+    expect(fixture.componentInstance.backupRequest?.format).toBe('zip');
+    await fixture.componentInstance.confirmBackupDownload();
+    expect(manualBackups.download).toHaveBeenLastCalledWith({ scope: 'account', accountGuid: 'account-a', format: 'zip' });
 
     buttonByText(fixture, 'Import backup').click();
     fixture.detectChanges(false);

@@ -1,4 +1,5 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, computed, inject } from '@angular/core';
+import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import {
   AppearanceService,
   BackgroundPattern,
@@ -34,6 +35,16 @@ interface PatternOption {
 export class ShellHeaderComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly appearance = inject(AppearanceService);
+  readonly backups = inject(ManualBackupDownloadService);
+  readonly backupDescription = computed(() =>
+    `${this.navigation.account()?.name ?? 'Account'}. Download a JSON backup of this entire account. ${this.backups.reminder().detail}`
+  );
+  backupTooltipOpen = false;
+
+  downloadAccountBackup(): void {
+    const account = this.navigation.account();
+    if (account) void this.backups.download({ scope: 'account', accountGuid: account.guid, format: 'json' });
+  }
 
   readonly paletteOptions: Array<PaletteOption> = [
     { id: 'default', label: 'Default', swatchClass: 'v1-settings__swatch--default' },
@@ -102,6 +113,7 @@ export class ShellHeaderComponent {
   }
 
   closeAll(): void {
+    this.backupTooltipOpen = false;
     this.isSettingsOpen = false;
     this.accountMenuOpen = false;
   }

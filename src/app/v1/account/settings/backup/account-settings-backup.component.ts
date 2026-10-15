@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild, ViewContainerRef, effect, inject, untracked } from '@angular/core';
+import { Component, DestroyRef, Injector, afterNextRender, TemplateRef, ViewChild, ViewContainerRef, effect, inject, untracked } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -6,6 +6,7 @@ import { BackupExportCoordinator } from '@data/backup/backup-export-coordinator.
 import { IdbAccount } from '@data/models/idbModels/account';
 import { AutomaticBackupStatus, AutomaticBackupsService } from '@platform/electron/automatic-backups.service';
 import { ElectronBackupFileGateway } from '@platform/electron/electron-backup-file.gateway';
+import { ManualBackupDownloadService, ManualBackupRequest } from '@app/v1/shared/backup/manual-backup-download.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountSettingsDetailBase } from '../account-settings-detail.base';
@@ -23,6 +24,9 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private backupOpener?: HTMLElement;
   readonly backupGateway = inject(ElectronBackupFileGateway);
 
   readonly automaticBackupStatus = toSignal(this.automaticBackups.status, { initialValue: 'disabled' as AutomaticBackupStatus });
@@ -33,7 +37,11 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
   form: FormGroup;
   showBackupConfirm = false;
   showImportPanel = false;
-  isBackingUp = false;
+  readonly backups = inject(ManualBackupDownloadService);
+  backupRequest: ManualBackupRequest | null = null;
+  backupName = '';
+
+  readonly isBackingUp = this.backups.preparing;
 
   override ngOnDestroy(): void {
     super.ngOnDestroy();
@@ -102,33 +110,30 @@ export class AccountSettingsBackupComponent extends AccountSettingsDetailBase {
     }));
   }
 
-  openBackupConfirm(): void {
-    if (!this.account() || this.isBackingUp) {
-      return;
-    }
+  openBackupConfirm(format: 'json' | 'zip' = 'json'): void {
+    const account = this.account();
+    if (!account || !this.backups.available()) return;
+    this.backupRequest = { scope: 'account', accountGuid: account.guid, format };
+    this.backupName = account.name;
+    this.backupOpener = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     this.showBackupConfirm = true;
-    this.saveError = '';
     this.modalPortal.show(new TemplatePortal(this.backupConfirmModal, this.viewContainerRef));
   }
 
   cancelBackupConfirm(): void {
-    if (!this.isBackingUp) {
-      this.showBackupConfirm = false;
-      this.modalPortal.hide();
-    }
+    this.showBackupConfirm = false;
+    this.backupRequest = null;
+    this.modalPortal.hide();
   }
 
   async confirmBackupDownload(): Promise<void> {
-    if (!this.account() || this.isBackingUp) {
-      return;
-    }
-    this.showBackupConfirm = false;
-    this.modalPortal.hide();
-    this.isBackingUp = true;
-    await this.runSave('Preparing account backup', async () => {
-      await this.backupExportCoordinator.exportActiveAccount({ downloadAsZip: false });
-    });
-    this.isBackingUp = false;
+    const request = this.backupRequest;
+    if (!request || !this.backups.available()) return;
+    this.cancelBackupConfirm();
+    await this.backups.download(request);
+    if (this.destroyRef.destroyed) return;
+    const opener = this.backupOpener;
+    afterNextRender(() => { if (opener?.isConnected) opener.focus(); }, { injector: this.injector });
   }
 
   async chooseAutomaticBackupLocation(): Promise<void> {
