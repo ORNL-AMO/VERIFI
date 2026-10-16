@@ -29,6 +29,7 @@ export class FacilityEmissionFactorsReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
+  calanderizedMetersSub: Subscription;
 
   invalidDateRange: boolean = false;
   constructor(
@@ -44,16 +45,20 @@ export class FacilityEmissionFactorsReportSetupComponent {
       if (this.isFormChange == false) {
         this.facilityReport = report;
         this.reportSettings = this.facilityReport.emissionFactorsReportSettings;
+        this.setYearOptions();
       } else {
         this.isFormChange = false;
       }
       this.setInvalidDateRange();
     });
-    this.setYearOptions();
+    this.calanderizedMetersSub = this.calanderizationService.calanderizedMeters.subscribe(() => {
+      this.setYearOptions();
+    });
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
+    this.calanderizedMetersSub.unsubscribe();
   }
 
   async save() {
@@ -62,8 +67,10 @@ export class FacilityEmissionFactorsReportSetupComponent {
     this.facilityReport.emissionFactorsReportSettings = this.reportSettings;
     const activeAccountGuid = this.accountWorkspaceStore.account()?.guid;
     const { value: updatedReport } = await this.commandBoundary.execute(
-      { entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report' ,
-        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }},
+      {
+        entityKind: 'facilityReport', changeKind: 'update', entityGuid: this.facilityReport.guid, label: 'Save Report',
+        publication: { mode: 'patch', buildPatch: value => ({ collections: [{ collection: 'facilityReports', upsert: [value] }] }) }
+      },
       () => this.reportHandler.updateFacilityReport(this.facilityReport, activeAccountGuid)
     );
     this.facilityReport = updatedReport;
@@ -74,7 +81,14 @@ export class FacilityEmissionFactorsReportSetupComponent {
     //TODO: baseline years less than report year selection
     //TODO: report years greater than baseline year selection
     //TODO: get options by water/energy
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, this.facilityReport.facilityId);
+
+    const facilityId = this.facilityReport?.facilityId;
+    if (!facilityId) {
+      this.reportYears = [];
+      this.baselineYears = [];
+      return;
+    }
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptions('all', true, facilityId);
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }

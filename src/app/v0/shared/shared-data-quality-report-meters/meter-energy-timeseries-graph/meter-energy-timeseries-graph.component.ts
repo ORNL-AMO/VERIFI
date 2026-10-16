@@ -4,6 +4,7 @@ import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getConsumptionData, getUnitFromMeter, Statistics } from '@v0/shared/shared-data-quality-report-meters/meterDataQualityStatistics';
 import { getDateFromMeterData } from '@shared/dateHelperFunctions';
+import { chartToImage } from '@app/shared/chart-image-export';
 
 @Component({
   selector: 'app-meter-energy-timeseries-graph',
@@ -135,18 +136,6 @@ export class MeterEnergyTimeseriesGraphComponent {
   }
 
   async getChartAsBase64Image(): Promise<string> {
-    try {
-      if (!this.meterEnergyTimeSeriesGraph?.nativeElement) {
-        return '';
-      }
-      const rawPlotly: any = await this.plotlyService.getPlotly();
-      if (!rawPlotly || typeof rawPlotly.toImage !== 'function') {
-        return '';
-      }
-      const dataUrl = await rawPlotly.toImage(this.meterEnergyTimeSeriesGraph.nativeElement, { format: 'jpeg', height: 700, width: 1400, imageDataOnly: false });
-      return dataUrl;
-    } catch (error) {
-      return '';
-    }
+    return chartToImage(this.plotlyService, this.meterEnergyTimeSeriesGraph?.nativeElement);
   }
 }
