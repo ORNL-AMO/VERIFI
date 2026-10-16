@@ -169,7 +169,7 @@ The current production UI is treated as v0 and is lazy-loaded through `src/app/v
 
 The unified UI/UX migration keeps the current experience as v0 and adds the new opt-in experience under `/v1`. v0 and v1 should have separate UI components and route shells. P1 prototype code under `/p1` is reference material only and may temporarily use v0 shared UI; production v1 code must not import from `@v0/*`. Shared data services, models, calculations, backups, imports, exports, Web Workers, and Electron boundaries remain outside versioned UI folders unless a dedicated compatibility issue changes those contracts. See the [Unified UI/UX migration guide](docs/unified-ux-migration.md) for the lightweight migration decision process.
 
-The v1 account portfolio reads facility and resource inventories from the committed account workspace. Its Account Data sidebar preserves the existing portfolio resource URLs; facilities use a compact directory, with a single column for small accounts and responsive columns based on available width for larger accounts.
+The v1 account portfolio reads facility and resource inventories from the committed account workspace. Its Account Data sidebar preserves the existing portfolio resource URLs; facilities use a compact directory, with a single column for small accounts and responsive columns based on available width for larger accounts. The account Meters portfolio groups compact meter entries by facility using existing meter and status projections; filtering precedes grouping, and navigation resolves the owning facility by GUID from the committed inventory.
 
 Use neighboring screens as the primary visual reference. Reuse shared components and existing classes before adding global rules. UI work should account for:
 

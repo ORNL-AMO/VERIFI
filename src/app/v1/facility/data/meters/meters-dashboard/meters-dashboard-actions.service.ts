@@ -30,11 +30,19 @@ export class MetersDashboardActionsService {
     return canAssignMeterToGroup(meter, target.group);
   }
 
-  async createMeter(draft: MeterDraft): Promise<IdbUtilityMeter> {
+  async createMeter(draft: MeterDraft, facilityGuid = this.workspace.selectedFacility()?.guid): Promise<IdbUtilityMeter> {
     const account = this.requireAccount();
-    const facility = this.requireFacility();
+    const facility = this.workspace.facilities().find(item => item.guid === facilityGuid && item.accountId === account.guid);
+    if (!facility) {
+      throw new WorkspaceWriteError('validation-failed', 'Select a facility in the active account.');
+    }
     const name = this.requireName(draft.name, 'Meter name is required.');
-    const group = this.resolveGroup(draft.groupId);
+    const group = draft.groupId ? this.workspace.meterGroups().find(item =>
+      item.guid === draft.groupId && item.facilityId === facility.guid && item.accountId === account.guid
+    ) : undefined;
+    if (draft.groupId && !group) {
+      throw new WorkspaceWriteError('validation-failed', 'The meter group is not part of the selected facility.');
+    }
     if (!canAssignSourceToGroup(draft.source, group)) {
       throw new WorkspaceWriteError('validation-failed', `${draft.source} meters cannot be assigned to ${group?.groupType} groups.`);
     }
@@ -295,13 +303,6 @@ export class MetersDashboardActionsService {
       throw new WorkspaceWriteError('validation-failed', 'The meter group is not part of the selected facility.');
     }
     return group;
-  }
-
-  private resolveGroup(groupGuid: string | undefined): IdbUtilityMeterGroup | undefined {
-    if (!groupGuid) {
-      return undefined;
-    }
-    return this.requireWorkspaceGroup(groupGuid);
   }
 
   private requireName(value: string, message: string): string {

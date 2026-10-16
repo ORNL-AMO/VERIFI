@@ -39,6 +39,8 @@
 }
 
 .v1-palette-neon {
+  --v1-error-row-tint: 7%;
+  --v1-warning-row-tint: 7%;
   --v1-inverse-text: #07100c;
   --v1-bg: #081121;
   --v1-surface: #101a2d;
@@ -110,6 +112,8 @@
 }
 
 .v1-theme-dark {
+  --v1-error-row-tint: 7%;
+  --v1-warning-row-tint: 7%;
   --v1-bg: #0f1512;
   --v1-surface: #1a2420;
   --v1-surface-muted: #1f2c27;

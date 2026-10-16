@@ -13,19 +13,21 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab.component';
 
 describe('AccountPortfolioMetersTabComponent', () => {
-  it('renders account-wide meter cards with their owning facility headers', () => {
+  it('renders compact meter sections with one heading per owning facility', () => {
     const fixture = setup();
 
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    expect(fixture.nativeElement.querySelectorAll('app-resource-browse-card').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('app-meter-facility-group').length).toBe(2);
     expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__actions')).toHaveLength(0);
     expect(text).toContain('Alpha Plant');
     expect(text).toContain('Beta Works');
     expect(text).toContain('Main Electric');
     expect(text).toContain('City Water');
-    expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__owner').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('app-meter-facility-group h2').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('app-resource-browse-card')).toHaveLength(0);
+    expect(text).not.toContain('First reading');
   });
 
   it('owns meter search, status filtering, and sort order', () => {
@@ -34,31 +36,69 @@ describe('AccountPortfolioMetersTabComponent', () => {
 
     expect(cardTitles(fixture)).toEqual(['Main Electric', 'City Water']);
 
-    fixture.componentInstance.setSearch('beta');
+    fixture.componentInstance.filtersForm.controls.search.setValue('beta');
     fixture.detectChanges();
     expect(cardTitles(fixture)).toEqual(['City Water']);
 
-    fixture.componentInstance.setSearch('');
-    fixture.componentInstance.setStatusFilter('missingGroup');
+    fixture.componentInstance.filtersForm.controls.search.setValue('');
+    fixture.componentInstance.filtersForm.controls.status.setValue('missingGroup');
     fixture.detectChanges();
     expect(cardTitles(fixture)).toEqual(['Main Electric']);
 
-    fixture.componentInstance.setStatusFilter('valid');
+    fixture.componentInstance.filtersForm.controls.status.setValue('valid');
     fixture.detectChanges();
     expect(cardTitles(fixture)).toEqual(['City Water']);
 
-    fixture.componentInstance.setStatusFilter('all');
-    fixture.componentInstance.setSortBy('facilityName');
+    fixture.componentInstance.filtersForm.controls.status.setValue('all');
+    fixture.componentInstance.filtersForm.controls.sort.setValue('facilityName');
     fixture.detectChanges();
     expect(cardTitles(fixture)).toEqual(['Main Electric', 'City Water']);
   });
 
-  it('opens meter routes through the card owning facility', () => {
+  it('updates groups after inventory changes and clears unmatched filters', () => {
+    const fixture = setup();
+    const workspace = TestBed.inject(AccountWorkspaceStore);
+    fixture.detectChanges();
+    fixture.componentInstance.filtersForm.controls.search.setValue('missing');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No meters match');
+    fixture.componentInstance.clearFilters();
+    fixture.detectChanges();
+    expect(cardTitles(fixture)).toHaveLength(2);
+    (workspace.meters as unknown as { set(value: unknown[]): void }).set([]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No meters');
+    expect(fixture.nativeElement.querySelector('app-meter-facility-group')).toBeNull();
+  });
+
+  it('reports navigation failure and ignores removed meter GUIDs', async () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const router = TestBed.inject(Router);
+    vi.mocked(router.navigate).mockRejectedValueOnce(new Error('Navigation failed'));
+    await fixture.componentInstance.openMeter('meter-water');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('could not be opened');
+    await fixture.componentInstance.openMeter('removed');
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+  });
+
+  it('links each facility heading to that facility meter dashboard', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const headings = [...fixture.nativeElement.querySelectorAll('h2 a')] as HTMLAnchorElement[];
+    expect(headings.map(link => link.getAttribute('href'))).toEqual([
+      '/v1/workspace/facility/facility-a/data/meters',
+      '/v1/workspace/facility/facility-b/data/meters'
+    ]);
+  });
+
+  it('opens meter routes through the entry owning facility', () => {
     const fixture = setup();
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
 
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('[aria-label="Open City Water settings"]') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('app-meter-facility-group:last-child .meter-facility-group__entry') as HTMLButtonElement).click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -111,6 +151,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
       {
         provide: WorkspaceNavigationService,
         useValue: {
+          facilityDataRoute: (facilityGuid: string, detail: string) => ['/v1', 'workspace', 'facility', facilityGuid, 'data', detail],
           facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [
             '/v1',
             'workspace',
@@ -122,16 +163,16 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
             tab
           ]
         }
-      },
-      { provide: Router, useValue: { navigate: vi.fn(async () => true) } }
+      }
     ]
   });
 
+  vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
   return TestBed.createComponent(AccountPortfolioMetersTabComponent);
 }
 
 function cardTitles(fixture: ComponentFixture<AccountPortfolioMetersTabComponent>): string[] {
-  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__title-text'))
+  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.meter-facility-group__name'))
     .map(element => element.textContent!.trim());
 }
 

@@ -1,10 +1,10 @@
-@let allCards = meterCards();
-@let visibleCards = filteredMeterCards();
+@let allMeters = meters();
+@let visibleMeters = filteredMeters();
 
 <section class="v1-account-portfolio-meters" aria-label="Portfolio meters">
   <form class="v1-data-browse-toolbar v1-account-portfolio-meters__toolbar" aria-label="Meter filters" [formGroup]="filtersForm">
     <div class="v1-portfolio-browse-search">
-      <p class="v1-portfolio-browse-count" role="status">Showing {{ visibleCards.length }} of {{ allCards.length }} meters</p>
+      <p class="v1-portfolio-browse-count" role="status">Showing {{ visibleMeters.length }} of {{ allMeters.length }} meters</p>
       <div class="v1-data-browse-search v1-account-portfolio-meters__search">
         <span class="input-group-text">
           <app-ui-icon name="search"></app-ui-icon>
@@ -25,7 +25,7 @@
         <option value="attention">Needs attention</option>
         <option value="noReadings">No readings</option>
         <option value="missingGroup">Missing group</option>
-        <option value="valid">Valid</option>
+        <option value="valid">No active findings</option>
       </select>
     </label>
 
@@ -33,33 +33,30 @@
       <span>Sort</span>
       <select class="v1-select" formControlName="sort">
         <option value="attention">Attention first</option>
-        <option value="meterName">Meter name</option>
         <option value="facilityName">Facility name</option>
         <option value="latestReading">Latest reading</option>
       </select>
     </label>
   </form>
 
-  @if (allCards.length === 0) {
+  @if (navigationError()) { <p class="v1-alert v1-alert--danger" role="alert">{{ navigationError() }}</p> }
+  @if (allMeters.length === 0) {
     <app-data-empty-state
       icon="meter"
       title="No meters"
       description="Meters will appear here after you add or upload them for a facility.">
     </app-data-empty-state>
-  } @else if (visibleCards.length === 0) {
+  } @else if (visibleMeters.length === 0) {
     <app-data-empty-state
       icon="clearFilter"
       title="No meters match these filters"
       description="Adjust the search or filter controls to return to the full meter list.">
+      <button type="button" class="v1-btn v1-btn--secondary" (click)="clearFilters()">Clear filters</button>
     </app-data-empty-state>
   } @else {
-    <div class="v1-data-browse-grid v1-data-browse-grid--portfolio v1-account-portfolio-meters__cards" role="list" aria-label="Account meters">
-      @for (item of visibleCards; track item.card.meter.guid) {
-        <app-resource-browse-card
-          [view]="item.view"
-          readOnly
-          (opened)="openMeter(item)">
-        </app-resource-browse-card>
+    <div class="meter-facility-board" [class.meter-facility-board--single]="singleFacility()">
+      @for (group of facilityGroups(); track group.facility.guid) {
+        <app-meter-facility-group [group]="group" [facilityRoute]="group.facilityRoute" [wide]="singleFacility()" (openMeter)="openMeter($event)"></app-meter-facility-group>
       }
     </div>
   }

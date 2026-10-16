@@ -21,6 +21,8 @@
   --v1-success: #20734a;
   --v1-warning: #9a6212;
   --v1-danger: #a53f36;
+  --v1-error-row-tint: 14%;
+  --v1-warning-row-tint: 20%;
   --v1-info: #2c386b;
   --v1-content-control: var(--v1-primary);
   --v1-action: var(--v1-facility);

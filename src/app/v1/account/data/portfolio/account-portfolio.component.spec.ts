@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { Router, RouterModule } from '@angular/router';
 import { vi } from 'vitest';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
@@ -97,8 +98,15 @@ describe('AccountPortfolioComponent', () => {
   });
 
   it('renders the portfolio shell and delegates the default content to the facilities tab', () => {
-    expect(fixture.nativeElement.textContent).toContain('Portfolio');
-    expect(fixture.nativeElement.querySelector('#v1-account-portfolio-title app-ui-icon[name="portfolio"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Facilities');
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Facilities');
+    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').textContent).toBe('Account A');
+    account.set({ ...account()!, name: 'Another Account' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('Facilities');
+    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').textContent).toBe('Another Account');
+    expect(fixture.nativeElement.querySelector('header .v1-eyebrow').title).toBe('Another Account');
+    expect(fixture.debugElement.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe('facility');
     expect(fixture.nativeElement.querySelector('[aria-label="Portfolio content"]')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Upload data');
     expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
@@ -115,12 +123,62 @@ describe('AccountPortfolioComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Manage Portfolio');
     expect(fixture.nativeElement.textContent).not.toContain('Add facility');
     expect(fixture.nativeElement.textContent).toContain('Upload data');
+    expect(buttonByText('Add meter').disabled).toBe(false);
+    const validation = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a'))
+      .find(link => link.textContent?.trim() === 'Data Validation')!;
+    expect(validation.getAttribute('href')).toContain('/account/account-a/settings/data-validation');
     for (const content of ['analyses', 'reports']) {
       activePortfolioTab.set(content);
       fixture.detectChanges();
       expect(fixture.nativeElement.textContent).not.toContain('Upload data');
       expect(fixture.nativeElement.textContent).not.toContain('Add facility');
     }
+  });
+
+  it('uses the active resource title for every portfolio destination', () => {
+    for (const [tab, [title, icon]] of Object.entries({ facilities: ['Facilities', 'facility'], meters: ['Meters', 'meter'], predictors: ['Predictors', 'predictor'], 'energy-uses': ['Energy Uses', 'tools'], analyses: ['Analyses', 'analysis'], reports: ['Reports', 'reports'] })) {
+      activePortfolioTab.set(tab);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe(title);
+      expect(fixture.debugElement.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
+    }
+  });
+
+  it('opens the meter portal, guards writes, and closes it when the page or account changes', () => {
+    activePortfolioTab.set('meters');
+    fixture.detectChanges();
+    buttonByText('Add meter').click();
+    expect(modalPortal.show).toHaveBeenCalledOnce();
+    expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(true);
+    activePortfolioTab.set('predictors');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(false);
+    activePortfolioTab.set('meters');
+    fixture.detectChanges();
+    buttonByText('Add meter').click();
+    account.set({ ...account()!, guid: 'account-b' });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(false);
+    for (const blocked of ['read-only', 'pending', 'no-facilities']) {
+      canWrite.set(blocked !== 'read-only');
+      hasPending.set(blocked === 'pending');
+      facilities.set(blocked === 'no-facilities' ? [] : [facilityFixture('facility-a', 'Alpha')]);
+      fixture.detectChanges();
+      expect(buttonByText('Add meter').disabled).toBe(true);
+      fixture.componentInstance.openCreateMeterDrawer();
+      expect(fixture.componentInstance.isCreateMeterDrawerOpen()).toBe(false);
+    }
+  });
+
+  it('opens the created meter settings and reports navigation failure without another creation', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const meter = { guid: 'meter-new', facilityId: 'facility-b', accountId: 'account-a' } as any;
+    await fixture.componentInstance.openCreatedMeter(meter);
+    expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'meters', 'meter-new', 'settings']);
+    navigate.mockResolvedValue(false);
+    await fixture.componentInstance.openCreatedMeter(meter);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Meter added. Its settings could not be opened');
   });
 
   it('counts both account and facility analyses and keeps existing analyses reachable without facilities', () => {
@@ -155,6 +213,30 @@ describe('AccountPortfolioComponent', () => {
       resized!([], {} as ResizeObserver);
       expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
       resizedFixture.destroy();
+      expect(disconnect).toHaveBeenCalled();
+    } finally { vi.unstubAllGlobals(); }
+  });
+
+  it('collapses the header gap after scrolling and restores it at the top, releasing the observer', () => {
+    let intersected!: IntersectionObserverCallback;
+    const disconnect = vi.fn();
+    const observe = vi.fn();
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(callback: IntersectionObserverCallback) { intersected = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    });
+    const observedFixture = TestBed.createComponent(AccountPortfolioComponent);
+    try {
+      observedFixture.detectChanges();
+      expect(observe).toHaveBeenCalled();
+      intersected([{ isIntersecting: false }] as IntersectionObserverEntry[], {} as IntersectionObserver);
+      observedFixture.detectChanges();
+      expect(observedFixture.nativeElement.querySelector('.v1-account-portfolio--scrolled')).not.toBeNull();
+      intersected([{ isIntersecting: true }] as IntersectionObserverEntry[], {} as IntersectionObserver);
+      observedFixture.detectChanges();
+      expect(observedFixture.nativeElement.querySelector('.v1-account-portfolio--scrolled')).toBeNull();
+      observedFixture.destroy();
       expect(disconnect).toHaveBeenCalled();
     } finally { vi.unstubAllGlobals(); }
   });

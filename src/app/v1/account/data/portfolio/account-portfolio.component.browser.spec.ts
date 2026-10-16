@@ -19,7 +19,7 @@ describe('portfolio sticky browse layout', () => {
         { provide: WorkspaceNavigationService, useValue: { activePortfolioTab: signal('facilities') } },
         { provide: ModalPortalService, useValue: { show: vi.fn(), hide: vi.fn() } },
         { provide: AccountWorkspaceStore, useValue: {
-          account: signal({ guid: 'account-a', name: 'Account A' }), facilities: signal([{ guid: 'facility-a' }]),
+          account: signal({ guid: 'account-a', name: 'A very long account name with unusual lengths '.repeat(8) }), facilities: signal([{ guid: 'facility-a' }]),
           meters: signal([]), predictors: signal([]), energyUseEquipment: signal([]),
           accountAnalyses: signal([]), facilityAnalyses: signal([]), facilityReports: signal([]),
           canWrite: signal(true), hasPending: signal(false)
@@ -27,10 +27,15 @@ describe('portfolio sticky browse layout', () => {
       ]
     });
     const fixture = TestBed.createComponent(AccountPortfolioComponent);
-    fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;
     host.classList.add('v1-root');
     Object.assign(host.style, { width: '900px', height: '500px', overflow: 'auto' });
+    fixture.detectChanges();
+    const eyebrow = host.querySelector<HTMLElement>('header .v1-eyebrow')!;
+    expect(eyebrow.scrollWidth).toBeGreaterThan(eyebrow.clientWidth);
+    expect(getComputedStyle(eyebrow).textOverflow).toBe('ellipsis');
+    expect(eyebrow.title).toBe(eyebrow.textContent);
+    expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth);
     const actions = [...host.querySelectorAll<HTMLElement>('.v1-account-portfolio__header-actions .v1-btn')];
     expect(actions).toHaveLength(3);
     const typography = actions.map(action => {
@@ -59,11 +64,16 @@ describe('portfolio sticky browse layout', () => {
     const toolbar = content.querySelector('form')!;
     await vi.waitFor(() => expect(parseFloat(host.style.getPropertyValue('--portfolio-sticky-height')))
       .toBeCloseTo(sticky.getBoundingClientRect().height, 0));
+    expect(parseFloat(getComputedStyle(sticky).paddingBottom)).toBeGreaterThan(0);
     host.scrollTop = 350;
     await vi.waitFor(() => {
+      expect(getComputedStyle(sticky).paddingBottom).toBe('0px');
+      expect(host.querySelector('header')!.getBoundingClientRect().bottom).toBeCloseTo(toolbar.getBoundingClientRect().top, 0);
       expect(sticky.getBoundingClientRect().top).toBeCloseTo(host.getBoundingClientRect().top, 0);
       expect(toolbar.getBoundingClientRect().top).toBeCloseTo(sticky.getBoundingClientRect().bottom, 0);
     });
+    host.scrollTop = 0;
+    await vi.waitFor(() => expect(parseFloat(getComputedStyle(sticky).paddingBottom)).toBeGreaterThan(0));
     sticky.style.paddingBottom = '45px';
     await vi.waitFor(() => {
       expect(parseFloat(host.style.getPropertyValue('--portfolio-sticky-height'))).toBeCloseTo(sticky.getBoundingClientRect().height, 0);

@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
+import { MeterDraftSlideoutComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
 import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
@@ -26,7 +27,9 @@ import { AccountPortfolioPredictorsTabComponent } from './portfolio/account-port
 import { AccountPortfolioReportsTabComponent } from './portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountPortfolioComponent } from './portfolio/account-portfolio.component';
 import { CreateFacilityDrawerComponent } from './portfolio/create-facility-drawer/create-facility-drawer.component';
+import { CreateMeterDrawerComponent } from './portfolio/create-meter-drawer/create-meter-drawer.component';
 import { FacilityDirectoryComponent } from './portfolio/facility-directory/facility-directory.component';
+import { MeterFacilityGroupComponent } from './portfolio/meter-facility-group/meter-facility-group.component';
 
 @NgModule({
   declarations: [
@@ -43,15 +46,18 @@ import { FacilityDirectoryComponent } from './portfolio/facility-directory/facil
     AccountPortfolioFacilitiesTabComponent,
     FacilityDirectoryComponent,
     AccountPortfolioMetersTabComponent,
+    MeterFacilityGroupComponent,
     AccountPortfolioPlaceholderTabComponent,
     AccountPortfolioPredictorsTabComponent,
     AccountPortfolioEnergyUsesTabComponent,
     AccountPortfolioAnalysesTabComponent,
     AccountPortfolioReportsTabComponent,
-    CreateFacilityDrawerComponent
+    CreateFacilityDrawerComponent,
+    CreateMeterDrawerComponent
   ],
   imports: [
     CommonModule,
+    MeterDraftSlideoutComponent,
     IconsModule,
     ReactiveFormsModule,
     RouterModule,

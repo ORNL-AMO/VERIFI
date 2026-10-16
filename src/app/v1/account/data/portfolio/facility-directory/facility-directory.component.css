@@ -39,14 +39,16 @@
 
 .facility-directory__entry[data-tone="danger"] {
   --directory-severity: var(--v1-danger);
+  --directory-row-tint: var(--v1-error-row-tint);
 }
 
 .facility-directory__entry[data-tone="warning"] {
   --directory-severity: var(--v1-warning);
+  --directory-row-tint: var(--v1-warning-row-tint);
 }
 
 .facility-directory__entry:is([data-tone="danger"], [data-tone="warning"]) {
-  --directory-background: color-mix(in srgb, var(--directory-severity) 7%, var(--v1-surface));
+  --directory-background: color-mix(in srgb, var(--directory-severity) var(--directory-row-tint), var(--v1-surface));
 }
 
 .facility-directory__entry:hover {
@@ -54,7 +56,7 @@
 }
 
 .facility-directory__entry:is([data-tone="danger"], [data-tone="warning"]):hover {
-  background: color-mix(in srgb, var(--directory-severity) 13%, var(--v1-surface));
+  background: color-mix(in srgb, var(--directory-severity) calc(var(--directory-row-tint) + 6%), var(--v1-surface));
 }
 
 .facility-directory__entry:focus-visible {

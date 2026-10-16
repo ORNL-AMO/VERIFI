@@ -38,6 +38,22 @@ describe('MetersDashboardActionsService', () => {
     }), expect.any(Function));
   });
 
+  it('creates for an explicitly chosen facility without changing the selected facility', async () => {
+    const { service, meterHandler } = setup();
+    const created = await service.createMeter({ name: 'Boiler', source: 'Natural Gas' }, 'facility-b');
+    expect(created).toMatchObject({ facilityId: 'facility-b', accountId: 'account-a', energyUnit: 'MMBtu' });
+    expect(meterHandler.addMeter).toHaveBeenCalledOnce();
+  });
+
+  it('rejects missing facilities and groups owned by another facility before saving', async () => {
+    const { service, meterHandler } = setup({ groups: [group({ guid: 'group-a' })] });
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity' }, 'deleted'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(service.createMeter({ name: 'Main', source: 'Electricity', groupId: 'group-a' }, 'facility-b'))
+      .rejects.toMatchObject({ code: 'validation-failed' });
+    expect(meterHandler.addMeter).not.toHaveBeenCalled();
+  });
+
   it('creates, updates, and deletes groups through atomic meter group commands', async () => {
     const existingGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy', id: 4 });
     const groupedMeter = meter({ guid: 'meter-electric', name: 'Main', groupId: existingGroup.guid });
@@ -221,6 +237,8 @@ function setup(options: {
   const store = {
     account: signal(account()),
     selectedFacility: signal(facility()),
+    facilities: signal([facility(), facility({ guid: 'facility-b', energyUnit: 'MMBtu' })]),
+    meterGroups: signal(options.groups ?? []),
     canWrite: signal(true),
     hasPending: signal(false),
     meters: signal(options.meters ?? []),

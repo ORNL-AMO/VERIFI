@@ -8,3 +8,17 @@
   gap: .85rem;
   min-width: 0;
 }
+
+.meter-facility-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(26rem, 100%), 1fr));
+  align-items: start;
+  gap: .85rem;
+  min-width: 0;
+}
+.meter-facility-board--single { grid-template-columns: 1fr; }
+
+@media print {
+  .v1-account-portfolio-meters__toolbar { display: none; }
+  .meter-facility-board { grid-template-columns: 1fr; }
+}

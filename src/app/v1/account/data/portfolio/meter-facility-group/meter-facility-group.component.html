@@ -1,0 +1,28 @@
+@let currentGroup = group();
+<section class="meter-facility-group" [class.meter-facility-group--wide]="wide()" [attr.aria-labelledby]="'meter-facility-' + currentGroup.facility.guid">
+  <h2 [id]="'meter-facility-' + currentGroup.facility.guid">
+    <a [routerLink]="facilityRoute()">
+      <app-ui-icon name="facility"></app-ui-icon><span>{{ currentGroup.facility.name }}</span>
+      <app-ui-icon name="chevronRight"></app-ui-icon>
+    </a>
+  </h2>
+  <ul role="list" [attr.aria-label]="currentGroup.facility.name + ' meters'">
+    @for (item of currentGroup.meters; track item.meter.guid) {
+      <li>
+        <button type="button" class="meter-facility-group__entry" [attr.data-tone]="item.statusTone" (click)="openMeter.emit(item.meter.guid)">
+          <span class="meter-facility-group__identity">
+            <strong class="meter-facility-group__name">{{ item.meter.name }}</strong>
+            <span class="meter-facility-group__source">
+              <app-ui-icon [name]="item.sourceIcon"></app-ui-icon><span>{{ item.meter.source }}</span>
+            </span>
+          </span>
+          <span class="meter-facility-group__status">
+            <app-ui-icon [name]="item.statusIcon"></app-ui-icon>
+            <span [class.visually-hidden]="item.statusTone === 'success'">{{ item.statusLabel }}</span>
+          </span>
+          <app-ui-icon class="meter-facility-group__arrow" name="chevronRight"></app-ui-icon>
+        </button>
+      </li>
+    }
+  </ul>
+</section>

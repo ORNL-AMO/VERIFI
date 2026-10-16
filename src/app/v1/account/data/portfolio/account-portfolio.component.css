@@ -4,14 +4,43 @@
 }
 
 .v1-account-portfolio {
+  position: relative;
   display: grid;
   gap: 0;
   padding: clamp(1rem, 3vw, 1.5rem);
 }
 
+.v1-account-portfolio__scroll-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.v1-account-portfolio--scrolled .v1-account-portfolio__sticky {
+  padding-bottom: 0;
+}
+
+.v1-account-portfolio--scrolled .v1-account-portfolio__header {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .v1-account-portfolio__header {
   align-items: center;
   grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.v1-account-portfolio__heading {
+  min-width: 0;
+}
+
+.v1-account-portfolio__heading .v1-eyebrow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .v1-account-portfolio__sticky.v1-data-workbench-sticky {
@@ -29,6 +58,15 @@
   display: flex;
   align-items: center;
   gap: var(--v1-space-2);
+}
+
+#v1-account-portfolio-title span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#v1-account-portfolio-title app-ui-icon {
+  flex-shrink: 0;
 }
 .v1-account-portfolio__header-actions {
   display: flex;

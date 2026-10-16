@@ -1,16 +1,21 @@
 @let currentAccount = account();
 
-<section class="v1-account-portfolio" aria-labelledby="v1-account-portfolio-title">
+<section class="v1-account-portfolio" [class.v1-account-portfolio--scrolled]="headerGapCollapsed()" aria-labelledby="v1-account-portfolio-title">
   @if (currentAccount) {
+    <span #scrollMarker class="v1-account-portfolio__scroll-marker" aria-hidden="true"></span>
     <div #portfolioSticky class="v1-data-workbench-sticky v1-account-portfolio__sticky">
     <header class="v1-section-header v1-account-portfolio__header">
-      <div>
-        <p class="v1-eyebrow">Account Data</p>
-        <h1 id="v1-account-portfolio-title"><app-ui-icon name="portfolio"></app-ui-icon> Portfolio</h1>
+      <div class="v1-account-portfolio__heading">
+        <p class="v1-eyebrow" [title]="currentAccount.name">{{ currentAccount.name }}</p>
+        <h1 id="v1-account-portfolio-title"><app-ui-icon [name]="headerIcon()"></app-ui-icon><span>{{ title() }}</span></h1>
       </div>
       <div class="v1-account-portfolio__header-actions">
         @if (showUpload()) {
           <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
+        }
+        @if (isMeters()) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreateMeterDrawer()"><app-ui-icon name="add"></app-ui-icon>Add meter</button>
+          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"></app-ui-icon>Data Validation</a>
         }
         @if (isFacilities()) {
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openCreateFacilityDrawer()"><app-ui-icon name="add"></app-ui-icon>Add facility</button>
@@ -21,6 +26,9 @@
 
     </div>
 
+    @if (meterNavigationError()) {
+      <div class="v1-alert v1-alert--warning" role="alert">{{ meterNavigationError() }}</div>
+    }
     @if (!canWrite()) {
       <div class="v1-alert v1-alert--warning" role="status">
         <app-ui-icon name="lock"></app-ui-icon>
@@ -52,5 +60,11 @@
 <ng-template #createFacilityDrawer>
   @if (isCreateFacilityDrawerOpen()) {
     <app-create-portfolio-facility-drawer (closed)="closeCreateFacilityDrawer()"></app-create-portfolio-facility-drawer>
+  }
+</ng-template>
+
+<ng-template #createMeterDrawer>
+  @if (isCreateMeterDrawerOpen()) {
+    <app-create-portfolio-meter-drawer (created)="openCreatedMeter($event)" (closed)="closeCreateMeterDrawer()"></app-create-portfolio-meter-drawer>
   }
 </ng-template>
