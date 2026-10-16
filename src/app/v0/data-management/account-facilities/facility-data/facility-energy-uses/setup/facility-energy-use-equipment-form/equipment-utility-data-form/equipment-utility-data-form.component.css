@@ -2,3 +2,20 @@
 span.badge.badge-text{
     font-size: small;
 }
+
+.utility-meter-warning {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.utility-meter-warning span {
+    min-width: 0;
+}
+
+.utility-meter-warning i {
+    min-width: 0;
+    margin-top: 0.2rem;
+}
