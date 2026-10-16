@@ -1,3 +1,4 @@
+import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { CommonModule } from '@angular/common';
 import { ScrollingModule, CdkScrollable } from '@angular/cdk/scrolling';
 import { NgModule, signal } from '@angular/core';
@@ -21,7 +22,7 @@ import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
 
 @NgModule({
-  imports: [SectionNavModule, StatusEvaluationMessageComponent, CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
+  imports: [NavigationMotionDirective, SectionNavModule, StatusEvaluationMessageComponent, CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
     PrimaryRailComponent,
@@ -41,7 +42,7 @@ describe('WorkspaceShellComponent', () => {
       panelTabs: vi.fn(() => SUPPORT_PANEL_TABS),
       isSupportPanelOpen: vi.fn(() => true),
       contextMode: vi.fn(() => 'account'),
-      routeMotion: vi.fn(() => 'workspace-entry'),
+      routeMotion: vi.fn(() => 'none'), routeMotionKey: signal('/v1/workspace/account/account-a/home/overview'),
       account: vi.fn(() => ({ guid: 'account-a', name: 'Account A' })),
       facilities: vi.fn(() => [{ guid: 'facility-a', name: 'Facility A' }]),
       facility: vi.fn(() => ({ guid: 'facility-a', name: 'Facility A' })),
@@ -57,7 +58,7 @@ describe('WorkspaceShellComponent', () => {
         details: [{ label: 'Context', value: 'Account workspace' }]
       })),
       showWelcome: vi.fn(),
-      setContext: vi.fn(),
+      setContext: vi.fn(), accountReturn: signal(undefined), contextNavigationError: signal(''),
       setFacility: vi.fn(),
       setPanelTab: vi.fn(),
       hideSupportPanel: vi.fn(),
@@ -135,13 +136,6 @@ describe('WorkspaceShellComponent', () => {
     const scrollable = fixture.debugElement.query(By.directive(CdkScrollable));
 
     expect(scrollable.nativeElement.classList.contains('v1-workspace__main')).toBe(true);
-  });
-
-  it('applies motion classes from the current v1 route transition', () => {
-    const workspace = fixture.nativeElement.querySelector('.v1-workspace');
-
-    expect(workspace.classList.contains('v1-workspace--entry')).toBe(true);
-    expect(workspace.classList.contains('v1-workspace--account')).toBe(true);
   });
 
   it('offers discard for active warnings and restore for discarded warnings', () => {

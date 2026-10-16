@@ -39,6 +39,14 @@
 }
 
 .v1-palette-neon {
+  --v1-chart-series-5: #bba2ff;
+  --v1-chart-series-6: #56cbd4;
+  --v1-chart-series-7: #ed9bbc;
+  --v1-chart-series-8: #a7cb6e;
+  --v1-chart-series-9: #f4ac81;
+  --v1-chart-series-10: #8cb7ee;
+  --v1-chart-series-11: #e3c17b;
+  --v1-chart-series-12: #c0a8cb;
   --v1-error-row-tint: 7%;
   --v1-warning-row-tint: 7%;
   --v1-inverse-text: #07100c;
@@ -112,6 +120,14 @@
 }
 
 .v1-theme-dark {
+  --v1-chart-series-5: #bba2ff;
+  --v1-chart-series-6: #56cbd4;
+  --v1-chart-series-7: #ed9bbc;
+  --v1-chart-series-8: #a7cb6e;
+  --v1-chart-series-9: #f4ac81;
+  --v1-chart-series-10: #8cb7ee;
+  --v1-chart-series-11: #e3c17b;
+  --v1-chart-series-12: #c0a8cb;
   --v1-error-row-tint: 7%;
   --v1-warning-row-tint: 7%;
   --v1-bg: #0f1512;

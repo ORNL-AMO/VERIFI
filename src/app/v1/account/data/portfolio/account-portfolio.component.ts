@@ -1,10 +1,11 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Component, ElementRef, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { AccountPortfolioTab, WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
 
 interface PortfolioTotals {
@@ -20,47 +21,12 @@ interface PortfolioTotals {
 })
 export class AccountPortfolioComponent implements OnDestroy {
   private readonly router = inject(Router);
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private headerResizeObserver?: ResizeObserver;
-  private scrollMarkerObserver?: IntersectionObserver;
   private readonly navigation = inject(WorkspaceNavigationService);
   private readonly workspace = inject(AccountWorkspaceStore);
   private readonly modalPortal = inject(ModalPortalService);
   private readonly viewContainerRef = inject(ViewContainerRef);
 
-  @ViewChild('scrollMarker') set scrollMarker(marker: ElementRef<HTMLElement> | undefined) {
-    this.scrollMarkerObserver?.disconnect();
-    this.scrollMarkerObserver = undefined;
-    this.headerGapCollapsed.set(false);
-    if (marker && typeof IntersectionObserver !== 'undefined') {
-      let root = marker.nativeElement.parentElement;
-      while (root && !/(auto|scroll|overlay)/.test(getComputedStyle(root).overflowY)) {
-        root = root.parentElement;
-      }
-      this.scrollMarkerObserver = new IntersectionObserver(entries => {
-        const entry = entries[0];
-        if (entry) { this.headerGapCollapsed.set(!entry.isIntersecting); }
-      }, { root });
-      this.scrollMarkerObserver.observe(marker.nativeElement);
-    }
-  }
-
-  @ViewChild('portfolioSticky') set stickyHeader(header: ElementRef<HTMLElement> | undefined) {
-    this.headerResizeObserver?.disconnect();
-    this.headerResizeObserver = undefined;
-    if (!header) {
-      this.element.nativeElement.style.removeProperty('--portfolio-sticky-height');
-      return;
-    }
-    const updateHeight = () => this.element.nativeElement.style.setProperty(
-      '--portfolio-sticky-height', `${header.nativeElement.getBoundingClientRect().height}px`
-    );
-    updateHeight();
-    if (typeof ResizeObserver !== 'undefined') {
-      this.headerResizeObserver = new ResizeObserver(updateHeight);
-      this.headerResizeObserver.observe(header.nativeElement, { box: 'border-box' });
-    }
-  }
+  private readonly sticky = viewChild(BrowseHeaderDirective);
 
   @ViewChild('createFacilityDrawer') private readonly createFacilityDrawer!: TemplateRef<unknown>;
 
@@ -82,7 +48,8 @@ export class AccountPortfolioComponent implements OnDestroy {
     'energy-uses': 'tools', analyses: 'analysis', reports: 'reports'
   } satisfies Record<AccountPortfolioTab, IconName>)[this.activeContent()]);
   readonly isCreateMeterDrawerOpen = signal(false);
-  readonly headerGapCollapsed = signal(false);
+  readonly headerGapCollapsed = computed(() => this.sticky()?.collapsed() ?? false);
+  readonly breadcrumbs = computed(() => [{ label: this.account()?.name ?? 'Account' }]);
   readonly meterNavigationError = signal('');
   readonly showUpload = computed(() => !['analyses', 'reports'].includes(this.activeContent()));
   readonly isCreateFacilityDrawerOpen = signal(false);
@@ -121,8 +88,6 @@ export class AccountPortfolioComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.headerResizeObserver?.disconnect();
-    this.scrollMarkerObserver?.disconnect();
     this.modalPortal.hide();
   }
 

@@ -28,7 +28,7 @@ describe('meter facility board in Chromium', () => {
     )));
     TestBed.configureTestingModule({ imports: [AccountDataModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: {
-        facilities: facilitiesState, meters: signal(meters),
+        canWrite: signal(true), account: signal({ guid: 'account-a' }), facilities: facilitiesState, meters: signal(meters),
         meterData: signal(meters.filter((_, index) => index % 7 !== 0).map(value => reading({ meterId: value.guid, facilityId: value.facilityId }))),
         meterGroups: signal(facilities.map(owner => group({ guid: `group-${owner.guid.slice(9)}`, facilityId: owner.guid })))
       } },

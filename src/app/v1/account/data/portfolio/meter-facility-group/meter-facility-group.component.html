@@ -1,7 +1,7 @@
 @let currentGroup = group();
 <section class="meter-facility-group" [class.meter-facility-group--wide]="wide()" [attr.aria-labelledby]="'meter-facility-' + currentGroup.facility.guid">
   <h2 [id]="'meter-facility-' + currentGroup.facility.guid">
-    <a [routerLink]="facilityRoute()">
+    <a [routerLink]="facilityRoute()" [attr.data-browse-id]="currentGroup.facility.guid">
       <app-ui-icon name="facility"></app-ui-icon><span>{{ currentGroup.facility.name }}</span>
       <app-ui-icon name="chevronRight"></app-ui-icon>
     </a>
@@ -9,7 +9,7 @@
   <ul role="list" [attr.aria-label]="currentGroup.facility.name + ' meters'">
     @for (item of currentGroup.meters; track item.meter.guid) {
       <li>
-        <button type="button" class="meter-facility-group__entry" [attr.data-tone]="item.statusTone" (click)="openMeter.emit(item.meter.guid)">
+        <button type="button" class="meter-facility-group__entry" [attr.data-browse-id]="item.meter.guid" [attr.data-tone]="item.statusTone" (click)="openMeter.emit(item.meter.guid)">
           <span class="meter-facility-group__identity">
             <strong class="meter-facility-group__name">{{ item.meter.name }}</strong>
             <span class="meter-facility-group__source">

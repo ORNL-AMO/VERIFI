@@ -1,3 +1,6 @@
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -55,7 +58,7 @@ import { MeterFacilityGroupComponent } from './portfolio/meter-facility-group/me
     CreateFacilityDrawerComponent,
     CreateMeterDrawerComponent
   ],
-  imports: [
+  imports: [PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
     CommonModule,
     MeterDraftSlideoutComponent,
     IconsModule,

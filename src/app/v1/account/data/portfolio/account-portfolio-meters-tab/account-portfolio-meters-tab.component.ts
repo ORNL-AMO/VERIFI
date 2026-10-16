@@ -1,6 +1,6 @@
+import { BrowseKey, rememberBrowseForm } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
@@ -23,7 +23,12 @@ export class AccountPortfolioMetersTabComponent {
     status: new FormControl<PortfolioMeterStatusFilter>('all', { nonNullable: true }),
     sort: new FormControl<PortfolioMeterSort>('attention', { nonNullable: true })
   });
-  readonly filters = toSignal(this.filtersForm.valueChanges, { initialValue: this.filtersForm.getRawValue() });
+  readonly browseKey = computed<BrowseKey<'meters'> | undefined>(() => {
+    const account = this.workspace.account();
+    return account ? { accountGuid: account.guid, kind: 'meters' } : undefined;
+  });
+  readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()));
   readonly navigationError = signal('');
   readonly meters = computed(() => buildPortfolioMeters({
     facilities: this.workspace.facilities(), meters: this.workspace.meters(), readings: this.workspace.meterData(),
@@ -34,6 +39,8 @@ export class AccountPortfolioMetersTabComponent {
     ...group, facilityRoute: this.navigation.facilityDataRoute(group.facility.guid, 'meters')
   })));
   readonly singleFacility = computed(() => new Set(this.meters().map(item => item.facility.guid)).size === 1);
+
+  readonly browseIds = computed(() => [...this.filteredMeters().map(item => item.meter.guid), ...this.facilityGroups().map(item => item.facility.guid)]);
 
   clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'attention' }); }
 

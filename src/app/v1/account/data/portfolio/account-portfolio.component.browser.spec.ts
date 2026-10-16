@@ -62,7 +62,7 @@ describe('portfolio sticky browse layout', () => {
     host.querySelector('.v1-account-portfolio')!.append(content);
     const sticky = host.querySelector('.v1-account-portfolio__sticky') as HTMLElement;
     const toolbar = content.querySelector('form')!;
-    await vi.waitFor(() => expect(parseFloat(host.style.getPropertyValue('--portfolio-sticky-height')))
+    await vi.waitFor(() => expect(parseFloat(host.querySelector<HTMLElement>('.v1-account-portfolio')!.style.getPropertyValue('--portfolio-sticky-height')))
       .toBeCloseTo(sticky.getBoundingClientRect().height, 0));
     expect(parseFloat(getComputedStyle(sticky).paddingBottom)).toBeGreaterThan(0);
     host.scrollTop = 350;
@@ -76,7 +76,7 @@ describe('portfolio sticky browse layout', () => {
     await vi.waitFor(() => expect(parseFloat(getComputedStyle(sticky).paddingBottom)).toBeGreaterThan(0));
     sticky.style.paddingBottom = '45px';
     await vi.waitFor(() => {
-      expect(parseFloat(host.style.getPropertyValue('--portfolio-sticky-height'))).toBeCloseTo(sticky.getBoundingClientRect().height, 0);
+      expect(parseFloat(host.querySelector<HTMLElement>('.v1-account-portfolio')!.style.getPropertyValue('--portfolio-sticky-height'))).toBeCloseTo(sticky.getBoundingClientRect().height, 0);
       expect(toolbar.getBoundingClientRect().top).toBeCloseTo(sticky.getBoundingClientRect().bottom, 0);
     });
   });

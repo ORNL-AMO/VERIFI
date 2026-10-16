@@ -1,34 +1,10 @@
 :host { display: grid; gap: .85rem; min-width: 0; }
-.v1-nav__context {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .25rem;
-  padding: .25rem;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius-sm);
-  background: var(--v1-surface-muted);
-}
-
-.v1-nav__context button {
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  color: var(--v1-muted);
-  cursor: pointer;
-}
-
-.v1-nav__context button.active:first-child,
-.v1-nav__context button.active:last-child {
-  background: color-mix(in srgb, var(--v1-content-control) 9%, var(--v1-surface));
-  color: var(--v1-text);
-  box-shadow: inset 0 0 0 1px var(--v1-content-control);
-}
-
-.v1-nav__context button:disabled {
-  cursor: not-allowed;
-  opacity: .55;
-}
-
+.v1-nav__account-return, .v1-nav__account-name { display: flex; align-items: center; gap: .4rem; min-width: 0; font-size: .85rem; }
+.v1-nav__account-return { color: var(--v1-link); text-decoration: none; font-weight: 800; }
+.v1-nav__account-return:hover { text-decoration: underline; }
+.v1-nav__account-return:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 3px; }
+.v1-nav__account-name { color: var(--v1-muted); }
+.v1-nav__account-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v1-nav__recovery {
   display: flex;
   gap: .55rem;

@@ -13,6 +13,14 @@ import { AccountDataModule } from '@app/v1/account/data/account-data.module';
 import { AccountPortfolioMetersTabComponent } from './account-portfolio-meters-tab.component';
 
 describe('AccountPortfolioMetersTabComponent', () => {
+  it('restores account meter filters when returning from a drilled-in page', () => {
+    const fixture = setup(); fixture.detectChanges();
+    fixture.componentInstance.filtersForm.patchValue({ search: 'Beta', sort: 'latestReading' }); fixture.detectChanges(); fixture.destroy();
+    const restored = TestBed.createComponent(AccountPortfolioMetersTabComponent); restored.detectChanges();
+    expect(restored.componentInstance.filtersForm.getRawValue()).toMatchObject({ search: 'Beta', sort: 'latestReading' });
+    expect(cardTitles(restored)).toEqual(['City Water']);
+  });
+
   it('renders compact meter sections with one heading per owning facility', () => {
     const fixture = setup();
 

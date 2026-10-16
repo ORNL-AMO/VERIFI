@@ -1,3 +1,4 @@
+import { OverlayModule } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -12,7 +13,7 @@ describe('FacilityPickerComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [FacilityPickerComponent],
-      imports: [ReactiveFormsModule, IconComponent]
+      imports: [OverlayModule, ReactiveFormsModule, IconComponent]
     });
   });
 
@@ -21,9 +22,21 @@ describe('FacilityPickerComponent', () => {
     return { fixture, component: fixture.componentInstance };
   }
 
+  it('moves from the search field to the last facility with ArrowUp', () => {
+    const { fixture, component } = createComponent();
+    component.facilities = [facility('f1', 'First'), facility('f2', 'Second'), facility('f3', 'Last')];
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.v1-facility-picker__toggle').click();
+    fixture.detectChanges();
+    const search = document.querySelector<HTMLInputElement>('.v1-facility-picker__search-input')!;
+    search.focus(); search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement?.textContent).toContain('Last');
+  });
+
   it('renders a static label when there is a single facility', () => {
     const { fixture, component } = createComponent();
     component.facilities = [facility('f1', 'Facility One')];
+    component.selectedFacility = component.facilities[0];
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
@@ -31,7 +44,7 @@ describe('FacilityPickerComponent', () => {
     expect(element.querySelector('.v1-facility-picker__toggle')).toBeNull();
   });
 
-  it('shows a toggle button and hides the search box for five or fewer facilities', () => {
+  it('shows a searchable toggle even for a small facility inventory', () => {
     const { fixture, component } = createComponent();
     component.facilities = [facility('f1', 'Facility One'), facility('f2', 'Facility Two')];
     component.selectedFacility = component.facilities[0];
@@ -44,8 +57,8 @@ describe('FacilityPickerComponent', () => {
     toggle?.click();
     fixture.detectChanges();
 
-    expect(element.querySelector('.v1-facility-picker__search')).toBeNull();
-    expect(element.querySelectorAll('.v1-facility-picker__item').length).toBe(2);
+    expect(document.querySelector('.v1-facility-picker__search')).not.toBeNull();
+    expect(document.querySelectorAll('.v1-facility-picker__item').length).toBe(2);
   });
 
   it('shows a search box once there are more than five facilities and filters the list', () => {
@@ -58,14 +71,14 @@ describe('FacilityPickerComponent', () => {
     element.querySelector<HTMLButtonElement>('.v1-facility-picker__toggle')?.click();
     fixture.detectChanges();
 
-    const searchInput = element.querySelector<HTMLInputElement>('.v1-facility-picker__search-input');
+    const searchInput = document.querySelector<HTMLInputElement>('.v1-facility-picker__search-input');
     expect(searchInput).not.toBeNull();
 
     searchInput!.value = 'Warehouse';
     searchInput!.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    const items = element.querySelectorAll('.v1-facility-picker__item');
+    const items = document.querySelectorAll('.v1-facility-picker__item');
     expect(items.length).toBe(1);
     expect(items[0].textContent).toContain('Warehouse');
   });
@@ -83,12 +96,12 @@ describe('FacilityPickerComponent', () => {
     element.querySelector<HTMLButtonElement>('.v1-facility-picker__toggle')?.click();
     fixture.detectChanges();
 
-    const items = element.querySelectorAll<HTMLButtonElement>('.v1-facility-picker__item');
+    const items = document.querySelectorAll<HTMLButtonElement>('.v1-facility-picker__item');
     items[1].click();
     fixture.detectChanges();
 
     expect(emittedGuid).toBe('f2');
-    expect(element.querySelector('.v1-facility-picker__menu')).toBeNull();
+    expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
   });
 
   it('closes the menu when the backdrop is clicked', () => {
@@ -99,12 +112,12 @@ describe('FacilityPickerComponent', () => {
     const element: HTMLElement = fixture.nativeElement;
     element.querySelector<HTMLButtonElement>('.v1-facility-picker__toggle')?.click();
     fixture.detectChanges();
-    expect(element.querySelector('.v1-facility-picker__menu')).not.toBeNull();
+    expect(document.querySelector('.v1-facility-picker__menu')).not.toBeNull();
 
-    element.querySelector<HTMLElement>('.v1-facility-picker__backdrop')?.click();
+    document.querySelector<HTMLElement>('.cdk-overlay-backdrop')?.click();
     fixture.detectChanges();
 
-    expect(element.querySelector('.v1-facility-picker__menu')).toBeNull();
+    expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
   });
 
   it('closes the menu and returns focus to the toggle button on Escape', () => {
@@ -116,14 +129,14 @@ describe('FacilityPickerComponent', () => {
     const toggle = element.querySelector<HTMLButtonElement>('.v1-facility-picker__toggle');
     toggle?.click();
     fixture.detectChanges();
-    expect(element.querySelector('.v1-facility-picker__menu')).not.toBeNull();
+    expect(document.querySelector('.v1-facility-picker__menu')).not.toBeNull();
 
     element.querySelector<HTMLElement>('.v1-facility-picker')?.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
     );
     fixture.detectChanges();
 
-    expect(element.querySelector('.v1-facility-picker__menu')).toBeNull();
+    expect(document.querySelector('.v1-facility-picker__menu')).toBeNull();
     expect(document.activeElement).toBe(toggle);
   });
 
@@ -135,16 +148,16 @@ describe('FacilityPickerComponent', () => {
     const toggle: HTMLButtonElement = fixture.nativeElement.querySelector('.v1-facility-picker__toggle');
     toggle.click();
     fixture.detectChanges();
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    const input: HTMLInputElement = document.querySelector('.v1-facility-picker__menu input');
     input.value = '  MEMPHIS  ';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.v1-facility-picker__item')).toHaveLength(1);
-    expect(fixture.nativeElement.querySelector('.v1-facility-picker__item')?.textContent).toContain('Memphis');
+    expect(document.querySelectorAll('.v1-facility-picker__item')).toHaveLength(1);
+    expect(document.querySelector('.v1-facility-picker__item')?.textContent).toContain('Memphis');
     toggle.click();
     toggle.click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('input').value).toBe('');
-    expect(fixture.nativeElement.querySelectorAll('.v1-facility-picker__item')).toHaveLength(6);
+    expect(document.querySelector<HTMLInputElement>('.v1-facility-picker__menu input')!.value).toBe('');
+    expect(document.querySelectorAll('.v1-facility-picker__item')).toHaveLength(6);
   });
 });

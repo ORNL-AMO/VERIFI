@@ -23,7 +23,7 @@ function setup() {
   const statusState = signal('ready');
   TestBed.configureTestingModule({ imports: [RouterModule.forRoot([]), AccountDataModule], providers: [
     { provide: AccountWorkspaceStore, useValue: {
-      account, facilities, meters: signal([{ facilityId: 'alpha' }]), meterData: signal([]), predictors: signal([]), predictorData: signal([]),
+      canWrite: signal(true), account, facilities, meters: signal([{ facilityId: 'alpha' }]), meterData: signal([]), predictors: signal([]), predictorData: signal([]),
       facilityAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([])
     } },
     { provide: WorkspaceStatusService, useValue: { state: statusState, items } },
@@ -40,6 +40,12 @@ function setup() {
 }
 
 describe('AccountPortfolioFacilitiesTabComponent', () => {
+  it('leaves facility selection to the route guard when navigation is cancelled', async () => {
+    const { fixture, navigate } = setup();
+    navigate.mockResolvedValueOnce(false);
+    await fixture.componentInstance.openFacility('beta');
+    expect(TestBed.inject(AccountWorkspaceService).selectFacility).not.toHaveBeenCalled();
+  });
   it('updates warnings filtering through the native select change event', async () => {
     const { fixture, items } = setup();
     items.set(presentFindings([

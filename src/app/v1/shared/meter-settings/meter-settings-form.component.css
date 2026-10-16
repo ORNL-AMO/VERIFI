@@ -2,10 +2,6 @@
   display: block;
 }
 
-.meter-settings__heading {
-  align-items: flex-start;
-  gap: 1rem;
-}
 
 .meter-settings__layout {
   display: grid;
@@ -81,6 +77,17 @@
 
 .meter-settings-save-status {
   flex: 0 0 auto;
+}
+
+.meter-settings__setup-lock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v1-space-2);
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--v1-divider);
+  color: var(--v1-muted);
+  font-size: .86rem;
 }
 
 .meter-settings__lock-alert {

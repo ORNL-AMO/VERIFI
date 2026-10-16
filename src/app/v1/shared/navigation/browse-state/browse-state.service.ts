@@ -1,0 +1,61 @@
+import { DestroyRef, Injectable, Signal, effect, inject, signal, untracked } from '@angular/core';
+import { Observable } from 'rxjs';
+import type { FacilitySort, FacilityStatusFilter } from '@app/v1/account/data/portfolio/portfolio-facility.view';
+import type { PortfolioMeterSort, PortfolioMeterStatusFilter } from '@app/v1/account/data/portfolio/portfolio-meter.view';
+
+export interface BrowseFilters {
+  facilities: { search: string; status: FacilityStatusFilter; sort: FacilitySort };
+  meters: { search: string; status: PortfolioMeterStatusFilter; sort: PortfolioMeterSort };
+  facilityMeters: { search: string; status: PortfolioMeterStatusFilter; sort: 'attention' | 'meterName' | 'latestReading' };
+}
+export type BrowseKind = keyof BrowseFilters;
+export interface BrowseKey<K extends BrowseKind = BrowseKind> { readonly kind: K; readonly accountGuid: string; readonly facilityGuid?: string; }
+export interface BrowsePosition { readonly scrollTop: number; readonly focusId?: string; }
+export interface FacilityMeterBrowseView { readonly page: number; readonly expanded: boolean; readonly zoom: { start: number; end: number }; }
+
+/** UI-only journey state. Nothing is written to storage or domain records. */
+@Injectable({ providedIn: 'root' })
+export class BrowseStateService {
+  private readonly filters = new Map<string, BrowseFilters[BrowseKind]>();
+  private readonly positions = new Map<string, BrowsePosition>();
+  private readonly facilityViews = new Map<string, FacilityMeterBrowseView>();
+  private readonly origins = signal<ReadonlyMap<string, 'facilities' | 'meters'>>(new Map());
+  origin(accountGuid: string): 'facilities' | 'meters' { return this.origins().get(accountGuid) ?? 'facilities'; }
+  setOrigin(accountGuid: string, kind: 'facilities' | 'meters'): void { this.origins.update(current => new Map(current).set(accountGuid, kind)); }
+  readFilters<K extends BrowseKind>(key: BrowseKey<K>): BrowseFilters[K] | undefined { return this.filters.get(this.id(key)) as BrowseFilters[K] | undefined; }
+  saveFilters<K extends BrowseKind>(key: BrowseKey<K>, value: BrowseFilters[K]): void { this.filters.set(this.id(key), { ...value }); }
+  readPosition(key: BrowseKey): BrowsePosition | undefined { return this.positions.get(this.id(key)); }
+  savePosition(key: BrowseKey, value: BrowsePosition): void { this.positions.set(this.id(key), value); }
+  readFacilityView(key: BrowseKey<'facilityMeters'>): FacilityMeterBrowseView | undefined { return this.facilityViews.get(this.id(key)); }
+  saveFacilityView(key: BrowseKey<'facilityMeters'>, value: FacilityMeterBrowseView): void { this.facilityViews.set(this.id(key), { ...value, zoom: { ...value.zoom } }); }
+  private id(key: BrowseKey): string { return JSON.stringify([key.accountGuid, key.kind, key.facilityGuid ?? '']); }
+}
+
+interface BrowseForm<K extends BrowseKind> {
+  readonly valueChanges: Observable<unknown>;
+  getRawValue(): BrowseFilters[K];
+  patchValue(value: BrowseFilters[K], options: { emitEvent: false }): void;
+}
+
+/** Hydration does not emit form edits; the returned signal includes both edits and hydration. */
+export function rememberBrowseForm<K extends BrowseKind>(key: Signal<BrowseKey<K> | undefined>, form: BrowseForm<K>): Signal<BrowseFilters[K]> {
+  const store = inject(BrowseStateService);
+  const destroy = inject(DestroyRef);
+  const defaults = form.getRawValue();
+  const value = signal(defaults);
+  let previous: BrowseKey<K> | undefined;
+  const subscription = form.valueChanges.subscribe(() => value.set(form.getRawValue()));
+  effect(() => {
+    const next = key();
+    untracked(() => {
+      if (JSON.stringify(previous) === JSON.stringify(next)) return;
+      if (previous) store.saveFilters(previous, value());
+      previous = next;
+      const restored = next ? store.readFilters(next) ?? defaults : defaults;
+      form.patchValue(restored, { emitEvent: false });
+      value.set(restored);
+    });
+  });
+  destroy.onDestroy(() => { if (previous) store.saveFilters(previous, form.getRawValue()); subscription.unsubscribe(); });
+  return value.asReadonly();
+}

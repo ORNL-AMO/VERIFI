@@ -29,7 +29,7 @@ describe('facilities portfolio directory in Chromium', () => {
     const facilitiesState = signal(facilities);
     TestBed.configureTestingModule({ imports: [AccountDataModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: {
-        account: signal({ guid: 'account-a' }), facilities: facilitiesState, meters: signal([]), meterData: signal([]),
+        canWrite: signal(true), account: signal({ guid: 'account-a' }), facilities: facilitiesState, meters: signal([]), meterData: signal([]),
         predictors: signal([]), predictorData: signal([]), facilityAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([])
       } },
       { provide: WorkspaceStatusService, useValue: { state: signal('ready'), items: signal(findings) } },

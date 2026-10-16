@@ -1,0 +1,12 @@
+:host { display: block; min-width: 0; }
+.v1-eyebrow { font-size: .85rem; font-weight: 800; line-height: 1.2; letter-spacing: normal; text-transform: none; color: var(--v1-muted); margin: 0 0 .25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ol { display: flex; align-items: center; gap: .25rem; min-width: 0; margin: 0 0 .25rem; padding: 0; list-style: none; color: var(--v1-muted); font-size: .85rem; font-weight: 800; line-height: 1.2; }
+li { display: inline-flex; min-width: 0; }
+.page-identity__crumb { flex: 0 1 auto; }
+a, li > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+a { color: var(--v1-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 2px; }
+h1 { display: flex; align-items: center; gap: var(--v1-space-2); min-width: 0; margin: 0; color: var(--v1-text); font-size: 1.8rem; font-weight: 700; line-height: 1.15; }
+h1 > app-ui-icon { flex: 0 0 auto; }
+h1 > span { min-width: 0; overflow-wrap: anywhere; }

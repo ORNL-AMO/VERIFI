@@ -126,7 +126,7 @@ export function setupSectionNavTest() {
             accountSettingsRoute: (_accountGuid: string, detail = 'profile') => ['/v1', 'workspace', 'account', 'account-a', 'settings', detail],
             facilitySettingsRoute: (_facilityGuid: string, detail = 'profile') => ['/v1', 'workspace', 'facility', 'facility-a', 'settings', detail],
             legacyFacilityManagementRoute: () => ['/data-management', 'account-a', 'facilities'],
-            setContext: () => undefined,
+            setContext: () => undefined, accountReturn: signal(undefined), contextNavigationError: signal(''),
             setFacility
           }
         },

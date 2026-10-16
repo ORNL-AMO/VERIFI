@@ -1,0 +1,22 @@
+<section class="monthly-trends" aria-label="Monthly trends">
+  @for (chart of charts(); track chart.id; let first = $first) {
+    <section class="monthly-trends__panel" [attr.aria-label]="chart.title + ' by meter'">
+      <header>
+        <div><h2>{{ chart.title }} <span>{{ chart.unit }}</span></h2><p>Monthly data: {{ state() === 'loading' ? 'Preparing data' : state() === 'error' ? 'Unavailable' : chart.coverage }}</p></div>
+        @if (first) {
+          <div class="monthly-trends__zoom" role="group" aria-label="Chart zoom" aria-description="Applies to all monthly charts">
+            <button type="button" class="v1-icon-btn" aria-label="Zoom in" title="Zoom all charts in" [disabled]="!chart.rows.length" (click)="zoom(.6)"><app-ui-icon name="zoomIn"/></button>
+            <button type="button" class="v1-icon-btn" aria-label="Zoom out" title="Zoom all charts out" [disabled]="!chart.rows.length" (click)="zoom(1.6)"><app-ui-icon name="zoomOut"/></button>
+            <button type="button" class="v1-icon-btn" aria-label="Reset zoom" title="Show all history for all charts" (click)="zoomChanged.emit({ start: 0, end: 100 })"><app-ui-icon name="refresh"/></button>
+          </div>
+        }
+      </header>
+      <app-meter-results-chart [chartRows]="chart.metrics.length ? chart.rows : []" [metrics]="chart.metrics" [state]="state()"
+        [yAxisTitle]="''" [compactAxes]="true" [showAllMetrics]="true" [showPointSymbols]="false" [tooltipMaxRows]="8" [showSeriesControls]="false" [showLegend]="false" [showChartActions]="false" [allowNegativeValues]="true"
+        [embedded]="true" [compact]="true" [zoomRange]="zoomRange()" [emphasizedMetricId]="emphasized()"
+        [ariaLabel]="chart.title + ' monthly data by meter'" [emptyTitle]="'No monthly ' + chart.title.toLowerCase() + ' data'"
+        emptyDescription="No matching meters have monthly data for this chart."
+        (zoomRangeChanged)="zoomChanged.emit($event)"/>
+    </section>
+  }
+</section>

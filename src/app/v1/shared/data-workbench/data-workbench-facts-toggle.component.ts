@@ -15,4 +15,6 @@ export class DataWorkbenchFactsToggleComponent {
   readonly expanded = this.layout.factsExpanded;
 
   toggle(): void { this.layout.toggleFacts(); }
+
+  collapse(): void { if (this.expanded()) this.layout.toggleFacts(); }
 }

@@ -54,20 +54,6 @@
   padding-bottom: 1rem;
 }
 
-#v1-account-portfolio-title {
-  display: flex;
-  align-items: center;
-  gap: var(--v1-space-2);
-}
-
-#v1-account-portfolio-title span {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-#v1-account-portfolio-title app-ui-icon {
-  flex-shrink: 0;
-}
 .v1-account-portfolio__header-actions {
   display: flex;
   flex-wrap: wrap;
@@ -76,9 +62,6 @@
 }
 
 .v1-account-portfolio__header-actions .v1-btn {
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.5;
   color: var(--v1-inverse-text);
 }
 

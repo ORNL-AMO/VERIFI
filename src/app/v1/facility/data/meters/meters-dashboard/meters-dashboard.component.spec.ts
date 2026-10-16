@@ -1,326 +1,211 @@
-import { signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, input, output, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { Router, RouterModule } from '@angular/router';
-import { vi } from 'vitest';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { buildMeterCards } from '@app/v1/facility/data/meters/models';
-import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
-import { account, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
+import { account, facility, group, meter, reading, calendarizedMeter, monthlyData } from '../facility-meters.testing';
+import { buildMeterCards } from '../models';
+import { FacilityMetersWorkspaceService } from '../facility-meters-workspace.service';
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters-dashboard.component';
+import { MonthlyTrendsComponent } from './monthly-trends/monthly-trends.component';
+import { MeterDirectoryComponent } from './meter-directory/meter-directory.component';
 
-describe('MetersDashboardComponent', () => {
-  it('renders meter cards with group footer tags and no grouping controls', () => {
-    const fixture = setup({
-      meters: [
-        meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' }),
-        meter({ guid: 'meter-water', name: 'City Water', groupId: undefined, source: 'Water Intake' })
-      ],
-      meterData: [
-        reading({ guid: 'reading-a', meterId: 'meter-electric', month: 12, year: 2025 }),
-        reading({ guid: 'reading-b', meterId: 'meter-electric', month: 1, year: 2026 })
-      ],
-      groups: [
-        group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })
-      ]
-    });
+@Component({ selector: 'app-monthly-trends', standalone: true, template: '' })
+class TrendsStub {
+  charts = input<any[]>([]); state = input('ready'); zoomRange = input<any>(); emphasized = input<string>(); zoomChanged = output<any>();
+}
 
-    fixture.detectChanges();
+function setup() {
+  const meters = signal([meter({ guid: 'a', name: 'Alpha', groupId: 'g' }), meter({ guid: 'b', name: 'Beta', source: 'Water Intake' })]);
+  const data = signal([reading({ guid: 'r1', meterId: 'a', month: 1, id: 11 }), reading({ guid: 'r2', meterId: 'b', month: 3, id: 12 })]);
+  const currentFacility = signal(facility());
+  const canWrite = signal(true), hasPending = signal(false);
+  const statusState = signal<any>('ready');
+  const calendarized = signal(meters().map(item => calendarizedMeter(item, [monthlyData({ energyCost: 10 })], { showEnergyUse: item.source === 'Electricity' })));
+  const cards = signal(buildMeterCards(meters(), data(), [group({ guid: 'g', name: 'Purchased Electricity' })]));
+  const workspace = { account: signal(account()), facility: currentFacility, meterData: data, meterGroups: signal([]), meterCards: cards,
+    facilityCalendarizedMeters: calendarized, statusState, calendarizationState: signal<any>('ready'), canWrite, hasPending };
+  const actions = { createMeter: vi.fn().mockResolvedValue(meter({ guid: 'created' })), copyMeter: vi.fn().mockResolvedValue(meter({ guid: 'copy' })), deleteMeters: vi.fn().mockResolvedValue(undefined) };
+  const portal = { show: vi.fn(), hide: vi.fn() };
+  TestBed.configureTestingModule({ imports: [MetersDashboardComponent], providers: [provideRouter([]),
+    { provide: FacilityMetersWorkspaceService, useValue: workspace }, { provide: ModalPortalService, useValue: portal },
+    { provide: WorkspaceNavigationService, useValue: {
+      accountDataReturnRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio', 'facilities'],
+      accountDataRoute: (guid: string) => ['/v1', 'workspace', 'account', guid, 'data', 'portfolio'],
+      facilityMeterRoute: (guid: string, id: string, tab: string) => ['/v1', 'workspace', 'facility', guid, 'data', 'meters', id, tab]
+    } }
+  ] }).overrideComponent(MetersDashboardComponent, { remove: { imports: [MonthlyTrendsComponent] }, add: { imports: [TrendsStub] } });
+  TestBed.overrideComponent(MetersDashboardComponent, { set: { providers: [{ provide: MetersDashboardActionsService, useValue: actions }] } });
+  const fixture = TestBed.createComponent(MetersDashboardComponent);
+  fixture.detectChanges();
+  const component = fixture.componentInstance;
+  return { fixture, component, workspace, cards, actions, portal, canWrite, hasPending, currentFacility, statusState, calendarized };
+}
 
+describe('compact facility meters dashboard', () => {
+  it('restores facility browse controls and chart range after a meter visit without restoring deletion selection', () => {
+    const { fixture, component, cards } = setup();
+    cards.set(buildMeterCards(Array.from({ length: 20 }, (_, index) => meter({ guid: `m-${index}` })), [], [])); fixture.detectChanges();
+    component.filtersForm.controls.sort.setValue('meterName'); fixture.detectChanges(); component.changePage(2); component.toggleListExpanded();
+    component.zoomRange.set({ start: 20, end: 70 }); component.startSelection(); component.selectAll(); fixture.detectChanges(); fixture.destroy();
+    const restored = TestBed.createComponent(MetersDashboardComponent); restored.detectChanges();
+    expect(restored.componentInstance.sortBy()).toBe('meterName');
+    expect(restored.componentInstance.currentPage()).toBe(2); expect(restored.componentInstance.listExpanded()).toBe(true);
+    expect(restored.componentInstance.zoomRange()).toEqual({ start: 20, end: 70 });
+    expect(restored.componentInstance.selecting()).toBe(false); expect(restored.componentInstance.selected()).toEqual([]);
+  });
+
+  it('shows compact names, source chips and status without detailed card facts', () => {
+    const { fixture } = setup();
     const text = fixture.nativeElement.textContent;
-    const breadcrumb = fixture.nativeElement.querySelector('.v1-facility-meters__breadcrumb') as HTMLElement;
-    expect(text).toContain('Meters');
-    expect(text).not.toContain('Facility Data');
-    expect(text).toContain('Account A');
-    expect(text).toContain('Facility A');
-    expect(breadcrumb.textContent).not.toContain('Meters');
-    expect(fixture.debugElement.query(By.css('.v1-facility-meters__title app-ui-icon')).componentInstance.name).toBe('meter');
-    expect(fixture.componentInstance.accountMetersRoute()).toEqual([
-      '/v1',
-      'workspace',
-      'account',
-      'account-a',
-      'data',
-      'portfolio',
-      'meters'
-    ]);
-    expect((fixture.nativeElement.querySelector('.v1-facility-meters__breadcrumb a') as HTMLAnchorElement).textContent?.trim()).toBe('Account A');
-    expect(text).toContain('Electric Main');
-    expect(text).toContain('Purchased Electricity');
-    expect(text).toContain('City Water');
-    expect(text).toContain('Ungrouped');
-    expect(text).toContain('First reading');
-    expect(text).toContain('Dec 2025');
-    expect(text).toContain('Latest');
-    expect(text).toContain('Scope');
-    expect(text).toContain('Add meter');
-    expect(fixture.nativeElement.querySelectorAll('app-meter-browse-card').length).toBe(2);
-    expect(fixture.nativeElement.querySelector('.v1-resource-browse-card__chip')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-action-bar')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-facility-meters__header .v1-btn--action')?.textContent).toContain('Add meter');
-    expect(findButton(fixture, 'Add meter')?.classList.contains('v1-btn--action')).toBe(true);
-    expect(fixture.nativeElement.querySelector('.v1-meter-dashboard-mode-toggle')).toBeNull();
-    expect(fixture.nativeElement.querySelector('app-meter-grouping')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.v1-meter-lane')).toBeNull();
-    expect(fixture.nativeElement.querySelector('[aria-label="Meter filters"]')).not.toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Attention first');
-    expect(text).not.toContain('Move meter');
-    expect(text).not.toContain('Add group');
+    expect(text).toContain('Account A'); expect(text).toContain('Facility A');
+    expect(text).toContain('Showing 2 of 2 meters'); expect(text).toContain('Select meters');
+    expect(text).not.toContain('First reading'); expect(text).not.toContain('Scope');
+    expect(fixture.nativeElement.querySelectorAll('.meter-directory__open')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('app-meter-browse-card')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Meter list display"]')).toBeNull();
   });
-
-  it('searches meter names, sources, groups, and statuses', () => {
-    const fixture = setup({
-      meters: [
-        meter({ guid: 'meter-electric', name: 'Electric Main', groupId: 'group-energy', source: 'Electricity' }),
-        meter({ guid: 'meter-water', name: 'City Water', groupId: undefined, source: 'Water Intake' })
-      ],
-      meterData: [
-        reading({ guid: 'reading-electric', meterId: 'meter-electric' }),
-        reading({ guid: 'reading-water', meterId: 'meter-water' })
-      ],
-      groups: [group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })]
-    });
-    fixture.detectChanges();
-
-    fixture.componentInstance.setSearch('water intake');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['City Water']);
-
-    fixture.componentInstance.setSearch('purchased electricity');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Electric Main']);
-
-    fixture.componentInstance.setSearch('ungrouped');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['City Water']);
-
-    fixture.componentInstance.setSearch('valid');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['City Water', 'Electric Main']);
-  });
-
-  it('filters meters by attention, missing readings, missing groups, and valid status', () => {
-    const fixture = setup({
-      meters: [
-        meter({ guid: 'meter-no-readings', name: 'No Readings', groupId: 'group-energy' }),
-        meter({ guid: 'meter-ungrouped', name: 'Ungrouped Meter', groupId: undefined }),
-        meter({ guid: 'meter-valid', name: 'Valid Meter', groupId: 'group-energy' })
-      ],
-      meterData: [
-        reading({ guid: 'reading-ungrouped', meterId: 'meter-ungrouped' }),
-        reading({ guid: 'reading-valid', meterId: 'meter-valid' })
-      ],
-      groups: [group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })]
-    });
-    fixture.detectChanges();
-
-    fixture.componentInstance.setStatusFilter('attention');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['No Readings', 'Ungrouped Meter']);
-
-    fixture.componentInstance.setStatusFilter('noReadings');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['No Readings']);
-
-    fixture.componentInstance.setStatusFilter('missingGroup');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Ungrouped Meter']);
-
-    fixture.componentInstance.setStatusFilter('valid');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['No Readings', 'Ungrouped Meter', 'Valid Meter']);
-  });
-
-  it('sorts meters by attention, name, and latest reading with stable name tie-breakers', () => {
-    const fixture = setup({
-      meters: [
-        meter({ guid: 'meter-zeta', name: 'Zeta Meter', groupId: 'group-energy' }),
-        meter({ guid: 'meter-alpha', name: 'Alpha Meter', groupId: 'group-energy' }),
-        meter({ guid: 'meter-empty', name: 'Empty Meter', groupId: 'group-energy' })
-      ],
-      meterData: [
-        reading({ guid: 'reading-zeta', meterId: 'meter-zeta', month: 1, year: 2026 }),
-        reading({ guid: 'reading-alpha', meterId: 'meter-alpha', month: 3, year: 2026 })
-      ],
-      groups: [group({ guid: 'group-energy', name: 'Purchased Electricity', groupType: 'Energy' })]
-    });
-    fixture.detectChanges();
-
-    expect(cardTitles(fixture)).toEqual(['Empty Meter', 'Alpha Meter', 'Zeta Meter']);
-
-    fixture.componentInstance.setSortBy('meterName');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Alpha Meter', 'Empty Meter', 'Zeta Meter']);
-
-    fixture.componentInstance.setSortBy('latestReading');
-    fixture.detectChanges();
-    expect(cardTitles(fixture)).toEqual(['Alpha Meter', 'Zeta Meter', 'Empty Meter']);
-  });
-
-  it('ignores legacy dashboard mode query parameters and keeps rendering meters', () => {
-    const fixture = setup();
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigate');
-
-    fixture.detectChanges();
-
-    expect(navigateSpy).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.querySelector('app-meter-browse-card')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('app-meter-grouping')).toBeNull();
-  });
-
-  it('renders the no-meter empty state', () => {
-    const fixture = setup({ meters: [], meterData: [], groups: [] });
-
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('No meters');
-    expect(fixture.nativeElement.textContent).toContain('Add or upload a meter to get started.');
-  });
-
-  it('renders a filtered empty state without replacing the no-meter state', () => {
-    const fixture = setup();
-    fixture.componentInstance.setSearch('not a meter');
-    fixture.detectChanges();
-
+  it('filters list and chart meters together by search and status, with a clear-filter empty state', () => {
+    const { fixture, component } = setup();
+    component.filtersForm.controls.search.setValue('water intake'); fixture.detectChanges();
+    expect(component.filteredMeterCards().map(item => item.card.meter.guid)).toEqual(['b']);
+    expect(component.chartViews().find(chart => chart.id === 'cost')!.metrics.map(item => item.id)).toEqual(['b']);
+    component.filtersForm.controls.status.setValue('missingGroup'); fixture.detectChanges();
+    expect(component.filteredMeterCards()).toHaveLength(1);
+    component.filtersForm.controls.search.setValue('purchased electricity'); fixture.detectChanges();
+    expect(component.filteredMeterCards()).toHaveLength(0);
     expect(fixture.nativeElement.textContent).toContain('No meters match these filters');
-    expect(fixture.nativeElement.querySelector('app-data-empty-state')).toBeNull();
+    component.clearFilters(); fixture.detectChanges();
+    expect(component.filteredMeterCards()).toHaveLength(2);
   });
-
-  it('opens the Add Meter slideout from the dashboard action bar', () => {
-    const fixture = setup();
-
+  it('pages only the directory, keeps charts and bulk selection complete, and resets or clamps pages as inventory changes', () => {
+    const { fixture, component, cards, calendarized } = setup();
+    const meters = Array.from({ length: 25 }, (_, index) => meter({ guid: `m-${index}`, name: `Meter ${index.toString().padStart(2, '0')}` }));
+    cards.set(buildMeterCards(meters, [], []));
+    calendarized.set(meters.map(item => calendarizedMeter(item, [monthlyData({ energyCost: 10 })])));
     fixture.detectChanges();
-    clickButton(fixture, 'Add meter');
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Create the meter, then continue setup');
+    expect(fixture.nativeElement.querySelectorAll('.meter-directory__open')).toHaveLength(8);
+    expect(component.chartViews().find(chart => chart.id === 'cost')!.metrics).toHaveLength(25);
+    component.startSelection(); component.selectAll(); component.changePage(2); fixture.detectChanges();
+    expect(component.visibleMeterCards()[0].card.meter.name).toBe('Meter 08');
+    expect(component.selected()).toHaveLength(25);
+    component.filtersForm.controls.sort.setValue('meterName'); fixture.detectChanges(); expect(component.currentPage()).toBe(1);
+    expect(component.selected()).toHaveLength(25);
+    component.changePage(3); component.filtersForm.controls.search.setValue('Meter 2'); fixture.detectChanges();
+    expect(component.currentPage()).toBe(1); expect(component.visibleMeterCards()).toHaveLength(5);
+    expect(component.selected()).toEqual([]);
+    component.clearFilters(); fixture.detectChanges(); component.changePage(4); fixture.detectChanges();
+    expect(component.visibleMeterCards()).toHaveLength(1);
+    cards.set(cards().slice(0, 3)); fixture.detectChanges();
+    expect(component.currentPage()).toBe(1); expect(component.visibleMeterCards()).toHaveLength(3);
+    expect(fixture.nativeElement.querySelector('[aria-label="Next meter page"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Meter list display"]')).toBeNull();
   });
-
-  it('persists a meter draft and opens the created meter workbench', async () => {
-    const created = meter({ guid: 'meter-new', name: 'Boiler Gas', source: 'Natural Gas' });
-    const fixture = setup({ createdMeter: created });
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigate');
-
-    await fixture.componentInstance.saveMeterDraft({ name: 'Boiler Gas', source: 'Natural Gas' });
-
-    const actions = fixture.componentRef.injector.get(MetersDashboardActionsService) as any;
-    expect(actions.createMeter).toHaveBeenCalledWith({ name: 'Boiler Gas', source: 'Natural Gas' });
-    expect(navigateSpy).toHaveBeenCalledWith([
-      '/v1',
-      'workspace',
-      'facility',
-      'facility-a',
-      'data',
-      'meters',
-      'meter-new',
-      'settings'
-    ]);
+  it('expands all matching meters in place of charts and restores paging, zoom, selection and keyboard focus', () => {
+    const { fixture, component, cards, currentFacility } = setup();
+    cards.set(buildMeterCards(Array.from({ length: 20 }, (_, index) => meter({ guid: `m-${index}` })), [], []));
+    fixture.detectChanges(); component.changePage(2); component.startSelection(); component.selectAll();
+    component.zoomRange.set({ start: 20, end: 80 }); component.toggleListExpanded(); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.meter-directory__open')).toHaveLength(20);
+    expect(fixture.nativeElement.querySelector('app-monthly-trends')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Next meter page"]')).toBeNull();
+    expect(component.selected()).toHaveLength(20);
+    component.toggleListExpanded(); fixture.detectChanges();
+    expect(component.currentPage()).toBe(2); expect(component.visibleMeterCards()).toHaveLength(8);
+    expect(component.zoomRange()).toEqual({ start: 20, end: 80 });
+    expect(component.selected()).toHaveLength(20);
+    expect(document.activeElement?.textContent).toContain('Expand list');
+    component.toggleListExpanded(); cards.set(cards().slice(0, 3)); fixture.detectChanges();
+    expect(component.pageCount()).toBe(1);
+    expect(fixture.nativeElement.querySelector('[aria-label="Return to list and charts"]')).not.toBeNull();
+    currentFacility.set(facility({ guid: 'other' })); fixture.detectChanges();
+    expect(component.listExpanded()).toBe(false);
   });
-
-  it('renders shared read-only and pending messaging and disables Add Meter', () => {
-    const readOnlyFixture = setup({ canWrite: false });
-    readOnlyFixture.detectChanges();
-    expect(readOnlyFixture.nativeElement.textContent).toContain('Meter actions are unavailable');
-    expect(findButton(readOnlyFixture, 'Add meter')?.disabled).toBe(true);
-
-    TestBed.resetTestingModule();
-
-    const pendingFixture = setup({ hasPending: true });
-    pendingFixture.detectChanges();
-    expect(pendingFixture.nativeElement.textContent).toContain('Another workspace update is still finishing');
-    expect(findButton(pendingFixture, 'Add meter')?.disabled).toBe(true);
+  it('preserves all sort modes, and sorting keeps selection and chart styles', () => {
+    const { fixture, component } = setup();
+    component.startSelection(); component.selectAll();
+    const colors = component.chartViews().find(chart => chart.id === 'cost')!.metrics.map(metric => metric.color);
+    component.filtersForm.controls.sort.setValue('latestReading'); fixture.detectChanges();
+    expect(component.filteredMeterCards().map(item => item.card.meter.guid)).toEqual(['b', 'a']);
+    expect(component.selected()).toHaveLength(2);
+    component.filtersForm.controls.sort.setValue('meterName'); fixture.detectChanges();
+    expect(component.filteredMeterCards().map(item => item.card.meter.guid)).toEqual(['a', 'b']);
+    expect(component.chartViews().find(chart => chart.id === 'cost')!.metrics.map(metric => metric.color)).toEqual(colors);
+  });
+  it('hides bulk checkboxes until select mode, filters clear selection and reset zoom, and facility switches exit mode', () => {
+    const { fixture, component, currentFacility } = setup();
+    expect(fixture.nativeElement.querySelector('input[type="checkbox"]')).toBeNull();
+    component.startSelection(); component.selectAll(); fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('input[type="checkbox"]')).toHaveLength(2);
+    component.zoomRange.set({ start: 20, end: 60 }); component.filtersForm.controls.search.setValue('Beta'); fixture.detectChanges();
+    expect(component.selected()).toEqual([]); expect(component.zoomRange()).toEqual({ start: 0, end: 100 });
+    component.selectAll(); currentFacility.set(facility({ guid: 'other' })); fixture.detectChanges();
+    expect(component.selecting()).toBe(false); expect(component.selected()).toEqual([]);
+  });
+  it('prunes deleted meters from the selection on live inventory updates', () => {
+    const { fixture, component, cards } = setup();
+    component.startSelection(); component.selectAll(); cards.set(cards().slice(0, 1)); fixture.detectChanges();
+    expect(component.selected()).toEqual(['a']);
+  });
+  it('preserves selection on cancel and failure, then deletes once and exits after success', async () => {
+    const { fixture, component, actions, portal } = setup();
+    component.startSelection(); component.selectAll(); component.requestDeleteSelected();
+    expect(portal.show).toHaveBeenCalled(); expect(component.targetReadingCount()).toBe(2);
+    component.closeConfirmation(); expect(component.selected()).toHaveLength(2);
+    component.requestDeleteSelected(); actions.deleteMeters.mockRejectedValueOnce(new Error('Save failed'));
+    await component.confirmAction(); expect(component.actionError()).toBe('Save failed'); expect(component.selected()).toHaveLength(2);
+    await component.confirmAction(); fixture.detectChanges();
+    expect(actions.deleteMeters).toHaveBeenLastCalledWith(expect.arrayContaining(['a', 'b']));
+    expect(component.selected()).toEqual([]); expect(component.selecting()).toBe(false); expect(component.confirmationKind()).toBeUndefined();
+  });
+  it('updates confirmation names and reading counts, and dismisses a stale selection after inventory changes', () => {
+    const { fixture, component, cards } = setup();
+    component.startSelection(); component.selectAll(); component.requestDeleteSelected(); fixture.detectChanges();
+    cards.update(current => current.map((card, index) => index ? card : {
+      ...card, meter: { ...card.meter, name: 'Alpha updated' }, readingCount: 3
+    })); fixture.detectChanges();
+    expect(component.targetReadingCount()).toBe(4);
+    expect(component.targets().find(card => card.meter.guid === 'a')?.meter.name).toBe('Alpha updated');
+    cards.update(current => current.slice(1)); fixture.detectChanges();
+    expect(component.confirmationKind()).toBeUndefined();
+    expect(component.selected()).toEqual(['b']);
+  });
+  it('does not navigate after a copy finishes on a destroyed dashboard', async () => {
+    const { fixture, component, actions } = setup();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    let finish!: (value: ReturnType<typeof meter>) => void;
+    actions.copyMeter.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    component.handleAction({ guid: 'a', action: 'copy' });
+    const pending = component.confirmAction(); fixture.destroy();
+    finish(meter({ guid: 'copy' })); await pending;
+    expect(navigate).not.toHaveBeenCalled();
+  });
+  it('keeps individual settings, readings, copy and delete actions', async () => {
+    const { component, actions } = setup();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    component.handleAction({ guid: 'b', action: 'settings' });
+    expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', 'b', 'settings']);
+    component.handleAction({ guid: 'a', action: 'readings' });
+    expect(navigate).toHaveBeenLastCalledWith(['/v1', 'workspace', 'facility', 'facility-a', 'data', 'meters', 'a', 'readings']);
+    component.handleAction({ guid: 'a', action: 'copy' }); await component.confirmAction(); expect(actions.copyMeter).toHaveBeenCalled();
+    component.handleAction({ guid: 'b', action: 'delete' }); await component.confirmAction(); expect(actions.deleteMeters).toHaveBeenCalledWith(['b']);
+  });
+  it('uses the portal to create a meter and open its settings', async () => {
+    const { component, actions, portal } = setup();
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    component.openAddMeter(); expect(portal.show).toHaveBeenCalled();
+    await component.saveMeterDraft({ name: 'New', source: 'Electricity' });
+    expect(actions.createMeter).toHaveBeenCalledWith({ name: 'New', source: 'Electricity' }, 'facility-a');
+    expect(component.addMeterOpen()).toBe(false);
+  });
+  it('keeps the list usable while chart checks are pending or unavailable and guards writes', () => {
+    const { fixture, component, workspace, statusState, canWrite } = setup();
+    statusState.set('error'); workspace.calendarizationState.set('error'); canWrite.set(false); fixture.detectChanges();
+    expect(component.meterCards()[0].statusLabel).toBe('Checks unavailable');
+    expect(fixture.nativeElement.querySelectorAll('.meter-directory__open')).toHaveLength(2);
+    component.startSelection(); component.openAddMeter(); expect(component.selecting()).toBe(false); expect(component.addMeterOpen()).toBe(false);
+    statusState.set('evaluating'); fixture.detectChanges(); expect(component.meterCards()[0].statusLabel).toBe('Checks pending');
   });
 });
-
-function setup(options: {
-  meters?: ReturnType<typeof meter>[];
-  meterData?: ReturnType<typeof reading>[];
-  groups?: ReturnType<typeof group>[];
-  canWrite?: boolean;
-  hasPending?: boolean;
-  createdMeter?: ReturnType<typeof meter>;
-} = {}): ComponentFixture<MetersDashboardComponent> {
-  const meters = signal(options.meters ?? [
-    meter({ guid: 'meter-electric', name: 'Electric Main', source: 'Electricity' })
-  ]);
-  const meterData = signal(options.meterData ?? []);
-  const groups = signal(options.groups ?? []);
-  const canWrite = signal(options.canWrite ?? true);
-  const hasPending = signal(options.hasPending ?? false);
-  const calendarizationState = signal<'idle' | 'loading' | 'ready' | 'error'>('ready');
-  const meterCards = signal(buildMeterCards(meters(), meterData(), groups()));
-  const actions = {
-    createMeter: vi.fn().mockResolvedValue(options.createdMeter ?? meter({ guid: 'meter-created' })),
-    copyMeter: vi.fn().mockResolvedValue(meter({ guid: 'meter-copy' })),
-    deleteMeter: vi.fn().mockResolvedValue(undefined)
-  };
-
-  TestBed.configureTestingModule({
-    imports: [
-      RouterModule.forRoot([]),
-      MetersDashboardComponent
-    ],
-    providers: [
-      {
-        provide: FacilityMetersWorkspaceService,
-        useValue: {
-          account: signal(account()),
-          facility: signal({ guid: 'facility-a', name: 'Facility A' }),
-          meterData,
-          meterGroups: groups,
-          meterCards,
-          calendarizationState,
-          canWrite,
-          hasPending
-        }
-      },
-      {
-        provide: WorkspaceNavigationService,
-        useValue: {
-          accountDataRoute: (accountGuid: string, detail = 'portfolio') => [
-            '/v1',
-            'workspace',
-            'account',
-            accountGuid,
-            'data',
-            detail
-          ],
-          facilityMeterRoute: (facilityGuid: string, meterGuid: string, tab = 'settings') => [
-            '/v1',
-            'workspace',
-            'facility',
-            facilityGuid,
-            'data',
-            'meters',
-            meterGuid,
-            tab
-          ]
-        }
-      }
-    ]
-  });
-  TestBed.overrideComponent(MetersDashboardComponent, {
-    set: {
-      providers: [{ provide: MetersDashboardActionsService, useValue: actions }]
-    }
-  });
-
-  return TestBed.createComponent(MetersDashboardComponent);
-}
-
-function clickButton(fixture: ComponentFixture<MetersDashboardComponent>, label: string): void {
-  findButton(fixture, label)?.click();
-}
-
-function findButton(fixture: ComponentFixture<MetersDashboardComponent>, label: string): HTMLButtonElement | undefined {
-  const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-  return buttons.find(button => button.textContent?.includes(label) || button.getAttribute('aria-label')?.includes(label));
-}
-
-function cardTitles(fixture: ComponentFixture<MetersDashboardComponent>): string[] {
-  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__title-text'))
-    .map(element => element.textContent!.trim());
-}

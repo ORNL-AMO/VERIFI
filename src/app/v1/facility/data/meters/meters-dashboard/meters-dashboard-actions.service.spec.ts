@@ -10,6 +10,18 @@ import { account, facility, group, meter, reading } from '@app/v1/facility/data/
 import { MetersDashboardActionsService } from './meters-dashboard-actions.service';
 
 describe('MetersDashboardActionsService', () => {
+  it('deletes distinct facility meters with readings through one bulk command and one reload', async () => {
+    const first = meter({ guid: 'first', id: 1 });
+    const second = meter({ guid: 'second', id: 2 });
+    const data = reading({ guid: 'data', id: 3, meterId: first.guid });
+    const { service, meterHandler, commandBoundary } = setup({ meters: [first, second], meterData: [data] });
+    await service.deleteMeters(['first', 'second', 'first']);
+    expect(commandBoundary.execute).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ changeKind: 'bulk', publication: { mode: 'reload' } }), expect.any(Function));
+    expect(meterHandler.deleteMetersWithData).toHaveBeenCalledExactlyOnceWith([
+      { meter: first, meterData: [data] }, { meter: second, meterData: [] }
+    ], 'account-a');
+  });
+
   it('creates a meter from factory defaults plus draft values', async () => {
     const energyGroup = group({ guid: 'group-energy', name: 'Electricity', groupType: 'Energy' });
     const { service, commandBoundary, meterHandler } = setup({ groups: [energyGroup] });
@@ -214,6 +226,7 @@ function setup(options: {
     addMeter: vi.fn().mockImplementation(async item => ({ ...item, id: 10 })),
     updateMeter: vi.fn().mockImplementation(async item => item),
     deleteMeterWithData: vi.fn().mockResolvedValue(undefined),
+    deleteMetersWithData: vi.fn().mockResolvedValue(2),
     deleteMeter: vi.fn().mockResolvedValue(1),
     deleteMeterData: vi.fn().mockResolvedValue(1),
     addMeterGroup: vi.fn().mockImplementation(async item => ({ ...item, id: 20 })),

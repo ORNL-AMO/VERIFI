@@ -1,0 +1,46 @@
+:host { display: block; min-width: 0; container-type: inline-size; }
+.meter-directory { list-style: none; padding: 0; margin: 0; }
+.meter-directory li { display: flex; align-items: center; gap: .4rem; position: relative; background: var(--v1-surface); border-bottom: 1px solid var(--v1-border); border-left: 4px solid transparent; padding: .2rem .5rem; }
+.meter-directory li[data-tone="danger"] { --severity: var(--v1-danger); border-left-color: var(--severity); background: color-mix(in srgb, var(--severity) var(--v1-error-row-tint), var(--v1-surface)); }
+.meter-directory li[data-tone="warning"] { --severity: var(--v1-warning); border-left-color: var(--severity); background: color-mix(in srgb, var(--severity) var(--v1-warning-row-tint), var(--v1-surface)); }
+.meter-directory__open { display: grid; grid-template-columns: 1rem minmax(0, 1fr); align-items: center; gap: .6rem; min-width: 0; flex: 1; text-align: left; border: 0; padding: .5rem .1rem; background: transparent; color: var(--v1-text); }
+.meter-directory__open:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: 1px; border-radius: var(--v1-radius-sm); }
+.meter-directory__identity { display: grid; gap: .25rem; min-width: 0; }
+.meter-directory__metadata { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem .6rem; }
+.meter-directory__identity strong { overflow-wrap: anywhere; font-size: .94rem; }
+.meter-directory__swatch { width: 1rem; height: .75rem; overflow: visible; }
+.meter-directory__source { display: inline-flex; align-items: center; gap: .3rem; justify-self: start; font-size: .72rem; background: var(--v1-surface-muted); padding: .12rem .4rem; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); }
+.meter-directory__status { display: inline-flex; align-items: center; gap: .25rem; font-size: .72rem; }
+[data-tone="danger"] .meter-directory__status { color: var(--v1-danger); }
+[data-tone="warning"] .meter-directory__status { color: var(--v1-warning); }
+[data-tone="success"] .meter-directory__status { color: var(--v1-success); }
+[data-tone="neutral"] .meter-directory__status { color: var(--v1-muted); }
+.meter-directory__menu .dropdown-toggle::after { display: none; }
+.meter-directory__menu .dropdown-menu { background: var(--v1-surface); border-color: var(--v1-border); box-shadow: 0 .5rem 1.5rem var(--v1-shadow-soft); }
+.meter-directory__menu .dropdown-item { color: var(--v1-text); }
+.meter-directory__menu .dropdown-item:hover, .meter-directory__menu .dropdown-item:focus { background: var(--v1-surface-muted); }
+.meter-directory--rounded-bottom li:last-child { border-bottom: 0; border-bottom-left-radius: calc(var(--v1-radius) - 1px); border-bottom-right-radius: calc(var(--v1-radius) - 1px); }
+@container (min-width: 36rem) {
+  .meter-directory--two-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .meter-directory--two-columns li:nth-child(odd) { border-right: 1px solid var(--v1-border); }
+  .meter-directory--two-columns.meter-directory--rounded-bottom li:last-child:nth-child(even) { border-bottom-left-radius: 0; }
+  .meter-directory--two-columns.meter-directory--rounded-bottom li:last-child:nth-child(odd) { border-bottom-right-radius: 0; }
+  .meter-directory--two-columns.meter-directory--rounded-bottom li:nth-last-child(2):nth-child(odd) { border-bottom: 0; border-bottom-left-radius: calc(var(--v1-radius) - 1px); }
+}
+@media print { .meter-directory__menu, input { display: none; } }
+
+.meter-directory__name-arrow { display: inline-flex; vertical-align: middle; margin-left: .3rem; transition: transform 140ms ease; }
+.meter-directory__open:hover .meter-directory__name-arrow,
+.meter-directory__open:focus-visible .meter-directory__name-arrow { transform: translateX(.2rem); }
+@media (prefers-reduced-motion: reduce) {
+  .meter-directory__name-arrow { transition: none; }
+  .meter-directory__open:hover .meter-directory__name-arrow,
+  .meter-directory__open:focus-visible .meter-directory__name-arrow { transform: none; }
+}
+
+.meter-directory li:is([data-tone="danger"], [data-tone="warning"]) .meter-directory__status {
+  padding: .12rem .35rem;
+  border-radius: var(--v1-radius-sm);
+  background: color-mix(in srgb, var(--severity) 5%, var(--v1-surface));
+  color: var(--severity);
+}

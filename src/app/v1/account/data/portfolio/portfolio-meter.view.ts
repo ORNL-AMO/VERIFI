@@ -60,8 +60,7 @@ export function buildPortfolioMeters(input: PortfolioMeterInput): PortfolioMeter
     if (Number.isFinite(period)) latest.set(reading.meterId, Math.max(latest.get(reading.meterId) || 0, period));
   }
   return input.facilities.flatMap(facility => buildMeterCards(
-    meters.get(facility.guid) || [], readings.get(facility.guid) || [], groups.get(facility.guid) || [],
-    findings.get(facility.guid) || [], facility, [], input.statusState === 'ready'
+    meters.get(facility.guid) || [], readings.get(facility.guid) || [], groups.get(facility.guid) || [], findings.get(facility.guid) || [], input.statusState === 'ready'
   ).map(card => {
     const noReadings = card.readingCount === 0;
     const missingGroup = !card.group;

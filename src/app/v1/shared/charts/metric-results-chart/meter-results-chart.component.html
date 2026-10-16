@@ -23,6 +23,7 @@
       <p>{{ errorDescription }}</p>
     </article>
   } @else {
+    @if (showSeriesControls || showChartActions) {
     <div class="v1-meter-results-chart__controls" aria-label="Chart controls">
       @if (showSeriesControls) {
         <div class="v1-meter-results-chart__series-controls">
@@ -58,6 +59,7 @@
         </div>
       }
 
+      @if (showChartActions) {
       <div class="v1-meter-results-chart__action-controls">
         <button type="button" class="v1-icon-btn" title="Zoom in" aria-label="Zoom in" [disabled]="!zoomAvailable" (click)="zoomIn()">
           <app-ui-icon name="zoomIn"></app-ui-icon>
@@ -72,7 +74,10 @@
           <app-ui-icon name="download"></app-ui-icon>
         </button>
       </div>
+      }
     </div>
+
+    }
 
     @if (currentRows.length === 0) {
       <article class="v1-empty-state" role="status">

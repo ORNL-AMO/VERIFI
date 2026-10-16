@@ -51,7 +51,7 @@ export function buildMeterGroupSections(
   statusFindings: readonly StatusItem[] = [],
   statusReady = true
 ): MeterGroupSectionView[] {
-  const cards = buildMeterCards(meters, meterData, groups, statusFindings, undefined, [], statusReady);
+  const cards = buildMeterCards(meters, meterData, groups, statusFindings, statusReady);
   const groupedSections = [...groups]
     .sort(sortGroupsForDisplay)
     .map(group => ({

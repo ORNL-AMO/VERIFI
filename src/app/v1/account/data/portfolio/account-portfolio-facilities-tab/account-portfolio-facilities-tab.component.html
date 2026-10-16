@@ -1,5 +1,5 @@
 @let summaries = filteredSummaries();
-<section class="facility-portfolio" aria-label="Portfolio facilities">
+<section [appBrowsePosition]="browseKey()" [browsePositionReady]="browseReady()" [browseVisibleIds]="browseIds()" class="facility-portfolio" aria-label="Portfolio facilities">
   <form class="v1-data-browse-toolbar facility-portfolio__toolbar" aria-label="Facility filters" [formGroup]="filtersForm">
     <div class="v1-portfolio-browse-search">
       <p class="v1-portfolio-browse-count" role="status">Showing {{ summaries.length }} of {{ facilitySummaries().length }} facilities</p>

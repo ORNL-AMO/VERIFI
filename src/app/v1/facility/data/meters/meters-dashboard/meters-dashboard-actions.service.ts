@@ -132,6 +132,28 @@ export class MetersDashboardActionsService {
     );
   }
 
+  async deleteMeters(meterGuids: readonly string[]): Promise<void> {
+    const account = this.requireAccount();
+    const facility = this.requireFacility();
+    const unique = [...new Set(meterGuids)];
+    if (!unique.length) return;
+    const changes = unique.map(guid => {
+      const meter = this.requireWorkspaceMeter(guid);
+      if (meter.facilityId !== facility.guid) {
+        throw new WorkspaceWriteError('validation-failed', 'Select meters from the current facility.');
+      }
+      return { meter, meterData: this.workspace.meterData().filter(reading => reading.meterId === guid) };
+    });
+    await this.commandBoundary.execute({
+      entityKind: 'meter', changeKind: 'bulk', entityGuid: facility.guid,
+      label: 'Deleting meters and readings', publication: { mode: 'reload' },
+      notification: {
+        successTitle: unique.length === 1 ? 'Meter deleted' : 'Meters deleted',
+        successMessage: `${unique.length} ${unique.length === 1 ? 'meter' : 'meters'} deleted`
+      }
+    }, () => this.meterHandler.deleteMetersWithData(changes, account.guid));
+  }
+
   async createGroup(draft: MeterGroupDraft): Promise<IdbUtilityMeterGroup> {
     const account = this.requireAccount();
     const facility = this.requireFacility();

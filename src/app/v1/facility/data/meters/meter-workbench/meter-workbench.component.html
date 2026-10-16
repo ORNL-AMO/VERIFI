@@ -1,5 +1,4 @@
 @let currentFacility = workspace.facility();
-@let currentAccount = workspace.account();
 @let currentMeter = workspace.selectedMeter();
 
 @if (!currentFacility) {
@@ -22,47 +21,13 @@
   @let currentCard = workspace.selectedMeterCard();
   @let usageFacts = workspace.selectedMeterUsageFacts();
   @let currentDisplaySettings = displaySettings();
-  @let accountMetersLink = accountMetersRoute();
-  <div class="v1-data-workbench-sticky v1-meter-workbench-sticky">
-    <header class="v1-data-workbench-header v1-meter-workbench-header">
-      <nav class="v1-data-workbench-breadcrumb v1-meter-workbench-header__breadcrumb" aria-label="Meter breadcrumb">
-        <ol>
-          @if (currentAccount && accountMetersLink) {
-            <li>
-              <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
-            </li>
-            <li aria-hidden="true">
-              <app-ui-icon name="chevronRight"></app-ui-icon>
-            </li>
-          }
-          <li>{{ currentFacility.name || 'Facility' }}</li>
-          <li aria-hidden="true">
-            <app-ui-icon name="chevronRight"></app-ui-icon>
-          </li>
-          <li>
-            <button type="button" (click)="openMeters()">
-              Meters
-            </button>
-          </li>
-        </ol>
-      </nav>
-
+  <span #scrollMarker class="v1-meter-workbench-scroll-marker" aria-hidden="true"></span>
+  <div #workbenchHeader [appBrowseHeader]="workbenchHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky v1-meter-workbench-sticky">
+    <header class="v1-data-workbench-header v1-meter-workbench-header v1-page-header">
       <div class="v1-data-workbench-title-row v1-meter-workbench-header__title-row">
-        <div class="v1-data-workbench-title v1-meter-workbench-header__title">
-          <h1
-            id="v1-facility-meters-title"
-            class="v1-meter-workbench-header__meter-title"
-            [style.--v1-meter-source-color]="currentCard?.sourceColor || null">
-            <app-ui-icon [name]="currentCard?.sourceIcon || 'meter'"></app-ui-icon>
-            <app-data-workbench-resource-switcher
-              [resources]="meterResources()"
-              [selectedId]="currentMeter.guid"
-              [currentLabel]="currentMeter.name"
-              ariaLabel="Switch meter"
-              (resourceSelected)="switchMeter($event)">
-            </app-data-workbench-resource-switcher>
-          </h1>
-        </div>
+        <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="currentMeter.name" [icon]="currentCard?.sourceIcon || 'meter'" headingId="v1-facility-meters-title" [customTitle]="true">
+          <app-data-workbench-resource-switcher [resources]="meterResources()" [selectedId]="currentMeter.guid" [currentLabel]="currentMeter.name" ariaLabel="Switch meter" (resourceSelected)="switchMeter($event)"/>
+        </app-page-identity>
         <div class="v1-data-workbench-actions v1-meter-workbench-header__chips" aria-label="Meter summary and controls">
           <span class="v1-meter-workbench-header__source-chip" [style.--v1-meter-source-color]="currentCard?.sourceColor || null">
             {{ currentCard?.meter?.source || currentMeter.source }}

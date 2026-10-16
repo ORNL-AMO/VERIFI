@@ -207,11 +207,14 @@ describe('AccountPortfolioComponent', () => {
     const resizedFixture = TestBed.createComponent(AccountPortfolioComponent);
     try {
       resizedFixture.detectChanges();
-      expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('180px');
+      expect(resizedFixture.nativeElement.querySelector('.v1-account-portfolio').style.getPropertyValue('--portfolio-sticky-height')).toBe('180px');
       expect(observe).toHaveBeenCalled();
       bounds.mockReturnValue({ height: 220 } as DOMRect);
       resized!([], {} as ResizeObserver);
-      expect(resizedFixture.nativeElement.style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
+      expect(resizedFixture.nativeElement.querySelector('.v1-account-portfolio').style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
+      bounds.mockReturnValue({ height: 217.8 } as DOMRect);
+      resized!([{ borderBoxSize: [{ blockSize: 220 }] }] as unknown as ResizeObserverEntry[], {} as ResizeObserver);
+      expect(resizedFixture.nativeElement.querySelector('.v1-account-portfolio').style.getPropertyValue('--portfolio-sticky-height')).toBe('220px');
       resizedFixture.destroy();
       expect(disconnect).toHaveBeenCalled();
     } finally { vi.unstubAllGlobals(); }

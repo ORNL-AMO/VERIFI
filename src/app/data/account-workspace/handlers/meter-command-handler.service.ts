@@ -128,6 +128,51 @@ export class MeterCommandHandler {
     });
   }
 
+  async deleteMetersWithData(changes: readonly MeterDeletionChanges[], activeAccountGuid: string): Promise<number> {
+    if (!changes.length) return 0;
+    const facilityGuid = changes[0].meter.facilityId;
+    const meterGuids = new Set<string>();
+    const meterIds = new Set<number>();
+    const readingIds = new Set<number>();
+    for (const { meter, meterData } of changes) {
+      this.assertOwnership(meter.accountId, activeAccountGuid, 'meter');
+      if (meter.accountId !== activeAccountGuid || !facilityGuid || meter.facilityId !== facilityGuid
+        || meter.id === undefined || meterGuids.has(meter.guid) || meterIds.has(meter.id)) {
+        throw new WorkspaceWriteError('validation-failed', 'Select distinct meters from the same facility.');
+      }
+      meterGuids.add(meter.guid);
+      meterIds.add(meter.id);
+      for (const entry of meterData) {
+        this.assertOwnership(entry.accountId, activeAccountGuid, 'meter data');
+        if (entry.accountId !== activeAccountGuid || entry.facilityId !== facilityGuid || entry.meterId !== meter.guid
+          || entry.id === undefined || readingIds.has(entry.id)) {
+          throw new WorkspaceWriteError('validation-failed', 'Meter readings are incomplete or belong to another meter.');
+        }
+        readingIds.add(entry.id);
+      }
+    }
+    return this.transactions.runTransaction(['utilityMeter', 'utilityMeterData'], 'readwrite', async transaction => {
+      // Recheck stored identities and the complete reading set before deleting anything.
+      for (const { meter, meterData } of changes) {
+        const stored = await transaction.get<IdbUtilityMeter>('utilityMeter', meter.id!);
+        if (!stored || stored.guid !== meter.guid || stored.accountId !== activeAccountGuid || stored.facilityId !== facilityGuid) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected meters changed. Refresh and try again.');
+        }
+        const readings = await transaction.getAllByIndex<IdbUtilityMeterData>('utilityMeterData', 'meterId', meter.guid);
+        const expected = new Map(meterData.map(entry => [entry.id, entry.guid]));
+        if (readings.length !== meterData.length || readings.some(entry => entry.accountId !== activeAccountGuid
+          || entry.facilityId !== facilityGuid || expected.get(entry.id) !== entry.guid)) {
+          throw new WorkspaceWriteError('validation-failed', 'The selected readings changed. Refresh and try again.');
+        }
+      }
+      for (const { meter, meterData } of changes) {
+        for (const entry of meterData) await transaction.deleteByKey('utilityMeterData', entry.id!);
+        await transaction.deleteByKey('utilityMeter', meter.id!);
+      }
+      return changes.length;
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Meter data
   // ---------------------------------------------------------------------------

@@ -5,6 +5,52 @@ import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '
 import { MeterResultsChartComponent } from './meter-results-chart.component';
 
 describe('MeterResultsChartComponent', () => {
+  it('uses compact dashboard gutters and tick labels while preserving exact tooltip and table values', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('compactAxes', true);
+    fixture.componentRef.setInput('allowNegativeValues', true);
+    fixture.detectChanges();
+    const option = fixture.componentInstance.chartOption() as any;
+    expect(option.grid).toMatchObject({ left: 8, right: 8, outerBoundsMode: 'same', outerBoundsContain: 'axisLabel' });
+    expect(option.grid.containLabel).toBeUndefined();
+    const utility = option.yAxis[0].axisLabel.formatter;
+    const currency = option.yAxis[1].axisLabel.formatter;
+    for (const [value, expected] of [[0, '0'], [0.05, '0.05'], [500, '500'], [5000, '5k'], [1500, '1.5k'], [-5000, '-5k'], [2000000, '2M']] as const) expect(utility(value)).toBe(expected);
+    expect(currency(40000)).toBe('$40k'); expect(currency(-10000)).toBe('-$10k');
+    expect(option.tooltip.formatter([{ seriesName: 'Total Cost', value: 40000.25 }])).toContain('$40,000.25');
+    expect(fixture.componentInstance.accessibleRows()[0].cells.find(cell => cell.metricId === 'cost')?.valueLabel).toBe('$20.00');
+    expect(option.dataZoom[1]).toMatchObject({ left: 8, right: 8 });
+  });
+
+  it('supports opt-in shared zoom, hidden controls and GUID-based emphasis without echoing controlled inputs', () => {
+    const fixture = setup();
+    const changed = vi.fn();
+    fixture.componentInstance.zoomRangeChanged.subscribe(changed);
+    for (const [key, value] of Object.entries({ showAllMetrics: true, showLegend: false, showChartActions: false, showSeriesControls: false, zoomRange: { start: 20, end: 60 }, emphasizedMetricId: 'utility', allowNegativeValues: true })) fixture.componentRef.setInput(key, value);
+    fixture.detectChanges();
+    const option = fixture.componentInstance.chartOption() as any;
+    expect(option.legend.show).toBe(false);
+    expect(option.series[0].id).toBe('utility');
+    expect(option.series[0].lineStyle.width).toBe(4);
+    expect(option.series[1].lineStyle.opacity).toBe(.25);
+    expect(option.yAxis[0].min).toBeUndefined();
+    expect(option.dataZoom[0]).toMatchObject({ start: 20, end: 60 });
+    expect(changed).not.toHaveBeenCalled();
+    fixture.componentInstance.syncDataZoom({ start: 30, end: 80 });
+    expect(changed).toHaveBeenCalledWith({ start: 30, end: 80 });
+    expect(fixture.nativeElement.querySelector('.v1-meter-results-chart__controls')).toBeNull();
+  });
+
+  it('bounds dense dashboard tooltips and isolates the emphasized meter while retaining default tooltips', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('tooltipMaxRows', 1); fixture.detectChanges();
+    const params = [{ seriesId: 'utility', seriesName: 'Total Energy', value: 10, axisValueLabel: 'Jan 2026' }, { seriesId: 'cost', seriesName: 'Total Cost', value: 20 }];
+    const format = () => (fixture.componentInstance.chartOption() as any).tooltip.formatter(params);
+    expect(format()).toContain('+1 more meters');
+    fixture.componentRef.setInput('emphasizedMetricId', 'cost'); fixture.detectChanges();
+    expect(format()).toContain('$20.00'); expect(format()).not.toContain('Total Energy');
+  });
+
   it('defaults utility and cost to line charts with zoom controls', () => {
     const fixture = setup();
     const component = fixture.componentInstance;
