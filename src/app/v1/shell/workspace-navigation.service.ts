@@ -196,7 +196,7 @@ export class WorkspaceNavigationService {
         const previous = parseWorkspaceRoute(this.currentUrl());
         const next = parseWorkspaceRoute(event.urlAfterRedirects);
         if (previous.accountGuid && previous.section === 'data' && next.contextMode === 'facility'
-          && (previous.portfolioTab === 'facilities' || previous.portfolioTab === 'meters')
+          && (previous.portfolioTab === 'facilities' || previous.portfolioTab === 'meters' || previous.portfolioTab === 'predictors')
           && this.workspace.facilities().some(facility => facility.guid === next.facilityGuid && facility.accountId === previous.accountGuid)) {
           this.browseState.setOrigin(previous.accountGuid, previous.portfolioTab);
         }
@@ -267,7 +267,7 @@ export class WorkspaceNavigationService {
     if (!this.facilities().some(facility => facility.guid === facilityGuid) || !this.unsavedChanges.confirmDiscard()) return;
     const state = this.routeState();
     this.contextNavigationError.set('');
-    void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.detail))
+    void this.router.navigate(this.facilityRouteForSection(facilityGuid, state.section, state.contextMode === 'account' && state.portfolioTab === 'predictors' ? 'predictors' : state.detail))
       .catch(() => this.contextNavigationError.set('The facility could not be opened. Please try again.'));
   }
 
@@ -284,7 +284,7 @@ export class WorkspaceNavigationService {
     if (this.isSingleSiteWorkspace() && section !== 'data' && section !== 'reports') return undefined;
     if (section === 'data') {
       const origin = this.browseState.origin(account.guid);
-      return { label: origin === 'meters' ? 'Account Meters' : 'Account Facilities', route: this.accountDataReturnRoute(account.guid) };
+      return { label: origin === 'predictors' ? 'Account Predictors' : origin === 'meters' ? 'Account Meters' : 'Account Facilities', route: this.accountDataReturnRoute(account.guid) };
     }
     return { label: section === 'home' ? 'Account overview' : `Account ${section === 'analysis' ? 'analyses' : section}`,
       route: this.accountRouteForSection(account.guid, section, this.activeDetail()) };
@@ -646,20 +646,21 @@ export class WorkspaceNavigationService {
     const previous = parseWorkspaceRoute(this.previousUrl());
     const current = this.routeState();
 
-    const depth = (route: RouteState): number | undefined => {
+    const depth = (route: RouteState, url: string): number | undefined => {
       if (route.view !== 'workspace' || route.section !== 'data') return undefined;
-      if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' ? 0 : undefined;
+      if (route.contextMode === 'account') return route.portfolioTab === 'facilities' || route.portfolioTab === 'meters' || route.portfolioTab === 'predictors' ? 0 : undefined;
+      if (route.detail === 'predictors') return route.predictorGuid || route.weatherPredictorGroupKey || url.includes('/predictors/weather/new') ? 2 : 1;
       return route.detail === 'meters' ? route.meterGuid ? 2 : 1 : undefined;
     };
-    const before = depth(previous);
-    const after = depth(current);
+    const before = depth(previous, this.previousUrl());
+    const after = depth(current, this.currentUrl());
     if (before === undefined || after === undefined) return 'none';
     const accountFor = (route: RouteState) => route.accountGuid || this.facilities().find(facility => facility.guid === route.facilityGuid)?.accountId;
     const accountGuid = accountFor(current);
     if (!accountGuid || accountGuid !== accountFor(previous)) return 'none';
     if (previous.facilityGuid && current.facilityGuid && previous.facilityGuid !== current.facilityGuid) return 'peer';
     if (after !== before) return after > before ? 'drill-in' : 'drill-out';
-    if (previous.meterGuid !== current.meterGuid) return 'peer';
+    if (previous.meterGuid !== current.meterGuid || previous.predictorGuid !== current.predictorGuid || previous.weatherPredictorGroupKey !== current.weatherPredictorGroupKey) return 'peer';
     return 'none';
   }
 

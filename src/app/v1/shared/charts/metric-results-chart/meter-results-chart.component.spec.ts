@@ -5,6 +5,13 @@ import { EChartsChartDirective, V1EChartsDataZoomRange, V1EChartsOption } from '
 import { MeterResultsChartComponent } from './meter-results-chart.component';
 
 describe('MeterResultsChartComponent', () => {
+  it('can plot unsmoothed raw monthly readings without changing the default', () => {
+    const fixture = setup(); fixture.componentRef.setInput('showAllMetrics', true); fixture.detectChanges();
+    expect((fixture.componentInstance.chartOption() as any).series[0].smooth).toBe(true);
+    fixture.componentRef.setInput('smoothLines', false); fixture.detectChanges();
+    expect((fixture.componentInstance.chartOption() as any).series[0].smooth).toBe(false);
+  });
+
   it('uses compact dashboard gutters and tick labels while preserving exact tooltip and table values', () => {
     const fixture = setup();
     fixture.componentRef.setInput('compactAxes', true);

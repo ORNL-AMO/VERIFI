@@ -20,6 +20,7 @@ describe('PredictorWorkspaceActionsService', () => {
   const predictorHandler = {
     createStandardPredictor: vi.fn(async ({ predictor }: any) => ({ ...predictor, id: 11 })),
     updateStandardPredictor: vi.fn(async ({ predictor }: any) => predictor),
+    deletePredictorsWithData: vi.fn(async () => 2),
     deleteStandardPredictor: vi.fn(async () => undefined),
     addPredictor: vi.fn(async (value: any) => ({ ...value, id: 11 })),
     updatePredictor: vi.fn(async (value: any) => value),
@@ -65,12 +66,43 @@ describe('PredictorWorkspaceActionsService', () => {
     );
   });
 
+  it.each([undefined, null, '', '  '])('saves an untyped legacy predictor (%s) as Standard without changing its identity or readings', async type => {
+    const legacy = { ...existing, predictorType: type };
+    facilityPredictors.set([legacy]); predictors.set([legacy]);
+    const before = structuredClone(readings());
+    await TestBed.inject(PredictorWorkspaceActionsService).updatePredictor({ ...legacy, predictorType: 'Standard', name: 'Edited' });
+    expect(predictorHandler.updateStandardPredictor).toHaveBeenCalledWith(expect.objectContaining({ predictor: expect.objectContaining({ id: existing.id, guid: existing.guid, predictorType: 'Standard', name: 'Edited' }) }), 'account-a');
+    expect(readings()).toEqual(before); expect(legacy.predictorType).toBe(type);
+  });
+  it('copies untyped legacy settings as a new Standard predictor and preserves the source snapshot for reviewed deletion', async () => {
+    const legacy = { ...existing, predictorType: undefined }; facilityPredictors.set([legacy]); predictors.set([legacy]);
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const copy = await service.copyPredictor(legacy);
+    expect(copy.predictorType).toBe('Standard'); expect(copy.guid).not.toBe(legacy.guid);
+    expect(service.previewDeletion([legacy.guid]).predictors[0].predictorType).toBeUndefined();
+  });
+
   it('deletes readings, analysis references, and the predictor in one command', async () => {
     await TestBed.inject(PredictorWorkspaceActionsService).deletePredictor(existing);
     expect(predictorHandler.deleteStandardPredictor).toHaveBeenCalledWith(expect.objectContaining({
       predictor: expect.objectContaining({ id: 10 }),
       predictorData: [expect.objectContaining({ id: 20 })]
     }), 'account-a');
+  });
+
+  it('executes a mixed reviewed deletion through one reload command and rejects stale previews', async () => {
+    const weather = { ...existing, id: 11, guid: 'weather', predictorType: 'Weather' };
+    facilityPredictors.set([existing, weather]);
+    const service = TestBed.inject(PredictorWorkspaceActionsService);
+    const reviewed = service.previewDeletion([existing.guid, weather.guid]);
+    await service.deletePredictors(reviewed);
+    expect(predictorHandler.deletePredictorsWithData).toHaveBeenCalledWith(reviewed, 'account-a');
+    const boundary = TestBed.inject(WorkspaceCommandBoundary);
+    expect(boundary.execute).toHaveBeenCalledTimes(1);
+    expect(boundary.execute).toHaveBeenCalledWith(expect.objectContaining({ changeKind: 'bulk', publication: { mode: 'reload' } }), expect.any(Function));
+    readings.set([]);
+    await expect(service.deletePredictors(reviewed)).rejects.toMatchObject({ code: 'stale-workspace' });
+    expect(boundary.execute).toHaveBeenCalledTimes(1);
   });
 
   it('reloads authoritative workspace state after an atomic command failure', async () => {

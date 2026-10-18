@@ -13,6 +13,10 @@
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreateMeterDrawer()"><app-ui-icon name="add"></app-ui-icon>Add meter</button>
           <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"></app-ui-icon>Data Validation</a>
         }
+        @if (isPredictors()) {
+          <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreatePredictorDrawer()"><app-ui-icon name="add"/>Add predictor</button>
+          <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"/>Data Validation</a>
+        }
         @if (isFacilities()) {
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending()" (click)="openCreateFacilityDrawer()"><app-ui-icon name="add"></app-ui-icon>Add facility</button>
           <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'portfolio']"><app-ui-icon name="settings"></app-ui-icon>Manage Portfolio</a>
@@ -63,3 +67,5 @@
     <app-create-portfolio-meter-drawer (created)="openCreatedMeter($event)" (closed)="closeCreateMeterDrawer()"></app-create-portfolio-meter-drawer>
   }
 </ng-template>
+
+<ng-template #createPredictorDrawer>@if (isCreatePredictorDrawerOpen()) { <app-create-portfolio-predictor-drawer (created)="openCreatedPredictor($event)" (weatherSelected)="openNewWeatherPredictors($event)" (closed)="closeCreatePredictorDrawer()"/> }</ng-template>

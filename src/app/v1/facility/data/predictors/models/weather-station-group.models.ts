@@ -28,10 +28,6 @@ export interface WeatherStationGroupView {
   readonly searchText: string;
 }
 
-export type PredictorBrowseItem =
-  | { readonly kind: 'standard'; readonly card: PredictorCardView }
-  | { readonly kind: 'weather'; readonly group: WeatherStationGroupView };
-
 export function buildWeatherStationGroups(
   predictors: readonly IdbPredictor[],
   readings: readonly IdbPredictorData[],

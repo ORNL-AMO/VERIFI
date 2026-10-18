@@ -39,6 +39,12 @@ export interface IdbPredictor extends IdbEntry {
     ignoreDateStatusChecks?: boolean
 }
 
+/** Older manually maintained predictors may have no saved type. Do not coerce explicit legacy or weather types. */
+export function isStandardPredictor(predictor: Pick<IdbPredictor, 'predictorType'>): boolean {
+    const type: unknown = predictor.predictorType;
+    return type == null || (typeof type === 'string' && (type.trim() === '' || type === 'Standard'));
+}
+
 export function getNewIdbPredictor(accountId: string, facilityId: string): IdbPredictor {
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {

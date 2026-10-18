@@ -124,13 +124,15 @@
 .v1-root .v1-account-portfolio .v1-portfolio-browse-count { margin: 0; color: var(--v1-text); font-size: .85rem; }
 
 @media (max-width: 76rem) {
-  .v1-root :is(.v1-account-portfolio, .facility-meters) .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v1-root .v1-account-portfolio .v1-portfolio-browse-search, .v1-root .facility-meters__search { grid-column: 1 / -1; }
+  .v1-root :is(.v1-account-portfolio, .facility-meters, .facility-predictors) .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v1-root .v1-account-portfolio .v1-portfolio-browse-search, .v1-root .facility-meters__search, .v1-root .facility-predictors__search { grid-column: 1 / -1; }
 }
 
 @media (max-width: 48rem) {
-  .v1-root :is(.v1-account-portfolio, .facility-meters) .v1-data-browse-toolbar { gap: .5rem; padding: .65rem; }
+  .v1-root :is(.v1-account-portfolio, .facility-meters, .facility-predictors) .v1-data-browse-toolbar { gap: .5rem; padding: .65rem; }
 }
 
 .v1-root .facility-meters__search > span { color: var(--v1-text); font-size: .85rem; font-weight: 400; text-transform: none; }
 .v1-root .facility-meters__search { gap: .35rem; }
+
+.v1-root .facility-predictors__search > span { color: var(--v1-text); font-size: .85rem; font-weight: 400; text-transform: none; }

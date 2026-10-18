@@ -59,7 +59,7 @@ describe('PredictorWorkbenchComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            accountDataRoute: () => ['/account', 'portfolio'],
+            accountDataReturnRoute: () => ['/account', 'portfolio'],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: (_facility: string, predictor: string, tab: string) => ['/predictors', predictor, tab],
             facilityWeatherPredictorRoute: (_facility: string, group: string, tab: string) => ['/weather', group, tab]
@@ -82,6 +82,7 @@ describe('PredictorWorkbenchComponent', () => {
         {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {
+            statusState: signal('ready'),
             account: signal({ guid: 'account-a', name: 'Account A' }),
             facility: signal({ guid: 'facility-a', name: 'Facility A' }),
             selectedPredictor,
@@ -113,7 +114,7 @@ describe('PredictorWorkbenchComponent', () => {
     expect(element.textContent).toContain('Apr 2025');
     const chips = Array.from(element.querySelectorAll<HTMLElement>('.v1-data-workbench-actions .v1-chip'))
       .map(chip => chip.textContent?.trim());
-    expect(chips).toEqual(['Production', 'Valid']);
+    expect(chips).toEqual(['Production', 'No active findings']);
     const statistics = element.querySelector<HTMLElement>('[aria-label="Predictor statistics"]')!;
     expect(statistics.textContent).toContain('Latest value');
     expect(statistics.textContent).toContain('40');
@@ -164,7 +165,7 @@ describe('PredictorWorkbenchComponent', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            accountDataRoute: () => [],
+            accountDataReturnRoute: () => [],
             facilityDataRoute: () => ['/facility', 'predictors'],
             facilityPredictorRoute: () => []
           }
@@ -178,6 +179,7 @@ describe('PredictorWorkbenchComponent', () => {
         {
           provide: FacilityPredictorsWorkspaceService,
           useValue: {
+            statusState: signal('ready'),
             account: signal(undefined),
             facility: signal({ guid: 'facility-a', name: 'Facility A' }),
             selectedPredictor: signal(undefined),

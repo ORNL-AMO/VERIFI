@@ -1,6 +1,7 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -33,6 +34,11 @@ export class AccountPortfolioComponent implements OnDestroy {
   @ViewChild('createMeterDrawer') private readonly createMeterDrawer!: TemplateRef<unknown>;
   private readonly meterDrawerAccountGuid = signal<string | undefined>(undefined);
 
+  @ViewChild('createPredictorDrawer') private readonly createPredictorDrawer!: TemplateRef<unknown>;
+  private readonly predictorDrawerAccountGuid = signal<string | undefined>(undefined);
+  readonly isCreatePredictorDrawerOpen = signal(false);
+  readonly isPredictors = computed(() => this.activeContent() === 'predictors');
+
   readonly account = this.workspace.account;
   readonly canWrite = this.workspace.canWrite;
   readonly hasPending = this.workspace.hasPending;
@@ -55,6 +61,9 @@ export class AccountPortfolioComponent implements OnDestroy {
   readonly isCreateFacilityDrawerOpen = signal(false);
 
   constructor() {
+    effect(() => {
+      if (this.isCreatePredictorDrawerOpen() && (!this.isPredictors() || this.account()?.guid !== this.predictorDrawerAccountGuid())) this.closeCreatePredictorDrawer();
+    });
     effect(() => {
       if (this.isCreateMeterDrawerOpen()
         && (!this.isMeters() || this.account()?.guid !== this.meterDrawerAccountGuid())) {
@@ -85,6 +94,24 @@ export class AccountPortfolioComponent implements OnDestroy {
     } catch {
       this.meterNavigationError.set('Meter added. Its settings could not be opened; select the meter from the list to continue.');
     }
+  }
+
+  openCreatePredictorDrawer(): void {
+    if (!this.isPredictors() || !this.canWrite() || this.hasPending() || !this.totals().facilities) return;
+    this.meterNavigationError.set(''); this.predictorDrawerAccountGuid.set(this.account()?.guid);
+    this.isCreatePredictorDrawerOpen.set(true); this.modalPortal.show(new TemplatePortal(this.createPredictorDrawer, this.viewContainerRef));
+  }
+  closeCreatePredictorDrawer(): void { this.isCreatePredictorDrawerOpen.set(false); this.modalPortal.hide(); }
+  async openCreatedPredictor(predictor: IdbPredictor): Promise<void> {
+    this.closeCreatePredictorDrawer(); if (predictor.accountId !== this.account()?.guid) return;
+    try { const opened = await this.router.navigate(this.navigation.facilityPredictorRoute(predictor.facilityId, predictor.guid, 'settings')); if (!opened) throw new Error('Navigation cancelled'); }
+    catch { this.meterNavigationError.set('Predictor added. Select it from the list to open its settings.'); }
+  }
+  async openNewWeatherPredictors(facilityGuid: string): Promise<void> {
+    this.closeCreatePredictorDrawer();
+    if (!this.workspace.facilities().some(item => item.guid === facilityGuid)) return;
+    try { await this.router.navigate(this.navigation.facilityWeatherPredictorCreateRoute(facilityGuid)); }
+    catch { this.meterNavigationError.set('Weather setup could not be opened. Please try again.'); }
   }
 
   ngOnDestroy(): void {

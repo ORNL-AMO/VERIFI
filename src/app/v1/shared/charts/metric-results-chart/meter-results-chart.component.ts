@@ -58,6 +58,7 @@ export class MeterResultsChartComponent implements OnChanges {
   /** Short tick labels and minimal gutters for embedded dashboard charts. */
   @Input() compactAxes = false;
   @Input() tooltipMaxRows?: number;
+  @Input() smoothLines = true;
   @Input() showPointSymbols = true;
   @Input() showChartActions = true;
   @Input() zoomRange?: V1EChartsDataZoomRange;
@@ -176,7 +177,7 @@ export class MeterResultsChartComponent implements OnChanges {
           yAxisIndex: 0,
           data: rows.map(row => chartValue(row, metric.id)),
           connectNulls: false,
-          smooth: display === 'line' && rows.length > 2 && !comparisonBand,
+          smooth: this.smoothLines && display === 'line' && rows.length > 2 && !comparisonBand,
           showSymbol: display === 'line' && this.showPointSymbols,
           symbolSize: display === 'line' ? 7 : undefined,
           stack: display === 'bar' && this.allMetricSeriesStacked() ? 'results' : undefined,

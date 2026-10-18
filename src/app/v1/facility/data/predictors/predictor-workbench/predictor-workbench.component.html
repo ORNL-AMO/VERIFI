@@ -1,8 +1,6 @@
 @let currentFacility = workspace.facility();
-@let currentAccount = workspace.account();
 @let currentPredictor = context.predictor();
 @let currentCard = context.card();
-@let accountPredictorsLink = accountPredictorsRoute();
 
 @if (!currentFacility) {
   <article class="v1-empty-state" role="status">
@@ -21,24 +19,14 @@
     </button>
   </article>
 } @else if (currentPredictor && currentCard) {
-  <div class="v1-data-workbench-sticky v1-predictor-workbench-sticky">
-    <header class="v1-data-workbench-header v1-predictor-workbench-header">
-      <nav class="v1-data-workbench-breadcrumb" aria-label="Predictor breadcrumb">
-        <ol>
-          @if (currentAccount && accountPredictorsLink) {
-            <li><a [routerLink]="accountPredictorsLink">{{ currentAccount.name || 'Account' }}</a></li>
-            <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          }
-          <li>{{ currentFacility.name || 'Facility' }}</li>
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><button type="button" (click)="openPredictors()">Predictors</button></li>
-        </ol>
-      </nav>
+  <span #scrollMarker class="predictor-workbench__marker" aria-hidden="true"></span>
+  <div #stickyHeader [appBrowseHeader]="stickyHeader" [browseMarker]="scrollMarker" class="v1-data-workbench-sticky v1-predictor-workbench-sticky">
+    <header class="v1-data-workbench-header v1-page-header v1-predictor-workbench-header">
 
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title">
-          <h1 id="v1-facility-predictors-title" class="v1-predictor-workbench-header__title">
-            <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
+          <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="currentPredictor.name" [icon]="currentCard.icon" headingId="predictor-workbench-title" [customTitle]="true">
+
             <app-data-workbench-resource-switcher
               [resources]="resources()"
               [selectedId]="'predictor:' + currentPredictor.guid"
@@ -46,7 +34,7 @@
               ariaLabel="Switch predictor"
               (resourceSelected)="switchResource($event)">
             </app-data-workbench-resource-switcher>
-          </h1>
+          </app-page-identity>
         </div>
 
         <div class="v1-data-workbench-actions" aria-label="Predictor summary and controls">
@@ -55,9 +43,9 @@
               <app-ui-icon [name]="currentCard.icon"></app-ui-icon>
               {{ currentCard.productionLabel }}
             </span>
-            <span class="v1-chip v1-chip--{{ currentCard.statusTone }} v1-predictor-workbench-header__chip">
-              <app-ui-icon [name]="currentCard.statusIcon" [spin]="currentCard.statusTone === 'info'"></app-ui-icon>
-              {{ currentCard.statusLabel }}
+            <span class="v1-chip v1-chip--{{ headerStatus().tone === 'neutral' ? 'info' : headerStatus().tone }} v1-predictor-workbench-header__chip">
+              <app-ui-icon [name]="headerStatus().icon" [spin]="headerStatus().icon === 'loading'"></app-ui-icon>
+              {{ headerStatus().label }}
             </span>
           </div>
           <app-data-workbench-facts-toggle
@@ -106,7 +94,7 @@
         <ul class="v1-data-workbench-status-notes">
           @for (summary of currentCard.statusActionSummaries; track summary) {
             <li>
-              <app-ui-icon [name]="currentCard.statusIcon" [spin]="currentCard.statusTone === 'info'"></app-ui-icon>
+              <app-ui-icon [name]="headerStatus().icon" [spin]="headerStatus().icon === 'loading'"></app-ui-icon>
               <span>{{ summary }}</span>
             </li>
           }

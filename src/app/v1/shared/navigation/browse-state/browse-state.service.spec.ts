@@ -23,6 +23,17 @@ describe('session browse state', () => {
     expect(store.readFacilityView({ accountGuid: 'a', kind: 'facilityMeters', facilityGuid: 'f2' })).toBeUndefined();
     expect(new BrowseStateService().origin('a')).toBe('facilities');
   });
+  it('keeps Predictor controls and previews isolated from Meters, other facilities and other accounts', () => {
+    const store = new BrowseStateService(); store.setOrigin('a', 'predictors');
+    store.saveFilters({ accountGuid: 'a', kind: 'predictors' }, { search: 'Weather', type: 'weather', status: 'attention', sort: 'latestReading' });
+    store.savePredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' }, { page: 2, expanded: true, previewGuid: 'p1', zoom: { start: 20, end: 80 } });
+    expect(store.origin('a')).toBe('predictors'); expect(store.origin('b')).toBe('facilities');
+    expect(store.readFilters({ accountGuid: 'a', kind: 'meters' })).toBeUndefined();
+    expect(store.readPredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f2' })).toBeUndefined();
+    expect(store.readPredictorView({ accountGuid: 'b', kind: 'facilityPredictors', facilityGuid: 'f1' })).toBeUndefined();
+    expect(store.readPredictorView({ accountGuid: 'a', kind: 'facilityPredictors', facilityGuid: 'f1' })?.previewGuid).toBe('p1');
+  });
+
   it('hydrates without emitting edits, restores account-specific filters, and saves on destroy', () => {
     TestBed.configureTestingModule({ imports: [FormHost] });
     const store = TestBed.inject(BrowseStateService);

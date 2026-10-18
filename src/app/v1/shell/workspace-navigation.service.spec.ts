@@ -95,6 +95,22 @@ describe('WorkspaceNavigationService', () => {
     expect(service.accountReturn()?.label).toBe('Account Facilities');
   });
 
+  it('keeps Predictor origins, picker destinations and standard/weather depth transitions', () => {
+    router.events.next(new NavigationEnd(1, '', '/v1/workspace/account/account-a/data/portfolio/predictors'));
+    service.setFacility('facility-b');
+    expect(router.navigate).toHaveBeenLastCalledWith(service.facilityDataRoute('facility-b', 'predictors'));
+    router.events.next(new NavigationEnd(2, '', '/v1/workspace/facility/facility-a/data/predictors'));
+    expect(service.accountReturn()?.label).toBe('Account Predictors'); expect(service.routeMotion()).toBe('drill-in');
+    router.events.next(new NavigationEnd(3, '', '/v1/workspace/facility/facility-a/data/predictors/weather/new'));
+    expect(service.routeMotion()).toBe('drill-in');
+    router.events.next(new NavigationEnd(4, '', '/v1/workspace/facility/facility-a/data/predictors/weather/station%3AKORD/setup'));
+    expect(service.routeMotion()).toBe('peer');
+    router.events.next(new NavigationEnd(5, '', '/v1/workspace/facility/facility-b/data/predictors'));
+    expect(service.routeMotion()).toBe('peer'); expect(service.accountDataReturnRoute('account-a')).toEqual(service.accountPortfolioRoute('account-a', 'predictors'));
+    router.events.next(new NavigationEnd(6, '', '/v1/workspace/account/account-a/data/portfolio/predictors'));
+    expect(service.routeMotion()).toBe('drill-out');
+  });
+
   it('uses section-appropriate returns and avoids single-facility redirect loops', () => {
     router.events.next(new NavigationEnd(1, '', '/v1/workspace/facility/facility-a/settings/units'));
     expect(service.accountReturn()?.route).toEqual(service.accountSettingsRoute('account-a', 'units'));

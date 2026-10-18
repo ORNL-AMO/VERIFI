@@ -1,5 +1,5 @@
 :host { display: block; min-width: 0; }
-.predictor-settings { display: grid; gap: 0; padding: 0; border: 1px solid var(--v1-border); border-radius: 0; background: var(--v1-surface); }
+.predictor-settings { display: grid; gap: 0; padding: 0; border: 1px solid var(--v1-border); border-radius: 0 0 var(--v1-radius) var(--v1-radius); background: var(--v1-surface); }
 .predictor-settings > .v1-alert { margin: 1rem 1rem 0; }
 .predictor-settings__footer { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: flex-end; padding: 1rem; }
 @media (max-width: 42rem) { .predictor-settings__footer { display: grid; } }
