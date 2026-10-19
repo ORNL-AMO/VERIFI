@@ -3,7 +3,8 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { Component, Input, inject, computed, Injector, Signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { defer, Observable, of, Subscription, switchMap, take } from 'rxjs';
+import { RouterGuardService } from '@shared/shared-router-guard-modal/router-guard-service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
@@ -34,6 +35,7 @@ import { AccountStatusCheckService } from '@app/shared/helper-services/account-s
 export class CalculatedPredictorDataUpdateComponent {
   private readonly accountWorkspaceQuery = inject(AccountWorkspaceQueryService);
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
+  private readonly routerGuardService = inject(RouterGuardService);
   private accountStatusCheckService: AccountStatusCheckService = inject(AccountStatusCheckService);
   private facilityStatusCheck: Signal<FacilityStatusCheck> = toSignal(this.accountStatusCheckService.selectedFacilityStatusCheck$);
 
@@ -52,11 +54,13 @@ export class CalculatedPredictorDataUpdateComponent {
   itemsPerPageSub: Subscription;
   predictorDataSub: Subscription;
 
-  predictorData: Array<CalculatedPredictorTableItem>;
+  predictorData: Array<CalculatedPredictorTableItem> = [];
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
   calculatingData: boolean = false;
+  savingData: boolean = false;
+  savedForNavigation: boolean = false;
   destroyed: boolean = false;
   paramsSub: Subscription;
 
@@ -118,9 +122,9 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   ngOnDestroy() {
-    this.itemsPerPageSub.unsubscribe();
-    this.predictorDataSub.unsubscribe();
-    this.paramsSub.unsubscribe();
+    this.itemsPerPageSub?.unsubscribe();
+    this.predictorDataSub?.unsubscribe();
+    this.paramsSub?.unsubscribe();
     this.destroyed = true;
   }
 
@@ -132,7 +136,7 @@ export class CalculatedPredictorDataUpdateComponent {
 
 
   setPredictorData() {
-    if (this.predictor) {
+    if (this.predictor && !this.calculatingData && !this.savingData && !this.savedForNavigation) {
       let predictorData: Array<IdbPredictorData> = this.accountWorkspaceQuery.getPredictorData(this.predictor.guid);
       this.predictorData = predictorData.map(pData => {
         return {
@@ -158,53 +162,60 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   async setUpdatedAmount(updateAll: boolean) {
+    if (this.calculatingData || this.savingData) {
+      return;
+    }
+    this.savedForNavigation = false;
     this.checkForUpdates = true;
     this.closeCheckForUpdatesModal();
     this.calculatingData = true;
-    let predictorStart: number = 0;
+    try {
+      let predictorStart: number = 0;
 
-    const predictorStatusCheck = this.predictorStatusCheck();
-    const monthKeys = new Set(this.predictorData.map(data => `${data.year}-${data.month}`));
-    const missingMonths = predictorStatusCheck?.missingEntryMonths?.filter(({ month, year }) => {
-      return !monthKeys.has(`${year}-${month}`);
-    }) ?? [];
+      const predictorStatusCheck = this.predictorStatusCheck();
+      const monthKeys = new Set(this.predictorData.map(data => `${data.year}-${data.month}`));
+      const missingMonths = predictorStatusCheck?.missingEntryMonths?.filter(({ month, year }) => {
+        return !monthKeys.has(`${year}-${month}`);
+      }) ?? [];
 
-    let existingPredictorIndex: Array<number> = this.predictorData.map((p, idx) => {
-      if (p.id && p.updatedAmount == undefined) {
-        return idx
-      };
-      return undefined;
-    });
-    existingPredictorIndex = existingPredictorIndex.filter(idx => {
-      return idx != undefined;
-    });
-    if (existingPredictorIndex.length > 6 && !updateAll) {
-      predictorStart = (existingPredictorIndex.length - 6);
-    }
-    for (let i = predictorStart; i < existingPredictorIndex.length; i++) {
-      if (this.destroyed) {
-        break;
+      let existingPredictorIndex: Array<number> = this.predictorData.map((p, idx) => {
+        if (p.id && p.updatedAmount == undefined) {
+          return idx
+        };
+        return undefined;
+      });
+      existingPredictorIndex = existingPredictorIndex.filter(idx => {
+        return idx != undefined;
+      });
+      if (existingPredictorIndex.length > 6 && !updateAll) {
+        predictorStart = (existingPredictorIndex.length - 6);
       }
-      let predictorIndex: number = existingPredictorIndex[i];
-      if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
-        let entryDate: Date = getDateFromPredictorData(this.predictorData[predictorIndex]);
-        let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
-        // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
-        if (degreeDays != 'error') {
-          this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-          this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
-          this.predictorData[predictorIndex].weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
-        } else {
-          this.toastNotificationService.weatherDataErrorToast();
+      for (let i = predictorStart; i < existingPredictorIndex.length; i++) {
+        if (this.destroyed) {
+          break;
+        }
+        let predictorIndex: number = existingPredictorIndex[i];
+        if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
+          let entryDate: Date = getDateFromPredictorData(this.predictorData[predictorIndex]);
+          let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+          // let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
+          if (degreeDays != 'error') {
+            this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+            this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
+            this.predictorData[predictorIndex].weatherDataWarning = hasWeatherDataWarning(degreeDays, this.predictor.weatherDataType);
+          } else {
+            this.toastNotificationService.weatherDataErrorToast();
+          }
         }
       }
+      await this.addMissingMonths(missingMonths);
+      this.predictorData = _.orderBy(this.predictorData, (data: CalculatedPredictorTableItem) =>
+        getDateFromPredictorData(data).getTime()
+      );
+      this.setDataSummary();
+    } finally {
+      this.calculatingData = false;
     }
-    await this.addMissingMonths(missingMonths);
-    this.predictorData = _.orderBy(this.predictorData, (data: CalculatedPredictorTableItem) =>
-      getDateFromPredictorData(data).getTime()
-    );
-    this.setDataSummary();
-    this.calculatingData = false;
   }
 
   async addMissingMonths(missingMonths: Array<{ month: number, year: number }>) {
@@ -242,51 +253,59 @@ export class CalculatedPredictorDataUpdateComponent {
 
 
   async updateDataDateChange() {
-    if (this.endDate && this.startDate) {
-      let endDate: Date = new Date(this.endDate);
-      let startDate: Date = new Date(this.startDate);
-      let orderedData: Array<CalculatedPredictorTableItem> = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
-        return getDateFromPredictorData(pData).getTime();
-      });
-
-      if (orderedData.length > 0) {
-        let dataEndDate: Date = getDateFromPredictorData(orderedData[orderedData.length - 1]);
-        dataEndDate.setMonth(dataEndDate.getMonth() + 1);
-        if (dataEndDate <= endDate) {
-          await this.addDegreeDays(dataEndDate, endDate);
-        }
-        let dataStartDate: Date = getDateFromPredictorData(orderedData[0]);
-        dataStartDate.setMonth(dataStartDate.getMonth() - 1);
-        if (startDate <= dataStartDate) {
-          await this.addDegreeDays(startDate, dataStartDate);
-        }
-
-        let testStartDate: Date = new Date(this.startDate);
-        let testEndDate: Date = new Date(this.endDate);
-        if (dataEndDate > testEndDate || dataStartDate > testStartDate) {
-          this.predictorData = this.predictorData.filter(pData => {
-            return pData.id || ((getDateFromPredictorData(pData).getTime() <= testEndDate.getTime()) && (getDateFromPredictorData(pData).getTime() >= testStartDate.getTime()));
-          });
-          this.predictorData = this.predictorData.map(pData => {
-            if (getDateFromPredictorData(pData).getTime() > testEndDate.getTime() || getDateFromPredictorData(pData).getTime() < testStartDate.getTime()) {
-              pData.deleted = true
-            } else {
-              pData.deleted = false;
-            }
-            return pData;
-          });
-        }
-      } else {
-        let dataEndDate: Date = new Date(endDate);
-        // dataEndDate.setMonth(dataEndDate.getMonth() + 1);
-        await this.addDegreeDays(startDate, dataEndDate);
-      }
-
-
-
-      this.setDataSummary();
+    if (this.calculatingData || this.savingData) {
+      return;
     }
-    this.calculatingData = false;
+    this.savedForNavigation = false;
+    this.calculatingData = true;
+    try {
+      if (this.endDate && this.startDate) {
+        let endDate: Date = new Date(this.endDate);
+        let startDate: Date = new Date(this.startDate);
+        let orderedData: Array<CalculatedPredictorTableItem> = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
+          return getDateFromPredictorData(pData).getTime();
+        });
+
+        if (orderedData.length > 0) {
+          let dataEndDate: Date = getDateFromPredictorData(orderedData[orderedData.length - 1]);
+          dataEndDate.setMonth(dataEndDate.getMonth() + 1);
+          if (dataEndDate <= endDate) {
+            await this.addDegreeDays(dataEndDate, endDate);
+          }
+          let dataStartDate: Date = getDateFromPredictorData(orderedData[0]);
+          dataStartDate.setMonth(dataStartDate.getMonth() - 1);
+          if (startDate <= dataStartDate) {
+            await this.addDegreeDays(startDate, dataStartDate);
+          }
+
+          let testStartDate: Date = new Date(this.startDate);
+          let testEndDate: Date = new Date(this.endDate);
+          if (dataEndDate > testEndDate || dataStartDate > testStartDate) {
+            this.predictorData = this.predictorData.filter(pData => {
+              return pData.id || ((getDateFromPredictorData(pData).getTime() <= testEndDate.getTime()) && (getDateFromPredictorData(pData).getTime() >= testStartDate.getTime()));
+            });
+            this.predictorData = this.predictorData.map(pData => {
+              if (getDateFromPredictorData(pData).getTime() > testEndDate.getTime() || getDateFromPredictorData(pData).getTime() < testStartDate.getTime()) {
+                pData.deleted = true
+              } else {
+                pData.deleted = false;
+              }
+              return pData;
+            });
+          }
+        } else {
+          let dataEndDate: Date = new Date(endDate);
+          // dataEndDate.setMonth(dataEndDate.getMonth() + 1);
+          await this.addDegreeDays(startDate, dataEndDate);
+        }
+
+
+
+        this.setDataSummary();
+      }
+    } finally {
+      this.calculatingData = false;
+    }
   }
 
   async addDegreeDays(startDate: Date, endDate: Date) {
@@ -360,17 +379,56 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   async updateEntries() {
+    if (await this.saveEntries()) {
+      this.cancel();
+    }
+  }
+
+  canDeactivate(): Observable<boolean> {
+    if (this.calculatingData || this.savingData) {
+      return of(false);
+    }
+    const changes = this.getPredictorDataChanges();
+    if (this.savedForNavigation || !(changes.add.length || changes.update.length || changes.delete.length)) {
+      return of(true);
+    }
+    this.routerGuardService.setShowSave(true);
+    this.routerGuardService.setShowModal(true);
+    return this.routerGuardService.getModalAction().pipe(
+      take(1),
+      switchMap(action => {
+        if (action === 'save') {
+          return defer(() => this.saveEntries());
+        }
+        return of(action === 'discard');
+      })
+    );
+  }
+
+  async saveEntries(): Promise<boolean> {
+    if (this.calculatingData || this.savingData) {
+      return false;
+    }
+    this.savingData = true;
     this.loadingService.setLoadingMessage('Updating Entries...');
     this.loadingService.setLoadingStatus(true);
-    const accountGuid = this.accountWorkspaceStore.account()?.guid;
-    const changes = this.getPredictorDataChanges();
-    await this.commandBoundary.execute(
-      { entityKind: 'predictorData', changeKind: 'bulk', label: 'Update Predictor Entries' },
-      () => this.predictorHandler.reconcilePredictorData(this.predictor.guid, changes, accountGuid)
-    );
-    this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
-    this.loadingService.setLoadingStatus(false);
-    this.cancel();
+    try {
+      const accountGuid = this.accountWorkspaceStore.account()?.guid;
+      const changes = this.getPredictorDataChanges();
+      await this.commandBoundary.execute(
+        { entityKind: 'predictorData', changeKind: 'bulk', label: 'Update Predictor Entries' },
+        () => this.predictorHandler.reconcilePredictorData(this.predictor.guid, changes, accountGuid)
+      );
+      this.savedForNavigation = true;
+      this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
+      return true;
+    } catch {
+      this.toastNotificationService.showToast('Unable to Update Predictor Entries.', 'Your changes have not been saved. Please try again.', undefined, false, 'alert-danger');
+      return false;
+    } finally {
+      this.savingData = false;
+      this.loadingService.setLoadingStatus(false);
+    }
   }
 
   private getPredictorDataChanges(): PredictorDataBatchChanges {

@@ -1,6 +1,8 @@
 import { AccountWorkspaceQueryService } from '@data/account-workspace/account-workspace-query.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { CalculatedPredictorDataUpdateComponent } from '@v0/shared/shared-predictors-content/calculated-predictor-data-update/calculated-predictor-data-update.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastNotificationsService } from '@shared/notifications/toast-notifications.service';
 import { IdbFacility } from '@data/models/idbModels/facility';
@@ -17,6 +19,12 @@ export class FacilityPredictorDataBulkUpdateComponent {
   private readonly accountWorkspaceStore = inject(AccountWorkspaceStore);
 
   predictor: IdbPredictor;
+  @ViewChild(CalculatedPredictorDataUpdateComponent)
+  calculatedPredictorDataUpdate: CalculatedPredictorDataUpdateComponent;
+
+  canDeactivate(): Observable<boolean> {
+    return this.calculatedPredictorDataUpdate?.canDeactivate() ?? of(true);
+  }
   constructor(
     private activatedRoute: ActivatedRoute,
     private toastNotificationService: ToastNotificationsService,
