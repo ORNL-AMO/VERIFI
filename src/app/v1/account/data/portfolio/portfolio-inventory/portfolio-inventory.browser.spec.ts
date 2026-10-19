@@ -10,6 +10,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
 import { makeFinding } from '@app/v1/status/status.models';
 import { presentFindings } from '@app/v1/status/status.catalog';
+import { StatusEvaluationState } from '@app/v1/status/status.models';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { account, facility, group, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { inventoryPredictor, inventoryReading, inventoryNavigation } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.testing';
@@ -36,12 +37,14 @@ function setup(count = 260) {
     meterGroups: signal(facilities().map(item => group({ guid:'g', facilityId:item.guid }))), predictors, predictorData: signal(predictors().map(item => inventoryReading(item.guid, { accountId: account().guid, facilityId: item.facilityId }))),
     facilityAnalyses: signal([]), accountAnalyses: signal([]), facilityReports: signal([]), energyUseEquipment: signal([]), canWrite: signal(true), hasPending: signal(false) };
   const active = signal<PortfolioResource>('meters'); const stored = new Map<string,unknown>();
+  const statusState = signal<StatusEvaluationState>('ready');
   const routes = [{ path: 'portfolio', component: AccountPortfolioComponent, children: [
     { path:'facilities', component:AccountPortfolioFacilitiesTabComponent }, { path:'meters', component:AccountPortfolioMetersTabComponent }, { path:'predictors', component:AccountPortfolioPredictorsTabComponent }
   ] }, { path:'v1/workspace/facility/:facility/data/meters/:meter/settings', component:ResourceDestination },
-    { path:'v1/workspace/facility/:facility/data/predictors/weather/:key/setup', component:ResourceDestination }];
+    { path:'v1/workspace/facility/:facility/data/predictors/weather/:key/setup', component:ResourceDestination },
+    { path:'v1/workspace/facility/:facility/data/:resource', component:ResourceDestination }];
   TestBed.configureTestingModule({ imports:[AccountDataModule, InventoryBrowserHost], providers:[provideRouter(routes),
-    { provide:AccountWorkspaceStore, useValue:workspace }, { provide:WorkspaceStatusService, useValue:{ state:signal('ready'), items:signal(findings) } },
+    { provide:AccountWorkspaceStore, useValue:workspace }, { provide:WorkspaceStatusService, useValue:{ state:statusState, items:signal(findings) } },
     { provide:WorkspaceNavigationService, useValue:{ ...inventoryNavigation, activePortfolioTab:active, facilityMeterRoute:(facility:string,guid:string,tab:string)=>['/v1','workspace','facility',facility,'data','meters',guid,tab] } },
     { provide:ModalPortalService, useValue:{ show:vi.fn(), hide:vi.fn() } },
     { provide:LocalStorageService, useValue:{ retrieve:(key:string)=>stored.get(key), store:(key:string,value:unknown)=>stored.set(key,value) } }
@@ -54,7 +57,7 @@ function setup(count = 260) {
     await vi.waitFor(() => { fixture.detectChanges(); expect(fixture.debugElement.query(By.directive(type)).componentInstance.browseReady()).toBe(true); });
     await fixture.whenStable();
   };
-  return { fixture, root, router, open, workspace };
+  return { fixture, root, router, open, workspace, statusState };
 }
 async function settled(root: HTMLElement) {
   await vi.waitFor(() => {
@@ -70,7 +73,73 @@ async function settled(root: HTMLElement) {
   });
 }
 
+function expectResourceRows(tile: HTMLElement) {
+  for (const resource of tile.querySelectorAll<HTMLElement>('.facility-snapshot__resource')) {
+    const parts = ['app-ui-icon','strong','.facility-snapshot__resource-label'].map(selector => resource.querySelector<HTMLElement>(selector)!);
+    const rectangles = parts.map(part => part.getBoundingClientRect());
+    const centers = rectangles.map(rect => (rect.top + rect.bottom) / 2);
+    const diagnostics = JSON.stringify({ resource: getComputedStyle(resource).display, heading: getComputedStyle(resource.querySelector('.facility-snapshot__resource-heading')!).display,
+      rectangles: rectangles.map(rect => ({left:rect.left,top:rect.top,width:rect.width,height:rect.height})) });
+    expect(Math.max(...centers) - Math.min(...centers),diagnostics).toBeLessThan(2);
+    expect(rectangles[0].right).toBeLessThanOrEqual(rectangles[1].left);
+    expect(rectangles[1].right).toBeLessThanOrEqual(rectangles[2].left);
+    const note=resource.querySelector<HTMLElement>('.facility-snapshot__resource-note');
+    if(note) expect(note.getBoundingClientRect().top).toBeGreaterThanOrEqual(Math.max(...rectangles.map(rect=>rect.bottom)));
+  }
+}
+
 describe('uniform account inventories in Chromium', () => {
+  it('keeps facility resource snapshots compact, accessible and navigable across detail levels, themes and narrow layouts', async () => {
+    await page.viewport(1300,1000);
+    const {fixture,root,router,open,workspace,statusState}=setup(25);
+    workspace.facilities.update(items=>items.map((item,index)=>({...item,address:'100 Industrial Drive',zip:'00501',name:`Plant ${String(index).padStart(2,'0')}${index===0?' — Reedsburg Greenway Manufacturing and Distribution Center':''}`})));
+    await open('facilities');
+    expect(root.querySelector('app-facility-snapshot')).toBeNull();
+    await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('summary');fixture.detectChanges();await settled(root);
+    const first=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+    expect(first.querySelectorAll('.facility-snapshot__resource')).toHaveLength(2);
+    expectResourceRows(first);
+    expect(first.querySelector('.portfolio-tile__location')?.textContent).toBe('Oak Ridge, TN');
+    expect(parseFloat(getComputedStyle(first.querySelector('.portfolio-tile__name')!).fontSize)).toBeGreaterThanOrEqual(20);
+    const resource=first.querySelector<HTMLAnchorElement>('.facility-snapshot__resource')!;
+    expect(resource.getAttribute('aria-label')).toContain('25 meters');
+    resource.focus();resource.click();await fixture.whenStable();fixture.detectChanges();
+    expect(router.url).toBe('/v1/workspace/facility/f0/data/meters');
+    await open('facilities');
+    await vi.waitFor(()=>expect((document.activeElement as HTMLElement).dataset['browseId']).toBe('f0'));
+    await page.getByRole('combobox',{name:'Detail level',exact:true}).selectOptions('detailed');fixture.detectChanges();await settled(root);
+    const tile=root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile')!;
+    expect(tile.querySelectorAll('.facility-snapshot__attention li')).toHaveLength(2);
+    expect(tile.querySelector('.portfolio-tile__location')?.textContent).toContain('100 Industrial Drive, Oak Ridge, TN, 00501');
+    expect(tile.textContent).not.toContain('Classification'); expect(tile.textContent).not.toContain('Latest activity');
+    expect(tile.querySelector('.facility-snapshot__resource-note')?.textContent).toContain('3 need attention');
+    expectResourceRows(tile);
+    for(const palette of PORTFOLIO_PALETTES) for(const dark of [false,true]) for(const contrast of [false,true]) {
+      root.className=`v1-root v1-palette-${palette}${dark?' v1-theme-dark':''}${contrast?' v1-contrast-strong':''}`;
+      for(const selector of ['.facility-snapshot__resource-label','.facility-snapshot__resource-note','.facility-snapshot__attention a','.portfolio-tile__location']) {
+        const element=tile.querySelector<HTMLElement>(selector)!;
+        element.style.backgroundColor=getComputedStyle(tile).backgroundColor;
+        expect(textContrast(element),`${palette}, dark=${dark}, contrast=${contrast}: ${selector}`).toBeGreaterThanOrEqual(4.5);
+        element.style.backgroundColor='';
+      }
+    }
+    root.className='v1-root';
+    await page.screenshot({element:tile.querySelector<HTMLElement>('.facility-snapshot__resources')!,path:'../../../../../../../.angular/facility-resource-row.png'});
+    await page.screenshot({element:tile,path:'../../../../../../../.angular/facility-resource-snapshot.png'});
+    for(const state of ['evaluating','error','ready'] as const) {
+      statusState.set(state);fixture.detectChanges();await settled(root);
+      expect(tile.querySelector('.facility-snapshot__strip')!==null).toBe(state==='ready');
+    }
+    await page.viewport(390,750);fixture.detectChanges();await settled(root);
+    expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
+    expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth);
+    expectResourceRows(tile);
+    await page.screenshot({element:tile,path:'../../../../../../../.angular/facility-resource-snapshot-narrow.png'});
+    const action=tile.querySelector<HTMLAnchorElement>('.facility-snapshot__attention a')!;
+    action.focus();await userEvent.keyboard('{Enter}');await fixture.whenStable();fixture.detectChanges();
+    expect(router.url).toBe('/v1/workspace/facility/f0/data/meters/m0/settings');
+    fixture.destroy();await page.viewport(1500,1000);
+  });
   it('aligns rows around wrapped facility names and gives pagination an opaque themed surface', async () => {
     await page.viewport(850,1000);
     const {fixture,root,open,workspace}=setup();

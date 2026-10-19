@@ -9,11 +9,12 @@ const navigation = { ...inventoryNavigation, facilityMeterRoute: (facility: stri
 describe('resource-specific portfolio tile facts', () => {
   it('uses saved facility location, exact resource counts and neutral evaluation state without invented facts', () => {
     const input: PortfolioFacilityInput = { facilities: [facility({ guid: 'f', city: 'Oak Ridge', state: 'TN', country: 'US' })],
-      meters: [{ facilityId: 'f' }, { facilityId: 'other' }], predictors: [{ facilityId: 'f' }, { facilityId: 'f' }],
+      meters: [{ guid: 'm', facilityId: 'f' }, { guid: 'other', facilityId: 'other' }], predictors: [{ guid: 'p1', facilityId: 'f' }, { guid: 'p2', facilityId: 'f' }],
       meterData: [], predictorData: [], equipment: [], findings: [], statusState: 'error' };
     const tile = facilityTiles(buildPortfolioFacilities(input), input, navigation)[0];
-    expect(tile.location).toBe('Oak Ridge, TN'); expect(tile.summary).toEqual([{ label: 'Meters', value: '1' }, { label: 'Predictors', value: '2' }]);
-    expect(tile.status.label).toBe('Checks unavailable'); expect(tile.details.find(item => item.label === 'Findings')?.value).toBe('Checks unavailable');
+    expect(tile.location).toBe('Oak Ridge, TN'); expect(tile.facilitySnapshot?.resources.map(item => [item.label,item.total])).toEqual([['Meters',1],['Predictors',2]]);
+    expect(tile.status.label).toBe('Checks unavailable'); expect(tile.facilitySnapshot?.evaluation).toBe('error');
+    expect(tile.details).toEqual([]); expect(tile.detailLink).toBeUndefined();
   });
   it('prepares meter coverage, reading units, ownership and an existing quality route', () => {
     const tiles = meterTiles(buildPortfolioMeters({ facilities: [facility({ guid: 'f' })], meters: [meter({ guid: 'm', facilityId: 'f', startingUnit: 'kWh', groupId: 'g' })],

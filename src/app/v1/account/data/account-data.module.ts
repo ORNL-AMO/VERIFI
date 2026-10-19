@@ -5,6 +5,7 @@ import { CreatePredictorDrawerComponent } from './portfolio/create-predictor-dra
 import { CommonModule } from '@angular/common';
 import { CdkMenuModule } from '@angular/cdk/menu';
 import { PortfolioTileComponent } from './portfolio/portfolio-tile/portfolio-tile.component';
+import { FacilitySnapshotComponent } from './portfolio/portfolio-tile/facility-snapshot/facility-snapshot.component';
 import { PortfolioInventoryComponent } from './portfolio/portfolio-inventory/portfolio-inventory.component';
 import { PortfolioGridDirective } from './portfolio/portfolio-inventory/portfolio-grid.directive';
 import { NgModule } from '@angular/core';
@@ -48,6 +49,7 @@ import { CreateMeterDrawerComponent } from './portfolio/create-meter-drawer/crea
     AccountPortfolioComponent,
     AccountPortfolioFacilitiesTabComponent,
     PortfolioTileComponent,
+    FacilitySnapshotComponent,
     PortfolioInventoryComponent,
     AccountPortfolioMetersTabComponent,
     AccountPortfolioPlaceholderTabComponent,

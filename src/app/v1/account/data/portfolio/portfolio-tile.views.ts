@@ -3,32 +3,18 @@ import { PredictorInventoryEntry } from '@app/v1/facility/data/predictors/predic
 import { PortfolioFacilityInput, PortfolioFacilityView } from './portfolio-facility.view';
 import { PortfolioMeterView, PortfolioMeterSort } from './portfolio-meter.view';
 import { PortfolioTile } from './portfolio-inventory.models';
-import { isDataFinding } from '@app/v1/status/status.models';
+import { buildFacilitySnapshots, FacilitySnapshotNavigation } from './portfolio-facility-snapshot.view';
 
 type Navigation = Pick<WorkspaceNavigationService, 'facilityDataRoute' | 'facilityMeterRoute' | 'facilityPredictorRoute' | 'facilityWeatherPredictorRoute' | 'facilityWeatherPredictorQualityRoute'>;
 const value = (item: unknown): string => typeof item === 'string' && item.trim() ? item : 'Not set';
 const fact = (label: string, text: unknown) => ({ label, value: value(text) });
 
-export function facilityTiles(views: readonly PortfolioFacilityView[], input: PortfolioFacilityInput, nav: Pick<Navigation, 'facilityDataRoute'>): PortfolioTile[] {
-  const count = (records: readonly { readonly facilityId: string }[]) => {
-    const result = new Map<string, number>(); for (const record of records) result.set(record.facilityId, (result.get(record.facilityId) ?? 0) + 1); return result;
-  };
-  const meters = count(input.meters), predictors = count(input.predictors);
-  const findings = new Map<string, string[]>();
-  if (input.statusState === 'ready') for (const finding of input.findings) {
-    if (!isDataFinding(finding)) continue;
-    const guid = finding.entity.facilityGuid ?? (finding.entity.kind === 'facility' ? finding.entity.guid : undefined);
-    if (guid) findings.set(guid, [...(findings.get(guid) ?? []), finding.description]);
-  }
+export function facilityTiles(views: readonly PortfolioFacilityView[], input: PortfolioFacilityInput, nav: FacilitySnapshotNavigation): PortfolioTile[] {
+  const snapshots = buildFacilitySnapshots(input, nav);
   return views.map(view => ({
     guid: view.facility.guid, name: view.facility.name, icon: 'facility', location: view.location || undefined, route: nav.facilityDataRoute(view.facility.guid, 'meters'),
     status: { tone: view.tone, icon: view.icon, label: view.statusLabel },
-    summary: [{ label: 'Meters', value: String(meters.get(view.facility.guid) ?? 0) }, { label: 'Predictors', value: String(predictors.get(view.facility.guid) ?? 0) }],
-    details: [fact('Address', [view.facility.address, view.facility.zip].filter(Boolean).join(', ')), fact('Classification', view.facility.classification),
-      { label: 'Latest activity', value: view.modified > 0 ? new Date(view.modified).toLocaleDateString('en-US') : 'Not available' },
-      { label: 'Findings', value: input.statusState === 'ready' ? `${view.errorCount} errors · ${view.warningCount} warnings` : view.statusLabel }],
-    findings: (findings.get(view.facility.guid) ?? []).slice(0, 2),
-    detailLink: { label: 'Open facility meters', route: nav.facilityDataRoute(view.facility.guid, 'meters') }
+    summary: [], details: [], findings: [], facilitySnapshot: snapshots.get(view.facility.guid)
   }));
 }
 export function meterTiles(views: readonly PortfolioMeterView[], nav: Pick<Navigation, 'facilityDataRoute' | 'facilityMeterRoute'>): PortfolioTile[] {

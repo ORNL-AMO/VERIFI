@@ -35,6 +35,19 @@ describe('portfolio tile interactions and additive details', () => {
     const owner = fixture.nativeElement.querySelector('.portfolio-tile__owner') as HTMLAnchorElement;
     owner.click(); expect(navigate).toHaveBeenLastCalledWith(['/plant']);
   });
+  it('shows the full facility address once in the Detailed header even when there are no attention findings', () => {
+    const fixture=setup(), root=fixture.nativeElement as HTMLElement;
+    fixture.componentRef.setInput('tile',portfolioTile('f', { location:'Oak Ridge, TN',
+      facilitySnapshot:{evaluation:'ready',resources:[],findings:[],remainingFindings:0,address:'100 Industrial Drive, Oak Ridge, TN, 00501'} }));
+    for(const level of ['simple','summary','detailed'] as const) {
+      fixture.componentRef.setInput('level',level);fixture.detectChanges();
+      const location=root.querySelector('.portfolio-tile__location')!;
+      expect(location.textContent).toBe(level==='detailed'?'100 Industrial Drive, Oak Ridge, TN, 00501':'Oak Ridge, TN');
+      expect(root.querySelector('.facility-snapshot__attention')).toBeNull();
+    }
+    expect(root.textContent?.match(/100 Industrial Drive/g)).toHaveLength(1);
+    expect(root.querySelector('app-facility-snapshot')?.textContent).not.toContain('100 Industrial Drive');
+  });
   it('emits GUID-keyed detail choices and inherits again without domain actions', () => {
     const fixture = setup(), changes = vi.fn(); fixture.componentInstance.detailChanged.subscribe(changes);
     fixture.componentInstance.choose('detailed'); fixture.componentInstance.choose(null);

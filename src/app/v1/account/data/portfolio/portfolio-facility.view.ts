@@ -6,6 +6,7 @@ export type FacilityStatusFilter = 'all' | 'attention' | 'error' | 'warning' | '
 export type FacilitySort = 'attention' | 'facilityName' | 'modified';
 export type FacilityTone = 'danger' | 'warning' | 'success' | 'neutral';
 interface FacilityRecord { readonly facilityId: string; readonly modifiedDate?: Date | string; }
+interface FacilityResourceRecord extends FacilityRecord { readonly guid: string; }
 
 export interface PortfolioFacilityView {
   readonly facility: IdbFacility;
@@ -24,9 +25,9 @@ export interface PortfolioFacilityView {
 
 export interface PortfolioFacilityInput {
   readonly facilities: readonly IdbFacility[];
-  readonly meters: readonly FacilityRecord[];
+  readonly meters: readonly FacilityResourceRecord[];
   readonly meterData: readonly FacilityRecord[];
-  readonly predictors: readonly FacilityRecord[];
+  readonly predictors: readonly FacilityResourceRecord[];
   readonly predictorData: readonly FacilityRecord[];
   readonly equipment: readonly FacilityRecord[];
   readonly findings: readonly StatusItem[];

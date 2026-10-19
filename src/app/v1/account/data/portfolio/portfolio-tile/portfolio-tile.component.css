@@ -22,6 +22,11 @@
 .portfolio-tile__facts dd { margin: 0; }
 .portfolio-tile__findings { margin: 0; padding-inline-start: 1.2rem; font-size: max(.9rem,14px); }
 .portfolio-tile__detail-link { font-size: max(.9rem,14px); text-decoration-color: currentColor !important; }
+.portfolio-tile--facility-snapshot .portfolio-tile__name { font-size: max(1.25rem,20px); }
+.portfolio-tile--facility-snapshot .portfolio-tile__location { align-items: flex-start; color: color-mix(in srgb,var(--v1-muted) 75%,var(--v1-text)) !important; }
+.portfolio-tile--facility-snapshot .portfolio-tile__location app-ui-icon { flex: 0 0 18px; margin-top: .1rem; }
+.portfolio-tile--facility-snapshot .portfolio-tile__status { margin-top: .2rem; margin-bottom: .3rem; }
+.portfolio-tile--facility-snapshot app-facility-snapshot { display: flex; flex-direction: column; flex: 1; }
 .portfolio-tile[data-detail='simple'] { position: relative; align-items: center; min-height: 13rem; text-align: center; padding-top: 1.65rem; }
 [data-detail='simple'] .portfolio-tile__heading { display: grid; justify-items: center; gap: .7rem; width: 100%; padding-inline: .6rem; }
 [data-detail='simple'] .portfolio-tile__heading > app-ui-icon { margin: 0; }

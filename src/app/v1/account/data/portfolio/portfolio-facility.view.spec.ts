@@ -27,10 +27,14 @@ describe('portfolio facility projections', () => {
     expect(views.map(view => [view.statusLabel, view.errorCount, view.warningCount])).toEqual([['All data valid', 0, 0], ['Has warnings', 0, 1]]);
     expect(filterPortfolioFacilities(views, '', 'error', 'attention')).toEqual([]);
     expect(filterPortfolioFacilities(views, '', 'attention', 'attention').map(view => view.facility.guid)).toEqual(['beta']);
-    const tiles = facilityTiles(views, source, { facilityDataRoute: guid => ['/facility', guid, 'data', 'meters'] });
-    expect(tiles[0].findings).toEqual([]);
-    expect(tiles[1].findings).toEqual([findings[3].description]);
-    expect(tiles.flatMap(tile => tile.summary).some(fact => fact.label === 'Analyses')).toBe(false);
+    const tiles = facilityTiles(views, source, {
+      facilityDataRoute: (guid, detail) => ['/facility', guid, 'data', detail],
+      facilityMeterRoute: (guid, meter, tab) => ['/facility', guid, 'meters', meter, tab],
+      facilityPredictorRoute: (guid, predictor, tab) => ['/facility', guid, 'predictors', predictor, tab]
+    });
+    expect(tiles[0].facilitySnapshot?.findings).toEqual([]);
+    expect(tiles[1].facilitySnapshot?.findings.map(item => item.description)).toEqual([findings[3].description]);
+    expect(tiles[0].facilitySnapshot?.resources.map(item => item.kind)).toEqual(['meters','predictors']);
   });
   it('searches names, saved location, ZIP and classification with stable alphabetical ordering', () => {
     const views = buildPortfolioFacilities(input({ facilities: [portfolioFacility('beta', 'Beta'), { ...portfolioFacility('alpha', 'Alpha'), city: 'Memphis', classification: 'Office' }] }));
@@ -54,7 +58,7 @@ describe('portfolio facility projections', () => {
   });
 
   it('preserves setup filters and activity sorting without exposing counts on tiles', () => {
-    const views = buildPortfolioFacilities(input({ meters: [{ facilityId: 'alpha' }], meterData: [{ facilityId: 'alpha', modifiedDate: '2026-10-01' }] }));
+    const views = buildPortfolioFacilities(input({ meters: [{ guid:'m', facilityId: 'alpha' }], meterData: [{ facilityId: 'alpha', modifiedDate: '2026-10-01' }] }));
     expect(filterPortfolioFacilities(views, '', 'noMeters', 'facilityName').map(view => view.facility.guid)).toEqual(['beta']);
     expect(filterPortfolioFacilities(views, '', 'noReadings', 'facilityName')).toEqual([]);
     expect(filterPortfolioFacilities(views, '', 'all', 'modified')[0].facility.guid).toBe('alpha');
