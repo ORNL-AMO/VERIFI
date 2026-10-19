@@ -2,14 +2,16 @@ import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identit
 import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
 import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
 import { CreatePredictorDrawerComponent } from './portfolio/create-predictor-drawer/create-predictor-drawer.component';
-import { PredictorDirectoryComponent } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-directory/predictor-directory.component';
 import { CommonModule } from '@angular/common';
+import { CdkMenuModule } from '@angular/cdk/menu';
+import { PortfolioTileComponent } from './portfolio/portfolio-tile/portfolio-tile.component';
+import { PortfolioInventoryComponent } from './portfolio/portfolio-inventory/portfolio-inventory.component';
+import { PortfolioGridDirective } from './portfolio/portfolio-inventory/portfolio-grid.directive';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { MeterDraftSlideoutComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-dashboard-slideout/meter-draft-slideout/meter-draft-slideout.component';
-import { ResourceBrowseCardComponent } from '@app/v1/shared/resource-browse-card/resource-browse-card.component';
 import { DataEmptyStateModule } from '@app/v1/shared/data-empty-state/data-empty-state.module';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
@@ -23,18 +25,14 @@ import { ExistingFuelPickerComponent } from './custom-fuels/existing-fuel-picker
 import { CustomGwpFormComponent } from './custom-gwps/custom-gwp-form/custom-gwp-form.component';
 import { CustomGwpsComponent } from './custom-gwps/custom-gwps.component';
 import { ExistingGwpPickerComponent } from './custom-gwps/existing-gwp-picker/existing-gwp-picker.component';
-import { AccountPortfolioAnalysesTabComponent } from './portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioEnergyUsesTabComponent } from './portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
 import { AccountPortfolioFacilitiesTabComponent } from './portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
 import { AccountPortfolioMetersTabComponent } from './portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
 import { AccountPortfolioPlaceholderTabComponent } from './portfolio/account-portfolio-placeholder-tab/account-portfolio-placeholder-tab.component';
 import { AccountPortfolioPredictorsTabComponent } from './portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { AccountPortfolioReportsTabComponent } from './portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountPortfolioComponent } from './portfolio/account-portfolio.component';
 import { CreateFacilityDrawerComponent } from './portfolio/create-facility-drawer/create-facility-drawer.component';
 import { CreateMeterDrawerComponent } from './portfolio/create-meter-drawer/create-meter-drawer.component';
-import { FacilityDirectoryComponent } from './portfolio/facility-directory/facility-directory.component';
-import { MeterFacilityGroupComponent } from './portfolio/meter-facility-group/meter-facility-group.component';
 
 @NgModule({
   declarations: [
@@ -49,18 +47,16 @@ import { MeterFacilityGroupComponent } from './portfolio/meter-facility-group/me
     ExistingGwpPickerComponent,
     AccountPortfolioComponent,
     AccountPortfolioFacilitiesTabComponent,
-    FacilityDirectoryComponent,
+    PortfolioTileComponent,
+    PortfolioInventoryComponent,
     AccountPortfolioMetersTabComponent,
-    MeterFacilityGroupComponent,
     AccountPortfolioPlaceholderTabComponent,
     AccountPortfolioPredictorsTabComponent,
     AccountPortfolioEnergyUsesTabComponent,
-    AccountPortfolioAnalysesTabComponent,
-    AccountPortfolioReportsTabComponent,
     CreateFacilityDrawerComponent,
     CreateMeterDrawerComponent
   ],
-  imports: [CreatePredictorDrawerComponent, PredictorDirectoryComponent, PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
+  imports: [CdkMenuModule, PortfolioGridDirective, CreatePredictorDrawerComponent, PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
     CommonModule,
     MeterDraftSlideoutComponent,
     IconsModule,
@@ -68,8 +64,7 @@ import { MeterFacilityGroupComponent } from './portfolio/meter-facility-group/me
     RouterModule,
     DataEmptyStateModule,
     WorkspaceSlideoutComponent,
-    ModalFocusTrapDirective,
-    ResourceBrowseCardComponent
+    ModalFocusTrapDirective
   ],
   exports: [
     CustomGridFactorsComponent,

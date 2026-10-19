@@ -31,12 +31,13 @@ describe('DataNavComponent', () => {
     const fixture = TestBed.createComponent(DataNavComponent);
     fixture.detectChanges();
     const links = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.v1-nav__link'));
-    expect(links.slice(0, 6).map(link => link.textContent?.trim())).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses', 'Analyses', 'Reports']);
+    expect(links.slice(0, 4).map(link => link.textContent?.trim())).toEqual(['Facilities', 'Meters', 'Predictors', 'Energy Uses']);
     expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Meters']);
     expect(links[1].getAttribute('href')).toContain('/account/account-a/data/portfolio/meters');
-    state.activePortfolioTab.set('reports');
+    expect(links.some(link => /Analyses|Reports/.test(link.textContent ?? ''))).toBe(false);
+    state.activePortfolioTab.set('predictors');
     fixture.detectChanges();
-    expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Reports']);
+    expect(activeLinks(fixture.nativeElement).map(link => link.textContent?.trim())).toEqual(['Predictors']);
   });
 
   it('shows emissions custom data navigation only when emissions display is enabled', () => {

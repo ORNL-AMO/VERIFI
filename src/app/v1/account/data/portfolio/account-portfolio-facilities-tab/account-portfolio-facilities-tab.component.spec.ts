@@ -43,7 +43,8 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
   it('leaves facility selection to the route guard when navigation is cancelled', async () => {
     const { fixture, navigate } = setup();
     navigate.mockResolvedValueOnce(false);
-    await fixture.componentInstance.openFacility('beta');
+    (fixture.nativeElement.querySelector('.portfolio-inventory > li:last-child .portfolio-tile__name') as HTMLAnchorElement).click();
+    await fixture.whenStable();
     expect(TestBed.inject(AccountWorkspaceService).selectFacility).not.toHaveBeenCalled();
   });
   it('updates warnings filtering through the native select change event', async () => {
@@ -61,29 +62,29 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     status.value = 'warning';
     status.dispatchEvent(new Event('change', { bubbles: true }));
     await fixture.whenStable();
-    const entries = fixture.nativeElement.querySelectorAll('.facility-directory__entry');
+    const entries = fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile');
     expect(entries).toHaveLength(1);
     expect(entries[0].textContent).toContain('Beta Works');
     expect(entries[0].getAttribute('data-tone')).toBe('warning');
     expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain('Showing 1 of 2 facilities');
   });
 
-  it('shows a searchable lightweight directory without map or view controls', () => {
+  it('shows uniform simple tiles with search and a screen-local detail control', () => {
     const { fixture } = setup();
     const component = fixture.componentInstance;
-    expect(fixture.nativeElement.querySelectorAll('.facility-directory__entry')).toHaveLength(2);
-    expect(fixture.nativeElement.querySelector('.facility-directory--single-column')).not.toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('.portfolio-inventory')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-facility-map')).toBeNull();
-    expect(fixture.nativeElement.querySelector('input[type=radio]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('select[aria-label="Detail level"]')).not.toBeNull();
     component.filtersForm.controls.search.setValue('knoxville');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.facility-directory__entry')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(1);
     expect(fixture.nativeElement.textContent).toContain('Beta Works');
     expect(fixture.nativeElement.textContent).not.toContain('Last modified');
     expect(fixture.nativeElement.querySelector('.v1-facility-card__facts')).toBeNull();
     component.clearFilters();
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.facility-directory__entry')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(2);
   });
 
   it('retains setup filters, neutral status, empty state, and opens Facility Data > Meters', async () => {
@@ -92,9 +93,9 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     component.filtersForm.controls.status.setValue('noMeters');
     statusState.set('error');
     fixture.detectChanges();
-    const tile = fixture.nativeElement.querySelector('.facility-directory__entry') as HTMLButtonElement;
+    const tile = fixture.nativeElement.querySelector('.portfolio-inventory .portfolio-tile__name') as HTMLAnchorElement;
     expect(tile.textContent).toContain('Beta Works');
-    expect(tile.textContent).toContain('Checks unavailable');
+    expect(tile.closest('article')!.textContent).toContain('Checks unavailable');
     tile.click();
     await fixture.whenStable();
     expect(navigate).toHaveBeenCalledWith(['/v1', 'workspace', 'facility', 'beta', 'data', 'meters']);
@@ -103,16 +104,16 @@ describe('AccountPortfolioFacilitiesTabComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('No facilities match');
   });
 
-  it('uses rows below five facilities and preserves the large-account directory while filtering', () => {
+  it('uses the same tile layout for small inventories and filtered larger inventories', () => {
     const { fixture, facilities } = setup();
-    expect(fixture.nativeElement.querySelector('.facility-directory--single-column')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-inventory')).not.toBeNull();
     facilities.update(current => [...current, facility('c', 'Gamma', 'Boston'), facility('d', 'Delta', 'Chicago'), facility('e', 'Epsilon', 'Seattle')]);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.facility-directory--single-column')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.portfolio-inventory')).not.toBeNull();
     fixture.componentInstance.filtersForm.controls.search.setValue('alpha');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.facility-directory__entry')).toHaveLength(1);
-    expect(fixture.nativeElement.querySelector('.facility-directory--single-column')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.portfolio-inventory')).not.toBeNull();
   });
 
 });

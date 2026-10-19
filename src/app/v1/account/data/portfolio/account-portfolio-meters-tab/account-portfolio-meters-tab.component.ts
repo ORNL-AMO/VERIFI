@@ -5,7 +5,9 @@ import { Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
-import { buildPortfolioMeters, filterPortfolioMeters, groupPortfolioMeters, PortfolioMeterSort, PortfolioMeterStatusFilter } from '../portfolio-meter.view';
+import { buildPortfolioMeters, filterPortfolioMeters, PortfolioMeterSort, PortfolioMeterStatusFilter } from '../portfolio-meter.view';
+import { PortfolioInventoryState } from '../portfolio-inventory-state';
+import { meterTiles, orderPortfolioMeters } from '../portfolio-tile.views';
 
 @Component({
   selector: 'app-account-portfolio-meters-tab',
@@ -21,37 +23,33 @@ export class AccountPortfolioMetersTabComponent {
   readonly filtersForm = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
     status: new FormControl<PortfolioMeterStatusFilter>('all', { nonNullable: true }),
-    sort: new FormControl<PortfolioMeterSort>('attention', { nonNullable: true })
+    sort: new FormControl<PortfolioMeterSort>('attention', { nonNullable: true }),
+    facilityGuid: new FormControl('', { nonNullable: true })
   });
   readonly browseKey = computed<BrowseKey<'meters'> | undefined>(() => {
     const account = this.workspace.account();
     return account ? { accountGuid: account.guid, kind: 'meters' } : undefined;
   });
   readonly filters = rememberBrowseForm(this.browseKey, this.filtersForm);
-  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()));
+  readonly layoutReady = signal(false);
+  readonly browseReady = computed(() => this.workspace.canWrite() && !['idle', 'evaluating'].includes(this.status.state()) && this.inventory.ready() && this.layoutReady());
   readonly navigationError = signal('');
   readonly meters = computed(() => buildPortfolioMeters({
     facilities: this.workspace.facilities(), meters: this.workspace.meters(), readings: this.workspace.meterData(),
     groups: this.workspace.meterGroups(), findings: this.status.items(), statusState: this.status.state()
   }));
-  readonly filteredMeters = computed(() => filterPortfolioMeters(this.meters(), this.filters().search, this.filters().status));
-  readonly facilityGroups = computed(() => groupPortfolioMeters(this.filteredMeters(), this.filters().sort).map(group => ({
-    ...group, facilityRoute: this.navigation.facilityDataRoute(group.facility.guid, 'meters')
-  })));
-  readonly singleFacility = computed(() => new Set(this.meters().map(item => item.facility.guid)).size === 1);
+  readonly facilities = computed(() => [...this.workspace.facilities()].sort((a,b) => a.name.localeCompare(b.name) || a.guid.localeCompare(b.guid)));
+  readonly filteredMeters = computed(() => orderPortfolioMeters(filterPortfolioMeters(this.meters(), this.filters().search, this.filters().status)
+    .filter(item => !this.filters().facilityGuid || item.facility.guid === this.filters().facilityGuid), this.filters().sort));
+  readonly tiles = computed(() => meterTiles(this.filteredMeters(), this.navigation));
+  readonly inventory = new PortfolioInventoryState(this.browseKey, this.tiles, computed(() => this.meters().map(item => item.meter.guid)), this.filters, this.workspace.canWrite);
 
-  readonly browseIds = computed(() => [...this.filteredMeters().map(item => item.meter.guid), ...this.facilityGroups().map(item => item.facility.guid)]);
+  readonly browseIds = this.inventory.visibleIds;
 
-  clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'attention' }); }
-
-  async openMeter(guid: string): Promise<void> {
-    const item = this.meters().find(meter => meter.meter.guid === guid);
-    if (!item) return;
+  clearFilters(): void { this.filtersForm.reset({ search: '', status: 'all', sort: 'attention', facilityGuid: '' }); }
+  async navigateRoute(route: readonly string[]): Promise<void> {
     this.navigationError.set('');
-    try {
-      await this.router.navigate(this.navigation.facilityMeterRoute(item.facility.guid, guid, 'settings'));
-    } catch {
-      this.navigationError.set('The meter could not be opened. Please try again.');
-    }
+    try { await this.router.navigate([...route]); } catch { this.navigationError.set('The meter could not be opened. Please try again.'); }
   }
+
 }

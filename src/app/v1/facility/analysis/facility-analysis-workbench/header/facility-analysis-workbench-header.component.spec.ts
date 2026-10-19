@@ -115,7 +115,7 @@ describe('facility analysis workbench header', () => {
         {
           provide: WorkspaceNavigationService,
           useValue: {
-            accountPortfolioRoute: (accountGuid: string, tab: string) => ['/account', accountGuid, 'data', 'portfolio', tab],
+            accountAnalysisRoute: (accountGuid: string) => ['/account', accountGuid, 'analysis', 'dashboard'],
             facilityRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'overview'],
             facilityAnalysisRoute: (facilityGuid: string) => ['/facility', facilityGuid, 'analyses'],
             facilityAnalysisWorkbenchRoute: (facilityGuid: string, analysisGuid: string) => [
@@ -139,7 +139,7 @@ describe('facility analysis workbench header', () => {
 
     expect(breadcrumbs.map(link => link.textContent?.trim())).toEqual(['Account A', 'Facility A', 'Analyses']);
     expect(breadcrumbs.map(link => link.getAttribute('href'))).toEqual([
-      '/account/account-a/data/portfolio/analyses',
+      '/account/account-a/analysis/dashboard',
       '/facility/facility-a/overview',
       '/facility/facility-a/analyses'
     ]);

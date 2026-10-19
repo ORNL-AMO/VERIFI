@@ -8,13 +8,11 @@ import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-f
 import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
 import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
 import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
-import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
 import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
 import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
 import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
 import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { AccountPortfolioReportsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { AccountSettingsComponent } from '@app/v1/account/settings/account-settings.component';
 import { AccountSettingsBackupComponent } from '@app/v1/account/settings/backup/account-settings-backup.component';
 import { AccountSettingsDeleteComponent } from '@app/v1/account/settings/delete/account-settings-delete.component';
@@ -127,6 +125,8 @@ export const V1Routes: Routes = [
             component: AccountHomeComponent,
             canActivate: [accountHomeCanonicalGuard]
           },
+          { path: 'data/portfolio/analyses', pathMatch: 'full', redirectTo: 'analysis/dashboard' },
+          { path: 'data/portfolio/reports', pathMatch: 'full', redirectTo: 'reports/dashboard' },
           {
             path: 'data',
             children: [
@@ -140,8 +140,6 @@ export const V1Routes: Routes = [
                   { path: 'meters', component: AccountPortfolioMetersTabComponent },
                   { path: 'predictors', component: AccountPortfolioPredictorsTabComponent },
                   { path: 'energy-uses', component: AccountPortfolioEnergyUsesTabComponent },
-                  { path: 'analyses', component: AccountPortfolioAnalysesTabComponent },
-                  { path: 'reports', component: AccountPortfolioReportsTabComponent },
                   { path: '**', redirectTo: 'facilities' }
                 ]
               },

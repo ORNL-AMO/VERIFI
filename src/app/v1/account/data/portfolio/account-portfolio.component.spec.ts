@@ -127,16 +127,11 @@ describe('AccountPortfolioComponent', () => {
     const validation = Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('a'))
       .find(link => link.textContent?.trim() === 'Data Validation')!;
     expect(validation.getAttribute('href')).toContain('/account/account-a/settings/data-validation');
-    for (const content of ['analyses', 'reports']) {
-      activePortfolioTab.set(content);
-      fixture.detectChanges();
-      expect(fixture.nativeElement.textContent).not.toContain('Upload data');
-      expect(fixture.nativeElement.textContent).not.toContain('Add facility');
-    }
+
   });
 
   it('uses the active resource title for every portfolio destination', () => {
-    for (const [tab, [title, icon]] of Object.entries({ facilities: ['Facilities', 'facility'], meters: ['Meters', 'meter'], predictors: ['Predictors', 'predictor'], 'energy-uses': ['Energy Uses', 'tools'], analyses: ['Analyses', 'analysis'], reports: ['Reports', 'reports'] })) {
+    for (const [tab, [title, icon]] of Object.entries({ facilities: ['Facilities', 'facility'], meters: ['Meters', 'meter'], predictors: ['Predictors', 'predictor'], 'energy-uses': ['Energy Uses', 'tools'] })) {
       activePortfolioTab.set(tab);
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe(title);
@@ -181,17 +176,11 @@ describe('AccountPortfolioComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Meter added. Its settings could not be opened');
   });
 
-  it('counts both account and facility analyses and keeps existing analyses reachable without facilities', () => {
-    expect(fixture.componentInstance.totals().analyses).toBe(2);
-    account.set({ ...account()!, isSingleFacilityCompany: true });
-    fixture.detectChanges();
-    expect(fixture.componentInstance.totals().analyses).toBe(1);
-    account.set({ ...account()!, isSingleFacilityCompany: false });
+  it('shows the empty Data portfolio when there are no facilities, even with saved analyses', () => {
     facilities.set([]);
-    (TestBed.inject(AccountWorkspaceStore).facilityAnalyses as ReturnType<typeof signal<any[]>>).set([]);
     fixture.detectChanges();
-    expect(fixture.componentInstance.totals().analyses).toBe(1);
-    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('No facilities');
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeNull();
   });
 
   it('updates the routed-toolbar offset after header resizing and releases its observer', () => {

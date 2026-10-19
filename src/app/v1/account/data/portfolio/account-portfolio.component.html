@@ -6,9 +6,7 @@
     <header class="v1-section-header v1-account-portfolio__header v1-page-header">
       <app-page-identity class="v1-account-portfolio__heading" [breadcrumbs]="breadcrumbs()" [title]="title()" [icon]="headerIcon()" headingId="v1-account-portfolio-title"/>
       <div class="v1-account-portfolio__header-actions">
-        @if (showUpload()) {
-          <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
-        }
+        <a class="v1-btn v1-btn--secondary" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'imports', 'upload']"><app-ui-icon name="uploadData"></app-ui-icon>Upload data</a>
         @if (isMeters()) {
           <button type="button" class="v1-btn v1-btn--action" [disabled]="!canWrite() || hasPending() || !totals().facilities" (click)="openCreateMeterDrawer()"><app-ui-icon name="add"></app-ui-icon>Add meter</button>
           <a class="v1-btn v1-account-portfolio__manage" [routerLink]="['/v1/workspace/account', currentAccount?.guid, 'settings', 'data-validation']"><app-ui-icon name="settings"></app-ui-icon>Data Validation</a>
@@ -36,7 +34,7 @@
       </div>
     }
 
-    @if (totals().facilities === 0 && totals().analyses === 0) {
+    @if (totals().facilities === 0) {
       <app-data-empty-state
         icon="facility"
         title="No facilities"

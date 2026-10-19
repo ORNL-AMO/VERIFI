@@ -1,10 +1,3 @@
 :host { display: block; min-width: 0; }
-.portfolio-predictors__groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr)); gap: 1rem; align-items: start; }
-.portfolio-predictors__groups--single { grid-template-columns: minmax(0, 1fr); }
-.portfolio-predictors__facility { min-width: 0; border: 1px solid var(--v1-border); border-radius: var(--v1-radius); background: var(--v1-surface); }
-h2 { margin: 0; font-size: 1rem; background: var(--v1-content-block); border-radius: var(--v1-radius) var(--v1-radius) 0 0; border-bottom: 1px solid var(--v1-border); }
-h2 a { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) 1rem; align-items: center; gap: .5rem; padding: .8rem 1rem; color: var(--v1-text); text-decoration: none; }
-h2 a:hover { text-decoration: underline; }
-h2 a:focus-visible { outline: 3px solid var(--v1-focus); outline-offset: -3px; }
-h2 span { overflow-wrap: anywhere; }
-@media print { .portfolio-predictors__groups { display: block; } .portfolio-predictors__facility { margin-bottom: 1rem; } }
+.portfolio-predictors { display: grid; gap: .85rem; min-width: 0; }
+@media print { .portfolio-inventory-toolbar { display: none; } }

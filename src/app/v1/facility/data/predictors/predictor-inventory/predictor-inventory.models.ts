@@ -29,7 +29,6 @@ export interface PredictorInventoryGroup {
   readonly status: PredictorStatusView;
   readonly entries: readonly PredictorInventoryEntry[];
 }
-export interface PredictorFacilityGroup { readonly facility: IdbFacility; readonly entries: readonly PredictorInventoryEntry[]; }
 export type PredictorInventoryAction = 'settings' | 'readings' | 'quality' | 'copy' | 'delete';
 export interface PredictorInventoryActionRequest { readonly guid: string; readonly action: PredictorInventoryAction; }
 
@@ -37,7 +36,7 @@ export function predictorStatusPresentation(tone: string, state: StatusEvaluatio
   if (state !== 'ready') return { tone: 'neutral', label: state === 'error' ? 'Checks unavailable' : 'Checks pending', icon: state === 'error' ? 'info' : 'loading' };
   return tone === 'danger' ? { tone, label: 'Has errors', icon: 'danger' }
     : tone === 'warning' ? { tone, label: 'Has warnings', icon: 'warning' }
-      : tone === 'success' ? { tone, label: 'No active findings', icon: 'success' }
+      : tone === 'success' ? { tone, label: 'All data valid', icon: 'success' }
         : { tone: 'neutral', label: 'Checks pending', icon: 'loading' };
 }
 
@@ -90,15 +89,6 @@ export function groupPredictorInventory(entries: readonly PredictorInventoryEntr
 export function orderPredictorInventory(entries: readonly PredictorInventoryEntry[], sort: PredictorInventorySort): PredictorInventoryEntry[] {
   return groupPredictorInventory(entries, sort).flatMap(group => group.entries);
 }
-export function groupPortfolioPredictors(entries: readonly PredictorInventoryEntry[], sort: PredictorInventorySort): PredictorFacilityGroup[] {
-  const groups = new Map<string, PredictorInventoryEntry[]>();
-  for (const entry of entries) groups.set(entry.facility.guid, [...(groups.get(entry.facility.guid) ?? []), entry]);
-  return [...groups.values()].map(children => ({ facility: children[0].facility, entries: orderPredictorInventory(children, sort) }))
-    .sort((a, b) => (sort === 'attention' ? Math.min(...a.entries.map(item => item.attentionRank)) - Math.min(...b.entries.map(item => item.attentionRank))
-      : sort === 'latestReading' ? compareLatest(Math.max(...a.entries.map(item => item.card.latestReadingSortValue)), Math.max(...b.entries.map(item => item.card.latestReadingSortValue))) : 0)
-      || a.facility.name.localeCompare(b.facility.name) || a.facility.guid.localeCompare(b.facility.guid));
-}
-
 export function buildPredictorPreviewRows(entry: PredictorInventoryEntry | undefined, readings: readonly IdbPredictorData[]): MeterResultsChartRow[] {
   if (!entry) return [];
   const ordered = readings.filter(item => item.predictorId === entry.guid && Number.isInteger(item.year) && item.year >= 1 && item.year <= 9999 && Number.isInteger(item.month) && item.month >= 1 && item.month <= 12)

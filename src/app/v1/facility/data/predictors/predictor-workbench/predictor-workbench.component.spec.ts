@@ -114,7 +114,7 @@ describe('PredictorWorkbenchComponent', () => {
     expect(element.textContent).toContain('Apr 2025');
     const chips = Array.from(element.querySelectorAll<HTMLElement>('.v1-data-workbench-actions .v1-chip'))
       .map(chip => chip.textContent?.trim());
-    expect(chips).toEqual(['Production', 'No active findings']);
+    expect(chips).toEqual(['Production', 'All data valid']);
     const statistics = element.querySelector<HTMLElement>('[aria-label="Predictor statistics"]')!;
     expect(statistics.textContent).toContain('Latest value');
     expect(statistics.textContent).toContain('40');

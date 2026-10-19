@@ -10,9 +10,7 @@ const PORTFOLIO_LINKS: ReadonlyArray<{ id: AccountPortfolioTab; label: string; i
   { id: 'facilities', label: 'Facilities', icon: 'facility' },
   { id: 'meters', label: 'Meters', icon: 'meter' },
   { id: 'predictors', label: 'Predictors', icon: 'predictor' },
-  { id: 'energy-uses', label: 'Energy Uses', icon: 'tools' },
-  { id: 'analyses', label: 'Analyses', icon: 'analysis' },
-  { id: 'reports', label: 'Reports', icon: 'reports' }
+  { id: 'energy-uses', label: 'Energy Uses', icon: 'tools' }
 ];
 
 @Component({

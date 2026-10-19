@@ -3,12 +3,13 @@ import { Observable } from 'rxjs';
 import type { PredictorInventoryFilters } from '@app/v1/facility/data/predictors/predictor-inventory/predictor-inventory.models';
 import type { FacilitySort, FacilityStatusFilter } from '@app/v1/account/data/portfolio/portfolio-facility.view';
 import type { PortfolioMeterSort, PortfolioMeterStatusFilter } from '@app/v1/account/data/portfolio/portfolio-meter.view';
+import type { PortfolioInventoryView } from '@app/v1/account/data/portfolio/portfolio-inventory.models';
 
 export interface BrowseFilters {
-  predictors: PredictorInventoryFilters;
+  predictors: PredictorInventoryFilters & { facilityGuid?: string };
   facilityPredictors: PredictorInventoryFilters;
   facilities: { search: string; status: FacilityStatusFilter; sort: FacilitySort };
-  meters: { search: string; status: PortfolioMeterStatusFilter; sort: PortfolioMeterSort };
+  meters: { search: string; status: PortfolioMeterStatusFilter; sort: PortfolioMeterSort; facilityGuid?: string };
   facilityMeters: { search: string; status: PortfolioMeterStatusFilter; sort: 'attention' | 'meterName' | 'latestReading' };
 }
 export type BrowseKind = keyof BrowseFilters;
@@ -25,6 +26,7 @@ export class BrowseStateService {
   private readonly positions = new Map<string, BrowsePosition>();
   private readonly facilityViews = new Map<string, FacilityMeterBrowseView>();
   private readonly predictorViews = new Map<string, FacilityPredictorBrowseView>();
+  private readonly inventoryViews = new Map<string, PortfolioInventoryView>();
   private readonly origins = signal<ReadonlyMap<string, AccountBrowseOrigin>>(new Map());
   origin(accountGuid: string): AccountBrowseOrigin { return this.origins().get(accountGuid) ?? 'facilities'; }
   setOrigin(accountGuid: string, kind: AccountBrowseOrigin): void { this.origins.update(current => new Map(current).set(accountGuid, kind)); }
@@ -36,6 +38,13 @@ export class BrowseStateService {
   saveFacilityView(key: BrowseKey<'facilityMeters'>, value: FacilityMeterBrowseView): void { this.facilityViews.set(this.id(key), { ...value, zoom: { ...value.zoom } }); }
   readPredictorView(key: BrowseKey<'facilityPredictors'>): FacilityPredictorBrowseView | undefined { return this.predictorViews.get(this.id(key)); }
   savePredictorView(key: BrowseKey<'facilityPredictors'>, value: FacilityPredictorBrowseView): void { this.predictorViews.set(this.id(key), { ...value, zoom: { ...value.zoom } }); }
+  readInventoryView(key: BrowseKey<AccountBrowseOrigin>): PortfolioInventoryView | undefined {
+    const value = this.inventoryViews.get(this.id(key));
+    return value ? { page: value.page, overrides: { ...value.overrides } } : undefined;
+  }
+  saveInventoryView(key: BrowseKey<AccountBrowseOrigin>, value: PortfolioInventoryView): void {
+    this.inventoryViews.set(this.id(key), { page: value.page, overrides: { ...value.overrides } });
+  }
   private id(key: BrowseKey): string { return JSON.stringify([key.accountGuid, key.kind, key.facilityGuid ?? '']); }
 }
 
@@ -59,7 +68,7 @@ export function rememberBrowseForm<K extends BrowseKind>(key: Signal<BrowseKey<K
       if (JSON.stringify(previous) === JSON.stringify(next)) return;
       if (previous) store.saveFilters(previous, value());
       previous = next;
-      const restored = next ? store.readFilters(next) ?? defaults : defaults;
+      const restored = next ? { ...defaults, ...store.readFilters(next) } : defaults;
       form.patchValue(restored, { emitEvent: false });
       value.set(restored);
     });

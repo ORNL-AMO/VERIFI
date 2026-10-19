@@ -6,7 +6,7 @@
     <header class="v1-data-workbench-header v1-account-analysis-workbench__header">
       <nav class="v1-data-workbench-breadcrumb" aria-label="Account analysis breadcrumb">
         <ol>
-          <li><a [routerLink]="navigation.accountPortfolioRoute(account.guid, 'analyses')">{{ account.name || 'Account' }}</a></li>
+          <li><a [routerLink]="navigation.accountAnalysisRoute(account.guid)">{{ account.name || 'Account' }}</a></li>
           <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
           <li><a [routerLink]="navigation.accountAnalysisRoute(account.guid)">Analyses</a></li>
         </ol>

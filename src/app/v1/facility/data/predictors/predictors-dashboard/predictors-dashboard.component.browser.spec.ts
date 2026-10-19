@@ -88,17 +88,17 @@ describe('compact Predictor journey in Chromium', () => {
     await client.send('Emulation.setEmulatedMedia', { media: 'print' }); expect(getComputedStyle(root.querySelector('.facility-predictors__toolbar')!).display).toBe('none');
     await client.send('Emulation.setEmulatedMedia', { media: '' }); fixture.destroy(); await page.viewport(1600, 900);
   });
-  it('keeps 60-plus facility sections distinct when stations and predictor names repeat', async () => {
+  it('keeps individual tiles distinct and paginated when stations and predictor names repeat across 60-plus facilities', async () => {
     const workspace = inventoryWorkspace(3), facilities = Array.from({ length: 64 }, (_, index) => ({ ...workspace.facility()!, guid: `f${index}`, name: `Facility ${index}` }));
     const predictors = facilities.flatMap(facility => workspace.predictors().map(item => ({ ...item, guid: `${facility.guid}-${item.guid}`, facilityId: facility.guid })));
     TestBed.configureTestingModule({ imports: [AccountDataModule], providers: [provideRouter([]),
       { provide: AccountWorkspaceStore, useValue: { ...workspace, facilities: signal(facilities), predictors: signal(predictors), predictorData: signal([]) } },
       { provide: WorkspaceNavigationService, useValue: inventoryNavigation }, { provide: WorkspaceStatusService, useValue: { items: signal([]), state: signal('ready') } }] });
     const fixture = TestBed.createComponent(AccountPortfolioPredictorsTabComponent); fixture.nativeElement.classList.add('v1-root'); fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('.portfolio-predictors__facility')).toHaveLength(64);
-    expect(fixture.nativeElement.querySelectorAll('.predictor-directory__open')).toHaveLength(192);
-    const stationIds = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.predictor-directory__station button')).map(item => item.dataset['browseId']);
-    expect(new Set(stationIds).size).toBe(64);
+    expect(fixture.componentInstance.filteredEntries()).toHaveLength(192);
+    expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile__name')).toHaveLength(24);
+    const stationIds = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile__name')).map(item => item.dataset['browseId']);
+    expect(new Set(stationIds).size).toBe(24);
     fixture.componentInstance.filtersForm.controls.search.setValue('Facility 63'); fixture.detectChanges(); expect(fixture.componentInstance.filteredEntries()).toHaveLength(3);
     fixture.destroy();
   });

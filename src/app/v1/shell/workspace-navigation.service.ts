@@ -9,7 +9,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { ApplicationLifecycleService } from '@app/application-lifecycle/application-lifecycle.service';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
-import { StatusItem } from '@app/v1/status/status.models';
+import { StatusItem, isDataFinding } from '@app/v1/status/status.models';
 import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import { BrowseStateService } from '@app/v1/shared/navigation/browse-state/browse-state.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
@@ -27,7 +27,7 @@ export type FacilityAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'month
 export type AccountAnalysisRouteTab = 'setup' | 'select-items' | 'used-by';
 export type AccountAnalysisResultRouteTab = 'annual' | 'monthly-table' | 'monthly-chart' | 'facility-details' | 'facility-contributions';
 export type AccountAnalysisStageScope = 'setup' | 'select-items' | 'results' | 'used-by';
-export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses' | 'analyses' | 'reports';
+export type AccountPortfolioTab = 'facilities' | 'meters' | 'predictors' | 'energy-uses';
 export type PanelTabId = 'help' | 'todos' | 'results' | 'details';
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 export type FacilityAnalysisStageScope = 'analysis' | 'group' | 'facility' | 'used-by';
@@ -612,6 +612,9 @@ export class WorkspaceNavigationService {
     const predictorCount = isFacility ? this.workspace.facilityPredictors().length : this.workspace.predictors().length;
     const analysisCount = isFacility ? this.workspace.selectedFacilityAnalyses().length : this.workspace.accountAnalyses().length;
     const reportCount = isFacility ? this.workspace.selectedFacilityReports().length : this.workspace.accountReports().length;
+    const isData = this.activeSection() === 'data';
+    const todos = isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos();
+    const discardedWarnings = isFacility ? this.status.selectedFacilityDiscardedWarnings() : this.status.accountDiscardedWarnings();
     const help = this.activeSection() === 'reports'
       ? ['Use the facility dashboard to create, copy, and delete saved reports. Report-specific settings and previews are coming in later migrations.', 'The account Reports landing links to facility dashboards; account report management is coming in phase 3.']
       : isFacility && this.activeSection() === 'data'
@@ -623,16 +626,16 @@ export class WorkspaceNavigationService {
 
     return {
       help,
-      todos: isFacility ? this.status.selectedFacilityTodos() : this.status.accountTodos(),
-      discardedWarnings: isFacility
-        ? this.status.selectedFacilityDiscardedWarnings()
-        : this.status.accountDiscardedWarnings(),
+      todos: isData ? todos.filter(isDataFinding) : todos,
+      discardedWarnings: isData ? discardedWarnings.filter(isDataFinding) : discardedWarnings,
       results: [
         { label: 'Facilities', value: String(this.facilities().length), tone: 'info' },
         { label: 'Meters', value: String(meterCount), tone: meterCount > 0 ? 'success' : 'neutral' },
         { label: 'Predictors', value: String(predictorCount), tone: predictorCount > 0 ? 'success' : 'neutral' },
-        { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' : 'neutral' },
-        { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' : 'neutral' }
+        ...(!isData ? [
+          { label: 'Analyses', value: String(analysisCount), tone: analysisCount > 0 ? 'success' as const : 'neutral' as const },
+          { label: 'Reports', value: String(reportCount), tone: reportCount > 0 ? 'success' as const : 'neutral' as const }
+        ] : [])
       ],
       details: [
         { label: 'Context', value: isFacility ? 'Facility workspace' : 'Account workspace' },
@@ -767,7 +770,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
     contextMode: 'account',
     accountGuid: routeParts[2],
     portfolioTab: section === 'data' && routeParts[4] === 'portfolio'
-      ? (['facilities', 'meters', 'predictors', 'energy-uses', 'analyses', 'reports'].includes(routeParts[5]) ? routeParts[5] as AccountPortfolioTab : 'facilities')
+      ? (['facilities', 'meters', 'predictors', 'energy-uses'].includes(routeParts[5]) ? routeParts[5] as AccountPortfolioTab : 'facilities')
       : undefined,
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],

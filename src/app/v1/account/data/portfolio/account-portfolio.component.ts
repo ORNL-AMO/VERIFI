@@ -11,7 +11,6 @@ import { IconName } from '@app/v1/shared/icons/icon-registry';
 
 interface PortfolioTotals {
   readonly facilities: number;
-  readonly analyses: number;
 }
 
 @Component({
@@ -47,17 +46,16 @@ export class AccountPortfolioComponent implements OnDestroy {
   readonly isMeters = computed(() => this.activeContent() === 'meters');
   readonly title = computed(() => ({
     facilities: 'Facilities', meters: 'Meters', predictors: 'Predictors',
-    'energy-uses': 'Energy Uses', analyses: 'Analyses', reports: 'Reports'
+    'energy-uses': 'Energy Uses'
   })[this.activeContent()]);
   readonly headerIcon = computed(() => ({
     facilities: 'facility', meters: 'meter', predictors: 'predictor',
-    'energy-uses': 'tools', analyses: 'analysis', reports: 'reports'
+    'energy-uses': 'tools'
   } satisfies Record<AccountPortfolioTab, IconName>)[this.activeContent()]);
   readonly isCreateMeterDrawerOpen = signal(false);
   readonly headerGapCollapsed = computed(() => this.sticky()?.collapsed() ?? false);
   readonly breadcrumbs = computed(() => [{ label: this.account()?.name ?? 'Account' }]);
   readonly meterNavigationError = signal('');
-  readonly showUpload = computed(() => !['analyses', 'reports'].includes(this.activeContent()));
   readonly isCreateFacilityDrawerOpen = signal(false);
 
   constructor() {
@@ -121,8 +119,6 @@ export class AccountPortfolioComponent implements OnDestroy {
   readonly totals = computed<PortfolioTotals>(() => {
     return {
       facilities: this.workspace.facilities().length,
-      analyses: this.workspace.facilityAnalyses().length
-        + (this.workspace.account()?.isSingleFacilityCompany ? 0 : this.workspace.accountAnalyses().length),
     };
   });
 

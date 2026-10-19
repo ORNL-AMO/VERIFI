@@ -1,13 +1,3 @@
 :host { display: block; min-width: 0; }
-.facility-portfolio {
-  min-width: 0;
-  border: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius);
-  background: var(--v1-surface);
-}
-.facility-portfolio .facility-portfolio__toolbar {
-  border: 0;
-  border-bottom: 1px solid var(--v1-border);
-  border-radius: var(--v1-radius) var(--v1-radius) 0 0;
-}
+.facility-portfolio { display: grid; gap: .85rem; min-width: 0; }
 @media print { .facility-portfolio__toolbar { display: none; } }

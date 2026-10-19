@@ -136,3 +136,9 @@
 .v1-root .facility-meters__search { gap: .35rem; }
 
 .v1-root .facility-predictors__search > span { color: var(--v1-text); font-size: .85rem; font-weight: 400; text-transform: none; }
+
+/* Account inventories share one toolbar regardless of resource-specific filters. */
+.v1-root .v1-account-portfolio .portfolio-inventory-toolbar { display: flex; flex-wrap: wrap; align-items: end; }
+.v1-root .v1-account-portfolio .portfolio-inventory-toolbar .v1-portfolio-browse-search { flex: 1 1 12rem; min-width: min(12rem,100%); grid-column: auto; }
+.v1-root .v1-account-portfolio .portfolio-inventory-toolbar > label { flex: 0 1 9rem; min-width: min(8rem,100%); }
+@media print { .v1-root .portfolio-inventory-toolbar { display: none; } }

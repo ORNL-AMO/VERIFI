@@ -72,7 +72,7 @@ describe('facility meter dashboard projections', () => {
   it.each(['idle', 'evaluating', 'error', 'ready'] as const)('presents %s checks without treating unavailable checks as healthy', state => {
     const cards = buildMeterCards([electric], [reading({ meterId: electric.guid })], []);
     const entry = buildMeterDirectory(cards, [], [], state)[0];
-    expect(entry.statusLabel).toBe(state === 'ready' ? 'No active findings' : state === 'error' ? 'Checks unavailable' : 'Checks pending');
+    expect(entry.statusLabel).toBe(state === 'ready' ? 'All data valid' : state === 'error' ? 'Checks unavailable' : 'Checks pending');
     expect(entry.tone).toBe(state === 'ready' ? 'success' : 'neutral');
   });
 

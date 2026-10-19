@@ -66,7 +66,7 @@ export function buildMeterDirectory(cards: readonly MeterCardView[], readings: r
     const missingGroup = !card.group;
     const tone = ready ? card.statusTone === 'danger' ? 'danger' : card.statusTone === 'warning' ? 'warning' : 'success' : 'neutral';
     const statusLabel = !ready ? statusState === 'error' ? 'Checks unavailable' : 'Checks pending'
-      : tone === 'danger' ? 'Has errors' : tone === 'warning' ? 'Has warnings' : 'No active findings';
+      : tone === 'danger' ? 'Has errors' : tone === 'warning' ? 'Has warnings' : 'All data valid';
     const statusIcon = tone === 'neutral' ? statusState === 'error' ? 'info' : 'loading' : tone === 'danger' ? 'danger' : tone === 'warning' ? 'warning' : 'success';
     return {
       card, tone, statusLabel, statusIcon, ...styles.get(card.meter.guid)!,

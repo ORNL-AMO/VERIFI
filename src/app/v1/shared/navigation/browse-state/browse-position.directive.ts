@@ -8,6 +8,7 @@ export class BrowsePositionDirective implements OnDestroy {
   readonly appBrowsePosition = input<BrowseKey>();
   readonly browsePositionReady = input(true);
   readonly browseVisibleIds = input<readonly string[]>([]);
+  readonly browseRestoreStickyGap = input(false);
   private readonly store = inject(BrowseStateService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly injector = inject(Injector);
@@ -17,6 +18,14 @@ export class BrowsePositionDirective implements OnDestroy {
   private destroyed = false;
   private departurePosition?: BrowsePosition;
   private returnHighlight?: Animation;
+  private stickyRestore?: ResizeObserver;
+  private stickyRestoreTimer?: ReturnType<typeof setTimeout>;
+  private readonly stopStickyRestore = () => {
+    this.stickyRestore?.disconnect(); this.stickyRestore = undefined;
+    if (this.stickyRestoreTimer !== undefined) clearTimeout(this.stickyRestoreTimer);
+    this.stickyRestoreTimer = undefined;
+    for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) this.host.ownerDocument.removeEventListener(event, this.stopStickyRestore, true);
+  };
   private readonly reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   private readonly print = window.matchMedia?.('print');
   private readonly stopHighlight = () => this.returnHighlight?.cancel();
@@ -24,6 +33,7 @@ export class BrowsePositionDirective implements OnDestroy {
   constructor() {
     inject(Router).events.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(event => {
       if (event instanceof NavigationStart) {
+        this.stopStickyRestore();
         // Removing a routed view can clamp its scroll pane before ngOnDestroy.
         this.departurePosition = { scrollTop: this.scrollRoot().scrollTop, focusId: this.focusedId };
         this.save();
@@ -41,6 +51,7 @@ export class BrowsePositionDirective implements OnDestroy {
       this.browseVisibleIds();
       untracked(() => {
         if (JSON.stringify(key) !== JSON.stringify(this.key)) {
+          this.stopStickyRestore();
           this.stopHighlight(); this.save(); this.key = key; this.departurePosition = undefined; this.restored = false; this.focusedId = undefined;
         }
         if (!key || !ready || this.restored) return;
@@ -52,6 +63,22 @@ export class BrowsePositionDirective implements OnDestroy {
           const heading = scope.querySelector<HTMLElement>('h1') ?? this.host.closest('.v1-facility-meters')?.querySelector<HTMLElement>('h1');
           const target = saved?.focusId ? [...this.host.querySelectorAll<HTMLElement>('[data-browse-id]')]
             .find(element => element.dataset['browseId'] === saved.focusId && element.getClientRects().length > 0) : undefined;
+          // Restoring a scrolled account page closes its header gap on the following observer cycle.
+          // Reapply the saved offset once after that resize; user input always cancels this correction.
+          const sticky = this.browseRestoreStickyGap() && saved?.scrollTop ? scope.querySelector<HTMLElement>('.v1-account-portfolio__sticky') : undefined;
+          if (sticky && typeof ResizeObserver !== 'undefined') {
+            this.stopStickyRestore();
+            const height = sticky.getBoundingClientRect().height;
+            this.stickyRestore = new ResizeObserver(() => {
+              if (this.destroyed || !this.stickyRestore || JSON.stringify(this.key) !== JSON.stringify(key)) return;
+              if (Math.abs(sticky.getBoundingClientRect().height - height) < .5) return;
+              this.scrollRoot().scrollTop = saved!.scrollTop;
+              this.stopStickyRestore();
+            });
+            this.stickyRestore.observe(sticky, { box: 'border-box' });
+            this.stickyRestoreTimer = setTimeout(this.stopStickyRestore, 500);
+            for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) this.host.ownerDocument.addEventListener(event, this.stopStickyRestore, true);
+          }
           (target ?? heading)?.focus({ preventScroll: true });
           this.scrollRoot().scrollTop = saved?.scrollTop ?? 0;
           if (target && !this.reduced?.matches && !this.print?.matches && typeof target.animate === 'function') {
@@ -78,6 +105,7 @@ export class BrowsePositionDirective implements OnDestroy {
   }
   private save(): void { if (this.key) this.store.savePosition(this.key, this.departurePosition ?? { scrollTop: this.scrollRoot().scrollTop, focusId: this.focusedId }); }
   ngOnDestroy(): void {
+    this.stopStickyRestore();
     this.save(); this.destroyed = true;
     this.stopHighlight();
     this.reduced?.removeEventListener('change', this.stopHighlight);

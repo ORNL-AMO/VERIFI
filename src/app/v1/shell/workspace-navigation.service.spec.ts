@@ -9,6 +9,8 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { parseWorkspaceRoute, WorkspaceNavigationService } from './workspace-navigation.service';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
+import { makeFinding } from '@app/v1/status/status.models';
+import { presentFindings } from '@app/v1/status/status.catalog';
 
 describe('WorkspaceNavigationService', () => {
   afterEach(() => vi.restoreAllMocks());
@@ -176,8 +178,8 @@ describe('WorkspaceNavigationService', () => {
       'data',
       'portfolio'
     ]);
-    expect(service.accountPortfolioRoute('account-a', 'analyses')).toEqual([
-      '/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'analyses'
+    expect(service.accountPortfolioRoute('account-a', 'meters')).toEqual([
+      '/v1', 'workspace', 'account', 'account-a', 'data', 'portfolio', 'meters'
     ]);
     expect(service.accountImportsRoute('account-a')).toEqual([
       '/v1', 'workspace', 'account', 'account-a', 'imports', 'upload'
@@ -336,6 +338,29 @@ describe('WorkspaceNavigationService', () => {
     expect(service.activeDetail()).toBe('file');
     expect(service.activeImportFileId()).toBe('draft 1');
     expect(service.activeImportStep()).toBe('meter-readings');
+  });
+
+  it('limits Data support findings and results to data while retaining analysis/report issues in other sections', () => {
+    const status = TestBed.inject(WorkspaceStatusService);
+    const items = presentFindings([
+      makeFinding('meter.currency.stale', 'warning', 'currency', { kind: 'meter', guid: 'm', name: 'Meter', accountGuid: 'account-a', facilityGuid: 'facility-a' }),
+      makeFinding('analysis.configuration.invalid', 'error', 'configuration', { kind: 'facility-analysis', guid: 'a', name: 'Analysis', accountGuid: 'account-a', facilityGuid: 'facility-a' }),
+      makeFinding('report.analysis.warning', 'warning', 'readiness', { kind: 'facility-report', guid: 'r', name: 'Report', accountGuid: 'account-a', facilityGuid: 'facility-a' })
+    ]);
+    const dataItem = items.find(item => item.entity.kind === 'meter')!;
+    for (const source of [status.accountTodos, status.selectedFacilityTodos, status.accountDiscardedWarnings, status.selectedFacilityDiscardedWarnings]) {
+      vi.mocked(source).mockReturnValue(items);
+    }
+    for (const url of ['/v1/workspace/account/account-a/data/portfolio/facilities', '/v1/workspace/facility/facility-a/data/meters']) {
+      router.events.next(new NavigationEnd(1, '', url));
+      expect(service.panelContent().todos).toEqual([dataItem]);
+      expect(service.panelContent().discardedWarnings).toEqual([dataItem]);
+      expect(service.panelContent().results.map(result => result.label)).toEqual(['Facilities', 'Meters', 'Predictors']);
+    }
+    router.events.next(new NavigationEnd(2, '', '/v1/workspace/account/account-a/analysis/dashboard'));
+    expect(service.panelContent().todos).toEqual(items);
+    expect(service.panelContent().discardedWarnings).toEqual(items);
+    expect(service.panelContent().results.map(result => result.label)).toContain('Analyses');
   });
 
   it('keeps support panel tab changes in shell state instead of navigating', () => {

@@ -14,7 +14,7 @@
   </header></div>
   <form class="v1-data-browse-toolbar v1-data-browse-toolbar--four facility-predictors__toolbar" aria-label="Predictor filters" [formGroup]="filtersForm" (ngSubmit)="$event.preventDefault()">
     <label class="facility-predictors__search"><span>Showing {{ matching().length }} of {{ entries().length }} predictors</span><input class="v1-input" type="search" formControlName="search" aria-label="Find predictor, type, station, unit, or status" placeholder="Find predictor, type, station, unit, or status"></label>
-    <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">No active findings</option></select></label>
+    <label><span>Status</span><select class="v1-select" formControlName="status"><option value="all">All</option><option value="attention">Needs attention</option><option value="noReadings">No readings</option><option value="clear">All data valid</option></select></label>
     <label><span>Type</span><select class="v1-select" formControlName="type"><option value="all">All</option><option value="standard">Standard</option><option value="weather">Weather</option></select></label>
     <label><span>Sort</span><select class="v1-select" formControlName="sort"><option value="attention">Attention first</option><option value="predictorName">Predictor name</option><option value="latestReading">Latest reading</option></select></label>
   </form>

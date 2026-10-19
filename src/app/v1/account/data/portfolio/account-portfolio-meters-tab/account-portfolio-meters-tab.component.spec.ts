@@ -21,19 +21,19 @@ describe('AccountPortfolioMetersTabComponent', () => {
     expect(cardTitles(restored)).toEqual(['City Water']);
   });
 
-  it('renders compact meter sections with one heading per owning facility', () => {
+  it('renders individual uniform meter tiles with owning-facility labels', () => {
     const fixture = setup();
 
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent;
-    expect(fixture.nativeElement.querySelectorAll('app-meter-facility-group').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile').length).toBe(2);
     expect(fixture.nativeElement.querySelectorAll('.v1-resource-browse-card__actions')).toHaveLength(0);
     expect(text).toContain('Alpha Plant');
     expect(text).toContain('Beta Works');
     expect(text).toContain('Main Electric');
     expect(text).toContain('City Water');
-    expect(fixture.nativeElement.querySelectorAll('app-meter-facility-group h2').length).toBe(2);
+    expect(fixture.nativeElement.querySelectorAll('h2')).toHaveLength(0);
     expect(fixture.nativeElement.querySelectorAll('app-resource-browse-card')).toHaveLength(0);
     expect(text).not.toContain('First reading');
   });
@@ -76,25 +76,24 @@ describe('AccountPortfolioMetersTabComponent', () => {
     (workspace.meters as unknown as { set(value: unknown[]): void }).set([]);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No meters');
-    expect(fixture.nativeElement.querySelector('app-meter-facility-group')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-portfolio-inventory')).toBeNull();
   });
 
-  it('reports navigation failure and ignores removed meter GUIDs', async () => {
+  it('reports navigation failure without changing the inventory', async () => {
     const fixture = setup();
     fixture.detectChanges();
     const router = TestBed.inject(Router);
     vi.mocked(router.navigate).mockRejectedValueOnce(new Error('Navigation failed'));
-    await fixture.componentInstance.openMeter('meter-water');
+    await fixture.componentInstance.navigateRoute(['/v1', 'workspace', 'facility', 'facility-b', 'data', 'meters', 'meter-water', 'settings']);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('could not be opened');
-    await fixture.componentInstance.openMeter('removed');
     expect(router.navigate).toHaveBeenCalledTimes(1);
   });
 
-  it('links each facility heading to that facility meter dashboard', () => {
+  it('links each tile owner to that facility meter dashboard', () => {
     const fixture = setup();
     fixture.detectChanges();
-    const headings = [...fixture.nativeElement.querySelectorAll('h2 a')] as HTMLAnchorElement[];
+    const headings = [...fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile__owner')] as HTMLAnchorElement[];
     expect(headings.map(link => link.getAttribute('href'))).toEqual([
       '/v1/workspace/facility/facility-a/data/meters',
       '/v1/workspace/facility/facility-b/data/meters'
@@ -106,7 +105,7 @@ describe('AccountPortfolioMetersTabComponent', () => {
     const router = TestBed.inject(Router) as unknown as { navigate: ReturnType<typeof vi.fn> };
 
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('app-meter-facility-group:last-child .meter-facility-group__entry') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('.portfolio-inventory > li:last-child .portfolio-tile__name') as HTMLButtonElement).click();
 
     expect(router.navigate).toHaveBeenCalledWith([
       '/v1',
@@ -180,7 +179,7 @@ function setup(): ComponentFixture<AccountPortfolioMetersTabComponent> {
 }
 
 function cardTitles(fixture: ComponentFixture<AccountPortfolioMetersTabComponent>): string[] {
-  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.meter-facility-group__name'))
+  return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile__name'))
     .map(element => element.textContent!.trim());
 }
 

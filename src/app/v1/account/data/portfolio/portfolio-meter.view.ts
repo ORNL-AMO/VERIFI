@@ -10,6 +10,7 @@ export type PortfolioMeterStatusFilter = 'all' | 'attention' | 'noReadings' | 'm
 export type PortfolioMeterSort = 'attention' | 'facilityName' | 'latestReading';
 
 export interface PortfolioMeterView {
+  readonly card: MeterCardView;
   readonly meter: IdbUtilityMeter;
   readonly facility: IdbFacility;
   readonly sourceIcon: IconName;
@@ -23,13 +24,6 @@ export interface PortfolioMeterView {
   readonly missingGroup: boolean;
   readonly valid: boolean;
   readonly needsAttention: boolean;
-}
-
-export interface PortfolioMeterFacilityGroup {
-  readonly facility: IdbFacility;
-  readonly meters: readonly PortfolioMeterView[];
-  readonly attentionRank: number;
-  readonly latestReading: number;
 }
 
 export interface PortfolioMeterInput {
@@ -66,9 +60,9 @@ export function buildPortfolioMeters(input: PortfolioMeterInput): PortfolioMeter
     const missingGroup = !card.group;
     const evaluated = input.statusState === 'ready';
     const statusLabel = !evaluated ? input.statusState === 'error' ? 'Checks unavailable' : 'Checks pending'
-      : card.statusTone === 'danger' ? 'Has errors' : card.statusTone === 'warning' ? 'Has warnings' : 'No active findings';
+      : card.statusTone === 'danger' ? 'Has errors' : card.statusTone === 'warning' ? 'Has warnings' : 'All data valid';
     return {
-      meter: card.meter, facility, sourceIcon: card.sourceIcon || 'meter',
+      card, meter: card.meter, facility, sourceIcon: card.sourceIcon || 'meter',
       statusTone: evaluated && card.statusTone !== 'info' ? card.statusTone || 'neutral' : 'neutral',
       statusIcon: evaluated ? card.statusIcon || 'info' : input.statusState === 'error' ? 'info' : 'loading',
       statusLabel,
@@ -90,25 +84,6 @@ export function filterPortfolioMeters(meters: readonly PortfolioMeterView[], sea
       : status === 'missingGroup' ? item.missingGroup
       : status === 'valid' ? item.valid : true
   ));
-}
-
-export function groupPortfolioMeters(meters: readonly PortfolioMeterView[], sort: PortfolioMeterSort): PortfolioMeterFacilityGroup[] {
-  const grouped = new Map<string, PortfolioMeterView[]>();
-  for (const item of meters) {
-    const items = grouped.get(item.facility.guid) || [];
-    items.push(item);
-    grouped.set(item.facility.guid, items);
-  }
-  return [...grouped.values()].map(items => ({
-    facility: items[0].facility,
-    meters: [...items].sort((a, b) => (sort === 'attention' ? a.attentionRank - b.attentionRank
-      : sort === 'latestReading' ? b.latestReading - a.latestReading : 0)
-      || a.meter.name.localeCompare(b.meter.name) || a.meter.guid.localeCompare(b.meter.guid)),
-    attentionRank: Math.min(...items.map(item => item.attentionRank)),
-    latestReading: Math.max(...items.map(item => item.latestReading))
-  })).sort((a, b) => (sort === 'attention' ? a.attentionRank - b.attentionRank
-    : sort === 'latestReading' ? b.latestReading - a.latestReading : 0)
-    || a.facility.name.localeCompare(b.facility.name) || a.facility.guid.localeCompare(b.facility.guid));
 }
 
 function byFacility<T extends { readonly facilityId: string }>(records: readonly T[]): Map<string, T[]> {

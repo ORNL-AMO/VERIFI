@@ -1,0 +1,33 @@
+<article class="portfolio-tile" [attr.data-tone]="tile.status.tone" [attr.data-detail]="level" [attr.aria-label]="tile.name" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
+  <div class="portfolio-tile__heading">
+    <app-ui-icon [name]="tile.icon" [size]="level === 'simple' ? 32 : 24"/>
+    <a class="portfolio-tile__name" [href]="mainHref" [attr.data-browse-id]="print ? null : tile.guid" [title]="tile.name" (click)="open($event, tile.route)">{{ tile.name }}</a>
+    @if (!print) {
+      <button #menuButton type="button" class="v1-icon-btn portfolio-tile__menu-button" [attr.data-browse-id]="tile.guid" [cdkMenuTriggerFor]="detailMenu" (cdkMenuOpened)="menuOpened()" (cdkMenuClosed)="menuClosed()" [attr.aria-label]="'Detail options for ' + tile.name" [title]="overridden ? 'Individual detail setting' : 'Tile detail options'">⋯</button>
+    }
+  </div>
+  @if (tile.location) { <p class="portfolio-tile__location"><app-ui-icon name="location" [size]="18"/>{{ tile.location }}</p> }
+  @if (tile.owner; as owner) { <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" (click)="open($event, owner.route)"><app-ui-icon name="facility" [size]="18"/>{{ owner.label }}</a> }
+  @if (tile.station) { <p class="portfolio-tile__station">{{ tile.station }}</p> }
+  @if (tile.chip) { <span class="portfolio-tile__chip">{{ tile.chip }}</span> }
+  <p class="portfolio-tile__status"><app-ui-icon [name]="tile.status.icon" [size]="18"/>{{ tile.status.label }}</p>
+  @if (level !== 'simple') {
+    <dl class="portfolio-tile__facts">@for (fact of tile.summary; track fact.label) { <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div> }</dl>
+  }
+  @if (level === 'detailed') {
+    <dl class="portfolio-tile__facts">@for (fact of tile.details; track fact.label) { <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div> }</dl>
+    @if (tile.findings.length) { <ul class="portfolio-tile__findings">@for (finding of tile.findings; track $index) { <li>{{ finding }}</li> }</ul> }
+    @if (tile.detailLink; as link) { <a class="portfolio-tile__detail-link" [href]="detailHref" [attr.data-browse-id]="print ? null : tile.guid" (click)="open($event, link.route)">{{ link.label }}</a> }
+  }
+</article>
+<ng-template #detailMenu>
+  <div cdkMenu [class]="menuClasses()" [id]="'portfolio-detail-' + tile.guid" [attr.aria-label]="'Detail level for ' + tile.name">
+    <p>{{ overridden ? 'Individual setting' : 'Using screen setting' }}</p>
+    <div cdkMenuGroup>
+      @for (option of levels; track option) {
+        <button type="button" cdkMenuItemRadio [cdkMenuItemChecked]="level === option" (cdkMenuItemTriggered)="choose(option)"><span>{{ option === 'simple' ? 'Simple' : option === 'summary' ? 'Summary' : 'Detailed' }}</span>@if (level === option) { <app-ui-icon name="success"/> }</button>
+      }
+    </div>
+    <button type="button" cdkMenuItem (cdkMenuItemTriggered)="choose(null)">Use screen setting</button>
+  </div>
+</ng-template>

@@ -1,5 +1,7 @@
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { makeFinding, StatusItem } from '@app/v1/status/status.models';
+import { presentFindings } from '@app/v1/status/status.catalog';
+import { facilityTiles } from './portfolio-tile.views';
 import { PortfolioFacilityInput, buildPortfolioFacilities, filterPortfolioFacilities } from './portfolio-facility.view';
 
 function portfolioFacility(guid: string, name: string, zip = '37830'): IdbFacility {
@@ -8,11 +10,28 @@ function portfolioFacility(guid: string, name: string, zip = '37830'): IdbFacili
 
 function input(overrides: Partial<PortfolioFacilityInput> = {}): PortfolioFacilityInput {
   return { facilities: [portfolioFacility('alpha', 'Alpha Plant'), portfolioFacility('beta', 'Beta Works')],
-    meters: [], meterData: [], predictors: [], predictorData: [], analyses: [], reports: [], equipment: [],
+    meters: [], meterData: [], predictors: [], predictorData: [], equipment: [],
     findings: [], statusState: 'ready', ...overrides };
 }
 
 describe('portfolio facility projections', () => {
+  it('excludes analysis and report issues from Data status, attention filters, counts and inline findings', () => {
+    const findings = presentFindings([
+      makeFinding('analysis.configuration.invalid', 'error', 'configuration', { kind: 'facility-analysis', guid: 'analysis', name: 'Analysis', accountGuid: 'account-a', facilityGuid: 'alpha' }),
+      makeFinding('analysis-group.setup.invalid', 'warning', 'configuration', { kind: 'analysis-group', guid: 'group', name: 'Group', accountGuid: 'account-a', facilityGuid: 'beta' }),
+      makeFinding('report.configuration.invalid', 'error', 'configuration', { kind: 'facility-report', guid: 'report', name: 'Report', accountGuid: 'account-a', facilityGuid: 'beta' }),
+      makeFinding('predictor.data.missing', 'warning', 'completeness', { kind: 'predictor', guid: 'predictor', name: 'Production', accountGuid: 'account-a', facilityGuid: 'beta' })
+    ]);
+    const source = input({ findings });
+    const views = buildPortfolioFacilities(source);
+    expect(views.map(view => [view.statusLabel, view.errorCount, view.warningCount])).toEqual([['All data valid', 0, 0], ['Has warnings', 0, 1]]);
+    expect(filterPortfolioFacilities(views, '', 'error', 'attention')).toEqual([]);
+    expect(filterPortfolioFacilities(views, '', 'attention', 'attention').map(view => view.facility.guid)).toEqual(['beta']);
+    const tiles = facilityTiles(views, source, { facilityDataRoute: guid => ['/facility', guid, 'data', 'meters'] });
+    expect(tiles[0].findings).toEqual([]);
+    expect(tiles[1].findings).toEqual([findings[3].description]);
+    expect(tiles.flatMap(tile => tile.summary).some(fact => fact.label === 'Analyses')).toBe(false);
+  });
   it('searches names, saved location, ZIP and classification with stable alphabetical ordering', () => {
     const views = buildPortfolioFacilities(input({ facilities: [portfolioFacility('beta', 'Beta'), { ...portfolioFacility('alpha', 'Alpha'), city: 'Memphis', classification: 'Office' }] }));
     expect(filterPortfolioFacilities(views, '', 'all', 'facilityName').map(view => view.facility.guid)).toEqual(['alpha', 'beta']);
@@ -35,10 +54,9 @@ describe('portfolio facility projections', () => {
   });
 
   it('preserves setup filters and activity sorting without exposing counts on tiles', () => {
-    const views = buildPortfolioFacilities(input({ meters: [{ facilityId: 'alpha' }], analyses: [{ facilityId: 'alpha', modifiedDate: '2026-10-01' }] }));
+    const views = buildPortfolioFacilities(input({ meters: [{ facilityId: 'alpha' }], meterData: [{ facilityId: 'alpha', modifiedDate: '2026-10-01' }] }));
     expect(filterPortfolioFacilities(views, '', 'noMeters', 'facilityName').map(view => view.facility.guid)).toEqual(['beta']);
-    expect(filterPortfolioFacilities(views, '', 'noReadings', 'facilityName').map(view => view.facility.guid)).toEqual(['alpha']);
-    expect(filterPortfolioFacilities(views, '', 'noAnalyses', 'facilityName').map(view => view.facility.guid)).toEqual(['beta']);
+    expect(filterPortfolioFacilities(views, '', 'noReadings', 'facilityName')).toEqual([]);
     expect(filterPortfolioFacilities(views, '', 'all', 'modified')[0].facility.guid).toBe('alpha');
   });
 
