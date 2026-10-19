@@ -6,7 +6,7 @@
         <select id="startDateMonth" class="form-select form-select-sm"
           [ngModel]="startDate?.getMonth() ?? null"
           (ngModelChange)="onStartMonthChange($event)"
-          [disabled]="calculatingData">
+          [disabled]="calculatingData || savingData">
           <option [ngValue]="null" disabled>Month</option>
           @for (month of months; track month.monthNumValue) {
             <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
@@ -15,7 +15,7 @@
         <select id="startDateYear" class="form-select form-select-sm"
           [ngModel]="startDate?.getFullYear() ?? null"
           (ngModelChange)="onStartYearChange($event)"
-          [disabled]="calculatingData">
+          [disabled]="calculatingData || savingData">
           <option [ngValue]="null" disabled>Year</option>
           @for (year of yearOptions; track year) {
             <option [ngValue]="year">{{year}}</option>
@@ -29,7 +29,7 @@
         <select id="endDateMonth" class="form-select form-select-sm"
           [ngModel]="endDate?.getMonth() ?? null"
           (ngModelChange)="onEndMonthChange($event)"
-          [disabled]="calculatingData">
+          [disabled]="calculatingData || savingData">
           <option [ngValue]="null" disabled>Month</option>
           @for (month of months; track month.monthNumValue) {
             <option [ngValue]="month.monthNumValue">{{month.abbreviation}}</option>
@@ -38,7 +38,7 @@
         <select id="endDateYear" class="form-select form-select-sm"
           [ngModel]="endDate?.getFullYear() ?? null"
           (ngModelChange)="onEndYearChange($event)"
-          [disabled]="calculatingData">
+          [disabled]="calculatingData || savingData">
           <option [ngValue]="null" disabled>Year</option>
           @for (year of yearOptions; track year) {
             <option [ngValue]="year">{{year}}</option>
@@ -55,7 +55,7 @@
   <div class="d-flex align-items-end">
     <!--Items Per Page-->
     @if (firstMeterReading) {
-      <button class="btn btn-outline me-1" (click)="openCheckForUpdatesModal()">
+      <button class="btn btn-outline me-1" (click)="openCheckForUpdatesModal()" [disabled]="calculatingData || savingData">
         <i class="fa fa-redo"></i>
         Check For Changes
       </button>
@@ -63,8 +63,8 @@
     @if (predictorData.length != 0) {
       <app-table-items-dropdown></app-table-items-dropdown>
     }
-    <button class="btn btn-secondary ms-1" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary ms-1" (click)="updateEntries()" [disabled]="calculatingData">
+    <button class="btn btn-secondary ms-1" (click)="cancel()" [disabled]="calculatingData || savingData">Cancel</button>
+    <button class="btn btn-primary ms-1" (click)="updateEntries()" [disabled]="calculatingData || savingData">
       @let btnLabel = firstMeterReading ? 'Update' : 'Add';
       {{btnLabel}}
     Entries</button>
