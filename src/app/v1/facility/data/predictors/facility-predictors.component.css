@@ -5,6 +5,6 @@
 
 .v1-facility-predictors {
   display: grid;
-  gap: var(--v1-space-4);
+  gap: 0;
   padding: clamp(1rem, 3vw, 1.5rem);
 }

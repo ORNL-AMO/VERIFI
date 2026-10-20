@@ -14,7 +14,7 @@ import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.s
 import { account, facility, meter, reading } from '@app/v1/facility/data/meters/facility-meters.testing';
 import { FacilityMetersWorkspaceService } from '@app/v1/facility/data/meters/facility-meters-workspace.service';
 import { MetersDashboardActionsService } from '@app/v1/facility/data/meters/meters-dashboard/meters-dashboard-actions.service';
-import { ConfirmDeleteMeterModalComponent } from '@app/v1/facility/data/meters/meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
+import { ConfirmDeleteMeterModalComponent } from './confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { TooltipComponent } from '@app/v1/shared/tooltip/tooltip.component';
 import { MeterCalendarizationHelpSlideoutComponent } from './meter-calendarization-help-slideout/meter-calendarization-help-slideout.component';
 import { MeterSettingsFormService } from '@app/v1/shared/meter-settings/meter-settings-form.service';
@@ -329,19 +329,34 @@ describe('MeterWorkbenchSettingsComponent', () => {
     expect(rows[1].querySelector('label:nth-child(2) span')?.classList.contains('visually-hidden')).toBe(true);
   });
 
-  it('locks setup fields when readings exist and unlocks them through the warning affordance', () => {
+  it('places the lock after meter information and unlocks setup through the analysis-style button', () => {
     const fixture = setup({ withReading: true });
 
     fixture.detectChanges();
     const sourceSelect = query<HTMLSelectElement>(fixture, 'select[formControlName="source"]');
     expect(sourceSelect.disabled).toBe(true);
 
-    fixture.componentInstance.enableSetupChanges();
-    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const core = root.querySelector('app-meter-settings-core-form')!;
+    const notice = core.nextElementSibling!;
+    expect(notice.classList.contains('meter-settings__setup-lock')).toBe(true);
+    expect(notice.textContent).toContain('Setup values are locked');
+    const unlock = notice.querySelector('button')!;
+    expect(unlock.textContent).toContain('Unlock setup to edit');
+    expect(unlock.querySelector('app-ui-icon')?.getAttribute('name')).toBe('lockKeyhole');
+    unlock.click(); fixture.detectChanges();
 
     expect(fixture.componentInstance.changingSetupValues()).toBe(true);
     expect(fixture.componentInstance.formSignal()?.controls.source.disabled).toBe(false);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('does not alter amounts already entered');
+  });
+
+  it('keeps the setup unlock action disabled in a read-only workspace with readings', () => {
+    const fixture = setup({ withReading: true, canWrite: false }); fixture.detectChanges();
+    const unlock = query<HTMLButtonElement>(fixture, '.meter-settings__setup-lock button');
+    expect(unlock.disabled).toBe(true); unlock.click(); fixture.detectChanges();
+    expect(fixture.componentInstance.changingSetupValues()).toBe(false);
+    expect(query<HTMLSelectElement>(fixture, 'select[formControlName="source"]').disabled).toBe(true);
   });
 
   it('disables the form for read-only workspaces without shifting layout during autosave pending state', () => {

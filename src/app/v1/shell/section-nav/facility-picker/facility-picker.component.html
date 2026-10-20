@@ -1,27 +1,26 @@
 <div class="v1-facility-picker" (keydown.escape)="onEscape()">
-  @if (facilities.length <= 1) {
+  @if (facilities.length === 1 && selectedFacility) {
     <div class="v1-facility-picker__single">
       <app-ui-icon name="facility"></app-ui-icon>
       <span>{{ facilities[0]?.name ?? 'Select facility' }}</span>
     </div>
   } @else {
-    <div class="v1-facility-picker__wrap" [class.open]="open">
+    <div cdkOverlayOrigin #origin="cdkOverlayOrigin" class="v1-facility-picker__wrap" [class.open]="open">
       <button
         #toggleButton
         type="button"
         class="v1-facility-picker__toggle"
         (click)="toggle()"
         [attr.aria-expanded]="open"
-        aria-haspopup="true">
+        aria-haspopup="dialog" [disabled]="!facilities.length">
         <app-ui-icon name="facility"></app-ui-icon>
-        <span class="v1-facility-picker__label">{{ selectedFacility?.name ?? 'Select facility' }}</span>
+        <span class="v1-facility-picker__label">{{ selectedFacility?.name ?? 'Choose facility…' }}</span>
         <app-ui-icon name="chevronDown" class="v1-facility-picker__chevron"></app-ui-icon>
       </button>
 
-      @if (open) {
-        <div class="v1-facility-picker__backdrop" (click)="close()" aria-hidden="true"></div>
-        <div class="v1-facility-picker__menu" role="menu" aria-label="Switch facility">
-          @if (showSearch()) {
+      <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="origin" [cdkConnectedOverlayOpen]="open" [cdkConnectedOverlayWidth]="menuWidth" [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayFlexibleDimensions]="true" [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="12" cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop" (backdropClick)="close()">
+        <div [class]="overlayClasses()">
+        <div class="v1-facility-picker__menu" role="dialog" aria-label="Choose facility" (keydown)="onMenuKeydown($event)">
             <div class="v1-facility-picker__search">
               <app-ui-icon name="search" class="v1-facility-picker__search-icon"></app-ui-icon>
               <input
@@ -32,13 +31,12 @@
                 autocomplete="off"
                 [formControl]="search" />
             </div>
-          }
           <div class="v1-facility-picker__list">
             @for (facility of filteredFacilities(); track facility.guid) {
               <button
                 type="button"
                 class="v1-facility-picker__item"
-                role="menuitem"
+                [attr.aria-pressed]="facility.guid === selectedFacility?.guid"
                 [class.active]="facility.guid === selectedFacility?.guid"
                 (click)="select(facility.guid)">
                 <app-ui-icon name="check" class="v1-facility-picker__check"></app-ui-icon>
@@ -55,7 +53,8 @@
             }
           </div>
         </div>
-      }
+        </div>
+      </ng-template>
     </div>
   }
 </div>

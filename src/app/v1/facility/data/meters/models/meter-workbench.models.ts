@@ -24,7 +24,7 @@ export interface MeterGroupWorkbenchTab {
 
 export const METER_WORKBENCH_TABS: ReadonlyArray<MeterWorkbenchTab> = [
   { id: 'settings', label: 'Settings', icon: 'settings', summary: 'Meter settings and assignment content is WIP.' },
-  { id: 'readings', label: 'Readings', icon: 'table', summary: 'Meter reading and utility bill tables are WIP.' },
+  { id: 'readings', label: 'Readings', icon: 'invoice', summary: 'Meter reading and utility bill tables are WIP.' },
   { id: 'monthly', label: 'Monthly Table', icon: 'calendar', summary: 'Monthly calendarized data table.' },
   { id: 'monthly-chart', label: 'Monthly Chart', icon: 'chartLine', summary: 'Monthly calendarized data chart.' },
   { id: 'yearly', label: 'Yearly Data', icon: 'barChart', summary: 'Yearly meter table and chart.' },

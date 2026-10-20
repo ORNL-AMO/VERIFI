@@ -2,7 +2,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WeatherMonthRange } from '@platform/weather/hourly-weather-data.models';
-import { PredictorBrowseItem, buildPredictorCards, buildWeatherStationGroups } from './models';
+import { buildPredictorCards, buildWeatherStationGroups } from './models';
 import { PredictorWeatherWorkflowService } from './predictor-weather-workflow.service';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class FacilityPredictorsWorkspaceService {
   private readonly status = inject(WorkspaceStatusService);
   private readonly weatherWorkflow = inject(PredictorWeatherWorkflowService);
 
+  readonly statusState = this.status.state;
   readonly account = this.workspace.account;
   readonly revision = this.workspace.revision;
   readonly workspaceState = this.workspace.status;
@@ -46,8 +47,5 @@ export class FacilityPredictorsWorkspaceService {
     this.status.items(),
     this.status.state() === 'ready'
   ));
-  readonly browseItems = computed<readonly PredictorBrowseItem[]>(() => [
-    ...this.standardPredictorCards().map(card => ({ kind: 'standard' as const, card })),
-    ...this.weatherStationGroups().map(group => ({ kind: 'weather' as const, group }))
-  ]);
+
 }

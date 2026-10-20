@@ -5,11 +5,18 @@
     @for (group of groups(); track group.id) {
       <app-resource-nav-group [group]="group"></app-resource-nav-group>
     }
-    @let primary = primaryLink();
-    <a class="v1-nav__link" [class.active]="primary.active" [routerLink]="primary.route" [attr.aria-current]="primary.active ? 'page' : null">
-      <app-ui-icon [name]="primary.icon"></app-ui-icon>
-      {{ primary.label }}
-    </a>
+    @if (facilityContext()) {
+      @let primary = primaryLink();
+      <a class="v1-nav__link" [class.active]="primary.active" [routerLink]="primary.route" [attr.aria-current]="primary.active ? 'page' : null">
+        <app-ui-icon [name]="primary.icon"></app-ui-icon>{{ primary.label }}
+      </a>
+    } @else {
+      @for (item of portfolioLinks(); track item.id) {
+        <a class="v1-nav__link" [class.active]="item.active" [routerLink]="item.route" [attr.aria-current]="item.active ? 'page' : null">
+          <app-ui-icon [name]="item.icon"></app-ui-icon>{{ item.label }}
+        </a>
+      }
+    }
     @if (!facilityContext() || navigation.isSingleSiteWorkspace()) {
       <div class="v1-nav__subgroup" aria-labelledby="v1-custom-data-nav-title">
         <span id="v1-custom-data-nav-title" class="v1-nav__sublabel">Custom Database Items</span>

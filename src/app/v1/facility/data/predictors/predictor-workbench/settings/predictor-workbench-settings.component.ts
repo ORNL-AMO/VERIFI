@@ -1,3 +1,4 @@
+import { isStandardPredictor } from '@data/models/idbModels/predictor';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, HostListener, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -12,7 +13,7 @@ import { PredictorSettingsForm, PredictorSettingsFormService } from '@app/v1/sha
 import { FacilityPredictorsWorkspaceService } from '../../facility-predictors-workspace.service';
 import { StandardPredictorActionsService } from '../../standard-predictor-actions.service';
 import { PredictorSettingsSaveState } from '../../models';
-import { ConfirmDeletePredictorModalComponent } from '../../predictors-dashboard/predictor-browse-card/confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
+import { ConfirmDeletePredictorModalComponent } from './confirm-delete-predictor-modal/confirm-delete-predictor-modal.component';
 import { PredictorWorkbenchContextService } from '../predictor-workbench-context.service';
 
 @Component({
@@ -37,7 +38,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
   readonly deleting = signal(false);
   readonly deleteError = signal<string | undefined>(undefined);
   readonly hasReadings = computed(() => this.context.readings().length > 0);
-  readonly supportedPredictor = computed(() => this.context.predictor()?.predictorType === 'Standard');
+  readonly supportedPredictor = computed(() => { const predictor = this.context.predictor(); return !!predictor && isStandardPredictor(predictor); });
   readonly canEdit = computed(() => this.workspace.canWrite() && !this.workspace.hasPending()
     && this.saveState() !== 'saving' && !this.deleting() && this.supportedPredictor());
   readonly canDelete = computed(() => !!this.context.predictor() && this.workspace.canWrite()
@@ -56,7 +57,7 @@ export class PredictorWorkbenchSettingsComponent implements HasUnsavedChanges, O
   private readonly rebuildEffect = effect(() => {
     const predictor = this.context.predictor();
     this.context.readings();
-    if (!predictor || predictor.predictorType !== 'Standard') {
+    if (!predictor || !isStandardPredictor(predictor)) {
       this.currentPredictorGuid = predictor?.guid;
       this.form.set(undefined);
       return;

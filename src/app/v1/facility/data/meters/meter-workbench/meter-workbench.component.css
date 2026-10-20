@@ -1,5 +1,19 @@
 :host {
   display: block;
+  position: relative;
+}
+
+.v1-meter-workbench-scroll-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.v1-meter-workbench-sticky {
+  border-radius: var(--v1-radius) var(--v1-radius) 0 0;
 }
 
 .v1-meter-workbench-header__facts-region {
@@ -76,13 +90,6 @@
   margin: 0;
 }
 
-.v1-meter-workbench-header__issues {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--v1-space-1);
-  align-items: center;
-  min-width: 0;
-}
 
 .v1-meter-workbench-header__source-chip {
   display: inline-flex;
@@ -100,21 +107,8 @@
   overflow-wrap: anywhere;
 }
 
-.v1-meter-workbench-header__meter-title {
-  display: inline-flex;
-  gap: var(--v1-space-2);
-  align-items: center;
-  max-width: 100%;
-}
 
-.v1-meter-workbench-header__meter-title .v1-icon {
-  flex: 0 0 auto;
-  color: color-mix(in srgb, var(--v1-meter-source-color, var(--v1-facility)) 76%, var(--v1-text));
-}
 
-.v1-meter-workbench-header__meter-title span {
-  min-width: 0;
-}
 
 .v1-meter-workbench-header__status {
   gap: var(--v1-space-1);

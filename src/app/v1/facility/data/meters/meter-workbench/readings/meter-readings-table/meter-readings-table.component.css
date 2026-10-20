@@ -300,7 +300,7 @@
   padding: var(--v1-space-2) var(--v1-space-3);
   border: 1px solid var(--v1-border);
   border-top: 0;
-  border-radius: 0;
+  border-radius: 0 0 var(--v1-radius) var(--v1-radius);
   background: var(--v1-surface);
 }
 

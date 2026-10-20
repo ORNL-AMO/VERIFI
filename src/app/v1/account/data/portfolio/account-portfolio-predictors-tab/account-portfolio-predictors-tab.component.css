@@ -1,10 +1,2 @@
-:host {
-  display: block;
-  min-width: 0;
-}
-
-.v1-account-portfolio-predictors {
-  display: grid;
-  gap: .85rem;
-  min-width: 0;
-}
+:host { display: block; min-width: 0; }
+.portfolio-predictors { display: grid; gap: .85rem; min-width: 0; }

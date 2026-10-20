@@ -1,3 +1,6 @@
+import { PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { BrowsePositionDirective } from '@app/v1/shared/navigation/browse-state/browse-position.directive';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -35,7 +38,7 @@ import { MeterGroupWorkbenchGraphComponent } from './meters/meter-group-workbenc
 import { MeterGroupWorkbenchTableComponent } from './meters/meter-group-workbench/table/meter-group-workbench-table.component';
 import { MeterGroupWorkbenchYearlyDataComponent } from './meters/meter-group-workbench/yearly-data/meter-group-workbench-yearly-data.component';
 import { MeterGroupWorkbenchComponent } from './meters/meter-group-workbench/meter-group-workbench.component';
-import { ConfirmDeleteMeterModalComponent } from './meters/meters-dashboard/meter-browse-card/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
+import { ConfirmDeleteMeterModalComponent } from './meters/meter-workbench/settings/confirm-delete-meter-modal/confirm-delete-meter-modal.component';
 import { MetersDashboardActionsService } from './meters/meters-dashboard/meters-dashboard-actions.service';
 import { MetersDashboardComponent } from './meters/meters-dashboard/meters-dashboard.component';
 import { MeterGroupingComponent } from './meters/meter-grouping/meter-grouping.component';
@@ -70,7 +73,7 @@ import { WeatherPredictorQualityComponent } from './predictors/weather-predictor
     MeterGroupWorkbenchGraphComponent,
     MeterGroupWorkbenchYearlyDataComponent
   ],
-  imports: [
+  imports: [PageIdentityComponent, BrowseHeaderDirective, BrowsePositionDirective,
     CommonModule,
     DataWorkbenchTabsComponent,
     DataWorkbenchResourceSwitcherComponent,

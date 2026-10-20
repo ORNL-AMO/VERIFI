@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, ViewChild, computed, signal } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild, EventEmitter, Output, computed, signal } from '@angular/core';
 import type {
   CustomSeriesRenderItemAPI,
   CustomSeriesRenderItemParams,
@@ -54,6 +54,17 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() yAxisTitle?: string;
   @Input() allowNegativeValues = false;
   @Input() showSeriesControls = true;
+  @Input() showLegend = true;
+  /** Short tick labels and minimal gutters for embedded dashboard charts. */
+  @Input() compactAxes = false;
+  @Input() tooltipMaxRows?: number;
+  @Input() tooltipOverflowHint = 'Use the legend to show fewer series.';
+  @Input() smoothLines = true;
+  @Input() showPointSymbols = true;
+  @Input() showChartActions = true;
+  @Input() zoomRange?: V1EChartsDataZoomRange;
+  @Output() zoomRangeChanged = new EventEmitter<V1EChartsDataZoomRange>();
+  private readonly optionRevision = signal(0);
   @Input() showValueLabels = false;
   @Input() compactValueLabels = false;
   @Input() showAllMetrics = false;
@@ -67,6 +78,8 @@ export class MeterResultsChartComponent implements OnChanges {
   @Input() loadingDescription = 'VERIFI is calculating calendarized data.';
   @Input() errorTitle = 'Chart data could not be calculated';
   @Input() errorDescription = 'Check the meter data and try again.';
+  @Input() noVisibleSeriesTitle = 'No visible series';
+  @Input() noVisibleSeriesDescription = 'Turn on a chart series to show the chart.';
   @Input() emptyTitle = 'No results to chart';
   @Input() emptyDescription = 'Add meter data to see charted results.';
   @Input() downloadFileName = 'meter-results-chart';
@@ -138,6 +151,7 @@ export class MeterResultsChartComponent implements OnChanges {
       && this.visibleMetrics().length > 0;
   });
   readonly chartOption = computed<V1EChartsOption>(() => {
+    this.optionRevision();
     const rows = this.rows();
     const utilityMetric = this.utilityMetric();
     const costMetric = this.costMetric();
@@ -147,7 +161,7 @@ export class MeterResultsChartComponent implements OnChanges {
     if (this.allMetricsEnabled()) {
       const metrics = this.visibleMetrics();
       if (metrics.length) {
-        yAxis.push(metricAxis(metrics[0], this.yAxisTitle, this.allowNegativeValues));
+        yAxis.push(metricAxis(metrics[0], this.yAxisTitle, this.allowNegativeValues, this.compactAxes));
       }
       const comparisonBand = this.metricComparisonBand();
       if (comparisonBand && this.allMetricSeriesDisplay() === 'line') {
@@ -159,23 +173,24 @@ export class MeterResultsChartComponent implements OnChanges {
       metrics.forEach((metric, index) => {
         const display = this.allMetricSeriesDisplay();
         series.push({
+          id: metric.id,
           name: metric.label,
           type: display,
           yAxisIndex: 0,
           data: rows.map(row => chartValue(row, metric.id)),
           connectNulls: false,
-          smooth: display === 'line' && rows.length > 2 && !comparisonBand,
-          showSymbol: display === 'line',
+          smooth: this.smoothLines && display === 'line' && rows.length > 2 && !comparisonBand,
+          showSymbol: display === 'line' && this.showPointSymbols,
           symbolSize: display === 'line' ? 7 : undefined,
           stack: display === 'bar' && this.allMetricSeriesStacked() ? 'results' : undefined,
           itemStyle: { color: metric.color ?? chartSeriesColor(index) },
-          lineStyle: { color: metric.color ?? chartSeriesColor(index), width: 3 },
+          lineStyle: { color: metric.color ?? chartSeriesColor(index), type: metric.lineStyle ?? 'solid', width: 3 },
           z: 2,
           ...seriesValueLabel(this.showValueLabels, metric, this.compactValueLabels)
         });
       });
     } else if (utilityMetric && this.utilityDisplay() !== 'off') {
-      yAxis.push(metricAxis(utilityMetric, this.yAxisTitle, this.allowNegativeValues));
+      yAxis.push(metricAxis(utilityMetric, this.yAxisTitle, this.allowNegativeValues, this.compactAxes));
       series.push({
         name: utilityMetric.label,
         type: this.utilityDisplay(),
@@ -191,7 +206,7 @@ export class MeterResultsChartComponent implements OnChanges {
 
     if (!this.allMetricsEnabled() && costMetric && this.costDisplay() !== 'off') {
       if (!this.sharedYAxis || yAxis.length === 0) {
-        yAxis.push(metricAxis(costMetric, this.yAxisTitle, this.allowNegativeValues));
+        yAxis.push(metricAxis(costMetric, this.yAxisTitle, this.allowNegativeValues, this.compactAxes));
       }
       series.push({
         name: costMetric.label,
@@ -212,9 +227,15 @@ export class MeterResultsChartComponent implements OnChanges {
       && visibleMetrics.length > 0 && visibleMetrics.every(metric => metric.unit === '%');
 
     return {
-      tooltip: { trigger: 'axis', formatter: params => formatChartTooltip(params, this.metricOptions()) },
-      legend: { top: 0, left: 'center', right: 88, data: this.visibleMetrics().map(metric => metric.label) },
-      grid: { top: this.showValueLabels ? 84 : 72, right: alignedYAxis.length > 1 ? 56 : 18, bottom: this.canZoom() ? 74 : 36, left: 54, containLabel: true },
+      tooltip: { trigger: 'axis', ...(this.tooltipMaxRows ? { confine: true } : {}), formatter: params => formatChartTooltip(params, this.metricOptions(), this.tooltipMaxRows, this.tooltipOverflowHint) },
+      legend: { show: this.showLegend, top: 0, left: 'center', right: 88, data: this.visibleMetrics().map(metric => metric.label) },
+      grid: {
+        top: !this.showLegend ? (this.compactAxes ? 12 : 24) : this.showValueLabels ? 84 : 72,
+        right: this.compactAxes ? 8 : alignedYAxis.length > 1 ? 56 : 18,
+        bottom: this.canZoom() ? 74 : 36,
+        left: this.compactAxes ? 8 : 54,
+        ...(this.compactAxes ? { outerBoundsMode: 'same', outerBoundsContain: 'axisLabel' } : { containLabel: true })
+      },
       xAxis: {
         type: 'category',
         data: rows.map(row => row.periodLabel),
@@ -229,7 +250,8 @@ export class MeterResultsChartComponent implements OnChanges {
       dataZoom: this.canZoom()
         ? [
           { type: 'inside', start: this.zoomStart(), end: this.zoomEnd() },
-          { type: 'slider', start: this.zoomStart(), end: this.zoomEnd(), bottom: 14, height: 24 }
+          { type: 'slider', start: this.zoomStart(), end: this.zoomEnd(), bottom: 14, height: 24,
+            ...(this.compactAxes ? { left: 8, right: 8 } : {}) }
         ]
         : [],
       series
@@ -271,8 +293,13 @@ export class MeterResultsChartComponent implements OnChanges {
       this.metricComparisonBand.set(this.comparisonBand);
     }
     if (changes['chartRows'] && !this.canZoom()) {
-      this.resetZoom();
+      this.resetZoom(false);
     }
+    if (changes['zoomRange'] && this.zoomRange) {
+      this.zoomStart.set(clampPercent(this.zoomRange.start, 0));
+      this.zoomEnd.set(clampPercent(this.zoomRange.end, 100));
+    }
+    this.optionRevision.update(value => value + 1);
   }
 
   setUtilityDisplay(display: MeterChartSeriesDisplay): void {
@@ -297,9 +324,10 @@ export class MeterResultsChartComponent implements OnChanges {
     this.setZoomRange(Math.min(100, (this.zoomEnd() - this.zoomStart()) / 0.6));
   }
 
-  resetZoom(): void {
+  resetZoom(emit = true): void {
     this.zoomStart.set(0);
     this.zoomEnd.set(100);
+    if (emit) this.zoomRangeChanged.emit({ start: 0, end: 100 });
   }
 
   syncDataZoom(range: V1EChartsDataZoomRange): void {
@@ -307,6 +335,7 @@ export class MeterResultsChartComponent implements OnChanges {
     const end = clampPercent(range.end, this.zoomEnd());
     this.zoomStart.set(Math.min(start, end));
     this.zoomEnd.set(Math.max(start, end));
+    this.zoomRangeChanged.emit({ start: this.zoomStart(), end: this.zoomEnd() });
   }
 
   downloadPng(): void {
@@ -479,7 +508,8 @@ function coerceMetricId(
 function metricAxis(
   metric: MeterResultsChartMetric,
   title: string | undefined,
-  allowNegativeValues: boolean
+  allowNegativeValues: boolean,
+  compactLabels = false
 ): Record<string, unknown> {
   const axis: Record<string, unknown> = {
     type: 'value',
@@ -488,12 +518,23 @@ function metricAxis(
   if (!allowNegativeValues) {
     axis['min'] = 0;
   }
-  if (metric.currency) {
+  if (compactLabels) {
+    axis['axisLabel'] = { formatter: (value: number) => formatCompactAxisValue(value, metric) };
+  } else if (metric.currency) {
     axis['axisLabel'] = { formatter: '${value}' };
   } else if (metric.unit === '%') {
     axis['axisLabel'] = { formatter: '{value}%' };
   }
   return axis;
+}
+
+const compactAxisNumber = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+const smallAxisNumber = new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 });
+
+function formatCompactAxisValue(value: number, metric: MeterResultsChartMetric): string {
+  const absolute = Math.abs(value);
+  const label = (absolute >= 1000 ? compactAxisNumber : smallAxisNumber).format(absolute).replace('K', 'k');
+  return `${value < 0 ? '-' : ''}${metric.currency ? '$' : ''}${label}${!metric.currency && metric.unit === '%' ? '%' : ''}`;
 }
 
 function accessibleMetricLabel(metric: MeterResultsChartMetric): string {
@@ -526,21 +567,26 @@ function alignDualYAxis(yAxis: Array<Record<string, unknown>>): Array<Record<str
 
 function formatChartTooltip(
   params: unknown,
-  metrics: readonly MeterResultsChartMetric[]
+  metrics: readonly MeterResultsChartMetric[],
+  maxRows: number | undefined,
+  overflowHint: string
 ): string {
   const tooltipParams = (Array.isArray(params) ? params : [params])
     .filter(isTooltipParam)
     .filter(param => metrics.some(metric => metric.label === param.seriesName));
   const firstParam = tooltipParams[0];
   const header = firstParam ? `<div>${escapeHtml(firstParam.axisValueLabel ?? firstParam.name ?? '')}</div>` : '';
-  const rows = tooltipParams
+  const limit = maxRows && maxRows > 0 ? maxRows : tooltipParams.length;
+  const omitted = Math.max(0, tooltipParams.length - limit);
+  const rows = tooltipParams.slice(0, limit)
     .map(param => {
-      const metric = metrics.find(item => item.label === param.seriesName);
+      const metric = metrics.find(item => item.id === param.seriesId) ?? metrics.find(item => item.label === param.seriesName);
       const value = formatChartTooltipValue(param.value, metric?.currency, metric?.unit);
       return `<div>${param.marker ?? ''}${escapeHtml(param.seriesName ?? '')}: ${escapeHtml(value)}</div>`;
     })
     .join('');
-  return `${header}${rows}`;
+  const more = omitted ? `<div>+${omitted} more meters. ${escapeHtml(overflowHint)}</div>` : '';
+  return `${header}${rows}${more}`;
 }
 
 function formatChartTooltipValue(value: unknown, currency = false, unit?: string): string {
@@ -578,6 +624,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 interface ChartTooltipParam {
+  seriesId?: string;
   axisValueLabel?: string;
   marker?: string;
   name?: string;

@@ -77,11 +77,6 @@
   align-items: stretch;
 }
 
-.v1-root .v1-data-browse-grid--portfolio {
-  grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
-  gap: .85rem;
-}
-
 .v1-root .v1-data-browse-grid--analysis {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -114,15 +109,31 @@
 
 .v1-root .v1-account-portfolio .v1-data-browse-toolbar { position: sticky; top: var(--portfolio-sticky-height, 0px); z-index: 3; }
 
+.v1-root .v1-account-portfolio--scrolled .v1-data-browse-toolbar {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 .v1-root .v1-account-portfolio .v1-portfolio-browse-search { display: grid; gap: .35rem; min-width: 0; }
 
 .v1-root .v1-account-portfolio .v1-portfolio-browse-count { margin: 0; color: var(--v1-text); font-size: .85rem; }
 
 @media (max-width: 76rem) {
-  .v1-root .v1-account-portfolio .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v1-root .v1-account-portfolio .v1-portfolio-browse-search { grid-column: 1 / -1; }
+  .v1-root :is(.facility-meters, .facility-predictors) .v1-data-browse-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v1-root .facility-meters__search, .v1-root .facility-predictors__search { grid-column: 1 / -1; }
 }
 
 @media (max-width: 48rem) {
-  .v1-root .v1-account-portfolio .v1-data-browse-toolbar { gap: .5rem; padding: .65rem; }
+  .v1-root :is(.v1-account-portfolio, .facility-meters, .facility-predictors) .v1-data-browse-toolbar { gap: .5rem; padding: .65rem; }
 }
+
+.v1-root .facility-meters__search > span { color: var(--v1-text); font-size: .85rem; font-weight: 400; text-transform: none; }
+.v1-root .facility-meters__search { gap: .35rem; }
+
+.v1-root .facility-predictors__search > span { color: var(--v1-text); font-size: .85rem; font-weight: 400; text-transform: none; }
+
+/* Account inventories share one toolbar regardless of resource-specific filters. */
+.v1-root .v1-account-portfolio .portfolio-inventory-toolbar { display: flex; flex-wrap: wrap; align-items: end; }
+.v1-root .v1-account-portfolio .portfolio-inventory-toolbar .v1-portfolio-browse-search { flex: 1 1 12rem; min-width: min(12rem,100%); grid-column: auto; }
+.v1-root .v1-account-portfolio .portfolio-inventory-toolbar > label { flex: 0 1 9rem; min-width: min(8rem,100%); }
+@media print { .v1-root .portfolio-inventory-toolbar { display: none; } }

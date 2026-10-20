@@ -1,5 +1,4 @@
-.v1-root .v1-nav .v1-nav__link,
-.v1-root .v1-nav .v1-nav__context button {
+.v1-root .v1-nav .v1-nav__link {
   display: inline-flex;
   gap: .45rem;
   align-items: center;
@@ -153,11 +152,9 @@
 }
 
 
-.v1-root .v1-nav .v1-nav__link:focus-visible,
-.v1-root .v1-nav .v1-nav__context button:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -2px; }
+.v1-root .v1-nav .v1-nav__link:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -2px; }
 .v1-root .v1-nav .v1-nav__link > app-status-attention { margin-left: auto; }
 @media (prefers-reduced-motion: reduce) {
   .v1-root .v1-nav .v1-nav__link,
-  .v1-root .v1-nav .v1-nav__context button,
   .v1-root .v1-nav .v1-nav__child-toggle .v1-icon { transition: none; }
 }

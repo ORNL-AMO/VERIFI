@@ -1,15 +1,12 @@
 /** Presentation-ready meter card data derived from meters, readings, and status checks. */
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
-import { CalanderizedMeter } from '@data/models/calanderization';
 import { MeterSource } from '@data/models/constantsAndTypes';
-import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { ScopeOptions } from '@data/models/scopeOption';
 import { StatusItem } from '@app/v1/status/status.models';
 import { UtilityColors } from '@shared/utilityColors';
-import { buildMeterUsageFactsFromCalendarizedMeters, MeterUsageFactsView } from './meter-usage.models';
 
 type MeterCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
 
@@ -29,7 +26,6 @@ export interface MeterCardView {
   readonly fuelLabel?: string;
   readonly statusIssueLabels?: readonly string[];
   readonly statusActionSummaries?: readonly string[];
-  readonly usageFacts?: MeterUsageFactsView;
 }
 
 export function buildMeterCards(
@@ -37,8 +33,6 @@ export function buildMeterCards(
   meterData: readonly IdbUtilityMeterData[],
   groups: readonly IdbUtilityMeterGroup[],
   statusFindings: readonly StatusItem[] = [],
-  facility?: IdbFacility,
-  calendarizedMeters: readonly CalanderizedMeter[] = [],
   statusReady = true
 ): MeterCardView[] {
   return [...meters]
@@ -46,7 +40,6 @@ export function buildMeterCards(
     .map(meter => {
       const readings = meterData.filter(reading => reading.meterId === meter.guid);
       const meterFindings = statusFindings.filter(finding => finding.entity.kind === 'meter' && finding.entity.guid === meter.guid);
-      const meterCalendarizedMeters = calendarizedMeters.filter(calendarizedMeter => calendarizedMeter.meter.guid === meter.guid);
       return {
         meter,
         group: groups.find(group => group.guid === meter.groupId),
@@ -62,10 +55,7 @@ export function buildMeterCards(
         scopeLabel: scopeLabel(meter.scope),
         fuelLabel: fuelLabel(meter),
         statusIssueLabels: meterStatusIssueLabels(meterFindings),
-        statusActionSummaries: meterFindings.slice(0, 2).map(finding => finding.description),
-        usageFacts: meterCalendarizedMeters.length > 0
-          ? buildMeterUsageFactsFromCalendarizedMeters(meterCalendarizedMeters, facility)
-          : undefined
+        statusActionSummaries: meterFindings.slice(0, 2).map(finding => finding.description)
       };
     });
 }

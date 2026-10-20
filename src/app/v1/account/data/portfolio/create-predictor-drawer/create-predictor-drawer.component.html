@@ -1,0 +1,6 @@
+<app-predictor-draft-slideout [saving]="saving()" [canSubmit]="canCreate()" [error]="error()" (submitted)="create($event)" (weatherSelected)="openWeather()" (cancelled)="closed.emit()">
+  <label predictorContext class="predictor-facility"><span>Facility</span><select class="v1-select" [formControl]="facilityControl" required><option value="" disabled>Select a facility</option>@for (facility of facilities(); track facility.guid) { <option [value]="facility.guid">{{ facility.name }}</option> }</select>
+    @if (!facilities().length) { <small>Add a facility before adding a predictor.</small> }
+    @else if (facilityGuid() && !selectedFacility()) { <small role="alert">This facility is no longer available. Select another facility.</small> }
+  </label>
+</app-predictor-draft-slideout>

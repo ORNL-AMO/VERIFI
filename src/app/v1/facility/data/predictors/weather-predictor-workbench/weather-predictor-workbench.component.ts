@@ -1,6 +1,9 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { predictorStatusPresentation } from '../predictor-inventory/predictor-inventory.models';
+import { Component, DestroyRef, computed, inject, signal, effect, untracked, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import {
@@ -25,12 +28,11 @@ import { WeatherPredictorWorkbenchContextService } from './weather-predictor-wor
   styleUrls: ['./weather-predictor-workbench.component.css'],
   standalone: true,
   providers: [WeatherPredictorWorkbenchContextService],
-  imports: [
+  imports: [PageIdentityComponent, BrowseHeaderDirective,
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,
     DataWorkbenchTabsComponent,
     IconComponent,
-    RouterLink,
     RouterOutlet
   ]
 })
@@ -90,9 +92,14 @@ export class WeatherPredictorWorkbenchComponent {
     const group = this.context.group();
     return group ? buildWeatherStationStatusChecks(group.predictors, group.statusFindings) : [];
   });
-  readonly accountPredictorsRoute = computed(() => {
-    const account = this.workspace.account();
-    return account ? [...this.navigation.accountDataRoute(account.guid), 'predictors'] : undefined;
+  private readonly stickyHeader = viewChild(BrowseHeaderDirective);
+  private readonly factsToggle = viewChild(DataWorkbenchFactsToggleComponent);
+  private readonly collapseScrolledFacts = effect(() => { if (this.stickyHeader()?.collapsed()) untracked(() => this.factsToggle()?.collapse()); });
+  readonly headerStatus = computed(() => predictorStatusPresentation(this.context.group()?.statusTone ?? 'info', this.workspace.statusState()));
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    const account = this.workspace.account(), facility = this.workspace.facility();
+    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'predictors') }] : [];
   });
 
   constructor() {

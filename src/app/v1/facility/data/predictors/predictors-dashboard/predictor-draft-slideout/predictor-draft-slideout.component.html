@@ -4,6 +4,7 @@
   size="large"
   [saving]="saving"
   (closed)="cancelled.emit()">
+  <ng-content select="[predictorContext]"/>
   @if (step() === 'choice') {
     <section class="predictor-type-choice" aria-labelledby="predictor-type-choice-title">
       <div>
@@ -11,12 +12,12 @@
         <h2 id="predictor-type-choice-title">What kind of predictor do you want to create?</h2>
       </div>
       <div class="predictor-type-choice__options">
-        <button type="button" [disabled]="saving" (click)="chooseStandard()">
+        <button type="button" [disabled]="saving || !canSubmit" (click)="chooseStandard()">
           <app-ui-icon name="predictor"></app-ui-icon>
           <span><strong>Standard predictor</strong><small>Enter and maintain monthly values directly.</small></span>
           <app-ui-icon name="chevronRight"></app-ui-icon>
         </button>
-        <button type="button" [disabled]="saving" (click)="chooseWeather()">
+        <button type="button" [disabled]="saving || !canSubmit" (click)="chooseWeather()">
           <app-ui-icon name="cloudRain"></app-ui-icon>
           <span><strong>Weather predictors</strong><small>Choose a station and generate one or more calculated predictors.</small></span>
           <app-ui-icon name="chevronRight"></app-ui-icon>
@@ -27,18 +28,17 @@
       </footer>
     </section>
   } @else {
-    @let currentDraft = draft();
-    <form class="predictor-draft-form" (submit)="$event.preventDefault(); submit()">
+    <form class="predictor-draft-form" [formGroup]="form" (ngSubmit)="submit()">
       <div class="predictor-draft-form__grid">
         <label><span>Predictor name</span>
-          <input #predictorName type="text" maxlength="100" required [value]="currentDraft.name" [disabled]="saving" (input)="setName(predictorName.value)">
+          <input type="text" maxlength="100" required formControlName="name">
         </label>
         <label class="predictor-draft-form__check">
-          <input #production type="checkbox" [checked]="currentDraft.production" [disabled]="saving" (change)="setProduction(production.checked)">
+          <input type="checkbox" formControlName="production">
           <span>Is Production?</span>
         </label>
         <label><span>Unit <small>Optional</small></span>
-          <input #predictorUnit type="text" maxlength="100" [value]="currentDraft.unit || ''" [disabled]="saving" (input)="setUnit(predictorUnit.value)">
+          <input type="text" maxlength="100" formControlName="unit">
         </label>
       </div>
       @if (error) {
@@ -46,7 +46,7 @@
       }
       <footer class="predictor-draft-form__footer">
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="back()">Back</button>
-        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
+        <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !canSubmit || !isValid()">
           <app-ui-icon [name]="saving ? 'loading' : 'add'" [spin]="saving"></app-ui-icon> Add predictor
         </button>
       </footer>

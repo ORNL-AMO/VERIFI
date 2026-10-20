@@ -1,12 +1,9 @@
-import { IdbPredictor, WeatherDataType } from '@data/models/idbModels/predictor';
+import { IdbPredictor, WeatherDataType, isStandardPredictor } from '@data/models/idbModels/predictor';
 import { IdbPredictorData } from '@data/models/idbModels/predictorData';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import { StatusItem } from '@app/v1/status/status.models';
 
 export type PredictorCardStatusTone = 'success' | 'warning' | 'danger' | 'info';
-export type FacilityPredictorStatusFilter = 'all' | 'attention' | 'noReadings' | 'clear';
-export type FacilityPredictorTypeFilter = 'all' | 'standard' | 'weather';
-export type FacilityPredictorSort = 'attention' | 'predictorName' | 'latestReading';
 
 export interface PredictorStatisticFactView {
   readonly id: 'latest' | 'same-month-last-year' | 'latest-twelve-month-average' | 'previous-twelve-month-average';
@@ -83,7 +80,7 @@ export function buildPredictorCard(
   return {
     predictor,
     icon: predictorIcon(predictor),
-    typeLabel: predictor.predictorType || 'Standard',
+    typeLabel: isStandardPredictor(predictor) ? 'Standard' : predictor.predictorType,
     productionLabel,
     unitLabel,
     readingCount: sortedReadings.length,

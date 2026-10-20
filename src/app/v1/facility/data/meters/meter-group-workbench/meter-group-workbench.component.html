@@ -1,5 +1,4 @@
 @let currentFacility = workspace.facility();
-@let currentAccount = workspace.account();
 @let currentGroup = selectedGroup();
 @let currentResults = results();
 
@@ -20,43 +19,17 @@
     </button>
   </article>
 } @else if (currentGroup) {
-  @let accountMetersLink = accountMetersRoute();
-  <header class="v1-data-workbench-header v1-meter-group-workbench-header">
-    <nav class="v1-data-workbench-breadcrumb v1-meter-group-workbench-header__breadcrumb" aria-label="Meter group breadcrumb">
-      <ol>
-        @if (currentAccount && accountMetersLink) {
-          <li>
-            <a [routerLink]="accountMetersLink">{{ currentAccount.name || 'Account' }}</a>
-          </li>
-          <li aria-hidden="true">
-            <app-ui-icon name="chevronRight"></app-ui-icon>
-          </li>
-        }
-        <li>{{ currentFacility.name || 'Facility' }}</li>
-        <li aria-hidden="true">
-          <app-ui-icon name="chevronRight"></app-ui-icon>
-        </li>
-        <li>
-          <button type="button" (click)="openGrouping()">
-            Meter Grouping
-          </button>
-        </li>
-      </ol>
-    </nav>
-
+  <header class="v1-data-workbench-header v1-meter-group-workbench-header v1-page-header">
     <div class="v1-data-workbench-title-row v1-meter-group-workbench-header__title-row">
-      <div class="v1-data-workbench-title v1-meter-group-workbench-header__title">
-        <h1 id="v1-facility-meters-title" class="v1-meter-group-workbench-header__group-title">
-          <app-ui-icon name="meterGroupItem"></app-ui-icon>
-          <app-data-workbench-resource-switcher
-            [resources]="groupResources()"
-            [selectedId]="currentGroup.guid"
-            [currentLabel]="currentGroup.name"
-            ariaLabel="Switch meter group"
-            (resourceSelected)="switchGroup($event)">
-          </app-data-workbench-resource-switcher>
-        </h1>
-      </div>
+      <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="currentGroup.name || 'Untitled group'" icon="meterGroupItem" headingId="v1-facility-meters-title" [customTitle]="true">
+        <app-data-workbench-resource-switcher
+          [resources]="groupResources()"
+          [selectedId]="currentGroup.guid"
+          [currentLabel]="currentGroup.name"
+          ariaLabel="Switch meter group"
+          (resourceSelected)="switchGroup($event)">
+        </app-data-workbench-resource-switcher>
+      </app-page-identity>
       <div class="v1-data-workbench-actions v1-meter-group-workbench-header__chips" aria-label="Meter group summary and controls">
         <span class="v1-meter-group-workbench-header__type-chip">
           <app-ui-icon name="meterGroupItem"></app-ui-icon>

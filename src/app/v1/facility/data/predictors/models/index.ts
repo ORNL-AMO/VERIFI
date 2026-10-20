@@ -1,7 +1,4 @@
 export type {
-  FacilityPredictorSort,
-  FacilityPredictorStatusFilter,
-  FacilityPredictorTypeFilter,
   PredictorCardStatusTone,
   PredictorCardView,
   PredictorStatisticFactView,
@@ -113,7 +110,6 @@ export {
 } from './weather-range.models';
 
 export type {
-  PredictorBrowseItem,
   WeatherStationGroupView
 } from './weather-station-group.models';
 export {

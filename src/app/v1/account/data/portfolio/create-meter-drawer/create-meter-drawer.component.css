@@ -1,0 +1,12 @@
+.v1-portfolio-meter-facility {
+  display: grid;
+  gap: var(--v1-space-2);
+  font-weight: 800;
+}
+
+.v1-portfolio-meter-facility select {
+  width: 100%;
+  min-height: var(--v1-control-height);
+  padding: .55rem 2.1rem .55rem .7rem;
+  background-color: var(--v1-surface);
+}

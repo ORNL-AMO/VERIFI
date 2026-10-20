@@ -20,6 +20,24 @@ describe('MeterDraftSlideoutComponent', () => {
     expect(submitted[0]).toMatchObject({ name: 'Boiler Gas', source: 'Natural Gas' });
   });
 
+  it('clears incompatible groups when the source changes and blocks whitespace or unavailable submission', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    component.groups = [group({ guid: 'water', groupType: 'Water' })];
+    component.setSource('Water Intake');
+    component.form.controls.groupId.setValue('water');
+    component.setSource('Electricity');
+    expect(component.form.controls.groupId.value).toBeUndefined();
+    component.form.controls.name.setValue('   ');
+    expect(component.isValid()).toBe(false);
+    const submitted = vi.fn();
+    component.submitted.subscribe(submitted);
+    component.form.controls.name.setValue('Main');
+    component.canSubmit = false;
+    component.submit();
+    expect(submitted).not.toHaveBeenCalled();
+  });
+
   it('disables incompatible group options for the selected source', () => {
     const fixture = setup();
     fixture.componentInstance.groups = [group({ guid: 'group-water', name: 'Water', groupType: 'Water' })];

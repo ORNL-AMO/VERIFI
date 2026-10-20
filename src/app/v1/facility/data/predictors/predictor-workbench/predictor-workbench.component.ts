@@ -1,6 +1,9 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { PageIdentityComponent, PageBreadcrumb } from '@app/v1/shared/page-identity/page-identity.component';
+import { BrowseHeaderDirective } from '@app/v1/shared/navigation/browse-header/browse-header.directive';
+import { predictorStatusPresentation } from '../predictor-inventory/predictor-inventory.models';
+import { Component, DestroyRef, computed, inject, signal, effect, untracked, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { DataWorkbenchTabsComponent } from '@app/v1/shared/data-workbench/data-workbench-tabs.component';
@@ -24,12 +27,11 @@ import { PredictorWorkbenchContextService } from './predictor-workbench-context.
     PredictorWorkbenchContextService,
     { provide: PREDICTOR_QUALITY_CONTEXT, useExisting: PredictorWorkbenchContextService }
   ],
-  imports: [
+  imports: [PageIdentityComponent, BrowseHeaderDirective,
     DataWorkbenchFactsToggleComponent,
     DataWorkbenchResourceSwitcherComponent,
     DataWorkbenchTabsComponent,
     IconComponent,
-    RouterLink,
     RouterOutlet
   ]
 })
@@ -59,9 +61,14 @@ export class PredictorWorkbenchComponent {
   readonly tabAttention = computed(() => {
     return buildPredictorWorkbenchTabAttention(this.context.findings());
   });
-  readonly accountPredictorsRoute = computed(() => {
-    const account = this.workspace.account();
-    return account ? [...this.navigation.accountDataRoute(account.guid), 'predictors'] : undefined;
+  private readonly stickyHeader = viewChild(BrowseHeaderDirective);
+  private readonly factsToggle = viewChild(DataWorkbenchFactsToggleComponent);
+  private readonly collapseScrolledFacts = effect(() => { if (this.stickyHeader()?.collapsed()) untracked(() => this.factsToggle()?.collapse()); });
+  readonly headerStatus = computed(() => predictorStatusPresentation(this.context.card()?.statusTone ?? 'info', this.workspace.statusState()));
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    const account = this.workspace.account(), facility = this.workspace.facility();
+    return account && facility ? [{ label: account.name, route: this.navigation.accountDataReturnRoute(account.guid) },
+      { label: facility.name, route: this.navigation.facilityDataRoute(facility.guid, 'predictors') }] : [];
   });
 
   constructor() {

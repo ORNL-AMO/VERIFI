@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, computed, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
 import { WorkspaceSlideoutComponent } from '@app/v1/shared/workspace-slideout/workspace-slideout.component';
 import { PredictorDraft } from '../../models';
@@ -10,9 +12,10 @@ type PredictorDraftStep = 'choice' | 'standard';
   templateUrl: './predictor-draft-slideout.component.html',
   styleUrls: ['./predictor-draft-slideout.component.css'],
   standalone: true,
-  imports: [IconComponent, WorkspaceSlideoutComponent]
+  imports: [ReactiveFormsModule, IconComponent, WorkspaceSlideoutComponent]
 })
-export class PredictorDraftSlideoutComponent {
+export class PredictorDraftSlideoutComponent implements OnChanges {
+  @Input() canSubmit = true;
   @Input() saving = false;
   @Input() error: string | undefined;
   @Output() submitted = new EventEmitter<PredictorDraft>();
@@ -20,28 +23,23 @@ export class PredictorDraftSlideoutComponent {
   @Output() cancelled = new EventEmitter<void>();
 
   readonly step = signal<PredictorDraftStep>('choice');
-  readonly draft = signal<PredictorDraft>({
-    name: '', production: false, predictorType: 'Standard', unit: ''
+  readonly form = new FormGroup({
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
+    production: new FormControl(false, { nonNullable: true }),
+    unit: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] })
   });
-  readonly isValid = computed(() => {
-    const draft = this.draft();
-    return draft.name.trim().length > 0
-      && draft.name.trim().length <= 100
-      && (!draft.unit || draft.unit.length <= 100);
-  });
+  private readonly value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  readonly draft = computed<PredictorDraft>(() => ({ name: this.value().name ?? '', production: this.value().production ?? false,
+    unit: this.value().unit ?? '', predictorType: 'Standard' }));
+  readonly isValid = computed(() => this.draft().name.trim().length > 0 && this.draft().name.trim().length <= 100 && (this.draft().unit?.length ?? 0) <= 100);
+  ngOnChanges(): void { if (this.saving) this.form.disable({ emitEvent: false }); else this.form.enable({ emitEvent: false }); }
 
   chooseStandard(): void { this.step.set('standard'); }
-  chooseWeather(): void { if (!this.saving) this.weatherSelected.emit(); }
+  chooseWeather(): void { if (!this.saving && this.canSubmit) this.weatherSelected.emit(); }
   back(): void { if (!this.saving) this.step.set('choice'); }
-  setName(value: string): void { this.patch({ name: value }); }
-  setUnit(value: string): void { this.patch({ unit: value }); }
-  setProduction(production: boolean): void { this.patch({ production }); }
 
   submit(): void {
-    if (this.isValid() && !this.saving) this.submitted.emit(this.draft());
+    if (this.isValid() && !this.saving && this.canSubmit) this.submitted.emit(this.draft());
   }
 
-  private patch(update: Partial<PredictorDraft>): void {
-    this.draft.update(current => ({ ...current, ...update }));
-  }
 }

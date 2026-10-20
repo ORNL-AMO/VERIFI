@@ -1,0 +1,40 @@
+<div class="facility-snapshot__resources" aria-label="Facility resources">
+  @for (resource of resources; track resource.kind) {
+    <a class="facility-snapshot__resource" [href]="resource.href" [attr.aria-label]="resource.description" [title]="resource.description" (click)="open($event, resource.route)">
+      <span class="facility-snapshot__resource-heading">
+        <app-ui-icon [name]="resource.icon" [size]="24"/>
+        <strong>{{ resource.total }}</strong><span class="facility-snapshot__resource-label">{{ resource.label }}</span>
+      </span>
+      @if (detailed) {
+        <span class="facility-snapshot__resource-note">{{ resource.note }}</span>
+        @if (snapshot.evaluation === 'ready' && resource.total > 0) {
+          <span class="facility-snapshot__strip" aria-hidden="true">
+            @if (resource.errorCount) { <span class="facility-snapshot__segment--error" [style.flex-grow]="resource.errorCount"></span> }
+            @if (resource.warningCount) { <span class="facility-snapshot__segment--warning" [style.flex-grow]="resource.warningCount"></span> }
+            @if (resource.validCount) { <span class="facility-snapshot__segment--valid" [style.flex-grow]="resource.validCount"></span> }
+          </span>
+        }
+      }
+    </a>
+  }
+</div>
+@if (detailed) {
+  @if (findings.length) {
+    <section class="facility-snapshot__attention" aria-label="Data findings needing attention">
+      <h2>Needs attention</h2>
+      <ul>
+        @for (finding of findings; track finding.id) {
+          <li [attr.data-severity]="finding.severity">
+            <app-ui-icon [name]="finding.severity === 'error' ? 'danger' : 'warning'" [size]="18"/>
+            <div>
+              <p [title]="finding.description"><span class="visually-hidden">{{ finding.severity === 'error' ? 'Error' : 'Warning' }}: </span>{{ finding.name }} · {{ finding.title }}</p>
+              @if (finding.action; as action) { <a [href]="finding.href" [attr.aria-label]="action.label + ' for ' + finding.name" (click)="open($event, action.route)">{{ action.label }}</a> }
+              @else { <p class="facility-snapshot__unavailable">Fix workflow unavailable</p> }
+            </div>
+          </li>
+        }
+      </ul>
+      @if (snapshot.remainingFindings) { <p class="facility-snapshot__remaining">{{ snapshot.remainingFindings }} more data {{ snapshot.remainingFindings === 1 ? 'finding' : 'findings' }} in the facility workflows.</p> }
+    </section>
+  }
+}

@@ -1,0 +1,46 @@
+<article class="portfolio-tile" [class.portfolio-tile--selecting]="selecting" [class.portfolio-tile--facility-snapshot]="!!tile.facilitySnapshot && level !== 'simple'" [class.portfolio-tile--reading-snapshot]="(!!tile.meterSnapshot || !!tile.predictorSnapshot) && level !== 'simple'" [class.portfolio-tile--predictor-snapshot]="!!tile.predictorSnapshot && level !== 'simple'" [attr.data-tone]="tile.status.tone" [attr.data-detail]="level" [attr.aria-label]="tile.name" (contextmenu)="contextMenu($event)" (keydown)="menuKey($event)">
+  @if (selecting && !print) { <input class="portfolio-tile__selection" type="checkbox" [formControl]="selectionControl" [attr.aria-label]="'Select ' + tile.name"> }
+  <div class="portfolio-tile__heading">
+    <app-ui-icon [name]="tile.icon" [size]="level === 'simple' ? 32 : 24"/>
+    <a class="portfolio-tile__name" [href]="mainHref" [attr.data-browse-id]="print ? null : tile.guid" [title]="tile.name" (click)="open($event, tile.route)">{{ tile.name }}</a>
+    @if (!print) {
+      <button #menuButton type="button" class="v1-icon-btn portfolio-tile__menu-button" [attr.data-browse-id]="tile.guid" [cdkMenuTriggerFor]="detailMenu" (cdkMenuOpened)="menuOpened()" (cdkMenuClosed)="menuClosed()" [attr.aria-label]="'Options for ' + tile.name" [title]="'Card options'">⋯</button>
+    }
+  </div>
+  <div class="portfolio-tile__metadata">
+  @if (locationLabel) { <p class="portfolio-tile__location"><app-ui-icon name="location" [size]="18"/>{{ locationLabel }}</p> }
+  @if (tile.owner || (level === 'detailed' && tile.meterSnapshot) || (level !== 'simple' && tile.stationLink)) {
+    <div class="portfolio-tile__ownership">
+      @if (tile.owner; as owner) { <a class="portfolio-tile__owner" [href]="ownerHref" [attr.data-browse-id]="print ? null : tile.guid" (click)="open($event, owner.route)"><app-ui-icon name="facility" [size]="18"/>{{ owner.label }}</a> }
+      @if (level === 'detailed' && tile.meterSnapshot; as snapshot) {
+        <span class="portfolio-tile__group" [title]="snapshot.group.label + ': ' + snapshot.group.value">
+          <app-ui-icon name="meterGroupItem" [size]="18"/>
+          @if (snapshot.group.route; as route) { <a [href]="groupHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Open meter group ' + snapshot.group.value + ' for ' + tile.name" (click)="open($event, route)">{{ snapshot.group.value }}</a> }
+          @else { <span><span class="visually-hidden">Meter group: </span>Not assigned</span> }
+        </span>
+      }
+      @if (level !== 'simple' && tile.stationLink; as station) {
+        <a class="portfolio-tile__station-link" [href]="stationHref" [attr.data-browse-id]="print ? null : tile.guid" [attr.aria-label]="'Open station setup for ' + tile.name + ': ' + stationLabel" [title]="stationLabel" (click)="open($event, station.route)"><app-ui-icon name="location" [size]="18"/>{{ stationLabel }}</a>
+      }
+    </div>
+  }
+  @if (stationLabel && (level === 'simple' || !tile.stationLink)) { <p class="portfolio-tile__station">{{ stationLabel }}</p> }
+  <div class="portfolio-tile__context">
+    @if (chipLabel) { <span class="portfolio-tile__chip">{{ chipLabel }}</span> }
+    <p class="portfolio-tile__status"><app-ui-icon [name]="tile.status.icon" [size]="18"/>{{ tile.status.label }}</p>
+  </div>
+  </div>
+  @if (tile.facilitySnapshot; as snapshot) {
+    @if (level !== 'simple') { <app-facility-snapshot [snapshot]="snapshot" [facilityName]="tile.name" [detailed]="level === 'detailed'" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
+  } @else if (tile.meterSnapshot || tile.predictorSnapshot; as snapshot) {
+    @if (level !== 'simple') { <app-reading-snapshot [snapshot]="snapshot" [resourceName]="tile.name" [detailed]="level === 'detailed'" [attr.data-browse-id]="print ? null : tile.guid" (navigationRequested)="navigationRequested.emit($event)"/> }
+  }
+</article>
+<ng-template #detailMenu>
+  <div cdkMenu [class]="menuClasses()" [id]="'portfolio-detail-' + tile.guid" [attr.aria-label]="'Options for ' + tile.name">
+    @if (actions.length) { <div cdkMenuGroup>@for (action of actions; track action.id) {
+      <button type="button" cdkMenuItem [disabled]="!!action.disabled" [cdkMenuItemDisabled]="!!action.disabled" [class.portfolio-tile-menu__danger]="action.id === 'delete'" (cdkMenuItemTriggered)="chooseAction(action)"><span><app-ui-icon [name]="action.icon"/>{{ action.label }}</span></button>
+    }</div><hr> }
+    <button type="button" cdkMenuItemCheckbox [cdkMenuItemChecked]="level === 'detailed'" (cdkMenuItemTriggered)="choose(level === 'detailed' ? 'simple' : 'detailed')"><span>{{ level === 'detailed' ? 'Hide details' : 'Show details' }}</span>@if (level === 'detailed') { <app-ui-icon name="success"/> }</button>
+  </div>
+</ng-template>

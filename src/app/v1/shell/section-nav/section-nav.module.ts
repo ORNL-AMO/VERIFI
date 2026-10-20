@@ -1,3 +1,4 @@
+import { OverlayModule } from '@angular/cdk/overlay';
 import { ReportsNavComponent } from './reports-nav/reports-nav.component';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -19,7 +20,7 @@ import { ResourceNavGroupComponent } from './resource-nav-group/resource-nav-gro
 
 @NgModule({
   declarations: [ReportsNavComponent, SectionNavComponent, FacilityPickerComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
-  exports: [SectionNavComponent]
+  imports: [OverlayModule,CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent, StatusEvaluationMessageComponent],
+  exports: [SectionNavComponent, FacilityPickerComponent]
 })
 export class SectionNavModule { }

@@ -63,6 +63,7 @@ import HelpCircleIcon from '@hugeicons/core-free-icons/HelpCircleIcon';
 import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
 import HumidityIcon from '@hugeicons/core-free-icons/HumidityIcon';
 import InformationCircleIcon from '@hugeicons/core-free-icons/InformationCircleIcon';
+import Invoice01Icon from '@hugeicons/core-free-icons/Invoice01Icon';
 import Loading03Icon from '@hugeicons/core-free-icons/Loading03Icon';
 import LayoutTable01Icon from '@hugeicons/core-free-icons/LayoutTable01Icon';
 import Link04Icon from '@hugeicons/core-free-icons/Link04Icon';
@@ -158,6 +159,7 @@ export const ICON_REGISTRY = {
   home: Home01Icon,
   humidity: HumidityIcon,
   info: InformationCircleIcon,
+  invoice: Invoice01Icon,
   loading: Loading03Icon,
   link: Link04Icon,
   location: Location01Icon,

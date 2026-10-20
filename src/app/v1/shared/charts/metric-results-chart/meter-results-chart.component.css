@@ -73,7 +73,7 @@
 
 .v1-meter-results-chart__chart {
   width: 100%;
-  min-height: 24rem;
+  min-height: var(--v1-metric-chart-height, 24rem);
   background: var(--v1-surface);
 }
 
@@ -102,6 +102,6 @@
   }
 
   .v1-meter-results-chart__chart {
-    min-height: 20rem;
+    min-height: var(--v1-metric-chart-height, 20rem);
   }
 }

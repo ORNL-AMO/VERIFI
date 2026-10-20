@@ -11,13 +11,11 @@ import { CustomGridFactorsComponent } from '@app/v1/account/data/custom-grid-fac
 import { CustomFuelsComponent } from '@app/v1/account/data/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/account/data/custom-gwps/custom-gwps.component';
 import { flushPendingChangesGuard, unsavedChangesGuard } from '@app/v1/account/data/unsaved-changes.guard';
-import { AccountPortfolioAnalysesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-analyses-tab/account-portfolio-analyses-tab.component';
 import { AccountPortfolioComponent } from '@app/v1/account/data/portfolio/account-portfolio.component';
 import { AccountPortfolioEnergyUsesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-energy-uses-tab/account-portfolio-energy-uses-tab.component';
 import { AccountPortfolioFacilitiesTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-facilities-tab/account-portfolio-facilities-tab.component';
 import { AccountPortfolioMetersTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-meters-tab/account-portfolio-meters-tab.component';
 import { AccountPortfolioPredictorsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-predictors-tab/account-portfolio-predictors-tab.component';
-import { AccountPortfolioReportsTabComponent } from '@app/v1/account/data/portfolio/account-portfolio-reports-tab/account-portfolio-reports-tab.component';
 import { FacilityDataModule } from '@app/v1/facility/data/facility-data.module';
 import { FacilityMetersComponent } from '@app/v1/facility/data/meters/facility-meters.component';
 import { MeterWorkbenchBillInspectionComponent } from '@app/v1/facility/data/meters/meter-workbench/bill-inspection/meter-workbench-bill-inspection.component';
@@ -207,8 +205,7 @@ describe('V1Routes facility data meters routes', () => {
     expect(children.find(child => child.path === 'meters')).toMatchObject({ component: AccountPortfolioMetersTabComponent });
     expect(children.find(child => child.path === 'predictors')).toMatchObject({ component: AccountPortfolioPredictorsTabComponent });
     expect(children.find(child => child.path === 'energy-uses')).toMatchObject({ component: AccountPortfolioEnergyUsesTabComponent });
-    expect(children.find(child => child.path === 'analyses')).toMatchObject({ component: AccountPortfolioAnalysesTabComponent });
-    expect(children.find(child => child.path === 'reports')).toMatchObject({ component: AccountPortfolioReportsTabComponent });
+    expect(children.some(child => child.path === 'analyses' || child.path === 'reports')).toBe(false);
     expect(children.find(child => child.path === '**')).toMatchObject({
       path: '**',
       redirectTo: 'facilities'
@@ -508,6 +505,25 @@ function tabRoute(path: string): Route {
 class ReportsRouteTestComponent { }
 
 describe('V1 Reports route entry and canonicalization', () => {
+  it('redirects former Data portfolio analysis/report bookmarks to their dedicated account sections', async () => {
+    const workspace = V1Routes[0].children!.find(route => route.path === 'workspace/account/:accountGuid')!;
+    const aliases = workspace.children!.filter(route => route.path === 'data/portfolio/analyses' || route.path === 'data/portfolio/reports');
+    expect(aliases).toHaveLength(2);
+    TestBed.configureTestingModule({ providers: [provideRouter([
+      { path: 'account/:accountGuid', children: [
+        ...aliases,
+        { path: 'analysis/dashboard', component: ReportsRouteTestComponent },
+        { path: 'reports/dashboard', component: ReportsRouteTestComponent }
+      ] }
+    ])] });
+    const harness = await RouterTestingHarness.create();
+    const router = TestBed.inject(Router);
+    for (const [oldSection, section] of [['analyses', 'analysis'], ['reports', 'reports']]) {
+      await harness.navigateByUrl(`/account/account-a/data/portfolio/${oldSection}`, ReportsRouteTestComponent);
+      expect(router.url).toBe(`/account/account-a/${section}/dashboard`);
+    }
+  });
+
   function reportsChildren(scope: 'account' | 'facility'): Route[] {
     const workspace = V1Routes[0].children!.find(route => route.path === `workspace/${scope}/:${scope}Guid`)!;
     return workspace.children!.find(route => route.path === 'reports')!.children!;

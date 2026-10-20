@@ -96,6 +96,12 @@ export interface StatusItem extends StatusFinding {
   readonly destination: StatusDestination;
 }
 
+/** Data views exclude analysis and report findings without changing their evaluation. */
+export function isDataFinding(finding: StatusFinding): boolean {
+  return finding.entity.kind === 'account' || finding.entity.kind === 'facility'
+    || finding.entity.kind === 'meter' || finding.entity.kind === 'predictor';
+}
+
 export interface StatusEvaluation {
   readonly accountGuid: string;
   readonly revision: number;

@@ -3,15 +3,19 @@
   description="Create the meter, then continue setup in its workbench."
   [saving]="saving"
   (closed)="cancelled.emit()">
-  <form class="v1-meter-slideout-form" (submit)="$event.preventDefault(); submit()">
+  <form class="v1-meter-slideout-form" [formGroup]="form" (ngSubmit)="submit()">
+    <ng-content select="[meterContext]"></ng-content>
+    @if (error) {
+      <div class="v1-alert v1-alert--danger" role="alert">{{ error }}</div>
+    }
     <label>
       <span>Meter name</span>
-      <input #meterName type="text" [value]="draft().name" [disabled]="saving" required (input)="setName(meterName.value)">
+      <input type="text" formControlName="name" required>
     </label>
 
     <label>
       <span>Source</span>
-      <select #meterSource class="v1-select" [value]="draft().source" [disabled]="saving" required (change)="setSource(meterSource.value)">
+      <select class="v1-select" formControlName="source" required>
         @for (source of sources; track source) {
           <option [value]="source">{{ source }}</option>
         }
@@ -20,8 +24,8 @@
 
     <label>
       <span>Group</span>
-      <select #meterGroup class="v1-select" [value]="draft().groupId || ''" [disabled]="saving" (change)="setGroup(meterGroup.value)">
-        <option value="">Ungrouped</option>
+      <select class="v1-select" formControlName="groupId">
+        <option [ngValue]="undefined">Ungrouped</option>
         @for (group of groups; track group.guid) {
           <option [value]="group.guid" [disabled]="!isGroupAllowed(group)">
             {{ group.name }} ({{ group.groupType }})
@@ -39,7 +43,7 @@
 
     <footer class="v1-meter-slideout-form__footer">
       <button type="button" class="v1-btn v1-btn--quiet" [disabled]="saving" (click)="cancelled.emit()">Cancel</button>
-      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !isValid()">
+      <button type="submit" class="v1-btn v1-btn--action" [disabled]="saving || !canSubmit || !isValid()">
         @if (saving) {
           <app-ui-icon name="loading" spin></app-ui-icon>
         } @else {

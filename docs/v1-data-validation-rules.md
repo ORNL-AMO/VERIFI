@@ -13,6 +13,10 @@ This document is the human-readable contract for validation in the production v1
 
 Findings use one of five categories: **configuration**, **completeness**, **currency**, **quality**, or **readiness**. A scope summary uses its most severe finding: error, warning, information, then valid. Pending or failed evaluation is never presented as valid.
 
+## Data presentation scope
+
+Data inventories and their support panel show data findings only: account/facility setup, meters, and predictors. Facility tiles exclude analysis, analysis-group, and report findings from status, attention filters/ordering, counts, and inline descriptions. Data support Todos and discarded warnings use the same scope. Analysis and Reports retain their existing findings in their own sections. This presentation boundary does not suppress rule evaluation or change severity, dismissal, or pending/unavailable states.
+
 ## Todo behavior
 
 - Every error is included in Todos.
